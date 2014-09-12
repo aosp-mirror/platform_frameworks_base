@@ -5723,14 +5723,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public boolean requestCursorUpdates(int cursorUpdateMode) {
             return getTarget().requestCursorUpdates(cursorUpdateMode);
         }
-
-        /**
-         * @removed
-         */
-        @Override
-        public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
-            return getTarget().requestCursorUpdates(cursorUpdateMode);
-        }
     }
 
     /**

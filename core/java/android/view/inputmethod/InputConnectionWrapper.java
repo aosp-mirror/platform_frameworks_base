@@ -129,11 +129,4 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         return mTarget.requestCursorUpdates(cursorUpdateMode);
     }
-
-    /**
-     * @removed
-     */
-    public final boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
-        return mTarget.requestCursorUpdates(cursorUpdateMode);
-    }
 }

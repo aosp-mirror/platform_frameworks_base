@@ -445,11 +445,4 @@ public class InputConnectionWrapper implements InputConnection {
         }
         return result;
     }
-
-    /**
-     * @removed
-     */
-    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
-        return requestCursorUpdates(cursorUpdateMode);
-    }
 }
