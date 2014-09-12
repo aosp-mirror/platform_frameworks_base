@@ -164,6 +164,7 @@ public final class PageAdapter extends Adapter implements
     public void onOrientationChanged() {
         mColumnCount = mContext.getResources().getInteger(
                 R.integer.preview_page_per_row_count);
+        notifyDataSetChanged();
     }
 
     public boolean isOpened() {
