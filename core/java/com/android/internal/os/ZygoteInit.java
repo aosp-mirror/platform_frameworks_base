@@ -254,10 +254,18 @@ public class ZygoteInit {
         preloadClasses();
         preloadResources();
         preloadOpenGL();
+        preloadSharedLibraries();
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
         // for memory sharing purposes.
         WebViewFactory.prepareWebViewInZygote();
         Log.d(TAG, "end preload");
+    }
+
+    private static void preloadSharedLibraries() {
+        Log.i(TAG, "Preloading shared libraries...");
+        System.loadLibrary("android");
+        System.loadLibrary("compiler_rt");
+        System.loadLibrary("jnigraphics");
     }
 
     private static void preloadOpenGL() {
