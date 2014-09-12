@@ -388,8 +388,6 @@ public class TransitionSet extends Transition {
     protected void createAnimators(ViewGroup sceneRoot, TransitionValuesMaps startValues,
             TransitionValuesMaps endValues, ArrayList<TransitionValues> startValuesList,
             ArrayList<TransitionValues> endValuesList) {
-        startValues = removeExcludes(startValues);
-        endValues = removeExcludes(endValues);
         long startDelay = getStartDelay();
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; i++) {
@@ -407,24 +405,6 @@ public class TransitionSet extends Transition {
             childTransition.createAnimators(sceneRoot, startValues, endValues, startValuesList,
                     endValuesList);
         }
-    }
-
-    private TransitionValuesMaps removeExcludes(TransitionValuesMaps values) {
-        if (mTargetIds.isEmpty() && mTargetIdExcludes == null && mTargetTypeExcludes == null
-                && mTargetNames == null && mTargetTypes == null
-                && mTargetExcludes == null && mTargetNameExcludes == null
-                && mTargets.isEmpty()) {
-            return values;
-        }
-        TransitionValuesMaps included = new TransitionValuesMaps();
-        int numValues = values.viewValues.size();
-        for (int i = 0; i < numValues; i++) {
-            View view = values.viewValues.keyAt(i);
-            if (isValidTarget(view)) {
-                addViewValues(included, view, values.viewValues.valueAt(i), false);
-            }
-        }
-        return included;
     }
 
     /**
@@ -470,6 +450,7 @@ public class TransitionSet extends Transition {
             for (Transition childTransition : mTransitions) {
                 if (childTransition.isValidTarget(transitionValues.view)) {
                     childTransition.captureStartValues(transitionValues);
+                    transitionValues.targetedTransitions.add(childTransition);
                 }
             }
         }
@@ -481,6 +462,7 @@ public class TransitionSet extends Transition {
             for (Transition childTransition : mTransitions) {
                 if (childTransition.isValidTarget(transitionValues.view)) {
                     childTransition.captureEndValues(transitionValues);
+                    transitionValues.targetedTransitions.add(childTransition);
                 }
             }
         }
