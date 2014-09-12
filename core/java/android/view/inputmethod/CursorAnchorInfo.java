@@ -120,38 +120,6 @@ public final class CursorAnchorInfo implements Parcelable {
      */
     public static final int FLAG_IS_RTL = 0x04;
 
-    /**
-     * @removed
-     */
-    public static final int CHARACTER_RECT_TYPE_MASK = 0x0f;
-    /**
-     * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the editor did not specify any type of this
-     * character. Editor authors should not use this flag.
-     * @removed
-     */
-    public static final int CHARACTER_RECT_TYPE_UNSPECIFIED = 0;
-    /**
-     * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the character is entirely visible.
-     * @removed
-     */
-    public static final int CHARACTER_RECT_TYPE_FULLY_VISIBLE = 1;
-    /**
-     * Type for {@link #CHARACTER_RECT_TYPE_MASK}: some area of the character is invisible.
-     * @removed
-     */
-    public static final int CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE = 2;
-    /**
-     * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the character is entirely invisible.
-     * @removed
-     */
-    public static final int CHARACTER_RECT_TYPE_INVISIBLE = 3;
-    /**
-     * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the editor gave up to calculate the rectangle
-     * for this character. Input method authors should ignore the returned rectangle.
-     * @removed
-     */
-    public static final int CHARACTER_RECT_TYPE_NOT_FEASIBLE = 4;
-
     public CursorAnchorInfo(final Parcel source) {
         mSelectionStart = source.readInt();
         mSelectionEnd = source.readInt();
@@ -318,20 +286,6 @@ public final class CursorAnchorInfo implements Parcelable {
         }
 
         /**
-         * @removed
-         */
-        public Builder setInsertionMarkerLocation(final float horizontalPosition,
-                final float lineTop, final float lineBaseline, final float lineBottom,
-                final boolean clipped){
-            mInsertionMarkerHorizontal = horizontalPosition;
-            mInsertionMarkerTop = lineTop;
-            mInsertionMarkerBaseline = lineBaseline;
-            mInsertionMarkerBottom = lineBottom;
-            mInsertionMarkerFlags = clipped ? FLAG_HAS_INVISIBLE_REGION : 0;
-            return this;
-        }
-
-        /**
          * Sets the location of the text insertion point (zero width cursor) as a rectangle in
          * local coordinates. Calling this can be skipped when there is no text insertion point;
          * however if there is an insertion point, editors must call this method.
@@ -387,43 +341,6 @@ public final class CursorAnchorInfo implements Parcelable {
             }
             mCharacterBoundsArrayBuilder.append(index, left, top, right, bottom, flags);
             return this;
-        }
-
-        /**
-         * Adds the bounding box of the character specified with the index.
-         *
-         * @param index index of the character in Java chars units. Must be specified in
-         * ascending order across successive calls.
-         * @param leadingEdgeX x coordinate of the leading edge of the character in local
-         * coordinates, that is, left edge for LTR text and right edge for RTL text.
-         * @param leadingEdgeY y coordinate of the leading edge of the character in local
-         * coordinates.
-         * @param trailingEdgeX x coordinate of the trailing edge of the character in local
-         * coordinates, that is, right edge for LTR text and left edge for RTL text.
-         * @param trailingEdgeY y coordinate of the trailing edge of the character in local
-         * coordinates.
-         * @param flags flags for this character rect. See {@link #FLAG_HAS_VISIBLE_REGION} for
-         * example.
-         * @throws IllegalArgumentException If the index is a negative value, or not greater than
-         * all of the previously called indices.
-         * @removed
-         */
-        public Builder addCharacterRect(final int index, final float leadingEdgeX,
-                final float leadingEdgeY, final float trailingEdgeX, final float trailingEdgeY,
-                final int flags) {
-            final int newFlags;
-            final float left;
-            final float right;
-            if (leadingEdgeX <= trailingEdgeX) {
-                newFlags = flags;
-                left = leadingEdgeX;
-                right = trailingEdgeX;
-            } else {
-                newFlags = flags | FLAG_IS_RTL;
-                left = trailingEdgeX;
-                right = leadingEdgeX;
-            }
-            return addCharacterBounds(index, left, leadingEdgeY, right, trailingEdgeY, newFlags);
         }
 
         /**
@@ -538,15 +455,6 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     /**
-     * Returns the visibility of the insertion marker.
-     * @return {@code true} if the insertion marker is partially or entirely clipped.
-     * @removed
-     */
-    public boolean isInsertionMarkerClipped() {
-        return (mInsertionMarkerFlags & FLAG_HAS_VISIBLE_REGION) != 0;
-    }
-
-    /**
      * Returns the horizontal start of the insertion marker, in the local coordinates that will
      * be transformed with {@link #getMatrix()} when rendered on the screen.
      * @return x coordinate that is compatible with {@link Layout#getPrimaryHorizontal(int)}.
@@ -602,25 +510,6 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     /**
-     * Returns a new instance of {@link RectF} that indicates the location of the character
-     * specified with the index.
-     * <p>
-     * Note that coordinates are not necessarily contiguous or even monotonous, especially when
-     * RTL text and LTR text are mixed.
-     * </p>
-     * @param index index of the character in a Java chars.
-     * @return a new instance of {@link RectF} that represents the location of the character in
-     * local coordinates. null if the character is invisible or the application did not provide
-     * the location. Note that the {@code left} field can be greater than the {@code right} field
-     * if the character is in RTL text. Returns {@code null} if no location information is
-     * available.
-     * @removed
-     */
-    public RectF getCharacterRect(final int index) {
-        return getCharacterBounds(index);
-    }
-
-    /**
      * Returns the flags associated with the character bounds specified with the index.
      * @param index index of the character in a Java chars.
      * @return {@code 0} if no flag is specified.
@@ -630,16 +519,6 @@ public final class CursorAnchorInfo implements Parcelable {
             return 0;
         }
         return mCharacterBoundsArray.getFlags(index, 0);
-    }
-
-    /**
-     * Returns the flags associated with the character rect specified with the index.
-     * @param index index of the character in a Java chars.
-     * @return {@code 0} if no flag is specified.
-     * @removed
-     */
-    public int getCharacterRectFlags(final int index) {
-        return getCharacterBoundsFlags(index);
     }
 
     /**
