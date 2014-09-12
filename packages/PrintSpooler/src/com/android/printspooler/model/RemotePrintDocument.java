@@ -74,7 +74,7 @@ public final class RemotePrintDocument {
 
     private final Looper mLooper;
     private final IPrintDocumentAdapter mPrintDocumentAdapter;
-    private final DocumentObserver mDocumentObserver;
+    private final RemoteAdapterDeathObserver mAdapterDeathObserver;
 
     private final UpdateResultCallbacks mUpdateCallbacks;
 
@@ -135,7 +135,7 @@ public final class RemotePrintDocument {
     private final DeathRecipient mDeathRecipient = new DeathRecipient() {
         @Override
         public void binderDied() {
-            finish();
+            mAdapterDeathObserver.onDied();
         }
     };
 
@@ -144,8 +144,8 @@ public final class RemotePrintDocument {
     private AsyncCommand mCurrentCommand;
     private AsyncCommand mNextCommand;
 
-    public interface DocumentObserver {
-        public void onDestroy();
+    public interface RemoteAdapterDeathObserver {
+        public void onDied();
     }
 
     public interface UpdateResultCallbacks {
@@ -155,12 +155,12 @@ public final class RemotePrintDocument {
     }
 
     public RemotePrintDocument(Context context, IPrintDocumentAdapter adapter,
-            MutexFileProvider fileProvider, DocumentObserver destroyListener,
+            MutexFileProvider fileProvider, RemoteAdapterDeathObserver deathObserver,
             UpdateResultCallbacks callbacks) {
         mPrintDocumentAdapter = adapter;
         mLooper = context.getMainLooper();
         mContext = context;
-        mDocumentObserver = destroyListener;
+        mAdapterDeathObserver = deathObserver;
         mDocumentInfo = new RemotePrintDocumentInfo();
         mDocumentInfo.fileProvider = fileProvider;
         mUpdateCallbacks = callbacks;
@@ -180,7 +180,7 @@ public final class RemotePrintDocument {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error calling start()", re);
             mState = STATE_FAILED;
-            mDocumentObserver.onDestroy();
+            mAdapterDeathObserver.onDied();
         }
     }
 
@@ -269,7 +269,7 @@ public final class RemotePrintDocument {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error calling finish()", re);
             mState = STATE_FAILED;
-            mDocumentObserver.onDestroy();
+            mAdapterDeathObserver.onDied();
         }
     }
 
@@ -302,7 +302,6 @@ public final class RemotePrintDocument {
         mState = STATE_DESTROYED;
 
         disconnectFromRemoteDocument();
-        mDocumentObserver.onDestroy();
     }
 
     public boolean isUpdating() {
@@ -1124,7 +1123,7 @@ public final class RemotePrintDocument {
                 new Handler(document.mLooper).post(new Runnable() {
                     @Override
                     public void run() {
-                        document.mDocumentObserver.onDestroy();
+                        document.mAdapterDeathObserver.onDied();
                     }
                 });
             }
