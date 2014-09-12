@@ -732,7 +732,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private void updateAudioManagerForSystemAudio(boolean on) {
-        mService.getAudioManager().setHdmiSystemAudioSupported(on);
+        int device = mService.getAudioManager().setHdmiSystemAudioSupported(on);
+        HdmiLogger.debug("[A]UpdateSystemAudio mode[on=%b] output=[%X]", on, device);
     }
 
     boolean isSystemAudioActivated() {
@@ -756,6 +757,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     boolean setArcStatus(boolean enabled) {
         assertRunOnServiceThread();
+
+        HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
         boolean oldStatus = mArcEstablished;
         // 1. Enable/disable ARC circuit.
         mService.setAudioReturnChannel(enabled);
@@ -885,7 +888,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeMute(boolean mute) {
         assertRunOnServiceThread();
+        HdmiLogger.debug("[A]:Change mute:%b", mute);
         if (!isSystemAudioActivated()) {
+            HdmiLogger.debug("[A]:System audio is not activated.");
             return;
         }
 
