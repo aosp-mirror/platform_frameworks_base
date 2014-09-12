@@ -40,7 +40,7 @@
             android:layout_weight="1"
             android:layoutDirection="ltr"
             >
-        <RelativeLayout
+        <com.android.keyguard.AlphaOptimizedRelativeLayout
                 android:id="@+id/row0"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -79,7 +79,7 @@
                     android:layout_alignParentBottom="true"
                     android:background="#28FFFFFF"
                     />
-        </RelativeLayout>
+        </com.android.keyguard.AlphaOptimizedRelativeLayout>
         <LinearLayout
                 android:id="@+id/row1"
                 android:layout_width="match_parent"
@@ -196,7 +196,7 @@
                     androidprv:textView="@+id/pinEntry"
                     androidprv:digit="0"
                     />
-            <ImageButton
+            <com.android.keyguard.AlphaOptimizedImageButton
                     android:id="@+id/key_enter"
                     android:layout_width="0px"
                     android:layout_height="match_parent"

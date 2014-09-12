@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.systemui.statusbar.AlphaOptimizedLinearLayout
+<com.android.keyguard.AlphaOptimizedLinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/keyguard_user_switcher"
         android:orientation="vertical"
@@ -23,4 +23,4 @@
         android:gravity="end"
         android:visibility="gone"
         android:paddingTop="4dp">
-</com.android.systemui.statusbar.AlphaOptimizedLinearLayout>
+</com.android.keyguard.AlphaOptimizedLinearLayout>
