@@ -436,14 +436,6 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * The default implementation does nothing.
-     * @removed
-     */
-    public final boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
-        return false;
-    }
-
-    /**
      * The default implementation places the given text into the editable,
      * replacing any existing composing text.  The new text is marked as
      * in a composing state with the composing style.
