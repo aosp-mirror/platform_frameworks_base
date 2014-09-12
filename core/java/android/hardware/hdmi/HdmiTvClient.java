@@ -36,9 +36,9 @@ public final class HdmiTvClient extends HdmiClient {
     private static final String TAG = "HdmiTvClient";
 
     /**
-     * Size of MHL scratchpad register.
+     * Size of MHL register for vendor command
      */
-    public static final int SCRATCHPAD_DATA_SIZE = 16;
+    public static final int VENDOR_DATA_SIZE = 16;
 
     HdmiTvClient(IHdmiControlService service) {
         super(service);
@@ -332,31 +332,31 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Interface used to get incoming MHL scratchpad command.
+     * Interface used to get incoming MHL vendor command.
      */
-    public interface HdmiMhlScratchpadCommandListener {
+    public interface HdmiMhlVendorCommandListener {
         void onReceived(int portId, int offset, int length, byte[] data);
     }
 
     /**
-     * Set {@link HdmiMhlScratchpadCommandListener} to get incoming MHL sSratchpad command.
+     * Set {@link HdmiMhlVendorCommandListener} to get incoming MHL vendor command.
      *
-     * @param listener to receive incoming MHL Scratchpad command
+     * @param listener to receive incoming MHL vendor command
      */
-    public void setHdmiMhlScratchpadCommandListener(HdmiMhlScratchpadCommandListener listener) {
+    public void setHdmiMhlVendorCommandListener(HdmiMhlVendorCommandListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null.");
         }
         try {
-            mService.addHdmiMhlScratchpadCommandListener(getListenerWrapper(listener));
+            mService.addHdmiMhlVendorCommandListener(getListenerWrapper(listener));
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to set hdmi mhl scratchpad command listener: ", e);
+            Log.e(TAG, "failed to set hdmi mhl vendor command listener: ", e);
         }
     }
 
-    private IHdmiMhlScratchpadCommandListener getListenerWrapper(
-            final HdmiMhlScratchpadCommandListener listener) {
-        return new IHdmiMhlScratchpadCommandListener.Stub() {
+    private IHdmiMhlVendorCommandListener getListenerWrapper(
+            final HdmiMhlVendorCommandListener listener) {
+        return new IHdmiMhlVendorCommandListener.Stub() {
             @Override
             public void onReceived(int portId, int offset, int length, byte[] data) {
                 listener.onReceived(portId, offset, length, data);
@@ -365,29 +365,29 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Send MHL Scratchpad command to the device connected to a port of the given portId.
+     * Send MHL vendor command to the device connected to a port of the given portId.
      *
-     * @param portId id of port to send MHL Scratchpad command
+     * @param portId id of port to send MHL vendor command
      * @param offset offset in the in given data
      * @param length length of data. offset + length should be bound to length of data.
-     * @param data container for Scratchpad data. It should be 16 bytes.
+     * @param data container for vendor command data. It should be 16 bytes.
      * @throws IllegalArgumentException if the given parameters are invalid
      */
-    public void sendScratchpadCommand(int portId, int offset, int length, byte[] data) {
-        if (data == null || data.length != SCRATCHPAD_DATA_SIZE) {
-            throw new IllegalArgumentException("Invalid scratchpad data.");
+    public void sendMhlVendorCommand(int portId, int offset, int length, byte[] data) {
+        if (data == null || data.length != VENDOR_DATA_SIZE) {
+            throw new IllegalArgumentException("Invalid vendor command data.");
         }
-        if (offset < 0 || offset >= SCRATCHPAD_DATA_SIZE) {
+        if (offset < 0 || offset >= VENDOR_DATA_SIZE) {
             throw new IllegalArgumentException("Invalid offset:" + offset);
         }
-        if (length < 0 || offset + length > SCRATCHPAD_DATA_SIZE) {
+        if (length < 0 || offset + length > VENDOR_DATA_SIZE) {
             throw new IllegalArgumentException("Invalid length:" + length);
         }
 
         try {
-            mService.sendScratchpadCommand(portId, offset, length, data);
+            mService.sendMhlVendorCommand(portId, offset, length, data);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to send scratchpad command: ", e);
+            Log.e(TAG, "failed to send vendor command: ", e);
         }
     }
 }

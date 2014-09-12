@@ -43,7 +43,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
-import android.hardware.hdmi.IHdmiMhlScratchpadCommandListener;
+import android.hardware.hdmi.IHdmiMhlVendorCommandListener;
 import android.hardware.hdmi.IHdmiRecordListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
@@ -247,10 +247,10 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mMhlInputChangeEnabled;
 
-    // List of records for MHL Scratchpad command listener to handle the caller killed in action.
+    // List of records for MHL Vendor command listener to handle the caller killed in action.
     @GuardedBy("mLock")
-    private final ArrayList<HdmiMhlScratchpadCommandListenerRecord>
-            mScratchpadCommandListenerRecords = new ArrayList<>();
+    private final ArrayList<HdmiMhlVendorCommandListenerRecord>
+            mMhlVendorCommandListenerRecords = new ArrayList<>();
 
     @GuardedBy("mLock")
     private List<HdmiDeviceInfo> mMhlDevices;
@@ -928,16 +928,16 @@ public final class HdmiControlService extends SystemService {
         return mMhlDevices;
     }
 
-    private class HdmiMhlScratchpadCommandListenerRecord implements IBinder.DeathRecipient {
-        private final IHdmiMhlScratchpadCommandListener mListener;
+    private class HdmiMhlVendorCommandListenerRecord implements IBinder.DeathRecipient {
+        private final IHdmiMhlVendorCommandListener mListener;
 
-        public HdmiMhlScratchpadCommandListenerRecord(IHdmiMhlScratchpadCommandListener listener) {
+        public HdmiMhlVendorCommandListenerRecord(IHdmiMhlVendorCommandListener listener) {
             mListener = listener;
         }
 
         @Override
         public void binderDied() {
-            mScratchpadCommandListenerRecords.remove(this);
+            mMhlVendorCommandListenerRecords.remove(this);
         }
     }
 
@@ -1403,7 +1403,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void sendScratchpadCommand(final int portId, final int offset, final int length,
+        public void sendMhlVendorCommand(final int portId, final int offset, final int length,
                 final byte[] data) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
@@ -1418,16 +1418,16 @@ public final class HdmiControlService extends SystemService {
                         Slog.w(TAG, "Invalid port id:" + portId);
                         return;
                     }
-                    mMhlController.sendScratchpadCommand(portId, offset, length, data);
+                    mMhlController.sendVendorCommand(portId, offset, length, data);
                 }
             });
         }
 
         @Override
-        public void addHdmiMhlScratchpadCommandListener(
-                IHdmiMhlScratchpadCommandListener listener) {
+        public void addHdmiMhlVendorCommandListener(
+                IHdmiMhlVendorCommandListener listener) {
             enforceAccessPermission();
-            HdmiControlService.this.addHdmiMhlScratchpadCommandListener(listener);
+            HdmiControlService.this.addHdmiMhlVendorCommandListener(listener);
         }
 
         @Override
@@ -1880,9 +1880,9 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private void addHdmiMhlScratchpadCommandListener(IHdmiMhlScratchpadCommandListener listener) {
-        HdmiMhlScratchpadCommandListenerRecord record =
-                new HdmiMhlScratchpadCommandListenerRecord(listener);
+    private void addHdmiMhlVendorCommandListener(IHdmiMhlVendorCommandListener listener) {
+        HdmiMhlVendorCommandListenerRecord record =
+                new HdmiMhlVendorCommandListenerRecord(listener);
         try {
             listener.asBinder().linkToDeath(record, 0);
         } catch (RemoteException e) {
@@ -1891,18 +1891,17 @@ public final class HdmiControlService extends SystemService {
         }
 
         synchronized (mLock) {
-            mScratchpadCommandListenerRecords.add(record);
+            mMhlVendorCommandListenerRecords.add(record);
         }
     }
 
-    void invokeScratchpadCommandListeners(int portId, int offest, int length, byte[] data) {
+    void invokeMhlVendorCommandListeners(int portId, int offest, int length, byte[] data) {
         synchronized (mLock) {
-            for (HdmiMhlScratchpadCommandListenerRecord record :
-                    mScratchpadCommandListenerRecords) {
+            for (HdmiMhlVendorCommandListenerRecord record : mMhlVendorCommandListenerRecords) {
                 try {
                     record.mListener.onReceived(portId, offest, length, data);
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to notify scratchpad command", e);
+                    Slog.e(TAG, "Failed to notify MHL vendor command", e);
                 }
             }
         }
