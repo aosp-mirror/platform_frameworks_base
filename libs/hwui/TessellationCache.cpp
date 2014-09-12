@@ -216,7 +216,7 @@ static void tessellateShadows(
 
     // tessellate caster outline into a 2d polygon
     Vector<Vertex> casterVertices2d;
-    const float casterRefinementThresholdSquared = 20.0f; // TODO: experiment with this value
+    const float casterRefinementThresholdSquared = 4.0f;
     PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
             casterRefinementThresholdSquared, casterVertices2d);
     if (!ShadowTessellator::isClockwisePath(*casterPerimeter)) {
