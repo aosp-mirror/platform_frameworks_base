@@ -23,6 +23,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1518,10 +1519,17 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device supports managed profiles for enterprise users.
+     * The device supports creating secondary users and managed profiles via
+     * {@link DevicePolicyManager}.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_MANAGED_PROFILES = "android.software.managed_profiles";
+    public static final String FEATURE_MANAGED_USERS = "android.software.managed_users";
+
+    /**
+     * @hide
+     * TODO: Remove after dependencies updated b/17392243
+     */
+    public static final String FEATURE_MANAGED_PROFILES = "android.software.managed_users";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
