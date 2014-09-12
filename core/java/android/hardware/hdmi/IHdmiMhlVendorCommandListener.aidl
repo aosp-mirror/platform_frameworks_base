@@ -17,11 +17,10 @@
 package android.hardware.hdmi;
 
  /**
- * Callback interface definition for MHL client to get the scratchpad
- * command.
+ * Callback interface definition for MHL client to get the vendor command.
  *
  * @hide
  */
- oneway interface IHdmiMhlScratchpadCommandListener {
+ oneway interface IHdmiMhlVendorCommandListener {
       void onReceived(int portId, int offset, int length, in byte[] data);
  }

@@ -22,7 +22,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
-import android.hardware.hdmi.IHdmiMhlScratchpadCommandListener;
+import android.hardware.hdmi.IHdmiMhlVendorCommandListener;
 import android.hardware.hdmi.IHdmiRecordListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
@@ -67,6 +67,6 @@ interface IHdmiControlService {
     void stopOneTouchRecord(int recorderAddress);
     void startTimerRecording(int recorderAddress, int sourceType, in byte[] recordSource);
     void clearTimerRecording(int recorderAddress, int sourceType, in byte[] recordSource);
-    void sendScratchpadCommand(int portId, int offset, int length, in byte[] data);
-    void addHdmiMhlScratchpadCommandListener(IHdmiMhlScratchpadCommandListener listener);
+    void sendMhlVendorCommand(int portId, int offset, int length, in byte[] data);
+    void addHdmiMhlVendorCommandListener(IHdmiMhlVendorCommandListener listener);
 }
