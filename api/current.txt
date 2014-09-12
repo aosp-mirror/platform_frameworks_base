@@ -589,6 +589,7 @@ package android {
     field public static final int fastScrollThumbDrawable = 16843574; // 0x1010336
     field public static final int fastScrollTrackDrawable = 16843577; // 0x1010339
     field public static final int fillAfter = 16843197; // 0x10101bd
+    field public static final int fillAlpha = 16843981; // 0x10104cd
     field public static final int fillBefore = 16843196; // 0x10101bc
     field public static final int fillColor = 16843806; // 0x101041e
     field public static final int fillEnabled = 16843343; // 0x101024f
@@ -1204,6 +1205,7 @@ package android {
     field public static final int streamType = 16843273; // 0x1010209
     field public static final int stretchColumns = 16843081; // 0x1010149
     field public static final int stretchMode = 16843030; // 0x1010116
+    field public static final int strokeAlpha = 16843980; // 0x10104cc
     field public static final int strokeColor = 16843808; // 0x1010420
     field public static final int strokeLineCap = 16843813; // 0x1010425
     field public static final int strokeLineJoin = 16843814; // 0x1010426
