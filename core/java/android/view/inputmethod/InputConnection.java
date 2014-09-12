@@ -756,19 +756,4 @@ public interface InputConnection {
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
      */
     public boolean requestCursorUpdates(int cursorUpdateMode);
-
-    /**
-     * @removed
-     */
-    public static final int REQUEST_UPDATE_CURSOR_UPDATE_IMMEDIATE = 1 << 0;
-
-    /**
-     * @removed
-     */
-    public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR = 1 << 1;
-
-    /**
-     * @removed
-     */
-    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode);
 }
