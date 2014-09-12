@@ -220,7 +220,7 @@ capabilities you expect from IntelliJ, Android Studio offers:</p>
   <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
   <li>ProGuard and app-signing capabilities.</li>
   <li>Built-in support for <a
-  href="https://developers.google.com/cloud/devtools/android_studio_templates/"
+  href="https://developers.google.com/cloud/mobile"
   class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
   Messaging and App Engine.
 </ul>
