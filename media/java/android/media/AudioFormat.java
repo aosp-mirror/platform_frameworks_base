@@ -320,15 +320,26 @@ public class AudioFormat {
 
     /**
      * Builder class for {@link AudioFormat} objects.
+     * Use this class to configure and create an AudioFormat instance. By setting format
+     * characteristics such as audio encoding, channel mask or sample rate, you indicate which
+     * of those are to vary from the default behavior on this device wherever this audio format
+     * is used.
+     * <p>{@link AudioFormat} is for instance used in
+     * {@link AudioTrack#AudioTrack(AudioAttributes, AudioFormat, int, int, int)}. In this
+     * constructor, every format characteristic set on the <code>Builder</code> (e.g. with
+     * {@link #setSampleRate(int)}) will alter the default values used by an
+     * <code>AudioTrack</code>. In this case for audio playback with <code>AudioTrack</code>, the
+     * sample rate set in the <code>Builder</code> would override the platform output sample rate
+     * which would otherwise be selected by default.
      */
     public static class Builder {
-        private int mEncoding = ENCODING_PCM_16BIT;
+        private int mEncoding = ENCODING_INVALID;
         private int mSampleRate = 0;
         private int mChannelMask = CHANNEL_INVALID;
         private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;
 
         /**
-         * Constructs a new Builder with the defaults format values.
+         * Constructs a new Builder with none of the format characteristics set.
          */
         public Builder() {
         }
