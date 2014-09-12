@@ -517,8 +517,12 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleVendorCommand(HdmiCecMessage message) {
-        mService.invokeVendorCommandListeners(mDeviceType, message.getSource(),
-                message.getParams(), false);
+        if (!mService.invokeVendorCommandListeners(mDeviceType, message.getSource(),
+                message.getParams(), false)) {
+            // Vendor command listener may not have been registered yet. Respond with
+            // <Feature Abort> [NOT_IN_CORRECT_MODE] so that the sender can try again later.
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_NOT_IN_CORRECT_MODE);
+        }
         return true;
     }
 
@@ -526,7 +530,10 @@ abstract class HdmiCecLocalDevice {
         byte[] params = message.getParams();
         int vendorId = HdmiUtils.threeBytesToInt(params);
         if (vendorId == mService.getVendorId()) {
-            mService.invokeVendorCommandListeners(mDeviceType, message.getSource(), params, true);
+            if (!mService.invokeVendorCommandListeners(mDeviceType, message.getSource(), params,
+                    true)) {
+                mService.maySendFeatureAbortCommand(message, Constants.ABORT_NOT_IN_CORRECT_MODE);
+            }
         } else if (message.getDestination() != Constants.ADDR_BROADCAST &&
                 message.getSource() != Constants.ADDR_UNREGISTERED) {
             Slog.v(TAG, "Wrong direct vendor command. Replying with <Feature Abort>");
@@ -535,6 +542,10 @@ abstract class HdmiCecLocalDevice {
             Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
         }
         return true;
+    }
+
+    protected void sendStandby(int deviceId) {
+        // Do nothing.
     }
 
     protected boolean handleSetOsdName(HdmiCecMessage message) {
