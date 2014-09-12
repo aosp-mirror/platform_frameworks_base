@@ -36,6 +36,7 @@ import android.os.FileUtils;
 import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.LogPrinter;
 
 import com.android.internal.util.FastXmlSerializer;
