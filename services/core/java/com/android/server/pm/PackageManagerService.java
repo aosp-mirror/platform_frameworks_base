@@ -1793,19 +1793,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         removeDataDirsLI(ps.name);
-
-        // TODO: try cleaning up codePath directory contents first, since it
-        // might be a cluster
-
         if (ps.codePath != null) {
-            if (!ps.codePath.delete()) {
-                Slog.w(TAG, "Unable to remove old code file: " + ps.codePath);
+            if (ps.codePath.isDirectory()) {
+                FileUtils.deleteContents(ps.codePath);
             }
+            ps.codePath.delete();
         }
-        if (ps.resourcePath != null) {
-            if (!ps.resourcePath.delete() && !ps.resourcePath.equals(ps.codePath)) {
-                Slog.w(TAG, "Unable to remove old code file: " + ps.resourcePath);
+        if (ps.resourcePath != null && !ps.resourcePath.equals(ps.codePath)) {
+            if (ps.resourcePath.isDirectory()) {
+                FileUtils.deleteContents(ps.resourcePath);
             }
+            ps.resourcePath.delete();
         }
         mSettings.removePackageLPw(ps.name);
     }
@@ -4958,6 +4956,21 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg, int parseFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
+        boolean success = false;
+        try {
+            final PackageParser.Package res = scanPackageDirtyLI(pkg, parseFlags, scanFlags,
+                    currentTime, user);
+            success = true;
+            return res;
+        } finally {
+            if (!success && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
+                removeDataDirsLI(pkg.packageName);
+            }
+        }
+    }
+
+    private PackageParser.Package scanPackageDirtyLI(PackageParser.Package pkg, int parseFlags,
+            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         final File scanFile = new File(pkg.codePath);
         if (pkg.applicationInfo.getCodePath() == null ||
                 pkg.applicationInfo.getResourcePath() == null) {
@@ -5264,7 +5277,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         File dataPath;
         if (mPlatformPackage == pkg) {
             // The system package is special.
-            dataPath = new File (Environment.getDataDirectory(), "system");
+            dataPath = new File(Environment.getDataDirectory(), "system");
+
             pkg.applicationInfo.dataDir = dataPath.getPath();
 
         } else {
@@ -5272,7 +5286,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             dataPath = getDataPathForPackage(pkg.packageName, 0);
 
             boolean uidError = false;
-
             if (dataPath.exists()) {
                 int currentUid = 0;
                 try {
@@ -5599,13 +5612,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg, forceDex, (scanFlags & SCAN_DEFER_DEX) != 0);
         }
 
-        if ((scanFlags&SCAN_NO_DEX) == 0) {
-            if (performDexOptLI(pkg, null /* instruction sets */, forceDex, (scanFlags&SCAN_DEFER_DEX) != 0, false)
-                    == DEX_OPT_FAILED) {
-                if ((scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                    removeDataDirsLI(pkg.packageName);
-                }
-
+        if ((scanFlags & SCAN_NO_DEX) == 0) {
+            if (performDexOptLI(pkg, null /* instruction sets */, forceDex,
+                    (scanFlags & SCAN_DEFER_DEX) != 0, false) == DEX_OPT_FAILED) {
                 throw new PackageManagerException(INSTALL_FAILED_DEXOPT, "scanPackageLI");
             }
         }
@@ -5676,16 +5685,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         // if these fail, we should abort the install since installing the library will
         // result in some apps being broken.
         if (clientLibPkgs != null) {
-            if ((scanFlags&SCAN_NO_DEX) == 0) {
-                for (int i=0; i<clientLibPkgs.size(); i++) {
+            if ((scanFlags & SCAN_NO_DEX) == 0) {
+                for (int i = 0; i < clientLibPkgs.size(); i++) {
                     PackageParser.Package clientPkg = clientLibPkgs.get(i);
-                    if (performDexOptLI(clientPkg, null /* instruction sets */,
-                            forceDex, (scanFlags&SCAN_DEFER_DEX) != 0, false)
-                            == DEX_OPT_FAILED) {
-                        if ((scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                            removeDataDirsLI(pkg.packageName);
-                        }
-
+                    if (performDexOptLI(clientPkg, null /* instruction sets */, forceDex,
+                            (scanFlags & SCAN_DEFER_DEX) != 0, false) == DEX_OPT_FAILED) {
                         throw new PackageManagerException(INSTALL_FAILED_DEXOPT,
                                 "scanPackageLI failed to dexopt clientLibPkgs");
                     }
@@ -11011,45 +11015,40 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Attempt to delete null packageName.");
             return false;
         }
+
+        // Try finding details about the requested package
         PackageParser.Package pkg;
-        boolean dataOnly = false;
-        final int appId;
         synchronized (mPackages) {
             pkg = mPackages.get(packageName);
             if (pkg == null) {
-                dataOnly = true;
-                PackageSetting ps = mSettings.mPackages.get(packageName);
-                if ((ps == null) || (ps.pkg == null)) {
-                    Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
-                    return false;
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    pkg = ps.pkg;
                 }
-                pkg = ps.pkg;
-            }
-            if (!dataOnly) {
-                // need to check this only for fully installed applications
-                if (pkg == null) {
-                    Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
-                    return false;
-                }
-                final ApplicationInfo applicationInfo = pkg.applicationInfo;
-                if (applicationInfo == null) {
-                    Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
-                    return false;
-                }
-            }
-            if (pkg != null && pkg.applicationInfo != null) {
-                appId = pkg.applicationInfo.uid;
-            } else {
-                appId = -1;
             }
         }
+
+        if (pkg == null) {
+            Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
+        }
+
+        // Always delete data directories for package, even if we found no other
+        // record of app. This helps users recover from UID mismatches without
+        // resorting to a full data wipe.
         int retCode = mInstaller.clearUserData(packageName, userId);
         if (retCode < 0) {
-            Slog.w(TAG, "Couldn't remove cache files for package: "
-                    + packageName);
+            Slog.w(TAG, "Couldn't remove cache files for package: " + packageName);
             return false;
         }
-        removeKeystoreDataIfNeeded(userId, appId);
+
+        if (pkg == null) {
+            return false;
+        }
+
+        if (pkg != null && pkg.applicationInfo != null) {
+            final int appId = pkg.applicationInfo.uid;
+            removeKeystoreDataIfNeeded(userId, appId);
+        }
 
         // Create a native library symlink only if we have native libraries
         // and if the native libraries are 32 bit libraries. We do not provide
