@@ -45,177 +45,99 @@ public class InputMethodTest extends InstrumentationTestCase {
     private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
     private static final Locale LOCALE_EN_IN = new Locale("en", "IN");
     private static final Locale LOCALE_HI = new Locale("hi");
+    private static final Locale LOCALE_JA_JP = new Locale("ja", "JP");
+    private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
+    private static final String SUBTYPE_MODE_VOICE = "voice";
 
     @SmallTest
-    public void testDefaultEnabledImesWithDefaultVoiceIme() throws Exception {
-        final Context context = getInstrumentation().getTargetContext();
-        final ArrayList<InputMethodInfo> imis = new ArrayList<InputMethodInfo>();
-        imis.add(createDefaultAutoDummyVoiceIme());
-        imis.add(createNonDefaultAutoDummyVoiceIme0());
-        imis.add(createNonDefaultAutoDummyVoiceIme1());
-        imis.add(createNonDefaultDummyVoiceIme2());
-        imis.add(createDefaultDummyLatinKeyboardIme());
-        imis.add(createNonDefaultDummyJaJPKeyboardIme());
-        imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
-        imis.add(createDefaultDummyHinglishKeyboardIme());
-
-        // locale: en_US, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleEnUs =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_EN_US);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
+    public void testVoiceImes() throws Exception {
+        // locale: en_US
+        assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_US, !IS_SYSTEM_READY,
                 "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleEnUs));
-
-        // locale: en_US, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleEnUs =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_EN_US);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleEnUs));
-
-        // locale: en_GB, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleEnGB =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_EN_GB);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
+                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+        assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_US, !IS_SYSTEM_READY,
                 "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleEnGB));
-
-        // locale: en_GB, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleEnGB =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_EN_GB);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleEnGB));
-
-        // locale: en_IN, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleEnIN =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_EN_IN);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
+                "DummyDefaultEnKeyboardIme");
+        assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_US, IS_SYSTEM_READY,
+                "DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme");
+        assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_US, IS_SYSTEM_READY,
                 "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleEnIN));
+                "DummyDefaultEnKeyboardIme");
 
-        // locale: en_IN, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleEnIN =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_EN_IN);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleEnIN));
-
-        // locale: hi, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleHi =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_HI);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
+        // locale: en_GB
+        assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_GB, !IS_SYSTEM_READY,
                 "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleHi));
-
-        // locale: hi, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleHi =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_HI);
-        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
+                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+        assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_GB, !IS_SYSTEM_READY,
                 "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleHi));
+                "DummyDefaultEnKeyboardIme");
+        assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_GB, IS_SYSTEM_READY,
+                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+        assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_GB, IS_SYSTEM_READY,
+                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme");
+
+        // locale: ja_JP
+        assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_JA_JP, !IS_SYSTEM_READY,
+                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+        assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_JA_JP, !IS_SYSTEM_READY,
+                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme");
+        assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_JA_JP, IS_SYSTEM_READY,
+                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+        assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_JA_JP, IS_SYSTEM_READY,
+                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme");
     }
 
     @SmallTest
-    public void testDefaultEnabledImesWithOutDefaultVoiceIme() throws Exception {
-        final Context context = getInstrumentation().getTargetContext();
-        final ArrayList<InputMethodInfo> imis = new ArrayList<InputMethodInfo>();
-        imis.add(createNonDefaultAutoDummyVoiceIme0());
-        imis.add(createNonDefaultAutoDummyVoiceIme1());
-        imis.add(createNonDefaultDummyVoiceIme2());
-        imis.add(createDefaultDummyLatinKeyboardIme());
-        imis.add(createNonDefaultDummyJaJPKeyboardIme());
-        imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
-        imis.add(createDefaultDummyHinglishKeyboardIme());
+    public void testKeyboardImes() throws Exception {
+        // locale: en_US
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_US, !IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_US, IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
 
-        // locale: en_US, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleEnUs =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_EN_US);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleEnUs));
+        // locale: en_GB
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_GB, !IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_GB, IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
 
-        // locale: en_US, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleEnUs =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_EN_US);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleEnUs));
+        // locale: en_IN
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_IN, !IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_IN, IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
 
-        // locale: en_GB, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleEnGB =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_EN_GB);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleEnGB));
+        // locale: hi
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_HI, !IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_HI, IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
 
-        // locale: en_GB, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleEnGB =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_EN_GB);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleEnGB));
-
-        // locale: en_IN, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleEnIN =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_EN_IN);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleEnIN));
-
-        // locale: en_IN, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleEnIN =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_EN_IN);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleEnIN));
-
-        // locale: hi, system: not ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemNotReadyLocaleHi =
-                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
-                        LOCALE_HI);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemNotReadyLocaleHi));
-
-        // locale: hi, system: ready
-        final ArrayList<InputMethodInfo> enabledImisForSystemReadyLocaleHi =
-                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
-                        LOCALE_HI);
-        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
-                "DummyDefaultEnKeyboardIme", "DummyDefaultHinglishKeyboardIme"),
-                getPackageNames(enabledImisForSystemReadyLocaleHi));
+        // locale: ja_JP
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_JA_JP, !IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi");
+        assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_JA_JP, IS_SYSTEM_READY,
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
+                "com.android.apps.inputmethod.hindi", "com.android.apps.inputmethod.japanese");
     }
 
     @SmallTest
     public void testParcelable() throws Exception {
-        final ArrayList<InputMethodInfo> originalList = new ArrayList<InputMethodInfo>();
-        originalList.add(createNonDefaultAutoDummyVoiceIme0());
-        originalList.add(createNonDefaultAutoDummyVoiceIme1());
-        originalList.add(createNonDefaultDummyVoiceIme2());
-        originalList.add(createDefaultDummyLatinKeyboardIme());
-        originalList.add(createNonDefaultDummyJaJPKeyboardIme());
-        originalList.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
-
+        final ArrayList<InputMethodInfo> originalList = getSamplePreinstalledImes();
         final List<InputMethodInfo> clonedList = cloneViaParcel(originalList);
         assertNotNull(clonedList);
         final List<InputMethodInfo> clonedClonedList = cloneViaParcel(clonedList);
@@ -228,6 +150,14 @@ public class InputMethodTest extends InstrumentationTestCase {
             verifyEquality(originalList.get(imeIndex), clonedList.get(imeIndex));
             verifyEquality(clonedList.get(imeIndex), clonedClonedList.get(imeIndex));
         }
+    }
+
+    private void assertDefaultEnabledImes(final ArrayList<InputMethodInfo> preinstalledImes,
+            final Locale systemLocale, final boolean isSystemReady, String... imeNames) {
+        final Context context = getInstrumentation().getTargetContext();
+        assertEquals(new HashSet<String>(Arrays.asList(imeNames)),
+                getPackageNames(callGetDefaultEnabledImesUnderWithLocale(context,
+                        isSystemReady, preinstalledImes, systemLocale)));
     }
 
     private static List<InputMethodInfo> cloneViaParcel(final List<InputMethodInfo> list) {
@@ -254,11 +184,6 @@ public class InputMethodTest extends InstrumentationTestCase {
         } finally {
             context.getResources().getConfiguration().setLocale(initialLocale);
         }
-    }
-
-    @SafeVarargs
-    private static <T> HashSet<T> toSet(final T... xs) {
-        return new HashSet<T>(Arrays.asList(xs));
     }
 
     private HashSet<String> getPackageNames(final ArrayList<InputMethodInfo> imis) {
@@ -315,83 +240,132 @@ public class InputMethodTest extends InstrumentationTestCase {
                 .build();
     }
 
-    private static InputMethodInfo createDefaultAutoDummyVoiceIme() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        return createDummyInputMethodInfo("DummyDefaultAutoVoiceIme", "dummy.voice0",
-                "DummyVoice0", IS_AUX, IS_DEFAULT, subtypes);
+    private static ArrayList<InputMethodInfo> getImesWithDefaultVoiceIme() {
+        ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX, IS_AUTO,
+                    !IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("DummyDefaultAutoVoiceIme",
+                    "dummy.voice0", "DummyVoice0", IS_AUX, IS_DEFAULT, subtypes));
+        }
+        preinstalledImes.addAll(getImesWithoutDefaultVoiceIme());
+        return preinstalledImes;
     }
 
-    private static InputMethodInfo createNonDefaultAutoDummyVoiceIme0() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        return createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme0", "dummy.voice1",
-                "DummyVoice1", IS_AUX, !IS_DEFAULT, subtypes);
+    private static ArrayList<InputMethodInfo> getImesWithoutDefaultVoiceIme() {
+        ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX, IS_AUTO,
+                    !IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme0",
+                    "dummy.voice1", "DummyVoice1", IS_AUX, !IS_DEFAULT, subtypes));
+        }
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX, IS_AUTO,
+                    !IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme1",
+                    "dummy.voice2", "DummyVoice2", IS_AUX, !IS_DEFAULT, subtypes));
+        }
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("DummyNonDefaultVoiceIme2",
+                    "dummy.voice3", "DummyVoice3", IS_AUX, !IS_DEFAULT, subtypes));
+        }
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("DummyDefaultEnKeyboardIme",
+                    "dummy.keyboard0", "DummyKeyboard0", !IS_AUX, IS_DEFAULT, subtypes));
+        }
+        return preinstalledImes;
     }
 
-    private static InputMethodInfo createNonDefaultAutoDummyVoiceIme1() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        return createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme1", "dummy.voice2",
-                "DummyVoice2", IS_AUX, !IS_DEFAULT, subtypes);
-    }
+    private static ArrayList<InputMethodInfo> getSamplePreinstalledImes() {
+        ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
 
-    private static InputMethodInfo createNonDefaultDummyVoiceIme2() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
-                !IS_ASCII_CAPABLE));
-        return createDummyInputMethodInfo("DummyNonDefaultVoiceIme2", "dummy.voice3",
-                "DummyVoice3", IS_AUX, !IS_DEFAULT, subtypes);
-    }
+        // a dummy Voice IME
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("", SUBTYPE_MODE_VOICE, IS_AUX,
+                    IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.voice",
+                    "com.android.inputmethod.voice", "DummyVoiceIme", IS_AUX, IS_DEFAULT,
+                    subtypes));
+        }
 
-    private static InputMethodInfo createDefaultDummyLatinKeyboardIme() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("en_US", "keyboard", !IS_AUX, !IS_AUTO,
-                IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("en_GB", "keyboard", !IS_AUX, !IS_AUTO,
-                IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("en_IN", "keyboard", !IS_AUX, !IS_AUTO,
-                IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("hi", "keyboard", !IS_AUX, !IS_AUTO,
-                !IS_ASCII_CAPABLE));  // not AsciiCapable!
-        subtypes.add(createDummyInputMethodSubtype("hi_ZZ", "keyboard", !IS_AUX, !IS_AUTO,
-                IS_ASCII_CAPABLE));
-        return createDummyInputMethodInfo("DummyDefaultEnKeyboardIme", "dummy.keyboard0",
-                "DummyKeyboard0", !IS_AUX, IS_DEFAULT, subtypes);
-    }
+        // a dummy Hindi IME
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            // TODO: This subtype should be marked as IS_ASCII_CAPABLE
+            subtypes.add(createDummyInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("hi", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.hindi",
+                    "com.android.inputmethod.hindi", "DummyHindiIme", !IS_AUX, IS_DEFAULT,
+                    subtypes));
+        }
 
-    private static InputMethodInfo createNonDefaultDummyJaJPKeyboardIme() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("ja_JP", "keyboard", !IS_AUX, !IS_AUTO,
-                IS_ASCII_CAPABLE));
-        return createDummyInputMethodInfo("DummyNonDefaultJaJPKeyboardIme", "dummy.keyboard1",
-                "DummyKeyboard1", !IS_AUX, !IS_DEFAULT, subtypes);
-    }
+        // a dummy Pinyin IME
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("zh_CN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("ccom.android.apps.inputmethod.pinyin",
+                    "com.android.apps.inputmethod.pinyin", "DummyPinyinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes));
+        }
 
-    // Although IMEs that have no subtype are considered to be deprecated, the Android framework
-    // must still be able to handle such IMEs as well as IMEs that have at least one subtype.
-    private static InputMethodInfo createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        return createDummyInputMethodInfo("DummyNonDefaultJaJPKeyboardImeWithoutSubtypes",
-                "dummy.keyboard2", "DummyKeyboard2", !IS_AUX, !IS_DEFAULT, NO_SUBTYPE);
-    }
+        // a dummy Korian IME
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("ko", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.korean",
+                    "com.android.apps.inputmethod.korean", "DummyKorianIme", !IS_AUX, IS_DEFAULT,
+                    subtypes));
+        }
 
-    private static InputMethodInfo createDefaultDummyHinglishKeyboardIme() {
-        final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("en_IN", "keyboard", !IS_AUX, !IS_AUTO,
-                IS_ASCII_CAPABLE));
-        subtypes.add(createDummyInputMethodSubtype("hi", "keyboard", !IS_AUX, !IS_AUTO,
-                !IS_ASCII_CAPABLE));  // not AsciiCapable!
-        return createDummyInputMethodInfo("DummyDefaultHinglishKeyboardIme", "dummy.keyboard2",
-                "DummyKeyboard2", !IS_AUX, IS_DEFAULT, subtypes);
+        // a dummy Latin IME
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("en_GB", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("hi", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes));
+        }
+
+        // a dummy Japanese IME
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(createDummyInputMethodSubtype("ja", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            subtypes.add(createDummyInputMethodSubtype("emoji", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                    !IS_AUTO, !IS_ASCII_CAPABLE));
+            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.japanese",
+                    "com.android.apps.inputmethod.japanese", "DummyJapaneseIme", !IS_AUX,
+                    IS_DEFAULT, subtypes));
+        }
+
+        return preinstalledImes;
     }
 }
