@@ -33,6 +33,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -131,6 +132,8 @@ public class Toolbar extends ViewGroup {
 
     private int mTitleTextColor;
     private int mSubtitleTextColor;
+
+    private boolean mEatingTouch;
 
     // Clear me after use.
     private final ArrayList<View> mTempViews = new ArrayList<View>();
@@ -1059,6 +1062,32 @@ public class Toolbar extends ViewGroup {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         removeCallbacks(mShowOverflowMenuRunnable);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        // Toolbars always eat touch events, but should still respect the touch event dispatch
+        // contract. If the normal View implementation doesn't want the events, we'll just silently
+        // eat the rest of the gesture without reporting the events to the default implementation
+        // since that's what it expects.
+
+        final int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            mEatingTouch = false;
+        }
+
+        if (!mEatingTouch) {
+            final boolean handled = super.onTouchEvent(ev);
+            if (action == MotionEvent.ACTION_DOWN && !handled) {
+                mEatingTouch = true;
+            }
+        }
+
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            mEatingTouch = false;
+        }
+
+        return true;
     }
 
     /**
