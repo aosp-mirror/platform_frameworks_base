@@ -49,7 +49,7 @@ oneway interface IConnectionServiceAdapter {
 
     void setOnHold(String callId);
 
-    void setRequestingRingback(String callId, boolean ringing);
+    void setRingbackRequested(String callId, boolean ringing);
 
     void setCallCapabilities(String callId, int callCapabilities);
 
@@ -67,11 +67,11 @@ oneway interface IConnectionServiceAdapter {
 
     void setVideoState(String callId, int videoState);
 
-    void setAudioModeIsVoip(String callId, boolean isVoip);
+    void setIsVoipAudioMode(String callId, boolean isVoip);
 
     void setStatusHints(String callId, in StatusHints statusHints);
 
-    void setHandle(String callId, in Uri handle, int presentation);
+    void setAddress(String callId, in Uri address, int presentation);
 
     void setCallerDisplayName(String callId, String callerDisplayName, int presentation);
 

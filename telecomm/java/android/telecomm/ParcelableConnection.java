@@ -35,14 +35,14 @@ public final class ParcelableConnection implements Parcelable {
     private final PhoneAccountHandle mPhoneAccount;
     private final int mState;
     private final int mCapabilities;
-    private final Uri mHandle;
-    private final int mHandlePresentation;
+    private final Uri mAddress;
+    private final int mAddressPresentation;
     private final String mCallerDisplayName;
     private final int mCallerDisplayNamePresentation;
     private final IVideoProvider mVideoProvider;
     private final int mVideoState;
-    private final boolean mRequestingRingback;
-    private final boolean mAudioModeIsVoip;
+    private final boolean mRingbackRequested;
+    private final boolean mIsVoipAudioMode;
     private final StatusHints mStatusHints;
     private final int mDisconnectCause;
     private final String mDisconnectMessage;
@@ -53,14 +53,14 @@ public final class ParcelableConnection implements Parcelable {
             PhoneAccountHandle phoneAccount,
             int state,
             int capabilities,
-            Uri handle,
-            int handlePresentation,
+            Uri address,
+            int addressPresentation,
             String callerDisplayName,
             int callerDisplayNamePresentation,
             IVideoProvider videoProvider,
             int videoState,
-            boolean requestingRingback,
-            boolean audioModeIsVoip,
+            boolean ringbackRequested,
+            boolean isVoipAudioMode,
             StatusHints statusHints,
             int disconnectCause,
             String disconnectMessage,
@@ -68,14 +68,14 @@ public final class ParcelableConnection implements Parcelable {
         mPhoneAccount = phoneAccount;
         mState = state;
         mCapabilities = capabilities;
-        mHandle = handle;
-        mHandlePresentation = handlePresentation;
+        mAddress = address;
+        mAddressPresentation = addressPresentation;
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
         mVideoProvider = videoProvider;
         mVideoState = videoState;
-        mRequestingRingback = requestingRingback;
-        mAudioModeIsVoip = audioModeIsVoip;
+        mRingbackRequested = ringbackRequested;
+        mIsVoipAudioMode = isVoipAudioMode;
         mStatusHints = statusHints;
         mDisconnectCause = disconnectCause;
         mDisconnectMessage = disconnectMessage;
@@ -96,11 +96,11 @@ public final class ParcelableConnection implements Parcelable {
     }
 
     public Uri getHandle() {
-        return mHandle;
+        return mAddress;
     }
 
     public int getHandlePresentation() {
-        return mHandlePresentation;
+        return mAddressPresentation;
     }
 
     public String getCallerDisplayName() {
@@ -119,12 +119,12 @@ public final class ParcelableConnection implements Parcelable {
         return mVideoState;
     }
 
-    public boolean isRequestingRingback() {
-        return mRequestingRingback;
+    public boolean isRingbackRequested() {
+        return mRingbackRequested;
     }
 
-    public boolean getAudioModeIsVoip() {
-        return mAudioModeIsVoip;
+    public boolean getIsVoipAudioMode() {
+        return mIsVoipAudioMode;
     }
 
     public final StatusHints getStatusHints() {
@@ -164,14 +164,14 @@ public final class ParcelableConnection implements Parcelable {
             PhoneAccountHandle phoneAccount = source.readParcelable(classLoader);
             int state = source.readInt();
             int capabilities = source.readInt();
-            Uri handle = source.readParcelable(classLoader);
-            int handlePresentation = source.readInt();
+            Uri address = source.readParcelable(classLoader);
+            int addressPresentation = source.readInt();
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
             IVideoProvider videoCallProvider =
                     IVideoProvider.Stub.asInterface(source.readStrongBinder());
             int videoState = source.readInt();
-            boolean requestingRingback = source.readByte() == 1;
+            boolean ringbackRequested = source.readByte() == 1;
             boolean audioModeIsVoip = source.readByte() == 1;
             StatusHints statusHints = source.readParcelable(classLoader);
             int disconnectCauseCode = source.readInt();
@@ -183,13 +183,13 @@ public final class ParcelableConnection implements Parcelable {
                     phoneAccount,
                     state,
                     capabilities,
-                    handle,
-                    handlePresentation,
+                    address,
+                    addressPresentation,
                     callerDisplayName,
                     callerDisplayNamePresentation,
                     videoCallProvider,
                     videoState,
-                    requestingRingback,
+                    ringbackRequested,
                     audioModeIsVoip,
                     statusHints,
                     disconnectCauseCode,
@@ -215,15 +215,15 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeParcelable(mPhoneAccount, 0);
         destination.writeInt(mState);
         destination.writeInt(mCapabilities);
-        destination.writeParcelable(mHandle, 0);
-        destination.writeInt(mHandlePresentation);
+        destination.writeParcelable(mAddress, 0);
+        destination.writeInt(mAddressPresentation);
         destination.writeString(mCallerDisplayName);
         destination.writeInt(mCallerDisplayNamePresentation);
         destination.writeStrongBinder(
                 mVideoProvider != null ? mVideoProvider.asBinder() : null);
         destination.writeInt(mVideoState);
-        destination.writeByte((byte) (mRequestingRingback ? 1 : 0));
-        destination.writeByte((byte) (mAudioModeIsVoip ? 1 : 0));
+        destination.writeByte((byte) (mRingbackRequested ? 1 : 0));
+        destination.writeByte((byte) (mIsVoipAudioMode ? 1 : 0));
         destination.writeParcelable(mStatusHints, 0);
         destination.writeInt(mDisconnectCause);
         destination.writeString(mDisconnectMessage);
