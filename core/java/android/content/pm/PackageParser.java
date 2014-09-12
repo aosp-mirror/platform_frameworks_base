@@ -3308,7 +3308,8 @@ public class PackageParser {
         info.softInputMode = target.info.softInputMode;
         info.uiOptions = target.info.uiOptions;
         info.parentActivityName = target.info.parentActivityName;
-        
+        info.maxRecents = target.info.maxRecents;
+
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {
             sa.recycle();
