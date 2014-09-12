@@ -406,7 +406,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         target.animate().cancel();
         source.animate()
                 .alpha(0f)
-                .withLayer()
                 .setStartDelay(delay)
                 .setDuration(duration)
                 .withEndAction(new Runnable() {
@@ -417,7 +416,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 });
         target.animate()
                 .alpha(1f)
-                .withLayer()
                 .setStartDelay(delay)
                 .setDuration(duration);
     }
