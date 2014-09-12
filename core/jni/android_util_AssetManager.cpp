@@ -2051,6 +2051,8 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_dumpTheme },
     { "applyStyle","(JIIJ[I[I[I)Z",
         (void*) android_content_AssetManager_applyStyle },
+    { "resolveAttrs","(JII[I[I[I[I)Z",
+        (void*) android_content_AssetManager_resolveAttrs },
     { "retrieveAttributes","(J[I[I[I)Z",
         (void*) android_content_AssetManager_retrieveAttributes },
     { "getArraySize","(I)I",

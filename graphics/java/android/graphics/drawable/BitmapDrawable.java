@@ -867,7 +867,7 @@ public class BitmapDrawable extends Drawable {
         int[] mThemeAttrs = null;
         Bitmap mBitmap = null;
         ColorStateList mTint = null;
-        Mode mTintMode = Mode.SRC_IN;
+        Mode mTintMode = DEFAULT_TINT_MODE;
         int mGravity = Gravity.FILL;
         float mBaseAlpha = 1.0f;
         Shader.TileMode mTileModeX = null;
