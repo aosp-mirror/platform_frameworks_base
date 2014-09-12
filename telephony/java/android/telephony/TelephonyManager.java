@@ -1761,10 +1761,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the phone number string and its alphatag for line 1 for display
-     * purpose only, for example, displayed in Phone Status. It won't change
-     * the actual MSISDN/MDN. This setting won't be persisted during power cycle
-     * and it should be set again after reboot.
+     * Set the line 1 phone number string and its alphatag for the current ICCID
+     * for display purpose only, for example, displayed in Phone Status. It won't
+     * change the actual MSISDN/MDN. To unset alphatag or number, pass in a null
+     * value.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
@@ -1778,10 +1778,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the phone number string and its alphatag for line 1 for display
-     * purpose only, for example, displayed in Phone Status. It won't change
-     * the actual MSISDN/MDN. This setting won't be persisted during power cycle
-     * and it should be set again after reboot.
+     * Set the line 1 phone number string and its alphatag for the current ICCID
+     * for display purpose only, for example, displayed in Phone Status. It won't
+     * change the actual MSISDN/MDN. To unset alphatag or number, pass in a null
+     * value.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
@@ -3406,8 +3406,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set whether Android should display a simplified Mobile Network Settings UI.
-     * The setting won't be persisted during power cycle.
+     * Set whether Android should display a simplified Mobile Network Settings UI
+     * for the current ICCID.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
@@ -3421,8 +3421,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set whether Android should display a simplified Mobile Network Settings UI.
-     * The setting won't be persisted during power cycle.
+     * Set whether Android should display a simplified Mobile Network Settings UI
+     * for the current ICCID.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
@@ -3441,7 +3441,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Get whether a simplified Mobile Network Settings UI is enabled.
+     * Get whether a simplified Mobile Network Settings UI is enabled for the
+     * current ICCID.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -3454,7 +3455,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Get whether a simplified Mobile Network Settings UI is enabled.
+     * Get whether a simplified Mobile Network Settings UI is enabled for the
+     * current ICCID.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
