@@ -38,6 +38,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.util.Log;
 
@@ -49,6 +50,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -1833,6 +1836,32 @@ public class DevicePolicyManager {
             } catch (CertificateException ce) {
                 Log.w(TAG, "Could not parse certificate", ce);
             }
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device or profile owner to install a certificate and private key pair. The
+     * keypair will be visible to all apps within the profile.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param privKey The private key to install.
+     * @param cert The certificate to install.
+     * @param alias The private key alias under which to install the certificate. If a certificate
+     * with that alias already exists, it will be overwritten.
+     * @return {@code true} if the keys were installed, {@code false} otherwise.
+     */
+    public boolean installKeyPair(ComponentName who, PrivateKey privKey, Certificate cert,
+            String alias) {
+        try {
+            final byte[] pemCert = Credentials.convertToPem(cert);
+            return mService.installKeyPair(who, privKey.getEncoded(), pemCert, alias);
+        } catch (CertificateException e) {
+            Log.w(TAG, "Error encoding certificate", e);
+        } catch (IOException e) {
+            Log.w(TAG, "Error writing certificate", e);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed talking with device policy service", e);
         }
         return false;
     }

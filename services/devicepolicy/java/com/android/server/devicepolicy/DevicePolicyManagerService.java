@@ -44,13 +44,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
-import android.net.Uri;
-import android.database.ContentObserver;
-import android.hardware.usb.UsbManager;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -69,6 +69,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
+import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.util.Log;
@@ -110,6 +111,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -2827,6 +2829,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(id);
         }
+    }
+
+    @Override
+    public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
+        if (who == null) {
+            throw new NullPointerException("ComponentName is null");
+        }
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final long id = Binder.clearCallingIdentity();
+        try {
+          final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
+          try {
+              IKeyChainService keyChain = keyChainConnection.getService();
+              return keyChain.installKeyPair(privKey, cert, alias);
+          } catch (RemoteException e) {
+              Log.e(LOG_TAG, "Installing certificate", e);
+          } finally {
+              keyChainConnection.close();
+          }
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while installing certificate", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
+        return false;
     }
 
     void wipeDataLocked(int flags) {

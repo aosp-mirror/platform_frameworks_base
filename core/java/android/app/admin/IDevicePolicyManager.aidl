@@ -126,6 +126,8 @@ interface IDevicePolicyManager {
     void uninstallCaCert(in ComponentName admin, in String alias);
     void enforceCanManageCaCerts(in ComponentName admin);
 
+    boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer, String alias);
+
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
 
