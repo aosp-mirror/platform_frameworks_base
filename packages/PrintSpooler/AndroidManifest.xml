@@ -55,7 +55,8 @@
 
         <service
             android:name=".renderer.PdfManipulationService"
-            android:isolatedProcess="true">
+            android:isolatedProcess="true"
+            android:process=":renderer">
         </service>
 
         <activity
