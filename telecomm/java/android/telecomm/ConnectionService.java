@@ -498,6 +498,13 @@ public abstract class ConnectionService extends Service {
         return mBinder;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean onUnbind(Intent intent) {
+        endAllConnections();
+        return super.onUnbind(intent);
+    }
+
     /**
      * This can be used by telecomm to either create a new outgoing call or attach to an existing
      * incoming call. In either case, telecomm will cycle through a set of services and call
@@ -950,5 +957,18 @@ public abstract class ConnectionService extends Service {
             sNullConference = new Conference(null) {};
         }
         return sNullConference;
+    }
+
+    private void endAllConnections() {
+        // Unbound from telecomm.  We should end all connections and conferences.
+        for (Connection connection : mIdByConnection.keySet()) {
+            // only operate on top-level calls. Conference calls will be removed on their own.
+            if (connection.getConference() == null) {
+                connection.onDisconnect();
+            }
+        }
+        for (Conference conference : mIdByConference.keySet()) {
+            conference.onDisconnect();
+        }
     }
 }
