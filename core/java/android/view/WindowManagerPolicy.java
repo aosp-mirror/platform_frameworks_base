@@ -638,6 +638,11 @@ public interface WindowManagerPolicy {
     public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs);
 
     /**
+     * Return the window that is hiding the keyguard, if such a thing exists.
+     */
+    public WindowState getWinShowWhenLockedLw();
+
+    /**
      * Called when the system would like to show a UI to indicate that an
      * application is starting.  You can use this to add a
      * APPLICATION_STARTING_TYPE window with the given appToken to the window
