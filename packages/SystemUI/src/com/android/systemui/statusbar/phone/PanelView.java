@@ -86,6 +86,7 @@ public abstract class PanelView extends FrameLayout {
     private String mViewName;
     private float mInitialTouchY;
     private float mInitialTouchX;
+    private boolean mTouchDisabled;
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutSlowInInterpolator;
@@ -207,9 +208,13 @@ public abstract class PanelView extends FrameLayout {
         event.offsetLocation(-deltaX, -deltaY);
     }
 
+    public void setTouchDisabled(boolean disabled) {
+        mTouchDisabled = disabled;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mInstantExpanding) {
+        if (mInstantExpanding || mTouchDisabled) {
             return false;
         }
 
