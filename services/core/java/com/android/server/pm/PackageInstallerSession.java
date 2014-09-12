@@ -96,15 +96,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     final int sessionId;
     final int userId;
     final String installerPackageName;
+    final int installerUid;
     final SessionParams params;
     final long createdMillis;
 
     /** Staging location where client data is written. */
     final File stageDir;
     final String stageCid;
-
-    /** Note that UID is not persisted; it's always derived at runtime. */
-    final int installerUid;
 
     private final AtomicInteger mActiveCount = new AtomicInteger();
 
@@ -186,7 +184,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
             Context context, PackageManagerService pm, Looper looper, int sessionId, int userId,
-            String installerPackageName, SessionParams params, long createdMillis,
+            String installerPackageName, int installerUid, SessionParams params, long createdMillis,
             File stageDir, String stageCid, boolean prepared, boolean sealed) {
         mCallback = callback;
         mContext = context;
@@ -196,6 +194,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.sessionId = sessionId;
         this.userId = userId;
         this.installerPackageName = installerPackageName;
+        this.installerUid = installerUid;
         this.params = params;
         this.createdMillis = createdMillis;
         this.stageDir = stageDir;
@@ -209,11 +208,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mPrepared = prepared;
         mSealed = sealed;
 
-        // Always derived at runtime
-        installerUid = mPm.getPackageUid(installerPackageName, userId);
-
-        if (mPm.checkPermission(android.Manifest.permission.INSTALL_PACKAGES,
-                installerPackageName) == PackageManager.PERMISSION_GRANTED) {
+        if ((mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES, installerUid)
+                == PackageManager.PERMISSION_GRANTED) || (installerUid == Process.ROOT_UID)) {
             mPermissionsAccepted = true;
         } else {
             mPermissionsAccepted = false;
@@ -537,8 +533,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        mPm.installStage(mPackageName, stageDir, stageCid, localObserver,
-                params, installerPackageName, installerUid, new UserHandle(userId));
+        final UserHandle user;
+        if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
+            user = UserHandle.ALL;
+        } else {
+            user = new UserHandle(userId);
+        }
+
+        mPm.installStage(mPackageName, stageDir, stageCid, localObserver, params,
+                installerPackageName, installerUid, user);
     }
 
     /**
@@ -764,8 +767,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static void extractNativeLibraries(File packageDir, String abiOverride)
             throws PackageManagerException {
-        if (LOGD) Slog.v(TAG, "extractNativeLibraries()");
-
         // Always start from a clean slate
         final File libDir = new File(packageDir, NativeLibraryHelper.LIB_DIR_NAME);
         NativeLibraryHelper.removeNativeBinariesFromDirLI(libDir, true);

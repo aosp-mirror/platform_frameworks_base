@@ -865,7 +865,7 @@ public final class Pm {
     }
 
     private void runInstall() {
-        int installFlags = PackageManager.INSTALL_ALL_USERS;
+        int installFlags = 0;
         int userId = UserHandle.USER_ALL;
         String installerPackageName = null;
 
@@ -912,15 +912,15 @@ public final class Pm {
                 abi = checkAbiArgument(nextOptionData());
             } else if (opt.equals("--user")) {
                 userId = Integer.parseInt(nextOptionData());
-                if (userId == UserHandle.USER_ALL) {
-                    installFlags |= PackageManager.INSTALL_ALL_USERS;
-                } else {
-                    installFlags &= ~PackageManager.INSTALL_ALL_USERS;
-                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
             }
+        }
+
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_OWNER;
+            installFlags |= PackageManager.INSTALL_ALL_USERS;
         }
 
         final Uri verificationURI;
@@ -961,8 +961,8 @@ public final class Pm {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
                     originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
-            mPm.installPackageAsUser(apkFilePath, obs.getBinder(), installFlags, installerPackageName,
-                    verificationParams, abi, userId);
+            mPm.installPackageAsUser(apkFilePath, obs.getBinder(), installFlags,
+                    installerPackageName, verificationParams, abi, userId);
 
             synchronized (obs) {
                 while (!obs.finished) {
@@ -986,10 +986,10 @@ public final class Pm {
     }
 
     private void runInstallCreate() throws RemoteException {
+        int userId = UserHandle.USER_ALL;
         String installerPackageName = null;
 
         final SessionParams params = new SessionParams(SessionParams.MODE_FULL_INSTALL);
-        params.installFlags = PackageManager.INSTALL_ALL_USERS;
 
         String opt;
         while ((opt = nextOption()) != null) {
@@ -1010,6 +1010,10 @@ public final class Pm {
                 params.installFlags |= PackageManager.INSTALL_INTERNAL;
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("--originating-uri")) {
+                params.originatingUri = Uri.parse(nextOptionData());
+            } else if (opt.equals("--referrer")) {
+                params.referrerUri = Uri.parse(nextOptionData());
             } else if (opt.equals("-p")) {
                 params.mode = SessionParams.MODE_INHERIT_EXISTING;
                 params.appPackageName = nextOptionData();
@@ -1020,13 +1024,19 @@ public final class Pm {
                 params.setSize(Long.parseLong(nextOptionData()));
             } else if (opt.equals("--abi")) {
                 params.abiOverride = checkAbiArgument(nextOptionData());
+            } else if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
             } else {
                 throw new IllegalArgumentException("Unknown option " + opt);
             }
         }
 
-        final int sessionId = mInstaller.createSession(params, installerPackageName,
-                UserHandle.USER_OWNER);
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_OWNER;
+            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
+        }
+
+        final int sessionId = mInstaller.createSession(params, installerPackageName, userId);
 
         // NOTE: adb depends on parsing this string
         System.out.println("Success: created install session [" + sessionId + "]");
@@ -1692,11 +1702,7 @@ public final class Pm {
         }
 
         public Intent getResult() {
-            try {
-                return mResult.poll(30, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            return mResult.poll();
         }
     }
 
