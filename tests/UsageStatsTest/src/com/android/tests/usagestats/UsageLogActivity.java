@@ -86,7 +86,10 @@ public class UsageLogActivity extends ListActivity implements Runnable {
                 }
                 mEvents.addFirst(event);
             }
-            notifyDataSetChanged();
+
+            if (lastTimeStamp != 0) {
+                notifyDataSetChanged();
+            }
             return lastTimeStamp;
         }
 

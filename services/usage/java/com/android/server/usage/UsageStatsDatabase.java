@@ -61,7 +61,7 @@ class UsageStatsDatabase {
     /**
      * Initialize any directories required and index what stats are available.
      */
-    void init() {
+    public void init(long currentTimeMillis) {
         synchronized (mLock) {
             for (File f : mIntervalDirs) {
                 f.mkdirs();
@@ -72,27 +72,53 @@ class UsageStatsDatabase {
             }
 
             checkVersionLocked();
+            indexFilesLocked();
 
-            final FilenameFilter backupFileFilter = new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return !name.endsWith(".bak");
+            // Delete files that are in the future.
+            for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
+                final int startIndex = files.closestIndexOnOrAfter(currentTimeMillis);
+                if (startIndex < 0) {
+                    continue;
                 }
-            };
 
-            // Index the available usage stat files on disk.
-            for (int i = 0; i < mSortedStatFiles.length; i++) {
+                final int fileCount = files.size();
+                for (int i = startIndex; i < fileCount; i++) {
+                    files.valueAt(i).delete();
+                }
+
+                // Remove in a separate loop because any accesses (valueAt)
+                // will cause a gc in the SparseArray and mess up the order.
+                for (int i = startIndex; i < fileCount; i++) {
+                    files.removeAt(i);
+                }
+            }
+        }
+    }
+
+    private void indexFilesLocked() {
+        final FilenameFilter backupFileFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return !name.endsWith(".bak");
+            }
+        };
+
+        // Index the available usage stat files on disk.
+        for (int i = 0; i < mSortedStatFiles.length; i++) {
+            if (mSortedStatFiles[i] == null) {
                 mSortedStatFiles[i] = new TimeSparseArray<>();
-                File[] files = mIntervalDirs[i].listFiles(backupFileFilter);
-                if (files != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Found " + files.length + " stat files for interval " + i);
-                    }
+            } else {
+                mSortedStatFiles[i].clear();
+            }
+            File[] files = mIntervalDirs[i].listFiles(backupFileFilter);
+            if (files != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Found " + files.length + " stat files for interval " + i);
+                }
 
-                    for (File f : files) {
-                        final AtomicFile af = new AtomicFile(f);
-                        mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
-                    }
+                for (File f : files) {
+                    final AtomicFile af = new AtomicFile(f);
+                    mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
                 }
             }
         }
@@ -132,6 +158,38 @@ class UsageStatsDatabase {
                     }
                 }
             }
+        }
+    }
+
+    public void onTimeChanged(long timeDiffMillis) {
+        synchronized (mLock) {
+            for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
+                final int fileCount = files.size();
+                for (int i = 0; i < fileCount; i++) {
+                    final AtomicFile file = files.valueAt(i);
+                    final long newTime = files.keyAt(i) + timeDiffMillis;
+                    if (newTime < 0) {
+                        Slog.i(TAG, "Deleting file " + file.getBaseFile().getAbsolutePath()
+                                + " for it is in the future now.");
+                        file.delete();
+                    } else {
+                        try {
+                            file.openRead().close();
+                        } catch (IOException e) {
+                            // Ignore, this is just to make sure there are no backups.
+                        }
+                        final File newFile = new File(file.getBaseFile().getParentFile(),
+                                Long.toString(newTime));
+                        Slog.i(TAG, "Moving file " + file.getBaseFile().getAbsolutePath() + " to "
+                                + newFile.getAbsolutePath());
+                        file.getBaseFile().renameTo(newFile);
+                    }
+                }
+                files.clear();
+            }
+
+            // Now re-index the new files.
+            indexFilesLocked();
         }
     }
 
@@ -296,25 +354,24 @@ class UsageStatsDatabase {
     /**
      * Remove any usage stat files that are too old.
      */
-    public void prune() {
+    public void prune(final long currentTimeMillis) {
         synchronized (mLock) {
-            long timeNow = System.currentTimeMillis();
-            mCal.setTimeInMillis(timeNow);
+            mCal.setTimeInMillis(currentTimeMillis);
             mCal.addYears(-3);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_YEARLY],
                     mCal.getTimeInMillis());
 
-            mCal.setTimeInMillis(timeNow);
+            mCal.setTimeInMillis(currentTimeMillis);
             mCal.addMonths(-6);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_MONTHLY],
                     mCal.getTimeInMillis());
 
-            mCal.setTimeInMillis(timeNow);
+            mCal.setTimeInMillis(currentTimeMillis);
             mCal.addWeeks(-4);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_WEEKLY],
                     mCal.getTimeInMillis());
 
-            mCal.setTimeInMillis(timeNow);
+            mCal.setTimeInMillis(currentTimeMillis);
             mCal.addDays(-7);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());

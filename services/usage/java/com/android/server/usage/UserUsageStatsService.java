@@ -22,6 +22,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.res.Configuration;
+import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -62,21 +63,15 @@ class UserUsageStatsService {
         mLogPrefix = "User[" + Integer.toString(userId) + "] ";
     }
 
-    void init() {
-        mDatabase.init();
+    void init(final long currentTimeMillis) {
+        mDatabase.init(currentTimeMillis);
 
-        final long timeNow = System.currentTimeMillis();
         int nullCount = 0;
         for (int i = 0; i < mCurrentStats.length; i++) {
             mCurrentStats[i] = mDatabase.getLatestUsageStats(i);
             if (mCurrentStats[i] == null) {
                 // Find out how many intervals we don't have data for.
                 // Ideally it should be all or none.
-                nullCount++;
-            } else if (mCurrentStats[i].beginTime > timeNow) {
-                Slog.e(TAG, mLogPrefix + "Interval " + i + " has stat in the future " +
-                        mCurrentStats[i].beginTime);
-                mCurrentStats[i] = null;
                 nullCount++;
             }
         }
@@ -92,7 +87,7 @@ class UserUsageStatsService {
 
             // By calling loadActiveStats, we will
             // generate new stats for each bucket.
-            loadActiveStats();
+            loadActiveStats(currentTimeMillis, false);
         } else {
             // Set up the expiry date to be one day from the latest daily stat.
             // This may actually be today and we will rollover on the first event
@@ -123,6 +118,12 @@ class UserUsageStatsService {
         }
     }
 
+    void onTimeChanged(long oldTime, long newTime) {
+        persistActiveStats();
+        mDatabase.onTimeChanged(newTime - oldTime);
+        loadActiveStats(newTime, true);
+    }
+
     void reportEvent(UsageEvents.Event event) {
         if (DEBUG) {
             Slog.d(TAG, mLogPrefix + "Got usage event for " + event.mPackage
@@ -132,7 +133,7 @@ class UserUsageStatsService {
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
-            rolloverStats();
+            rolloverStats(event.mTimeStamp);
         }
 
         final IntervalStats currentDailyStats = mCurrentStats[UsageStatsManager.INTERVAL_DAILY];
@@ -330,8 +331,8 @@ class UserUsageStatsService {
         }
     }
 
-    private void rolloverStats() {
-        final long startTime = System.currentTimeMillis();
+    private void rolloverStats(final long currentTimeMillis) {
+        final long startTime = SystemClock.elapsedRealtime();
         Slog.i(TAG, mLogPrefix + "Rolling over usage stats");
 
         // Finish any ongoing events with an END_OF_DAY event. Make a note of which components
@@ -348,7 +349,7 @@ class UserUsageStatsService {
                     continuePreviousDay.add(pkgStats.mPackageName);
                     stat.update(pkgStats.mPackageName, mDailyExpiryDate.getTimeInMillis() - 1,
                             UsageEvents.Event.END_OF_DAY);
-                    mStatsChanged = true;
+                    notifyStatsChanged();
                 }
             }
 
@@ -356,8 +357,8 @@ class UserUsageStatsService {
         }
 
         persistActiveStats();
-        mDatabase.prune();
-        loadActiveStats();
+        mDatabase.prune(currentTimeMillis);
+        loadActiveStats(currentTimeMillis, false);
 
         final int continueCount = continuePreviousDay.size();
         for (int i = 0; i < continueCount; i++) {
@@ -366,12 +367,12 @@ class UserUsageStatsService {
             for (IntervalStats stat : mCurrentStats) {
                 stat.update(name, beginTime, UsageEvents.Event.CONTINUE_PREVIOUS_DAY);
                 stat.updateConfigurationStats(previousConfig, beginTime);
-                mStatsChanged = true;
+                notifyStatsChanged();
             }
         }
         persistActiveStats();
 
-        final long totalTime = System.currentTimeMillis() - startTime;
+        final long totalTime = SystemClock.elapsedRealtime() - startTime;
         Slog.i(TAG, mLogPrefix + "Rolling over usage stats complete. Took " + totalTime
                 + " milliseconds");
     }
@@ -383,15 +384,16 @@ class UserUsageStatsService {
         }
     }
 
-    private void loadActiveStats() {
-        final long timeNow = System.currentTimeMillis();
-
+    /**
+     * @param force To force all in-memory stats to be reloaded.
+     */
+    private void loadActiveStats(final long currentTimeMillis, boolean force) {
         final UnixCalendar tempCal = mDailyExpiryDate;
         for (int intervalType = 0; intervalType < mCurrentStats.length; intervalType++) {
-            tempCal.setTimeInMillis(timeNow);
+            tempCal.setTimeInMillis(currentTimeMillis);
             UnixCalendar.truncateTo(tempCal, intervalType);
 
-            if (mCurrentStats[intervalType] != null &&
+            if (!force && mCurrentStats[intervalType] != null &&
                     mCurrentStats[intervalType].beginTime == tempCal.getTimeInMillis()) {
                 // These are the same, no need to load them (in memory stats are always newer
                 // than persisted stats).
@@ -399,11 +401,7 @@ class UserUsageStatsService {
             }
 
             final long lastBeginTime = mDatabase.getLatestUsageStatsBeginTime(intervalType);
-            if (lastBeginTime > timeNow) {
-                Slog.e(TAG, mLogPrefix + "Latest usage stats for interval " +
-                        intervalType + " begins in the future");
-                mCurrentStats[intervalType] = null;
-            } else if (lastBeginTime >= tempCal.getTimeInMillis()) {
+            if (lastBeginTime >= tempCal.getTimeInMillis()) {
                 if (DEBUG) {
                     Slog.d(TAG, mLogPrefix + "Loading existing stats @ " +
                             sDateFormat.format(lastBeginTime) + "(" + lastBeginTime +
@@ -423,11 +421,11 @@ class UserUsageStatsService {
                 }
                 mCurrentStats[intervalType] = new IntervalStats();
                 mCurrentStats[intervalType].beginTime = tempCal.getTimeInMillis();
-                mCurrentStats[intervalType].endTime = timeNow;
+                mCurrentStats[intervalType].endTime = currentTimeMillis;
             }
         }
         mStatsChanged = false;
-        mDailyExpiryDate.setTimeInMillis(timeNow);
+        mDailyExpiryDate.setTimeInMillis(currentTimeMillis);
         mDailyExpiryDate.addDays(1);
         mDailyExpiryDate.truncateToDay();
         Slog.i(TAG, mLogPrefix + "Rollover scheduled @ " +

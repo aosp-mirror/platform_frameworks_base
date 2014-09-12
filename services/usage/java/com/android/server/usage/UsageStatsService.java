@@ -65,6 +65,7 @@ public class UsageStatsService extends SystemService implements
     private static final long TEN_SECONDS = 10 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
     private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
+    private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -171,15 +172,44 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private UserUsageStatsService getUserDataAndInitializeIfNeededLocked(int userId) {
+    private UserUsageStatsService getUserDataAndInitializeIfNeededLocked(int userId,
+            long currentTimeMillis) {
         UserUsageStatsService service = mUserState.get(userId);
         if (service == null) {
             service = new UserUsageStatsService(userId,
                     new File(mUsageStatsDir, Integer.toString(userId)), this);
-            service.init();
+            service.init(currentTimeMillis);
             mUserState.put(userId, service);
         }
         return service;
+    }
+
+    /**
+     * This should be the only way to get the time from the system.
+     */
+    private long checkAndGetTimeLocked() {
+        final long actualSystemTime = System.currentTimeMillis();
+        final long actualRealtime = SystemClock.elapsedRealtime();
+        final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+        if (Math.abs(actualSystemTime - expectedSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
+            // The time has changed.
+            final int userCount = mUserState.size();
+            for (int i = 0; i < userCount; i++) {
+                final UserUsageStatsService service = mUserState.valueAt(i);
+                service.onTimeChanged(expectedSystemTime, actualSystemTime);
+            }
+            mRealTimeSnapshot = actualRealtime;
+            mSystemTimeSnapshot = actualSystemTime;
+        }
+        return actualSystemTime;
+    }
+
+    /**
+     * Assuming the event's timestamp is measured in milliseconds since boot,
+     * convert it to a system wall time.
+     */
+    private void convertToSystemTimeLocked(UsageEvents.Event event) {
+        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
     }
 
     /**
@@ -197,7 +227,11 @@ public class UsageStatsService extends SystemService implements
      */
     void reportEvent(UsageEvents.Event event, int userId) {
         synchronized (mLock) {
-            final UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
+            final long timeNow = checkAndGetTimeLocked();
+            convertToSystemTimeLocked(event);
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             service.reportEvent(event);
         }
     }
@@ -226,12 +260,14 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime) {
-        if (!validRange(beginTime, endTime)) {
-            return null;
-        }
-
         synchronized (mLock) {
-            UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
+            final long timeNow = checkAndGetTimeLocked();
+            if (!validRange(timeNow, beginTime, endTime)) {
+                return null;
+            }
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             return service.queryUsageStats(bucketType, beginTime, endTime);
         }
     }
@@ -241,12 +277,14 @@ public class UsageStatsService extends SystemService implements
      */
     List<ConfigurationStats> queryConfigurationStats(int userId, int bucketType, long beginTime,
             long endTime) {
-        if (!validRange(beginTime, endTime)) {
-            return null;
-        }
-
         synchronized (mLock) {
-            UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
+            final long timeNow = checkAndGetTimeLocked();
+            if (!validRange(timeNow, beginTime, endTime)) {
+                return null;
+            }
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             return service.queryConfigurationStats(bucketType, beginTime, endTime);
         }
     }
@@ -255,19 +293,20 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime) {
-        if (!validRange(beginTime, endTime)) {
-            return null;
-        }
-
         synchronized (mLock) {
-            UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
+            final long timeNow = checkAndGetTimeLocked();
+            if (!validRange(timeNow, beginTime, endTime)) {
+                return null;
+            }
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             return service.queryEvents(beginTime, endTime);
         }
     }
 
-    private static boolean validRange(long beginTime, long endTime) {
-        final long timeNow = System.currentTimeMillis();
-        return beginTime <= timeNow && beginTime < endTime;
+    private static boolean validRange(long currentTime, long beginTime, long endTime) {
+        return beginTime <= currentTime && beginTime < endTime;
     }
 
     private void flushToDiskLocked() {
@@ -387,14 +426,6 @@ public class UsageStatsService extends SystemService implements
      */
     private class LocalService extends UsageStatsManagerInternal {
 
-        /**
-         * The system may have its time change, so at least make sure the events
-         * are monotonic in order.
-         */
-        private long computeMonotonicSystemTime(long realTime) {
-            return (realTime - mRealTimeSnapshot) + mSystemTimeSnapshot;
-        }
-
         @Override
         public void reportEvent(ComponentName component, int userId, int eventType) {
             if (component == null) {
@@ -405,7 +436,10 @@ public class UsageStatsService extends SystemService implements
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = component.getPackageName();
             event.mClass = component.getClassName();
-            event.mTimeStamp = computeMonotonicSystemTime(SystemClock.elapsedRealtime());
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
             event.mEventType = eventType;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
@@ -419,7 +453,10 @@ public class UsageStatsService extends SystemService implements
 
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = "android";
-            event.mTimeStamp = computeMonotonicSystemTime(SystemClock.elapsedRealtime());
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
             event.mEventType = UsageEvents.Event.CONFIGURATION_CHANGE;
             event.mConfiguration = new Configuration(config);
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
