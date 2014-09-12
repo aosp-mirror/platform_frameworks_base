@@ -22,7 +22,6 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -33,7 +32,6 @@ import android.view.Window;
 import android.view.WindowCallbackWrapper;
 import android.widget.SpinnerAdapter;
 import android.widget.Toolbar;
-import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.widget.DecorToolbar;
@@ -47,8 +45,6 @@ public class ToolbarActionBar extends ActionBar {
     private boolean mToolbarMenuPrepared;
     private Window.Callback mWindowCallback;
     private boolean mMenuCallbackSet;
-
-    private CharSequence mHomeDescription;
 
     private boolean mLastMenuVisibility;
     private ArrayList<OnMenuVisibilityListener> mMenuVisibilityListeners =
@@ -76,8 +72,6 @@ public class ToolbarActionBar extends ActionBar {
         mDecorToolbar.setWindowCallback(mWindowCallback);
         toolbar.setOnMenuItemClickListener(mMenuClicker);
         mDecorToolbar.setWindowTitle(title);
-        mHomeDescription = mToolbar.getNavigationContentDescription();
-        updateNavDescription();
     }
 
     public Window.Callback getWrappedWindowCallback() {
@@ -168,8 +162,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setHomeActionContentDescription(CharSequence description) {
-        mToolbar.setNavigationContentDescription(description);
-        mHomeDescription = description;
+        mDecorToolbar.setNavigationContentDescription(description);
     }
 
     @Override
@@ -179,8 +172,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setHomeActionContentDescription(int resId) {
-        mToolbar.setNavigationContentDescription(resId);
-        mHomeDescription = mToolbar.getNavigationContentDescription();
+        mDecorToolbar.setNavigationContentDescription(resId);
     }
 
     @Override
@@ -258,21 +250,7 @@ public class ToolbarActionBar extends ActionBar {
     @Override
     public void setDisplayOptions(@DisplayOptions int options, @DisplayOptions int mask) {
         final int currentOptions = mDecorToolbar.getDisplayOptions();
-        final int changed = (options ^ currentOptions) & mask;
         mDecorToolbar.setDisplayOptions(options & mask | currentOptions & ~mask);
-        if ((changed & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-            updateNavDescription();
-        }
-    }
-
-    private void updateNavDescription() {
-        if ((mDecorToolbar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-            if (TextUtils.isEmpty(mHomeDescription)) {
-                mToolbar.setNavigationContentDescription(R.string.action_bar_up_description);
-            } else {
-                mToolbar.setNavigationContentDescription(mHomeDescription);
-            }
-        }
     }
 
     @Override

@@ -135,6 +135,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
 
     private ExpandedActionViewMenuPresenter mExpandedMenuPresenter;
     View mExpandedActionView;
+    private int mDefaultUpDescription = R.string.action_bar_up_description;
 
     Window.Callback mWindowCallback;
 
@@ -187,7 +188,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         mExpandedHomeLayout.setShowUp(true);
         mExpandedHomeLayout.setOnClickListener(mExpandedActionViewUpListener);
         mExpandedHomeLayout.setContentDescription(getResources().getText(
-                R.string.action_bar_up_description));
+                mDefaultUpDescription));
 
         // This needs to highlight/be focusable on its own.
         // TODO: Clean up the handoff between expanded/normal.
@@ -579,7 +580,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
             homeDesc = mHomeDescription;
         } else {
             if ((mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                homeDesc = mContext.getResources().getText(R.string.action_bar_up_description);
+                homeDesc = mContext.getResources().getText(mDefaultUpDescription);
             } else {
                 homeDesc = mContext.getResources().getText(R.string.action_bar_home_description);
             }
@@ -1327,6 +1328,15 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
     public void setNavigationContentDescription(int resId) {
         mHomeDescriptionRes = resId;
         mHomeDescription = resId != 0 ? getResources().getText(resId) : null;
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
+    }
+
+    @Override
+    public void setDefaultNavigationContentDescription(int defaultNavigationContentDescription) {
+        if (mDefaultUpDescription == defaultNavigationContentDescription) {
+            return;
+        }
+        mDefaultUpDescription = defaultNavigationContentDescription;
         updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
