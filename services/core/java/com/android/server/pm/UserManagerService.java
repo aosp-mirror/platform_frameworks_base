@@ -33,6 +33,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -476,6 +477,14 @@ public class UserManagerService extends IUserManager.Stub {
             mGuestRestrictions.clear();
             mGuestRestrictions.putAll(restrictions);
             writeUserListLocked();
+        }
+    }
+
+    @Override
+    public boolean hasUserRestriction(String restrictionKey, int userId) {
+        synchronized (mPackagesLock) {
+            Bundle restrictions = mUserRestrictions.get(userId);
+            return restrictions != null ? restrictions.getBoolean(restrictionKey) : false;
         }
     }
 
