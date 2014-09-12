@@ -56,8 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:minHeight="64dp"
-        android:paddingTop="@dimen/alert_dialog_padding_top_material">
+        android:minHeight="64dp">
         <ScrollView android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,6 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/alert_dialog_padding_material"
+                android:paddingTop="@dimen/alert_dialog_padding_top_material"
                 android:paddingEnd="@dimen/alert_dialog_padding_material" />
         </ScrollView>
     </LinearLayout>
