@@ -148,14 +148,16 @@ public class DevicePolicyManager {
      * created for. Used with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
      *
+     * <p> This extra is part of the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}.
+     *
      * <p> If the {@link #ACTION_PROVISION_MANAGED_PROFILE} intent that starts managed provisioning
      * contains this extra, it is forwarded in the
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} intent to the mobile
      * device management application that was set as the profile owner during provisioning.
      * It is usually used to avoid that the user has to enter their email address twice.
      */
-    public static final String KEY_PROVISIONING_EMAIL_ADDRESS
-        = "android.app.key.PROVISIONING_EMAIL_ADDRESS";
+    public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
+        = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
 
     /**
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
