@@ -224,12 +224,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
 
     /**
-     * Do not use, replaced by {@link #ACTION_PROFILE_PROVISIONING_COMPLETE}
-     */
-    private static final String LEGACY_ACTION_PROFILE_PROVISIONING_COMPLETE =
-            "android.app.action.ACTION_PROFILE_PROVISIONING_COMPLETE";
-
-    /**
      * Name under which a DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
      * a device-admin tag.  XXX TO DO: describe syntax.
@@ -436,9 +430,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_PASSWORD_EXPIRING.equals(action)) {
             onPasswordExpiring(context, intent);
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
-            onProfileProvisioningComplete(context, intent);
-        // TODO: remove when nobody depends on this 
-        } else if (LEGACY_ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_LOCK_TASK_ENTERING.equals(action)) {
             String pkg = intent.getStringExtra(EXTRA_LOCK_TASK_PACKAGE);
