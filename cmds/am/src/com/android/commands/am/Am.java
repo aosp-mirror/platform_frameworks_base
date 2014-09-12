@@ -28,10 +28,15 @@ import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
 import android.app.ProfilerInfo;
 import android.app.UiAutomationConnection;
+import android.app.usage.ConfigurationStats;
+import android.app.usage.IUsageStatsManager;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -47,6 +52,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AndroidException;
+import android.util.ArrayMap;
 import android.view.IWindowManager;
 import android.view.View;
 
@@ -61,6 +67,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -1722,7 +1731,64 @@ public class Am extends BaseCommand {
         }
     }
 
+    private List<Configuration> getRecentConfigurations(int days) {
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                    Context.USAGE_STATS_SERVICE));
+        final long now = System.currentTimeMillis();
+        final long nDaysAgo = now - (days * 24 * 60 * 60 * 1000);
+        try {
+            @SuppressWarnings("unchecked")
+            ParceledListSlice<ConfigurationStats> configStatsSlice = usm.queryConfigurationStats(
+                    UsageStatsManager.INTERVAL_BEST, nDaysAgo, now, "com.android.shell");
+            if (configStatsSlice == null) {
+                return Collections.emptyList();
+            }
+
+            final ArrayMap<Configuration, Integer> recentConfigs = new ArrayMap<>();
+            final List<ConfigurationStats> configStatsList = configStatsSlice.getList();
+            final int configStatsListSize = configStatsList.size();
+            for (int i = 0; i < configStatsListSize; i++) {
+                final ConfigurationStats stats = configStatsList.get(i);
+                final int indexOfKey = recentConfigs.indexOfKey(stats.getConfiguration());
+                if (indexOfKey < 0) {
+                    recentConfigs.put(stats.getConfiguration(), stats.getActivationCount());
+                } else {
+                    recentConfigs.setValueAt(indexOfKey,
+                            recentConfigs.valueAt(indexOfKey) + stats.getActivationCount());
+                }
+            }
+
+            final Comparator<Configuration> comparator = new Comparator<Configuration>() {
+                @Override
+                public int compare(Configuration a, Configuration b) {
+                    return recentConfigs.get(b).compareTo(recentConfigs.get(a));
+                }
+            };
+
+            ArrayList<Configuration> configs = new ArrayList<>(recentConfigs.size());
+            configs.addAll(recentConfigs.keySet());
+            Collections.sort(configs, comparator);
+            return configs;
+
+        } catch (RemoteException e) {
+            return Collections.emptyList();
+        }
+    }
+
     private void runGetConfig() throws Exception {
+        int days = 14;
+        String option = nextOption();
+        if (option != null) {
+            if (!option.equals("--days")) {
+                throw new IllegalArgumentException("unrecognized option " + option);
+            }
+
+            days = Integer.parseInt(nextArgRequired());
+            if (days <= 0) {
+                throw new IllegalArgumentException("--days must be a positive integer");
+            }
+        }
+
         try {
             Configuration config = mAm.getConfiguration();
             if (config == null) {
@@ -1732,6 +1798,17 @@ public class Am extends BaseCommand {
 
             System.out.println("config: " + Configuration.resourceQualifierString(config));
             System.out.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
+
+            final List<Configuration> recentConfigs = getRecentConfigurations(days);
+            final int recentConfigSize = recentConfigs.size();
+            if (recentConfigSize > 0) {
+                System.out.println("recentConfigs:");
+            }
+
+            for (int i = 0; i < recentConfigSize; i++) {
+                System.out.println("  config: " + Configuration.resourceQualifierString(
+                        recentConfigs.get(i)));
+            }
 
         } catch (RemoteException e) {
         }
