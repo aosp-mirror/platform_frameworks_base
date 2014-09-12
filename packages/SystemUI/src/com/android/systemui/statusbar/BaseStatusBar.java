@@ -857,6 +857,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 // Assume we are a status_bar_notification_row
                 final NotificationGuts guts = (NotificationGuts) v.findViewById(
                         R.id.notification_guts);
+                if (guts == null) {
+                    // This view has no guts. Examples are the more card or the dismiss all view
+                    return false;
+                }
 
                 // Already showing?
                 if (guts.getVisibility() == View.VISIBLE) {
