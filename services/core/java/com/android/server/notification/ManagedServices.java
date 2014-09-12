@@ -87,6 +87,10 @@ abstract public class ManagedServices {
     // Just the packages from mEnabledServicesForCurrentProfiles
     private ArraySet<String> mEnabledServicesPackageNames = new ArraySet<String>();
 
+    // Kept to de-dupe user change events (experienced after boot, when we receive a settings and a
+    // user change).
+    private int[] mLastSeenProfileIds;
+
     public ManagedServices(Context context, Handler handler, Object mutex,
             UserProfiles userProfiles) {
         mContext = context;
@@ -157,6 +161,15 @@ abstract public class ManagedServices {
             // make sure we're still bound to any of our services who may have just upgraded
             rebindServices();
         }
+    }
+
+    public void onUserSwitched() {
+        if (DEBUG) Slog.d(TAG, "onUserSwitched");
+        if (Arrays.equals(mLastSeenProfileIds, mUserProfiles.getCurrentProfileIds())) {
+            if (DEBUG) Slog.d(TAG, "Current profile IDs didn't change, skipping rebindServices().");
+            return;
+        }
+        rebindServices();
     }
 
     public ManagedServiceInfo checkServiceTokenLocked(IInterface service) {
@@ -321,6 +334,8 @@ abstract public class ManagedServices {
                 registerService(component, userIds[i]);
             }
         }
+
+        mLastSeenProfileIds = mUserProfiles.getCurrentProfileIds();
     }
 
     /**
@@ -523,6 +538,8 @@ abstract public class ManagedServices {
 
         private void update(Uri uri) {
             if (uri == null || mSecureSettingsUri.equals(uri)) {
+                if (DEBUG) Slog.d(TAG, "Setting changed: mSecureSettingsUri=" + mSecureSettingsUri +
+                        " / uri=" + uri);
                 rebindServices();
             }
         }

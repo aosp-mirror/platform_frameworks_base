@@ -718,6 +718,9 @@ public class NotificationManagerService extends SystemService {
                 // reload per-user settings
                 mSettingsObserver.update(null);
                 mUserProfiles.updateCache(context);
+                // Refresh managed services
+                mConditionProviders.onUserSwitched();
+                mListeners.onUserSwitched();
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 mUserProfiles.updateCache(context);
             }
