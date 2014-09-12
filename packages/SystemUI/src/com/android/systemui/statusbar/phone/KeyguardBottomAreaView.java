@@ -376,7 +376,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         // TODO: Real icon for facelock.
-        int iconRes = mUnlockMethodCache.isFaceUnlockRunning() ? R.drawable.ic_account_circle
+        int iconRes = mUnlockMethodCache.isFaceUnlockRunning()
+                ? com.android.internal.R.drawable.ic_account_circle
                 : mUnlockMethodCache.isMethodInsecure() ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
