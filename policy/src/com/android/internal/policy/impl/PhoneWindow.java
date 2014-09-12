@@ -124,6 +124,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
             (1 << FEATURE_CUSTOM_TITLE) |
             (1 << FEATURE_CONTENT_TRANSITIONS) |
+            (1 << FEATURE_ACTIVITY_TRANSITIONS) |
             (1 << FEATURE_ACTION_MODE_OVERLAY);
 
     private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
@@ -3207,6 +3208,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (a.getBoolean(R.styleable.Window_windowContentTransitions, false)) {
             requestFeature(FEATURE_CONTENT_TRANSITIONS);
         }
+        if (a.getBoolean(R.styleable.Window_windowActivityTransitions, false)) {
+            requestFeature(FEATURE_ACTIVITY_TRANSITIONS);
+        }
 
         final WindowManager windowService = (WindowManager) getContext().getSystemService(
                 Context.WINDOW_SERVICE);
@@ -3516,7 +3520,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             // Only inflate or create a new TransitionManager if the caller hasn't
             // already set a custom one.
-            if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+            if (hasFeature(FEATURE_ACTIVITY_TRANSITIONS)) {
                 if (mTransitionManager == null) {
                     final int transitionRes = getWindowStyle().getResourceId(
                             R.styleable.Window_windowContentTransitionManager,

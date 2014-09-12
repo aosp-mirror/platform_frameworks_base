@@ -111,10 +111,19 @@ public abstract class Window {
     public static final int FEATURE_CONTENT_TRANSITIONS = 12;
 
     /**
+     * Enables Activities to run Activity Transitions either through sending or receiving
+     * ActivityOptions bundle created with
+     * {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.app.Activity,
+     * android.util.Pair[])} or {@link android.app.ActivityOptions#makeSceneTransitionAnimation(
+     * android.app.Activity, View, String)}.
+     */
+    public static final int FEATURE_ACTIVITY_TRANSITIONS = 13;
+
+    /**
      * Max value used as a feature ID
      * @hide
      */
-    public static final int FEATURE_MAX = FEATURE_CONTENT_TRANSITIONS;
+    public static final int FEATURE_MAX = FEATURE_ACTIVITY_TRANSITIONS;
 
     /** Flag for setting the progress bar's visibility to VISIBLE */
     public static final int PROGRESS_VISIBILITY_ON = -1;
@@ -1459,7 +1468,7 @@ public abstract class Window {
      * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
      * {@link android.transition.Visibility} as exiting is governed by changing visibility
      * from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null, the views will
-     * remain unaffected. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * remain unaffected. Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param transition The Transition to use to move Views out of the scene when calling a
      *                   new Activity.
@@ -1475,7 +1484,7 @@ public abstract class Window {
      * visibility from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null,
      * the views will remain unaffected. If nothing is set, the default will be to use the same
      * transition as {@link #setExitTransition(android.transition.Transition)}.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param transition The Transition to use to move Views into the scene when reentering from a
      *                   previously-started Activity.
@@ -1489,7 +1498,7 @@ public abstract class Window {
      * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
      * {@link android.transition.Visibility} as entering is governed by changing visibility from
      * {@link View#INVISIBLE} to {@link View#VISIBLE}. If <code>transition</code> is null,
-     * entering Views will remain unaffected.  Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * entering Views will remain unaffected.  Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return the Transition to use to move Views into the initial Scene.
      * @attr ref android.R.styleable#Window_windowEnterTransition
@@ -1517,7 +1526,7 @@ public abstract class Window {
      * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
      * {@link android.transition.Visibility} as exiting is governed by changing visibility
      * from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null, the views will
-     * remain unaffected. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * remain unaffected. Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return the Transition to use to move Views out of the scene when calling a
      * new Activity.
@@ -1531,7 +1540,7 @@ public abstract class Window {
      * or ViewGroups that have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions
      * will extend {@link android.transition.Visibility} as exiting is governed by changing
      * visibility from {@link View#VISIBLE} to {@link View#INVISIBLE}.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return The Transition to use to move Views into the scene when reentering from a
      *         previously-started Activity.
@@ -1544,7 +1553,7 @@ public abstract class Window {
      * Scene. Typical Transitions will affect size and location, such as
      * {@link android.transition.ChangeBounds}. A null
      * value will cause transferred shared elements to blink to the final position.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param transition The Transition to use for shared elements transferred into the content
      *                   Scene.
@@ -1559,7 +1568,7 @@ public abstract class Window {
      * value will cause transferred shared elements to blink to the final position.
      * If no value is set, the default will be to use the same value as
      * {@link #setSharedElementEnterTransition(android.transition.Transition)}.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param transition The Transition to use for shared elements transferred out of the content
      *                   Scene.
@@ -1569,7 +1578,7 @@ public abstract class Window {
 
     /**
      * Returns the Transition that will be used for shared elements transferred into the content
-     * Scene. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Scene. Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return Transition to use for sharend elements transferred into the content Scene.
      * @attr ref android.R.styleable#Window_windowSharedElementEnterTransition
@@ -1578,7 +1587,7 @@ public abstract class Window {
 
     /**
      * Returns the Transition that will be used for shared elements transferred back to a
-     * calling Activity. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * calling Activity. Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return Transition to use for sharend elements transferred into the content Scene.
      * @attr ref android.R.styleable#Window_windowSharedElementReturnTransition
@@ -1590,7 +1599,7 @@ public abstract class Window {
      * before the shared elements are transferred to the called Activity. If the shared elements
      * must animate during the exit transition, this Transition should be used. Upon completion,
      * the shared elements may be transferred to the started Activity.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param transition The Transition to use for shared elements in the launching Window
      *                   prior to transferring to the launched Activity's Window.
@@ -1603,7 +1612,7 @@ public abstract class Window {
      * Activity after it has returned the shared element to it start location. If no value
      * is set, this will default to
      * {@link #setSharedElementExitTransition(android.transition.Transition)}.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param transition The Transition to use for shared elements in the launching Window
      *                   after the shared element has returned to the Window.
@@ -1614,7 +1623,7 @@ public abstract class Window {
     /**
      * Returns the Transition to use for shared elements in the launching Window prior
      * to transferring to the launched Activity's Window.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return the Transition to use for shared elements in the launching Window prior
      * to transferring to the launched Activity's Window.
@@ -1625,7 +1634,7 @@ public abstract class Window {
     /**
      * Returns the Transition that will be used for shared elements reentering from a started
      * Activity after it has returned the shared element to it start location.
-     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * Requires {@link #FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @return the Transition that will be used for shared elements reentering from a started
      * Activity after it has returned the shared element to it start location.
@@ -1703,7 +1712,7 @@ public abstract class Window {
      * Returns the duration, in milliseconds, of the window background fade
      * when transitioning into or away from an Activity when called with an Activity Transition.
      * <p>When executing the enter transition, the background starts transparent
-     * and fades in. This requires {@link #FEATURE_CONTENT_TRANSITIONS}. The default is
+     * and fades in. This requires {@link #FEATURE_ACTIVITY_TRANSITIONS}. The default is
      * 300 milliseconds.</p>
      *
      * @return The duration of the window background fade to opaque during enter transition.
@@ -1716,7 +1725,7 @@ public abstract class Window {
      * Sets the duration, in milliseconds, of the window background fade
      * when transitioning into or away from an Activity when called with an Activity Transition.
      * <p>When executing the enter transition, the background starts transparent
-     * and fades in. This requires {@link #FEATURE_CONTENT_TRANSITIONS}. The default is
+     * and fades in. This requires {@link #FEATURE_ACTIVITY_TRANSITIONS}. The default is
      * 300 milliseconds.</p>
      *
      * @param fadeDurationMillis The duration of the window background fade to or from opaque

@@ -192,6 +192,7 @@ please see themes_device_defaults.xml.
         <item name="navigationBarColor">@color/black</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_action_bar</item>
         <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
 
         <!-- Define these here; ContextThemeWrappers around themes that define them should
              always clear these values. -->
@@ -816,6 +817,7 @@ please see themes_device_defaults.xml.
     <!-- Theme for the dialog shown when an app crashes or ANRs. -->
     <style name="Theme.Dialog.AppError" parent="Theme.DeviceDefault.Light.Dialog.Alert">
         <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
     </style>
 
@@ -827,6 +829,7 @@ please see themes_device_defaults.xml.
         <item name="textColor">@color/secondary_text_nofocus</item>
         <item name="windowCloseOnTouchOutside">false</item>
         <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
     </style>
 
     <!-- Theme for a window that looks like a toast. -->
@@ -836,6 +839,7 @@ please see themes_device_defaults.xml.
         <item name="backgroundDimEnabled">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
         <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
     </style>
 
 </resources>

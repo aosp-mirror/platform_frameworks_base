@@ -458,6 +458,10 @@
              transitions between different window content. -->
         <attr name="windowContentTransitionManager" format="reference" />
 
+        <!-- Flag indicating whether this window allows Activity Transitions.
+             Corresponds to {@link android.view.Window#FEATURE_ACTIVITY_TRANSITIONS}. -->
+        <attr name="windowActivityTransitions" format="boolean" />
+
         <!-- Reference to a Transition XML resource defining the desired Transition
              used to move Views into the initial Window's content Scene. Corresponds to
              {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
@@ -1792,6 +1796,7 @@
         <attr name="windowTranslucentNavigation" />
         <attr name="windowSwipeToDismiss" />
         <attr name="windowContentTransitions" />
+        <attr name="windowActivityTransitions" />
         <attr name="windowContentTransitionManager" />
         <attr name="windowActionBarFullscreenDecorLayout" />
 

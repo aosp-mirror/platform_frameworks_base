@@ -414,7 +414,7 @@ public class ActivityOptions {
      * exit Transition. The position of the shared element in the launched Activity will be the
      * epicenter of its entering Transition.
      *
-     * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
+     * <p>This requires {@link android.view.Window#FEATURE_ACTIVITY_TRANSITIONS} to be
      * enabled on the calling Activity to cause an exit transition. The same must be in
      * the called Activity to get an entering transition.</p>
      * @param activity The Activity whose window contains the shared elements.
@@ -438,7 +438,7 @@ public class ActivityOptions {
      * will be used as the epicenter for the exit Transition. The position of the associated
      * shared element in the launched Activity will be the epicenter of its entering Transition.
      *
-     * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
+     * <p>This requires {@link android.view.Window#FEATURE_ACTIVITY_TRANSITIONS} to be
      * enabled on the calling Activity to cause an exit transition. The same must be in
      * the called Activity to get an entering transition.</p>
      * @param activity The Activity whose window contains the shared elements.
@@ -453,7 +453,7 @@ public class ActivityOptions {
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
-        if (!activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
+        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
             opts.mAnimationType = ANIM_DEFAULT;
             return opts;
         }

@@ -1430,6 +1430,7 @@ package android {
     field public static final int windowActionBar = 16843469; // 0x10102cd
     field public static final int windowActionBarOverlay = 16843492; // 0x10102e4
     field public static final int windowActionModeOverlay = 16843485; // 0x10102dd
+    field public static final int windowActivityTransitions = 16843982; // 0x10104ce
     field public static final int windowAllowEnterTransitionOverlap = 16843836; // 0x101043c
     field public static final int windowAllowReturnTransitionOverlap = 16843835; // 0x101043b
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
@@ -35120,6 +35121,7 @@ package android.view {
     field public static final int FEATURE_ACTION_BAR = 8; // 0x8
     field public static final int FEATURE_ACTION_BAR_OVERLAY = 9; // 0x9
     field public static final int FEATURE_ACTION_MODE_OVERLAY = 10; // 0xa
+    field public static final int FEATURE_ACTIVITY_TRANSITIONS = 13; // 0xd
     field public static final int FEATURE_CONTENT_TRANSITIONS = 12; // 0xc
     field public static final int FEATURE_CONTEXT_MENU = 6; // 0x6
     field public static final int FEATURE_CUSTOM_TITLE = 7; // 0x7

@@ -4756,7 +4756,7 @@ public class Activity extends ContextThemeWrapper
      * Activity through a returning activity transition, giving you the resultCode
      * and any additional data from it. This method will only be called if the activity
      * set a result code other than {@link #RESULT_CANCELED} and it supports activity
-     * transitions with {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     * transitions with {@link Window#FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * <p>The purpose of this function is to let the called Activity send a hint about
      * its state so that this underlying Activity can prepare to be exposed. A call to
@@ -5781,7 +5781,7 @@ public class Activity extends ContextThemeWrapper
      * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
      * android.view.View, String)} was used to start an Activity, <var>callback</var>
      * will be called to handle shared elements on the <i>launched</i> Activity. This requires
-     * {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     * {@link Window#FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param callback Used to manipulate shared element transitions on the launched Activity.
      */
@@ -5797,7 +5797,7 @@ public class Activity extends ContextThemeWrapper
      * android.view.View, String)} was used to start an Activity, <var>callback</var>
      * will be called to handle shared elements on the <i>launching</i> Activity. Most
      * calls will only come when returning from the started Activity.
-     * This requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     * This requires {@link Window#FEATURE_ACTIVITY_TRANSITIONS}.
      *
      * @param callback Used to manipulate shared element transitions on the launching Activity.
      */
