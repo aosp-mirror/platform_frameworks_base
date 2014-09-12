@@ -28729,6 +28729,8 @@ package android.telecomm {
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecomm.action.CHANGE_PHONE_ACCOUNTS";
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecomm.action.CONNECTION_SERVICE_CONFIGURE";
+    field public static final java.lang.String ACTION_PHONE_ACCOUNT_DISABLED = "android.telecom.action.PHONE_ACCOUNT_DISABLED";
+    field public static final java.lang.String ACTION_PHONE_ACCOUNT_ENABLED = "android.telecom.action.PHONE_ACCOUNT_ENABLED";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecomm.action.SHOW_CALL_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
