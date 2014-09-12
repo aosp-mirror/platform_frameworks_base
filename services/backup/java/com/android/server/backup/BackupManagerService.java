@@ -1234,6 +1234,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
         // Register for events related to sdcard installation.
@@ -1688,11 +1689,12 @@ public class BackupManagerService extends IBackupManager.Stub {
             String action = intent.getAction();
             boolean replacing = false;
             boolean added = false;
-            boolean rebind = false;
+            boolean changed = false;
             Bundle extras = intent.getExtras();
             String pkgList[] = null;
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                    Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
+                    Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 Uri uri = intent.getData();
                 if (uri == null) {
                     return;
@@ -1701,7 +1703,43 @@ public class BackupManagerService extends IBackupManager.Stub {
                 if (pkgName != null) {
                     pkgList = new String[] { pkgName };
                 }
-                rebind = added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
+
+                // At package-changed we only care about looking at new transport states
+                if (changed) {
+                    try {
+                        if (MORE_DEBUG) {
+                            Slog.i(TAG, "Package " + pkgName + " changed; rechecking");
+                        }
+                        // unbind existing possibly-stale connections to that package's transports
+                        synchronized (mTransports) {
+                            TransportConnection conn = mTransportConnections.get(pkgName);
+                            if (conn != null) {
+                                final ServiceInfo svc = conn.mTransport;
+                                ComponentName svcName =
+                                        new ComponentName(svc.packageName, svc.name);
+                                String flatName = svcName.flattenToShortString();
+                                Slog.i(TAG, "Unbinding " + svcName);
+
+                                mContext.unbindService(conn);
+                                mTransportConnections.remove(pkgName);
+                                mTransports.remove(mTransportNames.get(flatName));
+                                mTransportNames.remove(flatName);
+                            }
+                        }
+                        // and then (re)bind as appropriate
+                        PackageInfo app = mPackageManager.getPackageInfo(pkgName, 0);
+                        checkForTransportAndBind(app);
+                    } catch (NameNotFoundException e) {
+                        // Nope, can't find it - just ignore
+                        if (MORE_DEBUG) {
+                            Slog.w(TAG, "Can't find changed package " + pkgName);
+                        }
+                    }
+                    return; // nothing more to do in the PACKAGE_CHANGED case
+                }
+
+                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
                 replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                 added = true;
@@ -1737,17 +1775,15 @@ public class BackupManagerService extends IBackupManager.Stub {
 
                         // Transport maintenance: rebind to known existing transports that have
                         // just been updated; and bind to any newly-installed transport services.
-                        if (rebind) {
-                            synchronized (mTransportConnections) {
-                                final TransportConnection conn = mTransportConnections.get(packageName);
-                                if (conn != null) {
-                                    if (DEBUG) {
-                                        Slog.i(TAG, "Transport package changed; rebinding");
-                                    }
-                                    bindTransport(conn.mTransport);
-                                } else {
-                                    checkForTransportAndBind(app);
+                        synchronized (mTransports) {
+                            final TransportConnection conn = mTransportConnections.get(packageName);
+                            if (conn != null) {
+                                if (MORE_DEBUG) {
+                                    Slog.i(TAG, "Transport package changed; rebinding");
                                 }
+                                bindTransport(conn.mTransport);
+                            } else {
+                                checkForTransportAndBind(app);
                             }
                         }
 
@@ -1840,7 +1876,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         intent.setComponent(svcName);
 
         TransportConnection connection;
-        synchronized (mTransportConnections) {
+        synchronized (mTransports) {
             connection = mTransportConnections.get(transport.packageName);
             if (null == connection) {
                 connection = new TransportConnection(transport);
@@ -8462,31 +8498,24 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return list;
     }
 
-    // Select which transport to use for the next backup operation.  If the given
-    // name is not one of the available transports, no action is taken and the method
-    // returns null.
+    // Select which transport to use for the next backup operation.
     public String selectBackupTransport(String transport) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "selectBackupTransport");
 
         synchronized (mTransports) {
-            String prevTransport = null;
-            if (mTransports.get(transport) != null) {
-                final long oldId = Binder.clearCallingIdentity();
-                try {
-                    prevTransport = mCurrentTransport;
-                    mCurrentTransport = transport;
-                    Settings.Secure.putString(mContext.getContentResolver(),
-                            Settings.Secure.BACKUP_TRANSPORT, transport);
-                } finally {
-                    Binder.restoreCallingIdentity(oldId);
-                }
+            final long oldId = Binder.clearCallingIdentity();
+            try {
+                String prevTransport = mCurrentTransport;
+                mCurrentTransport = transport;
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_TRANSPORT, transport);
                 Slog.v(TAG, "selectBackupTransport() set " + mCurrentTransport
                         + " returning " + prevTransport);
-            } else {
-                Slog.w(TAG, "Attempt to select unavailable transport " + transport);
+                return prevTransport;
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
             }
-            return prevTransport;
         }
     }
 
