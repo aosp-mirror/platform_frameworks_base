@@ -585,7 +585,7 @@ public class NinePatchDrawable extends Drawable {
         int[] mThemeAttrs = null;
         NinePatch mNinePatch = null;
         ColorStateList mTint = null;
-        Mode mTintMode = Mode.SRC_IN;
+        Mode mTintMode = DEFAULT_TINT_MODE;
         Rect mPadding = null;
         Insets mOpticalInsets = Insets.NONE;
         float mBaseAlpha = 1.0f;
