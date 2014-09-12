@@ -32,8 +32,8 @@ import java.util.Map;
  * Listener provided in
  * {@link Activity#setEnterSharedElementCallback(SharedElementCallback)} and
  * {@link Activity#setExitSharedElementCallback(SharedElementCallback)} as well as
- * {@link Fragment#setEnterSharedElementTransitionCallback(SharedElementCallback)} and
- * {@link Fragment#setExitSharedElementTransitionCallback(SharedElementCallback)}
+ * {@link Fragment#setEnterSharedElementCallback(SharedElementCallback)} and
+ * {@link Fragment#setExitSharedElementCallback(SharedElementCallback)}
  * to monitor the Shared element transitions. The events can be used to customize Activity
  * and Fragment Transition behavior.
  */

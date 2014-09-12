@@ -4328,9 +4328,9 @@ package android.app {
     method public void setAllowEnterTransitionOverlap(boolean);
     method public void setAllowReturnTransitionOverlap(boolean);
     method public void setArguments(android.os.Bundle);
-    method public void setEnterSharedElementTransitionCallback(android.app.SharedElementCallback);
+    method public void setEnterSharedElementCallback(android.app.SharedElementCallback);
     method public void setEnterTransition(android.transition.Transition);
-    method public void setExitSharedElementTransitionCallback(android.app.SharedElementCallback);
+    method public void setExitSharedElementCallback(android.app.SharedElementCallback);
     method public void setExitTransition(android.transition.Transition);
     method public void setHasOptionsMenu(boolean);
     method public void setInitialSavedState(android.app.Fragment.SavedState);
