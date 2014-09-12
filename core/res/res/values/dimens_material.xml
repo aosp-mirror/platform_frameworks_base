@@ -31,6 +31,7 @@
     <!-- Bottom margin for action bar subtitles -->
     <dimen name="action_bar_subtitle_bottom_margin_material">5dp</dimen>
 
+    <dimen name="action_button_min_width_overflow_material">36dp</dimen>
     <dimen name="action_button_min_width_material">48dp</dimen>
     <dimen name="action_button_min_height_material">48dp</dimen>
 

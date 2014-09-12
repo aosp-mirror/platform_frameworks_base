@@ -19,6 +19,7 @@ package android.widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -582,6 +583,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     private class OverflowMenuButton extends ImageButton implements ActionMenuView.ActionMenuChildView {
+        private final float[] mTempPts = new float[2];
+
         public OverflowMenuButton(Context context) {
             super(context, null, com.android.internal.R.attr.actionOverflowButtonStyle);
 
@@ -649,20 +652,21 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
 
         @Override
-        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            super.onLayout(changed, left, top, right, bottom);
+        protected boolean setFrame(int l, int t, int r, int b) {
+            final boolean changed = super.setFrame(l, t, r, b);
 
             // Set up the hotspot bounds to be centered on the image.
             final Drawable d = getDrawable();
             final Drawable bg = getBackground();
             if (d != null && bg != null) {
-                final Rect bounds = d.getBounds();
-                final int height = bottom - top;
-                final int offset = (height - bounds.width()) / 2;
-                final int hotspotLeft = bounds.left - offset;
-                final int hotspotRight = bounds.right + offset;
-                bg.setHotspotBounds(hotspotLeft, 0, hotspotRight, height);
+                final float[] pts = mTempPts;
+                pts[0] = d.getBounds().centerX();
+                getImageMatrix().mapPoints(pts);
+                final int offset =  (int) pts[0] - getWidth() / 2;
+                bg.setHotspotBounds(offset, 0, getWidth() + offset, getHeight());
             }
+
+            return changed;
         }
     }
 
