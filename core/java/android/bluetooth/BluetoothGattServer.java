@@ -48,6 +48,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     private BluetoothAdapter mAdapter;
     private IBluetoothGatt mService;
     private BluetoothGattServerCallback mCallback;
+    private Boolean mIsCongested = false;
 
     private Object mServerIfLock = new Object();
     private int mServerIf;
@@ -297,7 +298,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
                 if (device == null) return;
 
                 try {
-                    mCallback.onConnectionCongested(device, congested);
+                    mIsCongested = congested;
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
