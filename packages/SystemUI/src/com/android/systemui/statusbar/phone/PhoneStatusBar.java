@@ -404,6 +404,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mNavigationBarMode;
     private Boolean mScreenOn;
 
+    // The second field is a bit different from the first one because it only listens to screen on/
+    // screen of events from Keyguard. We need this so we don't have a race condition with the
+    // broadcast. In the future, we should remove the first field altogether and rename the second
+    // field.
+    private boolean mScreenOnFromKeyguard;
+
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
 
@@ -3466,6 +3472,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void showKeyguard() {
         setBarState(StatusBarState.KEYGUARD);
         updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
+        if (!mScreenOnFromKeyguard) {
+
+            // If the screen is off already, we need to disable touch events because these might
+            // collapse the panel after we expanded it, and thus we would end up with a blank
+            // Keyguard.
+            mNotificationPanel.setTouchDisabled(true);
+        }
         instantExpandNotificationsPanel();
         mLeaveOpenOnKeyguardHide = false;
         if (mDraggedDownRow != null) {
@@ -3870,12 +3883,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onScreenTurnedOff() {
+        mScreenOnFromKeyguard = false;
         mStackScroller.setAnimationsEnabled(false);
     }
 
     public void onScreenTurnedOn() {
+        mScreenOnFromKeyguard = true;
         mStackScroller.setAnimationsEnabled(true);
         mNotificationPanel.onScreenTurnedOn();
+        mNotificationPanel.setTouchDisabled(false);
     }
 
     /**
