@@ -28,14 +28,12 @@ import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
 import android.hardware.camera2.utils.ParamsUtils;
-import android.location.Location;
 import android.util.Log;
 import android.util.Size;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureResult.*;
 
 /**
@@ -73,7 +71,7 @@ public class LegacyResultMapper {
             result = new CameraMetadataNative(mCachedResult);
             cached = true;
         } else {
-            result = convertResultMetadata(legacyRequest, timestamp);
+            result = convertResultMetadata(legacyRequest);
             cached = false;
 
             // Always cache a *copy* of the metadata result,
@@ -106,12 +104,9 @@ public class LegacyResultMapper {
      * Generate capture result metadata from the legacy camera request.
      *
      * @param legacyRequest a non-{@code null} legacy request containing the latest parameters
-     * @param timestamp the timestamp to use for this result in nanoseconds.
-     *
      * @return a {@link CameraMetadataNative} object containing result metadata.
      */
-    private static CameraMetadataNative convertResultMetadata(LegacyRequest legacyRequest,
-                                                      long timestamp) {
+    private static CameraMetadataNative convertResultMetadata(LegacyRequest legacyRequest) {
         CameraCharacteristics characteristics = legacyRequest.characteristics;
         CaptureRequest request = legacyRequest.captureRequest;
         Size previewSize = legacyRequest.previewSize;
@@ -123,6 +118,15 @@ public class LegacyResultMapper {
                 CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
         ZoomData zoomData = ParameterUtils.convertScalerCropRegion(activeArraySize,
                 request.get(CaptureRequest.SCALER_CROP_REGION), previewSize, params);
+
+        /*
+         * colorCorrection
+         */
+        // colorCorrection.aberrationMode
+        {
+            // Always hardcoded to FAST
+            result.set(COLOR_CORRECTION_ABERRATION_MODE, COLOR_CORRECTION_ABERRATION_MODE_FAST);
+        }
 
         /*
          * control
@@ -274,7 +278,12 @@ public class LegacyResultMapper {
             Log.w(TAG, "Null thumbnail size received from parameters.");
         }
 
-        // TODO: Remaining result metadata tags conversions.
+        /*
+         * noiseReduction.*
+         */
+        // noiseReduction.mode
+        result.set(NOISE_REDUCTION_MODE, NOISE_REDUCTION_MODE_FAST);
+
         return result;
     }
 
