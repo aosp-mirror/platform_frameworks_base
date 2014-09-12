@@ -37,7 +37,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.R;
-import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.view.menu.MenuPresenter;
@@ -1007,8 +1006,15 @@ public class Toolbar extends ViewGroup {
     }
 
     private void addSystemView(View v) {
-        final LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT);
+        final ViewGroup.LayoutParams vlp = v.getLayoutParams();
+        final LayoutParams lp;
+        if (vlp == null) {
+            lp = generateDefaultLayoutParams();
+        } else if (!checkLayoutParams(vlp)) {
+            lp = generateLayoutParams(vlp);
+        } else {
+            lp = (LayoutParams) vlp;
+        }
         lp.mViewType = LayoutParams.SYSTEM;
         addView(v, lp);
     }
@@ -1280,27 +1286,36 @@ public class Toolbar extends ViewGroup {
         final int[] collapsingMargins = mTempMargins;
         collapsingMargins[0] = collapsingMargins[1] = 0;
 
+        // Align views within the minimum toolbar height, if set.
+        final int alignmentHeight = getMinimumHeight();
+
         if (shouldLayout(mNavButtonView)) {
             if (isRtl) {
-                right = layoutChildRight(mNavButtonView, right, collapsingMargins);
+                right = layoutChildRight(mNavButtonView, right, collapsingMargins,
+                        alignmentHeight);
             } else {
-                left = layoutChildLeft(mNavButtonView, left, collapsingMargins);
+                left = layoutChildLeft(mNavButtonView, left, collapsingMargins,
+                        alignmentHeight);
             }
         }
 
         if (shouldLayout(mCollapseButtonView)) {
             if (isRtl) {
-                right = layoutChildRight(mCollapseButtonView, right, collapsingMargins);
+                right = layoutChildRight(mCollapseButtonView, right, collapsingMargins,
+                        alignmentHeight);
             } else {
-                left = layoutChildLeft(mCollapseButtonView, left, collapsingMargins);
+                left = layoutChildLeft(mCollapseButtonView, left, collapsingMargins,
+                        alignmentHeight);
             }
         }
 
         if (shouldLayout(mMenuView)) {
             if (isRtl) {
-                left = layoutChildLeft(mMenuView, left, collapsingMargins);
+                left = layoutChildLeft(mMenuView, left, collapsingMargins,
+                        alignmentHeight);
             } else {
-                right = layoutChildRight(mMenuView, right, collapsingMargins);
+                right = layoutChildRight(mMenuView, right, collapsingMargins,
+                        alignmentHeight);
             }
         }
 
@@ -1311,17 +1326,21 @@ public class Toolbar extends ViewGroup {
 
         if (shouldLayout(mExpandedActionView)) {
             if (isRtl) {
-                right = layoutChildRight(mExpandedActionView, right, collapsingMargins);
+                right = layoutChildRight(mExpandedActionView, right, collapsingMargins,
+                        alignmentHeight);
             } else {
-                left = layoutChildLeft(mExpandedActionView, left, collapsingMargins);
+                left = layoutChildLeft(mExpandedActionView, left, collapsingMargins,
+                        alignmentHeight);
             }
         }
 
         if (shouldLayout(mLogoView)) {
             if (isRtl) {
-                right = layoutChildRight(mLogoView, right, collapsingMargins);
+                right = layoutChildRight(mLogoView, right, collapsingMargins,
+                        alignmentHeight);
             } else {
-                left = layoutChildLeft(mLogoView, left, collapsingMargins);
+                left = layoutChildLeft(mLogoView, left, collapsingMargins,
+                        alignmentHeight);
             }
         }
 
@@ -1434,13 +1453,15 @@ public class Toolbar extends ViewGroup {
         addCustomViewsWithGravity(mTempViews, Gravity.LEFT);
         final int leftViewsCount = mTempViews.size();
         for (int i = 0; i < leftViewsCount; i++) {
-            left = layoutChildLeft(mTempViews.get(i), left, collapsingMargins);
+            left = layoutChildLeft(mTempViews.get(i), left, collapsingMargins,
+                    alignmentHeight);
         }
 
         addCustomViewsWithGravity(mTempViews, Gravity.RIGHT);
         final int rightViewsCount = mTempViews.size();
         for (int i = 0; i < rightViewsCount; i++) {
-            right = layoutChildRight(mTempViews.get(i), right, collapsingMargins);
+            right = layoutChildRight(mTempViews.get(i), right, collapsingMargins,
+                    alignmentHeight);
         }
 
         // Centered views try to center with respect to the whole bar, but views pinned
@@ -1459,8 +1480,10 @@ public class Toolbar extends ViewGroup {
 
         final int centerViewsCount = mTempViews.size();
         for (int i = 0; i < centerViewsCount; i++) {
-            centerLeft = layoutChildLeft(mTempViews.get(i), centerLeft, collapsingMargins);
+            centerLeft = layoutChildLeft(mTempViews.get(i), centerLeft, collapsingMargins,
+                    alignmentHeight);
         }
+
         mTempViews.clear();
     }
 
@@ -1483,46 +1506,49 @@ public class Toolbar extends ViewGroup {
         return width;
     }
 
-    private int layoutChildLeft(View child, int left, int[] collapsingMargins) {
+    private int layoutChildLeft(View child, int left, int[] collapsingMargins,
+            int alignmentHeight) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         final int l = lp.leftMargin - collapsingMargins[0];
         left += Math.max(0, l);
         collapsingMargins[0] = Math.max(0, -l);
-        final int top = getChildTop(child);
+        final int top = getChildTop(child, alignmentHeight);
         final int childWidth = child.getMeasuredWidth();
         child.layout(left, top, left + childWidth, top + child.getMeasuredHeight());
         left += childWidth + lp.rightMargin;
         return left;
     }
 
-    private int layoutChildRight(View child, int right, int[] collapsingMargins) {
+    private int layoutChildRight(View child, int right, int[] collapsingMargins,
+            int alignmentHeight) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         final int r = lp.rightMargin - collapsingMargins[1];
         right -= Math.max(0, r);
         collapsingMargins[1] = Math.max(0, -r);
-        final int top = getChildTop(child);
+        final int top = getChildTop(child, alignmentHeight);
         final int childWidth = child.getMeasuredWidth();
         child.layout(right - childWidth, top, right, top + child.getMeasuredHeight());
         right -= childWidth + lp.leftMargin;
         return right;
     }
 
-    private int getChildTop(View child) {
+    private int getChildTop(View child, int alignmentHeight) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+        final int childHeight = child.getMeasuredHeight();
+        final int alignmentOffset = alignmentHeight > 0 ? (childHeight - alignmentHeight) / 2 : 0;
         switch (getChildVerticalGravity(lp.gravity)) {
             case Gravity.TOP:
-                return getPaddingTop();
+                return getPaddingTop() - alignmentOffset;
 
             case Gravity.BOTTOM:
-                return getHeight() - getPaddingBottom() -
-                        child.getMeasuredHeight() - lp.bottomMargin;
+                return getHeight() - getPaddingBottom() - childHeight
+                        - lp.bottomMargin - alignmentOffset;
 
             default:
             case Gravity.CENTER_VERTICAL:
                 final int paddingTop = getPaddingTop();
                 final int paddingBottom = getPaddingBottom();
                 final int height = getHeight();
-                final int childHeight = child.getMeasuredHeight();
                 final int space = height - paddingTop - paddingBottom;
                 int spaceAbove = (space - childHeight) / 2;
                 if (spaceAbove < lp.topMargin) {

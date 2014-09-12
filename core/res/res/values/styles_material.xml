@@ -851,10 +851,7 @@ please see styles_device_defaults.xml.
         <item name="src">@drawable/ic_menu_moreoverflow_material</item>
         <item name="background">?attr/actionBarItemBackground</item>
         <item name="contentDescription">@string/action_menu_overflow_description</item>
-        <item name="minWidth">@dimen/action_button_min_width_material</item>
-        <item name="minHeight">@dimen/action_button_min_height_material</item>
         <item name="paddingEnd">12dp</item>
-        <item name="scaleType">center</item>
     </style>
 
     <style name="Widget.Material.ActionBar.TabView" parent="Widget.ActionBar.TabView">
