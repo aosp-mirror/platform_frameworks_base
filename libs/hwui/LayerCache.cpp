@@ -83,6 +83,7 @@ void LayerCache::deleteLayer(Layer* layer) {
         LAYER_LOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(),
                 layer->getFbo());
         mSize -= layer->getWidth() * layer->getHeight() * 4;
+        layer->state = Layer::kState_DeletedFromCache;
         Caches::getInstance().resourceCache.decrementRefcount(layer);
     }
 }
@@ -106,6 +107,7 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
         mCache.removeAt(index);
 
         layer = entry.mLayer;
+        layer->state = Layer::kState_RemovedFromCache;
         mSize -= layer->getWidth() * layer->getHeight() * 4;
 
         LAYER_LOGD("Reusing layer %dx%d", layer->getWidth(), layer->getHeight());
@@ -166,8 +168,11 @@ bool LayerCache::put(Layer* layer) {
         mCache.add(entry);
         mSize += size;
 
+        layer->state = Layer::kState_InCache;
         return true;
     }
+
+    layer->state = Layer::kState_FailedToCache;
     return false;
 }
 
