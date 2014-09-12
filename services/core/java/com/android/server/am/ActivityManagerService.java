@@ -412,7 +412,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * List of intents that were used to start the most recent tasks.
      */
     ArrayList<TaskRecord> mRecentTasks;
-    ArraySet<TaskRecord> mTmpRecents = new ArraySet<TaskRecord>();
+    ArrayList<TaskRecord> mTmpRecents = new ArrayList<TaskRecord>();
 
     /**
      * For addAppTask: cached of the last activity component that was added.
@@ -3841,6 +3841,86 @@ public final class ActivityManagerService extends ActivityManagerNative
         mTaskPersister.wakeup(null, true);
     }
 
+    // Sort by taskId
+    private Comparator<TaskRecord> mTaskRecordComparator = new Comparator<TaskRecord>() {
+        @Override
+        public int compare(TaskRecord lhs, TaskRecord rhs) {
+            return rhs.taskId - lhs.taskId;
+        }
+    };
+
+    // Extract the affiliates of the chain containing mRecentTasks[start].
+    private int processNextAffiliateChain(int start) {
+        final TaskRecord startTask = mRecentTasks.get(start);
+        final int affiliateId = startTask.mAffiliatedTaskId;
+
+        // Quick identification of isolated tasks. I.e. those not launched behind.
+        if (startTask.taskId == affiliateId && startTask.mPrevAffiliate == null &&
+                startTask.mNextAffiliate == null) {
+            // There is still a slim chance that there are other tasks that point to this task
+            // and that the chain is so messed up that this task no longer points to them but
+            // the gain of this optimization outweighs the risk.
+            startTask.inRecents = true;
+            return start + 1;
+        }
+
+        // Remove all tasks that are affiliated to affiliateId and put them in mTmpRecents.
+        mTmpRecents.clear();
+        for (int i = mRecentTasks.size() - 1; i >= start; --i) {
+            final TaskRecord task = mRecentTasks.get(i);
+            if (task.mAffiliatedTaskId == affiliateId) {
+                mRecentTasks.remove(i);
+                mTmpRecents.add(task);
+            }
+        }
+
+        // Sort them all by taskId. That is the order they were create in and that order will
+        // always be correct.
+        Collections.sort(mTmpRecents, mTaskRecordComparator);
+
+        // Go through and fix up the linked list.
+        // The first one is the end of the chain and has no next.
+        final TaskRecord first = mTmpRecents.get(0);
+        first.inRecents = true;
+        if (first.mNextAffiliate != null) {
+            Slog.w(TAG, "Link error 1 first.next=" + first.mNextAffiliate);
+            first.setNextAffiliate(null);
+            mTaskPersister.wakeup(first, false);
+        }
+        // Everything in the middle is doubly linked from next to prev.
+        final int tmpSize = mTmpRecents.size();
+        for (int i = 0; i < tmpSize - 1; ++i) {
+            final TaskRecord next = mTmpRecents.get(i);
+            final TaskRecord prev = mTmpRecents.get(i + 1);
+            if (next.mPrevAffiliate != prev) {
+                Slog.w(TAG, "Link error 2 next=" + next + " prev=" + next.mPrevAffiliate +
+                        " setting prev=" + prev);
+                next.setPrevAffiliate(prev);
+                mTaskPersister.wakeup(next, false);
+            }
+            if (prev.mNextAffiliate != next) {
+                Slog.w(TAG, "Link error 3 prev=" + prev + " next=" + prev.mNextAffiliate +
+                        " setting next=" + next);
+                prev.setNextAffiliate(next);
+                mTaskPersister.wakeup(prev, false);
+            }
+            prev.inRecents = true;
+        }
+        // The last one is the beginning of the list and has no prev.
+        final TaskRecord last = mTmpRecents.get(tmpSize - 1);
+        if (last.mPrevAffiliate != null) {
+            Slog.w(TAG, "Link error 4 last.prev=" + last.mPrevAffiliate);
+            last.setPrevAffiliate(null);
+            mTaskPersister.wakeup(last, false);
+        }
+
+        // Insert the group back into mRecentTasks at start.
+        mRecentTasks.addAll(start, mTmpRecents);
+
+        // Let the caller know where we left off.
+        return start + tmpSize;
+    }
+
     /**
      * Update the recent tasks lists: make sure tasks should still be here (their
      * applications / activities still exist), update their availability, fixup ordering
@@ -3953,51 +4033,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Verify the affiliate chain for each task.
-        for (int i = 0; i < N; ) {
-            TaskRecord task = mRecentTasks.remove(i);
-            if (mTmpRecents.contains(task)) {
-                continue;
-            }
-            int affiliatedTaskId = task.mAffiliatedTaskId;
-            while (true) {
-                TaskRecord next = task.mNextAffiliate;
-                if (next == null) {
-                    break;
-                }
-                if (next.mAffiliatedTaskId != affiliatedTaskId) {
-                    Slog.e(TAG, "Error in Recents: next.affiliatedTaskId=" +
-                            next.mAffiliatedTaskId + " affiliatedTaskId=" + affiliatedTaskId);
-                    task.setNextAffiliate(null);
-                    if (next.mPrevAffiliate == task) {
-                        next.setPrevAffiliate(null);
-                    }
-                    break;
-                }
-                if (next.mPrevAffiliate != task) {
-                    Slog.e(TAG, "Error in Recents chain prev.mNextAffiliate=" +
-                            next.mPrevAffiliate + " task=" + task);
-                    next.setPrevAffiliate(null);
-                    task.setNextAffiliate(null);
-                    break;
-                }
-                if (!mRecentTasks.contains(next)) {
-                    Slog.e(TAG, "Error in Recents: next=" + next + " not in mRecentTasks");
-                    task.setNextAffiliate(null);
-                    // We know that next.mPrevAffiliate is always task, from above, so clear
-                    // its previous affiliate.
-                    next.setPrevAffiliate(null);
-                    break;
-                }
-                task = next;
-            }
-            // task is now the end of the list
-            do {
-                mRecentTasks.remove(task);
-                mRecentTasks.add(i++, task);
-                mTmpRecents.add(task);
-                task.inRecents = true;
-            } while ((task = task.mPrevAffiliate) != null);
+        for (int i = 0; i < N; i = processNextAffiliateChain(i)) {
         }
+
         mTmpRecents.clear();
         // mRecentTasks is now in sorted, affiliated order.
     }
