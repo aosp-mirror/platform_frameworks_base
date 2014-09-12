@@ -144,6 +144,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     private final File mStagingDir;
     private final HandlerThread mInstallThread;
+    private final Handler mInstallHandler;
 
     private final Callbacks mCallbacks;
 
@@ -187,6 +188,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         mInstallThread = new HandlerThread(TAG);
         mInstallThread.start();
+
+        mInstallHandler = new Handler(mInstallThread.getLooper());
 
         mCallbacks = new Callbacks(mInstallThread.getLooper());
 
@@ -961,13 +964,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
         }
 
-        public void onSessionFinished(PackageInstallerSession session, boolean success) {
+        public void onSessionFinished(final PackageInstallerSession session, boolean success) {
             mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
-            synchronized (mSessions) {
-                mSessions.remove(session.sessionId);
-                mHistoricalSessions.put(session.sessionId, session);
-            }
-            writeSessionsAsync();
+
+            mInstallHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mSessions) {
+                        mSessions.remove(session.sessionId);
+                        mHistoricalSessions.put(session.sessionId, session);
+                        writeSessionsLocked();
+                    }
+                }
+            });
         }
 
         public void onSessionPrepared(PackageInstallerSession session) {
@@ -976,11 +985,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             writeSessionsAsync();
         }
 
-        public void onSessionSealed(PackageInstallerSession session) {
+        public void onSessionSealedBlocking(PackageInstallerSession session) {
             // It's very important that we block until we've recorded the
             // session as being sealed, since we never want to allow mutation
             // after sealing.
-            writeSessionsLocked();
+            synchronized (mSessions) {
+                writeSessionsLocked();
+            }
         }
     }
 }
