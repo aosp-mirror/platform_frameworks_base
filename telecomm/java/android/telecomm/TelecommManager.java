@@ -142,6 +142,30 @@ public class TelecommManager {
             "android.telecomm.extra.CONNECTION_SERVICE";
 
     /**
+     * An optional {@link android.content.Intent#ACTION_CALL} intent extra denoting the
+     * package name of the app specifying an alternative gateway for the call.
+     * The value is a string.
+     *
+     * (The following comment corresponds to the all GATEWAY_* extras)
+     * An app which sends the {@link android.content.Intent#ACTION_CALL} intent can specify an
+     * alternative address to dial which is different from the one specified and displayed to
+     * the user. This alternative address is referred to as the gateway address.
+     */
+    public static final String GATEWAY_PROVIDER_PACKAGE =
+            "android.telecomm.extra.GATEWAY_PROVIDER_PACKAGE";
+
+    /**
+     * An optional {@link android.content.Intent#ACTION_CALL} intent extra corresponding to the
+     * original address to dial for the call. This is used when an alternative gateway address is
+     * provided to recall the original address.
+     * The value is a {@link android.net.Uri}.
+     *
+     * (See {@link #GATEWAY_PROVIDER_PACKAGE} for details)
+     */
+    public static final String GATEWAY_ORIGINAL_ADDRESS =
+            "android.telecomm.extra.GATEWAY_ORIGINAL_ADDRESS";
+
+    /**
      * The number which the party on the other side of the line will see (and use to return the
      * call).
      * <p>
@@ -288,7 +312,7 @@ public class TelecommManager {
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to initiate a
-     * phone call must either create their {@link android.content .Intent#ACTION_CALL} or
+     * phone call must either create their {@link android.content.Intent#ACTION_CALL} or
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
      * {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance to
      * select one of the elements of {@link #getEnabledPhoneAccounts()}.
@@ -579,15 +603,13 @@ public class TelecommManager {
     }
 
     /**
-     * Remove all Accounts for a given package from the system.
-     *
-     * @param packageName A package name that may have registered Accounts.
+     * Remove all Accounts that belong to the calling package from the system.
      */
     @SystemApi
-    public void clearAccounts(String packageName) {
+    public void clearAccounts() {
         try {
             if (isServiceConnected()) {
-                getTelecommService().clearAccounts(packageName);
+                getTelecommService().clearAccounts(mContext.getPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#clearAccounts", e);
