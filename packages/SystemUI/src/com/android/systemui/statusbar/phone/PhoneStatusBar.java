@@ -3949,7 +3949,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void wakeUpIfDozing(long time) {
-        if (mDozeServiceHost != null && mDozeServiceHost.isDozing()) {
+        if (mDozeServiceHost != null && mDozeServiceHost.isDozing()
+                && mScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time);
         }
@@ -4045,10 +4046,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         @Override
-        public void requestPulse(int pulses, boolean delayed, DozeService dozeService) {
+        public void requestPulse(boolean delayed, DozeService dozeService) {
             if (dozeService == null) return;
             dozeService.stayAwake(PROCESSING_TIME);
-            mHandler.obtainMessage(H.REQUEST_PULSE, pulses, delayed ? 1 : 0, dozeService)
+            mHandler.obtainMessage(H.REQUEST_PULSE, delayed ? 1 : 0, 0, dozeService)
                     .sendToTarget();
         }
 
@@ -4073,9 +4074,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mCurrentDozeService.startDozing();
         }
 
-        private void handleRequestPulse(int pulses, boolean delayed, DozeService dozeService) {
+        private void handleRequestPulse(boolean delayed, DozeService dozeService) {
             if (!dozeService.equals(mCurrentDozeService)) return;
-            final long stayAwake = mScrimController.pulse(pulses, delayed);
+            final long stayAwake = mScrimController.pulse(delayed);
             mCurrentDozeService.stayAwake(stayAwake);
         }
 
@@ -4099,7 +4100,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (msg.what == REQUEST_DOZE) {
                     handleRequestDoze((DozeService) msg.obj);
                 } else if (msg.what == REQUEST_PULSE) {
-                    handleRequestPulse(msg.arg1, msg.arg2 != 0, (DozeService) msg.obj);
+                    handleRequestPulse(msg.arg1 != 0, (DozeService) msg.obj);
                 } else if (msg.what == DOZING_STOPPED) {
                     handleDozingStopped((DozeService) msg.obj);
                 }

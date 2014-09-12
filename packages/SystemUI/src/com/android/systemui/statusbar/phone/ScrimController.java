@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
@@ -36,7 +37,7 @@ import com.android.systemui.R;
  */
 public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final String TAG = "ScrimController";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final long ANIMATION_DURATION = 220;
 
@@ -46,17 +47,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
 
-    private static final long PULSE_IN_ANIMATION_DURATION = 1000;
-    private static final long PULSE_VISIBLE_DURATION = 3000;
-    private static final long PULSE_OUT_ANIMATION_DURATION = 1000;
-    private static final long PULSE_INVISIBLE_DURATION = 1000;
-    private static final long PULSE_DURATION = PULSE_IN_ANIMATION_DURATION
-            + PULSE_VISIBLE_DURATION + PULSE_OUT_ANIMATION_DURATION + PULSE_INVISIBLE_DURATION;
-    private static final long PRE_PULSE_DELAY = 1000;
-
     private final View mScrimBehind;
     private final View mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
+    private final DozeParameters mDozeParameters;
 
     private boolean mKeyguardShowing;
     private float mFraction;
@@ -72,16 +66,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private Runnable mOnAnimationFinished;
     private boolean mAnimationStarted;
     private boolean mDozing;
-    private int mPulsesRemaining;
+    private long mPulseEndTime;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
     private final Interpolator mLinearOutSlowInInterpolator;
 
     public ScrimController(View scrimBehind, View scrimInFront) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
-        mUnlockMethodCache = UnlockMethodCache.getInstance(scrimBehind.getContext());
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(scrimBehind.getContext(),
+        final Context context = scrimBehind.getContext();
+        mUnlockMethodCache = UnlockMethodCache.getInstance(context);
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 android.R.interpolator.linear_out_slow_in);
+        mDozeParameters = new DozeParameters(context);
     }
 
     public void setKeyguardShowing(boolean showing) {
@@ -137,19 +133,28 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         scheduleUpdate();
     }
 
-    /** When dozing, fade screen contents in and out a few times using the front scrim. */
-    public long pulse(int pulses, boolean delayed) {
+    /** When dozing, fade screen contents in and out using the front scrim. */
+    public long pulse(boolean delayed) {
         if (!mDozing) return 0;
-        mPulsesRemaining = Math.max(pulses, mPulsesRemaining);
-        final long delay = delayed ? PRE_PULSE_DELAY : 0;
+        final long now = System.currentTimeMillis();
+        if (DEBUG) Log.d(TAG, "pulse delayed=" + delayed + " mPulseEndTime=" + mPulseEndTime
+                + " now=" + now);
+        if (mPulseEndTime != 0 && mPulseEndTime > now) return mPulseEndTime - now;
+        final long delay = delayed ? mDozeParameters.getPulseStartDelay() : 0;
         mScrimInFront.postDelayed(mPulseIn, delay);
-        return delay + mPulsesRemaining * PULSE_DURATION;
+        mPulseEndTime = now + delay + mDozeParameters.getPulseDuration();
+        return mPulseEndTime - now;
+    }
+
+    public boolean isPulsing() {
+        return mDozing && mPulseEndTime != 0;
     }
 
     private void cancelPulsing() {
-        mPulsesRemaining = 0;
+        if (DEBUG) Log.d(TAG, "Cancel pulsing");
         mScrimInFront.removeCallbacks(mPulseIn);
         mScrimInFront.removeCallbacks(mPulseOut);
+        mPulseEndTime = 0;
     }
 
     private void scheduleUpdate() {
@@ -302,11 +307,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private final Runnable mPulseIn = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing
-                    + " mPulsesRemaining=" + mPulsesRemaining);
-            if (!mDozing || mPulsesRemaining == 0) return;
-            mPulsesRemaining--;
-            mDurationOverride = PULSE_IN_ANIMATION_DURATION;
+            if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing);
+            if (!mDozing) return;
+            mDurationOverride = mDozeParameters.getPulseInDuration();
             mAnimationDelay = 0;
             mAnimateChange = true;
             mOnAnimationFinished = mPulseInFinished;
@@ -319,7 +322,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse in finished, mDozing=" + mDozing);
             if (!mDozing) return;
-            mScrimInFront.postDelayed(mPulseOut, PULSE_VISIBLE_DURATION);
+            mScrimInFront.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
         }
     };
 
@@ -328,7 +331,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
-            mDurationOverride = PULSE_OUT_ANIMATION_DURATION;
+            mDurationOverride = mDozeParameters.getPulseOutDuration();
             mAnimationDelay = 0;
             mAnimateChange = true;
             mOnAnimationFinished = mPulseOutFinished;
@@ -339,10 +342,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private final Runnable mPulseOutFinished = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Pulse out finished, mPulsesRemaining=" + mPulsesRemaining);
-            if (mPulsesRemaining > 0) {
-                mScrimInFront.postDelayed(mPulseIn, PULSE_INVISIBLE_DURATION);
-            }
+            if (DEBUG) Log.d(TAG, "Pulse out finished");
+            mPulseEndTime = 0;
         }
     };
 }

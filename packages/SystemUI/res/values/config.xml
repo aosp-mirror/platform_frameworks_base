@@ -191,11 +191,21 @@
     <!-- Doze: maximum brightness to use when pulsing -->
     <integer name="doze_pulse_brightness">40</integer>
 
-    <!-- Doze: number of pulses when doing multiple pulses in quick succession -->
-    <integer name="doze_multipulse_count">3</integer>
+    <!-- Doze: period of time between pulses (start of pulse) when following the notification light
+         Format: <under_ms>:<period_ms>,...,<default_ms> -->
+    <string name="doze_pulse_period_function">60000:10000,300000:30000,1800000:60000,0</string>
 
-    <!-- Doze: interval between pulses when following the notification light -->
-    <integer name="doze_notification_pulse_interval">30000</integer>
+    <!-- Doze: pulse parameter - how long does it take to fade in? -->
+    <integer name="doze_pulse_duration_in">1000</integer>
+
+    <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
+    <integer name="doze_pulse_duration_visible">3000</integer>
+
+    <!-- Doze: pulse parameter - how long does it take to fade out? -->
+    <integer name="doze_pulse_duration_out">1000</integer>
+
+    <!-- Doze: pulse parameter - how long to wait before pulsing (if not starting immediately) -->
+    <integer name="doze_pulse_delay">1000</integer>
 
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
