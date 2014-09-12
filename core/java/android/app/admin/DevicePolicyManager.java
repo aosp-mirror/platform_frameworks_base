@@ -52,11 +52,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1907,13 +1911,15 @@ public class DevicePolicyManager {
             String alias) {
         try {
             final byte[] pemCert = Credentials.convertToPem(cert);
-            return mService.installKeyPair(who, privKey.getEncoded(), pemCert, alias);
-        } catch (CertificateException e) {
-            Log.w(TAG, "Error encoding certificate", e);
-        } catch (IOException e) {
-            Log.w(TAG, "Error writing certificate", e);
+            final byte[] pkcs8Key = KeyFactory.getInstance(privKey.getAlgorithm())
+                    .getKeySpec(privKey, PKCS8EncodedKeySpec.class).getEncoded();
+            return mService.installKeyPair(who, pkcs8Key, pemCert, alias);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed talking with device policy service", e);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            Log.w(TAG, "Failed to obtain private key material", e);
+        } catch (CertificateException | IOException e) {
+            Log.w(TAG, "Could not pem-encode certificate", e);
         }
         return false;
     }
