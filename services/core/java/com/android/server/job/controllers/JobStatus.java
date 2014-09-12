@@ -195,16 +195,23 @@ public class JobStatus {
     }
 
     /**
-     * @return Whether or not this job is ready to run, based on its requirements.
+     * @return Whether or not this job is ready to run, based on its requirements. This is true if
+     * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
      */
     public synchronized boolean isReady() {
+        return isConstraintsSatisfied()
+                || (hasDeadlineConstraint() && deadlineConstraintSatisfied.get());
+    }
+
+    /**
+     * @return Whether the constraints set on this job are satisfied.
+     */
+    public synchronized boolean isConstraintsSatisfied() {
         return (!hasChargingConstraint() || chargingConstraintSatisfied.get())
                 && (!hasTimingDelayConstraint() || timeDelayConstraintSatisfied.get())
                 && (!hasConnectivityConstraint() || connectivityConstraintSatisfied.get())
                 && (!hasUnmeteredConstraint() || unmeteredConstraintSatisfied.get())
-                && (!hasIdleConstraint() || idleConstraintSatisfied.get())
-                // Also ready if the deadline has expired - special case.
-                || (hasDeadlineConstraint() && deadlineConstraintSatisfied.get());
+                && (!hasIdleConstraint() || idleConstraintSatisfied.get());
     }
 
     public boolean matches(int uid, int jobId) {
