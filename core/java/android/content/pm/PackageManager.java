@@ -1296,11 +1296,17 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The Connection Service API is enabled on the device.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's display has a touch screen.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
-
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -1754,7 +1760,7 @@ public abstract class PackageManager {
      * @return A fully-qualified {@link Intent} that can be used to launch the
      * main activity in the package. Returns <code>null</code> if the package
      * does not contain such an activity, or if <em>packageName</em> is not
-     * recognized. 
+     * recognized.
      */
     public abstract Intent getLaunchIntentForPackage(String packageName);
 
@@ -3810,7 +3816,7 @@ public abstract class PackageManager {
      */
     public abstract KeySet getKeySetByAlias(String packageName, String alias);
 
-    /** Return the signing {@link KeySet} for this application. 
+    /** Return the signing {@link KeySet} for this application.
      * @hide
      */
     public abstract KeySet getSigningKeySet(String packageName);
