@@ -28580,9 +28580,12 @@ package android.telecomm {
     method public java.lang.CharSequence getShortDescription();
     method public android.net.Uri getSubscriptionAddress();
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
+    method public boolean hasCapabilities(int);
+    method public boolean isEnabled();
     method public boolean supportsUriScheme(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
+    field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final java.lang.String SCHEME_SIP = "sip";
@@ -28592,6 +28595,7 @@ package android.telecomm {
 
   public static class PhoneAccount.Builder {
     ctor public PhoneAccount.Builder(android.telecomm.PhoneAccountHandle, java.lang.CharSequence);
+    ctor public PhoneAccount.Builder(android.telecomm.PhoneAccount);
     method public android.telecomm.PhoneAccount build();
     method public android.telecomm.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecomm.PhoneAccount.Builder setCapabilities(int);

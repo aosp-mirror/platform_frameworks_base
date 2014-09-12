@@ -50,9 +50,9 @@ interface ITelecommService {
     void setUserSelectedOutgoingPhoneAccount(in PhoneAccountHandle account);
 
     /**
-     * @see TelecommServiceImpl#getOutgoingPhoneAccounts
+     * @see TelecommServiceImpl#getEnabledPhoneAccounts
      */
-    List<PhoneAccountHandle> getOutgoingPhoneAccounts();
+    List<PhoneAccountHandle> getEnabledPhoneAccounts();
 
     /**
      * @see TelecommManager#getPhoneAccountsSupportingScheme
@@ -63,6 +63,21 @@ interface ITelecommService {
      * @see TelecommManager#getPhoneAccount
      */
     PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
+
+    /**
+     * @see TelecommManager#getAllPhoneAccountsCount
+     */
+    int getAllPhoneAccountsCount();
+
+    /**
+     * @see TelecommManager#getAllPhoneAccounts
+     */
+    List<PhoneAccount> getAllPhoneAccounts();
+
+    /**
+     * @see TelecommManager#getAllPhoneAccountHandles
+     */
+    List<PhoneAccountHandle> getAllPhoneAccountHandles();
 
     /**
      * @see TelecommServiceImpl#getSimCallManager
@@ -78,6 +93,11 @@ interface ITelecommService {
      * @see TelecommServiceImpl#getSimCallManagers
      */
     List<PhoneAccountHandle> getSimCallManagers();
+
+    /**
+     * @see TelecommServiceImpl#setPhoneAccountEnabled
+     */
+    void setPhoneAccountEnabled(in PhoneAccountHandle account, in boolean isEnabled);
 
     /**
      * @see TelecommServiceImpl#registerPhoneAccount

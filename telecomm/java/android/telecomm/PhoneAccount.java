@@ -83,6 +83,25 @@ public class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_VIDEO_CALLING = 0x8;
 
     /**
+     * Flag indicating that this {@code PhoneAccount} is capable of placing emergency calls.
+     * By default all PSTN {@code PhoneAccount}s are capable of placing emergency calls.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 0x10;
+
+    /**
+     * Flag indicating that this {@code PhoneAccount} is always enabled and cannot be disabled by
+     * the user.
+     * This capability is reserved for important {@code PhoneAccount}s such as the emergency calling
+     * only {@code PhoneAccount}.
+     * <p>
+     * See {@link #getCapabilities}
+     * @hide
+     */
+    public static final int CAPABILITY_ALWAYS_ENABLED = 0x20;
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
@@ -105,6 +124,7 @@ public class PhoneAccount implements Parcelable {
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
     private final List<String> mSupportedUriSchemes;
+    private final boolean mIsEnabled;
 
     public static class Builder {
         private PhoneAccountHandle mAccountHandle;
@@ -115,10 +135,29 @@ public class PhoneAccount implements Parcelable {
         private CharSequence mLabel;
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
+        private boolean mIsEnabled = false;
 
         public Builder(PhoneAccountHandle accountHandle, CharSequence label) {
             this.mAccountHandle = accountHandle;
             this.mLabel = label;
+        }
+
+        /**
+         * Creates an instance of the {@link PhoneAccount.Builder} from an existing
+         * {@link PhoneAccount}.
+         *
+         * @param phoneAccount The {@link PhoneAccount} used to initialize the builder.
+         */
+        public Builder(PhoneAccount phoneAccount) {
+            mAccountHandle = phoneAccount.getAccountHandle();
+            mAddress = phoneAccount.getAddress();
+            mSubscriptionAddress = phoneAccount.getSubscriptionAddress();
+            mCapabilities = phoneAccount.getCapabilities();
+            mIconResId = phoneAccount.getIconResId();
+            mLabel = phoneAccount.getLabel();
+            mShortDescription = phoneAccount.getShortDescription();
+            mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
+            mIsEnabled = phoneAccount.isEnabled();
         }
 
         public Builder setAddress(Uri value) {
@@ -177,6 +216,24 @@ public class PhoneAccount implements Parcelable {
             return this;
         }
 
+        /**
+         * Specifies whether the {@link PhoneAccount} is enabled or not.  {@link PhoneAccount}s are
+         * by default not enabled.
+         *
+         * @param value {@code True} if the {@link PhoneAccount} is enabled.
+         * @return The Builder.
+         * @hide
+         */
+        public Builder setEnabled(boolean value) {
+            this.mIsEnabled = value;
+            return this;
+        }
+
+        /**
+         * Creates an instance of a {@link PhoneAccount} based on the current builder settings.
+         *
+         * @return The {@link PhoneAccount}.
+         */
         public PhoneAccount build() {
             // If no supported URI schemes were defined, assume "tel" is supported.
             if (mSupportedUriSchemes.isEmpty()) {
@@ -191,7 +248,8 @@ public class PhoneAccount implements Parcelable {
                     mIconResId,
                     mLabel,
                     mShortDescription,
-                    mSupportedUriSchemes);
+                    mSupportedUriSchemes,
+                    mIsEnabled);
         }
     }
 
@@ -203,7 +261,8 @@ public class PhoneAccount implements Parcelable {
             int iconResId,
             CharSequence label,
             CharSequence shortDescription,
-            List<String> supportedUriSchemes) {
+            List<String> supportedUriSchemes,
+            boolean enabled) {
         mAccountHandle = account;
         mAddress = address;
         mSubscriptionAddress = subscriptionAddress;
@@ -212,6 +271,7 @@ public class PhoneAccount implements Parcelable {
         mLabel = label;
         mShortDescription = shortDescription;
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
+        mIsEnabled = enabled;
     }
 
     public static Builder builder(
@@ -219,6 +279,14 @@ public class PhoneAccount implements Parcelable {
             CharSequence label) {
         return new Builder(accountHandle, label);
     }
+
+    /**
+     * Returns a builder initialized with the current {@link PhoneAccount} instance.
+     *
+     * @return The builder.
+     * @hide
+     */
+    public Builder toBuilder() { return new Builder(this); }
 
     /**
      * The unique identifier of this {@code PhoneAccount}.
@@ -262,6 +330,17 @@ public class PhoneAccount implements Parcelable {
      */
     public int getCapabilities() {
         return mCapabilities;
+    }
+
+    /**
+     * Determines if this {@code PhoneAccount} has a capabilities specified by the passed in
+     * bit mask.
+     *
+     * @param capability The capabilities to check.
+     * @return {@code True} if the phone account has the capability.
+     */
+    public boolean hasCapabilities(int capability) {
+        return (mCapabilities & capability) == capability;
     }
 
     /**
@@ -310,6 +389,15 @@ public class PhoneAccount implements Parcelable {
             }
         }
         return false;
+    }
+
+    /**
+     * Determines whether this {@code PhoneAccount} is enabled.
+     *
+     * @return {@code True} if this {@code PhoneAccount} is enabled..
+     */
+    public boolean isEnabled() {
+        return mIsEnabled;
     }
 
     /**
@@ -367,6 +455,7 @@ public class PhoneAccount implements Parcelable {
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
         out.writeList(mSupportedUriSchemes);
+        out.writeInt(mIsEnabled ? 1 : 0);
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -396,5 +485,6 @@ public class PhoneAccount implements Parcelable {
         List<String> supportedUriSchemes = new ArrayList<>();
         in.readList(supportedUriSchemes, classLoader);
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
+        mIsEnabled = in.readInt() == 1;
     }
 }
