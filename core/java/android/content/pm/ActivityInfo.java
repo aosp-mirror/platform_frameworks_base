@@ -657,6 +657,7 @@ public class ActivityInfo extends ComponentInfo
         softInputMode = orig.softInputMode;
         uiOptions = orig.uiOptions;
         parentActivityName = orig.parentActivityName;
+        maxRecents = orig.maxRecents;
     }
     
     /**
@@ -728,6 +729,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(uiOptions);
         dest.writeString(parentActivityName);
         dest.writeInt(persistableMode);
+        dest.writeInt(maxRecents);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -754,5 +756,6 @@ public class ActivityInfo extends ComponentInfo
         uiOptions = source.readInt();
         parentActivityName = source.readString();
         persistableMode = source.readInt();
+        maxRecents = source.readInt();
     }
 }
