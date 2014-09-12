@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import android.app.ActivityManager;
+import android.os.Build;
 import android.os.SystemClock;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.wm.WindowManagerService;
@@ -230,21 +231,31 @@ final class ProcessList {
             Slog.i("XXXXXX", "minfree_adj=" + minfree_adj + " minfree_abs=" + minfree_abs);
         }
 
+        final boolean is64bit = Build.SUPPORTED_64_BIT_ABIS.length > 0;
+
         for (int i=0; i<mOomAdj.length; i++) {
             int low = mOomMinFreeLow[i];
             int high = mOomMinFreeHigh[i];
             mOomMinFree[i] = (int)(low + ((high-low)*scale));
+            if (is64bit) {
+                // On 64 bit devices, we consume more baseline RAM, because 64 bit is cool!
+                // To avoid being all pagey and stuff, scale up the memory levels to
+                // give us some breathing room.
+                mOomMinFree[i] = (3*mOomMinFree[i])/2;
+            }
         }
 
         if (minfree_abs >= 0) {
             for (int i=0; i<mOomAdj.length; i++) {
-                mOomMinFree[i] = (int)((float)minfree_abs * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
+                mOomMinFree[i] = (int)((float)minfree_abs * mOomMinFree[i]
+                        / mOomMinFree[mOomAdj.length - 1]);
             }
         }
 
         if (minfree_adj != 0) {
             for (int i=0; i<mOomAdj.length; i++) {
-                mOomMinFree[i] += (int)((float)minfree_adj * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
+                mOomMinFree[i] += (int)((float)minfree_adj * mOomMinFree[i]
+                        / mOomMinFree[mOomAdj.length - 1]);
                 if (mOomMinFree[i] < 0) {
                     mOomMinFree[i] = 0;
                 }
