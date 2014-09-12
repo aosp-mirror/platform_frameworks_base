@@ -16,10 +16,9 @@
 
 <resources>
     <style name="PreferencePanel">
-        <item name="android:layout_marginStart">@dimen/preference_screen_side_margin</item>
-        <item name="android:layout_marginEnd">@dimen/preference_screen_side_margin</item>
-        <item name="android:layout_marginTop">@dimen/preference_screen_top_margin</item>
-        <item name="android:layout_marginBottom">@dimen/preference_screen_bottom_margin</item>
-        <item name="android:background">?attr/detailsElementBackground</item>
+        <item name="layout_marginStart">@dimen/preference_screen_side_margin</item>
+        <item name="layout_marginEnd">@dimen/preference_screen_side_margin</item>
+        <item name="layout_marginTop">@dimen/preference_screen_top_margin</item>
+        <item name="layout_marginBottom">@dimen/preference_screen_bottom_margin</item>
     </style>
 </resources>
