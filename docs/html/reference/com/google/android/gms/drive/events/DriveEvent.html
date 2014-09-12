@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -731,9 +736,6 @@ Summary:
 
 
 
-  &#124; <a href="#constants">Constants</a>
-
-
 
   &#124; <a href="#inhconstants">Inherited Constants</a>
 
@@ -741,9 +743,6 @@ Summary:
 
 
 
-
-
-  &#124; <a href="#pubmethods">Methods</a>
 
 
 
@@ -821,6 +820,8 @@ Summary:
 
               <a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>,
 
+              <a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a>,
+
               <a href="/reference/com/google/android/gms/drive/events/ResourceEvent.html">ResourceEvent</a>
 
 
@@ -831,9 +832,16 @@ Summary:
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a></td>
-              <td class="jd-descrcol" width="100%">Sent when a <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> has had a change to its <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> or <code><a href="/reference/com/google/android/gms/drive/Metadata.html">Metadata</a></code>.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Sent when a <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> has had a change to its <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> or
+ <code><a href="/reference/com/google/android/gms/drive/Metadata.html">Metadata</a></code>.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a></td>
+              <td class="jd-descrcol" width="100%">An event delivered after the client requests a completion notification using
+ <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html#setNotifyOnCompletion(boolean)">setNotifyOnCompletion(boolean)</a></code> and that action has either succeeded or
+ failed on the server.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/ResourceEvent.html">ResourceEvent</a></td>
               <td class="jd-descrcol" width="100%">Base interface for <code><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html">DriveEvent</a></code> types related to a specific resource.&nbsp;</td>
           </tr>
@@ -848,35 +856,35 @@ Summary:
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Base interface implemented by all Drive event types.   An application can express interest in
- receiving events by adding an event listener or subscription.
+ receiving events by adding an event listener or declaring an event listener service.
  <p>
  An event listener implements the <code><a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">DriveEvent.Listener</a></code> interface for a particular event type and
- receives a direct callback from the Drive service to a client application that is
+ receives a direct callback from the Drive service to the client application that is
  currently connected.  A listener is added by calling the appropriate
- <code>add<EventType>Listener</code> method on the <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> of interest or on
- <code><a href="/reference/com/google/android/gms/drive/DriveApi.html">DriveApi</a></code> for listeners that are not resource-specific.   Listeners are active for the
- duration of the current connection or until the <code>remove<EventType>Listener</code> method is
- called on the same entity with the same callback parameter.
+ <code>add<EventType>Listener</code> method on the <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> of interest.   Listeners are
+ active for the duration of the current connection or until the <code>remove<EventType>Listener</code>
+ method is called on the same entity with the same callback parameter.
  <p>
- An event subscription is used to indicate that an application is interested in receiving events
- via intents, even if the application is not currently connected or even running.   A subscription
- is added by calling the appropriate
- <code>add<EventType>Subscription</code> method on the <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> of interest or on
- <code><a href="/reference/com/google/android/gms/drive/DriveApi.html">DriveApi</a></code> for subscriptions that are not resource-specific, passing the class name of an
- exported <code><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html">DriveEventService</a></code> subclass that will process the event intents delivered as a
- result of the subscription.   Subscriptions are active  until the
- <code>remove<EventType>Subscription</code> method is called on the same entity with the same service
- class or until the next device reboot.   An application that is interested in maintaining any
- subscriptions across reboots should handle the
+ An event service must be declared in an application's manifest to indicate that an application is
+ interested in receiving events via bound service AIDL calls on the event service, even if the
+ application is not currently connected or even running.
+ <p>
+ A subscription is added by calling the appropriate
+ <code>add<EventType>Subscription</code> method on the <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> of interest.
+ Subscriptions are active  until the <code>remove<EventType>Subscription</code> method is called on the
+ same entity or until the next device reboot.   An application that is interested in maintaining
+ any subscriptions across reboots should handle the
  <code><a href="/reference/android/content/Intent.html#ACTION_BOOT_COMPLETED">ACTION_BOOT_COMPLETED</a></code> intent to add back these subscriptions after
  the reboot has completed.
  <p>
- A client can have both listeners and subscriptions active for a given resource at the same time.
- When an event is raised, the Drive service will have a preference for delivering events to
- listeners over subscriptions.   If an event is delivered to successfully to one or more
- listeners for a connected client, then the event will not be delivered to any active
- subscriptions for the same client application.    An event can be delivered to multiple listeners
- or multiple subscribers for a given application but never to both.
+ Some event types will also support the ability to request event delivery using the
+ <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></code> parameter that is passed to a Drive API
+ call.    This will indicate that the requested events be delivered to the event service for as
+ long as the operation is active, i.e. until it has successfully completed or permanently failed.
+ <p>
+ Events will be delivered to all registered listeners, subscribers, and/or enabled operations
+ that match the event.   The same event may be delivered to more than one listener or service
+ when appropriate.
 </p>
 
 
@@ -935,22 +943,6 @@ Summary:
 
 
 
-
-
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html#TYPE_CHANGE">TYPE_CHANGE</a></td>
-        <td class="jd-descrcol" width="100%">Event type that indicates a resource change.</td>
-    </tr>
-
-
-
-</table>
 
 
 
@@ -1042,52 +1034,6 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html#getDriveId()">getDriveId</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Returns the id of the Drive resource that triggered the event, or <code>null</code> if not
- resource-specific.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html#getType()">getType</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Returns the type of an event.</div>
-
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -1183,56 +1129,6 @@ From interface
 <!-- Constants -->
 
 
-<!-- ========= ENUM CONSTANTS DETAIL ======== -->
-<h2>Constants</h2>
-
-
-
-
-<A NAME="TYPE_CHANGE"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        int
-      </span>
-        TYPE_CHANGE
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Event type that indicates a resource change.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a></code></li>
-      </ul>
-  </div>
-
-
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-
-                1
-                (0x00000001)
-
-        </span>
-        </div>
-
-    </div>
-</div>
-
-
-
-
 <!-- Fields -->
 
 
@@ -1247,72 +1143,6 @@ From interface
 
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
-
-<h2>Public Methods</h2>
-
-
-
-<A NAME="getDriveId()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a>
-      </span>
-      <span class="sympad">getDriveId</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the id of the Drive resource that triggered the event, or <code>null</code> if not
- resource-specific.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="getType()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        int
-      </span>
-      <span class="sympad">getType</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the type of an event.  See the <code>TYPE_*</code> constants for possible values.
-</p></div>
-
-    </div>
-</div>
-
-
 
 
 

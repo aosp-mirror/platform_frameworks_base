@@ -499,11 +499,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -564,9 +564,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -618,6 +615,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -625,7 +628,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -734,15 +739,26 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a Contents reference.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a></code> instead.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a DriveId.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a></td>
+              <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
+              <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a MetadataBuffer.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></td>
+              <td class="jd-descrcol" width="100%">A reference to a Drive file's contents.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></td>
@@ -758,11 +774,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a></td>
-              <td class="jd-descrcol" width="100%">A result that contains a DriveFile.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code>.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a></td>
-              <td class="jd-descrcol" width="100%">A result that contains a DriveFolder.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code>.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></td>
@@ -784,7 +800,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></td>
-              <td class="jd-descrcol" width="100%">A reference to a Drive file's contents.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> instead.
+</em>&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html">CreateFileActivityBuilder</a></td>
@@ -800,8 +819,16 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveStatusCodes.html">DriveStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%">Drive specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
-&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Drive specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></td>
+              <td class="jd-descrcol" width="100%">Options that can be included with certain requests to the API to configure notification
+ and conflict resolution behavior.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html">ExecutionOptions.Builder</a></td>
+              <td class="jd-descrcol" width="100%">A builder for creating a new <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></code>.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Metadata.html">Metadata</a></td>

@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -805,14 +810,21 @@ Summary:
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">A builder that is used to configure and display the create file activity. This dialog creates a
- new file in the user's drive with a destination and title selected by the user, and the initial
- metadata and contents specified in this builder. If the device is currently offline, the file
- will be created locally and committed to the server when connectivity is restored.
+ new file in the user's drive with a destination and file title selected by the user. If the
+ device is currently offline, the file will be created locally and committed to the server when
+ connectivity is restored.
+
  <p>
- To create a new <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code>, create a <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> object using
- <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newContents(com.google.android.gms.common.api.GoogleApiClient)">newContents(GoogleApiClient)</a></code> and use it to write the file content and
- <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></code> to create the associated metadata and set them on the builder
- using <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialContents(com.google.android.gms.drive.Contents)">setInitialContents(Contents)</a></code> and <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialMetadata(com.google.android.gms.drive.MetadataChangeSet)">setInitialMetadata(MetadataChangeSet)</a></code> before building.
+ To create a new <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code>, the following objects should be provided through the setters
+ in this class before <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code> is called:
+ <ul>
+ <li><code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>, created using <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code>, used to write the
+     file contents, and provided here through <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialDriveContents(com.google.android.gms.drive.DriveContents)">setInitialDriveContents(DriveContents)</a></code>.
+ <li><code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>, created through a <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></code>, used to
+     specify the initial file metadata and provided here through
+     <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialMetadata(com.google.android.gms.drive.MetadataChangeSet)">setInitialMetadata(MetadataChangeSet)</a></code>.
+ </ul>
+
  <p>
  To display the activity, pass the result of <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code> to <code>#startActivityForResult()</code>.
  When the activity completes, a successful response will include an extra
@@ -963,7 +975,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialContents(com.google.android.gms.drive.Contents)">setInitialContents</a></span>(<a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
         
-        <div class="jd-descrdiv">Sets the initial contents for the new file.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    use <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialDriveContents(com.google.android.gms.drive.DriveContents)">setInitialDriveContents(DriveContents)</a></code> instead.
+</em></div>
   
   </td></tr>
 
@@ -976,6 +991,24 @@ Summary:
             
             
             
+            <a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html">CreateFileActivityBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialDriveContents(com.google.android.gms.drive.DriveContents)">setInitialDriveContents</a></span>(<a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents)</nobr>
+
+        <div class="jd-descrdiv">Sets the initial <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> for the new file.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             <a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html">CreateFileActivityBuilder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1323,7 +1356,8 @@ From class
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
-      connected before invoking this method.
+      connected before invoking this method and must have a scope to create files in the
+      target directory (e.g. <code><a href="/reference/com/google/android/gms/drive/Drive.html#SCOPE_FILE">SCOPE_FILE</a></code>).
 </td>
         </tr>
       </table>
@@ -1359,6 +1393,10 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Sets the default folder that will be presented at activity startup as the location for
  file creation. The activity supports navigation from this point to other folders. If not set,
  defaults to the root folder in the user's Drive.
+
+ <p>
+ If this method is called multiple times before <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code>, the last call will overwrite
+ any previous value.
 </p></div>
 
     </div>
@@ -1388,7 +1426,11 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the title displayed in the activity.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the title displayed in the activity.
+
+ <p>
+ If this method is called multiple times before <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code>, the last call will overwrite
+ any previous value.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1426,13 +1468,60 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    use <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialDriveContents(com.google.android.gms.drive.DriveContents)">setInitialDriveContents(DriveContents)</a></code> instead.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setInitialDriveContents(com.google.android.gms.drive.DriveContents)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html">CreateFileActivityBuilder</a>
+      </span>
+      <span class="sympad">setInitialDriveContents</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the initial contents for the new file. This will close the contents, and persist them
- as the initial contents for the file. To continue editing the contents, reopen them
- once the file has been created. If the file being creates is binary (the default type), this
- method must be called or the <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code> method will fail. A new <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> object
- can be created using the API <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newContents(com.google.android.gms.common.api.GoogleApiClient)">newContents(GoogleApiClient)</a></code>.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the initial <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> for the new file. This will persist the contents as
+ the initial contents for the file. To continue editing the contents, open them again through
+ <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#open(com.google.android.gms.common.api.GoogleApiClient, int, com.google.android.gms.drive.DriveFile.DownloadProgressListener)">open(GoogleApiClient, int, DriveFile.DownloadProgressListener)</a></code> once the file has been created.
+
+ <p>
+ This method must always be called or the <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code> method will fail. If this method is
+ called multiple times before <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code>, the last call will overwrite any previous value.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>driveContents</td>
+          <td>The initial contents. The provided contents must have been obtained
+     through <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code>. This <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> cannot be reused
+     after this method returns.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1461,9 +1550,13 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the initial metadata for the new file. This method must be called or the <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code>
- method will fail. A new <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code> can be created using
- <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the initial metadata for the new file.
+
+ <p>
+ This method must be called or the <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code> method will fail. A new
+ <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code> can be created using <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></code>. If this
+ method is called multiple times before <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#build(com.google.android.gms.common.api.GoogleApiClient)">build(GoogleApiClient)</a></code>, the last call will overwrite any
+ previous value.
 </p></div>
 
     </div>

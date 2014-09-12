@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -992,8 +997,8 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_DARK">THEME_HOLO_DARK</a></td>
-        <td class="jd-descrcol" width="100%">Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use Holo Dark
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></td>
+        <td class="jd-descrcol" width="100%">Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a dark
  theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
  >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</td>
     </tr>
@@ -1001,9 +1006,29 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_DARK">THEME_HOLO_DARK</a></td>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    use <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></code>
+</em></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_LIGHT">THEME_HOLO_LIGHT</a></td>
-        <td class="jd-descrcol" width="100%">Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use Holo
- Light theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    use <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></code>
+</em></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></td>
+        <td class="jd-descrcol" width="100%">Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a light
+ theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
  >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</td>
     </tr>
     
@@ -2058,6 +2083,48 @@ From class
 
 
 
+<A NAME="THEME_DARK"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        THEME_DARK
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a dark
+ theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>. This will provide the dark version of
+ either Holo or Material based on the API level of the device.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="THEME_HOLO_DARK"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2077,11 +2144,15 @@ From class
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    use <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></code>
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use Holo Dark
  theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
- >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.
-</p></div>
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</p></div>
 
     
         <div class="jd-tagdata">
@@ -2118,10 +2189,56 @@ From class
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    use <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></code>
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use Holo
  Light theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
- >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="THEME_LIGHT"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        THEME_LIGHT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a light
+ theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>. This will provide the light version of
+ either Holo or Material based on the API level of the device.
 </p></div>
 
     

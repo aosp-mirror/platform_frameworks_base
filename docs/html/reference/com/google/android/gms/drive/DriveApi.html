@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -804,7 +809,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result that contains a Contents reference.&nbsp;</td>
+      <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a></code> instead.
+</em>&nbsp;</td>
     </tr>
     
     
@@ -815,8 +823,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
          
         
         interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
-      <td class="jd-descrcol" width="100%">Result that contains a DriveId.&nbsp;</td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a></td>
+      <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.&nbsp;</td>
     </tr>
     
     
@@ -827,8 +835,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
          
         
         interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
+      <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.&nbsp;</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+      <td class="jd-typecol"><nobr>
+
+
+
+
+        interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a></td>
-      <td class="jd-descrcol" width="100%">Result that contains a MetadataBuffer.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></code>.&nbsp;</td>
     </tr>
     
     
@@ -877,7 +897,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
         
-        <div class="jd-descrdiv">Closes the provided contents without saving the results.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    Stop using <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> and use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> and
+     <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#discard(com.google.android.gms.common.api.GoogleApiClient)">discard(GoogleApiClient)</a></code> instead.
+</em></div>
   
   </td></tr>
 
@@ -988,8 +1012,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newContents(com.google.android.gms.common.api.GoogleApiClient)">newContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Retrieves a new contents instance that can be used to provide initial contents for a new
- file.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code> instead.
+</em></div>
   
   </td></tr>
 
@@ -1022,6 +1048,25 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+
+        <div class="jd-descrdiv">Retrieves a new <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> instance that can be used to provide initial contents
+ for a new file.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">OpenFileActivityBuilder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1033,7 +1078,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1051,7 +1096,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1139,27 +1184,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Closes the provided contents without saving the results.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>apiClient</td>
-          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected before invoking this method.</td>
-        </tr>
-        <tr>
-          <th>contents</td>
-          <td>The contents to discard.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a PendingResult which can be used to verify the success of the operation.
-</li></ul>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Stop using <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> and use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> and
+     <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#discard(com.google.android.gms.common.api.GoogleApiClient)">discard(GoogleApiClient)</a></code> instead.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1205,7 +1237,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a PendingResult which can be used to retrieve the DriveId object.
+      <ul class="nolist"><li>A PendingResult which can be used to retrieve the DriveId object.
 </li></ul>
   </div>
 
@@ -1246,7 +1278,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
+     connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
 </td>
         </tr>
       </table>
@@ -1287,7 +1319,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
+     connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
 </td>
         </tr>
       </table>
@@ -1328,7 +1360,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
+     connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
 </td>
         </tr>
       </table>
@@ -1369,7 +1401,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
+     connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.
 </td>
         </tr>
       </table>
@@ -1401,30 +1433,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a new contents instance that can be used to provide initial contents for a new
- file.  Write the initial contents to the Contents object returned by this request
- using the file APIs provided in <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code>.
- <p> To be persisted, the contents must be saved by being passed as initial contents to
- <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.Contents)">createFile(GoogleApiClient, MetadataChangeSet, Contents)</a></code> or
- <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialContents(com.google.android.gms.drive.Contents)">setInitialContents(Contents)</a></code>.
- <p> To discard the contents without saving them, invoke
- <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents(GoogleApiClient, Contents)</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>apiClient</td>
-          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a PendingResult which can be used to retrieve the Contents object.
-</li></ul>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code> instead.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1457,6 +1472,61 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  destination for a new binary file in their Drive with the contents and additional metadata
  provided in the builder.
 </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newDriveContents(com.google.android.gms.common.api.GoogleApiClient)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a>&gt;
+      </span>
+      <span class="sympad">newDriveContents</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a new <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> instance that can be used to provide initial contents
+ for a new file. The returned contents will be in <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_WRITE_ONLY">MODE_WRITE_ONLY</a></code> and can be
+ used to write the initial contents through the file APIs provided in <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.
+
+ <p>
+ To be persisted, the contents must be saved by being passed as initial contents to
+ <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)">createFile(GoogleApiClient, MetadataChangeSet, DriveContents)</a></code> or
+ <code><a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html#setInitialDriveContents(com.google.android.gms.drive.DriveContents)">setInitialDriveContents(DriveContents)</a></code>.
+
+ <p>
+ To discard the contents without saving them, invoke
+ <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#discard(com.google.android.gms.common.api.GoogleApiClient)">discard(GoogleApiClient)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
+     connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>A PendingResult which can be used to retrieve the Contents object.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1524,7 +1594,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.</td>
+     connected using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> before invoking this method.</td>
         </tr>
         <tr>
           <th>query</td>
@@ -1534,7 +1604,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a PendingResult which can be used to retrieve the children list.
+      <ul class="nolist"><li>A PendingResult which can be used to retrieve the result set. Be sure to call
+     <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> when you're done with the result.
 </li></ul>
   </div>
 
@@ -1573,7 +1644,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>apiClient</td>
           <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
- connected before invoking this method.
+     connected before invoking this method.
 </td>
         </tr>
       </table>

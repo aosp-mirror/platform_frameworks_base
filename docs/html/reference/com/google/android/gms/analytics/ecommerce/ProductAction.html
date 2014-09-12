@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -816,12 +821,12 @@ Summary:
  Typical usage:
  <p>
      <pre>
-          ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder();
+          HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder();
 
           builder.setProductAction(
               new ProductAction(ProductAction.ACTION_PURCHASE)
                   .setTransactionId("TT-1234")
-                  .setTransactionRevenue("3.14")
+                  .setTransactionRevenue(3.14)
                   .setTransactionCouponCode("EXTRA100"))
               .addProduct(new Product().setId("PID-4321").setName("Water Monkeys!"));
           tracker.send(builder.build());
@@ -888,7 +893,7 @@ Summary:
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTIONS">ACTION_CHECKOUT_OPTIONS</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></td>
         <td class="jd-descrcol" width="100%">Action to be used for supplemental checkout data that needs to be provided after a checkout
  hit.</td>
     </tr>
@@ -896,33 +901,43 @@ Summary:
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTIONS">ACTION_CHECKOUT_OPTIONS</a></td>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> instead.
+</em></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CLICK">ACTION_CLICK</a></td>
         <td class="jd-descrcol" width="100%">Action to use when the user clicks on a set of products.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_DETAIL">ACTION_DETAIL</a></td>
         <td class="jd-descrcol" width="100%">Action to use when the user views detailed descriptions of products.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></td>
         <td class="jd-descrcol" width="100%">Action that is used to report all the transaction data to GA.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></td>
         <td class="jd-descrcol" width="100%">Action to use while reporting refunded transactions to GA.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REMOVE">ACTION_REMOVE</a></td>
         <td class="jd-descrcol" width="100%">Action to use when a product is removed from the cart.</td>
@@ -1482,6 +1497,45 @@ From class
 
 
 
+<A NAME="ACTION_CHECKOUT_OPTION"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        ACTION_CHECKOUT_OPTION
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Action to be used for supplemental checkout data that needs to be provided after a checkout
+ hit. This action can additionally have the same fields as the checkout action.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "checkout_option"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="ACTION_CHECKOUT_OPTIONS"></A>
 
 <div class="jd-details api apilevel-">
@@ -1501,10 +1555,14 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> instead.
 
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Action to be used for supplemental checkout data that needs to be provided after a checkout
- hit. This action can additionally have the same fields as the checkout action.
-</p></div>
+ hit. This action can additionally have the same fields as the checkout action.</p></div>
 
 
         <div class="jd-tagdata">
@@ -1754,7 +1812,7 @@ From class
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the product action for all the products included in the hit. Valid values include
- "detail", "click", "add", "remove", "checkout", "checkout_options", "purchase" and "refund".
+ "detail", "click", "add", "remove", "checkout", "checkout_option", "purchase" and "refund".
  All these values are also defined in this class for ease of use. You also also send
  additional values with the hit for some specific actions. See the action documentation for
  details.</p></div>
@@ -1763,14 +1821,10 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>action</td>
-          <td>The value of product action.</td>
+          <td>The value of product action.
+</td>
         </tr>
       </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Returns the same object to enable chaining of methods.
-</li></ul>
   </div>
 
     </div>
@@ -1816,7 +1870,7 @@ From class
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the label associated with the checkout. This value is used with <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT">ACTION_CHECKOUT</a></code>
- and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTIONS">ACTION_CHECKOUT_OPTIONS</a></code> actions.</p></div>
+ and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> actions.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1860,7 +1914,7 @@ From class
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the checkout processes's progress. This value is used with <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT">ACTION_CHECKOUT</a></code> and
- <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTIONS">ACTION_CHECKOUT_OPTIONS</a></code> actions.</p></div>
+ <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> actions.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2042,7 +2096,7 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>value</td>
-          <td>A 11string representing the coupon code used in a transaction.</td>
+          <td>A string representing the coupon code used in a transaction.</td>
         </tr>
       </table>
   </div>

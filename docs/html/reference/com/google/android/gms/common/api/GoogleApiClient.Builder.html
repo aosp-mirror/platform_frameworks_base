@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -1040,11 +1045,10 @@ Summary:
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#enableAutoManage(android.support.v4.app.FragmentActivity, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">enableAutoManage</a></span>(FragmentActivity fragmentActivity, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> unresolvedConnectionFailedListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#enableAutoManage(android.support.v4.app.FragmentActivity, int, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">enableAutoManage</a></span>(FragmentActivity fragmentActivity, int clientId, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> unresolvedConnectionFailedListener)</nobr>
 
         <div class="jd-descrdiv">Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
- connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in
- <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.</div>
+ connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.</div>
 
   </td></tr>
 
@@ -1759,7 +1763,7 @@ From class
 </div>
 
 
-<A NAME="enableAutoManage(android.support.v4.app.FragmentActivity, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)"></A>
+<A NAME="enableAutoManage(android.support.v4.app.FragmentActivity, int, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1772,7 +1776,7 @@ From class
         <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
       </span>
       <span class="sympad">enableAutoManage</span>
-      <span class="normal">(FragmentActivity fragmentActivity, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> unresolvedConnectionFailedListener)</span>
+      <span class="normal">(FragmentActivity fragmentActivity, int clientId, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> unresolvedConnectionFailedListener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1783,28 +1787,47 @@ From class
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
- connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in
- <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
- <p>
- It handles user recoverable errors appropriately and fires
-   if the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> has no
- resolution.
- <p>
- Using this option should eliminate most of the boiler plate associated with using
- <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.</p></div>
+ connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
+ <p/>
+ It handles user recoverable errors appropriately and fires  if the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> has no resolution.
+ This eliminates most of the boiler plate associated with using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.
+ <p/>
+ When using this option, <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#build()">build()</a></code> must be called from the main thread.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>fragmentActivity</td>
-          <td>The activity that uses the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>. For lifecycle
- management to work correctly the activity must call its parent's
- <code><a href="/reference/android/app/Activity.html#onActivityResult(int, int, android.content.Intent)">onActivityResult(int, int, android.content.Intent)</a></code>.</td>
+          <td>The activity that uses the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>. For lifecycle management to
+         work correctly the activity must call its parent's <code><a href="/reference/android/app/Activity.html#onActivityResult(int, int, android.content.Intent)">onActivityResult(int, int, android.content.Intent)</a></code>.</td>
+        </tr>
+        <tr>
+          <th>clientId</td>
+          <td>A non-negative identifier for this client. At any given time, only one
+         auto-managed client is allowed per id. To reuse an id you must first call <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#stopAutoManage(android.support.v4.app.FragmentActivity)">stopAutoManage(FragmentActivity)</a></code> on the previous client.</td>
         </tr>
         <tr>
           <th>unresolvedConnectionFailedListener</td>
-          <td>Fires if the connection failed and and there
- was no resolution or the user chose not to complete the provided resolution.
+          <td>Fires if the connection failed and and there was no resolution or the user chose
+         not to complete the provided resolution. If this listener is fired, the client
+         will no longer be auto-managed, and a new instance must be built.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>NullPointerException</td>
+            <td>if fragmentActivity is null</td>
+        </tr>
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if clientId is negative.</td>
+        </tr>
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if clientId is already being auto-managed.
 </td>
         </tr>
       </table>

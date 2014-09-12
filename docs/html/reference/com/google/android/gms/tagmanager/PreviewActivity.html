@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -1158,77 +1163,105 @@ android.content.Context
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">APP_OPS_SERVICE</td>
+        <td class="jd-linkcol">APPWIDGET_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">APP_OPS_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">AUDIO_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_ABOVE_CLIENT</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
     <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_ADJUST_WITH_ACTIVITY</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_ALLOW_OOM_MANAGEMENT</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_AUTO_CREATE</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_DEBUG_UNBIND</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_IMPORTANT</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_NOT_FOREGROUND</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_WAIVE_PRIORITY</td>
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">BACKUP_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">BATTERY_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_ABOVE_CLIENT</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_ADJUST_WITH_ACTIVITY</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_ALLOW_OOM_MANAGEMENT</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_AUTO_CREATE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_DEBUG_UNBIND</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_IMPORTANT</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_NOT_FOREGROUND</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_WAIVE_PRIORITY</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BLUETOOTH_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">CAMERA_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1312,14 +1345,28 @@ android.content.Context
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">INPUT_METHOD_SERVICE</td>
+        <td class="jd-linkcol">HDMI_CONTROL_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">INPUT_METHOD_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">INPUT_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">JOB_SCHEDULER_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1333,14 +1380,28 @@ android.content.Context
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">LAYOUT_INFLATER_SERVICE</td>
+        <td class="jd-linkcol">LAUNCHER_APPS_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">LAYOUT_INFLATER_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">LOCATION_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">MEDIA_PROJECTION_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1353,43 +1414,57 @@ android.content.Context
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">MEDIA_SESSION_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_APPEND</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_ENABLE_WRITE_AHEAD_LOGGING</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_MULTI_PROCESS</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_PRIVATE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_READABLE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_WRITEABLE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">NETWORK_SCORE_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1431,21 +1506,35 @@ android.content.Context
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">SEARCH_SERVICE</td>
+        <td class="jd-linkcol">RESTRICTIONS_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">SENSOR_SERVICE</td>
+        <td class="jd-linkcol">SEARCH_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">SENSOR_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">STORAGE_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">TELECOMM_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1466,54 +1555,75 @@ android.content.Context
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">UI_MODE_SERVICE</td>
+        <td class="jd-linkcol">TV_INPUT_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">UI_MODE_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">USB_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">USER_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">VIBRATOR_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WALLPAPER_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_P2P_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">WIFI_RTT_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">WIFI_SCANNING_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WINDOW_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
@@ -1833,6 +1943,38 @@ From class
 
 
 
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">convertFromTranslucent</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">convertToTranslucent</span>(Activity.TranslucentConversionListener arg0, ActivityOptions arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             PendingIntent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2060,6 +2202,38 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finishAfterTransition</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finishAndRemoveTask</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finishFromChild</span>(Activity arg0)</nobr>
 
   </td></tr>
@@ -2157,6 +2331,38 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getComponentName</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Scene</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getContentScene</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            TransitionManager</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getContentTransitionManager</span>()</nobr>
 
   </td></tr>
 
@@ -2278,6 +2484,22 @@ From class
         <td class="jd-typecol"><nobr>
 
 
+            final
+
+
+            MediaController</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getMediaController</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
 
 
 
@@ -2290,7 +2512,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2306,7 +2528,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2322,7 +2544,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2338,7 +2560,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2354,7 +2576,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2370,7 +2592,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2386,7 +2608,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2402,7 +2624,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2413,6 +2635,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTitleColor</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            VoiceInteractor</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getVoiceInteractor</span>()</nobr>
 
   </td></tr>
 
@@ -2508,13 +2746,29 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">isChangingConfigurations</span>()</nobr>
+        <span class="sympad">isBackgroundVisibleBehind</span>()</nobr>
 
   </td></tr>
 
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">isChangingConfigurations</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2530,7 +2784,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2546,7 +2800,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2562,7 +2816,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2578,7 +2832,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2589,6 +2843,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">isTaskRoot</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">isVoiceInteraction</span>()</nobr>
 
   </td></tr>
 
@@ -2700,13 +2970,29 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onActivityResult</span>(int arg0, int arg1, Intent arg2)</nobr>
+        <span class="sympad">onActivityReenter</span>(int arg0, Intent arg1)</nobr>
 
   </td></tr>
 
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onActivityResult</span>(int arg0, int arg1, Intent arg2)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2722,7 +3008,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2738,7 +3024,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2754,7 +3040,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2765,6 +3051,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onBackPressed</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onBackgroundVisibleBehindChanged</span>(boolean arg0)</nobr>
 
   </td></tr>
 
@@ -2876,7 +3178,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateContextMenu</span>(ContextMenu arg0, View arg1, ContextMenu.ContextMenuInfo arg2)</nobr>
+        <span class="sympad">onCreate</span>(Bundle arg0, PersistableBundle arg1)</nobr>
 
   </td></tr>
 
@@ -2889,10 +3191,10 @@ From class
 
 
 
-            CharSequence</nobr>
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateDescription</span>()</nobr>
+        <span class="sympad">onCreateContextMenu</span>(ContextMenu arg0, View arg1, ContextMenu.ContextMenuInfo arg2)</nobr>
 
   </td></tr>
 
@@ -2905,10 +3207,10 @@ From class
 
 
 
-            Dialog</nobr>
+            CharSequence</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateDialog</span>(int arg0)</nobr>
+        <span class="sympad">onCreateDescription</span>()</nobr>
 
   </td></tr>
 
@@ -2937,6 +3239,22 @@ From class
 
 
 
+            Dialog</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onCreateDialog</span>(int arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2946,7 +3264,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2962,7 +3280,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2978,7 +3296,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2994,7 +3312,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3010,7 +3328,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3026,7 +3344,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3042,7 +3360,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3058,7 +3376,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3069,6 +3387,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onDetachedFromWindow</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onEnterAnimationComplete</span>()</nobr>
 
   </td></tr>
 
@@ -3356,7 +3690,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onPostResume</span>()</nobr>
+        <span class="sympad">onPostCreate</span>(Bundle arg0, PersistableBundle arg1)</nobr>
 
   </td></tr>
 
@@ -3372,7 +3706,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onPrepareDialog</span>(int arg0, Dialog arg1)</nobr>
+        <span class="sympad">onPostResume</span>()</nobr>
 
   </td></tr>
 
@@ -3404,13 +3738,29 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onPrepareNavigateUpTaskStack</span>(TaskStackBuilder arg0)</nobr>
+        <span class="sympad">onPrepareDialog</span>(int arg0, Dialog arg1)</nobr>
 
   </td></tr>
 
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onPrepareNavigateUpTaskStack</span>(TaskStackBuilder arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3426,7 +3776,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3442,7 +3792,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3458,7 +3808,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3469,6 +3819,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onRestart</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onRestoreInstanceState</span>(Bundle arg0, PersistableBundle arg1)</nobr>
 
   </td></tr>
 
@@ -3545,6 +3911,22 @@ From class
 
 
 
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onSaveInstanceState</span>(Bundle arg0, PersistableBundle arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -3554,7 +3936,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3570,7 +3952,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3586,7 +3968,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3602,7 +3984,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3618,7 +4000,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3634,7 +4016,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3650,7 +4032,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3666,7 +4048,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3677,6 +4059,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onUserLeaveHint</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onVisibleBehindCanceled</span>()</nobr>
 
   </td></tr>
 
@@ -3788,7 +4186,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">recreate</span>()</nobr>
+        <span class="sympad">postponeEnterTransition</span>()</nobr>
 
   </td></tr>
 
@@ -3804,7 +4202,39 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">recreate</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">registerForContextMenu</span>(View arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">releaseInstance</span>()</nobr>
 
   </td></tr>
 
@@ -3846,6 +4276,22 @@ From class
         <td class="jd-typecol"><nobr>
 
 
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">requestVisibleBehind</span>(boolean arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
             final
 
 
@@ -3858,7 +4304,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3874,6 +4320,22 @@ From class
 
 
 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setActionBar</span>(Toolbar arg0)</nobr>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
@@ -3884,7 +4346,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setContentView</span>(int arg0)</nobr>
+        <span class="sympad">setContentTransitionManager</span>(TransitionManager arg0)</nobr>
 
   </td></tr>
 
@@ -3916,13 +4378,29 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setContentView</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
+        <span class="sympad">setContentView</span>(int arg0)</nobr>
 
   </td></tr>
 
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setContentView</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3938,7 +4416,39 @@ From class
 
 
 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setEnterSharedElementCallback</span>(SharedElementCallback arg0)</nobr>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setExitSharedElementCallback</span>(SharedElementCallback arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3954,7 +4464,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3970,7 +4480,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3986,7 +4496,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4002,7 +4512,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4018,7 +4528,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4034,7 +4544,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4045,6 +4555,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setIntent</span>(Intent arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setMediaController</span>(MediaController arg0)</nobr>
 
   </td></tr>
 
@@ -4188,13 +4714,29 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setTitle</span>(int arg0)</nobr>
+        <span class="sympad">setTaskDescription</span>(ActivityManager.TaskDescription arg0)</nobr>
 
   </td></tr>
 
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setTitle</span>(int arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4210,7 +4752,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4226,7 +4768,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4242,7 +4784,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4258,7 +4800,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4274,7 +4816,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4290,7 +4832,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4306,7 +4848,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4322,7 +4864,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4338,22 +4880,6 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivities</span>(Intent[] arg0)</nobr>
-
-  </td></tr>
-
-
-
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
@@ -4364,7 +4890,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivity</span>(Intent arg0)</nobr>
+        <span class="sympad">startActivities</span>(Intent[] arg0)</nobr>
 
   </td></tr>
 
@@ -4396,13 +4922,29 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivityForResult</span>(Intent arg0, int arg1)</nobr>
+        <span class="sympad">startActivity</span>(Intent arg0)</nobr>
 
   </td></tr>
 
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">startActivityForResult</span>(Intent arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4418,7 +4960,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4434,7 +4976,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4450,7 +4992,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4466,7 +5008,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4482,7 +5024,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4498,7 +5040,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4514,7 +5056,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4530,22 +5072,6 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startIntentSender</span>(IntentSender arg0, Intent arg1, int arg2, int arg3, int arg4)</nobr>
-
-  </td></tr>
-
-
-
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
@@ -4556,7 +5082,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startIntentSenderForResult</span>(IntentSender arg0, int arg1, Intent arg2, int arg3, int arg4, int arg5, Bundle arg6)</nobr>
+        <span class="sympad">startIntentSender</span>(IntentSender arg0, Intent arg1, int arg2, int arg3, int arg4)</nobr>
 
   </td></tr>
 
@@ -4588,7 +5114,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startIntentSenderFromChild</span>(Activity arg0, IntentSender arg1, int arg2, Intent arg3, int arg4, int arg5, int arg6)</nobr>
+        <span class="sympad">startIntentSenderForResult</span>(IntentSender arg0, int arg1, Intent arg2, int arg3, int arg4, int arg5, Bundle arg6)</nobr>
 
   </td></tr>
 
@@ -4604,7 +5130,39 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">startIntentSenderFromChild</span>(Activity arg0, IntentSender arg1, int arg2, Intent arg3, int arg4, int arg5, int arg6)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">startIntentSenderFromChild</span>(Activity arg0, IntentSender arg1, int arg2, Intent arg3, int arg4, int arg5, int arg6, Bundle arg7)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">startLockTask</span>()</nobr>
 
   </td></tr>
 
@@ -4668,7 +5226,39 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">startPostponedEnterTransition</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">startSearch</span>(String arg0, boolean arg1, Bundle arg2, boolean arg3)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">stopLockTask</span>()</nobr>
 
   </td></tr>
 
@@ -5389,6 +5979,22 @@ From class
 
 
 
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getCodeCacheDir</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             ContentResolver</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -5398,7 +6004,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5414,7 +6020,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5430,7 +6036,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5446,7 +6052,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5462,7 +6068,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5478,7 +6084,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5489,6 +6095,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getExternalFilesDirs</span>(String arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            File[]</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getExternalMediaDirs</span>()</nobr>
 
   </td></tr>
 
@@ -5552,13 +6174,29 @@ From class
             File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getObbDir</span>()</nobr>
+        <span class="sympad">getNoBackupFilesDir</span>()</nobr>
 
   </td></tr>
 
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getObbDir</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5574,7 +6212,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5590,7 +6228,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5606,7 +6244,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5622,7 +6260,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5638,7 +6276,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5654,7 +6292,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5670,7 +6308,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5686,7 +6324,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5702,7 +6340,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5718,7 +6356,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5734,7 +6372,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5750,7 +6388,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5766,7 +6404,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5782,7 +6420,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5798,7 +6436,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5814,7 +6452,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5830,7 +6468,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5846,7 +6484,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5862,7 +6500,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5878,7 +6516,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5894,7 +6532,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5910,7 +6548,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5926,7 +6564,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5942,7 +6580,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5958,7 +6596,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5974,7 +6612,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5990,7 +6628,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6006,7 +6644,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6022,7 +6660,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6038,7 +6676,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6054,7 +6692,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6070,7 +6708,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6086,7 +6724,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6102,7 +6740,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6118,7 +6756,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6134,7 +6772,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6150,7 +6788,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6166,7 +6804,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6182,7 +6820,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6198,7 +6836,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6214,7 +6852,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6230,7 +6868,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6246,7 +6884,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6262,7 +6900,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6278,7 +6916,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6294,7 +6932,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6310,7 +6948,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6326,7 +6964,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -6823,10 +7461,10 @@ From class
 
 
 
-            ContentResolver</nobr>
+            File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getContentResolver</span>()</nobr>
+        <span class="sympad">getCodeCacheDir</span>()</nobr>
 
   </td></tr>
 
@@ -6839,10 +7477,10 @@ From class
 
 
 
-            File</nobr>
+            ContentResolver</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getDatabasePath</span>(String arg0)</nobr>
+        <span class="sympad">getContentResolver</span>()</nobr>
 
   </td></tr>
 
@@ -6858,7 +7496,39 @@ From class
             File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getDatabasePath</span>(String arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getDir</span>(String arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Drawable</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getDrawable</span>(int arg0)</nobr>
 
   </td></tr>
 
@@ -6935,10 +7605,10 @@ From class
 
 
 
-            File</nobr>
+            File[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getFileStreamPath</span>(String arg0)</nobr>
+        <span class="sympad">getExternalMediaDirs</span>()</nobr>
 
   </td></tr>
 
@@ -6954,7 +7624,7 @@ From class
             File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getFilesDir</span>()</nobr>
+        <span class="sympad">getFileStreamPath</span>(String arg0)</nobr>
 
   </td></tr>
 
@@ -6967,10 +7637,42 @@ From class
 
 
 
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getFilesDir</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             Looper</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getMainLooper</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getNoBackupFilesDir</span>()</nobr>
 
   </td></tr>
 
@@ -7290,7 +7992,7 @@ From class
             TypedArray</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1)</nobr>
+        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1, int arg2, int arg3)</nobr>
 
   </td></tr>
 
@@ -7306,7 +8008,7 @@ From class
             TypedArray</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">obtainStyledAttributes</span>(int arg0, int[] arg1)</nobr>
+        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1)</nobr>
 
   </td></tr>
 
@@ -7322,7 +8024,7 @@ From class
             TypedArray</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1, int arg2, int arg3)</nobr>
+        <span class="sympad">obtainStyledAttributes</span>(int arg0, int[] arg1)</nobr>
 
   </td></tr>
 
@@ -7514,7 +8216,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">sendBroadcast</span>(Intent arg0)</nobr>
+        <span class="sympad">sendBroadcast</span>(Intent arg0, String arg1)</nobr>
 
   </td></tr>
 
@@ -7530,7 +8232,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">sendBroadcast</span>(Intent arg0, String arg1)</nobr>
+        <span class="sympad">sendBroadcast</span>(Intent arg0)</nobr>
 
   </td></tr>
 
@@ -7706,7 +8408,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setWallpaper</span>(Bitmap arg0)</nobr>
+        <span class="sympad">setWallpaper</span>(InputStream arg0)</nobr>
 
   </td></tr>
 
@@ -7722,7 +8424,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setWallpaper</span>(InputStream arg0)</nobr>
+        <span class="sympad">setWallpaper</span>(Bitmap arg0)</nobr>
 
   </td></tr>
 
@@ -7738,7 +8440,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivities</span>(Intent[] arg0)</nobr>
+        <span class="sympad">startActivities</span>(Intent[] arg0, Bundle arg1)</nobr>
 
   </td></tr>
 
@@ -7754,7 +8456,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivities</span>(Intent[] arg0, Bundle arg1)</nobr>
+        <span class="sympad">startActivities</span>(Intent[] arg0)</nobr>
 
   </td></tr>
 

@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -743,9 +748,6 @@ Summary:
   
 
 
-  &#124; <a href="#lfields">Fields</a>
-  
-
 
 
 
@@ -832,10 +834,10 @@ Summary:
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">A data object that contains quality of service parameters for requests to
- the <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.
+ the <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code>.
 
  <p>LocationRequest objects are used to request a quality of service for location updates from
- the <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.
+ the <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code>.
 
  <p>For example, if your application wants high accuracy location it should create a location
  request with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> set to <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_HIGH_ACCURACY">PRIORITY_HIGH_ACCURACY</a></code> and
@@ -1037,26 +1039,6 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 </table>
 
 
-
-
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          LocationRequestCreator</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-      
-    
-
-</table>
 
 
 
@@ -1886,41 +1868,6 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<A NAME="CREATOR"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        LocationRequestCreator
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
 
 
@@ -1963,7 +1910,8 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>Create a location request with default parameters.
 
  <p>Default parameters are for a block accuracy, slowly updated location. It can then be
- adjusted as required by the applications before passing to the <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.</p></div>
+ adjusted as required by the applications before passing to the
+ <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a new location request

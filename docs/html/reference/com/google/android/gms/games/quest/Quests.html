@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -916,20 +921,28 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_RECENTLY_FAILED">SELECT_RECENTLY_FAILED</a></td>
+        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state with a
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp()</a></code> no older than 7 days ago.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_UPCOMING">SELECT_UPCOMING</a></td>
         <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code> state to the QuestBuffer
  returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SORT_ORDER_ENDING_SOON_FIRST">SORT_ORDER_ENDING_SOON_FIRST</a></td>
         <td class="jd-descrcol" width="100%">Sort requests with the quests ending soon first.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SORT_ORDER_RECENTLY_UPDATED_FIRST">SORT_ORDER_RECENTLY_UPDATED_FIRST</a></td>
         <td class="jd-descrcol" width="100%">Sort requests with the recently updated quests first.</td>
@@ -1108,6 +1121,24 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#showStateChangedPopup(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">showStateChangedPopup</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String questId)</nobr>
+
+        <div class="jd-descrdiv">Show the default popup for certain quest states.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -1486,6 +1517,49 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+<A NAME="SELECT_RECENTLY_FAILED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        SELECT_RECENTLY_FAILED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state with a
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp()</a></code> no older than 7 days ago. In simple terms, it will
+ include quests that the player attempted, but failed in the last 7 days. Use with the
+ <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code> API endpoints. This is a subset of
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code>.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                103
+                (0x00000067)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="SELECT_UPCOMING"></A>
 
 <div class="jd-details api apilevel-">
@@ -1740,7 +1814,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  player has completed the milestone on this device, and prevents the milestone from being
  claimed on another device by the same user. If the method call returns
  <code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code>, your app should reward the player based on the
- ComepletionRewardData of the milestone.
+ CompletionRewardData of the milestone.
  <p/>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br/>
  Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
@@ -1890,8 +1964,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <td>Array of quest selectors to include in the list of quests. Valid values
             include: <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_UPCOMING">SELECT_UPCOMING</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_OPEN">SELECT_OPEN</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ACCEPTED">SELECT_ACCEPTED</a></code>,
             <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ENDING_SOON">SELECT_ENDING_SOON</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED">SELECT_COMPLETED</a></code>,
-            <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED_UNCLAIMED">SELECT_COMPLETED_UNCLAIMED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_EXPIRED">SELECT_EXPIRED</a></code>, or
-            <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_FAILED">SELECT_FAILED</a></code>. Use <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ALL_QUESTS">SELECT_ALL_QUESTS</a></code> to view all quests.</td>
+            <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED_UNCLAIMED">SELECT_COMPLETED_UNCLAIMED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_EXPIRED">SELECT_EXPIRED</a></code>,
+            <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_FAILED">SELECT_FAILED</a></code>, or <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_RECENTLY_FAILED">SELECT_RECENTLY_FAILED</a></code>.
+            Use <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ALL_QUESTS">SELECT_ALL_QUESTS</a></code> to view all quests.</td>
         </tr>
       </table>
   </div>
@@ -1948,7 +2023,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_UPCOMING">SELECT_UPCOMING</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_OPEN">SELECT_OPEN</a></code>,
       <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ACCEPTED">SELECT_ACCEPTED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ENDING_SOON">SELECT_ENDING_SOON</a></code>,
       <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED">SELECT_COMPLETED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED_UNCLAIMED">SELECT_COMPLETED_UNCLAIMED</a></code>,
-      <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_EXPIRED">SELECT_EXPIRED</a></code>, or <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_FAILED">SELECT_FAILED</a></code>.
+      <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_EXPIRED">SELECT_EXPIRED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_FAILED">SELECT_FAILED</a></code>, or <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_RECENTLY_FAILED">SELECT_RECENTLY_FAILED</a></code>.
       Use <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ALL_QUESTS">SELECT_ALL_QUESTS</a></code> to view all quests.</td>
         </tr>
         <tr>
@@ -2076,6 +2151,62 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>listener</td>
           <td>The listener that is called when the quest state changes.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="showStateChangedPopup(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        void
+      </span>
+      <span class="sympad">showStateChangedPopup</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String questId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Show the default popup for certain quest states. Call this from the onAccepted and onComplete
+ callbacks. We currently only support popups for quest in either the
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> or <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state. If the quest is in
+ another state, no popup will be shown. Display a popup based on the current state of the
+ quest. Popups are only displayed for quests in <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> or
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code>. If the quest is in any other state, no popup will be
+ displayed.
+ <p/>
+ This method should generally be invoked at the point of quest acceptance (after the callback
+ from <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#accept(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">accept(GoogleApiClient, String)</a></code> returns) or when a quest is newly completed (after receiving
+ <code><a href="/reference/com/google/android/gms/games/quest/QuestUpdateListener.html#onQuestCompleted(com.google.android.gms.games.quest.Quest)">onQuestCompleted(Quest)</a></code>.
+ <p/>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>questId</td>
+          <td>The ID of the quest to fetch assets from for the popup (name and images).
 </td>
         </tr>
       </table>

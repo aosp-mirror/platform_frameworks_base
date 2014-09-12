@@ -499,11 +499,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -564,9 +564,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -618,6 +615,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -625,7 +628,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -729,6 +734,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a></td>
+              <td class="jd-descrcol" width="100%">Event listener interface for <code><a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/CompletionListener.html">CompletionListener</a></td>
+              <td class="jd-descrcol" width="100%">Event listener interface for <code><a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a></code>.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html">DriveEvent</a></td>
               <td class="jd-descrcol" width="100%">Base interface implemented by all Drive event types.&nbsp;</td>
           </tr>
@@ -752,11 +765,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a></td>
-              <td class="jd-descrcol" width="100%">Sent when a <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> has had a change to its <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> or <code><a href="/reference/com/google/android/gms/drive/Metadata.html">Metadata</a></code>.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Sent when a <code><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></code> has had a change to its <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> or
+ <code><a href="/reference/com/google/android/gms/drive/Metadata.html">Metadata</a></code>.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a></td>
+              <td class="jd-descrcol" width="100%">An event delivered after the client requests a completion notification using
+ <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html#setNotifyOnCompletion(boolean)">setNotifyOnCompletion(boolean)</a></code> and that action has either succeeded or
+ failed on the server.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html">DriveEventService</a></td>
-              <td class="jd-descrcol" width="100%">Abstract base class for an intent service that handles Drive events.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Abstract base class for a bound service that handles Drive events.&nbsp;</td>
           </tr>
   </table>
     </div>

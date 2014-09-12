@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -808,6 +813,8 @@ Summary:
  it must be re-opened to be modified.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_FOLDER_UNAVAILABLE">STATUS_SNAPSHOT_FOLDER_UNAVAILABLE</a></code> if the root snapshot folder
  for this game could not be found or created.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT_MISSING">STATUS_SNAPSHOT_CONFLICT_MISSING</a></code> if a conflict was being
+ resolved and the ID was not found.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></code> if the device was unable to
  retrieve any data from the network and has no data cached locally.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to
@@ -925,13 +932,35 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html#getResolutionContents()">getResolutionContents</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves a <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> object used to update the data in case of a conflict.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    use <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html#getResolutionSnapshotContents()">getResolutionSnapshotContents()</a></code>
+</em></div>
 
   </td></tr>
 
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html#getResolutionSnapshotContents()">getResolutionSnapshotContents</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> object used to update the data in case of a
+ conflict.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -1141,14 +1170,52 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    use <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html#getResolutionSnapshotContents()">getResolutionSnapshotContents()</a></code>
 
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> object used to update the data in case of a conflict. Pass
- this to <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.games.snapshot.Snapshot)">resolveConflict(GoogleApiClient, String, Snapshot)</a></code> to resolve this conflict. Will return null if
- the status of this operation is not <code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT">STATUS_SNAPSHOT_CONFLICT</a></code>.</p></div>
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getResolutionSnapshotContents()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a>
+      </span>
+      <span class="sympad">getResolutionSnapshotContents</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> object used to update the data in case of a
+ conflict. Pass this to
+ <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.games.snapshot.SnapshotContents)">resolveConflict(GoogleApiClient, String, String, SnapshotMetadataChange, SnapshotContents)</a></code>
+ to resolve this conflict.
+ <p>
+ Will return null if the status of this operation is not
+ <code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT">STATUS_SNAPSHOT_CONFLICT</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>A <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> object to use to write resolved snapshot data, or null if
-         there was no conflict.
+      <ul class="nolist"><li>A <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> object to use to write resolved snapshot data, or null
+         if there was no conflict.
 </li></ul>
   </div>
 

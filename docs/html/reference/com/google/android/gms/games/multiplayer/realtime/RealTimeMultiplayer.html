@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -923,7 +928,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int, boolean)">getSelectOpponentsIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int minPlayers, int maxPlayers, boolean allowAutomatch)</nobr>
         
         <div class="jd-descrdiv">Returns an intent that will let the user select opponents to send an invitation to for a
- turn based multiplayer match.</div>
+ real-time multiplayer match.</div>
   
   </td></tr>
 
@@ -942,7 +947,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int)">getSelectOpponentsIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int minPlayers, int maxPlayers)</nobr>
         
         <div class="jd-descrdiv">Returns an intent that will let the user select opponents to send an invitation to for a
- turn based multiplayer match.</div>
+ real-time multiplayer match.</div>
   
   </td></tr>
 
@@ -1361,8 +1366,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user select opponents to send an invitation to for a
- turn based multiplayer match. Note that this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling package
- can be established.
+ real-time multiplayer match. Note that this must be invoked with
+ <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling
+ package can be established.
  <p>
  The number of players passed in should be the desired number of additional players to select,
  not including the current player. So, for a game that can handle between 2 and 4 players,
@@ -1373,12 +1379,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  <p>
  If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
  selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
- contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and
- maximum numbers of additional auto-match players in
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
- <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected,
- not the current player.
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and maximum
+ numbers of additional auto-match players in <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code>
+ and <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected, not the current
+ player.
  <p>
  If the <code>allowAutomatch</code> parameter is set to false, the UI will not display an option
  for selecting automatch players. Set this to false if your game does not support
@@ -1445,8 +1450,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user select opponents to send an invitation to for a
- turn based multiplayer match. Note that this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling package
- can be established.
+ real-time multiplayer match. Note that this must be invoked with
+ <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling
+ package can be established.
  <p>
  The number of players passed in should be the desired number of additional players to select,
  not including the current player. So, for a game that can handle between 2 and 4 players,
@@ -1457,12 +1463,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  <p>
  If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
  selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
- contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and
- maximum numbers of additional auto-match players in
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
- <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected,
- not the current player.
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> and the minimum and maximum
+ numbers of additional auto-match players in <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code>
+ and <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in
+ <code><a href="/reference/com/google/android/gms/games/Games.html#EXTRA_PLAYER_IDS">EXTRA_PLAYER_IDS</a></code> will include only the other players selected, not the current
+ player.
  <p>
  This method is the equivalent of calling
  <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int, boolean)">getSelectOpponentsIntent(GoogleApiClient, int, int, boolean)</a></code> with the

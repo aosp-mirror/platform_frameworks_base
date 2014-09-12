@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -857,7 +862,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_needs_enabling_title">auth_client_needs_enabling_title</a></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#accept">accept</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
       
@@ -868,7 +873,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_needs_installation_title">auth_client_needs_installation_title</a></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_android_wear_notification_needs_update_text">common_android_wear_notification_needs_update_text</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
       
@@ -879,7 +884,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_needs_update_title">auth_client_needs_update_title</a></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_android_wear_update_text">common_android_wear_update_text</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
       
@@ -890,29 +895,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_play_services_err_notification_msg">auth_client_play_services_err_notification_msg</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_requested_by_msg">auth_client_requested_by_msg</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_using_bad_version_title">auth_client_using_bad_version_title</a></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_android_wear_update_title">common_android_wear_update_title</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
       
@@ -959,13 +942,13 @@ Summary:
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_error_notification_requested_by_msg">common_google_play_services_error_notification_requested_by_msg</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_install_button">common_google_play_services_install_button</a></td>
           <td class="jd-descrcol" width="100%"></td>
@@ -981,13 +964,13 @@ Summary:
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_install_text_phone">common_google_play_services_install_text_phone</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-      
-    
+
+
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-          
+
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_install_text_tablet">common_google_play_services_install_text_tablet</a></td>
           <td class="jd-descrcol" width="100%"></td>
@@ -1031,13 +1014,13 @@ Summary:
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_needs_enabling_title">common_google_play_services_needs_enabling_title</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1053,13 +1036,13 @@ Summary:
           <td class="jd-typecol"><nobr>
           public
           static
-          
+
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_network_error_title">common_google_play_services_network_error_title</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-      
-    
+
+
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1069,24 +1052,24 @@ Summary:
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_notification_needs_installation_title">common_google_play_services_notification_needs_installation_title</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_notification_needs_update_title">common_google_play_services_notification_needs_update_title</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_notification_ticker">common_google_play_services_notification_ticker</a></td>
           <td class="jd-descrcol" width="100%"></td>
@@ -1102,42 +1085,31 @@ Summary:
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unknown_issue">common_google_play_services_unknown_issue</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-      
-    
+
+
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unsupported_date_text">common_google_play_services_unsupported_date_text</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
+
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unsupported_text">common_google_play_services_unsupported_text</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-      
-    
-      <tr class=" api apilevel-" >
+
+
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-          
+
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unsupported_title">common_google_play_services_unsupported_title</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1148,7 +1120,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1159,13 +1131,24 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_update_title">common_google_play_services_update_title</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_open_on_phone">common_open_on_phone</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
       
@@ -1192,6 +1175,72 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#create_calendar_message">create_calendar_message</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#create_calendar_title">create_calendar_title</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#decline">decline</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#gh_fallback_browse_help_button">gh_fallback_browse_help_button</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#store_picture_message">store_picture_message</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#store_picture_title">store_picture_title</a></td>
+          <td class="jd-descrcol" width="100%"></td>
+      </tr>
+
+
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1485,7 +1534,7 @@ From class
 
 
 
-<A NAME="auth_client_needs_enabling_title"></A>
+<A NAME="accept"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1495,7 +1544,7 @@ From class
          
         int
       </span>
-        auth_client_needs_enabling_title
+        accept
     </h4>
       <div class="api-level">
         
@@ -1513,7 +1562,7 @@ From class
 
 
 
-<A NAME="auth_client_needs_installation_title"></A>
+<A NAME="common_android_wear_notification_needs_update_text"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1523,7 +1572,7 @@ From class
          
         int
       </span>
-        auth_client_needs_installation_title
+        common_android_wear_notification_needs_update_text
     </h4>
       <div class="api-level">
         
@@ -1541,7 +1590,7 @@ From class
 
 
 
-<A NAME="auth_client_needs_update_title"></A>
+<A NAME="common_android_wear_update_text"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1551,7 +1600,7 @@ From class
          
         int
       </span>
-        auth_client_needs_update_title
+        common_android_wear_update_text
     </h4>
       <div class="api-level">
         
@@ -1569,7 +1618,7 @@ From class
 
 
 
-<A NAME="auth_client_play_services_err_notification_msg"></A>
+<A NAME="common_android_wear_update_title"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1579,63 +1628,7 @@ From class
          
         int
       </span>
-        auth_client_play_services_err_notification_msg
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="auth_client_requested_by_msg"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        auth_client_requested_by_msg
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="auth_client_using_bad_version_title"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        auth_client_using_bad_version_title
+        common_android_wear_update_title
     </h4>
       <div class="api-level">
         
@@ -1739,27 +1732,27 @@ From class
 
 <A NAME="common_google_play_services_error_notification_requested_by_msg"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         common_google_play_services_error_notification_requested_by_msg
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -1795,27 +1788,27 @@ From class
 
 <A NAME="common_google_play_services_install_text_phone"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-         
+        public
+        static
+
         int
       </span>
         common_google_play_services_install_text_phone
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
+
     </div>
 </div>
 
@@ -1935,27 +1928,27 @@ From class
 
 <A NAME="common_google_play_services_needs_enabling_title"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         common_google_play_services_needs_enabling_title
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -1991,27 +1984,27 @@ From class
 
 <A NAME="common_google_play_services_network_error_title"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-         
+        public
+        static
+
         int
       </span>
         common_google_play_services_network_error_title
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
+
     </div>
 </div>
 
@@ -2047,27 +2040,27 @@ From class
 
 <A NAME="common_google_play_services_notification_needs_update_title"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         common_google_play_services_notification_needs_update_title
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2075,6 +2068,34 @@ From class
 
 <A NAME="common_google_play_services_notification_ticker"></A>
 
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        common_google_play_services_notification_ticker
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="common_google_play_services_unknown_issue"></A>
+
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
@@ -2083,75 +2104,19 @@ From class
 
         int
       </span>
-        common_google_play_services_notification_ticker
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-
-    </div>
-</div>
-
-
-
-<A NAME="common_google_play_services_unknown_issue"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
         common_google_play_services_unknown_issue
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
-    </div>
-</div>
 
-
-
-<A NAME="common_google_play_services_unsupported_date_text"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        common_google_play_services_unsupported_date_text
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
     </div>
 </div>
 
@@ -2159,27 +2124,27 @@ From class
 
 <A NAME="common_google_play_services_unsupported_text"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-         
+        public
+        static
+
         int
       </span>
         common_google_play_services_unsupported_text
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
+
     </div>
 </div>
 
@@ -2187,27 +2152,27 @@ From class
 
 <A NAME="common_google_play_services_unsupported_title"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-         
+        public
+        static
+
         int
       </span>
         common_google_play_services_unsupported_title
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
+
     </div>
 </div>
 
@@ -2215,27 +2180,27 @@ From class
 
 <A NAME="common_google_play_services_update_button"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-         
+        public
+        static
+
         int
       </span>
         common_google_play_services_update_button
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
+
     </div>
 </div>
 
@@ -2243,27 +2208,27 @@ From class
 
 <A NAME="common_google_play_services_update_text"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-         
+        public
+        static
+
         int
       </span>
         common_google_play_services_update_text
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
+
     </div>
 </div>
 
@@ -2271,6 +2236,34 @@ From class
 
 <A NAME="common_google_play_services_update_title"></A>
 
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+        int
+      </span>
+        common_google_play_services_update_title
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="common_open_on_phone"></A>
+
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
@@ -2279,7 +2272,7 @@ From class
          
         int
       </span>
-        common_google_play_services_update_title
+        common_open_on_phone
     </h4>
       <div class="api-level">
         
@@ -2336,6 +2329,174 @@ From class
         int
       </span>
         common_signin_button_text_long
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="create_calendar_message"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        create_calendar_message
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="create_calendar_title"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        create_calendar_title
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="decline"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        decline
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="gh_fallback_browse_help_button"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        gh_fallback_browse_help_button
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="store_picture_message"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        store_picture_message
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="store_picture_title"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        store_picture_title
     </h4>
       <div class="api-level">
         

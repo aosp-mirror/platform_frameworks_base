@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -1635,7 +1640,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.
+  <div class="jd-tagdata jd-tagdescr"><p>Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.  If no <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> has been set,
+ a default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> is provided that logs to <code><a href="/reference/android/util/Log.html">android.util.Log</a></code>
+ with <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html">Logger.LogLevel</a></code> set to <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html#WARNING">WARNING</a></code>.
 </p></div>
 
     </div>
@@ -2009,7 +2016,7 @@ From class
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Provide a custom implementation of <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> to use. This custom <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code>
- will replace the default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> that prints to the console.</p></div>
+ will replace a default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> that logs to <code><a href="/reference/android/util/Log.html">android.util.Log</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

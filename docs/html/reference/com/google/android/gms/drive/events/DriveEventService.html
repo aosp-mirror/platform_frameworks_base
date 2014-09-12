@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -759,6 +764,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
+
+
+
+
 <div class="sum-details-links">
 
 Summary:
@@ -767,8 +779,11 @@ Summary:
 
 
 
+  <a href="#constants">Constants</a>
 
-  <a href="#inhconstants">Inherited Constants</a>
+
+
+  &#124; <a href="#inhconstants">Inherited Constants</a>
 
 
 
@@ -826,15 +841,18 @@ Summary:
 
 
 
+    extends Service<br/>
 
 
 
 
-    extends IntentService<br/>
 
 
+      implements
 
+        <a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a>
 
+        <a href="/reference/com/google/android/gms/drive/events/CompletionListener.html">CompletionListener</a>
 
 
 
@@ -850,7 +868,7 @@ Summary:
 
     <tr>
 
-        <td colspan="6" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="5" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
 
 
@@ -858,7 +876,7 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="5" class="jd-inheritance-class-cell">android.content.Context</td>
+        <td colspan="4" class="jd-inheritance-class-cell">android.content.Context</td>
     </tr>
 
 
@@ -868,7 +886,7 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="4" class="jd-inheritance-class-cell">android.content.ContextWrapper</td>
+        <td colspan="3" class="jd-inheritance-class-cell">android.content.ContextWrapper</td>
     </tr>
 
 
@@ -880,27 +898,11 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="3" class="jd-inheritance-class-cell">android.app.Service</td>
+        <td colspan="2" class="jd-inheritance-class-cell">android.app.Service</td>
     </tr>
 
 
     <tr>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
-        <td colspan="2" class="jd-inheritance-class-cell">android.app.IntentService</td>
-    </tr>
-
-
-    <tr>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
 
             <td class="jd-inheritance-space">&nbsp;</td>
 
@@ -926,22 +928,42 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Abstract base class for an intent service that handles Drive events.   These events will be
- delivered using intents and invokes the appropriate <code>onXxxEvent</code>
- callback for expected event types.   Refer to <code><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html">DriveEvent</a></code> for more information about
- Drive event subscriptions.
- <p></p>
- The default implementation of all event handling (<code>onXxxEvent</code>) methods will log a
- warning to indicate that methods received are not being handled.
+<p itemprop="articleBody">Abstract base class for a bound service that handles Drive events.   These events will be
+ delivered using AIDL calls to the service.  The base class handles binding and handling of these
+ calls and will raise listener events on the subclass.
+ <p>
+ Subclasses should override one or more of the following interfaces depending upon the event
+ types that expected by the application:
+ <ul>
+ <li><code><a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a></code></li>
+ <li><code><a href="/reference/com/google/android/gms/drive/events/CompletionListener.html">CompletionListener</a></code></li>
+ </ul>
+
+ <p>
+ The default implementation of all listener methods (<code>onListener</code>) methods will log an
+ unhandled event warning to indicate that an unexpected event type was received.   Subclasses
+ should override these methods for any expected event types to provide appropriate handling.
  <p>
  The implementation subclass must be listed as an exported service in the Android manifest
- for the application to be valid as an argument to an add subscription call and to receive
- event intents from the Drive service at runtime.
+ for the application.    The following manifest fragment shows a sample declaration with the
+ required attributes:
  </p>
-</p>
+ <pre>
+ &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   &lt;service android:name=".MyAppEventService" android:exported="true" &gt;
+     &lt;intent-filter&gt;
+       &lt;action android:name="com.google.android.gms.drive.events.HANDLE_EVENT" /&gt;
+     &lt;/intent-filter&gt;
+   &lt;/service&gt;
+ &lt;/manifest&gt;</pre></p>
 
 
 
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html">DriveEvent</a></code></li>
+      </ul>
+  </div>
 
 
 </div><!-- jd-descr -->
@@ -978,6 +1000,22 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#ACTION_HANDLE_EVENT">ACTION_HANDLE_EVENT</a></td>
+        <td class="jd-descrcol" width="100%">The action name used to bind to the DriveEventService for event delivery </td>
+    </tr>
+
+
+
+</table>
+
+
 
 
 
@@ -985,8 +1023,6 @@ Summary:
 <table id="inhconstants" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Constants</div></th></tr>
-
-
 
 
 <tr class="api apilevel-" >
@@ -1111,77 +1147,105 @@ android.content.Context
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">APP_OPS_SERVICE</td>
+        <td class="jd-linkcol">APPWIDGET_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">APP_OPS_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">AUDIO_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_ABOVE_CLIENT</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
     <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_ADJUST_WITH_ACTIVITY</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_ALLOW_OOM_MANAGEMENT</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_AUTO_CREATE</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_DEBUG_UNBIND</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_IMPORTANT</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_NOT_FOREGROUND</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">BIND_WAIVE_PRIORITY</td>
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">BACKUP_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">BATTERY_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_ABOVE_CLIENT</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_ADJUST_WITH_ACTIVITY</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_ALLOW_OOM_MANAGEMENT</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_AUTO_CREATE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_DEBUG_UNBIND</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_IMPORTANT</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_NOT_FOREGROUND</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">BIND_WAIVE_PRIORITY</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BLUETOOTH_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">CAMERA_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1265,14 +1329,28 @@ android.content.Context
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">INPUT_METHOD_SERVICE</td>
+        <td class="jd-linkcol">HDMI_CONTROL_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">INPUT_METHOD_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">INPUT_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">JOB_SCHEDULER_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1286,14 +1364,28 @@ android.content.Context
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">LAYOUT_INFLATER_SERVICE</td>
+        <td class="jd-linkcol">LAUNCHER_APPS_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">LAYOUT_INFLATER_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">LOCATION_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">MEDIA_PROJECTION_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1306,43 +1398,57 @@ android.content.Context
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">MEDIA_SESSION_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_APPEND</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_ENABLE_WRITE_AHEAD_LOGGING</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_MULTI_PROCESS</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_PRIVATE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_READABLE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_WRITEABLE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">NETWORK_SCORE_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1384,21 +1490,35 @@ android.content.Context
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">SEARCH_SERVICE</td>
+        <td class="jd-linkcol">RESTRICTIONS_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">SENSOR_SERVICE</td>
+        <td class="jd-linkcol">SEARCH_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">SENSOR_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">STORAGE_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">TELECOMM_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
@@ -1419,54 +1539,75 @@ android.content.Context
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">UI_MODE_SERVICE</td>
+        <td class="jd-linkcol">TV_INPUT_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">UI_MODE_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">USB_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">USER_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">VIBRATOR_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WALLPAPER_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_P2P_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">WIFI_RTT_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">WIFI_SCANNING_SERVICE</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WINDOW_SERVICE</td>
         <td class="jd-descrcol" width="100%"></td>
@@ -1556,6 +1697,10 @@ android.content.ComponentCallbacks2
 </td></tr>
 
 
+
+
+
+
 </table>
 
 
@@ -1624,8 +1769,8 @@ android.content.ComponentCallbacks2
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
-
-
+            synchronized
+            final
 
 
             IBinder</nobr>
@@ -1647,9 +1792,55 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#onChangeEvent(com.google.android.gms.drive.events.ChangeEvent)">onChangeEvent</a></span>(<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a> event)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#onChange(com.google.android.gms.drive.events.ChangeEvent)">onChange</a></span>(<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a> event)</nobr>
 
-        <div class="jd-descrdiv">Called when an event intent containing a <code><a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a></code> is delivered to the service.</div>
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#onCompletion(com.google.android.gms.drive.events.CompletionEvent)">onCompletion</a></span>(<a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a> event)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+            synchronized
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#onDestroy()">onDestroy</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#onUnbind(android.content.Intent)">onUnbind</a></span>(Intent intent)</nobr>
 
   </td></tr>
 
@@ -1670,13 +1861,15 @@ android.content.ComponentCallbacks2
         <td class="jd-typecol"><nobr>
 
 
-            final
 
 
-            void</nobr>
+
+            int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#onHandleIntent(android.content.Intent)">onHandleIntent</a></span>(Intent intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#getCallingUid()">getCallingUid</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieves the current calling UID.</div>
 
   </td></tr>
 
@@ -1692,144 +1885,6 @@ android.content.ComponentCallbacks2
 <table id="inhmethods" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.app.IntentService" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.app.IntentService-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  android.app.IntentService
-
-<div id="inherited-methods-android.app.IntentService">
-  <div id="inherited-methods-android.app.IntentService-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.app.IntentService-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            IBinder</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onBind</span>(Intent arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreate</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onDestroy</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onHandleIntent</span>(Intent arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onStart</span>(Intent arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onStartCommand</span>(Intent arg0, int arg1, int arg2)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setIntentRedelivery</span>(boolean arg0)</nobr>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
 
 
 <tr class="api apilevel-" >
@@ -2653,6 +2708,22 @@ From class
 
 
 
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getCodeCacheDir</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             ContentResolver</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2662,7 +2733,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2678,7 +2749,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2694,7 +2765,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2710,7 +2781,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2726,7 +2797,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2742,7 +2813,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2753,6 +2824,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getExternalFilesDirs</span>(String arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            File[]</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getExternalMediaDirs</span>()</nobr>
 
   </td></tr>
 
@@ -2816,13 +2903,29 @@ From class
             File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getObbDir</span>()</nobr>
+        <span class="sympad">getNoBackupFilesDir</span>()</nobr>
 
   </td></tr>
 
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getObbDir</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2838,7 +2941,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2854,7 +2957,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2870,7 +2973,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2886,7 +2989,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2902,7 +3005,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2918,7 +3021,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2934,7 +3037,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2950,7 +3053,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2966,7 +3069,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2982,7 +3085,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2998,7 +3101,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3014,7 +3117,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3030,7 +3133,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3046,7 +3149,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3062,7 +3165,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3078,7 +3181,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3094,7 +3197,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3110,7 +3213,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3126,7 +3229,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3142,7 +3245,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3158,7 +3261,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3174,7 +3277,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3190,7 +3293,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3206,7 +3309,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3222,7 +3325,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3238,7 +3341,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3254,7 +3357,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3270,7 +3373,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3286,7 +3389,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3302,7 +3405,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3318,7 +3421,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3334,7 +3437,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3350,7 +3453,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3366,7 +3469,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3382,7 +3485,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3398,7 +3501,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3414,7 +3517,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3430,7 +3533,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3446,7 +3549,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3462,7 +3565,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3478,7 +3581,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3494,7 +3597,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3510,7 +3613,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3526,7 +3629,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3542,7 +3645,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3558,7 +3661,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3574,7 +3677,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -3590,7 +3693,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4087,10 +4190,10 @@ From class
 
 
 
-            ContentResolver</nobr>
+            File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getContentResolver</span>()</nobr>
+        <span class="sympad">getCodeCacheDir</span>()</nobr>
 
   </td></tr>
 
@@ -4103,10 +4206,10 @@ From class
 
 
 
-            File</nobr>
+            ContentResolver</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getDatabasePath</span>(String arg0)</nobr>
+        <span class="sympad">getContentResolver</span>()</nobr>
 
   </td></tr>
 
@@ -4122,7 +4225,39 @@ From class
             File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getDatabasePath</span>(String arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getDir</span>(String arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Drawable</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getDrawable</span>(int arg0)</nobr>
 
   </td></tr>
 
@@ -4199,10 +4334,10 @@ From class
 
 
 
-            File</nobr>
+            File[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getFileStreamPath</span>(String arg0)</nobr>
+        <span class="sympad">getExternalMediaDirs</span>()</nobr>
 
   </td></tr>
 
@@ -4218,7 +4353,7 @@ From class
             File</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getFilesDir</span>()</nobr>
+        <span class="sympad">getFileStreamPath</span>(String arg0)</nobr>
 
   </td></tr>
 
@@ -4231,10 +4366,42 @@ From class
 
 
 
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getFilesDir</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             Looper</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getMainLooper</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            File</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getNoBackupFilesDir</span>()</nobr>
 
   </td></tr>
 
@@ -4554,7 +4721,7 @@ From class
             TypedArray</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1)</nobr>
+        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1, int arg2, int arg3)</nobr>
 
   </td></tr>
 
@@ -4570,7 +4737,7 @@ From class
             TypedArray</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">obtainStyledAttributes</span>(int arg0, int[] arg1)</nobr>
+        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1)</nobr>
 
   </td></tr>
 
@@ -4586,7 +4753,7 @@ From class
             TypedArray</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">obtainStyledAttributes</span>(AttributeSet arg0, int[] arg1, int arg2, int arg3)</nobr>
+        <span class="sympad">obtainStyledAttributes</span>(int arg0, int[] arg1)</nobr>
 
   </td></tr>
 
@@ -4778,7 +4945,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">sendBroadcast</span>(Intent arg0)</nobr>
+        <span class="sympad">sendBroadcast</span>(Intent arg0, String arg1)</nobr>
 
   </td></tr>
 
@@ -4794,7 +4961,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">sendBroadcast</span>(Intent arg0, String arg1)</nobr>
+        <span class="sympad">sendBroadcast</span>(Intent arg0)</nobr>
 
   </td></tr>
 
@@ -4970,7 +5137,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setWallpaper</span>(Bitmap arg0)</nobr>
+        <span class="sympad">setWallpaper</span>(InputStream arg0)</nobr>
 
   </td></tr>
 
@@ -4986,7 +5153,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setWallpaper</span>(InputStream arg0)</nobr>
+        <span class="sympad">setWallpaper</span>(Bitmap arg0)</nobr>
 
   </td></tr>
 
@@ -5002,7 +5169,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivities</span>(Intent[] arg0)</nobr>
+        <span class="sympad">startActivities</span>(Intent[] arg0, Bundle arg1)</nobr>
 
   </td></tr>
 
@@ -5018,7 +5185,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivities</span>(Intent[] arg0, Bundle arg1)</nobr>
+        <span class="sympad">startActivities</span>(Intent[] arg0)</nobr>
 
   </td></tr>
 
@@ -5491,6 +5658,90 @@ From interface
 </td></tr>
 
 
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.drive.events.ChangeListener" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.drive.events.ChangeListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">com.google.android.gms.drive.events.ChangeListener</a>
+
+<div id="inherited-methods-com.google.android.gms.drive.events.ChangeListener">
+  <div id="inherited-methods-com.google.android.gms.drive.events.ChangeListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.drive.events.ChangeListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/ChangeListener.html#onChange(com.google.android.gms.drive.events.ChangeEvent)">onChange</a></span>(<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a> event)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.drive.events.CompletionListener" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.drive.events.CompletionListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/drive/events/CompletionListener.html">com.google.android.gms.drive.events.CompletionListener</a>
+
+<div id="inherited-methods-com.google.android.gms.drive.events.CompletionListener">
+  <div id="inherited-methods-com.google.android.gms.drive.events.CompletionListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.drive.events.CompletionListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/CompletionListener.html#onCompletion(com.google.android.gms.drive.events.CompletionEvent)">onCompletion</a></span>(<a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a> event)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
 </table>
 
 
@@ -5512,6 +5763,50 @@ From interface
 
 
 <!-- Constants -->
+
+
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="ACTION_HANDLE_EVENT"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        ACTION_HANDLE_EVENT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The action name used to bind to the DriveEventService for event delivery </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "com.google.android.gms.drive.events.HANDLE_EVENT"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
 
 
 <!-- Fields -->
@@ -5614,9 +5909,9 @@ From interface
       <span class="normal">
         public
 
+        final
 
-
-
+        synchronized
         IBinder
       </span>
       <span class="sympad">onBind</span>
@@ -5636,7 +5931,7 @@ From interface
 </div>
 
 
-<A NAME="onChangeEvent(com.google.android.gms.drive.events.ChangeEvent)"></A>
+<A NAME="onChange(com.google.android.gms.drive.events.ChangeEvent)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -5648,7 +5943,7 @@ From interface
 
         void
       </span>
-      <span class="sympad">onChangeEvent</span>
+      <span class="sympad">onChange</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a> event)</span>
     </h4>
       <div class="api-level">
@@ -5659,9 +5954,94 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Called when an event intent containing a <code><a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a></code> is delivered to the service.
- The default implementation will simply log a warning about an unhandled event.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onCompletion(com.google.android.gms.drive.events.CompletionEvent)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onCompletion</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html">CompletionEvent</a> event)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onDestroy()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+        synchronized
+        void
+      </span>
+      <span class="sympad">onDestroy</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onUnbind(android.content.Intent)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">onUnbind</span>
+      <span class="normal">(Intent intent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -5676,20 +6056,20 @@ From interface
 
 
 
-<A NAME="onHandleIntent(android.content.Intent)"></A>
+<A NAME="getCallingUid()"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
         protected
 
-        final
 
 
-        void
+
+        int
       </span>
-      <span class="sympad">onHandleIntent</span>
-      <span class="normal">(Intent intent)</span>
+      <span class="sympad">getCallingUid</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5699,7 +6079,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the current calling UID.  Exposed to support test mocking </p></div>
 
     </div>
 </div>
