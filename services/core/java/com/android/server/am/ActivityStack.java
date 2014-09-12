@@ -1042,11 +1042,8 @@ final class ActivityStack {
 
             if (prev.app != null && prev.cpuTimeAtResume > 0
                     && mService.mBatteryStatsService.isOnBattery()) {
-                long diff;
-                synchronized (mService.mProcessCpuThread) {
-                    diff = mService.mProcessCpuTracker.getCpuTimeForPid(prev.app.pid)
-                            - prev.cpuTimeAtResume;
-                }
+                long diff = mService.mProcessCpuTracker.getCpuTimeForPid(prev.app.pid)
+                        - prev.cpuTimeAtResume;
                 if (diff > 0) {
                     BatteryStatsImpl bsi = mService.mBatteryStatsService.getActiveStatistics();
                     synchronized (bsi) {
@@ -1097,9 +1094,7 @@ final class ActivityStack {
         // TODO: To be more accurate, the mark should be before the onCreate,
         //       not after the onResume. But for subsequent starts, onResume is fine.
         if (next.app != null) {
-            synchronized (mService.mProcessCpuThread) {
-                next.cpuTimeAtResume = mService.mProcessCpuTracker.getCpuTimeForPid(next.app.pid);
-            }
+            next.cpuTimeAtResume = mService.mProcessCpuTracker.getCpuTimeForPid(next.app.pid);
         } else {
             next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
