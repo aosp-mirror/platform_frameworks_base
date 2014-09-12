@@ -150,6 +150,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // mDecor itself, or a child of mDecor where the contents go.
     private ViewGroup mContentParent;
 
+    private ViewGroup mContentRoot;
+
     SurfaceHolder.Callback2 mTakeSurfaceCallback;
 
     InputQueue.Callback mTakeInputQueueCallback;
@@ -2154,6 +2156,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private int mLastTopInset = 0;
         private int mLastBottomInset = 0;
+        private int mLastRightInset = 0;
         private int mLastSystemUiVisibility = 0;
 
 
@@ -2732,7 +2735,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public WindowInsets onApplyWindowInsets(WindowInsets insets) {
             mFrameOffsets.set(insets.getSystemWindowInsets());
-            updateColorViews(insets);
+            insets = updateColorViews(insets);
             insets = updateStatusGuard(insets);
             updateNavigationGuard(insets);
             if (getForeground() != null) {
@@ -2749,8 +2752,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private WindowInsets updateColorViews(WindowInsets insets) {
             if (!mIsFloating && ActivityManager.isHighEndGfx()) {
                 if (insets != null) {
-                    mLastTopInset = insets.getStableInsetTop();
-                    mLastBottomInset = insets.getStableInsetBottom();
+                    mLastTopInset = Math.min(insets.getStableInsetTop(),
+                            insets.getSystemWindowInsetTop());
+                    mLastBottomInset = Math.min(insets.getStableInsetBottom(),
+                            insets.getSystemWindowInsetBottom());
+                    mLastRightInset = Math.min(insets.getStableInsetRight(),
+                            insets.getSystemWindowInsetRight());
                 }
                 mStatusColorView = updateColorViewInt(mStatusColorView,
                         SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
@@ -2765,8 +2772,39 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         com.android.internal.R.id.navigationBarBackground,
                         false /* hiddenByWindowFlag */);
             }
+
+            WindowManager.LayoutParams attrs = getAttributes();
+            int sysUiVisibility = attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility;
+
+            // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
+            // to ensure that the rest of the view hierarchy doesn't notice it, unless they've
+            // explicitly asked for it.
+
+            boolean consumingNavBar =
+                    (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
+                            && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
+                            && (mLastSystemUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+
+            int consumedRight = consumingNavBar ? mLastRightInset : 0;
+            int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
+
+            if (mContentRoot != null
+                    && mContentRoot.getLayoutParams() instanceof MarginLayoutParams) {
+                MarginLayoutParams lp = (MarginLayoutParams) mContentRoot.getLayoutParams();
+                if (lp.rightMargin != consumedRight || lp.bottomMargin != consumedBottom) {
+                    lp.rightMargin = consumedRight;
+                    lp.bottomMargin = consumedBottom;
+                    mContentRoot.setLayoutParams(lp);
+                }
+            }
+
             if (insets != null) {
-                insets = insets.consumeStableInsets();
+                insets = insets.consumeStableInsets().replaceSystemWindowInsets(
+                        insets.getSystemWindowInsetLeft(),
+                        insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight() - consumedRight,
+                        insets.getSystemWindowInsetBottom() - consumedBottom
+                );
             }
             return insets;
         }
@@ -3381,6 +3419,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         View in = mLayoutInflater.inflate(layoutResource, null);
         decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        mContentRoot = (ViewGroup) in;
 
         ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
         if (contentParent == null) {
