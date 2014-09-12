@@ -14,10 +14,12 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:name="rootGroup"
         android:height="64dp"
         android:width="64dp"
         android:viewportHeight="600"
-        android:viewportWidth="600" >
+        android:viewportWidth="600"
+        android:alpha="0.5" >
 
     <group
         android:name="rotationGroup"
