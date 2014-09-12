@@ -235,6 +235,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             View view = mTransitioningViews.get(i);
             if (!view.getGlobalVisibleRect(r)) {
                 mTransitioningViews.remove(i);
+                showView(view, true);
             }
         }
     }
@@ -605,14 +606,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected void showViews(ArrayList<View> views, boolean setTransitionAlpha) {
         int count = views.size();
         for (int i = 0; i < count; i++) {
-            View view = views.get(i);
-            Float alpha = mOriginalAlphas.remove(view);
-            if (alpha != null) {
-                view.setAlpha(alpha);
-            }
-            if (setTransitionAlpha) {
-                view.setTransitionAlpha(1f);
-            }
+            showView(views.get(i), setTransitionAlpha);
+        }
+    }
+
+    private void showView(View view, boolean setTransitionAlpha) {
+        Float alpha = mOriginalAlphas.remove(view);
+        if (alpha != null) {
+            view.setAlpha(alpha);
+        }
+        if (setTransitionAlpha) {
+            view.setTransitionAlpha(1f);
         }
     }
 
