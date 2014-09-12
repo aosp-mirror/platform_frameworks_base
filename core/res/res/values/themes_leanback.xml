@@ -76,6 +76,7 @@
 
     <style name="Theme.Leanback.Dialog.AppError" parent="Theme.Leanback.Dialog">
         <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
     </style>
 

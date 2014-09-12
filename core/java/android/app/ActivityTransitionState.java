@@ -144,7 +144,7 @@ class ActivityTransitionState {
     }
 
     public void setEnterActivityOptions(Activity activity, ActivityOptions options) {
-        if (activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)
+        if (activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
                 && options != null && mEnterActivityOptions == null
                 && mEnterTransitionCoordinator == null
                 && options.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
@@ -272,7 +272,7 @@ class ActivityTransitionState {
     }
 
     public void startExitOutTransition(Activity activity, Bundle options) {
-        if (!activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
+        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
             return;
         }
         ActivityOptions activityOptions = new ActivityOptions(options);
