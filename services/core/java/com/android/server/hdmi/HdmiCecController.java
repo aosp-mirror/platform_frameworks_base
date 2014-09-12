@@ -32,6 +32,7 @@ import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -367,7 +368,8 @@ final class HdmiCecController {
 
         // Extract polling candidates. No need to poll against local devices.
         List<Integer> pollingCandidates = pickPollCandidates(pickStrategy);
-        runDevicePolling(sourceAddress, pollingCandidates, retryCount, callback);
+        ArrayList<Integer> allocated = new ArrayList<>();
+        runDevicePolling(sourceAddress, pollingCandidates, retryCount, callback, allocated);
     }
 
     /**
@@ -395,7 +397,7 @@ final class HdmiCecController {
         }
 
         int iterationStrategy = pickStrategy & Constants.POLL_ITERATION_STRATEGY_MASK;
-        ArrayList<Integer> pollingCandidates = new ArrayList<>();
+        LinkedList<Integer> pollingCandidates = new LinkedList<>();
         switch (iterationStrategy) {
             case Constants.POLL_ITERATION_IN_ORDER:
                 for (int i = Constants.ADDR_TV; i <= Constants.ADDR_SPECIFIC_USE; ++i) {
@@ -430,26 +432,32 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void runDevicePolling(final int sourceAddress,
             final List<Integer> candidates, final int retryCount,
-            final DevicePollingCallback callback) {
+            final DevicePollingCallback callback, final List<Integer> allocated) {
         assertRunOnServiceThread();
+        if (candidates.isEmpty()) {
+            if (callback != null) {
+                HdmiLogger.debug("[P]:AllocatedAddress=%s", allocated.toString());
+                callback.onPollingFinished(allocated);
+            }
+            return;
+        }
+
+        final Integer candidate = candidates.remove(0);
+        // Proceed polling action for the next address once polling action for the
+        // previous address is done.
         runOnIoThread(new Runnable() {
             @Override
             public void run() {
-                final ArrayList<Integer> allocated = new ArrayList<>();
-                for (Integer address : candidates) {
-                    if (sendPollMessage(sourceAddress, address, retryCount)) {
-                        allocated.add(address);
+                if (sendPollMessage(sourceAddress, candidate, retryCount)) {
+                    allocated.add(candidate);
+                }
+                runOnServiceThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        runDevicePolling(sourceAddress, candidates, retryCount, callback,
+                                allocated);
                     }
-                }
-                HdmiLogger.debug("[P]:Allocated Address=" + allocated);
-                if (callback != null) {
-                    runOnServiceThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onPollingFinished(allocated);
-                        }
-                    });
-                }
+                });
             }
         });
     }
