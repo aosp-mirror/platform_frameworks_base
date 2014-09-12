@@ -17,6 +17,7 @@
 package android.webkit;
 
 import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.util.Map;
 
 /**
@@ -40,13 +41,14 @@ public class WebResourceResponse {
      *
      * @param mimeType the resource response's MIME type, for example text/html
      * @param encoding the resource response's encoding
-     * @param data the input stream that provides the resource response's data
+     * @param data the input stream that provides the resource response's data. Must not be a
+     *             StringBufferInputStream.
      */
     public WebResourceResponse(String mimeType, String encoding,
             InputStream data) {
         mMimeType = mimeType;
         mEncoding = encoding;
-        mInputStream = data;
+        setData(data);
     }
 
     /**
@@ -62,7 +64,8 @@ public class WebResourceResponse {
      *                     and not empty.
      * @param responseHeaders the resource response's headers represented as a mapping of header
      *                        name -> header value.
-     * @param data the input stream that provides the resource response's data
+     * @param data the input stream that provides the resource response's data. Must not be a
+     *             StringBufferInputStream.
      */
     public WebResourceResponse(String mimeType, String encoding, int statusCode,
             String reasonPhrase, Map<String, String> responseHeaders, InputStream data) {
@@ -178,9 +181,16 @@ public class WebResourceResponse {
      * Sets the input stream that provides the resource response's data. Callers
      * must implement {@link InputStream#read(byte[]) InputStream.read(byte[])}.
      *
-     * @param data the input stream that provides the resource response's data
+     * @param data the input stream that provides the resource response's data. Must not be a
+     *             StringBufferInputStream.
      */
     public void setData(InputStream data) {
+        // If data is (or is a subclass of) StringBufferInputStream
+        if (data != null && StringBufferInputStream.class.isAssignableFrom(data.getClass())) {
+            throw new IllegalArgumentException("StringBufferInputStream is deprecated and must " +
+                "not be passed to a WebResourceResponse");
+        }
+
         mInputStream = data;
     }
 
