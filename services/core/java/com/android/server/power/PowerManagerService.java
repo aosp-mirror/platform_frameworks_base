@@ -814,7 +814,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                         + " [" + wakeLock.mTag + "], flags=0x" + Integer.toHexString(flags));
             }
 
-            if ((flags & PowerManager.WAIT_FOR_DISTANT_PROXIMITY) != 0) {
+            if ((flags & PowerManager.RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY) != 0) {
                 mRequestWaitForNegativeProximity = true;
             }
 
