@@ -1759,6 +1759,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
+    public WindowState getWinShowWhenLockedLw() {
+        return mWinShowWhenLocked;
+    }
+
     /** {@inheritDoc} */
     @Override
     public View addStartingWindow(IBinder appToken, String packageName, int theme,
@@ -3795,7 +3800,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mShowingLockscreen = true;
             }
             boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type <= LAST_APPLICATION_WINDOW;
+                    && attrs.type < FIRST_SYSTEM_WINDOW;
             if (attrs.type == TYPE_DREAM) {
                 // If the lockscreen was showing when the dream started then wait
                 // for the dream to draw before hiding the lockscreen.
