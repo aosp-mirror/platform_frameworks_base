@@ -61,6 +61,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -191,6 +192,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private PrintContentView mOptionsContent;
 
+    private View mSummaryContainer;
     private TextView mSummaryCopies;
     private TextView mSummaryPaperSize;
 
@@ -983,6 +985,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private void bindUi() {
         // Summary
+        mSummaryContainer = findViewById(R.id.summary_content);
         mSummaryCopies = (TextView) findViewById(R.id.copies_count_summary);
         mSummaryPaperSize = (TextView) findViewById(R.id.paper_size_summary);
 
@@ -1081,15 +1084,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     void updateOptionsUi() {
         // Always update the summary.
-        if (!TextUtils.isEmpty(mCopiesEditText.getText())) {
-            mSummaryCopies.setText(mCopiesEditText.getText());
-        }
-
-        final int selectedMediaIndex = mMediaSizeSpinner.getSelectedItemPosition();
-        if (selectedMediaIndex >= 0) {
-            SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(selectedMediaIndex);
-            mSummaryPaperSize.setText(mediaItem.label);
-        }
+        updateSummary();
 
         if (mState == STATE_PRINT_CONFIRMED
                 || mState == STATE_PRINT_COMPLETED
@@ -1330,8 +1325,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Print
         if (mDestinationSpinnerAdapter.getPdfPrinter() != mCurrentPrinter) {
             mPrintButton.setImageResource(com.android.internal.R.drawable.ic_print);
+            mPrintButton.setContentDescription(getString(R.string.print_button));
         } else {
             mPrintButton.setImageResource(R.drawable.ic_menu_savetopdf);
+            mPrintButton.setContentDescription(getString(R.string.savetopdf_button));
         }
         if ((mRangeOptionsSpinner.getSelectedItemPosition() == 1
                 && (TextUtils.isEmpty(mPageRangeEditText.getText()) || hasErrors()))
@@ -1354,6 +1351,28 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 && TextUtils.isEmpty(mCopiesEditText.getText())) {
             mCopiesEditText.setText(String.valueOf(MIN_COPIES));
             mCopiesEditText.requestFocus();
+        }
+    }
+
+    private void updateSummary() {
+        CharSequence copiesText = null;
+        CharSequence mediaSizeText = null;
+
+        if (!TextUtils.isEmpty(mCopiesEditText.getText())) {
+            copiesText = mCopiesEditText.getText();
+            mSummaryCopies.setText(copiesText);
+        }
+
+        final int selectedMediaIndex = mMediaSizeSpinner.getSelectedItemPosition();
+        if (selectedMediaIndex >= 0) {
+            SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(selectedMediaIndex);
+            mediaSizeText = mediaItem.label;
+            mSummaryPaperSize.setText(mediaSizeText);
+        }
+
+        if (!TextUtils.isEmpty(copiesText) && !TextUtils.isEmpty(mediaSizeText)) {
+            String summaryText = getString(R.string.summary_template, copiesText, mediaSizeText);
+            mSummaryContainer.setContentDescription(summaryText);
         }
     }
 
