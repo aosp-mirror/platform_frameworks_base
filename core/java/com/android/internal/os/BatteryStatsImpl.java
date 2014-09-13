@@ -237,6 +237,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     String mStartPlatformVersion;
     String mEndPlatformVersion;
 
+    long mLastRecordedClockTime;
+    long mLastRecordedClockRealtime;
+
     long mUptime;
     long mUptimeStart;
     long mRealtime;
@@ -2271,6 +2274,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (dataSize == 0) {
             // The history is currently empty; we need it to start with a time stamp.
             cur.currentTime = System.currentTimeMillis();
+            mLastRecordedClockTime = cur.currentTime;
+            mLastRecordedClockRealtime = elapsedRealtimeMs;
             addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_RESET, cur);
         }
         addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
@@ -2439,6 +2444,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mNumHistoryTagChars = 0;
         mHistoryBufferLastPos = -1;
         mHistoryOverflow = false;
+        mLastRecordedClockTime = 0;
+        mLastRecordedClockRealtime = 0;
     }
 
     public void updateTimeBasesLocked(boolean unplugged, boolean screenOff, long uptime,
@@ -2498,6 +2505,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         final long currentTime = System.currentTimeMillis();
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
+        if (isStartClockTimeValid()) {
+            // Has the time changed sufficiently that it is really worth recording?
+            if (mLastRecordedClockTime != 0) {
+                long expectedClockTime = mLastRecordedClockTime
+                        + (elapsedRealtime - mLastRecordedClockRealtime);
+                if (currentTime >= (expectedClockTime-500)
+                        && currentTime <= (expectedClockTime+500)) {
+                    // Not sufficiently changed, skip!
+                    return;
+                }
+            }
+        }
         recordCurrentTimeChangeLocked(currentTime, elapsedRealtime, uptime);
         if (isStartClockTimeValid()) {
             mStartClockTime = currentTime;
@@ -6821,6 +6840,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             boolean reset) {
         mRecordingHistory = true;
         mHistoryCur.currentTime = System.currentTimeMillis();
+        mLastRecordedClockTime = mHistoryCur.currentTime;
+        mLastRecordedClockRealtime = elapsedRealtimeMs;
         addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs,
                 reset ? HistoryItem.CMD_RESET : HistoryItem.CMD_CURRENT_TIME,
                 mHistoryCur);
@@ -6834,6 +6855,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             final long uptimeMs) {
         if (mRecordingHistory) {
             mHistoryCur.currentTime = currentTime;
+            mLastRecordedClockTime = currentTime;
+            mLastRecordedClockRealtime = elapsedRealtimeMs;
             addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_CURRENT_TIME,
                     mHistoryCur);
             mHistoryCur.currentTime = 0;
