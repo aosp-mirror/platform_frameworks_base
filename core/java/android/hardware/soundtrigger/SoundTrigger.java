@@ -873,7 +873,7 @@ public class SoundTrigger {
             int capturePreambleMs = in.readInt();
             boolean triggerInData = in.readByte() == 1;
             AudioFormat captureFormat = null;
-            if (triggerInData) {
+            if (in.readByte() == 1) {
                 int sampleRate = in.readInt();
                 int encoding = in.readInt();
                 int channelMask = in.readInt();
@@ -899,7 +899,8 @@ public class SoundTrigger {
             dest.writeInt(captureSession);
             dest.writeInt(captureDelayMs);
             dest.writeInt(capturePreambleMs);
-            if (triggerInData && (captureFormat != null)) {
+            dest.writeByte((byte) (triggerInData ? 1 : 0));
+            if (captureFormat != null) {
                 dest.writeByte((byte)1);
                 dest.writeInt(captureFormat.getSampleRate());
                 dest.writeInt(captureFormat.getEncoding());
