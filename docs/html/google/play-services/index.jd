@@ -60,9 +60,88 @@ about your users' Android version.</p>
 
 <h2 style="margin-top:0" id="newfeatures">New Features</h2>
 
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+    class="toggle-content-img"
+      alt=""/>Google Play services, Version 6.1</a> <em>(September 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 6.1</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 6.1, see the
+announcement
+<a href="http://android-developers.blogspot.com/2014/09/google-play-services-61.html"
+class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Drive</strong> - This release adds the
+    <a href="{@docRoot}reference/com/google/android/gms/drive/events/CompletionEvent.html">
+      <code>CompletionEvent</code></a> class to notify you when actions are
+      committed to the server and respond to conflicts. Recent and starred views
+      are now available in the file picker user interface provided by
+    <a href="{@docRoot}reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">
+    <code>OpenFileActivityBuilder</code><a/>, and the user interface has been
+    updated to use
+      <a href="{@docRoot}preview/material/index.html">material design</a>. A new
+    <a href="{@docRoot}reference/com/google/android/gms/drive/DriveResource.html#setParents(com.google.android.gms.common.api.GoogleApiClient, java.util.Set<com.google.android.gms.drive.DriveId>)">
+      DriveResource.setParents()</a> method makes it possible to organize files
+    and folders. In addition, the
+    <a href="{@docRoot}reference/com/google/android/gms/drive/Contents.html">
+      <code>Contents</code></a>
+    class has been replaced with a
+    <a href="{@docRoot}reference/com/google/android/gms/drive/DriveContents.html">
+      <code>DriveContents</code></a> class that simplifies working with file
+      contents.
+  <ul>
+    <li><a href="https://developers.google.com/drive/release-notes"
+      class="external-link">Drive SDK release notes</a></li>
+    <li><a href="https://developers.google.com/drive/android/completion"
+      class="external-link">Completion events developer guide and Google
+      Developers video</a></li>
+    <li><a href="https://developers.google.com/drive/android/intro?hl=pt-PT#activity_builders"
+      class="external-link">Using the OpenFileActivity Builder</a></li>
+  </ul>
+  </li>
+
+  <li><strong>Tag Manager</strong> - Google Tag Manager now supports
+    <a href="https://developers.google.com/analytics/devguides/collection/android/v4/enhanced-ecommerce"
+    class="external-link">Enhanced Ecommerce</a> through the
+    <a href="https://support.google.com/tagmanager/answer/3281379"
+    class="external-link">Universal Analytics tag</a>.
+    <ul>
+      <li><a href="https://developers.google.com/analytics/devguides/collection/upgrade/"
+        class="external-link">Universal Analytics Upgrade Center</a></li>
+      <li><a href="https://developers.google.com/tag-manager/android/v4/"
+        class="external-link">Enhanced Ecommerce developer guide</a></li>
+    </ul>
+  </li>
+
+  <li><strong>Fit</strong> - The Google Fit developer preview, initially
+  <a href="http://googledevelopers.blogspot.com/2014/08/google-fit-preview-sdk-now-available.html"
+  class=""external-link>announced</a> in August, has been
+  refreshed to enable you to test your new fitness apps on any Android device.
+    <ul>
+      <li><a href="https://developers.google.com/fit/preview"
+        class="external-link">Google Fit developer guide</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/fitness/package-summary.html">
+        Fit API reference</a></li>
+    </ul>
+  </li>
+
+</ul>
+</dd>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
     class="toggle-content-img"
       alt=""/>Google Play services, Version 5.0</a> <em>(July 2014)</em>
   </p>

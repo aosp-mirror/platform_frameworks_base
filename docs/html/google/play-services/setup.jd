@@ -67,7 +67,7 @@ apply plugin: 'android'
 
 dependencies {
     compile 'com.android.support:appcompat-v7:20.+'
-    <strong>compile 'com.google.android.gms:play-services:5.+'</strong>
+    <strong>compile 'com.google.android.gms:play-services:6.1.+'</strong>
 }
 </pre>
 <p>Be sure you update this version number each time Google Play services is updated.</p>
