@@ -14,33 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.ims.internal;
+package com.android.internal.telecom;
 
 import android.view.Surface;
 import android.telecom.VideoProfile;
 
-import com.android.ims.internal.IImsVideoCallCallback;
-
 /**
- * Internal remote interface for IMS's video call provider.
- *
- * At least initially, this aidl mirrors telecomm's {@link IVideoCallProvider}. We created a
- * separate aidl interface even though the methods and parameters are same because the
- * {@link IVideoCallProvider} was specifically created as a binder for inter-process communication
- * between Telecomm and Telephony.
- *
- * We don't want to use the same aidl in other places for communication, namely communication
- * between Telephony and the IMS Service, even if that communication may be for similar methods.
- * This decouples the communication among these processes. Similarly, third parties implementing a
- * video call provider will not have the benefit of accessing the internal
- * {@link IVideoCallProvider} aidl for interprocess communication.
- *
- * @see android.telecom.internal.IVideoCallProvider
- * @see android.telecom.VideoCallProvider
+ * Internal remote interface for a video call provider.
+ * @see android.telecom.VideoProvider
  * @hide
  */
-oneway interface IImsVideoCallProvider {
-    void setCallback(IImsVideoCallCallback callback);
+oneway interface IVideoProvider {
+    void setVideoCallback(IBinder videoCallbackBinder);
 
     void setCamera(String cameraId);
 
