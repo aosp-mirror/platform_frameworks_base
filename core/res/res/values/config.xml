@@ -353,7 +353,27 @@
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_threshold">-75</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_factor">2</integer>
 
+    <!-- Integer parameters of the wifi to cellular handover feature
+         wifi should not stick to bad networks -->
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-60</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-72</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-82</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-87</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-77</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-65</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_24">6</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_5">12</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
+    <bool translatable="false" name="config_wifi_framework_cellular_handover_enable_user_triggered_adjustment">true</bool>
 
+    <!-- Integer packet threshold used to allow scan while associated -->
+    <integer translatable="false" name="config_wifi_framework_associated_full_scan_tx_packet_threshold">5</integer>
+    <integer translatable="false" name="config_wifi_framework_associated_full_scan_rx_packet_threshold">10</integer>
+    <integer translatable="false" name="config_wifi_framework_associated_partial_scan_tx_packet_threshold">40</integer>
+    <integer translatable="false" name="config_wifi_framework_associated_partial_scan_rx_packet_threshold">80</integer>
+    <integer translatable="false" name="config_wifi_framework_network_switch_tx_packet_threshold">2</integer>
+    <integer translatable="false" name="config_wifi_framework_network_switch_rx_packet_threshold">20</integer>
 
     <!-- Integer indicating wpa_supplicant scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_supplicant_scan_interval">15000</integer>

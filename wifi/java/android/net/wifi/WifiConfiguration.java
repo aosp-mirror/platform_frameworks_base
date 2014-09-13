@@ -382,10 +382,13 @@ public class WifiConfiguration implements Parcelable {
 
     /** The Below RSSI thresholds are used to configure AutoJoin
      *  - GOOD/LOW/BAD thresholds are used so as to calculate link score
-     *  - UNWANTED_SOFT are used by the blacklisting logic so as to handle the unwanted network message coming from CS
-     *  - UNBLACKLIST thresholds are used so as to tweak the speed at which the network is unblacklisted (i.e. if
+     *  - UNWANTED_SOFT are used by the blacklisting logic so as to handle
+     *  the unwanted network message coming from CS
+     *  - UNBLACKLIST thresholds are used so as to tweak the speed at which
+     *  the network is unblacklisted (i.e. if
      *          it is seen with good RSSI, it is blacklisted faster)
-     *  - INITIAL_AUTOJOIN_ATTEMPT, used to determine how close from the network we need to be before autojoin kicks in
+     *  - INITIAL_AUTOJOIN_ATTEMPT, used to determine how close from
+     *  the network we need to be before autojoin kicks in
      */
     /** @hide **/
     public static int INVALID_RSSI = -127;
