@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.ActionMode;
