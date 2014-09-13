@@ -7386,7 +7386,7 @@ package android.content {
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
-    field public static final java.lang.String TELECOMM_SERVICE = "telecomm";
+    field public static final java.lang.String TELECOM_SERVICE = "telecom";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
@@ -28197,11 +28197,11 @@ package android.system {
 
 }
 
-package android.telecomm {
+package android.telecom {
 
   public final class AudioState implements android.os.Parcelable {
     ctor public AudioState(boolean, int, int);
-    ctor public AudioState(android.telecomm.AudioState);
+    ctor public AudioState(android.telecom.AudioState);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -28216,20 +28216,20 @@ package android.telecomm {
   }
 
   public abstract class Conference {
-    ctor public Conference(android.telecomm.PhoneAccountHandle);
-    method public final boolean addConnection(android.telecomm.Connection);
+    ctor public Conference(android.telecom.PhoneAccountHandle);
+    method public final boolean addConnection(android.telecom.Connection);
     method public final void destroy();
     method public final int getCapabilities();
-    method public final java.util.List<android.telecomm.Connection> getConnections();
-    method public final android.telecomm.PhoneAccountHandle getPhoneAccountHandle();
+    method public final java.util.List<android.telecom.Connection> getConnections();
+    method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public final int getState();
     method public void onDisconnect();
     method public void onHold();
     method public void onMerge();
-    method public void onSeparate(android.telecomm.Connection);
+    method public void onSeparate(android.telecom.Connection);
     method public void onSwap();
     method public void onUnhold();
-    method public final void removeConnection(android.telecomm.Connection);
+    method public final void removeConnection(android.telecom.Connection);
     method public final void setActive();
     method public final void setCapabilities(int);
     method public final void setDisconnected(int, java.lang.String);
@@ -28238,27 +28238,27 @@ package android.telecomm {
 
   public abstract class Connection {
     ctor public Connection();
-    method public static android.telecomm.Connection createCanceledConnection();
-    method public static android.telecomm.Connection createFailedConnection(int, java.lang.String);
+    method public static android.telecom.Connection createCanceledConnection();
+    method public static android.telecom.Connection createFailedConnection(int, java.lang.String);
     method public final void destroy();
     method public final android.net.Uri getAddress();
     method public final int getAddressPresentation();
     method public final boolean getAudioModeIsVoip();
-    method public final android.telecomm.AudioState getAudioState();
+    method public final android.telecom.AudioState getAudioState();
     method public final int getCallCapabilities();
     method public final java.lang.String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
-    method public final android.telecomm.Conference getConference();
-    method public final java.util.List<android.telecomm.Connection> getConferenceableConnections();
+    method public final android.telecom.Conference getConference();
+    method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
     method public final int getDisconnectCause();
     method public final java.lang.String getDisconnectMessage();
     method public final int getState();
-    method public final android.telecomm.StatusHints getStatusHints();
+    method public final android.telecom.StatusHints getStatusHints();
     method public final boolean isRingbackRequested();
     method public void onAbort();
     method public void onAnswer();
-    method public void onAudioStateChanged(android.telecomm.AudioState);
-    method public void onConferenceWith(android.telecomm.Connection);
+    method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onConferenceWith(android.telecom.Connection);
     method public void onDisconnect();
     method public void onHold();
     method public void onPlayDtmfTone(char);
@@ -28273,8 +28273,8 @@ package android.telecomm {
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallCapabilities(int);
     method public final void setCallerDisplayName(java.lang.String, int);
-    method public final void setConferenceableConnections(java.util.List<android.telecomm.Connection>);
-    method public final void setConnectionService(android.telecomm.ConnectionService);
+    method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
+    method public final void setConnectionService(android.telecom.ConnectionService);
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
     method public final void setInitialized();
@@ -28283,7 +28283,7 @@ package android.telecomm {
     method public final void setPostDialWait(java.lang.String);
     method public final void setRingbackRequested(boolean);
     method public final void setRinging();
-    method public final void setStatusHints(android.telecomm.StatusHints);
+    method public final void setStatusHints(android.telecom.StatusHints);
     method public static java.lang.String stateToString(int);
     field public static final int STATE_ACTIVE = 4; // 0x4
     field public static final int STATE_DIALING = 3; // 0x3
@@ -28295,9 +28295,9 @@ package android.telecomm {
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
-    ctor public ConnectionRequest(android.telecomm.PhoneAccountHandle, android.net.Uri, android.os.Bundle);
+    ctor public ConnectionRequest(android.telecom.PhoneAccountHandle, android.net.Uri, android.os.Bundle);
     method public int describeContents();
-    method public android.telecomm.PhoneAccountHandle getAccountHandle();
+    method public android.telecom.PhoneAccountHandle getAccountHandle();
     method public android.net.Uri getAddress();
     method public android.os.Bundle getExtras();
     method public void writeToParcel(android.os.Parcel, int);
@@ -28306,17 +28306,17 @@ package android.telecomm {
 
   public abstract class ConnectionService extends android.app.Service {
     ctor public ConnectionService();
-    method public final void addConference(android.telecomm.Conference);
-    method public final void conferenceRemoteConnections(android.telecomm.RemoteConnection, android.telecomm.RemoteConnection);
-    method public final android.telecomm.RemoteConnection createRemoteIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
-    method public final android.telecomm.RemoteConnection createRemoteOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
-    method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
+    method public final void addConference(android.telecom.Conference);
+    method public final void conferenceRemoteConnections(android.telecom.RemoteConnection, android.telecom.RemoteConnection);
+    method public final android.telecom.RemoteConnection createRemoteIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public final android.telecom.RemoteConnection createRemoteOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public final java.util.Collection<android.telecom.Connection> getAllConnections();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public void onConference(android.telecomm.Connection, android.telecomm.Connection);
-    method public android.telecomm.Connection onCreateIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
-    method public android.telecomm.Connection onCreateOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
-    method public void onRemoteConferenceAdded(android.telecomm.RemoteConference);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
+    method public void onConference(android.telecom.Connection, android.telecom.Connection);
+    method public android.telecom.Connection onCreateIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public android.telecom.Connection onCreateOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public void onRemoteConferenceAdded(android.telecom.RemoteConference);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.ConnectionService";
   }
 
   public class GatewayInfo implements android.os.Parcelable {
@@ -28330,9 +28330,9 @@ package android.telecomm {
   }
 
   public class PhoneAccount implements android.os.Parcelable {
-    method public static android.telecomm.PhoneAccount.Builder builder(android.telecomm.PhoneAccountHandle, java.lang.CharSequence);
+    method public static android.telecom.PhoneAccount.Builder builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     method public int describeContents();
-    method public android.telecomm.PhoneAccountHandle getAccountHandle();
+    method public android.telecom.PhoneAccountHandle getAccountHandle();
     method public android.net.Uri getAddress();
     method public int getCapabilities();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
@@ -28355,15 +28355,15 @@ package android.telecomm {
   }
 
   public static class PhoneAccount.Builder {
-    ctor public PhoneAccount.Builder(android.telecomm.PhoneAccountHandle, java.lang.CharSequence);
-    ctor public PhoneAccount.Builder(android.telecomm.PhoneAccount);
-    method public android.telecomm.PhoneAccount build();
-    method public android.telecomm.PhoneAccount.Builder setAddress(android.net.Uri);
-    method public android.telecomm.PhoneAccount.Builder setCapabilities(int);
-    method public android.telecomm.PhoneAccount.Builder setIconResId(int);
-    method public android.telecomm.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
-    method public android.telecomm.PhoneAccount.Builder setSubscriptionAddress(android.net.Uri);
-    method public android.telecomm.PhoneAccount.Builder setSupportedUriSchemes(java.util.List<java.lang.String>);
+    ctor public PhoneAccount.Builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
+    ctor public PhoneAccount.Builder(android.telecom.PhoneAccount);
+    method public android.telecom.PhoneAccount build();
+    method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
+    method public android.telecom.PhoneAccount.Builder setCapabilities(int);
+    method public android.telecom.PhoneAccount.Builder setIconResId(int);
+    method public android.telecom.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
+    method public android.telecom.PhoneAccount.Builder setSubscriptionAddress(android.net.Uri);
+    method public android.telecom.PhoneAccount.Builder setSupportedUriSchemes(java.util.List<java.lang.String>);
   }
 
   public class PhoneAccountHandle implements android.os.Parcelable {
@@ -28393,25 +28393,25 @@ package android.telecomm {
   public final class RemoteConference {
     method public void disconnect();
     method public final int getCallCapabilities();
-    method public final java.util.List<android.telecomm.RemoteConnection> getConnections();
+    method public final java.util.List<android.telecom.RemoteConnection> getConnections();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
     method public final int getState();
     method public void hold();
-    method public final void registerCallback(android.telecomm.RemoteConference.Callback);
-    method public void separate(android.telecomm.RemoteConnection);
+    method public final void registerCallback(android.telecom.RemoteConference.Callback);
+    method public void separate(android.telecom.RemoteConnection);
     method public void unhold();
-    method public final void unregisterCallback(android.telecomm.RemoteConference.Callback);
+    method public final void unregisterCallback(android.telecom.RemoteConference.Callback);
   }
 
   public static abstract class RemoteConference.Callback {
     ctor public RemoteConference.Callback();
-    method public void onCapabilitiesChanged(android.telecomm.RemoteConference, int);
-    method public void onConnectionAdded(android.telecomm.RemoteConference, android.telecomm.RemoteConnection);
-    method public void onConnectionRemoved(android.telecomm.RemoteConference, android.telecomm.RemoteConnection);
-    method public void onDestroyed(android.telecomm.RemoteConference);
-    method public void onDisconnected(android.telecomm.RemoteConference, int, java.lang.String);
-    method public void onStateChanged(android.telecomm.RemoteConference, int, int);
+    method public void onCapabilitiesChanged(android.telecom.RemoteConference, int);
+    method public void onConnectionAdded(android.telecom.RemoteConference, android.telecom.RemoteConnection);
+    method public void onConnectionRemoved(android.telecom.RemoteConference, android.telecom.RemoteConnection);
+    method public void onDestroyed(android.telecom.RemoteConference);
+    method public void onDisconnected(android.telecom.RemoteConference, int, java.lang.String);
+    method public void onStateChanged(android.telecom.RemoteConference, int, int);
   }
 
   public final class RemoteConnection {
@@ -28423,41 +28423,41 @@ package android.telecomm {
     method public int getCallCapabilities();
     method public java.lang.CharSequence getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
-    method public android.telecomm.RemoteConference getConference();
-    method public java.util.List<android.telecomm.RemoteConnection> getConferenceableConnections();
+    method public android.telecom.RemoteConference getConference();
+    method public java.util.List<android.telecom.RemoteConnection> getConferenceableConnections();
     method public int getDisconnectCauseCode();
     method public java.lang.String getDisconnectCauseMessage();
     method public int getFailureCode();
     method public java.lang.String getFailureMessage();
     method public int getState();
-    method public android.telecomm.StatusHints getStatusHints();
+    method public android.telecom.StatusHints getStatusHints();
     method public void hold();
     method public boolean isRingbackRequested();
     method public boolean isVoipAudioMode();
     method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
-    method public void registerCallback(android.telecomm.RemoteConnection.Callback);
+    method public void registerCallback(android.telecom.RemoteConnection.Callback);
     method public void reject();
-    method public void setAudioState(android.telecomm.AudioState);
+    method public void setAudioState(android.telecom.AudioState);
     method public void stopDtmfTone();
     method public void unhold();
-    method public void unregisterCallback(android.telecomm.RemoteConnection.Callback);
+    method public void unregisterCallback(android.telecom.RemoteConnection.Callback);
   }
 
   public static abstract class RemoteConnection.Callback {
     ctor public RemoteConnection.Callback();
-    method public void onAddressChanged(android.telecomm.RemoteConnection, android.net.Uri, int);
-    method public void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
-    method public void onCallerDisplayNameChanged(android.telecomm.RemoteConnection, java.lang.String, int);
-    method public void onConferenceChanged(android.telecomm.RemoteConnection, android.telecomm.RemoteConference);
-    method public void onConferenceableConnectionsChanged(android.telecomm.RemoteConnection, java.util.List<android.telecomm.RemoteConnection>);
-    method public void onDestroyed(android.telecomm.RemoteConnection);
-    method public void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
-    method public void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
-    method public void onRingbackRequested(android.telecomm.RemoteConnection, boolean);
-    method public void onStateChanged(android.telecomm.RemoteConnection, int);
-    method public void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
-    method public void onVoipAudioChanged(android.telecomm.RemoteConnection, boolean);
+    method public void onAddressChanged(android.telecom.RemoteConnection, android.net.Uri, int);
+    method public void onCallCapabilitiesChanged(android.telecom.RemoteConnection, int);
+    method public void onCallerDisplayNameChanged(android.telecom.RemoteConnection, java.lang.String, int);
+    method public void onConferenceChanged(android.telecom.RemoteConnection, android.telecom.RemoteConference);
+    method public void onConferenceableConnectionsChanged(android.telecom.RemoteConnection, java.util.List<android.telecom.RemoteConnection>);
+    method public void onDestroyed(android.telecom.RemoteConnection);
+    method public void onDisconnected(android.telecom.RemoteConnection, int, java.lang.String);
+    method public void onPostDialWait(android.telecom.RemoteConnection, java.lang.String);
+    method public void onRingbackRequested(android.telecom.RemoteConnection, boolean);
+    method public void onStateChanged(android.telecom.RemoteConnection, int);
+    method public void onStatusHintsChanged(android.telecom.RemoteConnection, android.telecom.StatusHints);
+    method public void onVoipAudioChanged(android.telecom.RemoteConnection, boolean);
   }
 
   public final class StatusHints implements android.os.Parcelable {
@@ -28472,36 +28472,36 @@ package android.telecomm {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class TelecommManager {
-    method public void addNewIncomingCall(android.telecomm.PhoneAccountHandle, android.os.Bundle);
+  public class TelecomManager {
+    method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
     method public void clearAccounts();
-    method public android.telecomm.PhoneAccountHandle getConnectionManager();
-    method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
-    method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
-    method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
-    method public java.util.List<android.telecomm.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
+    method public android.telecom.PhoneAccountHandle getConnectionManager();
+    method public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
+    method public java.util.List<android.telecom.PhoneAccountHandle> getEnabledPhoneAccounts();
+    method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
+    method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean handleMmi(java.lang.String);
     method public boolean hasMultipleEnabledAccounts();
     method public boolean isInCall();
-    method public void registerPhoneAccount(android.telecomm.PhoneAccount);
+    method public void registerPhoneAccount(android.telecom.PhoneAccount);
     method public void showInCallScreen(boolean);
-    method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
-    field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecomm.action.CHANGE_PHONE_ACCOUNTS";
-    field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecomm.action.CONNECTION_SERVICE_CONFIGURE";
+    method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
+    field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
+    field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_PHONE_ACCOUNT_DISABLED = "android.telecom.action.PHONE_ACCOUNT_DISABLED";
     field public static final java.lang.String ACTION_PHONE_ACCOUNT_ENABLED = "android.telecom.action.PHONE_ACCOUNT_ENABLED";
-    field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecomm.action.SHOW_CALL_SETTINGS";
+    field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecom.action.SHOW_CALL_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
-    field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
-    field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
-    field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
-    field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
-    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecomm.extra.PHONE_ACCOUNT_HANDLE";
-    field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecomm.extra.START_CALL_WITH_SPEAKERPHONE";
-    field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecomm.extra.GATEWAY_ORIGINAL_ADDRESS";
-    field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecomm.extra.GATEWAY_PROVIDER_PACKAGE";
+    field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
+    field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecom.extra.CALL_DISCONNECT_CAUSE";
+    field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecom.extra.CALL_DISCONNECT_MESSAGE";
+    field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
+    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
+    field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecom.extra.START_CALL_WITH_SPEAKERPHONE";
+    field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecom.extra.GATEWAY_ORIGINAL_ADDRESS";
+    field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecom.extra.GATEWAY_PROVIDER_PACKAGE";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2

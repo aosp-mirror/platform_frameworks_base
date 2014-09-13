@@ -30,7 +30,7 @@ import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.DataUsageFeedback;
-import android.telecomm.PhoneAccountHandle;
+import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.CallerInfo;

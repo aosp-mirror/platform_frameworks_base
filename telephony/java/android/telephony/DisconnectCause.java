@@ -155,7 +155,7 @@ public class DisconnectCause {
     public static final int OUTGOING_FAILURE = 43;
 
     /**
-     * The outgoing call was canceled by the {@link android.telecomm.ConnectionService}.
+     * The outgoing call was canceled by the {@link android.telecom.ConnectionService}.
      */
     public static final int OUTGOING_CANCELED = 44;
 
