@@ -42,7 +42,6 @@ import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -195,6 +194,7 @@ public class VectorDrawable extends Drawable {
     private VectorDrawableState mVectorState;
 
     private PorterDuffColorFilter mTintFilter;
+    private ColorFilter mColorFilter;
 
     private boolean mMutated;
 
@@ -216,7 +216,6 @@ public class VectorDrawable extends Drawable {
         }
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-        state.setColorFilter(mTintFilter);
     }
 
     @Override
@@ -255,14 +254,18 @@ public class VectorDrawable extends Drawable {
             canvas.scale(-1.0f, 1.0f);
         }
 
+        // Color filters always override tint filters.
+        final ColorFilter colorFilter = mColorFilter == null ? mTintFilter : mColorFilter;
+
         if (!mAllowCaching) {
             // AnimatedVectorDrawable
             if (!mVectorState.hasTranslucentRoot()) {
-                mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
+                mVectorState.mVPathRenderer.draw(
+                        canvas, bounds.width(), bounds.height(), colorFilter);
             } else {
                 mVectorState.createCachedBitmapIfNeeded(bounds);
                 mVectorState.updateCachedBitmap(bounds);
-                mVectorState.drawCachedBitmapWithRootAlpha(canvas);
+                mVectorState.drawCachedBitmapWithRootAlpha(canvas, colorFilter);
             }
         } else {
             // Static Vector Drawable case.
@@ -271,7 +274,7 @@ public class VectorDrawable extends Drawable {
                 mVectorState.updateCachedBitmap(bounds);
                 mVectorState.updateCacheStates();
             }
-            mVectorState.drawCachedBitmapWithRootAlpha(canvas);
+            mVectorState.drawCachedBitmapWithRootAlpha(canvas, colorFilter);
         }
 
         canvas.restoreToCount(saveCount);
@@ -292,18 +295,7 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
-        final VectorDrawableState state = mVectorState;
-        if (colorFilter != null) {
-            // Color filter overrides tint.
-            mTintFilter = null;
-        } else if (state.mTint != null && state.mTintMode != null) {
-            // Restore the tint filter, if we need one.
-            final int color = state.mTint.getColorForState(getState(), Color.TRANSPARENT);
-            mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
-            colorFilter = mTintFilter;
-        }
-
-        state.setColorFilter(colorFilter);
+        mColorFilter = colorFilter;
         invalidateSelf();
     }
 
@@ -313,7 +305,6 @@ public class VectorDrawable extends Drawable {
         if (state.mTint != tint) {
             state.mTint = tint;
             mTintFilter = updateTintFilter(mTintFilter, tint, state.mTintMode);
-            state.setColorFilter(mTintFilter);
             invalidateSelf();
         }
     }
@@ -324,7 +315,6 @@ public class VectorDrawable extends Drawable {
         if (state.mTintMode != tintMode) {
             state.mTintMode = tintMode;
             mTintFilter = updateTintFilter(mTintFilter, state.mTint, tintMode);
-            state.setColorFilter(mTintFilter);
             invalidateSelf();
         }
     }
@@ -340,7 +330,6 @@ public class VectorDrawable extends Drawable {
         final VectorDrawableState state = mVectorState;
         if (state.mTint != null && state.mTintMode != null) {
             mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            state.setColorFilter(mTintFilter);
             invalidateSelf();
             return true;
         }
@@ -384,7 +373,6 @@ public class VectorDrawable extends Drawable {
             }
 
             mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            state.setColorFilter(mTintFilter);
         }
 
         final VPathRenderer path = state.mVPathRenderer;
@@ -464,7 +452,6 @@ public class VectorDrawable extends Drawable {
         inflateInternal(res, parser, attrs, theme);
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-        state.setColorFilter(mTintFilter);
     }
 
     private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
@@ -657,6 +644,9 @@ public class VectorDrawable extends Drawable {
         boolean mCachedAutoMirrored;
         boolean mCacheDirty;
 
+        /** Temporary paint object used to draw cached bitmaps. */
+        Paint mTempPaint;
+
         // Deep copy for mutate() or implicitly mutate.
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
@@ -669,20 +659,16 @@ public class VectorDrawable extends Drawable {
                 if (copy.mVPathRenderer.mStrokePaint != null) {
                     mVPathRenderer.mStrokePaint = new Paint(copy.mVPathRenderer.mStrokePaint);
                 }
-                if (copy.mVPathRenderer.mColorFilter != null) {
-                    mVPathRenderer.mColorFilter = copy.mVPathRenderer.mColorFilter;
-                }
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
                 mAutoMirrored = copy.mAutoMirrored;
             }
         }
 
-        // TODO: Support colorFilter here.
-        public void drawCachedBitmapWithRootAlpha(Canvas canvas) {
-            Paint alphaPaint = getRootAlphaPaint();
+        public void drawCachedBitmapWithRootAlpha(Canvas canvas, ColorFilter filter) {
             // The bitmap's size is the same as the bounds.
-            canvas.drawBitmap(mCachedBitmap, 0, 0, alphaPaint);
+            final Paint p = getPaint(filter);
+            canvas.drawBitmap(mCachedBitmap, 0, 0, p);
         }
 
         public boolean hasTranslucentRoot() {
@@ -692,20 +678,23 @@ public class VectorDrawable extends Drawable {
         /**
          * @return null when there is no need for alpha paint.
          */
-        public Paint getRootAlphaPaint() {
-            Paint paint = null;
-            boolean needsAlphaPaint = hasTranslucentRoot();
-            if (needsAlphaPaint) {
-                paint = new Paint();
-                paint.setAlpha(mVPathRenderer.getRootAlpha());
+        public Paint getPaint(ColorFilter filter) {
+            if (!hasTranslucentRoot() && filter == null) {
+                return null;
             }
-            return paint;
+
+            if (mTempPaint == null) {
+                mTempPaint = new Paint();
+            }
+            mTempPaint.setAlpha(mVPathRenderer.getRootAlpha());
+            mTempPaint.setColorFilter(filter);
+            return mTempPaint;
         }
 
         public void updateCachedBitmap(Rect bounds) {
             mCachedBitmap.eraseColor(Color.TRANSPARENT);
             Canvas tmpCanvas = new Canvas(mCachedBitmap);
-            mVPathRenderer.draw(tmpCanvas, bounds.width(), bounds.height());
+            mVPathRenderer.draw(tmpCanvas, bounds.width(), bounds.height(), null);
         }
 
         public void createCachedBitmapIfNeeded(Rect bounds) {
@@ -752,12 +741,6 @@ public class VectorDrawable extends Drawable {
         public boolean canApplyTheme() {
             return super.canApplyTheme() || mThemeAttrs != null
                     || (mVPathRenderer != null && mVPathRenderer.canApplyTheme());
-        }
-
-        public void setColorFilter(ColorFilter colorFilter) {
-            if (mVPathRenderer != null && mVPathRenderer.setColorFilter(colorFilter)) {
-                mCacheDirty = true;
-            }
         }
 
         public VectorDrawableState() {
@@ -807,7 +790,6 @@ public class VectorDrawable extends Drawable {
 
         private Paint mStrokePaint;
         private Paint mFillPaint;
-        private ColorFilter mColorFilter;
         private PathMeasure mPathMeasure;
 
         /////////////////////////////////////////////////////
@@ -918,25 +900,8 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public boolean setColorFilter(ColorFilter colorFilter) {
-            if (colorFilter != mColorFilter
-                    || (colorFilter != null && !colorFilter.equals(mColorFilter))) {
-                mColorFilter = colorFilter;
-
-                if (mFillPaint != null) {
-                    mFillPaint.setColorFilter(colorFilter);
-                }
-
-                if (mStrokePaint != null) {
-                    mStrokePaint.setColorFilter(colorFilter);
-                }
-                return true;
-            }
-            return false;
-        }
-
         private void drawGroupTree(VGroup currentGroup, Matrix currentMatrix,
-                Canvas canvas, int w, int h) {
+                Canvas canvas, int w, int h, ColorFilter filter) {
             // Calculate current group's matrix by preConcat the parent's and
             // and the current one on the top of the stack.
             // Basically the Mfinal = Mviewport * M0 * M1 * M2;
@@ -951,20 +916,21 @@ public class VectorDrawable extends Drawable {
                 if (child instanceof VGroup) {
                     VGroup childGroup = (VGroup) child;
                     drawGroupTree(childGroup, currentGroup.mStackedMatrix,
-                            canvas, w, h);
+                            canvas, w, h, filter);
                 } else if (child instanceof VPath) {
                     VPath childPath = (VPath) child;
-                    drawPath(currentGroup, childPath, canvas, w, h);
+                    drawPath(currentGroup, childPath, canvas, w, h, filter);
                 }
             }
         }
 
-        public void draw(Canvas canvas, int w, int h) {
+        public void draw(Canvas canvas, int w, int h, ColorFilter filter) {
             // Travese the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h);
+            drawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h, filter);
         }
 
-        private void drawPath(VGroup vGroup, VPath vPath, Canvas canvas, int w, int h) {
+        private void drawPath(VGroup vGroup, VPath vPath, Canvas canvas, int w, int h,
+                ColorFilter filter) {
             final float scaleX = w / mViewportWidth;
             final float scaleY = h / mViewportHeight;
             final float minScale = Math.min(scaleX, scaleY);
@@ -1008,19 +974,19 @@ public class VectorDrawable extends Drawable {
                 if (fullPath.mFillColor != Color.TRANSPARENT) {
                     if (mFillPaint == null) {
                         mFillPaint = new Paint();
-                        mFillPaint.setColorFilter(mColorFilter);
                         mFillPaint.setStyle(Paint.Style.FILL);
                         mFillPaint.setAntiAlias(true);
                     }
-                    mFillPaint.setColor(applyAlpha(fullPath.mFillColor,
-                            fullPath.mFillAlpha));
-                    canvas.drawPath(mRenderPath, mFillPaint);
+
+                    final Paint fillPaint = mFillPaint;
+                    fillPaint.setColor(applyAlpha(fullPath.mFillColor, fullPath.mFillAlpha));
+                    fillPaint.setColorFilter(filter);
+                    canvas.drawPath(mRenderPath, fillPaint);
                 }
 
                 if (fullPath.mStrokeColor != Color.TRANSPARENT) {
                     if (mStrokePaint == null) {
                         mStrokePaint = new Paint();
-                        mStrokePaint.setColorFilter(mColorFilter);
                         mStrokePaint.setStyle(Paint.Style.STROKE);
                         mStrokePaint.setAntiAlias(true);
                     }
@@ -1035,9 +1001,8 @@ public class VectorDrawable extends Drawable {
                     }
 
                     strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
-
-                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor,
-                            fullPath.mStrokeAlpha));
+                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, fullPath.mStrokeAlpha));
+                    strokePaint.setColorFilter(filter);
                     strokePaint.setStrokeWidth(fullPath.mStrokeWidth * minScale);
                     canvas.drawPath(mRenderPath, strokePaint);
                 }
