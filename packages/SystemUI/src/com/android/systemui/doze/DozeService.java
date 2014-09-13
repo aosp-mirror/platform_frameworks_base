@@ -121,7 +121,7 @@ public class DozeService extends DreamService {
                 new Intent(NOTIFICATION_PULSE_ACTION).setPackage(getPackageName()),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         mDisplayStateWhenOn = mDisplayStateSupported ? Display.STATE_DOZE : Display.STATE_ON;
-        setDozeScreenState(mDisplayStateWhenOn);
+        mDisplayOff.run();
     }
 
     @Override
@@ -160,16 +160,6 @@ public class DozeService extends DreamService {
         mHandler.postDelayed(mDisplayOff, millis);
     }
 
-    public void startDozing() {
-        if (DEBUG) Log.d(mTag, "startDozing mDreaming=" + mDreaming);
-        if (!mDreaming) {
-            Log.w(mTag, "Not dozing, no longer dreaming");
-            return;
-        }
-
-        super.startDozing();
-    }
-
     @Override
     public void onDreamingStopped() {
         if (DEBUG) Log.d(mTag, "onDreamingStopped isDozing=" + isDozing());
@@ -180,24 +170,8 @@ public class DozeService extends DreamService {
             mWakeLock.release();
         }
         listenForPulseSignals(false);
-        stopDozing();
         dozingStopped();
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        if (DEBUG) Log.d(mTag, "onDetachedFromWindow");
-        super.onDetachedFromWindow();
-
-        dozingStopped();
-    }
-
-    @Override
-    public void onDestroy() {
-        if (DEBUG) Log.d(mTag, "onDestroy");
-        super.onDestroy();
-
-        dozingStopped();
+        mHandler.removeCallbacks(mDisplayOff);
     }
 
     private void requestDoze() {
