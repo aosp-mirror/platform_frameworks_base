@@ -8623,13 +8623,11 @@ package android.content.pm {
   }
 
   public class LauncherApps {
-    method public void addCallback(android.content.pm.LauncherApps.Callback);
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
     method public boolean isActivityEnabled(android.content.ComponentName, android.os.UserHandle);
     method public boolean isPackageEnabled(java.lang.String, android.os.UserHandle);
     method public void registerCallback(android.content.pm.LauncherApps.Callback);
     method public void registerCallback(android.content.pm.LauncherApps.Callback, android.os.Handler);
-    method public void removeCallback(android.content.pm.LauncherApps.Callback);
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
     method public void startAppDetailsActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
     method public void startMainActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
