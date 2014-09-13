@@ -20,8 +20,8 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
-import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemService;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -55,7 +55,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -78,7 +77,7 @@ import libcore.util.Objects;
  * The power manager service is responsible for coordinating power management
  * functions on the device.
  */
-public final class PowerManagerService extends com.android.server.SystemService
+public final class PowerManagerService extends SystemService
         implements Watchdog.Monitor {
     private static final String TAG = "PowerManagerService";
 
@@ -328,6 +327,9 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     // True if dreams should be activated on dock.
     private boolean mDreamsActivateOnDockSetting;
+
+    // True if doze should not be started until after the screen off transition.
+    private boolean mDozeAfterScreenOffConfig;
 
     // The minimum screen off timeout, in milliseconds.
     private int mMinimumScreenOffTimeoutConfig;
@@ -603,6 +605,8 @@ public final class PowerManagerService extends com.android.server.SystemService
                 com.android.internal.R.integer.config_dreamsBatteryLevelMinimumWhenNotPowered);
         mDreamsBatteryLevelDrainCutoffConfig = resources.getInteger(
                 com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff);
+        mDozeAfterScreenOffConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dozeAfterScreenOff);
         mMinimumScreenOffTimeoutConfig = resources.getInteger(
                 com.android.internal.R.integer.config_minimumScreenOffTimeout);
         mMaximumScreenDimDurationConfig = resources.getInteger(
@@ -1242,16 +1246,18 @@ public final class PowerManagerService extends com.android.server.SystemService
                 }
             }
 
-            // Phase 2: Update dreams and display power state.
-            updateDreamLocked(dirtyPhase2);
-            updateDisplayPowerStateLocked(dirtyPhase2);
+            // Phase 2: Update display power state.
+            boolean displayBecameReady = updateDisplayPowerStateLocked(dirtyPhase2);
 
-            // Phase 3: Send notifications, if needed.
+            // Phase 3: Update dream state (depends on display ready signal).
+            updateDreamLocked(dirtyPhase2, displayBecameReady);
+
+            // Phase 4: Send notifications, if needed.
             if (mDisplayReady) {
                 finishInteractiveStateChangeLocked();
             }
 
-            // Phase 4: Update suspend blocker.
+            // Phase 5: Update suspend blocker.
             // Because we might release the last suspend blocker here, we need to make sure
             // we finished everything else first!
             updateSuspendBlockerLocked();
@@ -1603,7 +1609,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     /**
      * Determines whether to post a message to the sandman to update the dream state.
      */
-    private void updateDreamLocked(int dirty) {
+    private void updateDreamLocked(int dirty, boolean displayBecameReady) {
         if ((dirty & (DIRTY_WAKEFULNESS
                 | DIRTY_USER_ACTIVITY
                 | DIRTY_WAKE_LOCKS
@@ -1612,8 +1618,10 @@ public final class PowerManagerService extends com.android.server.SystemService
                 | DIRTY_IS_POWERED
                 | DIRTY_STAY_ON
                 | DIRTY_PROXIMITY_POSITIVE
-                | DIRTY_BATTERY_STATE)) != 0) {
-            scheduleSandmanLocked();
+                | DIRTY_BATTERY_STATE)) != 0 || displayBecameReady) {
+            if (mDisplayReady) {
+                scheduleSandmanLocked();
+            }
         }
     }
 
@@ -1640,7 +1648,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         synchronized (mLock) {
             mSandmanScheduled = false;
             wakefulness = mWakefulness;
-            if (mSandmanSummoned) {
+            if (mSandmanSummoned && mDisplayReady) {
                 startDreaming = ((wakefulness == WAKEFULNESS_DREAMING && canDreamLocked())
                         || wakefulness == WAKEFULNESS_DOZING);
                 mSandmanSummoned = false;
@@ -1772,8 +1780,11 @@ public final class PowerManagerService extends com.android.server.SystemService
      * has been updated so we come back here to double-check and finish up.
      *
      * This function recalculates the display power state each time.
+     *
+     * @return True if the display became ready.
      */
-    private void updateDisplayPowerStateLocked(int dirty) {
+    private boolean updateDisplayPowerStateLocked(int dirty) {
+        final boolean oldDisplayReady = mDisplayReady;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
@@ -1839,6 +1850,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                         + ", mBootCompleted=" + mBootCompleted);
             }
         }
+        return mDisplayReady && !oldDisplayReady;
     }
 
     private static boolean isValidBrightness(int value) {
@@ -1855,8 +1867,15 @@ public final class PowerManagerService extends com.android.server.SystemService
             return DisplayPowerRequest.POLICY_OFF;
         }
 
-        if ((mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
-            return DisplayPowerRequest.POLICY_DOZE;
+        if (mWakefulness == WAKEFULNESS_DOZING) {
+            if ((mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
+                return DisplayPowerRequest.POLICY_DOZE;
+            }
+            if (mDozeAfterScreenOffConfig) {
+                return DisplayPowerRequest.POLICY_OFF;
+            }
+            // Fall through and preserve the current screen policy if not configured to
+            // doze after screen off.  This causes the screen off transition to be skipped.
         }
 
         if ((mWakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
@@ -2326,6 +2345,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
+            pw.println("  mDozeAfterScreenOffConfig=" + mDozeAfterScreenOffConfig);
             pw.println("  mLowPowerModeSetting=" + mLowPowerModeSetting);
             pw.println("  mAutoLowPowerModeEnabled=" + mAutoLowPowerModeEnabled);
             pw.println("  mAutoLowPowerModeSnoozing=" + mAutoLowPowerModeSnoozing);

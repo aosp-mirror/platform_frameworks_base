@@ -497,9 +497,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // We might override this below based on other factors.
         int state;
         int brightness = PowerManager.BRIGHTNESS_DEFAULT;
+        boolean performScreenOffTransition = false;
         switch (mPowerRequest.policy) {
             case DisplayPowerRequest.POLICY_OFF:
                 state = Display.STATE_OFF;
+                performScreenOffTransition = true;
                 break;
             case DisplayPowerRequest.POLICY_DOZE:
                 if (mPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
@@ -515,6 +517,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 state = Display.STATE_ON;
                 break;
         }
+        assert(state != Display.STATE_UNKNOWN);
 
         // Apply the proximity sensor.
         if (mProximitySensor != null) {
@@ -691,7 +694,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // Wait for previous on animation to complete beforehand.
             unblockScreenOn();
             if (!mColorFadeOnAnimator.isStarted()) {
-                if (mPowerRequest.policy == DisplayPowerRequest.POLICY_OFF) {
+                if (performScreenOffTransition) {
                     // Perform screen off animation.
                     if (!mColorFadeOffAnimator.isStarted()) {
                         if (mPowerState.getColorFadeLevel() == 0.0f) {
@@ -934,8 +937,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mScreenBrightnessDarkConfig=" + mScreenBrightnessDarkConfig);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
-        pw.println("  mUseSoftwareAutoBrightnessConfig="
-                + mUseSoftwareAutoBrightnessConfig);
+        pw.println("  mUseSoftwareAutoBrightnessConfig=" + mUseSoftwareAutoBrightnessConfig);
+        pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);
 
         mHandler.runWithScissors(new Runnable() {
             @Override
