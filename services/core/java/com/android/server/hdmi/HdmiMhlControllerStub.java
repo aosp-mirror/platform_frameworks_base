@@ -29,7 +29,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
  */
 final class HdmiMhlControllerStub {
 
-    private static final SparseArray<HdmiMhlLocalDevice> mLocalDevices = new SparseArray<>();
+    private static final SparseArray<HdmiMhlLocalDeviceStub> mLocalDevices = new SparseArray<>();
     private static final HdmiPortInfo[] EMPTY_PORT_INFO = new HdmiPortInfo[0];
     private static final int INVALID_MHL_VERSION = 0;
     private static final int NO_SUPPORTED_FEATURES = 0;
@@ -53,58 +53,47 @@ final class HdmiMhlControllerStub {
     }
 
     /**
-     * Return {@link HdmiMhlLocalDevice} matched with the given port id.
+     * Return {@link HdmiMhlLocalDeviceStub} matched with the given port id.
      *
      * @return null if has no matched port id
      */
-    HdmiMhlLocalDevice getLocalDevice(int portId) {
+    HdmiMhlLocalDeviceStub getLocalDevice(int portId) {
         return null;
     }
 
     /**
-     * Return {@link HdmiMhlLocalDevice} matched with the given device id.
+     * Return {@link HdmiMhlLocalDeviceStub} matched with the given device id.
      *
      * @return null if has no matched id
      */
-    HdmiMhlLocalDevice getLocalDeviceById(int deviceId) {
+    HdmiMhlLocalDeviceStub getLocalDeviceById(int deviceId) {
         return null;
     }
 
-    SparseArray<HdmiMhlLocalDevice> getAllLocalDevices() {
+    SparseArray<HdmiMhlLocalDeviceStub> getAllLocalDevices() {
         return mLocalDevices;
     }
 
     /**
-     * Remove a {@link HdmiMhlLocalDevice} matched with the given port id.
+     * Remove a {@link HdmiMhlLocalDeviceStub} matched with the given port id.
      *
-     * @return removed {@link HdmiMhlLocalDevice}. Return null if no matched port id.
+     * @return removed {@link HdmiMhlLocalDeviceStub}. Return null if no matched port id.
      */
-    HdmiMhlLocalDevice removeLocalDevice(int portId) {
+    HdmiMhlLocalDeviceStub removeLocalDevice(int portId) {
         return null;
     }
 
     /**
-     * Add a new {@link HdmiMhlLocalDevice}.
+     * Add a new {@link HdmiMhlLocalDeviceStub}.
      *
-     * @return old {@link HdmiMhlLocalDevice} having same port id
+     * @return old {@link HdmiMhlLocalDeviceStub} having same port id
      */
-    HdmiMhlLocalDevice addLocalDevice(HdmiMhlLocalDevice device) {
+    HdmiMhlLocalDeviceStub addLocalDevice(HdmiMhlLocalDeviceStub device) {
         return null;
     }
 
     void clearAllLocalDevices() {
     }
-
-    /**
-     * Send MHL MSC-Subcommand to the device connected to the given port.
-     */
-    void sendSubcommand(int portId, HdmiMhlSubcommand command) {
-    }
-
-    void sendSubcommand(final int portId, final HdmiMhlSubcommand command,
-            SendMessageCallback callback) {
-    }
-
 
     void sendVendorCommand(int portId, int offset, int length, byte[] data) {
     }
