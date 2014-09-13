@@ -515,8 +515,8 @@ public class ShapeDrawable extends Drawable {
         int mChangingConfigurations;
         Paint mPaint;
         Shape mShape;
-        ColorStateList mTint;
-        Mode mTintMode = Mode.SRC_IN;
+        ColorStateList mTint = null;
+        Mode mTintMode = DEFAULT_TINT_MODE;
         Rect mPadding;
         int mIntrinsicWidth;
         int mIntrinsicHeight;
