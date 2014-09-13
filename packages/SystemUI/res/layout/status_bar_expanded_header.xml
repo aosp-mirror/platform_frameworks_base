@@ -44,7 +44,7 @@
             android:scaleType="centerInside"/>
     </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
-    <ImageButton android:id="@+id/settings_button"
+    <com.android.keyguard.AlphaOptimizedImageButton android:id="@+id/settings_button"
         style="@android:style/Widget.Material.Button.Borderless"
         android:layout_toStartOf="@id/multi_user_switch"
         android:layout_width="48dp"

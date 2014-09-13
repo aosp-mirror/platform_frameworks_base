@@ -17,13 +17,11 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
 
-public class EmergencyCarrierArea extends LinearLayout {
+public class EmergencyCarrierArea extends AlphaOptimizedLinearLayout {
 
     private CarrierText mCarrierText;
     private EmergencyButton mEmergencyButton;
