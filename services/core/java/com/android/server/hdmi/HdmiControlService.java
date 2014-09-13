@@ -856,8 +856,8 @@ public final class HdmiControlService extends SystemService {
             HdmiMhlLocalDevice device = mMhlController.removeLocalDevice(portId);
             if (device != null) {
                 device.onDeviceRemoved();
-                // There is no explicit event for device removal unlike capability register event
-                // used for device addition . Hence we remove the device on hotplug event.
+                // There is no explicit event for device removal.
+                // Hence we remove the device on hotplug event.
                 HdmiDeviceInfo deviceInfo = device.getInfo();
                 if (deviceInfo != null) {
                     invokeDeviceEventListeners(deviceInfo, DEVICE_EVENT_REMOVE_DEVICE);
@@ -871,40 +871,40 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    void handleMhlCbusModeChanged(int portId, int cbusmode) {
+    void handleMhlBusModeChanged(int portId, int busmode) {
         assertRunOnServiceThread();
         HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
         if (device != null) {
-            device.setCbusMode(cbusmode);
+            device.setBusMode(busmode);
         } else {
-            Slog.w(TAG, "No mhl device exists for cbus mode change[portId:" + portId +
-                    ", cbusmode:" + cbusmode + "]");
+            Slog.w(TAG, "No mhl device exists for bus mode change[portId:" + portId +
+                    ", busmode:" + busmode + "]");
         }
     }
 
     @ServiceThreadOnly
-    void handleMhlVbusOvercurrent(int portId, boolean on) {
+    void handleMhlBusOvercurrent(int portId, boolean on) {
         assertRunOnServiceThread();
         HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
         if (device != null) {
-            device.onVbusOvercurrentDetected(on);
+            device.onBusOvercurrentDetected(on);
         } else {
-            Slog.w(TAG, "No mhl device exists for vbus overcurrent event[portId:" + portId + "]");
+            Slog.w(TAG, "No mhl device exists for bus overcurrent event[portId:" + portId + "]");
         }
     }
 
     @ServiceThreadOnly
-    void handleMhlCapabilityRegisterChanged(int portId, int adopterId, int deviceId) {
+    void handleMhlDeviceStatusChanged(int portId, int adopterId, int deviceId) {
         assertRunOnServiceThread();
         HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
 
-        // Hotplug event should already have been called before capability register change event.
+        // Hotplug event should already have been called before device status change event.
         if (device != null) {
-            device.setCapabilityRegister(adopterId, deviceId);
+            device.setDeviceStatusChange(adopterId, deviceId);
             invokeDeviceEventListeners(device.getInfo(), DEVICE_EVENT_ADD_DEVICE);
             updateSafeMhlInput();
         } else {
-            Slog.w(TAG, "No mhl device exists for capability register change event[portId:"
+            Slog.w(TAG, "No mhl device exists for device status event[portId:"
                     + portId + ", adopterId:" + adopterId + ", deviceId:" + deviceId + "]");
         }
     }
