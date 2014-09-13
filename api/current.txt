@@ -5523,6 +5523,7 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
+    field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCALE = "android.app.extra.PROVISIONING_LOCALE";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.PROVISIONING_LOCAL_TIME";
     field public static final java.lang.String EXTRA_PROVISIONING_TIME_ZONE = "android.app.extra.PROVISIONING_TIME_ZONE";
@@ -5544,7 +5545,6 @@ package android.app.admin {
     field public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 16; // 0x10
     field public static final int KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS = 8; // 0x8
     field public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1; // 0x1
-    field public static final java.lang.String KEY_PROVISIONING_EMAIL_ADDRESS = "android.app.key.PROVISIONING_EMAIL_ADDRESS";
     field public static final java.lang.String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
     field public static final int PASSWORD_QUALITY_ALPHABETIC = 262144; // 0x40000
     field public static final int PASSWORD_QUALITY_ALPHANUMERIC = 327680; // 0x50000
