@@ -212,8 +212,13 @@ final class Constants {
     //       in config.xml to allow customization.
     static final int IRT_MS = 300;
 
-    static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "hdmi_cec.prefaddr.playback";
-    static final String PROPERTY_PREFERRED_ADDRESS_TV = "hdmi_cec.prefaddr.tv";
+    static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
+    static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
+
+    // Property name for the local device configurations.
+    // TODO(OEM): OEM should provide this property, and the value is the comma separated integer
+    //     values which denotes the device type in HDMI Spec 1.4.
+    static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
 
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
@@ -249,11 +254,6 @@ final class Constants {
 
     static final int DISABLED = 0;
     static final int ENABLED = 1;
-
-    // Property name for the local device configurations.
-    // TODO(OEM): OEM should provide this property, and the value is the comma separated integer
-    //     values which denotes the device type in HDMI Spec 1.4.
-    static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
 
     private Constants() { /* cannot be instantiated */ }
 }
