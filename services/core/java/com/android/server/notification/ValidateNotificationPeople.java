@@ -112,6 +112,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     }
 
     public float getContactAffinity(UserHandle userHandle, Bundle extras) {
+        if (DEBUG) Slog.d(TAG, "checking affinity for " + userHandle);
         if (extras == null) return NONE;
         final String key = Long.toString(System.nanoTime());
         final float[] affinityOut = new float[1];
