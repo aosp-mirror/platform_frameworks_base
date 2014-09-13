@@ -261,8 +261,8 @@ public class ColorDrawable extends Drawable {
         @ViewDebug.ExportedProperty
         int mUseColor;  // basecolor modulated by setAlpha()
         int mChangingConfigurations;
-        ColorStateList mTint;
-        Mode mTintMode;
+        ColorStateList mTint = null;
+        Mode mTintMode = DEFAULT_TINT_MODE;
 
         ColorState() {
             // Empty constructor.
