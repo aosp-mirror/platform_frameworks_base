@@ -341,6 +341,21 @@ public final class WindowInsets {
     }
 
     /**
+     * Returns a copy of this WindowInsets with selected system window insets replaced
+     * with new values.
+     *
+     * @param systemWindowInsets New system window insets. Each field is the inset in pixels
+     *                           for that edge
+     * @return A modified copy of this WindowInsets
+     */
+    public WindowInsets replaceSystemWindowInsets(Rect systemWindowInsets) {
+        final WindowInsets result = new WindowInsets(this);
+        result.mSystemWindowInsets = new Rect(systemWindowInsets);
+        result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
+        return result;
+    }
+
+    /**
      * @hide
      */
     public WindowInsets consumeWindowDecorInsets() {
