@@ -825,7 +825,7 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return (mAlpha == 255 && mGradientState.mOpaqueOverBounds) ?
+        return (mAlpha == 255 && mGradientState.mOpaqueOverBounds && isOpaqueForState()) ?
                 PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
     }
 
@@ -1414,12 +1414,25 @@ public class GradientDrawable extends Drawable {
         return mGradientState;
     }
 
+    private boolean isOpaqueForState() {
+        if (mGradientState.mStrokeWidth >= 0 && mStrokePaint != null
+                && !isOpaque(mStrokePaint.getColor())) {
+            return false;
+        }
+
+        if (!isOpaque(mFillPaint.getColor())) {
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public void getOutline(Outline outline) {
         final GradientState st = mGradientState;
         final Rect bounds = getBounds();
         // only report non-zero alpha if shape being drawn is opaque
-        outline.setAlpha(st.mOpaqueOverShape ? (mAlpha / 255.0f) : 0.0f);
+        outline.setAlpha(st.mOpaqueOverShape && isOpaqueForState() ? (mAlpha / 255.0f) : 0.0f);
 
         switch (st.mShape) {
             case RECTANGLE:
@@ -1617,19 +1630,6 @@ public class GradientDrawable extends Drawable {
             mOpaqueOverBounds = false;
             mOpaqueOverShape = false;
 
-            // First test opacity of all colors
-            if (mStrokeWidth > 0) {
-                if (mStrokeColorStateList != null) {
-                    if (!mStrokeColorStateList.isOpaque()) {
-                        return;
-                    }
-                }
-            }
-
-            if (mColorStateList != null && !mColorStateList.isOpaque()) {
-                return;
-            }
-
             if (mColors != null) {
                 for (int i = 0; i < mColors.length; i++) {
                     if (!isOpaque(mColors[i])) {
@@ -1649,10 +1649,6 @@ public class GradientDrawable extends Drawable {
             mOpaqueOverBounds = mShape == RECTANGLE
                     && mRadius <= 0
                     && mRadiusArray == null;
-        }
-
-        private static boolean isOpaque(int color) {
-            return ((color >> 24) & 0xff) == 0xff;
         }
 
         public void setStroke(
@@ -1688,6 +1684,10 @@ public class GradientDrawable extends Drawable {
             mGradientRadius = gradientRadius;
             mGradientRadiusType = type;
         }
+    }
+
+    static boolean isOpaque(int color) {
+        return ((color >> 24) & 0xff) == 0xff;
     }
 
     /**
