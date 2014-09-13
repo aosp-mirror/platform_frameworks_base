@@ -72,7 +72,7 @@ import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.speech.RecognizerIntent;
-import android.telecomm.TelecommManager;
+import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -2131,8 +2131,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
     }
 
-    TelecommManager getTelecommService() {
-        return (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
+    TelecomManager getTelecommService() {
+        return (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
     }
 
     static IAudioService getAudioService() {
@@ -2221,8 +2221,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // If an incoming call is ringing, HOME is totally disabled.
                 // (The user is already on the InCallUI at this point,
                 // and his ONLY options are to answer or reject the call.)
-                TelecommManager telecommManager = getTelecommService();
-                if (telecommManager != null && telecommManager.isRinging()) {
+                TelecomManager telecomManager = getTelecommService();
+                if (telecomManager != null && telecomManager.isRinging()) {
                     Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
                     return -1;
                 }
@@ -4322,9 +4322,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 if (down) {
-                    TelecommManager telecommManager = getTelecommService();
-                    if (telecommManager != null) {
-                        if (telecommManager.isRinging()) {
+                    TelecomManager telecomManager = getTelecommService();
+                    if (telecomManager != null) {
+                        if (telecomManager.isRinging()) {
                             // If an incoming call is ringing, either VOLUME key means
                             // "silence ringer".  We handle these keys here, rather than
                             // in the InCallScreen, to make sure we'll respond to them
@@ -4336,14 +4336,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                             // Silence the ringer.  (It's safe to call this
                             // even if the ringer has already been silenced.)
-                            telecommManager.silenceRinger();
+                            telecomManager.silenceRinger();
 
                             // And *don't* pass this key thru to the current activity
                             // (which is probably the InCallScreen.)
                             result &= ~ACTION_PASS_TO_USER;
                             break;
                         }
-                        if (telecommManager.isInCall()
+                        if (telecomManager.isInCall()
                                 && (result & ACTION_PASS_TO_USER) == 0) {
                             // If we are in call but we decided not to pass the key to
                             // the application, just pass it to the session service.
@@ -4369,10 +4369,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_ENDCALL: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
-                    TelecommManager telecommManager = getTelecommService();
+                    TelecomManager telecomManager = getTelecommService();
                     boolean hungUp = false;
-                    if (telecommManager != null) {
-                        hungUp = telecommManager.endCall();
+                    if (telecomManager != null) {
+                        hungUp = telecomManager.endCall();
                     }
                     interceptPowerKeyDown(!interactive || hungUp);
                 } else {
@@ -4409,19 +4409,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         interceptScreenshotChord();
                     }
 
-                    TelecommManager telecommManager = getTelecommService();
+                    TelecomManager telecomManager = getTelecommService();
                     boolean hungUp = false;
-                    if (telecommManager != null) {
-                        if (telecommManager.isRinging()) {
+                    if (telecomManager != null) {
+                        if (telecomManager.isRinging()) {
                             // Pressing Power while there's a ringing incoming
                             // call should silence the ringer.
-                            telecommManager.silenceRinger();
+                            telecomManager.silenceRinger();
                         } else if ((mIncallPowerBehavior
                                 & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
-                                && telecommManager.isInCall() && interactive) {
+                                && telecomManager.isInCall() && interactive) {
                             // Otherwise, if "Power button ends call" is enabled,
                             // the Power button will hang up any current active call.
-                            hungUp = telecommManager.endCall();
+                            hungUp = telecomManager.endCall();
                         }
                     }
                     interceptPowerKeyDown(!interactive || hungUp
@@ -4459,9 +4459,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 if (down) {
-                    TelecommManager telecommManager = getTelecommService();
-                    if (telecommManager != null) {
-                        if (telecommManager.isInCall()) {
+                    TelecomManager telecomManager = getTelecommService();
+                    if (telecomManager != null) {
+                        if (telecomManager.isInCall()) {
                             // Suppress PLAY/PAUSE toggle when phone is ringing or in-call
                             // to avoid music playback.
                             break;
@@ -4494,12 +4494,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_CALL: {
                 if (down) {
-                    TelecommManager telecommManager = getTelecommService();
-                    if (telecommManager != null) {
-                        if (telecommManager.isRinging()) {
+                    TelecomManager telecomManager = getTelecommService();
+                    if (telecomManager != null) {
+                        if (telecomManager.isRinging()) {
                             Log.i(TAG, "interceptKeyBeforeQueueing:"
                                   + " CALL key-down while ringing: Answer the call!");
-                            telecommManager.acceptRingingCall();
+                            telecomManager.acceptRingingCall();
 
                             // And *don't* pass this key thru to the current activity
                             // (which is presumably the InCallScreen.)

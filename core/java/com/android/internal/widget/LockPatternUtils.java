@@ -35,7 +35,7 @@ import android.os.UserHandle;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.telecomm.TelecommManager;
+import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -1477,8 +1477,8 @@ public class LockPatternUtils {
         return getTelecommManager().isInCall();
     }
 
-    private TelecommManager getTelecommManager() {
-        return (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
+    private TelecomManager getTelecommManager() {
+        return (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
     }
 
     private void finishBiometricWeak() {

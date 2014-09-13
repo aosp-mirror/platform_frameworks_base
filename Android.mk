@@ -353,14 +353,14 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/tv/ITvInputSessionCallback.aidl \
 	media/java/android/service/media/IMediaBrowserService.aidl \
 	media/java/android/service/media/IMediaBrowserServiceCallbacks.aidl \
-	telecomm/java/com/android/internal/telecomm/IVideoCallback.aidl \
-	telecomm/java/com/android/internal/telecomm/IVideoProvider.aidl \
-	telecomm/java/com/android/internal/telecomm/IConnectionService.aidl \
-	telecomm/java/com/android/internal/telecomm/IConnectionServiceAdapter.aidl \
-	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \
-	telecomm/java/com/android/internal/telecomm/IInCallService.aidl \
-	telecomm/java/com/android/internal/telecomm/ITelecommService.aidl \
-	telecomm/java/com/android/internal/telecomm/RemoteServiceCallback.aidl \
+	telecomm/java/com/android/internal/telecom/IVideoCallback.aidl \
+	telecomm/java/com/android/internal/telecom/IVideoProvider.aidl \
+	telecomm/java/com/android/internal/telecom/IConnectionService.aidl \
+	telecomm/java/com/android/internal/telecom/IConnectionServiceAdapter.aidl \
+	telecomm/java/com/android/internal/telecom/IInCallAdapter.aidl \
+	telecomm/java/com/android/internal/telecom/IInCallService.aidl \
+	telecomm/java/com/android/internal/telecom/ITelecomService.aidl \
+	telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl \
 	telephony/java/com/android/ims/internal/IImsCallSession.aidl \
 	telephony/java/com/android/ims/internal/IImsCallSessionListener.aidl \
 	telephony/java/com/android/ims/internal/IImsConfig.aidl \
