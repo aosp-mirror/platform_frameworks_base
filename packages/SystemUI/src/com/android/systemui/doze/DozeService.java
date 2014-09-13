@@ -16,9 +16,6 @@
 
 package com.android.systemui.doze;
 
-import static android.os.PowerManager.BRIGHTNESS_OFF;
-import static android.os.PowerManager.BRIGHTNESS_ON;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -37,7 +34,6 @@ import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.service.dreams.DreamService;
 import android.util.Log;
-import android.util.MathUtils;
 import android.view.Display;
 
 import com.android.systemui.R;
@@ -68,7 +64,6 @@ public class DozeService extends DreamService {
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private AlarmManager mAlarmManager;
-    private int mMaxBrightness;
     private boolean mDreaming;
     private boolean mBroadcastReceiverRegistered;
     private boolean mDisplayStateSupported;
@@ -91,7 +86,6 @@ public class DozeService extends DreamService {
         pw.print("  mBroadcastReceiverRegistered: "); pw.println(mBroadcastReceiverRegistered);
         pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
         pw.print("  mPickupSensor:"); pw.println(mPickupSensor);
-        pw.print("  mMaxBrightness: "); pw.println(mMaxBrightness);
         pw.print("  mDisplayStateSupported: "); pw.println(mDisplayStateSupported);
         pw.print("  mNotificationLightOn: "); pw.println(mNotificationLightOn);
         pw.print("  mPowerSaveActive: "); pw.println(mPowerSaveActive);
@@ -123,8 +117,6 @@ public class DozeService extends DreamService {
         final Resources res = mContext.getResources();
         mDisplayStateSupported = SystemProperties.getBoolean("doze.display.supported",
                 res.getBoolean(R.bool.doze_display_state_supported));
-        mMaxBrightness = MathUtils.constrain(res.getInteger(R.integer.doze_pulse_brightness),
-                BRIGHTNESS_OFF, BRIGHTNESS_ON);
         mNotificationPulseIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(NOTIFICATION_PULSE_ACTION).setPackage(getPackageName()),
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -158,7 +150,6 @@ public class DozeService extends DreamService {
             if (DEBUG) Log.d(mTag, "stayAwake millis=" + millis);
             mWakeLock.acquire(millis);
             setDozeScreenState(mDisplayStateWhenOn);
-            setDozeScreenBrightness(mMaxBrightness);
             rescheduleOff(millis);
         }
     }
@@ -295,7 +286,6 @@ public class DozeService extends DreamService {
         public void run() {
             if (DEBUG) Log.d(TAG, "Display off");
             setDozeScreenState(Display.STATE_OFF);
-            setDozeScreenBrightness(PowerManager.BRIGHTNESS_DEFAULT);
         }
     };
 
