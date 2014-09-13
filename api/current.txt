@@ -33895,6 +33895,7 @@ package android.view {
     method protected int computeHorizontalScrollOffset();
     method protected int computeHorizontalScrollRange();
     method public void computeScroll();
+    method public android.view.WindowInsets computeSystemWindowInsets(android.view.WindowInsets, android.graphics.Rect);
     method protected int computeVerticalScrollExtent();
     method protected int computeVerticalScrollOffset();
     method protected int computeVerticalScrollRange();
@@ -35220,6 +35221,7 @@ package android.view {
     method public boolean isConsumed();
     method public boolean isRound();
     method public android.view.WindowInsets replaceSystemWindowInsets(int, int, int, int);
+    method public android.view.WindowInsets replaceSystemWindowInsets(android.graphics.Rect);
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {
