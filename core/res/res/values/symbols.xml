@@ -298,6 +298,21 @@
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_autojoin_scan" />
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
+  <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
+  <java-symbol type="bool" name="config_wifi_enable_5GHz_preference" />
+  <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />
+  <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_factor" />
+  <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />
+  <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_high" />
+  <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_low" />
+  <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />
+  <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_factor" />
+  <java-symbol type="integer" name="config_wifi_framework_associated_scan_interval" />
+  <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_backoff" />
+  <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_interval" />
+  <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_total_dwell_time" />
+  <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_max_num_active_channels" />
+  <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_max_num_passive_channels" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
@@ -316,7 +331,6 @@
   <java-symbol type="integer" name="config_shortPressOnPowerBehavior" />
   <java-symbol type="integer" name="config_toastDefaultGravity" />
   <java-symbol type="integer" name="config_wifi_framework_scan_interval" />
-  <java-symbol type="integer" name="config_wifi_framework_associated_scan_interval" />
   <java-symbol type="integer" name="config_wifi_supplicant_scan_interval" />
   <java-symbol type="integer" name="config_wifi_scan_interval_p2p_connected" />
   <java-symbol type="integer" name="db_connection_pool_size" />
