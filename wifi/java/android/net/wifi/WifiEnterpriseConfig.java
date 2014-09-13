@@ -271,9 +271,11 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setEapMethod(int eapMethod) {
         switch (eapMethod) {
             /** Valid methods */
+            case Eap.TLS:
+                setPhase2Method(Phase2.NONE);
+                /* fall through */
             case Eap.PEAP:
             case Eap.PWD:
-            case Eap.TLS:
             case Eap.TTLS:
             case Eap.SIM:
             case Eap.AKA:
