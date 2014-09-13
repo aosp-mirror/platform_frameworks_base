@@ -30,7 +30,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
-import android.telecomm.TelecommManager;
+import android.telecom.TelecomManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -331,7 +331,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void launchPhone() {
-        final TelecommManager tm = TelecommManager.from(mContext);
+        final TelecomManager tm = TelecomManager.from(mContext);
         if (tm.isInCall()) {
             AsyncTask.execute(new Runnable() {
                 @Override
