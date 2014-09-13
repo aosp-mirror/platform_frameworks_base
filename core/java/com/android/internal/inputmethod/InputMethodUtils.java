@@ -108,7 +108,7 @@ public class InputMethodUtils {
         return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage(), SUBTYPE_MODE_KEYBOARD);
     }
 
-    private static boolean isSystemAuxilialyImeThatHashAutomaticSubtype(InputMethodInfo imi) {
+    private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(InputMethodInfo imi) {
         if (!isSystemIme(imi)) {
             return false;
         }
@@ -131,7 +131,8 @@ public class InputMethodUtils {
         boolean auxilialyImeAdded = false;
         for (int i = 0; i < imis.size(); ++i) {
             final InputMethodInfo imi = imis.get(i);
-            if (isDefaultEnabledIme(isSystemReady, imi, context)) {
+            if (isValidSystemDefaultIme(isSystemReady, imi, context)
+                    || isSystemImeThatHasEnglishKeyboardSubtype(imi)) {
                 retval.add(imi);
                 if (imi.isAuxiliaryIme()) {
                     auxilialyImeAdded = true;
@@ -143,7 +144,7 @@ public class InputMethodUtils {
         }
         for (int i = 0; i < imis.size(); ++i) {
             final InputMethodInfo imi = imis.get(i);
-            if (isSystemAuxilialyImeThatHashAutomaticSubtype(imi)) {
+            if (isSystemAuxilialyImeThatHasAutomaticSubtype(imi)) {
                 retval.add(imi);
             }
         }
@@ -173,12 +174,6 @@ public class InputMethodUtils {
             Slog.w(TAG, "Found no subtypes in a system IME: " + imi.getPackageName());
         }
         return false;
-    }
-
-    public static boolean isDefaultEnabledIme(
-            boolean isSystemReady, InputMethodInfo imi, Context context) {
-        return isValidSystemDefaultIme(isSystemReady, imi, context)
-                || isSystemImeThatHasEnglishKeyboardSubtype(imi);
     }
 
     public static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
@@ -219,25 +214,25 @@ public class InputMethodUtils {
 
     public static InputMethodInfo getMostApplicableDefaultIME(
             List<InputMethodInfo> enabledImes) {
-        if (enabledImes != null && enabledImes.size() > 0) {
-            // We'd prefer to fall back on a system IME, since that is safer.
-            int i = enabledImes.size();
-            int firstFoundSystemIme = -1;
-            while (i > 0) {
-                i--;
-                final InputMethodInfo imi = enabledImes.get(i);
-                if (InputMethodUtils.isSystemImeThatHasEnglishKeyboardSubtype(imi)
-                        && !imi.isAuxiliaryIme()) {
-                    return imi;
-                }
-                if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)
-                        && !imi.isAuxiliaryIme()) {
-                    firstFoundSystemIme = i;
-                }
-            }
-            return enabledImes.get(Math.max(firstFoundSystemIme, 0));
+        if (enabledImes == null || enabledImes.isEmpty()) {
+            return null;
         }
-        return null;
+        // We'd prefer to fall back on a system IME, since that is safer.
+        int i = enabledImes.size();
+        int firstFoundSystemIme = -1;
+        while (i > 0) {
+            i--;
+            final InputMethodInfo imi = enabledImes.get(i);
+            if (InputMethodUtils.isSystemImeThatHasEnglishKeyboardSubtype(imi)
+                    && !imi.isAuxiliaryIme()) {
+                return imi;
+            }
+            if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)
+                    && !imi.isAuxiliaryIme()) {
+                firstFoundSystemIme = i;
+            }
+        }
+        return enabledImes.get(Math.max(firstFoundSystemIme, 0));
     }
 
     public static boolean isValidSubtypeId(InputMethodInfo imi, int subtypeHashCode) {
