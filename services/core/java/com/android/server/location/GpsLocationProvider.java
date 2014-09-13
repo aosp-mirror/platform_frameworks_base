@@ -494,7 +494,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     Log.d(TAG, "SIM STATE is ready, SIM MCC/MNC is " + mccMnc);
                     synchronized (mLock) {
                         reloadGpsProperties(context, mProperties);
-                        mNIHandler.setSuplEsEnablement(mSuplEsEnabled);
+                        mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
                     }
                 }
             }
@@ -590,6 +590,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 com.android.internal.R.array.config_gpsParameters);
         for (String item : configValues) {
             Log.d(TAG, "GpsParamsResource: " + item);
+            // We need to support "KEY =", but not "=VALUE".
             String[] split = item.split("=");
             if (split.length == 2) {
                 properties.setProperty(split[0].trim().toUpperCase(), split[1]);
