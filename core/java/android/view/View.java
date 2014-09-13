@@ -6525,6 +6525,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Compute insets that should be consumed by this view and the ones that should propagate
+     * to those under it.
+     *
+     * @param in Insets currently being processed by this View, likely received as a parameter
+     *           to {@link #onApplyWindowInsets(WindowInsets)}.
+     * @param outLocalInsets A Rect that will receive the insets that should be consumed
+     *                       by this view
+     * @return Insets that should be passed along to views under this one
+     */
+    public WindowInsets computeSystemWindowInsets(WindowInsets in, Rect outLocalInsets) {
+        if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
+                || mAttachInfo == null
+                || (mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
+            outLocalInsets.set(in.getSystemWindowInsets());
+            return in.consumeSystemWindowInsets();
+        } else {
+            outLocalInsets.set(0, 0, 0, 0);
+            return in;
+        }
+    }
+
+    /**
      * Sets whether or not this view should account for system screen decorations
      * such as the status bar and inset its content; that is, controlling whether
      * the default implementation of {@link #fitSystemWindows(Rect)} will be
