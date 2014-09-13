@@ -339,6 +339,22 @@
          capability can provide power savings when wifi needs to be always kept on. -->
     <bool translatable="false" name="config_wifi_background_scan_support">false</bool>
 
+    <!-- Boolean indicating we re-try re-associating once upon disconnection and RSSI is high failure  -->
+    <bool translatable="true" name="config_wifi_enable_disconnection_debounce">true</bool>
+
+    <!-- Boolean indicating autojoin will prefer 5GHz and choose 5GHz BSSIDs -->
+    <bool translatable="true" name="config_wifi_enable_5GHz_preference">true</bool>
+
+    <!-- Integer specifying the basic autojoin parameters -->
+    <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_threshold">-65</integer>
+    <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">5</integer>
+    <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_high">16</integer>
+    <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_low">10</integer>
+    <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_threshold">-75</integer>
+    <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_factor">2</integer>
+
+
+
     <!-- Integer indicating wpa_supplicant scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_supplicant_scan_interval">15000</integer>
 
@@ -351,8 +367,23 @@
          point on the move. A value of 0 means no periodic scans will be used in the framework. -->
     <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
 
-    <!-- Integer indicating associated scan interval in milliseconds -->
+    <!-- Integer indicating associated partial scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_framework_associated_scan_interval">10000</integer>
+
+    <!-- Integer indicating associated full scan backoff, representing a fraction: xx/8 -->
+    <integer translatable="false" name="config_wifi_framework_associated_full_scan_backoff">12</integer>
+
+    <!-- Integer indicating associated full scan max interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_framework_associated_full_scan_max_interval">300000</integer>
+
+    <!-- Integer indicating associated full scan max total dwell time in milliseconds -->
+    <integer translatable="false" name="config_wifi_framework_associated_full_scan_max_total_dwell_time">500</integer>
+
+    <!-- Integer indicating associated full scan max num active channels -->
+    <integer translatable="false" name="config_wifi_framework_associated_partial_scan_max_num_active_channels">6</integer>
+
+    <!-- Integer indicating associated full scan max num passive channels -->
+    <integer translatable="false" name="config_wifi_framework_associated_partial_scan_max_num_passive_channels">3</integer>
 
     <!-- Boolean indicating associated scan are allowed -->
     <bool translatable="false" name="config_wifi_framework_enable_associated_autojoin_scan">true</bool>
