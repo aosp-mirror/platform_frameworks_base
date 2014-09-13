@@ -46,16 +46,12 @@ public class PageContentView extends View
 
     private boolean mContentRequested;
 
-    private boolean mNeedsLayout;
-
     public PageContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        mNeedsLayout = false;
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         requestPageContentIfNeeded();
     }
 
@@ -91,7 +87,6 @@ public class PageContentView extends View
 
         mEmptyState = emptyState;
         mContentRequested = false;
-        mNeedsLayout = mNeedsLayout || mediaSizeChanged || marginsChanged;
 
         // If there is no provider we want immediately to switch to
         // the empty state, so pages with no content appear blank.
@@ -104,7 +99,7 @@ public class PageContentView extends View
 
     private void requestPageContentIfNeeded() {
         if (getWidth() > 0 && getHeight() > 0 && !mContentRequested
-                && mProvider != null && !mNeedsLayout) {
+                && mProvider != null) {
             mContentRequested = true;
             mProvider.getPageContent(new RenderSpec(getWidth(), getHeight(),
                     mMediaSize, mMinMargins), this);
