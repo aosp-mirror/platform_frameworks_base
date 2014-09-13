@@ -5271,11 +5271,16 @@
         <attr name="viewportWidth" format="float"/>
         <!-- The height of the canvas the drawing is on. -->
         <attr name="viewportHeight" format="float"/>
+        <!-- The name of this vector drawable -->
+        <attr name="name" />
+        <!-- The opacity of the whole vector drawable, as a value between 0
+             (completely transparent) and 1 (completely opaque). -->
+        <attr name="alpha" />
     </declare-styleable>
 
     <!-- Defines the group used in VectorDrawables. -->
     <declare-styleable name="VectorDrawableGroup">
-        <!-- The Name of this group -->
+        <!-- The name of this group -->
         <attr name="name" />
         <!-- The amount to rotate the group -->
         <attr name="rotation" />
@@ -5295,7 +5300,7 @@
 
     <!-- Defines the path used in VectorDrawables. -->
     <declare-styleable name="VectorDrawablePath">
-        <!-- The Name of this path -->
+        <!-- The name of this path -->
         <attr name="name" />
         <!-- The width a path stroke -->
         <attr name="strokeWidth" format="float" />

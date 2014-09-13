@@ -31,6 +31,8 @@ public class AnimatedVectorDrawableTest extends Activity implements View.OnClick
             R.drawable.animation_vector_progress_bar,
             R.drawable.animation_vector_drawable_favorite,
             R.drawable.animation_vector_drawable01,
+            // Duplicate to test constant state.
+            R.drawable.animation_vector_drawable01,
     };
 
     @Override
