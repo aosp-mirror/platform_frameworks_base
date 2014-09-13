@@ -59,6 +59,7 @@
                     android:id="@+id/copies_edittext"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dip"
                     style="?android:attr/editTextStyle"
                     android:singleLine="true"
                     android:ellipsize="end"
@@ -89,7 +90,8 @@
                 <Spinner
                     android:id="@+id/paper_size_spinner"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dip">
                 </Spinner>
 
             </LinearLayout>
@@ -116,7 +118,8 @@
                 <Spinner
                     android:id="@+id/color_spinner"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dip">
                 </Spinner>
 
             </LinearLayout>
@@ -143,7 +146,8 @@
                 <Spinner
                     android:id="@+id/orientation_spinner"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dip">
                 </Spinner>
 
             </LinearLayout>
@@ -170,7 +174,8 @@
                 <Spinner
                     android:id="@+id/range_options_spinner"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dip">
                 </Spinner>
 
             </LinearLayout>
@@ -202,6 +207,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|fill_horizontal"
+                    android:layout_marginStart="8dip"
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:visibility="visible"
@@ -239,7 +245,7 @@
              android:id="@+id/expand_collapse_icon"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
-             android:layout_marginTop="4dip"
+             android:layout_marginTop="0dip"
              android:layout_marginBottom="4dip"
              android:layout_gravity="center"
              android:background="@drawable/ic_expand_more">
