@@ -25,7 +25,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.KeyguardManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -68,7 +67,7 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
-import android.telecomm.TelecommManager;
+import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
@@ -2939,9 +2938,9 @@ public class AudioService extends IAudioService.Stub {
     private boolean isInCommunication() {
         boolean IsInCall = false;
 
-        TelecommManager telecommManager =
-                (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
-        IsInCall = telecommManager.isInCall();
+        TelecomManager telecomManager =
+                (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+        IsInCall = telecomManager.isInCall();
 
         return (IsInCall || getMode() == AudioManager.MODE_IN_COMMUNICATION);
     }

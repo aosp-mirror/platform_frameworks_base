@@ -40,7 +40,7 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
-import android.telecomm.TelecommManager;
+import android.telecom.TelecomManager;
 import android.util.Log;
 import android.util.Slog;
 
@@ -346,8 +346,8 @@ public class ZenModeHelper {
 
     private boolean isDefaultPhoneApp(String pkg) {
         if (mDefaultPhoneApp == null) {
-            final TelecommManager telecomm =
-                    (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
+            final TelecomManager telecomm =
+                    (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
             mDefaultPhoneApp = telecomm != null ? telecomm.getDefaultPhoneApp() : null;
             if (DEBUG) Slog.d(TAG, "Default phone app: " + mDefaultPhoneApp);
         }

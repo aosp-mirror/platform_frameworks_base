@@ -19,7 +19,7 @@ package com.android.ims;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telecomm.VideoProfile;
+import android.telecom.VideoProfile;
 
 import com.android.internal.telephony.PhoneConstants;
 
