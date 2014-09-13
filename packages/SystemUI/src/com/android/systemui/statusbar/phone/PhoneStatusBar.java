@@ -4079,7 +4079,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void requestDoze(DozeService dozeService) {
             if (dozeService == null) return;
-            dozeService.stayAwake(PROCESSING_TIME);
             mHandler.obtainMessage(H.REQUEST_DOZE, dozeService).sendToTarget();
         }
 
@@ -4094,7 +4093,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void dozingStopped(DozeService dozeService) {
             if (dozeService == null) return;
-            dozeService.stayAwake(PROCESSING_TIME);
             mHandler.obtainMessage(H.DOZING_STOPPED, dozeService).sendToTarget();
         }
 

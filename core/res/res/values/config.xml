@@ -1284,6 +1284,10 @@
          Doze dreams will run whenever the power manager is in a dozing state. -->
     <string name="config_dozeComponent"></string>
 
+    <!-- If true, the doze component is not started until after the screen has been
+         turned off and the screen off animation has been performed. -->
+    <bool name="config_dozeAfterScreenOff">false</bool>
+
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
 
