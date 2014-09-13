@@ -410,7 +410,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void commit(IntentSender statusReceiver) {
         Preconditions.checkNotNull(statusReceiver);
 
+        final boolean wasSealed;
         synchronized (mLock) {
+            wasSealed = mSealed;
             if (!mSealed) {
                 // Verify that all writers are hands-off
                 for (FileBridge bridge : mBridges) {
@@ -418,17 +420,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         throw new SecurityException("Files still open");
                     }
                 }
-
-                // Persist the fact that we've sealed ourselves to prevent
-                // mutations of any hard links we create.
                 mSealed = true;
-                mCallback.onSessionSealed(this);
             }
+
+            // Client staging is fully done at this point
+            mClientProgress = 1f;
+            computeProgressLocked(true);
         }
 
-        // Client staging is fully done at this point
-        mClientProgress = 1f;
-        computeProgressLocked(true);
+        if (!wasSealed) {
+            // Persist the fact that we've sealed ourselves to prevent
+            // mutations of any hard links we create. We do this without holding
+            // the session lock, since otherwise it's a lock inversion.
+            mCallback.onSessionSealedBlocking(this);
+        }
 
         // This ongoing commit should keep session active, even though client
         // will probably close their end.
