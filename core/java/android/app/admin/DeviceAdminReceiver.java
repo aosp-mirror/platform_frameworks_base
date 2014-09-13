@@ -221,6 +221,12 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
+            "android.app.action.PROFILE_PROVISIONING_COMPLETE";
+
+    /**
+     * Do not use, replaced by {@link #ACTION_PROFILE_PROVISIONING_COMPLETE}
+     */
+    private static final String LEGACY_ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.ACTION_PROFILE_PROVISIONING_COMPLETE";
 
     /**
@@ -430,6 +436,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_PASSWORD_EXPIRING.equals(action)) {
             onPasswordExpiring(context, intent);
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
+            onProfileProvisioningComplete(context, intent);
+        // TODO: remove when nobody depends on this 
+        } else if (LEGACY_ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_LOCK_TASK_ENTERING.equals(action)) {
             String pkg = intent.getStringExtra(EXTRA_LOCK_TASK_PACKAGE);
