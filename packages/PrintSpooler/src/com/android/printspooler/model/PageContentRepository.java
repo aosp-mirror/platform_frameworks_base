@@ -345,7 +345,7 @@ public final class PageContentRepository {
             Iterator<Map.Entry<Integer, RenderedPage>> iterator =
                     mRenderedPages.entrySet().iterator();
             while (iterator.hasNext()) {
-                iterator.next().getValue().recycle();
+                iterator.next();
                 iterator.remove();
             }
         }
@@ -423,10 +423,6 @@ public final class PageContentRepository {
 
         public int getSizeInBytes() {
             return content.getBitmap().getByteCount();
-        }
-
-        public void recycle() {
-            content.getBitmap().recycle();
         }
 
         public void erase() {
@@ -738,7 +734,6 @@ public final class PageContentRepository {
                                 + " with different size.");
                     }
                     mPageContentCache.removeRenderedPage(mPageIndex);
-                    mRenderedPage.recycle();
                     mRenderedPage = null;
                 }
 
@@ -762,7 +757,6 @@ public final class PageContentRepository {
                             Log.i(LOG_TAG, "Recycling bitmap for page: " + mPageIndex
                                    + " with different size.");
                         }
-                        renderedPage.recycle();
                         continue;
                     }
 
