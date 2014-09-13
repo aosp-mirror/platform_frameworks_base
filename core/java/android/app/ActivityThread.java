@@ -122,6 +122,7 @@ import java.util.regex.Pattern;
 import libcore.io.DropBox;
 import libcore.io.EventLogger;
 import libcore.io.IoUtils;
+import libcore.net.event.NetworkEventDispatcher;
 
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
@@ -827,6 +828,9 @@ public final class ActivityThread {
         public void clearDnsCache() {
             // a non-standard API to get this to libcore
             InetAddress.clearDnsCache();
+            // Allow libcore to perform the necessary actions as it sees fit upon a network
+            // configuration change.
+            NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
         }
 
         public void setHttpProxy(String host, String port, String exclList, Uri pacFileUrl) {
