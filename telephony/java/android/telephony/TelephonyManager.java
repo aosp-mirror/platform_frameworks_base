@@ -26,9 +26,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
-import android.util.Pair;
 
-import com.android.internal.telecomm.ITelecommService;
+import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -62,8 +61,6 @@ import java.util.regex.Pattern;
  */
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
-
-    private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
     private static ITelephonyRegistry sRegistry;
 
@@ -2177,8 +2174,8 @@ public class TelephonyManager {
     /**
     * @hide
     */
-    private ITelecommService getTelecommService() {
-        return ITelecommService.Stub.asInterface(ServiceManager.getService(TELECOMM_SERVICE_NAME));
+    private ITelecomService getTelecomService() {
+        return ITelecomService.Stub.asInterface(ServiceManager.getService(Context.TELECOM_SERVICE));
     }
 
     //
@@ -3182,9 +3179,9 @@ public class TelephonyManager {
     @SystemApi
     public void silenceRinger() {
         try {
-            getTelecommService().silenceRinger();
+            getTelecomService().silenceRinger();
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#silenceRinger", e);
+            Log.e(TAG, "Error calling ITelecomService#silenceRinger", e);
         }
     }
 
