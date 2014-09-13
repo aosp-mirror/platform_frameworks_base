@@ -7672,16 +7672,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void installPackageAsUser(String originPath, IPackageInstallObserver2 observer,
             int installFlags, String installerPackageName, VerificationParams verificationParams,
             String packageAbiOverride, int userId) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
-                null);
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "installPackage " + userId);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
 
-        final File originFile = new File(originPath);
-        final int uid = Binder.getCallingUid();
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, true, true, "installPackageAsUser");
+
         if (isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             try {
                 if (observer != null) {
@@ -7692,6 +7687,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+            installFlags |= PackageManager.INSTALL_FROM_ADB;
+
+        } else {
+            // Caller holds INSTALL_PACKAGES permission, so we're less strict
+            // about installerPackageName.
+
+            installFlags &= ~PackageManager.INSTALL_FROM_ADB;
+            installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+        }
+
         UserHandle user;
         if ((installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
             user = UserHandle.ALL;
@@ -7699,22 +7705,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             user = new UserHandle(userId);
         }
 
-        final int filteredInstallFlags;
-        if (uid == Process.SHELL_UID || uid == 0) {
-            if (DEBUG_INSTALL) {
-                Slog.v(TAG, "Install from ADB");
-            }
-            filteredInstallFlags = installFlags | PackageManager.INSTALL_FROM_ADB;
-        } else {
-            filteredInstallFlags = installFlags & ~PackageManager.INSTALL_FROM_ADB;
-        }
+        verificationParams.setInstallerUid(callingUid);
 
-        verificationParams.setInstallerUid(uid);
-
+        final File originFile = new File(originPath);
         final OriginInfo origin = OriginInfo.fromUntrustedFile(originFile);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(origin, observer, filteredInstallFlags,
+        msg.obj = new InstallParams(origin, observer, installFlags,
                 installerPackageName, verificationParams, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }
