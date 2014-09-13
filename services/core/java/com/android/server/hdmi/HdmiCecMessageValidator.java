@@ -145,7 +145,9 @@ public final class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_OSD_STRING, maxLengthValidator, DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_OSD_NAME, maxLengthValidator, DEST_DIRECT);
 
-        // TODO: Handle messages for the Device Menu Control.
+        // Messages for the Device Menu Control.
+        addValidationInfo(Constants.MESSAGE_MENU_REQUEST, oneByteValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_MENU_STATUS, oneByteValidator, DEST_DIRECT);
 
         // Messages for the Remote Control Passthrough.
         // TODO: Parse the first parameter and determine if it can have the next parameter.
