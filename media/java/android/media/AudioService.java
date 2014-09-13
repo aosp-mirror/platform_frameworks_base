@@ -76,6 +76,7 @@ import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
@@ -451,11 +452,6 @@ public class AudioService extends IAudioService.Stub {
     private Looper mSoundPoolLooper = null;
     // volume applied to sound played with playSoundEffect()
     private static int sSoundEffectVolumeDb;
-    // getActiveStreamType() will return:
-    // - STREAM_NOTIFICATION on tablets during this period after a notification stopped
-    // - STREAM_MUSIC on phones during this period after music or talkback/voice search prompt
-    // stopped
-    private static final int DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS = 5000;
     // previous volume adjustment direction received by checkForRingerModeChange()
     private int mPrevVolDirection = AudioManager.ADJUST_SAME;
     // Keyguard manager proxy
@@ -683,6 +679,8 @@ public class AudioService extends IAudioService.Stub {
                 0,
                 null,
                 SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
+
+        StreamOverride.init(mContext);
     }
 
     private void createAudioSystemThread() {
@@ -2972,7 +2970,7 @@ public class AudioService extends IAudioService.Stub {
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                if (isAfMusicActiveRecently(StreamOverride.sDelayMs)) {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
@@ -3004,13 +3002,13 @@ public class AudioService extends IAudioService.Stub {
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_NOTIFICATION,
-                    DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS) ||
+                    StreamOverride.sDelayMs) ||
                     AudioSystem.isStreamActive(AudioSystem.STREAM_RING,
-                            DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                            StreamOverride.sDelayMs)) {
                 if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                 return AudioSystem.STREAM_NOTIFICATION;
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                if (isAfMusicActiveRecently(StreamOverride.sDelayMs)) {
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
                 } else {
@@ -5108,6 +5106,47 @@ public class AudioService extends IAudioService.Stub {
     @Override
     public boolean isHdmiSystemAudioSupported() {
         return mHdmiSystemAudioSupported;
+    }
+
+    //==========================================================================================
+    // Accessibility: taking touch exploration into account for selecting the default
+    //   stream override timeout when adjusting volume
+    //==========================================================================================
+    private static class StreamOverride
+            implements AccessibilityManager.TouchExplorationStateChangeListener {
+
+        // AudioService.getActiveStreamType() will return:
+        // - STREAM_NOTIFICATION on tablets during this period after a notification stopped
+        // - STREAM_MUSIC on phones during this period after music or talkback/voice search prompt
+        // stopped
+        private static final int DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS = 5000;
+        private static final int TOUCH_EXPLORE_STREAM_TYPE_OVERRIDE_DELAY_MS = 1000;
+
+        static int sDelayMs;
+
+        static void init(Context ctxt) {
+            AccessibilityManager accessibilityManager =
+                    (AccessibilityManager) ctxt.getSystemService(Context.ACCESSIBILITY_SERVICE);
+            updateDefaultStreamOverrideDelay(
+                    accessibilityManager.isTouchExplorationEnabled());
+            accessibilityManager.addTouchExplorationStateChangeListener(
+                    new StreamOverride());
+        }
+
+        @Override
+        public void onTouchExplorationStateChanged(boolean enabled) {
+            updateDefaultStreamOverrideDelay(enabled);
+        }
+
+        private static void updateDefaultStreamOverrideDelay(boolean touchExploreEnabled) {
+            if (touchExploreEnabled) {
+                sDelayMs = TOUCH_EXPLORE_STREAM_TYPE_OVERRIDE_DELAY_MS;
+            } else {
+                sDelayMs = DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS;
+            }
+            if (DEBUG_VOL) Log.d(TAG, "Touch exploration enabled=" + touchExploreEnabled
+                    + " stream override delay is now " + sDelayMs + " ms");
+        }
     }
 
     //==========================================================================================
