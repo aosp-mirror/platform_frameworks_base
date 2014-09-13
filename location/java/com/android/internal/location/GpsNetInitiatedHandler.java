@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -110,6 +111,9 @@ public class GpsNetInitiatedHandler {
     // Set to true if the phone is having emergency call.
     private volatile boolean mIsInEmergency;
 
+    // If Location function is enabled.
+    private volatile boolean mIsLocationEnabled = false;
+
     private final INetInitiatedListener mNetInitiatedListener;
 
     // Set to true if string from HAL is encoded as Hex, e.g., "3F0039"
@@ -132,7 +136,7 @@ public class GpsNetInitiatedHandler {
     };
 
     public static class GpsNiResponse {
-        /* User reponse, one of the values in GpsUserResponseType */
+        /* User response, one of the values in GpsUserResponseType */
         int userResponse;
         /* Optional extra data to pass with the user response */
         Bundle extras;
@@ -154,8 +158,11 @@ public class GpsNetInitiatedHandler {
                        Emergency call back mode will be checked by reading system properties
                        when necessary: SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE)
                 */
-                mIsInEmergency |= PhoneNumberUtils.isEmergencyNumber(phoneNumber);
-                if (DEBUG) Log.v(TAG, "ACTION_NEW_OUTGOING_CALL - " + mIsInEmergency);
+                setInEmergency(PhoneNumberUtils.isEmergencyNumber(phoneNumber));
+                if (DEBUG) Log.v(TAG, "ACTION_NEW_OUTGOING_CALL - " + getInEmergency());
+            } else if (action.equals(LocationManager.MODE_CHANGED_ACTION)) {
+                updateLocationMode();
+                if (DEBUG) Log.d(TAG, "location enabled :" + getLocationEnabled());
             }
         }
     };
@@ -179,8 +186,9 @@ public class GpsNetInitiatedHandler {
             mNetInitiatedListener = netInitiatedListener;
         }
 
-        mIsSuplEsEnabled = isSuplEsEnabled;
+        setSuplEsEnabled(isSuplEsEnabled);
         mLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        updateLocationMode();
         mTelephonyManager =
             (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -190,7 +198,7 @@ public class GpsNetInitiatedHandler {
                 if (DEBUG) Log.d(TAG, "onCallStateChanged(): state is "+ state);
                 // listening for emergency call ends
                 if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    mIsInEmergency = false;
+                    setInEmergency(false);
                 }
             }
         };
@@ -198,27 +206,65 @@ public class GpsNetInitiatedHandler {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
+        intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
         mContext.registerReceiver(mBroadcastReciever, intentFilter);
     }
 
-    public void setSuplEsEnablement(boolean isEnabled)
-    {
+    public void setSuplEsEnabled(boolean isEnabled) {
         mIsSuplEsEnabled = isEnabled;
     }
 
+    public boolean getSuplEsEnabled() {
+        return mIsSuplEsEnabled;
+    }
+
+    /**
+     * Updates Location enabler based on location setting.
+     */
+    public void updateLocationMode() {
+        mIsLocationEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    /**
+     * Checks if user agreed to use location.
+     */
+    public boolean getLocationEnabled() {
+        return mIsLocationEnabled;
+    }
+
+    // Note: Currently, there are two mechanisms involved to determine if a
+    // phone is in emergency mode:
+    // 1. If the user is making an emergency call, this is provided by activly
+    //    monitoring the outgoing phone number;
+    // 2. If the device is in a emergency callback state, this is provided by
+    //    system properties.
+    // If either one of above exists, the phone is considered in an emergency
+    // mode. Because of this complexity, we need to be careful about how to set
+    // and clear the emergency state.
+    public void setInEmergency(boolean isInEmergency) {
+        mIsInEmergency = isInEmergency;
+    }
+
+    public boolean getInEmergency() {
+        boolean isInEmergencyCallback = Boolean.parseBoolean(
+                SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE));
+        return mIsInEmergency || isInEmergencyCallback;
+    }
+
+
     // Handles NI events from HAL
-    public void handleNiNotification(GpsNiNotification notif)
-    {
+    public void handleNiNotification(GpsNiNotification notif) {
         if (DEBUG) Log.d(TAG, "in handleNiNotification () :"
                         + " notificationId: " + notif.notificationId
                         + " requestorId: " + notif.requestorId
                         + " text: " + notif.text
-                        + " mIsSuplEsEnabled" + mIsSuplEsEnabled);
+                        + " mIsSuplEsEnabled" + getSuplEsEnabled()
+                        + " mIsLocationEnabled" + getLocationEnabled());
 
-        if (mIsSuplEsEnabled == false) {
-            handleNi(notif);
-        } else {
+        if (getSuplEsEnabled()) {
             handleNiInEs(notif);
+        } else {
+            handleNi(notif);
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -240,9 +286,18 @@ public class GpsNetInitiatedHandler {
                         + " needNotify: " + notif.needNotify
                         + " needVerify: " + notif.needVerify
                         + " privacyOverride: " + notif.privacyOverride
-                        + " mPopupImmediately: " + mPopupImmediately);
+                        + " mPopupImmediately: " + mPopupImmediately
+                        + " mInEmergency: " + getInEmergency());
 
-        // legacy behaviour
+        if (getLocationEnabled() && !getInEmergency()) {
+            // Location is currently disabled, ignore all NI requests.
+            try {
+                mNetInitiatedListener.sendNiResponse(notif.notificationId,
+                                                     GPS_NI_RESPONSE_IGNORE);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in sendNiResponse");
+            }
+        }
         if (notif.needNotify) {
         // If NI does not need verify or the dialog is not requested
         // to pop up immediately, the dialog box will not pop up.
@@ -274,9 +329,6 @@ public class GpsNetInitiatedHandler {
                     + " notificationId: " + notif.notificationId);
 
         // UE is in emergency mode when in emergency call mode or in emergency call back mode
-        boolean isUEInEmergencyMode = mIsInEmergency ||
-            Boolean.parseBoolean(SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE));
-
         /*
            1. When SUPL ES bit is off and UE is not in emergency mode:
                   Call handleNi() to do legacy behaviour.
@@ -288,7 +340,7 @@ public class GpsNetInitiatedHandler {
                   Ignore the emergency SUPL INIT.
         */
         boolean isNiTypeES = (notif.niType == GPS_NI_TYPE_EMERGENCY_SUPL);
-        if (isNiTypeES != isUEInEmergencyMode) {
+        if (isNiTypeES != getInEmergency()) {
             try {
                 mNetInitiatedListener.sendNiResponse(notif.notificationId,
                                                      GPS_NI_RESPONSE_IGNORE);
