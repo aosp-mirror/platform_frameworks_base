@@ -1785,6 +1785,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private boolean isLiveNetworkAgent(NetworkAgentInfo nai, String msg) {
+        if (nai.network == null) return false;
         final NetworkAgentInfo officialNai;
         synchronized (mNetworkForNetId) {
             officialNai = mNetworkForNetId.get(nai.network.netId);
@@ -1924,12 +1925,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     break;
                 }
-                case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
+                case NetworkMonitor.EVENT_NETWORK_TESTED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     if (isLiveNetworkAgent(nai, "EVENT_NETWORK_VALIDATED")) {
-                        if (DBG) log("Validated " + nai.name());
-                        nai.validated = true;
-                        rematchNetworkAndRequests(nai);
+                        boolean valid = (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
+                        if (valid) {
+                            if (DBG) log("Validated " + nai.name());
+                            nai.validated = true;
+                            rematchNetworkAndRequests(nai);
+                        }
+                        updateInetCondition(nai, valid);
                     }
                     break;
                 }
@@ -4714,6 +4719,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 rematchNetworkAndRequests(nai);
             }
         }
+    }
+
+    private void updateInetCondition(NetworkAgentInfo nai, boolean valid) {
+        // Don't bother updating until we've graduated to validated at least once.
+        if (!nai.validated) return;
+        // For now only update icons for default connection.
+        // TODO: Update WiFi and cellular icons separately. b/17237507
+        if (!isDefaultNetwork(nai)) return;
+
+        int newInetCondition = valid ? 100 : 0;
+        // Don't repeat publish.
+        if (newInetCondition == mDefaultInetConditionPublished) return;
+
+        mDefaultInetConditionPublished = newInetCondition;
+        sendInetConditionBroadcast(nai.networkInfo);
     }
 
     private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo newInfo) {
