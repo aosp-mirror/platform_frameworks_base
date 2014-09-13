@@ -46,11 +46,7 @@ import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
-import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
@@ -101,7 +97,6 @@ import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
@@ -120,9 +115,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -230,6 +223,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         sApplicationLaunchKeyCategories.append(
                 KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
     }
+
+    /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
+    static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
     /**
      * Lock protecting internal state.  Must not call out into window
@@ -4768,7 +4764,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (DEBUG_WAKEUP) Slog.d(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
             mKeyguardDrawComplete = true;
         }
-        mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback, 500);
+        mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback,
+                WAITING_FOR_DRAWN_TIMEOUT);
     }
 
     // Called on the mHandler thread.
