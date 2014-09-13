@@ -20,6 +20,7 @@ import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -51,6 +52,11 @@ public class TransitionValues {
      * The set of values tracked by transitions for this scene
      */
     public final Map<String, Object> values = new ArrayMap<String, Object>();
+
+    /**
+     * The Transitions that targeted this view.
+     */
+    final ArrayList<Transition> targetedTransitions = new ArrayList<Transition>();
 
     @Override
     public boolean equals(Object other) {
