@@ -36563,7 +36563,6 @@ package android.webkit {
     method public abstract java.util.Map<java.lang.String, java.lang.String> getRequestHeaders();
     method public abstract android.net.Uri getUrl();
     method public abstract boolean hasGesture();
-    method public abstract boolean hasUserGestureInsecure();
     method public abstract boolean isForMainFrame();
   }
 
