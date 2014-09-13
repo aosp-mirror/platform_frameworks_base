@@ -329,7 +329,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 @Override
                 public void run() {
                     if (mAnimations++ < MIN_ANIMATION_FRAMES) {
-                        getDecor().postOnAnimation(this);
+                        View decorView = getDecor();
+                        if (decorView != null) {
+                            decorView.postOnAnimation(this);
+                        }
                     } else if (mResultReceiver != null) {
                         mResultReceiver.send(MSG_HIDE_SHARED_ELEMENTS, null);
                         mResultReceiver = null; // all done sending messages.
