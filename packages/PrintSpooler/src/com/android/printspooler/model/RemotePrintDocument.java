@@ -135,7 +135,7 @@ public final class RemotePrintDocument {
     private final DeathRecipient mDeathRecipient = new DeathRecipient() {
         @Override
         public void binderDied() {
-            mAdapterDeathObserver.onDied();
+            notifyPrintingAppDied();
         }
     };
 
@@ -180,7 +180,6 @@ public final class RemotePrintDocument {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error calling start()", re);
             mState = STATE_FAILED;
-            mAdapterDeathObserver.onDied();
         }
     }
 
@@ -269,7 +268,6 @@ public final class RemotePrintDocument {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error calling finish()", re);
             mState = STATE_FAILED;
-            mAdapterDeathObserver.onDied();
         }
     }
 
@@ -1108,6 +1106,15 @@ public final class RemotePrintDocument {
         }
     }
 
+    private void notifyPrintingAppDied() {
+        new Handler(mLooper).post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapterDeathObserver.onDied();
+            }
+        });
+    }
+
     private static final class PrintDocumentAdapterObserver
             extends IPrintDocumentAdapterObserver.Stub {
         private final WeakReference<RemotePrintDocument> mWeakDocument;
@@ -1120,12 +1127,7 @@ public final class RemotePrintDocument {
         public void onDestroy() {
             final RemotePrintDocument document = mWeakDocument.get();
             if (document != null) {
-                new Handler(document.mLooper).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        document.mAdapterDeathObserver.onDied();
-                    }
-                });
+                document.notifyPrintingAppDied();
             }
         }
     }
