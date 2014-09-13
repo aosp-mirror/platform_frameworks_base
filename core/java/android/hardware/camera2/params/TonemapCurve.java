@@ -81,7 +81,8 @@ public final class TonemapCurve {
      * <p>Values are stored as a contiguous array of {@code (Pin, Pout)} points.</p>
      *
      * <p>All parameters may have independent length but should have at most
-     * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS} * {@value #POINT_SIZE} elements.</p>
+     * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS} * {@value #POINT_SIZE} elements and
+     * at least 2 * {@value #POINT_SIZE} elements.</p>
      *
      * <p>All sub-elements must be in the inclusive range of
      * [{@value #LEVEL_BLACK}, {@value #LEVEL_WHITE}].</p>
@@ -109,6 +110,10 @@ public final class TonemapCurve {
         checkArgumentArrayLengthDivisibleBy(red, POINT_SIZE, "red");
         checkArgumentArrayLengthDivisibleBy(green, POINT_SIZE, "green");
         checkArgumentArrayLengthDivisibleBy(blue, POINT_SIZE, "blue");
+
+        checkArgumentArrayLengthNoLessThan(red, MIN_CURVE_LENGTH, "red");
+        checkArgumentArrayLengthNoLessThan(green, MIN_CURVE_LENGTH, "green");
+        checkArgumentArrayLengthNoLessThan(blue, MIN_CURVE_LENGTH, "blue");
 
         checkArrayElementsInRange(red, LEVEL_BLACK, LEVEL_WHITE, "red");
         checkArrayElementsInRange(green, LEVEL_BLACK, LEVEL_WHITE, "green");
@@ -138,6 +143,14 @@ public final class TonemapCurve {
         }
 
         return colorChannel;
+    }
+
+    private static void checkArgumentArrayLengthNoLessThan(float[] array, int minLength,
+            String arrayName) {
+        if (array.length < minLength) {
+            throw new IllegalArgumentException(arrayName + " size must be at least "
+                    + minLength);
+        }
     }
 
     /**
@@ -270,6 +283,47 @@ public final class TonemapCurve {
         return mHashCode;
     }
 
+    /**
+     * Return the TonemapCurve as a string representation.
+     *
+     * <p> {@code "TonemapCurve{R:[(%f, %f), (%f, %f) ... (%f, %f)], G:[(%f, %f), (%f, %f) ...
+     * (%f, %f)], B:[(%f, %f), (%f, %f) ... (%f, %f)]}"},
+     * where each {@code (%f, %f)} respectively represents one point of the corresponding
+     * tonemap curve. </p>
+     *
+     * @return string representation of {@link TonemapCurve}
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("TonemapCurve{");
+        sb.append("R:");
+        sb.append(curveToString(CHANNEL_RED));
+        sb.append(", G:");
+        sb.append(curveToString(CHANNEL_GREEN));
+        sb.append(", B:");
+        sb.append(curveToString(CHANNEL_BLUE));
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private String curveToString(int colorChannel) {
+        checkArgumentColorChannel(colorChannel);
+        StringBuilder sb = new StringBuilder("[");
+        float[] curve = getCurve(colorChannel);
+        int pointCount = curve.length / POINT_SIZE;
+        for (int i = 0, j = 0; i < pointCount; i++, j += 2) {
+            sb.append("(");
+            sb.append(curve[j]);
+            sb.append(", ");
+            sb.append(curve[j+1]);
+            sb.append("), ");
+        }
+        // trim extra ", " at the end. Guaranteed to work because pointCount >= 2
+        sb.setLength(sb.length() - 2);
+        sb.append("]");
+        return sb.toString();
+    }
+
     private float[] getCurve(int colorChannel) {
         switch (colorChannel) {
             case CHANNEL_RED:
@@ -285,6 +339,8 @@ public final class TonemapCurve {
 
     private final static int OFFSET_POINT_IN = 0;
     private final static int OFFSET_POINT_OUT = 1;
+    private final static int TONEMAP_MIN_CURVE_POINTS = 2;
+    private final static int MIN_CURVE_LENGTH = TONEMAP_MIN_CURVE_POINTS * POINT_SIZE;
 
     private final float[] mRed;
     private final float[] mGreen;
@@ -292,4 +348,4 @@ public final class TonemapCurve {
 
     private int mHashCode;
     private boolean mHashCalculated = false;
-};
+}
