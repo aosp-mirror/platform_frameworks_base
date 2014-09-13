@@ -26,7 +26,6 @@ import android.os.Message;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import com.android.internal.os.SomeArgs;
-import com.android.printspooler.model.PrintSpoolerService;
 
 import java.util.ArrayList;
 import java.util.List;
