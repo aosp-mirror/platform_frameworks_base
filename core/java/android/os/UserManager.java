@@ -998,6 +998,7 @@ public class UserManager {
      * Returns a file descriptor for the user's photo. PNG data can be read from this file.
      * @param userHandle the user whose photo we want to read.
      * @return a {@link Bitmap} of the user's photo, or null if there's no photo.
+     * @see com.android.internal.util.UserIcons#getDefaultUserIcon for a default.
      * @hide
      */
     public Bitmap getUserIcon(int userHandle) {

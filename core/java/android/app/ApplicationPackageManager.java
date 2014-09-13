@@ -66,6 +66,7 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.UserIcons;
 
 import dalvik.system.VMRuntime;
 
@@ -1660,7 +1661,11 @@ final class ApplicationPackageManager extends PackageManager {
      */
     public Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
         if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
-            return new BitmapDrawable(getUserManager().getUserIcon(itemInfo.showUserIcon));
+            Bitmap bitmap = getUserManager().getUserIcon(itemInfo.showUserIcon);
+            if (bitmap == null) {
+                return UserIcons.getDefaultUserIcon(itemInfo.showUserIcon, /* light= */ false);
+            }
+            return new BitmapDrawable(bitmap);
         }
         Drawable dr = null;
         if (itemInfo.packageName != null) {
