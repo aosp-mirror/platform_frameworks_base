@@ -1345,6 +1345,22 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void sendStandby(final int deviceType, final int deviceId) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDevice device = mCecController.getLocalDevice(deviceType);
+                    if (device == null) {
+                        Slog.w(TAG, "Local device not available");
+                        return;
+                    }
+                    device.sendStandby(deviceId);
+                }
+            });
+        }
+
+        @Override
         public void setHdmiRecordListener(IHdmiRecordListener listener) {
             HdmiControlService.this.setHdmiRecordListener(listener);
         }
@@ -1869,9 +1885,12 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeVendorCommandListeners(int deviceType, int srcAddress, byte[] params,
+    boolean invokeVendorCommandListeners(int deviceType, int srcAddress, byte[] params,
             boolean hasVendorId) {
         synchronized (mLock) {
+            if (mVendorCommandListenerRecords.isEmpty()) {
+                return false;
+            }
             for (VendorCommandListenerRecord record : mVendorCommandListenerRecords) {
                 if (record.mDeviceType != deviceType) {
                     continue;
@@ -1882,6 +1901,7 @@ public final class HdmiControlService extends SystemService {
                     Slog.e(TAG, "Failed to notify vendor command reception", e);
                 }
             }
+            return true;
         }
     }
 
