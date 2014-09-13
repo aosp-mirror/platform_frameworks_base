@@ -33,7 +33,35 @@ import java.util.Set;
 
 /**
  * A class to encapsulate a collection of attributes describing information about an audio
- * player or recorder.
+ * stream.
+ * <p><code>AudioAttributes</code> supersede the notion of stream types (see for instance
+ * {@link AudioManager#STREAM_MUSIC} or {@link AudioManager#STREAM_ALARM}) for defining the
+ * behavior of audio playback. Attributes allow an application to specify more information than is
+ * conveyed in a stream type by allowing the application to define:
+ * <ul>
+ * <li>usage: "why" you are playing a sound, what is this sound used for. This is achieved with
+ *     the "usage" information. Examples of usage are {@link #USAGE_MEDIA} and {@link #USAGE_ALARM}.
+ *     These two examples are the closest to stream types, but more detailed use cases are
+ *     available. Usage information is more expressive than a stream type, and allows certain
+ *     platforms or routing policies to use this information for more refined volume or routing
+ *     decisions. Usage is the most important information to supply in <code>AudioAttributes</code>
+ *     and it is recommended to build any instance with this information supplied, see
+ *     {@link AudioAttributes.Builder} for exceptions.</li>
+ * <li>content type: "what" you are playing. The content type expresses the general category of
+ *     the content. This information is optional. But in case it is known (for instance
+ *     {@link #CONTENT_TYPE_MOVIE} for a movie streaming service or {@link #CONTENT_TYPE_MUSIC} for
+ *     a music playback application) this information might be used by the audio framework to
+ *     selectively configure some audio post-processing blocks.</li>
+ * <li>flags: "how" is playback to be affected, see the flag definitions for the specific playback
+ *     behaviors they control. </li>
+ * </ul>
+ * <p><code>AudioAttributes</code> are used for example in one of the {@link AudioTrack}
+ * constructors (see {@link AudioTrack#AudioTrack(AudioAttributes, AudioFormat, int, int, int)}),
+ * to configure a {@link MediaPlayer}
+ * (see {@link MediaPlayer#setAudioAttributes(AudioAttributes)} or a
+ * {@link android.app.Notification} (see {@link android.app.Notification#audioAttributes}). An
+ * <code>AudioAttributes</code> instance is built through its builder,
+ * {@link AudioAttributes.Builder}.
  */
 public final class AudioAttributes implements Parcelable {
     private final static String TAG = "AudioAttributes";
@@ -237,6 +265,22 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * Builder class for {@link AudioAttributes} objects.
+     * <p> Here is an example where <code>Builder</code> is used to define the
+     * {@link AudioAttributes} to be used by a new <code>AudioTrack</code> instance:
+     *
+     * <pre class="prettyprint">
+     * AudioTrack myTrack = new AudioTrack(
+     *         new AudioAttributes.Builder()
+     *             .setUsage(AudioAttributes.USAGE_MEDIA)
+     *             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+     *             .build(),
+     *         myFormat, myBuffSize, AudioTrack.MODE_STREAM, mySession);
+     * </pre>
+     *
+     * <p>By default all types of information (usage, content type, flags) conveyed by an
+     * <code>AudioAttributes</code> instance are set to "unknown". Unknown information will be
+     * interpreted as a default value that is dependent on the context of use, for instance a
+     * {@link MediaPlayer} will use a default usage of {@link AudioAttributes#USAGE_MEDIA}.
      */
     public static class Builder {
         private int mUsage = USAGE_UNKNOWN;
@@ -247,6 +291,11 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Constructs a new Builder with the defaults.
+         * By default, usage and content type are respectively {@link AudioAttributes#USAGE_UNKNOWN}
+         * and {@link AudioAttributes#CONTENT_TYPE_UNKNOWN}, and flags are 0. It is recommended to
+         * configure the usage (with {@link #setUsage(int)}) or deriving attributes from a legacy
+         * stream type (with {@link #setLegacyStreamType(int)}) before calling {@link #build()}
+         * to override any default playback behavior in terms of routing and volume management.
          */
         public Builder() {
         }
@@ -373,7 +422,9 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
-         * Adds attributes inferred from the legacy stream types.
+         * Sets attributes as inferred from the legacy stream types.
+         * Use this method when building an {@link AudioAttributes} instance to initialize some of
+         * the attributes by information derived from a legacy stream type.
          * @param streamType one of {@link AudioManager#STREAM_VOICE_CALL},
          *   {@link AudioManager#STREAM_SYSTEM}, {@link AudioManager#STREAM_RING},
          *   {@link AudioManager#STREAM_MUSIC}, {@link AudioManager#STREAM_ALARM},
@@ -432,7 +483,6 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * @hide
-         * CANDIDATE FOR PUBLIC API
          * Sets the capture preset.
          * Use this audio attributes configuration method when building an {@link AudioRecord}
          * instance with {@link AudioRecord#AudioRecord(AudioAttributes, AudioFormat, int)}.
