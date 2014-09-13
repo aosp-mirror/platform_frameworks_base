@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -3579,7 +3580,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " for device owner");
         }
         synchronized (this) {
-            if (isDeviceProvisioned()) {
+            if (!allowedToSetDeviceOwnerOnDevice()) {
                 throw new IllegalStateException(
                         "Trying to set device owner but device is already provisioned.");
             }
@@ -3878,9 +3879,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return null;
     }
 
-    private boolean isDeviceProvisioned() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.DEVICE_PROVISIONED, 0) > 0;
+    /**
+     * Device owner can only be set on an unprovisioned device, unless it was initiated by "adb", in
+     * which case we allow it if no account is associated with the device.
+     */
+    private boolean allowedToSetDeviceOwnerOnDevice() {
+        int callingId = Binder.getCallingUid();
+        if (callingId == Process.SHELL_UID || callingId == Process.ROOT_UID) {
+            return AccountManager.get(mContext).getAccounts().length == 0;
+        } else {
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0) == 0;
+        }
     }
 
     private boolean isUserSetupComplete(int userId) {
