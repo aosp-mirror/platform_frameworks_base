@@ -631,7 +631,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int checkPackage(int uid, String packageName) {
         synchronized (this) {
-            if (getOpsLocked(uid, packageName, true) != null) {
+            if (getOpsRawLocked(uid, packageName, true) != null) {
                 return AppOpsManager.MODE_ALLOWED;
             } else {
                 return AppOpsManager.MODE_ERRORED;
@@ -769,6 +769,15 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private Ops getOpsLocked(int uid, String packageName, boolean edit) {
+        if (uid == 0) {
+            packageName = "root";
+        } else if (uid == Process.SHELL_UID) {
+            packageName = "com.android.shell";
+        }
+        return getOpsRawLocked(uid, packageName, edit);
+    }
+
+    private Ops getOpsRawLocked(int uid, String packageName, boolean edit) {
         HashMap<String, Ops> pkgOps = mUidOps.get(uid);
         if (pkgOps == null) {
             if (!edit) {
@@ -776,11 +785,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             pkgOps = new HashMap<String, Ops>();
             mUidOps.put(uid, pkgOps);
-        }
-        if (uid == 0) {
-            packageName = "root";
-        } else if (uid == Process.SHELL_UID) {
-            packageName = "com.android.shell";
         }
         Ops ops = pkgOps.get(packageName);
         if (ops == null) {
