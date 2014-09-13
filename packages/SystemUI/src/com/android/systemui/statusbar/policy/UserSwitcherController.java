@@ -16,13 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.BitmapHelper;
-import com.android.systemui.GuestResumeSessionReceiver;
-import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.tiles.UserDetailView;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
@@ -45,8 +38,15 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
+
+import com.android.internal.util.UserIcons;
+import com.android.systemui.BitmapHelper;
+import com.android.systemui.GuestResumeSessionReceiver;
+import com.android.systemui.R;
+import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -425,7 +425,8 @@ public class UserSwitcherController {
             if (item.isAddUser) {
                 return context.getDrawable(R.drawable.ic_add_circle_qs);
             }
-            return context.getDrawable(R.drawable.ic_account_circle_qs);
+            return UserIcons.getDefaultUserIcon(item.isGuest ? UserHandle.USER_NULL : item.info.id,
+                    /* light= */ true);
         }
     }
 
@@ -565,6 +566,9 @@ public class UserSwitcherController {
                 dismiss();
                 int id = mUserManager.createUser(
                         mContext.getString(R.string.user_new_user_name), 0 /* flags */).id;
+                Bitmap icon = UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
+                        id, /* light= */ false));
+                mUserManager.setUserIcon(id, icon);
                 switchToUserId(id);
             }
         }
