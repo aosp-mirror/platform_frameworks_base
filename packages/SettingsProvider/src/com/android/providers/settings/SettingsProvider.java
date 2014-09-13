@@ -789,8 +789,15 @@ public class SettingsProvider extends ContentProvider {
                             Slog.v(TAG, "putting to additional user "
                                     + mManagedProfiles.get(i).id);
                         }
-                        insertForUser(Settings.Secure.CONTENT_URI, values,
-                                mManagedProfiles.get(i).id);
+                        try {
+                            insertForUser(Settings.Secure.CONTENT_URI, values,
+                                    mManagedProfiles.get(i).id);
+                        } catch (SecurityException e) {
+                            // Temporary fix, see b/17450158
+                            Slog.w(TAG, "Cannot clone request '" + request + "' with value '"
+                                    + newValue + "' to managed profile (id "
+                                    + mManagedProfiles.get(i).id + ")", e);
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(token);
