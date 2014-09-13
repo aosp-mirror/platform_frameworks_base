@@ -107,11 +107,13 @@ public final class RemotePrintDocument {
                                         mDocumentInfo.info.getPageCount());
                             }
                             // Notify we are done.
+                            mState = STATE_UPDATED;
                             notifyUpdateCompleted();
                         }
                     }
                 } else {
                     // We always notify after a write.
+                    mState = STATE_UPDATED;
                     notifyUpdateCompleted();
                 }
                 runPendingCommand();
