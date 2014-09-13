@@ -236,6 +236,7 @@ public final class Parcel {
     private static final int EX_NULL_POINTER = -4;
     private static final int EX_ILLEGAL_STATE = -5;
     private static final int EX_NETWORK_MAIN_THREAD = -6;
+    private static final int EX_UNSUPPORTED_OPERATION = -7;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
 
     private static native int nativeDataSize(long nativePtr);
@@ -1427,6 +1428,8 @@ public final class Parcel {
             code = EX_ILLEGAL_STATE;
         } else if (e instanceof NetworkOnMainThreadException) {
             code = EX_NETWORK_MAIN_THREAD;
+        } else if (e instanceof UnsupportedOperationException) {
+            code = EX_UNSUPPORTED_OPERATION;
         }
         writeInt(code);
         StrictMode.clearGatheredViolations();
@@ -1545,6 +1548,8 @@ public final class Parcel {
                 throw new IllegalStateException(msg);
             case EX_NETWORK_MAIN_THREAD:
                 throw new NetworkOnMainThreadException();
+            case EX_UNSUPPORTED_OPERATION:
+                throw new UnsupportedOperationException(msg);
         }
         throw new RuntimeException("Unknown exception code: " + code
                 + " msg " + msg);
