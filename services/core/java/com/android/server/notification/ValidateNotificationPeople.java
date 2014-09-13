@@ -19,9 +19,11 @@ package com.android.server.notification;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
@@ -75,6 +77,9 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     // maps raw person handle to resolved person object
     private LruCache<String, LookupResult> mPeopleCache;
     private Map<Integer, Context> mUserToContextMap;
+    private Handler mHandler;
+    private ContentObserver mObserver;
+    private int mEvictionCount;
 
     public void initialize(Context context) {
         if (DEBUG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
@@ -83,6 +88,22 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         mPeopleCache = new LruCache<String, LookupResult>(PEOPLE_CACHE_SIZE);
         mEnabled = ENABLE_PEOPLE_VALIDATOR && 1 == Settings.Global.getInt(
                 mBaseContext.getContentResolver(), SETTING_ENABLE_PEOPLE_VALIDATOR, 1);
+        if (mEnabled) {
+            mHandler = new Handler();
+            mObserver = new ContentObserver(mHandler) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri, int userId) {
+                    super.onChange(selfChange, uri, userId);
+                    if (DEBUG || mEvictionCount % 100 == 0) {
+                        if (INFO) Slog.i(TAG, "mEvictionCount: " + mEvictionCount);
+                    }
+                    mPeopleCache.evictAll();
+                    mEvictionCount++;
+                }
+            };
+            mBaseContext.getContentResolver().registerContentObserver(Contacts.CONTENT_URI, true,
+                    mObserver, UserHandle.USER_ALL);
+        }
     }
 
     public RankingReconsideration process(NotificationRecord record) {
