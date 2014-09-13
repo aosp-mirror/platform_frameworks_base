@@ -41,7 +41,8 @@ BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
         , mHasStartValue(false)
         , mStartTime(0)
         , mDuration(300)
-        , mStartDelay(0) {
+        , mStartDelay(0)
+        , mMayRunAsync(true) {
 }
 
 BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
