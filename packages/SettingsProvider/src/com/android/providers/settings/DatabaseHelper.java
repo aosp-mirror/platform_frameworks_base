@@ -2609,11 +2609,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private String getOldDefaultDeviceName() {
-        return mContext.getResources().getString(R.string.def_device_name_old,
+        return mContext.getResources().getString(R.string.def_device_name,
                 Build.MANUFACTURER, Build.MODEL);
     }
 
     private String getDefaultDeviceName() {
-        return mContext.getResources().getString(R.string.def_device_name, Build.MODEL);
+        return mContext.getResources().getString(R.string.def_device_name_simple, Build.MODEL);
     }
 }
