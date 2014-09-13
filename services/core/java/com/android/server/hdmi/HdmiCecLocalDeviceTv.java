@@ -1652,6 +1652,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    protected void sendStandby(int deviceId) {
+        HdmiDeviceInfo targetDevice = mDeviceInfos.get(deviceId);
+        if (targetDevice == null) {
+            return;
+        }
+        int targetAddress = targetDevice.getLogicalAddress();
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
+    }
+
+    @Override
     protected void dump(final IndentingPrintWriter pw) {
         super.dump(pw);
         pw.println("mArcEstablished: " + mArcEstablished);
