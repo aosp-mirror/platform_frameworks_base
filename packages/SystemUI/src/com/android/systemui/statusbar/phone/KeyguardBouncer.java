@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +44,8 @@ public class KeyguardBouncer {
     private StatusBarWindowManager mWindowManager;
     private KeyguardViewBase mKeyguardView;
     private ViewGroup mRoot;
-    private boolean mFadingOut;
+    private boolean mShowingSoon;
+    private Choreographer mChoreographer = Choreographer.getInstance();
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, StatusBarWindowManager windowManager,
@@ -57,7 +59,7 @@ public class KeyguardBouncer {
 
     public void show() {
         ensureView();
-        if (mRoot.getVisibility() == View.VISIBLE) {
+        if (mRoot.getVisibility() == View.VISIBLE || mShowingSoon) {
 
             // show() updates the current security method. This is needed in case we are already
             // showing and the current security method changed.
@@ -68,10 +70,27 @@ public class KeyguardBouncer {
         // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
         // Keyguard. If we need to authenticate, show the bouncer.
         if (!mKeyguardView.dismiss()) {
+            mShowingSoon = true;
+
+            // Split up the work over multiple frames.
+            mChoreographer.postCallbackDelayed(Choreographer.CALLBACK_ANIMATION, mShowRunnable,
+                    null, 48);
+        }
+    }
+
+    private final Runnable mShowRunnable = new Runnable() {
+        @Override
+        public void run() {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.onResume();
             mKeyguardView.startAppearAnimation();
+            mShowingSoon = false;
         }
+    };
+
+    private void cancelShowRunnable() {
+        mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION, mShowRunnable, null);
+        mShowingSoon = false;
     }
 
     public void showWithDismissAction(OnDismissAction r) {
@@ -81,7 +100,8 @@ public class KeyguardBouncer {
     }
 
     public void hide(boolean destroyView) {
-        if (mKeyguardView != null) {
+        cancelShowRunnable();
+         if (mKeyguardView != null) {
             mKeyguardView.setOnDismissAction(null);
             mKeyguardView.cleanUp();
         }
@@ -107,6 +127,7 @@ public class KeyguardBouncer {
      * Reset the state of the view.
      */
     public void reset() {
+        cancelShowRunnable();
         inflateView();
     }
 
@@ -127,7 +148,7 @@ public class KeyguardBouncer {
     }
 
     public boolean isShowing() {
-        return mRoot != null && mRoot.getVisibility() == View.VISIBLE && !mFadingOut;
+        return mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE);
     }
 
     public void prepare() {
