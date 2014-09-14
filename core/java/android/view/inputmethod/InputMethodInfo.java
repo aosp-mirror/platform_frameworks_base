@@ -416,6 +416,9 @@ public final class InputMethodInfo implements Parcelable {
             return true;
         }
         try {
+            if (getIsDefaultResourceId() == 0) {
+                return false;
+            }
             final Resources res = context.createPackageContext(getPackageName(), 0).getResources();
             return res.getBoolean(getIsDefaultResourceId());
         } catch (NameNotFoundException e) {

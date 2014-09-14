@@ -79,7 +79,6 @@ public class InputMethodTest extends InstrumentationTestCase {
         assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_JA_JP, !IS_SYSTEM_READY,
                 "DummyDefaultEnKeyboardIme");
         assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_JA_JP, IS_SYSTEM_READY,
-                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
                 "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
         assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_JA_JP, IS_SYSTEM_READY,
                 "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
@@ -90,38 +89,36 @@ public class InputMethodTest extends InstrumentationTestCase {
     public void testKeyboardImes() throws Exception {
         // locale: en_US
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_US, !IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.latin", "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.latin");
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_US, IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
-                "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin");
 
         // locale: en_GB
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_GB, !IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.latin", "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.latin");
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_GB, IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
-                "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin");
 
         // locale: en_IN
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_IN, !IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.latin", "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.latin");
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_EN_IN, IS_SYSTEM_READY,
                 "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
                 "com.android.apps.inputmethod.hindi");
 
         // locale: hi
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_HI, !IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.latin", "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.latin");
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_HI, IS_SYSTEM_READY,
                 "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
                 "com.android.apps.inputmethod.hindi");
 
         // locale: ja_JP
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_JA_JP, !IS_SYSTEM_READY,
-                "com.android.apps.inputmethod.latin", "com.android.apps.inputmethod.hindi");
+                "com.android.apps.inputmethod.latin");
         assertDefaultEnabledImes(getSamplePreinstalledImes(), LOCALE_JA_JP, IS_SYSTEM_READY,
                 "com.android.apps.inputmethod.voice", "com.android.apps.inputmethod.latin",
-                "com.android.apps.inputmethod.hindi", "com.android.apps.inputmethod.japanese");
+                "com.android.apps.inputmethod.japanese");
     }
 
     @SmallTest
