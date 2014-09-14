@@ -638,6 +638,9 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         const SkPaint* paint, int flags, const SkPath* convexMask) {
+    // force matrix/clip isolation for layer
+    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+
     const int count = saveSnapshot(flags);
 
     if (!currentSnapshot()->isIgnored()) {
