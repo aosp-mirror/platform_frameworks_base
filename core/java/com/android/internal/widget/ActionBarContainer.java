@@ -39,6 +39,7 @@ public class ActionBarContainer extends FrameLayout {
     private boolean mIsTransitioning;
     private View mTabContainer;
     private View mActionBarView;
+    private View mActionContextView;
 
     private Drawable mBackground;
     private Drawable mStackedBackground;
@@ -79,6 +80,7 @@ public class ActionBarContainer extends FrameLayout {
     public void onFinishInflate() {
         super.onFinishInflate();
         mActionBarView = findViewById(com.android.internal.R.id.action_bar);
+        mActionContextView = findViewById(com.android.internal.R.id.action_context_bar);
     }
 
     public void setPrimaryBackground(Drawable bg) {
@@ -312,8 +314,16 @@ public class ActionBarContainer extends FrameLayout {
             }
         } else {
             if (mBackground != null) {
-                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
-                        mActionBarView.getRight(), mActionBarView.getBottom());
+                if (mActionBarView.getVisibility() == View.VISIBLE) {
+                    mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
+                            mActionBarView.getRight(), mActionBarView.getBottom());
+                } else if (mActionContextView != null &&
+                        mActionContextView.getVisibility() == View.VISIBLE) {
+                    mBackground.setBounds(mActionContextView.getLeft(), mActionContextView.getTop(),
+                            mActionContextView.getRight(), mActionContextView.getBottom());
+                } else {
+                    mBackground.setBounds(0, 0, 0, 0);
+                }
                 needsInvalidate = true;
             }
             mIsStacked = hasTabs;
