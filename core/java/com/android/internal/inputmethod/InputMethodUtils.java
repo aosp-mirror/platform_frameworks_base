@@ -44,6 +44,7 @@ import java.util.Locale;
 public class InputMethodUtils {
     public static final boolean DEBUG = false;
     public static final int NOT_A_SUBTYPE_ID = -1;
+    public static final String SUBTYPE_MODE_ANY = null;
     public static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     public static final String SUBTYPE_MODE_VOICE = "voice";
     private static final String TAG = "InputMethodUtils";
@@ -127,10 +128,23 @@ public class InputMethodUtils {
 
     public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
             Context context, boolean isSystemReady, ArrayList<InputMethodInfo> imis) {
-        final ArrayList<InputMethodInfo> retval = new ArrayList<InputMethodInfo>();
+        if (!isSystemReady) {
+            final ArrayList<InputMethodInfo> retval = new ArrayList<>();
+            for (int i = 0; i < imis.size(); ++i) {
+                final InputMethodInfo imi = imis.get(i);
+                if (isSystemImeThatHasEnglishKeyboardSubtype(imi)) {
+                    retval.add(imi);
+                }
+            }
+            return retval;
+        }
+
+        final ArrayList<InputMethodInfo> retval = new ArrayList<>();
         boolean auxilialyImeAdded = false;
         for (int i = 0; i < imis.size(); ++i) {
             final InputMethodInfo imi = imis.get(i);
+            // TODO: We should check isAsciiCapable instead of relying on
+            // isSystemImeThatHasEnglishKeyboardSubtype().
             if (isValidSystemDefaultIme(isSystemReady, imi, context)
                     || isSystemImeThatHasEnglishKeyboardSubtype(imi)) {
                 retval.add(imi);
@@ -139,6 +153,7 @@ public class InputMethodUtils {
                 }
             }
         }
+        // If one or more auxiliary input methods are available, OK to stop populating the list.
         if (auxilialyImeAdded) {
             return retval;
         }
@@ -164,7 +179,7 @@ public class InputMethodUtils {
             try {
                 if (imi.isDefault(context) && containsSubtypeOf(
                         imi, context.getResources().getConfiguration().locale.getLanguage(),
-                        null /* mode */)) {
+                        SUBTYPE_MODE_ANY)) {
                     return true;
                 }
             } catch (Resources.NotFoundException ex) {
@@ -179,13 +194,14 @@ public class InputMethodUtils {
     public static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
         final int N = imi.getSubtypeCount();
         for (int i = 0; i < N; ++i) {
-            if (!imi.getSubtypeAt(i).getLocale().startsWith(language)) {
+            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
+            if (!subtype.getLocale().startsWith(language)) {
                 continue;
             }
-            if(!TextUtils.isEmpty(mode) && !imi.getSubtypeAt(i).getMode().equalsIgnoreCase(mode)) {
-                continue;
+            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode) ||
+                    mode.equalsIgnoreCase(subtype.getMode())) {
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -212,8 +228,7 @@ public class InputMethodUtils {
         return subtypes;
     }
 
-    public static InputMethodInfo getMostApplicableDefaultIME(
-            List<InputMethodInfo> enabledImes) {
+    public static InputMethodInfo getMostApplicableDefaultIME(List<InputMethodInfo> enabledImes) {
         if (enabledImes == null || enabledImes.isEmpty()) {
             return null;
         }
