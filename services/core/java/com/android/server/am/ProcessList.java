@@ -124,7 +124,7 @@ final class ProcessList {
     // we have no limit on the number of service, visible, foreground, or other such
     // processes and the number of those processes does not count against the cached
     // process limit.
-    static final int MAX_CACHED_APPS = 24;
+    static final int MAX_CACHED_APPS = 32;
 
     // We allow empty processes to stick around for at most 30 minutes.
     static final long MAX_EMPTY_TIME = 30*60*1000;
@@ -138,7 +138,7 @@ final class ProcessList {
 
     // The number of cached at which we don't consider it necessary to do
     // memory trimming.
-    static final int TRIM_CACHED_APPS = ((MAX_CACHED_APPS-MAX_EMPTY_APPS)*2)/3;
+    static final int TRIM_CACHED_APPS = (MAX_CACHED_APPS-MAX_EMPTY_APPS)/3;
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_CRITICAL_THRESHOLD = 3;
@@ -300,7 +300,7 @@ final class ProcessList {
     }
 
     public static int computeEmptyProcessLimit(int totalProcessLimit) {
-        return (totalProcessLimit*2)/3;
+        return totalProcessLimit/2;
     }
 
     private static String buildOomTag(String prefix, String space, int val, int base) {

@@ -16404,8 +16404,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // send to process) since there can be an arbitrary number of stopping
                     // processes and they should soon all go into the cached state.
                     if (!r.finishing) {
-                        if (procState > ActivityManager.PROCESS_STATE_CACHED_ACTIVITY) {
-                            procState = ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
+                        if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                            procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
                         }
                     }
                     app.cached = false;
@@ -17793,7 +17793,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (DEBUG_OOM_ADJ) {
-            Slog.d(TAG, "Did OOM ADJ in " + (SystemClock.uptimeMillis()-now) + "ms");
+            if (false) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.d(TAG, "Did OOM ADJ in " + (SystemClock.uptimeMillis()-now) + "ms", here);
+            } else {
+                Slog.d(TAG, "Did OOM ADJ in " + (SystemClock.uptimeMillis()-now) + "ms");
+            }
         }
     }
 
