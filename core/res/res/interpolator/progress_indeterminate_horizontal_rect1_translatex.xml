@@ -14,12 +14,5 @@
      limitations under the License.
 -->
 
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/vector_drawable_progress_indeterminate_horizontal" >
-    <target
-        android:name="rect2_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect2" />
-    <target
-        android:name="rect1_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect1" />
-</animated-vector>
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:pathData="M 0.0,0.0 L 0.2 0 C 0.3958333333336,0.0 0.474845090492,0.206797621729 0.5916666666664,0.417082932942 C 0.7151610251224,0.639379624869 0.81625,0.974556908664 1.0,1.0 " />
