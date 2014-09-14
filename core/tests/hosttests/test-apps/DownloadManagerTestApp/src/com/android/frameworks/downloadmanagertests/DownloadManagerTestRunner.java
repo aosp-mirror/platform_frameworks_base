@@ -16,12 +16,11 @@
 
 package com.android.frameworks.downloadmanagertests;
 
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import android.util.Log;
-
-import com.android.frameworks.downloadmanagertests.DownloadManagerTestApp;
 
 import junit.framework.TestSuite;
 
@@ -57,6 +56,9 @@ public class DownloadManagerTestRunner extends InstrumentationTestRunner {
         if (externalDownloadUri != null) {
             externalDownloadUriValue = externalDownloadUri;
         }
+        // enable verbose wifi logging
+        ((WifiManager)getContext().getSystemService(Context.WIFI_SERVICE))
+            .enableVerboseLogging(1);
         super.onCreate(icicle);
     }
 
