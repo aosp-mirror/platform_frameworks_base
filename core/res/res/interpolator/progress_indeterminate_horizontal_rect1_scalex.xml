@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,5 @@
      limitations under the License.
 -->
 
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/vector_drawable_progress_indeterminate_horizontal" >
-    <target
-        android:name="rect2_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect2" />
-    <target
-        android:name="rect1_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect1" />
-</animated-vector>
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:pathData="M 0 0 L 0.3665 0 C 0.47252618112021,0.062409910275 0.61541608570164,0.5 0.68325,0.5 C 0.75475061236836,0.5 0.75725829093844,0.814510098964 1.0,1.0" />
