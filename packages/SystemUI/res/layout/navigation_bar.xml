@@ -55,7 +55,6 @@
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:scaleType="center"
-                android:background="@drawable/ripple_drawable"
                 android:contentDescription="@string/accessibility_back"
                 />
             <View 
@@ -71,7 +70,6 @@
                 systemui:keyCode="3"
                 systemui:keyRepeat="false"
                 android:layout_weight="0"
-                android:background="@drawable/ripple_drawable"
                 android:contentDescription="@string/accessibility_home"
                 />
             <View 
@@ -85,7 +83,6 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
-                android:background="@drawable/ripple_drawable"
                 android:contentDescription="@string/accessibility_recent"
                 />
             <FrameLayout
@@ -99,7 +96,6 @@
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu"
                     android:visibility="invisible"
-                    android:background="@drawable/ripple_drawable"
                     systemui:keyCode="82" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
@@ -109,8 +105,7 @@
                     android:contentDescription="@string/accessibility_ime_switch_button"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_ime_switcher_default"
-                    android:visibility="invisible"
-                    android:background="@drawable/ripple_drawable" />
+                    android:visibility="invisible" />
             </FrameLayout>
 
         </LinearLayout>
@@ -202,8 +197,7 @@
                     android:contentDescription="@string/accessibility_ime_switch_button"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_ime_switcher_default"
-                    android:visibility="invisible"
-                    android:background="@drawable/ripple_drawable" />
+                    android:visibility="invisible" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/menu"
@@ -212,7 +206,6 @@
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu_land"
                     android:visibility="invisible"
-                    android:background="@drawable/ripple_drawable"
                     systemui:keyCode="82" />
             </FrameLayout>
 
@@ -222,7 +215,6 @@
                 android:src="@drawable/ic_sysbar_recent_land"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_recent"
-                android:background="@drawable/ripple_drawable"
                 />
             <View 
                 android:layout_height="match_parent"
@@ -238,7 +230,6 @@
                 systemui:keyRepeat="false"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_home"
-                android:background="@drawable/ripple_drawable"
                 />
             <View 
                 android:layout_height="match_parent"
@@ -254,7 +245,6 @@
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
-                android:background="@drawable/ripple_drawable"
                 />
             <View
                 android:layout_height="40dp"
