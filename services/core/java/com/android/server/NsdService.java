@@ -716,8 +716,9 @@ public class NsdService extends INsdManager.Stub {
             for (String key : txtRecords.keySet()) {
                 try {
                     // TODO: Send encoded TXT record as bytes once NDC/netd supports binary data.
+                    byte[] recordValue = txtRecords.get(key);
                     cmd.appendArg(String.format(Locale.US, "%s=%s", key,
-                            new String(txtRecords.get(key), "UTF_8")));
+                            recordValue != null ? new String(recordValue, "UTF_8") : ""));
                 } catch (UnsupportedEncodingException e) {
                     Slog.e(TAG, "Failed to encode txtRecord " + e);
                 }
