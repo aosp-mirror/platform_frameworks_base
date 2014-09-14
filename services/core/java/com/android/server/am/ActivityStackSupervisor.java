@@ -350,6 +350,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
                 final int displayId = displays[displayNdx].getDisplayId();
                 ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
+                if (activityDisplay.mDisplay == null) {
+                    throw new IllegalStateException("Default Display does not exist");
+                }
                 mActivityDisplays.put(displayId, activityDisplay);
             }
 
@@ -3261,6 +3264,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             newDisplay = mActivityDisplays.get(displayId) == null;
             if (newDisplay) {
                 ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
+                if (activityDisplay.mDisplay == null) {
+                    Slog.w(TAG, "Display " + displayId + " gone before initialization complete");
+                    return;
+                }
                 mActivityDisplays.put(displayId, activityDisplay);
             }
         }
@@ -3902,8 +3909,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityDisplay() {
         }
 
+        // After instantiation, check that mDisplay is not null before using this. The alternative
+        // is for this to throw an exception if mDisplayManager.getDisplay() returns null.
         ActivityDisplay(int displayId) {
-            init(mDisplayManager.getDisplay(displayId));
+            final Display display = mDisplayManager.getDisplay(displayId);
+            if (display == null) {
+                return;
+            }
+            init(display);
         }
 
         void init(Display display) {
