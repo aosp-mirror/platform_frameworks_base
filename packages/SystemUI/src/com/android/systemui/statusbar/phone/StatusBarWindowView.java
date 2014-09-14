@@ -55,12 +55,24 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     protected boolean fitSystemWindows(Rect insets) {
         if (getFitsSystemWindows()) {
-            setPadding(insets.left, insets.top, insets.right, 0);
+            boolean changed = insets.left != getPaddingLeft()
+                    || insets.top != getPaddingTop()
+                    || insets.right != getPaddingRight()
+                    || insets.bottom != getPaddingBottom();
+            if (changed) {
+                setPadding(insets.left, insets.top, insets.right, 0);
+            }
             insets.left = 0;
             insets.top = 0;
             insets.right = 0;
         } else {
-            setPadding(0, 0, 0, 0);
+            boolean changed = getPaddingLeft() != 0
+                    || getPaddingRight() != 0
+                    || getPaddingTop() != 0
+                    || getPaddingBottom() != 0;
+            if (changed) {
+                setPadding(0, 0, 0, 0);
+            }
         }
         return false;
     }
