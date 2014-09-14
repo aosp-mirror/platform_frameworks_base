@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
@@ -609,8 +610,25 @@ public final class ActiveServices {
         mAm.updateProcessForegroundLocked(proc, anyForeground, oomAdj);
     }
 
+    public void updateServiceConnectionActivitiesLocked(ProcessRecord clientProc) {
+        ArraySet<ProcessRecord> updatedProcesses = null;
+        for (int i=0; i<clientProc.connections.size(); i++) {
+            final ConnectionRecord conn = clientProc.connections.valueAt(i);
+            final ProcessRecord proc = conn.binding.service.app;
+            if (proc == null || proc == clientProc) {
+                continue;
+            } else if (updatedProcesses == null) {
+                updatedProcesses = new ArraySet<>();
+            } else if (updatedProcesses.contains(proc)) {
+                continue;
+            }
+            updatedProcesses.add(proc);
+            updateServiceClientActivitiesLocked(proc, null, false);
+        }
+    }
+
     private boolean updateServiceClientActivitiesLocked(ProcessRecord proc,
-            ConnectionRecord modCr) {
+            ConnectionRecord modCr, boolean updateLru) {
         if (modCr != null && modCr.binding.client != null) {
             if (modCr.binding.client.activities.size() <= 0) {
                 // This connection is from a client without activities, so adding
@@ -639,7 +657,9 @@ public final class ActiveServices {
         }
         if (anyClientActivities != proc.hasClientActivities) {
             proc.hasClientActivities = anyClientActivities;
-            mAm.updateLruProcessLocked(proc, anyClientActivities, null);
+            if (updateLru) {
+                mAm.updateLruProcessLocked(proc, anyClientActivities, null);
+            }
             return true;
         }
         return false;
@@ -751,7 +771,7 @@ public final class ActiveServices {
                 b.client.hasAboveClient = true;
             }
             if (s.app != null) {
-                updateServiceClientActivitiesLocked(s.app, c);
+                updateServiceClientActivitiesLocked(s.app, c, true);
             }
             clist = mServiceConnections.get(binder);
             if (clist == null) {
@@ -1445,6 +1465,8 @@ public final class ActiveServices {
 
         requestServiceBindingsLocked(r, execInFg);
 
+        updateServiceClientActivitiesLocked(app, null, true);
+
         // If the service is in the started state, and there are no
         // pending arguments, then fake up one so its onStartCommand() will
         // be called.
@@ -1700,7 +1722,7 @@ public final class ActiveServices {
                 b.client.updateHasAboveClientLocked();
             }
             if (s.app != null) {
-                updateServiceClientActivitiesLocked(s.app, c);
+                updateServiceClientActivitiesLocked(s.app, c, true);
             }
         }
         clist = mServiceConnections.get(binder);
@@ -2077,6 +2099,19 @@ public final class ActiveServices {
                         + ": shouldUnbind=" + b.hasBound);
                 b.binder = null;
                 b.requested = b.received = b.hasBound = false;
+                // If this binding is coming from a cached process and is asking to keep
+                // the service created, then we'll kill the cached process as well -- we
+                // don't want to be thrashing around restarting processes that are only
+                // there to be cached.
+                for (int appi=b.apps.size()-1; appi>=0; appi--) {
+                    ProcessRecord proc = b.apps.keyAt(appi);
+                    if (proc != null && !proc.persistent && proc.thread != null
+                            && proc.pid != 0 && proc.pid != ActivityManagerService.MY_PID
+                            && proc.setProcState >= ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                        proc.kill("bound to service " + sr.name.flattenToShortString()
+                                + " in dying proc " + (app != null ? app.processName : "??"), true);
+                    }
+                }
             }
         }
 
@@ -2085,6 +2120,7 @@ public final class ActiveServices {
             ConnectionRecord r = app.connections.valueAt(i);
             removeConnectionLocked(r, app, null);
         }
+        updateServiceConnectionActivitiesLocked(app);
         app.connections.clear();
 
         ServiceMap smap = getServiceMap(app.userId);
