@@ -33,6 +33,7 @@ import com.android.internal.view.menu.MenuDialogHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.ActionBarContextView;
+import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorContentParent;
 import com.android.internal.widget.SwipeDismissLayout;
 
@@ -211,6 +212,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ProgressBar mHorizontalProgressBar;
 
     private int mBackgroundResource = 0;
+    private int mBackgroundFallbackResource = 0;
 
     private Drawable mBackgroundDrawable;
 
@@ -1326,6 +1328,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mDecor != null) {
                 mDecor.setWindowBackground(drawable);
             }
+            if (mBackgroundFallbackResource != 0) {
+                mDecor.setBackgroundFallback(drawable != null ? 0 : mBackgroundFallbackResource);
+            }
         }
     }
 
@@ -2153,6 +2158,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private View mStatusColorView;
         private View mNavigationColorView;
+        private final BackgroundFallback mBackgroundFallback = new BackgroundFallback();
 
         private int mLastTopInset = 0;
         private int mLastBottomInset = 0;
@@ -2163,6 +2169,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
+        }
+
+        public void setBackgroundFallback(int resId) {
+            mBackgroundFallback.setDrawable(resId != 0 ? getContext().getDrawable(resId) : null);
+            setWillNotDraw(getBackground() == null && !mBackgroundFallback.hasFallback());
+        }
+
+        @Override
+        public void onDraw(Canvas c) {
+            super.onDraw(c);
+            mBackgroundFallback.draw(mContentRoot, c, mContentParent);
         }
 
         @Override
@@ -3342,6 +3359,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mFrameResource == 0) {
                     mFrameResource = a.getResourceId(R.styleable.Window_windowFrame, 0);
                 }
+                mBackgroundFallbackResource = a.getResourceId(
+                        R.styleable.Window_windowBackgroundFallback, 0);
                 if (false) {
                     System.out.println("Background: "
                             + Integer.toHexString(mBackgroundResource) + " Frame: "
@@ -3555,6 +3574,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mTitleView.setText(mTitle);
                     }
                 }
+            }
+
+            if (mDecor.getBackground() == null && mBackgroundFallbackResource != 0) {
+                mDecor.setBackgroundFallback(mBackgroundFallbackResource);
             }
 
             // Only inflate or create a new TransitionManager if the caller hasn't

@@ -308,6 +308,10 @@
                   null so it will not be drawn.
              </ul> -->
         <attr name="windowBackground" format="reference" />
+        <!-- Drawable to draw selectively within the inset areas when the windowBackground
+             has been set to null. This protects against seeing visual garbage in the
+             surface when the app has not drawn any content into this area. -->
+        <attr name="windowBackgroundFallback" format="reference" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
@@ -1772,6 +1776,7 @@
     <!-- The set of attributes that describe a Windows's theme. -->
     <declare-styleable name="Window">
         <attr name="windowBackground" />
+        <attr name="windowBackgroundFallback" />
         <attr name="windowContentOverlay" />
         <attr name="windowFrame" />
         <attr name="windowNoTitle" />
