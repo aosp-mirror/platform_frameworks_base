@@ -31,6 +31,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -72,6 +73,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private final Context mContext;
     private final NotificationManager mNoMan;
+    private final PowerManager mPowerMan;
     private final Handler mHandler = new Handler();
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
@@ -93,6 +95,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     public PowerNotificationWarnings(Context context, PhoneStatusBar phoneStatusBar) {
         mContext = context;
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mReceiver.init();
     }
 
@@ -356,9 +359,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mSaverConfirmation = d;
     }
 
-    private void setSaverSetting(boolean mode) {
-        final int val = mode ? 1 : 0;
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.LOW_POWER_MODE, val);
+    private void setSaverMode(boolean mode) {
+        mPowerMan.setPowerSaveMode(mode);
     }
 
     private final class Receiver extends BroadcastReceiver {
@@ -384,7 +386,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             } else if (action.equals(ACTION_STOP_SAVER)) {
                 dismissSaverNotification();
                 dismissLowBatteryNotification();
-                setSaverSetting(false);
+                setSaverMode(false);
             }
         }
     }
@@ -395,7 +397,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
-                    setSaverSetting(true);
+                    setSaverMode(true);
                 }
             });
         }
