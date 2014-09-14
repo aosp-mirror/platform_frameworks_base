@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.util.Pools.SynchronizedPool;
 import android.view.ViewDebug;
 import com.android.internal.util.XmlUtils;
 
@@ -96,6 +97,9 @@ public class Resources {
     private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
             = new LongSparseArray<ColorStateList>();
 
+    // Pool of TypedArrays targeted to this Resources object.
+    final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<TypedArray>(5);
+
     // Used by BridgeResources in layoutlib
     static Resources mSystem = null;
 
@@ -121,9 +125,10 @@ public class Resources {
     private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[4];
 
-    private final AssetManager mAssets;
+    final AssetManager mAssets;
+    final DisplayMetrics mMetrics = new DisplayMetrics();
+
     private final Configuration mConfiguration = new Configuration();
-    private final DisplayMetrics mMetrics = new DisplayMetrics();
     private NativePluralRules mPluralRule;
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
