@@ -796,6 +796,23 @@ public final class PowerManager {
     }
 
     /**
+     * Set the current power save mode.
+     *
+     * @return True if the set was allowed.
+     *
+     * @see #isPowerSaveMode()
+     *
+     * @hide
+     */
+    public boolean setPowerSaveMode(boolean mode) {
+        try {
+            return mService.setPowerSaveMode(mode);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
