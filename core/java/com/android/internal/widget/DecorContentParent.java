@@ -49,5 +49,4 @@ public interface DecorContentParent {
     void saveToolbarHierarchyState(SparseArray<Parcelable> toolbarStates);
     void restoreToolbarHierarchyState(SparseArray<Parcelable> toolbarStates);
     void dismissPopups();
-
 }
