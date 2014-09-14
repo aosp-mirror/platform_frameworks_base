@@ -42,6 +42,7 @@ interface IPowerManager
     void nap(long time);
     boolean isInteractive();
     boolean isPowerSaveMode();
+    boolean setPowerSaveMode(boolean mode);
 
     void reboot(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, boolean wait);

@@ -416,9 +416,9 @@ public final class PowerManagerService extends SystemService
     private boolean mLowPowerModeSetting;
 
     // Current state of whether the settings are allowing auto low power mode.
-    private boolean mAutoLowPowerModeEnabled;
+    private boolean mAutoLowPowerModeConfigured;
 
-   // The user turned off low power mode below the trigger level
+    // The user turned off low power mode below the trigger level
     private boolean mAutoLowPowerModeSnoozing;
 
     // True if the battery level is currently considered low.
@@ -659,26 +659,12 @@ public final class PowerManagerService extends SystemService
 
         final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
-        final boolean autoLowPowerModeEnabled = Settings.Global.getInt(resolver,
+        final boolean autoLowPowerModeConfigured = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) != 0;
         if (lowPowerModeEnabled != mLowPowerModeSetting
-                || autoLowPowerModeEnabled != mAutoLowPowerModeEnabled) {
-            if (lowPowerModeEnabled != mLowPowerModeSetting) {
-                if (!mAutoLowPowerModeSnoozing && !lowPowerModeEnabled && !mIsPowered
-                        && mAutoLowPowerModeEnabled) {
-                    if (DEBUG_SPEW) {
-                        Slog.d(TAG, "updateSettingsLocked: snoozing low power mode");
-                    }
-                    mAutoLowPowerModeSnoozing = true;
-                } else if (mAutoLowPowerModeSnoozing && lowPowerModeEnabled) {
-                    if (DEBUG_SPEW) {
-                        Slog.d(TAG, "updateSettingsLocked: no longer snoozing low power mode");
-                    }
-                    mAutoLowPowerModeSnoozing = true;
-                }
-            }
+                || autoLowPowerModeConfigured != mAutoLowPowerModeConfigured) {
             mLowPowerModeSetting = lowPowerModeEnabled;
-            mAutoLowPowerModeEnabled = autoLowPowerModeEnabled;
+            mAutoLowPowerModeConfigured = autoLowPowerModeConfigured;
             updateLowPowerModeLocked();
         }
 
@@ -694,21 +680,14 @@ public final class PowerManagerService extends SystemService
             Settings.Global.putInt(mContext.getContentResolver(),
                     Settings.Global.LOW_POWER_MODE, 0);
             mLowPowerModeSetting = false;
-        } else if (!mIsPowered && mAutoLowPowerModeEnabled && !mAutoLowPowerModeSnoozing
-                && mBatteryLevelLow && !mLowPowerModeSetting) {
-            if (DEBUG_SPEW) {
-                Slog.d(TAG, "updateLowPowerModeLocked: trigger level reached, turning setting on");
-            }
-            // Turn setting on if trigger level is enabled, and we're now below it
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.LOW_POWER_MODE, 1);
-            mLowPowerModeSetting = true;
         }
-        final boolean lowPowerModeEnabled = mLowPowerModeSetting;
+        final boolean autoLowPowerModeEnabled = !mIsPowered && mAutoLowPowerModeConfigured
+                && !mAutoLowPowerModeSnoozing && mBatteryLevelLow;
+        final boolean lowPowerModeEnabled = mLowPowerModeSetting || autoLowPowerModeEnabled;
+
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
             powerHintInternal(POWER_HINT_LOW_POWER, lowPowerModeEnabled ? 1 : 0);
-            mLowPowerModeEnabled = lowPowerModeEnabled;
             BackgroundThread.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
@@ -2083,6 +2062,35 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private boolean setLowPowerModeInternal(boolean mode) {
+        synchronized (mLock) {
+            if (DEBUG) Slog.d(TAG, "setLowPowerModeInternal " + mode + " mIsPowered=" + mIsPowered);
+            if (mIsPowered) {
+                return false;
+            }
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.LOW_POWER_MODE, mode ? 1 : 0);
+            mLowPowerModeSetting = mode;
+
+            if (mAutoLowPowerModeConfigured && mBatteryLevelLow) {
+                if (mode && mAutoLowPowerModeSnoozing) {
+                    if (DEBUG_SPEW) {
+                        Slog.d(TAG, "setLowPowerModeInternal: clearing low power mode snooze");
+                    }
+                    mAutoLowPowerModeSnoozing = false;
+                } else if (!mode && !mAutoLowPowerModeSnoozing) {
+                    if (DEBUG_SPEW) {
+                        Slog.d(TAG, "setLowPowerModeInternal: snoozing low power mode");
+                    }
+                    mAutoLowPowerModeSnoozing = true;
+                }
+            }
+
+            updateLowPowerModeLocked();
+            return true;
+        }
+    }
+
     private void handleBatteryStateChangedLocked() {
         mDirty |= DIRTY_BATTERY_STATE;
         updatePowerStateLocked();
@@ -2347,7 +2355,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
             pw.println("  mDozeAfterScreenOffConfig=" + mDozeAfterScreenOffConfig);
             pw.println("  mLowPowerModeSetting=" + mLowPowerModeSetting);
-            pw.println("  mAutoLowPowerModeEnabled=" + mAutoLowPowerModeEnabled);
+            pw.println("  mAutoLowPowerModeConfigured=" + mAutoLowPowerModeConfigured);
             pw.println("  mAutoLowPowerModeSnoozing=" + mAutoLowPowerModeSnoozing);
             pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
             pw.println("  mMaximumScreenDimDurationConfig=" + mMaximumScreenDimDurationConfig);
@@ -2958,6 +2966,18 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 return isLowPowerModeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean setPowerSaveMode(boolean mode) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return setLowPowerModeInternal(mode);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
