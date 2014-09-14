@@ -3195,6 +3195,9 @@ final class ActivityStack {
                             ActivityManagerService.CANCEL_HEAVY_NOTIFICATION_MSG);
                 }
                 if (r.app.activities.isEmpty()) {
+                    // Update any services we are bound to that might care about whether
+                    // their client may have activities.
+                    mService.mServices.updateServiceConnectionActivitiesLocked(r.app);
                     // No longer have activities, so update LRU list and oom adj.
                     mService.updateLruProcessLocked(r.app, false, null);
                     mService.updateOomAdjLocked();
