@@ -139,6 +139,11 @@ interface ITelecomService {
     boolean isRinging();
 
     /**
+     * @see TelecomServiceImpl#getCallState
+     */
+    int getCallState();
+
+    /**
      * @see TelecomServiceImpl#endCall
      */
     boolean endCall();
