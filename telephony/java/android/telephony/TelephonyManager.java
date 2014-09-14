@@ -2045,7 +2045,11 @@ public class TelephonyManager {
      * Returns a constant indicating the call state (cellular) on the device.
      */
     public int getCallState() {
-        return getCallState(getDefaultSubscription());
+        try {
+            return getTelecomService().getCallState();
+        } catch (RemoteException | NullPointerException e) {
+            return CALL_STATE_IDLE;
+        }
     }
 
     /**
@@ -2142,7 +2146,7 @@ public class TelephonyManager {
         return ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
     }
 
-    private ITelecomService getTelecommService() {
+    private ITelecomService getTelecomService() {
         return ITelecomService.Stub.asInterface(ServiceManager.getService(Context.TELECOM_SERVICE));
     }
 
@@ -3132,7 +3136,7 @@ public class TelephonyManager {
     @SystemApi
     public void silenceRinger() {
         try {
-            getTelecommService().silenceRinger();
+            getTelecomService().silenceRinger();
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#silenceRinger", e);
         }
