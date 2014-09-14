@@ -4083,11 +4083,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         @Override
-        public void requestPulse(boolean delayed, DozeService dozeService) {
+        public void requestPulse(DozeService dozeService) {
             if (dozeService == null) return;
             dozeService.stayAwake(PROCESSING_TIME);
-            mHandler.obtainMessage(H.REQUEST_PULSE, delayed ? 1 : 0, 0, dozeService)
-                    .sendToTarget();
+            mHandler.obtainMessage(H.REQUEST_PULSE, dozeService).sendToTarget();
         }
 
         @Override
@@ -4110,9 +4109,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mCurrentDozeService.startDozing();
         }
 
-        private void handleRequestPulse(boolean delayed, DozeService dozeService) {
+        private void handleRequestPulse(DozeService dozeService) {
             if (!dozeService.equals(mCurrentDozeService)) return;
-            final long stayAwake = mScrimController.pulse(delayed);
+            final long stayAwake = mScrimController.pulse();
             mCurrentDozeService.stayAwake(stayAwake);
         }
 
@@ -4136,7 +4135,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (msg.what == REQUEST_DOZE) {
                     handleRequestDoze((DozeService) msg.obj);
                 } else if (msg.what == REQUEST_PULSE) {
-                    handleRequestPulse(msg.arg1 != 0, (DozeService) msg.obj);
+                    handleRequestPulse((DozeService) msg.obj);
                 } else if (msg.what == DOZING_STOPPED) {
                     handleDozingStopped((DozeService) msg.obj);
                 }

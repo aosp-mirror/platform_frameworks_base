@@ -188,9 +188,14 @@
     <!-- Doze: should the pickup sensor be used as a pulse signal? -->
     <bool name="doze_pulse_on_pick_up">false</bool>
 
-    <!-- Doze: period of time between pulses (start of pulse) when following the notification light
-         Format: <under_ms>:<period_ms>,...,<default_ms> -->
-    <string name="doze_pulse_period_function">60000:10000,300000:30000,1800000:60000,0</string>
+    <!-- Doze: should notifications be used as a pulse signal? -->
+    <bool name="doze_pulse_on_notifications">true</bool>
+
+    <!-- Doze: when to pulse after a buzzworthy notification arrives -->
+    <string name="doze_pulse_schedule">1s,10s,30s,60s,120s</string>
+
+    <!-- Doze: maximum number of times the notification pulse schedule can be reset -->
+    <integer name="doze_pulse_schedule_resets">3</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">1000</integer>
@@ -200,9 +205,6 @@
 
     <!-- Doze: pulse parameter - how long does it take to fade out? -->
     <integer name="doze_pulse_duration_out">1000</integer>
-
-    <!-- Doze: pulse parameter - how long to wait before pulsing (if not starting immediately) -->
-    <integer name="doze_pulse_delay">1000</integer>
 
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
