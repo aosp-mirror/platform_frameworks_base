@@ -3459,8 +3459,6 @@
         <!-- @hide The alpha value (0-255) set on the ImageView's drawable. Equivalent
              to calling ImageView.setAlpha(int), not the same as View.setAlpha(float). -->
         <attr name="drawableAlpha" format="integer" />
-        <!-- Tint to apply to the image. -->
-        <attr name="tint" />
         <!-- Blending mode used to apply the image tint. -->
         <attr name="tintMode" />
     </declare-styleable>
