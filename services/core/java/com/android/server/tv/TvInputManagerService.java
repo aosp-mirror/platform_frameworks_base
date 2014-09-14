@@ -95,8 +95,7 @@ import java.util.Set;
 
 /** This class provides a system service that manages television inputs. */
 public final class TvInputManagerService extends SystemService {
-    // STOPSHIP: Turn debugging off.
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
 
     private final Context mContext;

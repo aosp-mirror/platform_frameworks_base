@@ -57,8 +57,7 @@ import java.util.List;
  */
 public class TvView extends ViewGroup {
     private static final String TAG = "TvView";
-    // STOPSHIP: Turn debugging off.
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
 
