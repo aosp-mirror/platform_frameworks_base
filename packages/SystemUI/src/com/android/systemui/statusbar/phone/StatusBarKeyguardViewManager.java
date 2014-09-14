@@ -43,6 +43,10 @@ public class StatusBarKeyguardViewManager {
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = -3 * 16;
 
+    // Delay for showing the navigation bar when the bouncer appears. This should be kept in sync
+    // with the appear animations of the PIN/pattern/password views.
+    private static final long NAV_BAR_SHOW_DELAY_BOUNCER = 320;
+
     private static String TAG = "StatusBarKeyguardViewManager";
 
     private final Context mContext;
@@ -323,12 +327,30 @@ public class StatusBarKeyguardViewManager {
         return mBouncer.isShowing();
     }
 
+    private long getNavBarShowDelay() {
+        if (mPhoneStatusBar.isKeyguardFadingAway()) {
+            return mPhoneStatusBar.getKeyguardFadingAwayDelay();
+        } else {
+
+            // Keyguard is not going away, thus we are showing the navigation bar because the
+            // bouncer is appearing.
+            return NAV_BAR_SHOW_DELAY_BOUNCER;
+        }
+    }
+
+    private Runnable mMakeNavigationBarVisibleRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
+        }
+    };
+
     private void updateStates() {
         int vis = mContainer.getSystemUiVisibility();
         boolean showing = mShowing;
         boolean occluded = mOccluded;
         boolean bouncerShowing = mBouncer.isShowing();
-        boolean bouncerDismissible = bouncerShowing && !mBouncer.needsFullscreenBouncer();
+        boolean bouncerDismissible = !mBouncer.needsFullscreenBouncer();
 
         if ((bouncerDismissible || !showing) != (mLastBouncerDismissible || !mLastShowing)
                 || mFirstUpdate) {
@@ -342,8 +364,10 @@ public class StatusBarKeyguardViewManager {
                 != (!(mLastShowing && !mLastOccluded) || mLastBouncerShowing) || mFirstUpdate) {
             if (mPhoneStatusBar.getNavigationBarView() != null) {
                 if (!(showing && !occluded) || bouncerShowing) {
-                    mPhoneStatusBar.getNavigationBarView().setVisibility(View.VISIBLE);
+                    mContainer.postOnAnimationDelayed(mMakeNavigationBarVisibleRunnable,
+                            getNavBarShowDelay());
                 } else {
+                    mContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
                     mPhoneStatusBar.getNavigationBarView().setVisibility(View.GONE);
                 }
             }
