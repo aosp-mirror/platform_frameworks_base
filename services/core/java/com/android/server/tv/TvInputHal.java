@@ -32,8 +32,7 @@ import java.util.Queue;
  * Provides access to the low-level TV input hardware abstraction layer.
  */
 final class TvInputHal implements Handler.Callback {
-    // STOPSHIP: Turn debugging off
-    private final static boolean DEBUG = true;
+    private final static boolean DEBUG = false;
     private final static String TAG = TvInputHal.class.getSimpleName();
 
     public final static int SUCCESS = 0;

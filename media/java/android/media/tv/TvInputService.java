@@ -66,8 +66,7 @@ import java.util.Set;
  * </p>
  */
 public abstract class TvInputService extends Service {
-    // STOPSHIP: Turn debugging off.
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "TvInputService";
 
     /**
