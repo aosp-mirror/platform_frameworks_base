@@ -2364,8 +2364,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setVisibility(View.VISIBLE);
         mNotificationPanel.setVisibility(View.GONE);
 
-        setAreThereNotifications(); // show the clear button
-
         mNotificationPanel.closeQs();
 
         mExpandedVisible = false;
@@ -3578,6 +3576,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardFadingAwayDuration = fadeoutDuration;
         mWaitingForKeyguardExit = false;
         disable(mDisabledUnmodified, true /* animate */);
+    }
+
+    public boolean isKeyguardFadingAway() {
+        return mKeyguardFadingAway;
     }
 
     /**
