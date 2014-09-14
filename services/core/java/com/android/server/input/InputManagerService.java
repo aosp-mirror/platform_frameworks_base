@@ -1387,7 +1387,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         if ((switchMask & SW_CAMERA_LENS_COVER_BIT) != 0) {
-            final boolean lensCovered = ((switchValues & SW_CAMERA_LENS_COVER_BIT) == 0);
+            final boolean lensCovered = ((switchValues & SW_CAMERA_LENS_COVER_BIT) != 0);
             mWindowManagerCallbacks.notifyCameraLensCoverSwitchChanged(whenNanos, lensCovered);
         }
 
