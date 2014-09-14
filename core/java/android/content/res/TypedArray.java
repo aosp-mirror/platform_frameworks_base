@@ -20,7 +20,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pools.SynchronizedPool;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
@@ -37,15 +36,11 @@ import java.util.Arrays;
  * the positions of the attributes given to obtainStyledAttributes.
  */
 public class TypedArray {
-    private static final SynchronizedPool<TypedArray> mPool = new SynchronizedPool<TypedArray>(5);
 
     static TypedArray obtain(Resources res, int len) {
-        final TypedArray attrs = mPool.acquire();
+        final TypedArray attrs = res.mTypedArrayPool.acquire();
         if (attrs != null) {
             attrs.mLength = len;
-            attrs.mResources = res;
-            attrs.mMetrics = res.getDisplayMetrics();
-            attrs.mAssets = res.getAssets();
             attrs.mRecycled = false;
 
             final int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
@@ -63,9 +58,10 @@ public class TypedArray {
                 new int[1+len], len);
     }
 
-    private Resources mResources;
-    private DisplayMetrics mMetrics;
-    private AssetManager mAssets;
+    private final Resources mResources;
+    private final DisplayMetrics mMetrics;
+    private final AssetManager mAssets;
+
     private boolean mRecycled;
 
     /*package*/ XmlBlock.Parser mXml;
@@ -872,17 +868,12 @@ public class TypedArray {
         }
 
         mRecycled = true;
-        mResources = null;
-        mMetrics = null;
-        mAssets = null;
 
         // These may have been set by the client.
         mXml = null;
         mTheme = null;
 
-        synchronized (mPool) {
-            mPool.release(this);
-        }
+        mResources.mTypedArrayPool.release(this);
     }
 
     /**
@@ -984,8 +975,8 @@ public class TypedArray {
 
     /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {
         mResources = resources;
-        mMetrics = mResources.getDisplayMetrics();
-        mAssets = mResources.getAssets();
+        mMetrics = mResources.mMetrics;
+        mAssets = mResources.mAssets;
         mData = data;
         mIndices = indices;
         mLength = len;
