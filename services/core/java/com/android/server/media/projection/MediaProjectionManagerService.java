@@ -23,6 +23,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
+import android.media.MediaRouter;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
@@ -68,6 +69,10 @@ public final class MediaProjectionManagerService extends SystemService
     private final Context mContext;
     private final AppOpsManager mAppOps;
 
+    private final MediaRouter mMediaRouter;
+    private final MediaRouterCallback mMediaRouterCallback;
+    private MediaRouter.RouteInfo mMediaRouteInfo;
+
     private IBinder mProjectionToken;
     private MediaProjection mProjectionGrant;
 
@@ -77,6 +82,8 @@ public final class MediaProjectionManagerService extends SystemService
         mDeathEaters = new ArrayMap<IBinder, IBinder.DeathRecipient>();
         mCallbackDelegate = new CallbackDelegate();
         mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mMediaRouterCallback = new MediaRouterCallback();
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -84,6 +91,12 @@ public final class MediaProjectionManagerService extends SystemService
     public void onStart() {
         publishBinderService(Context.MEDIA_PROJECTION_SERVICE, new BinderService(),
                 false /*allowIsolated*/);
+        mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback);
+    }
+
+    @Override
+    public void onSwitchUser(int userId) {
+        mMediaRouter.rebindAsUser(userId);
     }
 
     @Override
@@ -94,6 +107,9 @@ public final class MediaProjectionManagerService extends SystemService
     private void startProjectionLocked(final MediaProjection projection) {
         if (mProjectionGrant != null) {
             mProjectionGrant.stop();
+        }
+        if (mMediaRouteInfo != null) {
+            mMediaRouter.getDefaultRoute().select();
         }
         mProjectionToken = projection.asBinder();
         mProjectionGrant = projection;
@@ -445,6 +461,27 @@ public final class MediaProjectionManagerService extends SystemService
 
         public void dump(PrintWriter pw) {
             pw.println("(" + packageName + ", uid=" + uid + "): " + typeToString(mType));
+        }
+    }
+
+    private class MediaRouterCallback extends MediaRouter.SimpleCallback {
+        @Override
+        public void onRouteSelected(MediaRouter router, int type, MediaRouter.RouteInfo info) {
+            synchronized (mLock) {
+                if ((type & MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY) != 0) {
+                    mMediaRouteInfo = info;
+                    if (mProjectionGrant != null) {
+                        mProjectionGrant.stop();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onRouteUnselected(MediaRouter route, int type, MediaRouter.RouteInfo info) {
+            if (mMediaRouteInfo == info) {
+                mMediaRouteInfo = null;
+            }
         }
     }
 
