@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.telecom.ITelecomService;
@@ -661,9 +662,33 @@ public class TelecomManager {
                 return getTelecomService().isInCall();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException attempting to get default phone app.", e);
+            Log.e(TAG, "RemoteException calling isInCall().", e);
         }
         return false;
+    }
+
+    /**
+     * Returns one of the following constants that represents the current state of Telecom:
+     *
+     * {@link TelephonyManager#CALL_STATE_RINGING}
+     * {@link TelephonyManager#CALL_STATE_OFFHOOK}
+     * {@link TelephonyManager#CALL_STATE_IDLE}
+     *
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    public int getCallState() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getCallState();
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "RemoteException calling getCallState().", e);
+        }
+        return TelephonyManager.CALL_STATE_IDLE;
     }
 
     /**
