@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
 import android.media.session.IActiveSessionsListener;
@@ -800,7 +801,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             }
             if (session == null) {
-                if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0) {
+                if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0
+                        && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
                     if (DEBUG) {
                         Log.d(TAG, "No active session to adjust, skipping media only volume event");
                     }
