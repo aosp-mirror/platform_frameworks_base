@@ -507,7 +507,16 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        boolean visible = visibility == View.VISIBLE;
+        getBackButton().getBackground().setVisible(visible, false /* restart */);
+        getHomeButton().getBackground().setVisible(visible, false /* restart */);
+        getRecentsButton().getBackground().setVisible(visible, false /* restart */);
+        getMenuButton().getBackground().setVisible(visible, false /* restart */);
+        getImeSwitchButton().getBackground().setVisible(visible, false /* restart */);
+    }
 
     /*
     @Override
