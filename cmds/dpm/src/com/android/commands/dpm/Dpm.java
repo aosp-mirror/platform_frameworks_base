@@ -17,9 +17,11 @@
 package com.android.commands.dpm;
 
 import android.app.admin.IDevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 import com.android.internal.os.BaseCommand;
 
@@ -42,10 +44,12 @@ public final class Dpm extends BaseCommand {
 
     @Override
     public void onShowUsage(PrintStream out) {
-        out.println("usage: adb shell dpm [subcommand] [options]\n" +
+        out.println(
+                "usage: dpm [subcommand] [options]\n" +
+                "usage: dpm set-device-owner <COMPONENT>\n" +
                 "\n" +
-                "usage: adb shell dpm set-device-owner <PACKAGE>\n" +
-                "  <PACKAGE> an Android package name.\n");
+                "dpm set-device-owner: Sets the given component as active admin, and its\n" +
+                "  package as device owner.\n");
     }
 
     @Override
@@ -63,15 +67,28 @@ public final class Dpm extends BaseCommand {
                 runSetDeviceOwner(nextArgRequired());
                 break;
             default:
-                showError("Error: unknown command '" + command + "'");
+                throw new IllegalArgumentException ("unknown command '" + command + "'");
         }
     }
 
-    private void runSetDeviceOwner(String packageName) throws RemoteException {
-        if (mDevicePolicyManager.setDeviceOwner(packageName, null)) {
-            System.out.println("Device owner set to package " + packageName);
-        } else {
-            showError("Error: Can't set package " + packageName + " as device owner.");
+    private void runSetDeviceOwner(String argument) throws Exception {
+        ComponentName component = ComponentName.unflattenFromString(argument);
+        if (component == null) {
+            throw new IllegalArgumentException ("Invalid component " + argument);
         }
+        mDevicePolicyManager.setActiveAdmin(component, true, UserHandle.USER_OWNER);
+
+        String packageName = component.getPackageName();
+        try {
+            if (!mDevicePolicyManager.setDeviceOwner(packageName, null)) {
+                throw new Exception("Can't set package " + packageName + " as device owner.");
+            }
+        } catch (Exception e) {
+            // Need to remove the admin that we just added.
+            mDevicePolicyManager.removeActiveAdmin(component, UserHandle.USER_OWNER);
+            throw e;
+        }
+        System.out.println("Device owner set to package " + packageName);
+        System.out.println("Active admin set to component " + component.toShortString());
     }
 }
