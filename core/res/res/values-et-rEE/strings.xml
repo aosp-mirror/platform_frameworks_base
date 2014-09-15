@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Jagamine rakendusega %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Avalehe rakenduse valimine"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Kasuta vaikimisi selleks toiminguks."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Teise rakenduse kasutamine"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Tühjendage vaikeandmed valikutes Süsteemiseaded &gt; Rakendused &gt; Allalaaditud."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Toimingu valimine"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB-seadme jaoks rakenduse valimine"</string>
@@ -1776,4 +1777,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Enne vabastamist küsi parooli"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Aku kestuse parandamiseks vähendab akusäästja teie seadme jõudlust ja piirab vibratsiooni ning suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Kuni seisakuaja lõppemiseni kell <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Üheks minutiks"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d minutiks"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Üheks tunniks"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d tunniks"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Määramata ajaks"</string>
 </resources>

@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sနှင့် မျှဝေရန်"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ပင်မ အပလီကေးရှင်း ရွေးချယ်ပါ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ဤလှုပ်ရှားမှုအတွက် မူရင်းအတိုင်း အသုံးပြုပါ။"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"အခြား appကို သုံးပါ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"စနစ် ဆက်တင် ထဲမှာ ပုံသေကို ရှင်းလိုက်ပါ &gt; Appများ &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"လုပ်စရာ တစ်ခု ရွေးချယ်ပါ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ကိရိယာ အတွက် app တစ်ခု ရွေးပါ"</string>
@@ -1776,4 +1777,11 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်အတွက်၊ ဘက်ထရီချွေတာရေးအပိုင်းမှ သင့် စက်ပစ္စည်း၏ဆောင်ရွက်ချက်များကို လျော့ချပေးပြီး တုန်ခါမှုနှင့် နောက်ခံအချက်အလက်အများစုကို ကန့်သတ်ပေးသည်။ အီးမေး၊ စာပို့ခြင်း နှင့် တခြားapp များကို သင်ဖွင့်မထားပါက အချိန်နှင့်တပြေးညီ ညှိမပေးပါ။ \n\n စက်ပစ္စည်း အားသွင်းနေစဉ် ဘက်ထရီချွေတာရေးအပိုင်းသည် အလိုအလျောက်ပင် အလုပ်မလုပ်ပါ။"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"သင်၏ စက်ရပ်ချိန် <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> မှာ ပြီးဆုံးသည့် အထိ။"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"တစ်မိနစ် အတွင်း"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d မိနစ် အတွင်း"</item>
+  </plurals>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
+    <string name="zen_mode_forever" msgid="4316804956488785559">"အကန့်အသတ်မရှိစွာ"</string>
 </resources>

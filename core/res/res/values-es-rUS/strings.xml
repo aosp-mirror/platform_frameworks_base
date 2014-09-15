@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Seleccionar una aplicación de la pantalla principal"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de manera predeterminada en esta acción."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Utilizar una aplicación diferente"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Eliminar valores predeterminados en Configuración del sistema &gt; Aplicaciones &gt; Descargas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Seleccionar una acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Selecciona una aplicación para el dispositivo USB."</string>
@@ -1776,4 +1777,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para quitar fijación"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Para ayudar a mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo electrónico y mensajería, no se actualicen a menos que las abras.\n\nEl ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hasta que termine el tiempo de inactividad a la(s) <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Durante un minuto"</item>
+    <item quantity="other" msgid="6924190729213550991">"Durante %d minutos"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Durante una hora"</item>
+    <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
 </resources>

@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Deel met %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Kies \'n tuisprogram"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gebruik hierdie aksie by verstek."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Gebruik \'n ander program"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vee die verstek instelling uit in Stelselinstellings &gt; Programme &gt; Afgelaai."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Kies \'n handeling"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Kies \'n program vir die USB-toestel"</string>
@@ -1776,4 +1777,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vra wagwoord voordat jy ontspeld"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Om batteryleeftyd te help verbeter, verminder batterybespaarder jou toestel se werkverrigting en beperk vibrasie en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer nie tensy jy hulle oopmaak.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel laai."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Totdat jou ontspantyd om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> eindig"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Een minuut lank"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d minute lank"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Een uur lank"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d uur lank"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Onbepaalde tyd"</string>
 </resources>
