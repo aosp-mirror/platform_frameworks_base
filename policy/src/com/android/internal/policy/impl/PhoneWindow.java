@@ -2164,6 +2164,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private int mLastBottomInset = 0;
         private int mLastRightInset = 0;
         private int mLastSystemUiVisibility = 0;
+        private int mLastWindowSystemUiVisibility = 0;
 
 
         public DecorView(Context context, int featureId) {
@@ -2750,6 +2751,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        public void onWindowSystemUiVisibilityChanged(int visible) {
+            mLastWindowSystemUiVisibility = visible;
+            updateColorViews(null /* insets */);
+        }
+
+        @Override
         public WindowInsets onApplyWindowInsets(WindowInsets insets) {
             mFrameOffsets.set(insets.getSystemWindowInsets());
             insets = updateColorViews(insets);
@@ -2791,7 +2798,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             WindowManager.LayoutParams attrs = getAttributes();
-            int sysUiVisibility = attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility;
+            int sysUiVisibility = attrs.systemUiVisibility | mLastWindowSystemUiVisibility;
 
             // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
             // to ensure that the rest of the view hierarchy doesn't notice it, unless they've
@@ -2812,16 +2819,24 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     lp.rightMargin = consumedRight;
                     lp.bottomMargin = consumedBottom;
                     mContentRoot.setLayoutParams(lp);
+
+                    if (insets == null) {
+                        // The insets have changed, but we're not currently in the process
+                        // of dispatching them.
+                        requestApplyInsets();
+                    }
+                }
+                if (insets != null) {
+                    insets = insets.replaceSystemWindowInsets(
+                            insets.getSystemWindowInsetLeft(),
+                            insets.getSystemWindowInsetTop(),
+                            insets.getSystemWindowInsetRight() - consumedRight,
+                            insets.getSystemWindowInsetBottom() - consumedBottom);
                 }
             }
 
             if (insets != null) {
-                insets = insets.consumeStableInsets().replaceSystemWindowInsets(
-                        insets.getSystemWindowInsetLeft(),
-                        insets.getSystemWindowInsetTop(),
-                        insets.getSystemWindowInsetRight() - consumedRight,
-                        insets.getSystemWindowInsetBottom() - consumedBottom
-                );
+                insets = insets.consumeStableInsets();
             }
             return insets;
         }
