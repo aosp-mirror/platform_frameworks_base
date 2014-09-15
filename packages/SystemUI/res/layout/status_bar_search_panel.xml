@@ -30,17 +30,14 @@
         android:id="@+id/search_panel_scrim"
         android:background="@drawable/search_panel_scrim" />
 
-    <FrameLayout
-        style="@style/SearchPanelCard"
-        android:id="@+id/search_panel_card"
-        android:background="@drawable/search_panel_card_bg"
-        android:elevation="12dp">
+    <com.android.systemui.SearchPanelCircleView
+        style="@style/SearchPanelCircle"
+        android:id="@+id/search_panel_circle">
 
         <ImageView
-            style="@style/SearchPanelLogo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/search_logo" />
-    </FrameLayout>
+    </com.android.systemui.SearchPanelCircleView>
 
 </com.android.systemui.SearchPanelView>
