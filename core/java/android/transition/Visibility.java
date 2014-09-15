@@ -224,11 +224,10 @@ public abstract class Visibility extends Transition {
                     }
                 }
             }
-        }
-        if (startValues == null) {
+        } else if (startValues == null && visInfo.endVisibility == View.VISIBLE) {
             visInfo.fadeIn = true;
             visInfo.visibilityChange = true;
-        } else if (endValues == null) {
+        } else if (endValues == null && visInfo.startVisibility == View.VISIBLE) {
             visInfo.fadeIn = false;
             visInfo.visibilityChange = true;
         }
@@ -370,16 +369,14 @@ public abstract class Visibility extends Transition {
                     overlayView = startView;
                 } else if (startView.getParent() instanceof View) {
                     View startParent = (View) startView.getParent();
-                    VisibilityInfo parentVisibilityInfo = null;
+                    TransitionValues startParentValues = getTransitionValues(startParent, true);
                     TransitionValues endParentValues = getMatchedTransitionValues(startParent,
                             true);
-                    if (endParentValues != null) {
-                        TransitionValues startParentValues = getTransitionValues(startParent, true);
-                        parentVisibilityInfo =
-                                getVisibilityChangeInfo(startParentValues, endParentValues);
-                    }
-                    if (parentVisibilityInfo == null || !parentVisibilityInfo.visibilityChange) {
-                        overlayView = copyViewImage(startView);
+                    VisibilityInfo parentVisibilityInfo =
+                            getVisibilityChangeInfo(startParentValues, endParentValues);
+                    if (!parentVisibilityInfo.visibilityChange) {
+                        overlayView = TransitionUtils.copyViewImage(sceneRoot, startView,
+                                startParent);
                     } else if (startParent.getParent() == null) {
                         int id = startParent.getId();
                         if (id != View.NO_ID && sceneRoot.findViewById(id) != null
@@ -483,26 +480,6 @@ public abstract class Visibility extends Transition {
             return animator;
         }
         return null;
-    }
-
-    private View copyViewImage(View view) {
-        int width = view.getWidth();
-        int height = view.getHeight();
-        if (width <= 0 || height <= 0) {
-            return null;
-        }
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-        final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-
-        View overlayView = new View(view.getContext());
-        overlayView.setBackground(drawable);
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
-        int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
-        overlayView.measure(widthSpec, heightSpec);
-        overlayView.layout(0, 0, width, height);
-        return overlayView;
     }
 
     @Override
