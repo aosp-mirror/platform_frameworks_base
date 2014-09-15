@@ -42,6 +42,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private static final String TAG = "CameraCaptureSession";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
+    /** Simple integer ID for session for debugging */
+    private final int mId;
+    private final String mIdString;
+
     /** User-specified set of surfaces used as the configuration outputs */
     private final List<Surface> mOutputs;
     /**
@@ -83,7 +87,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * There must be no pending actions
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
-    CameraCaptureSessionImpl(List<Surface> outputs,
+    CameraCaptureSessionImpl(int id, List<Surface> outputs,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
@@ -92,6 +96,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         } else if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
+
+        mId = id;
+        mIdString = String.format("Session %d: ", mId);
 
         // TODO: extra verification of outputs
         mOutputs = outputs;
@@ -120,12 +127,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (configureSuccess) {
             mStateCallback.onConfigured(this);
-            if (VERBOSE) Log.v(TAG, "ctor - Created session successfully");
+            if (VERBOSE) Log.v(TAG, mIdString + "Created session successfully");
             mConfigureSuccess = true;
         } else {
             mStateCallback.onConfigureFailed(this);
             mClosed = true; // do not fire any other callbacks, do not allow any other work
-            Log.e(TAG, "Failed to create capture session; configuration failed");
+            Log.e(TAG, mIdString + "Failed to create capture session; configuration failed");
             mConfigureSuccess = false;
         }
     }
@@ -147,8 +154,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         handler = checkHandler(handler, callback);
 
         if (VERBOSE) {
-            Log.v(TAG, "capture - request " + request + ", callback " + callback + " handler" +
-                    " " + handler);
+            Log.v(TAG, mIdString + "capture - request " + request + ", callback " + callback +
+                    " handler " + handler);
         }
 
         return addPendingSequence(mDeviceImpl.capture(request,
@@ -170,8 +177,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            Log.v(TAG, "captureBurst - requests " + Arrays.toString(requestArray) + ", callback " +
-                    callback + " handler" + "" + handler);
+            Log.v(TAG, mIdString + "captureBurst - requests " + Arrays.toString(requestArray) +
+                    ", callback " + callback + " handler " + handler);
         }
 
         return addPendingSequence(mDeviceImpl.captureBurst(requests,
@@ -190,8 +197,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         handler = checkHandler(handler, callback);
 
         if (VERBOSE) {
-            Log.v(TAG, "setRepeatingRequest - request " + request + ", callback " + callback +
-                    " handler" + " " + handler);
+            Log.v(TAG, mIdString + "setRepeatingRequest - request " + request + ", callback " +
+                    callback + " handler" + " " + handler);
         }
 
         return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
@@ -213,7 +220,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            Log.v(TAG, "setRepeatingBurst - requests " + Arrays.toString(requestArray) +
+            Log.v(TAG, mIdString + "setRepeatingBurst - requests " + Arrays.toString(requestArray) +
                     ", callback " + callback + " handler" + "" + handler);
         }
 
@@ -226,7 +233,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
 
         if (VERBOSE) {
-            Log.v(TAG, "stopRepeating");
+            Log.v(TAG, mIdString + "stopRepeating");
         }
 
         mDeviceImpl.stopRepeating();
@@ -237,11 +244,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
 
         if (VERBOSE) {
-            Log.v(TAG, "abortCaptures");
+            Log.v(TAG, mIdString + "abortCaptures");
         }
 
         if (mAborting) {
-            Log.w(TAG, "abortCaptures - Session is already aborting; doing nothing");
+            Log.w(TAG, mIdString + "abortCaptures - Session is already aborting; doing nothing");
             return;
         }
 
@@ -279,7 +286,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * but this would introduce nondeterministic behavior.
          */
 
-        if (VERBOSE) Log.v(TAG, "replaceSessionClose");
+        if (VERBOSE) Log.v(TAG, mIdString + "replaceSessionClose");
 
         // Set up fast shutdown. Possible alternative paths:
         // - This session is active, so close() below starts the shutdown drain
@@ -299,11 +306,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     public synchronized void close() {
 
         if (mClosed) {
-            if (VERBOSE) Log.v(TAG, "close - reentering");
+            if (VERBOSE) Log.v(TAG, mIdString + "close - reentering");
             return;
         }
 
-        if (VERBOSE) Log.v(TAG, "close - first time");
+        if (VERBOSE) Log.v(TAG, mIdString + "close - first time");
 
         mClosed = true;
 
@@ -321,7 +328,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             mDeviceImpl.stopRepeating();
         } catch (IllegalStateException e) {
             // OK: Camera device may already be closed, nothing else to do
-            Log.w(TAG, "The camera device was already closed: ", e);
+            Log.w(TAG, mIdString + "The camera device was already closed: ", e);
 
             // TODO: Fire onClosed anytime we get the device onClosed or the ISE?
             // or just suppress the ISE only and rely onClosed.
@@ -332,7 +339,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             return;
         } catch (CameraAccessException e) {
             // OK: close does not throw checked exceptions.
-            Log.e(TAG, "Exception while stopping repeating: ", e);
+            Log.e(TAG, mIdString + "Exception while stopping repeating: ", e);
 
             // TODO: call onError instead of onClosed if this happens
         }
@@ -453,13 +460,14 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
             @Override
             public void onDisconnected(CameraDevice camera) {
+                if (VERBOSE) Log.v(TAG, mIdString + "onDisconnected");
                 close();
             }
 
             @Override
             public void onError(CameraDevice camera, int error) {
-                // TODO: Handle errors somehow.
-                Log.wtf(TAG, "Got device error " + error);
+                // Should not be reached, handled by device code
+                Log.wtf(TAG, mIdString + "Got device error " + error);
             }
 
             @Override
@@ -467,12 +475,15 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                 mIdleDrainer.taskStarted();
                 mActive = true;
 
+                if (VERBOSE) Log.v(TAG, mIdString + "onActive");
                 mStateCallback.onActive(session);
             }
 
             @Override
             public void onIdle(CameraDevice camera) {
                 boolean isAborting;
+                if (VERBOSE) Log.v(TAG, mIdString + "onIdle");
+
                 synchronized (session) {
                     isAborting = mAborting;
                 }
@@ -513,14 +524,29 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                 // TODO: Queue captures during abort instead of failing them
                 // since the app won't be able to distinguish the two actives
                 // Don't signal the application since there's no clean mapping here
-                Log.w(TAG, "Device is now busy; do not submit new captures (TODO: allow this)");
+                if (VERBOSE) Log.v(TAG, mIdString + "onBusy");
             }
 
             @Override
             public void onUnconfigured(CameraDevice camera) {
+                if (VERBOSE) Log.v(TAG, mIdString + "onUnconfigured");
                 synchronized (session) {
-                    // Ignore #onUnconfigured before #close is called
-                    if (mClosed && mConfigureSuccess) {
+                    // Ignore #onUnconfigured before #close is called.
+                    //
+                    // Normally, this is reached when this session is closed and no immediate other
+                    // activity happens for the camera, in which case the camera is configured to
+                    // null streams by this session and the UnconfigureDrainer task is started.
+                    // However, we can also end up here if
+                    //
+                    // 1) Session is closed
+                    // 2) New session is created before this session finishes closing, setting
+                    //    mSkipUnconfigure and therefore this session does not configure null or
+                    //    start the UnconfigureDrainer task.
+                    // 3) And then the new session fails to be created, so onUnconfigured fires
+                    //    _anyway_.
+                    // In this second case, need to not finish a task that was never started, so
+                    // guard with mSkipUnconfigure
+                    if (mClosed && mConfigureSuccess && !mSkipUnconfigure) {
                         mUnconfigureDrainer.taskFinished();
                     }
                 }
@@ -580,6 +606,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
              * If the camera is already "IDLE" and no aborts are pending,
              * then the drain immediately finishes.
              */
+            if (VERBOSE) Log.v(TAG, mIdString + "onSequenceDrained");
             mAbortDrainer.beginDrain();
         }
     }
@@ -587,6 +614,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private class AbortDrainListener implements TaskDrainer.DrainListener {
         @Override
         public void onDrained() {
+            if (VERBOSE) Log.v(TAG, mIdString + "onAbortDrained");
             synchronized (CameraCaptureSessionImpl.this) {
                 /*
                  * Any queued aborts have now completed.
@@ -604,6 +632,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private class IdleDrainListener implements TaskDrainer.DrainListener {
         @Override
         public void onDrained() {
+            if (VERBOSE) Log.v(TAG, mIdString + "onIdleDrained");
             synchronized (CameraCaptureSessionImpl.this) {
                 /*
                  * The device is now IDLE, and has settled. It will not transition to
@@ -613,7 +642,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                  *
                  * This operation is idempotent; a session will not be closed twice.
                  */
-                if (VERBOSE) Log.v(TAG, "Session drain complete, skip unconfigure: " +
+                if (VERBOSE) Log.v(TAG, mIdString + "Session drain complete, skip unconfigure: " +
                         mSkipUnconfigure);
 
                 // Fast path: A new capture session has replaced this one; don't unconfigure.
@@ -629,7 +658,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                     mDeviceImpl.configureOutputsChecked(null); // begin transition to unconfigured
                 } catch (CameraAccessException e) {
                     // OK: do not throw checked exceptions.
-                    Log.e(TAG, "Exception while configuring outputs: ", e);
+                    Log.e(TAG, mIdString + "Exception while configuring outputs: ", e);
 
                     // TODO: call onError instead of onClosed if this happens
                 }
@@ -641,7 +670,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
     private class UnconfigureDrainListener implements TaskDrainer.DrainListener {
         @Override
+
         public void onDrained() {
+            if (VERBOSE) Log.v(TAG, mIdString + "onUnconfigureDrained");
             synchronized (CameraCaptureSessionImpl.this) {
                 // The device has finished unconfiguring. It's now fully closed.
                 mStateCallback.onClosed(CameraCaptureSessionImpl.this);
