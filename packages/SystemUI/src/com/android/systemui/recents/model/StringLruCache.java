@@ -23,10 +23,4 @@ class StringLruCache extends KeyStoreLruCache<String> {
     public StringLruCache(int cacheSize) {
         super(cacheSize);
     }
-
-    @Override
-    protected int computeSize(String s) {
-        // The cache size is measured in number of strings
-        return 1;
-    }
 }

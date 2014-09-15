@@ -34,21 +34,12 @@ public class KeyStoreLruCache<V> {
 
     public KeyStoreLruCache(int cacheSize) {
         mCache = new LruCache<Integer, V>(cacheSize) {
-            @Override
-            protected int sizeOf(Integer taskId, V v) {
-                return computeSize(v);
-            }
 
             @Override
             protected void entryRemoved(boolean evicted, Integer taskId, V oldV, V newV) {
                 mTaskKeys.remove(taskId);
             }
         };
-    }
-
-    /** Computes the size of a value. */
-    protected int computeSize(V value) {
-        return 0;
     }
 
     /** Gets a specific entry in the cache. */
