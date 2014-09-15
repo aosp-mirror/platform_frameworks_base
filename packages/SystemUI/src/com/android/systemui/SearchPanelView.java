@@ -16,10 +16,6 @@
 
 package com.android.systemui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -38,8 +34,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -62,26 +56,19 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     private final Context mContext;
     private BaseStatusBar mBar;
 
-    private View mCard;
+    private SearchPanelCircleView mCircle;
     private ImageView mLogo;
     private View mScrim;
 
-    private int mPeekHeight;
     private int mThreshold;
     private boolean mHorizontal;
-    private final Interpolator mLinearOutSlowInInterpolator;
-    private final Interpolator mFastOutLinearInInterpolator;
 
-    private boolean mAnimatingIn;
-    private boolean mAnimatingOut;
+    private boolean mLaunching;
     private boolean mDragging;
     private boolean mDraggedFarEnough;
     private float mStartTouch;
     private float mStartDrag;
-
-    private ObjectAnimator mEnterAnimator;
-
-    private boolean mStartExitAfterAnimatingIn;
+    private boolean mLaunchPending;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -90,12 +77,7 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     public SearchPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-        mPeekHeight = context.getResources().getDimensionPixelSize(R.dimen.search_card_peek_height);
         mThreshold = context.getResources().getDimensionPixelSize(R.dimen.search_panel_threshold);
-        mLinearOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
-        mFastOutLinearInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_linear_in);
     }
 
     private void startAssistActivity() {
@@ -128,7 +110,7 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mCard = findViewById(R.id.search_panel_card);
+        mCircle = (SearchPanelCircleView) findViewById(R.id.search_panel_circle);
         mLogo = (ImageView) findViewById(R.id.search_logo);
         mScrim = findViewById(R.id.search_panel_scrim);
     }
@@ -170,16 +152,9 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
         v.setImageDrawable(null);
     }
 
-    private boolean pointInside(int x, int y, View v) {
-        final int l = v.getLeft();
-        final int r = v.getRight();
-        final int t = v.getTop();
-        final int b = v.getBottom();
-        return x >= l && x < r && y >= t && y < b;
-    }
-
+    @Override
     public boolean isInContentArea(int x, int y) {
-        return pointInside(x, y, mCard);
+        return true;
     }
 
     private void vibrate() {
@@ -199,16 +174,10 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
             if (getVisibility() != View.VISIBLE) {
                 setVisibility(View.VISIBLE);
                 vibrate();
-                mCard.setAlpha(1f);
                 if (animate) {
                     startEnterAnimation();
                 } else {
                     mScrim.setAlpha(1f);
-                    if (mHorizontal) {
-                        mCard.setX(getWidth() - mPeekHeight);
-                    } else {
-                        mCard.setY(getHeight() - mPeekHeight);
-                    }
                 }
             }
             setFocusable(true);
@@ -224,30 +193,7 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     }
 
     private void startEnterAnimation() {
-        if (mHorizontal) {
-            mCard.setX(getWidth());
-        } else {
-            mCard.setY(getHeight());
-        }
-        mAnimatingIn = true;
-        mCard.animate().cancel();
-        mEnterAnimator = ObjectAnimator.ofFloat(mCard, mHorizontal ? View.X : View.Y,
-                mHorizontal ? mCard.getX() : mCard.getY(),
-                mHorizontal ? getWidth() - mPeekHeight : getHeight() - mPeekHeight);
-        mEnterAnimator.setDuration(300);
-        mEnterAnimator.setStartDelay(50);
-        mEnterAnimator.setInterpolator(mLinearOutSlowInInterpolator);
-        mEnterAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mEnterAnimator = null;
-                mAnimatingIn = false;
-                if (mStartExitAfterAnimatingIn) {
-                    startExitAnimation();
-                }
-            }
-        });
-        mEnterAnimator.start();
+        mCircle.startEnterAnimation();
         mScrim.setAlpha(0f);
         mScrim.animate()
                 .alpha(1f)
@@ -259,26 +205,17 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     }
 
     private void startAbortAnimation() {
-        mCard.animate().cancel();
-        mAnimatingOut = true;
-        if (mHorizontal) {
-            mCard.animate().x(getWidth());
-        } else {
-            mCard.animate().y(getHeight());
-        }
-        mCard.animate()
-                .setDuration(150)
-                .setInterpolator(mFastOutLinearInInterpolator)
-                .withEndAction(new Runnable() {
+        mCircle.startAbortAnimation(new Runnable() {
                     @Override
                     public void run() {
-                        mAnimatingOut = false;
+                        mCircle.setAnimatingOut(false);
                         setVisibility(View.INVISIBLE);
                     }
                 });
+        mCircle.setAnimatingOut(true);
         mScrim.animate()
                 .alpha(0f)
-                .setDuration(150)
+                .setDuration(300)
                 .setStartDelay(0)
                 .setInterpolator(PhoneStatusBar.ALPHA_OUT);
     }
@@ -314,7 +251,7 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
      * when the animation is done.
      */
     public boolean isShowing() {
-        return getVisibility() == View.VISIBLE && !mAnimatingOut;
+        return getVisibility() == View.VISIBLE && !mCircle.isAnimatingOut();
     }
 
     public void setBar(BaseStatusBar bar) {
@@ -326,60 +263,46 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
                 .getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
     }
 
-    private float rubberband(float diff) {
-        return Math.signum(diff) * (float) Math.pow(Math.abs(diff), 0.8f);
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mLaunching || mLaunchPending) {
+            return false;
+        }
         int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mStartTouch = mHorizontal ? event.getX() : event.getY();
                 mDragging = false;
                 mDraggedFarEnough = false;
-                mStartExitAfterAnimatingIn = false;
+                mCircle.reset();
                 break;
             case MotionEvent.ACTION_MOVE:
                 float currentTouch = mHorizontal ? event.getX() : event.getY();
                 if (getVisibility() == View.VISIBLE && !mDragging &&
-                        (!mAnimatingIn || Math.abs(mStartTouch - currentTouch) > mThreshold)) {
+                        (!mCircle.isAnimationRunning(true /* enterAnimation */)
+                                || Math.abs(mStartTouch - currentTouch) > mThreshold)) {
                     mStartDrag = currentTouch;
                     mDragging = true;
                 }
-                if (!mDraggedFarEnough && Math.abs(mStartTouch - currentTouch) > mThreshold) {
-                    mDraggedFarEnough = true;
-                }
                 if (mDragging) {
-                    if (!mAnimatingIn && !mAnimatingOut) {
-                        if (Math.abs(currentTouch - mStartDrag) > mThreshold) {
-                            startExitAnimation();
-                        } else {
-                            if (mHorizontal) {
-                                mCard.setX(getWidth() - mPeekHeight + rubberband(
-                                        currentTouch - mStartDrag));
-                            } else {
-                                mCard.setY(getHeight() - mPeekHeight + rubberband(
-                                        currentTouch - mStartDrag));
-                            }
-                        }
-                    } else if (mAnimatingIn ) {
-                        float diff = rubberband(currentTouch - mStartDrag);
-                        PropertyValuesHolder[] values = mEnterAnimator.getValues();
-                        values[0].setFloatValues(
-                                mHorizontal ? getWidth() + diff : getHeight() + diff,
-                                mHorizontal
-                                        ? getWidth() - mPeekHeight + diff
-                                        : getHeight() - mPeekHeight + diff);
-                        mEnterAnimator.setCurrentPlayTime(mEnterAnimator.getCurrentPlayTime());
-                    }
+                    float offset = Math.max(mStartDrag - currentTouch, 0.0f);
+                    mCircle.setDragDistance(offset);
+                    mDraggedFarEnough = Math.abs(mStartTouch - currentTouch) > mThreshold;
+                    mCircle.setDraggedFarEnough(mDraggedFarEnough);
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (mDraggedFarEnough) {
-                    if (mAnimatingIn) {
-                        mStartExitAfterAnimatingIn = true;
+                    if (mCircle.isAnimationRunning(true  /* enterAnimation */)) {
+                        mLaunchPending = true;
+                        mCircle.setAnimatingOut(true);
+                        mCircle.performOnAnimationFinished(new Runnable() {
+                            @Override
+                            public void run() {
+                                startExitAnimation();
+                            }
+                        });
                     } else {
                         startExitAnimation();
                     }
@@ -392,35 +315,31 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     }
 
     private void startExitAnimation() {
-        if (mAnimatingOut || getVisibility() != View.VISIBLE) {
+        mLaunchPending = false;
+        if (mLaunching || getVisibility() != View.VISIBLE) {
             return;
         }
-        if (mEnterAnimator != null) {
-            mEnterAnimator.cancel();
-        }
-        mAnimatingOut = true;
+        mLaunching = true;
         startAssistActivity();
         vibrate();
-        mCard.animate()
-                .alpha(0f)
-                .withLayer()
-                .setDuration(250)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
-                .withEndAction(new Runnable() {
+        mCircle.setAnimatingOut(true);
+        mCircle.startExitAnimation(new Runnable() {
                     @Override
                     public void run() {
-                        mAnimatingOut = false;
+                        mLaunching = false;
+                        mCircle.setAnimatingOut(false);
                         setVisibility(View.INVISIBLE);
                     }
                 });
         mScrim.animate()
                 .alpha(0f)
-                .setDuration(250)
+                .setDuration(300)
                 .setStartDelay(0)
                 .setInterpolator(PhoneStatusBar.ALPHA_OUT);
     }
 
     public void setHorizontal(boolean horizontal) {
         mHorizontal = horizontal;
+        mCircle.setHorizontal(horizontal);
     }
 }
