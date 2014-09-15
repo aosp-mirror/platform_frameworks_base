@@ -720,19 +720,22 @@ final public class MediaCodec {
 
         /**
          * This indicates that no key has been set to perform the requested
-         * decrypt operation.
+         * decrypt operation.  The operation can be retried after adding
+         * a decryption key.
          */
         public static final int ERROR_NO_KEY = 1;
 
         /**
          * This indicates that the key used for decryption is no longer
-         * valid due to license term expiration.
+         * valid due to license term expiration.  The operation can be retried
+         * after updating the expired keys.
          */
         public static final int ERROR_KEY_EXPIRED = 2;
 
         /**
          * This indicates that a required crypto resource was not able to be
-         * allocated while attempting the requested operation.
+         * allocated while attempting the requested operation.  The operation
+         * can be retried if the app is able to release resources.
          */
         public static final int ERROR_RESOURCE_BUSY = 3;
 
