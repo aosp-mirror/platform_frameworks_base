@@ -1049,12 +1049,15 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private static ArrayList<View> captureExitingViews(Transition exitTransition,
-            Fragment outFragment) {
+            Fragment outFragment, ArrayMap<String, View> namedViews) {
         ArrayList<View> viewList = null;
         if (exitTransition != null) {
             viewList = new ArrayList<View>();
             View root = outFragment.getView();
             root.captureTransitioningViews(viewList);
+            if (namedViews != null) {
+                viewList.removeAll(namedViews.values());
+            }
             addTargets(exitTransition, viewList);
         }
         return viewList;
@@ -1117,9 +1120,9 @@ final class BackStackRecord extends FragmentTransaction implements
                         excludeHiddenFragments(hiddenFragmentViews, inFragment.mContainerId,
                                 overallTransition);
 
+                        ArrayMap<String, View> namedViews = null;
                         if (sharedElementTransition != null) {
-                            ArrayMap<String, View> namedViews = mapSharedElementsIn(
-                                    state, isBack, inFragment);
+                            namedViews = mapSharedElementsIn(state, isBack, inFragment);
 
                             setEpicenterIn(namedViews, state);
 
@@ -1131,6 +1134,9 @@ final class BackStackRecord extends FragmentTransaction implements
                             View view = inFragment.getView();
                             if (view != null) {
                                 view.captureTransitioningViews(enteringViews);
+                                if (namedViews != null) {
+                                    enteringViews.removeAll(namedViews.values());
+                                }
                                 addTargets(enterTransition, enteringViews);
                             }
                             setSharedElementEpicenter(enterTransition, state);
@@ -1190,16 +1196,42 @@ final class BackStackRecord extends FragmentTransaction implements
                     inFragment.getAllowEnterTransitionOverlap();
         }
 
+        // Wrap the transitions. Explicit targets like in enter and exit will cause the
+        // views to be targeted regardless of excluded views. If that happens, then the
+        // excluded fragments views (hidden fragments) will still be in the transition.
+
         Transition transition;
         if (overlap) {
+            // Regular transition -- do it all together
             transition = TransitionUtils.mergeTransitions(enterTransition, exitTransition,
                     sharedElementTransition);
+            if (!(transition instanceof TransitionSet)) {
+                transition = new TransitionSet().addTransition(transition);
+            }
         } else {
-            TransitionSet staggered = new TransitionSet()
-                    .addTransition(exitTransition)
-                    .addTransition(enterTransition)
-                    .setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-            transition = TransitionUtils.mergeTransitions(staggered, sharedElementTransition);
+            // First do exit, then enter, but allow shared element transition to happen
+            // during both.
+            Transition staggered = null;
+            if (exitTransition != null && enterTransition != null) {
+                staggered = new TransitionSet()
+                        .addTransition(exitTransition)
+                        .addTransition(enterTransition)
+                        .setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+            } else if (exitTransition != null) {
+                staggered = exitTransition;
+            } else if (enterTransition != null) {
+                staggered = enterTransition;
+            }
+            if (sharedElementTransition != null) {
+                TransitionSet together = new TransitionSet();
+                if (staggered != null) {
+                    together.addTransition(staggered);
+                }
+                together.addTransition(sharedElementTransition);
+                transition = together;
+            } else {
+                transition = staggered;
+            }
         }
         return transition;
     }
@@ -1232,11 +1264,9 @@ final class BackStackRecord extends FragmentTransaction implements
                     exitTransition == null) {
                 return; // no transitions!
             }
-            ArrayList<View> exitingViews = captureExitingViews(exitTransition, outFragment);
-            if (exitingViews == null || exitingViews.isEmpty()) {
-                exitTransition = null;
+            if (enterTransition != null) {
+                enterTransition.addTarget(state.nonExistentView);
             }
-
             ArrayMap<String, View> namedViews = null;
             if (sharedElementTransition != null) {
                 namedViews = remapSharedElements(state, outFragment, isBack);
@@ -1250,11 +1280,22 @@ final class BackStackRecord extends FragmentTransaction implements
                 callback.onSharedElementStart(names, views, null);
             }
 
+            ArrayList<View> exitingViews = captureExitingViews(exitTransition, outFragment,
+                    namedViews);
+            if (exitingViews == null || exitingViews.isEmpty()) {
+                exitTransition = null;
+            }
+
             // Set the epicenter of the exit transition
-            if (mSharedElementTargetNames != null && exitTransition != null && namedViews != null) {
+            if (mSharedElementTargetNames != null && namedViews != null) {
                 View epicenterView = namedViews.get(mSharedElementTargetNames.get(0));
                 if (epicenterView != null) {
-                    setEpicenter(exitTransition, epicenterView);
+                    if (exitTransition != null) {
+                        setEpicenter(exitTransition, epicenterView);
+                    }
+                    if (sharedElementTransition != null) {
+                        setEpicenter(sharedElementTransition, epicenterView);
+                    }
                 }
             }
 
