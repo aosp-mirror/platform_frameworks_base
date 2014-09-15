@@ -37,6 +37,21 @@
     <string name="all_printers" msgid="5018829726861876202">"Toate imprimantele..."</string>
     <string name="print_dialog" msgid="32628687461331979">"Caseta de dialog de printare"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
+    <!-- no translation found for page_description_template (6831239682256197161) -->
+    <skip />
+    <!-- no translation found for summary_template (8899734908625669193) -->
+    <skip />
+    <!-- no translation found for expand_handle (7282974448109280522) -->
+    <skip />
+    <!-- no translation found for collapse_handle (6886637989442507451) -->
+    <skip />
+    <string name="print_button" msgid="645164566271246268">"Printați"</string>
+    <!-- no translation found for savetopdf_button (2976186791686924743) -->
+    <skip />
+    <!-- no translation found for print_options_expanded (6944679157471691859) -->
+    <skip />
+    <!-- no translation found for print_options_collapsed (7455930445670414332) -->
+    <skip />
     <string name="search" msgid="5421724265322228497">"Căutați"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Toate imprimantele"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Adăugați un serviciu"</string>
