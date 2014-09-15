@@ -25,10 +25,4 @@ class BitmapLruCache extends KeyStoreLruCache<Bitmap> {
     public BitmapLruCache(int cacheSize) {
         super(cacheSize);
     }
-
-    @Override
-    protected int computeSize(Bitmap b) {
-        // The cache size will be measured in kilobytes rather than number of items
-        return b.getAllocationByteCount();
-    }
 }

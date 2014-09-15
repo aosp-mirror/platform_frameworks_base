@@ -41,6 +41,7 @@ import com.android.systemui.recents.model.Task;
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         TaskViewFooter.TaskFooterViewCallbacks, View.OnClickListener, View.OnLongClickListener {
+
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskViewAppIconClicked(TaskView tv);

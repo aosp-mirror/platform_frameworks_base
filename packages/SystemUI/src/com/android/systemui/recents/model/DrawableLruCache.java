@@ -25,12 +25,4 @@ class DrawableLruCache extends KeyStoreLruCache<Drawable> {
     public DrawableLruCache(int cacheSize) {
         super(cacheSize);
     }
-
-    @Override
-    protected int computeSize(Drawable d) {
-        // The cache size will be measured in kilobytes rather than number of items
-        // NOTE: this isn't actually correct, as the icon may be smaller
-        int maxBytes = (d.getIntrinsicWidth() * d.getIntrinsicHeight() * 4);
-        return maxBytes;
-    }
 }
