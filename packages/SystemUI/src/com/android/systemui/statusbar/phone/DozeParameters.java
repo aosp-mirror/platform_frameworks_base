@@ -25,17 +25,19 @@ import android.util.MathUtils;
 import com.android.systemui.R;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DozeParameters {
     private static final String TAG = "DozeParameters";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int MAX_DURATION = 10 * 1000;
 
     private final Context mContext;
 
-    private StepFunction mPulsePeriodFunction;
+    private static PulseSchedule sPulseSchedule;
 
     public DozeParameters(Context context) {
         mContext = context;
@@ -43,12 +45,22 @@ public class DozeParameters {
 
     public void dump(PrintWriter pw) {
         pw.println("  DozeParameters:");
+        pw.print("    getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
         pw.print("    getPulseDuration(): "); pw.println(getPulseDuration());
         pw.print("    getPulseInDuration(): "); pw.println(getPulseInDuration());
         pw.print("    getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
         pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
-        pw.print("    getPulseStartDelay(): "); pw.println(getPulseStartDelay());
-        pw.print("    getPulsePeriodFunction(): "); pw.println(getPulsePeriodFunction());
+        pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
+        pw.print("    getVibrateOnSigMotion(): "); pw.println(getVibrateOnSigMotion());
+        pw.print("    getPulseOnPickup(): "); pw.println(getPulseOnPickup());
+        pw.print("    getVibrateOnPickup(): "); pw.println(getVibrateOnPickup());
+        pw.print("    getPulseOnNotifications(): "); pw.println(getPulseOnNotifications());
+        pw.print("    getPulseSchedule(): "); pw.println(getPulseSchedule());
+        pw.print("    getPulseScheduleResets(): "); pw.println(getPulseScheduleResets());
+    }
+
+    public boolean getDisplayStateSupported() {
+        return getBoolean("doze.display.supported", R.bool.doze_display_state_supported);
     }
 
     public int getPulseDuration() {
@@ -67,20 +79,40 @@ public class DozeParameters {
         return getInt("doze.pulse.duration.out", R.integer.doze_pulse_duration_out);
     }
 
-    public int getPulseStartDelay() {
-        return getInt("doze.pulse.delay", R.integer.doze_pulse_delay);
+    public boolean getPulseOnSigMotion() {
+        return getBoolean("doze.pulse.sigmotion", R.bool.doze_pulse_on_significant_motion);
     }
 
-    public long getPulsePeriod(long age) {
-        final String spec = getPulsePeriodFunction();
-        if (mPulsePeriodFunction == null || !mPulsePeriodFunction.mSpec.equals(spec)) {
-            mPulsePeriodFunction = StepFunction.parse(spec);
+    public boolean getVibrateOnSigMotion() {
+        return SystemProperties.getBoolean("doze.vibrate.sigmotion", false);
+    }
+
+    public boolean getPulseOnPickup() {
+        return getBoolean("doze.pulse.pickup", R.bool.doze_pulse_on_pick_up);
+    }
+
+    public boolean getVibrateOnPickup() {
+        return SystemProperties.getBoolean("doze.vibrate.pickup", false);
+    }
+
+    public boolean getPulseOnNotifications() {
+        return getBoolean("doze.pulse.notifications", R.bool.doze_pulse_on_notifications);
+    }
+
+    public PulseSchedule getPulseSchedule() {
+        final String spec = getString("doze.pulse.schedule", R.string.doze_pulse_schedule);
+        if (sPulseSchedule == null || !sPulseSchedule.mSpec.equals(spec)) {
+            sPulseSchedule = PulseSchedule.parse(spec);
         }
-        return mPulsePeriodFunction != null ? mPulsePeriodFunction.evaluate(age) : 0;
+        return sPulseSchedule;
     }
 
-    private String getPulsePeriodFunction() {
-        return getString("doze.pulse.period.function", R.string.doze_pulse_period_function);
+    public int getPulseScheduleResets() {
+        return getInt("doze.pulse.schedule.resets", R.integer.doze_pulse_schedule_resets);
+    }
+
+    private boolean getBoolean(String propName, int resId) {
+        return SystemProperties.getBoolean(propName, mContext.getResources().getBoolean(resId));
     }
 
     private int getInt(String propName, int resId) {
@@ -92,29 +124,25 @@ public class DozeParameters {
         return SystemProperties.get(propName, mContext.getString(resId));
     }
 
-    private static class StepFunction {
-        private static final Pattern PATTERN = Pattern.compile("(\\d+?)(:(\\d+?))?", 0);
+    public static class PulseSchedule {
+        private static final Pattern PATTERN = Pattern.compile("(\\d+?)s", 0);
 
         private String mSpec;
-        private long[] mSteps;
-        private long[] mValues;
-        private long mDefault;
+        private int[] mSchedule;
 
-        public static StepFunction parse(String spec) {
+        public static PulseSchedule parse(String spec) {
             if (TextUtils.isEmpty(spec)) return null;
             try {
-                final StepFunction rt = new StepFunction();
+                final PulseSchedule rt = new PulseSchedule();
                 rt.mSpec = spec;
                 final String[] tokens = spec.split(",");
-                rt.mSteps = new long[tokens.length - 1];
-                rt.mValues = new long[tokens.length - 1];
-                for (int i = 0; i < tokens.length - 1; i++) {
+                rt.mSchedule = new int[tokens.length];
+                for (int i = 0; i < tokens.length; i++) {
                     final Matcher m = PATTERN.matcher(tokens[i]);
                     if (!m.matches()) throw new IllegalArgumentException("Bad token: " + tokens[i]);
-                    rt.mSteps[i] = Long.parseLong(m.group(1));
-                    rt.mValues[i] = Long.parseLong(m.group(3));
+                    rt.mSchedule[i] = Integer.parseInt(m.group(1));
                 }
-                rt.mDefault = Long.parseLong(tokens[tokens.length - 1]);
+                if (DEBUG) Log.d(TAG, "Parsed spec [" + spec + "] as: " + rt);
                 return rt;
             } catch (RuntimeException e) {
                 Log.w(TAG, "Error parsing spec: " + spec, e);
@@ -122,11 +150,17 @@ public class DozeParameters {
             }
         }
 
-        public long evaluate(long x) {
-            for (int i = 0; i < mSteps.length; i++) {
-                if (x < mSteps[i]) return mValues[i];
+        @Override
+        public String toString() {
+            return Arrays.toString(mSchedule);
+        }
+
+        public long getNextTime(long now, long notificationTime) {
+            for (int i = 0; i < mSchedule.length; i++) {
+                final long time = notificationTime + mSchedule[i] * 1000;
+                if (time > now) return time;
             }
-            return mDefault;
+            return 0;
         }
     }
 }
