@@ -68,8 +68,9 @@ public class FrameLayout extends ViewGroup {
     @ViewDebug.ExportedProperty(category = "drawing")
     private Drawable mForeground;
     private ColorStateList mForegroundTintList = null;
-    private PorterDuff.Mode mForegroundTintMode = PorterDuff.Mode.SRC_ATOP;
+    private PorterDuff.Mode mForegroundTintMode = null;
     private boolean mHasForegroundTint = false;
+    private boolean mHasForegroundTintMode = false;
 
     @ViewDebug.ExportedProperty(category = "padding")
     private int mForegroundPaddingLeft = 0;
@@ -127,20 +128,22 @@ public class FrameLayout extends ViewGroup {
             setMeasureAllChildren(true);
         }
 
-        mForegroundTintMode = Drawable.parseTintMode(a.getInt(
-                R.styleable.FrameLayout_foregroundTintMode, -1), mForegroundTintMode);
+        if (a.hasValue(R.styleable.FrameLayout_foregroundTintMode)) {
+            mForegroundTintMode = Drawable.parseTintMode(a.getInt(
+                    R.styleable.FrameLayout_foregroundTintMode, -1), mForegroundTintMode);
+            mHasForegroundTintMode = true;
+        }
 
         if (a.hasValue(R.styleable.FrameLayout_foregroundTint)) {
             mForegroundTintList = a.getColorStateList(R.styleable.FrameLayout_foregroundTint);
             mHasForegroundTint = true;
-
-            applyForegroundTint();
         }
 
-        mForegroundInPadding = a.getBoolean(
-                com.android.internal.R.styleable.FrameLayout_foregroundInsidePadding, true);
+        mForegroundInPadding = a.getBoolean(R.styleable.FrameLayout_foregroundInsidePadding, true);
 
         a.recycle();
+
+        applyForegroundTint();
     }
 
     /**
@@ -302,7 +305,7 @@ public class FrameLayout extends ViewGroup {
 
     /**
      * Applies a tint to the foreground drawable. Does not modify the current
-     * tint mode, which is {@link PorterDuff.Mode#SRC_ATOP} by default.
+     * tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
      * <p>
      * Subsequent calls to {@link #setForeground(Drawable)} will automatically
      * mutate the drawable and apply the specified tint and tint mode using
@@ -334,7 +337,7 @@ public class FrameLayout extends ViewGroup {
     /**
      * Specifies the blending mode used to apply the tint specified by
      * {@link #setForegroundTintList(ColorStateList)}} to the foreground drawable.
-     * The default mode is {@link PorterDuff.Mode#SRC_ATOP}.
+     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
      *
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
@@ -344,6 +347,7 @@ public class FrameLayout extends ViewGroup {
      */
     public void setForegroundTintMode(@Nullable PorterDuff.Mode tintMode) {
         mForegroundTintMode = tintMode;
+        mHasForegroundTintMode = true;
 
         applyForegroundTint();
     }
@@ -360,10 +364,16 @@ public class FrameLayout extends ViewGroup {
     }
 
     private void applyForegroundTint() {
-        if (mForeground != null && mHasForegroundTint) {
+        if (mForeground != null && (mHasForegroundTint || mHasForegroundTintMode)) {
             mForeground = mForeground.mutate();
-            mForeground.setTintList(mForegroundTintList);
-            mForeground.setTintMode(mForegroundTintMode);
+
+            if (mHasForegroundTint) {
+                mForeground.setTintList(mForegroundTintList);
+            }
+
+            if (mHasForegroundTintMode) {
+                mForeground.setTintMode(mForegroundTintMode);
+            }
         }
     }
 
