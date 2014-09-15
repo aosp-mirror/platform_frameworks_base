@@ -16,21 +16,23 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -76,15 +78,27 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // Optimizations
     int mStackViewsAnimationDuration;
     boolean mStackViewsDirty = true;
+    boolean mStackViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
     boolean mStartEnterAnimationRequestedAfterLayout;
     boolean mStartEnterAnimationCompleted;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
     int[] mTmpVisibleRange = new int[2];
+    float[] mTmpCoord = new float[2];
+    Matrix mTmpMatrix = new Matrix();
     Rect mTmpRect = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<Task, TaskView>();
     LayoutInflater mInflater;
+
+    // A convenience update listener to request updating clipping of tasks
+    ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            requestUpdateStackViewsClip();
+        }
+    };
 
     // A convenience runnable to return all views to the pool
     Runnable mReturnAllViewsToPoolRunnable = new Runnable() {
@@ -149,6 +163,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStackViewsAnimationDuration = 0;
         } else {
             mStackViewsAnimationDuration = Math.max(mStackViewsAnimationDuration, duration);
+        }
+    }
+
+    /** Requests that the views clipping be updated. */
+    void requestUpdateStackViewsClip() {
+        if (!mStackViewsClipDirty) {
+            invalidate();
+            mStackViewsClipDirty = true;
         }
     }
 
@@ -301,7 +323,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
                 // Animate the task into place
                 tv.updateViewPropertiesToTaskTransform(mCurrentTaskTransforms.get(taskIndex),
-                        mStackViewsAnimationDuration);
+                        mStackViewsAnimationDuration, mRequestUpdateClippingListener);
 
                 // Request accessibility focus on the next view if we removed the task
                 // that previously held accessibility focus
@@ -319,6 +341,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Reset the request-synchronize params
             mStackViewsAnimationDuration = 0;
             mStackViewsDirty = false;
+            mStackViewsClipDirty = true;
             return true;
         }
         return false;
@@ -349,10 +372,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     // stacked and we can make assumptions about the visibility of the this
                     // task relative to the ones in front of it.
                     if (nextTv != null) {
-                        // We can reuse the current task transforms to find the task rects
-                        TaskViewTransform transform = mCurrentTaskTransforms.get(mStack.indexOfTask(tv.getTask()));
-                        TaskViewTransform nextTransform = mCurrentTaskTransforms.get(mStack.indexOfTask(nextTv.getTask()));
-                        clipBottom = transform.rect.bottom - nextTransform.rect.top;
+                        // Map the top edge of next task view into the local space of the current
+                        // task view to find the clip amount in local space
+                        mTmpCoord[0] = mTmpCoord[1] = 0;
+                        Utilities.mapCoordInDescendentToSelf(nextTv, this, mTmpCoord, false);
+                        Utilities.mapCoordInSelfToDescendent(tv, this, mTmpCoord, mTmpMatrix);
+                        clipBottom = (int) Math.floor(tv.getMeasuredHeight() - mTmpCoord[1]
+                                - nextTv.getPaddingTop() - 1);
                     }
                 }
                 tv.getViewBounds().setClipBottom(clipBottom);
@@ -363,6 +389,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 tv.getViewBounds().setClipBottom(0);
             }
         }
+        mStackViewsClipDirty = false;
     }
 
     /** The stack insets to apply to the stack contents */
@@ -665,6 +692,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 ctx.currentTaskRect = mLayoutAlgorithm.mTaskRect;
                 ctx.currentTaskOccludesLaunchTarget = (launchTargetTask != null) &&
                         launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
+                ctx.updateListener = mRequestUpdateClippingListener;
                 mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(), ctx.currentTaskTransform, null);
                 tv.startEnterRecentsAnimation(ctx);
             }
@@ -1003,7 +1031,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onTaskViewClipStateChanged(TaskView tv) {
-        invalidate();
+        if (!mStackViewsDirty) {
+            invalidate();
+        }
     }
 
     @Override

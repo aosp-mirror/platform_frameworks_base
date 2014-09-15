@@ -20,12 +20,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Outline;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
+import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
@@ -74,6 +69,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     AnimateableViewBounds mViewBounds;
     Paint mLayerPaint = new Paint();
 
+    View mContent;
     TaskViewThumbnail mThumbnailView;
     TaskViewHeader mHeaderView;
     TaskViewFooter mFooterView;
@@ -134,15 +130,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     protected void onFinishInflate() {
         // Bind the views
+        mContent = findViewById(R.id.task_view_content);
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
+        mThumbnailView.enableTaskBarClip(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
         mActionButtonView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
                 // Set the outline to match the FAB background
-                outline.setOval(0, 0, mActionButtonView.getWidth(),
-                        mActionButtonView.getHeight());
+                outline.setOval(0, 0, mActionButtonView.getWidth(), mActionButtonView.getHeight());
             }
         });
         if (mFooterView != null) {
@@ -157,6 +154,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         int widthWithoutPadding = width - mPaddingLeft - mPaddingRight;
         int heightWithoutPadding = height - mPaddingTop - mPaddingBottom;
+
+        // Measure the content
+        mContent.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
+
         // Measure the bar view, thumbnail, and footer
         mHeaderView.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
@@ -186,6 +188,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Synchronizes this view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
+        updateViewPropertiesToTaskTransform(toTransform, duration, null);
+    }
+
+    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration,
+                                             ValueAnimator.AnimatorUpdateListener updateCallback) {
         // If we are a full screen view, then only update the Z to keep it in order
         // XXX: Also update/animate the dim as well
         if (mIsFullScreenView) {
@@ -198,7 +205,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         // Apply the transform
         toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false,
-                !mConfig.fakeShadows);
+                !mConfig.fakeShadows, updateCallback);
 
         // Update the task progress
         if (mTaskProgressAnimator != null) {
@@ -331,8 +338,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                                 mViewBounds.setClipRight(0);
                                 // Reset the bar translation
                                 mHeaderView.setTranslationY(0);
-                                // Enable the thumbnail clip
-                                mThumbnailView.enableTaskBarClip(mHeaderView);
                                 // Animate the footer into view (if it is the front most task)
                                 animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
 
@@ -349,9 +354,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         })
                         .start();
             } else {
-                // Otherwise, just enable the thumbnail clip
-                mThumbnailView.enableTaskBarClip(mHeaderView);
-
                 // Animate the footer into view
                 animateFooterVisibility(true, 0);
             }
@@ -359,8 +361,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (mTask.isLaunchTarget) {
-                // Enable the task bar clip
-                mThumbnailView.enableTaskBarClip(mHeaderView);
                 // Animate the dim/overlay
                 if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
                     // Animate the thumbnail alpha before the dim animation (to prevent updating the
@@ -392,8 +392,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         .withLayer()
                         .start();
             } else {
-                // Enable the task bar clip
-                mThumbnailView.enableTaskBarClip(mHeaderView);
                 // Animate the task up if it was occluding the launch target
                 if (ctx.currentTaskOccludesLaunchTarget) {
                     setTranslationY(transform.translationY + mConfig.taskViewAffiliateGroupEnterOffsetPx);
@@ -407,7 +405,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                             .withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mThumbnailView.enableTaskBarClip(mHeaderView);
                                     // Decrement the post animation trigger
                                     ctx.postAnimationTrigger.decrement();
                                 }
@@ -421,8 +418,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else if (mConfig.launchedFromHome) {
             // Animate the tasks up
             int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
-            int delay = mConfig.taskViewEnterFromHomeDelay +
-                    frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay;
+            float fraction = (float) frontIndex / (ctx.currentStackViewCount - 1);
+            fraction = (float) Math.pow(fraction, 0.85f);
+            int delay = (int) (mConfig.taskViewEnterFromHomeDelay +
+                                fraction * mConfig.taskViewEnterFromHomeStaggerDelay);
+            long delayIncrease = (long) (fraction * mConfig.taskViewEnterFromHomeStaggerDuration);
             if (!mConfig.fakeShadows) {
                 animate().translationZ(transform.translationZ);
             }
@@ -431,13 +431,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .scaleY(transform.scale)
                     .translationY(transform.translationY)
                     .setStartDelay(delay)
-                    .setUpdateListener(null)
+                    .setUpdateListener(ctx.updateListener)
                     .setInterpolator(mConfig.quintOutInterpolator)
-                    .setDuration(mConfig.taskViewEnterFromHomeDuration)
+                    .setDuration(mConfig.taskViewEnterFromHomeDuration + delayIncrease)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
-                            mThumbnailView.enableTaskBarClip(mHeaderView);
                             // Decrement the post animation trigger
                             ctx.postAnimationTrigger.decrement();
                         }
@@ -450,9 +449,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             startDelay = delay;
 
         } else {
-            // Otherwise, just enable the thumbnail clip
-            mThumbnailView.enableTaskBarClip(mHeaderView);
-
             // Animate the footer into view
             animateFooterVisibility(true, 0);
         }
@@ -484,8 +480,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void startLaunchTaskAnimation(final Runnable postAnimRunnable, boolean isLaunchingTask,
             boolean occludesLaunchTarget, boolean lockToTask) {
         if (isLaunchingTask) {
-            // Disable the thumbnail clip
-            mThumbnailView.disableTaskBarClip();
             // Animate the thumbnail alpha back into full opacity for the window animation out
             mThumbnailView.startLaunchTaskAnimation(postAnimRunnable);
 
@@ -662,7 +656,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 int inverse = 255 - mDim;
                 mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
                 mLayerPaint.setColorFilter(mDimColorFilter);
-                setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+                mContent.setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
             }
         } else {
             float dimAlpha = mDim / 255.0f;
