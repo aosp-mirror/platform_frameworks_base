@@ -25743,6 +25743,7 @@ package android.provider {
     field public static final int STATUS_NONE = -1; // 0xffffffff
     field public static final int STATUS_PENDING = 32; // 0x20
     field public static final java.lang.String SUBJECT = "subject";
+    field public static final java.lang.String SUB_ID = "sub_id";
     field public static final java.lang.String THREAD_ID = "thread_id";
     field public static final java.lang.String TYPE = "type";
   }
