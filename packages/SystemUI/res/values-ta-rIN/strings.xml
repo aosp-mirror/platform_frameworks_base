@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS அமைத்த இருப்பிடம்"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"இருப்பிடக் கோரிக்கைகள் இயக்கப்பட்டன"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"எல்லா அறிவிப்புகளையும் அழி."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"அறிவிப்பு அமைப்புகள்"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> அமைப்புகள்"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"திரை தானாகச் சுழலும்."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"நிலத்தோற்ற திசையமைப்பில் திரைப் பூட்டப்பட்டுள்ளது."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"உருவப்பட திசையமைப்பில் திசை பூட்டப்பட்டுள்ளது."</string>
@@ -301,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"திறக்க, மேலே ஸ்வைப் செய்யவும்"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ஃபோனுக்கு, வலப்புறம் ஸ்வைப் செய்க"</string>
     <string name="camera_hint" msgid="5241441720959174226">"கேமராவிற்கு இடப்புறம் ஸ்வைப் செய்க"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"ஏதுமில்லை"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"முன்னுரிமை"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"எல்லாம்"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"மீண்டும் தொடங்கு"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"தொடரவும்"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ஒரு மணி நேரம்"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d மணிநேரம்"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"புதியவரைச் சேர்க்கவா?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், மற்ற எல்லா பயனர்களுக்காகவும் பயன்பாடுகளைப் புதுப்பிக்கலாம்."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"பேட்டரி சேமிப்பான் இயக்கத்தில் உள்ளது"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"செயல்திறனையும் பின்புலத் தரவையும் குறைக்கிறது"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"பேட்டரி சேமிப்பானை முடக்கு"</string>

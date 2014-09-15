@@ -301,13 +301,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"غیر مقفل کرنے کیلئے اوپر سوائپ کریں"</string>
     <string name="phone_hint" msgid="3101468054914424646">"فون کیلئے دائیں سوائپ کریں"</string>
     <string name="camera_hint" msgid="5241441720959174226">"کیمرہ کیلئے بائیں سوائپ کریں"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"غیر متعینہ"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"کوئی نہیں"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"ترجیح"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"سبھی"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"چارج ہو رہا ہے (مکمل ہونے تک <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> باقی ہیں)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"صارف سوئچ کریں"</string>
-    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"صارف کو سوئچ کریں، موجودہ صارف <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"صارف سوئچ کریں، موجودہ صارف <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"پروفائل دکھائیں"</string>
     <string name="user_add_user" msgid="5110251524486079492">"صارف کو شامل کریں"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"نیا صارف"</string>
@@ -321,14 +320,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"کیا آپ اپنا سیشن جاری رکھنا چاہتے ہیں؟"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"دوبارہ شروع کریں"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ہاں، جاری رکھیں"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ایک منٹ کیلئے"</item>
-    <item quantity="other" msgid="6924190729213550991">"‏%d منٹ کیلئے"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ایک گھنٹے کیلئے"</item>
-    <item quantity="other" msgid="5408537517529822157">"‏%d گھنٹوں کیلئے"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"نیا صارف شامل کریں؟"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"بیٹری سیور آن ہے"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"کارکردگی اور پس منظر کا ڈیٹا کم کر دیتا ہے"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"بیٹری کی بچت آف کریں"</string>

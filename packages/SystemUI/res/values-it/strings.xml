@@ -214,10 +214,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posizione stabilita dal GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Richieste di accesso alla posizione attive"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Cancella tutte le notifiche."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Impostazioni di notifica"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Impostazioni di <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Lo schermo ruoterà automaticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Lo schermo è bloccato in orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Lo schermo è bloccato in orientamento verticale."</string>
@@ -303,7 +301,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Scorri verso l\'alto per sbloccare"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Scorri verso destra per accedere al telefono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Scorri verso sinistra per accedere alla fotocamera"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Sempre"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Nessuna"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Priorità"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Tutte"</string>
@@ -323,14 +320,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Vuoi continuare la sessione?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Ricomincia"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sì, continua"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Per un minuto"</item>
-    <item quantity="other" msgid="6924190729213550991">"Per %d minuti"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Per un\'ora"</item>
-    <item quantity="other" msgid="5408537517529822157">"Per %d ore"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Aggiungere un nuovo utente?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Risparmio batteria attivo"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Riduce le prestazioni e i dati in background"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Disattiva risparmio energetico"</string>

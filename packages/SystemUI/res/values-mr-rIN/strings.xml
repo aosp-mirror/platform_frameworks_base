@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारे स्थान सेट केले"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान विनंत्या सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सर्व सूचना साफ करा."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"सूचना सेटिंग्ज"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिंग्ज"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्क्रीन स्वयंचलितपणे फिरेल."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"भूदृश्य अभिमुखतेमध्ये स्क्रीन लॉक केली आहे."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"पोर्ट्रेट अभिमुखतेमध्ये स्क्रीन लॉक केली आहे."</string>
@@ -301,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करण्यासाठी स्वाइप करा"</string>
     <string name="phone_hint" msgid="3101468054914424646">"फोन साठी उजवीकडे स्वाइप करा"</string>
     <string name="camera_hint" msgid="5241441720959174226">"कॅमेर्‍यासाठी डावीकडे स्वाइप करा"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्‍चितपणे"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"काहीही नाही"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"प्राधान्य"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"सर्व"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"आपण आपले सत्र सुरु ठेवू इच्छिता?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"येथून प्रारंभ करा"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"होय, सुरु ठेवा"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"एक मिनिटासाठी"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d मिनिटांसाठी"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"एका तासासाठी"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d तासांसाठी"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"नवीन वापरकर्ता जोडायचा?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"आपण एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अॅप्स अद्यतनित करू शकतो."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"बॅटरी बचतकर्ता चालू आहे"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"कार्यप्रदर्शन आणि पार्श्वभूमी डेटा कमी करते"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"बॅटरी बचतकर्ता बंद करा"</string>

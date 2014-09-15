@@ -299,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Swipe up to unlock"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Swipe right for phone"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Swipe left for camera"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinitely"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"None"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Priority"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"All"</string>
@@ -319,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Do you want to continue your session?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Start again"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Yes, continue"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"For one minute"</item>
-    <item quantity="other" msgid="6924190729213550991">"For %d minutes"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"For one hour"</item>
-    <item quantity="other" msgid="5408537517529822157">"For %d hours"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Add new user?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Battery saver is on"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduces performance and background data"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Turn off battery saver"</string>
