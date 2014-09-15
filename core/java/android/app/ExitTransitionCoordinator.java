@@ -126,7 +126,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void resetViews() {
-        showViews(mTransitioningViews, true);
+        if (mTransitioningViews != null) {
+            showViews(mTransitioningViews, true);
+        }
         showViews(mSharedElements, true);
         mIsHidden = true;
         ViewGroup decorView = getDecor();
@@ -253,7 +255,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private void startExitTransition() {
         Transition transition = getExitTransition();
         ViewGroup decorView = getDecor();
-        if (transition != null && decorView != null) {
+        if (transition != null && decorView != null && mTransitioningViews != null) {
             TransitionManager.beginDelayedTransition(decorView, transition);
             mTransitioningViews.get(0).invalidate();
         } else {
@@ -289,19 +291,20 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private Transition getExitTransition() {
         Transition viewsTransition = null;
-        if (!mTransitioningViews.isEmpty()) {
+        if (mTransitioningViews != null && !mTransitioningViews.isEmpty()) {
             viewsTransition = configureTransition(getViewsTransition(), true);
         }
         if (viewsTransition == null) {
             exitTransitionComplete();
         } else {
+            final ArrayList<View> transitioningViews = mTransitioningViews;
             viewsTransition.addListener(new ContinueTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     transition.removeListener(this);
                     exitTransitionComplete();
-                    if (mIsHidden) {
-                        showViews(mTransitioningViews, true);
+                    if (mIsHidden && transitioningViews != null) {
+                        showViews(transitioningViews, true);
                     }
                     if (mSharedElementBundle != null) {
                         delayCancel();
