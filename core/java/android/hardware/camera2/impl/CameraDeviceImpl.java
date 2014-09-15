@@ -99,6 +99,7 @@ public class CameraDeviceImpl extends CameraDevice {
     private final FrameNumberTracker mFrameNumberTracker = new FrameNumberTracker();
 
     private CameraCaptureSessionImpl mCurrentSession;
+    private int mNextSessionId = 0;
 
     // Runnables for all state transitions, except error, which needs the
     // error code argument
@@ -445,7 +446,8 @@ public class CameraDeviceImpl extends CameraDevice {
 
             // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
             CameraCaptureSessionImpl newSession =
-                    new CameraCaptureSessionImpl(outputs, callback, handler, this, mDeviceHandler,
+                    new CameraCaptureSessionImpl(mNextSessionId++,
+                            outputs, callback, handler, this, mDeviceHandler,
                             configureSuccess);
 
             // TODO: wait until current session closes, then create the new session
@@ -1003,8 +1005,10 @@ public class CameraDeviceImpl extends CameraDevice {
                     Log.e(TAG, String.format(
                             "result frame number %d comes out of order, should be %d + 1",
                             frameNumber, mCompletedFrameNumber));
+                    // Continue on to set the completed frame number to this frame anyway,
+                    // to be robust to lower-level errors and allow for clean shutdowns.
                 }
-                mCompletedFrameNumber++;
+                mCompletedFrameNumber = frameNumber;
             }
             update();
         }
