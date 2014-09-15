@@ -170,8 +170,7 @@ public class AlwaysOnHotwordDetector {
             = SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
 
     static final String TAG = "AlwaysOnHotwordDetector";
-    // TODO: Set to false.
-    static final boolean DBG = true;
+    static final boolean DBG = false;
 
     private static final int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
     private static final int STATUS_OK = SoundTrigger.STATUS_OK;
@@ -575,7 +574,7 @@ public class AlwaysOnHotwordDetector {
         int code = STATUS_ERROR;
         try {
             code = mModelManagementService.startRecognition(mVoiceInteractionService,
-                    mKeyphraseMetadata.id, mInternalCallback,
+                    mKeyphraseMetadata.id, mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
                             recognitionExtra, null /* additional data */));
         } catch (RemoteException e) {
@@ -690,7 +689,7 @@ public class AlwaysOnHotwordDetector {
             if (availability == STATE_NOT_READY
                     || availability == STATE_KEYPHRASE_UNENROLLED
                     || availability == STATE_KEYPHRASE_ENROLLED) {
-                enrolled = internalGetIsEnrolled(mKeyphraseMetadata.id);
+                enrolled = internalGetIsEnrolled(mKeyphraseMetadata.id, mLocale);
                 if (!enrolled) {
                     availability = STATE_KEYPHRASE_UNENROLLED;
                 } else {
@@ -741,10 +740,10 @@ public class AlwaysOnHotwordDetector {
         /**
          * @return The corresponding {@link KeyphraseSoundModel} or null if none is found.
          */
-        private boolean internalGetIsEnrolled(int keyphraseId) {
+        private boolean internalGetIsEnrolled(int keyphraseId, Locale locale) {
             try {
                 return mModelManagementService.isEnrolledForKeyphrase(
-                        mVoiceInteractionService, keyphraseId);
+                        mVoiceInteractionService, keyphraseId, locale.toLanguageTag());
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in listRegisteredKeyphraseSoundModels!", e);
             }

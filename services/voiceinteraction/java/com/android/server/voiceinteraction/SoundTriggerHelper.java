@@ -50,8 +50,7 @@ import java.util.UUID;
  */
 public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     static final String TAG = "SoundTriggerHelper";
-    // TODO: Set to false.
-    static final boolean DBG = true;
+    static final boolean DBG = false;
 
     /**
      * Return codes for {@link #startRecognition(int, KeyphraseSoundModel,
@@ -166,8 +165,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
 
+            // Unload the previous model if the current one isn't invalid
+            // and, it's not the same as the new one, or we are already started
+            // if we are already started, we can get multiple calls to start
+            // if the underlying sound model changes, in which case we should unload and reload.
+            // The model reuse helps only in cases when we trigger and stop internally
+            // without a start recognition call.
             if (mCurrentSoundModelHandle != INVALID_VALUE
-                    && !soundModel.uuid.equals(mCurrentSoundModelUuid)) {
+                    && (!soundModel.uuid.equals(mCurrentSoundModelUuid) || mStarted)) {
                 Slog.w(TAG, "Unloading previous sound model");
                 int status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
                 if (status != SoundTrigger.STATUS_OK) {

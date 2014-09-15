@@ -446,7 +446,7 @@ public class VoiceInteractionManagerService extends SystemService {
         //----------------- Model management APIs --------------------------------//
 
         @Override
-        public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId) {
+        public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {
             synchronized (this) {
                 if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -455,9 +455,14 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
 
+            if (bcp47Locale == null) {
+                throw new IllegalArgumentException("Illegal argument(s) in getKeyphraseSoundModel");
+            }
+
+            final int callingUid = UserHandle.getCallingUserId();
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mDbHelper.getKeyphraseSoundModel(keyphraseId);
+                return mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -495,7 +500,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int deleteKeyphraseSoundModel(int keyphraseId) {
+        public int deleteKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {
             synchronized (this) {
                 if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -504,13 +509,16 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
 
+            if (bcp47Locale == null) {
+                throw new IllegalArgumentException(
+                        "Illegal argument(s) in deleteKeyphraseSoundModel");
+            }
+
+            final int callingUid = UserHandle.getCallingUserId();
             final long caller = Binder.clearCallingIdentity();
             boolean deleted = false;
             try {
-                KeyphraseSoundModel soundModel = mDbHelper.getKeyphraseSoundModel(keyphraseId);
-                if (soundModel != null) {
-                    deleted = mDbHelper.deleteKeyphraseSoundModel(soundModel.uuid);
-                }
+                deleted = mDbHelper.deleteKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
                 return deleted ? SoundTriggerHelper.STATUS_OK : SoundTriggerHelper.STATUS_ERROR;
             } finally {
                 if (deleted) {
@@ -527,7 +535,8 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //----------------- SoundTrigger APIs --------------------------------//
         @Override
-        public boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId) {
+        public boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId,
+                String bcp47Locale) {
             synchronized (this) {
                 if (mImpl == null || mImpl.mService == null
                         || service.asBinder() != mImpl.mService.asBinder()) {
@@ -536,9 +545,15 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
 
+            if (bcp47Locale == null) {
+                throw new IllegalArgumentException("Illegal argument(s) in isEnrolledForKeyphrase");
+            }
+
+            final int callingUid = UserHandle.getCallingUserId();
             final long caller = Binder.clearCallingIdentity();
             try {
-                KeyphraseSoundModel model = mDbHelper.getKeyphraseSoundModel(keyphraseId);
+                KeyphraseSoundModel model =
+                        mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
                 return model != null;
             } finally {
                 Binder.restoreCallingIdentity(caller);
@@ -566,7 +581,8 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public int startRecognition(IVoiceInteractionService service, int keyphraseId,
-                IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
+                String bcp47Locale, IRecognitionStatusCallback callback,
+                RecognitionConfig recognitionConfig) {
             // Allow the call if this is the current voice interaction service.
             synchronized (this) {
                 if (mImpl == null || mImpl.mService == null
@@ -575,14 +591,16 @@ public class VoiceInteractionManagerService extends SystemService {
                             "Caller is not the current voice interaction service");
                 }
 
-                if (callback == null || recognitionConfig == null) {
+                if (callback == null || recognitionConfig == null || bcp47Locale == null) {
                     throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
                 }
             }
 
+            int callingUid = UserHandle.getCallingUserId();
             final long caller = Binder.clearCallingIdentity();
             try {
-                KeyphraseSoundModel soundModel = mDbHelper.getKeyphraseSoundModel(keyphraseId);
+                KeyphraseSoundModel soundModel =
+                        mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
                 if (soundModel == null
                         || soundModel.uuid == null
                         || soundModel.keyphrases == null) {
