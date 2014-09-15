@@ -683,8 +683,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void maybeSendUserPresentBroadcast() {
-        if (mSystemReady && mLockPatternUtils.isLockScreenDisabled()
-                && !mUserManager.isUserSwitcherEnabled()) {
+        if (mSystemReady && mLockPatternUtils.isLockScreenDisabled()) {
             // Lock screen is disabled because the user has set the preference to "None".
             // In this case, send out ACTION_USER_PRESENT here instead of in
             // handleKeyguardDone()
