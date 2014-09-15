@@ -67,8 +67,6 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
                 } else {
                     return false;
                 }
-            default:
-                Slog.w(TAG, "Unsupported opcode:" + cmd.toString());
         }
         return false;
     }
