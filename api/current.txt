@@ -28722,6 +28722,8 @@ package android.telephony {
     method public void downloadMultimediaMessage(android.content.Context, java.lang.String, android.net.Uri, android.os.Bundle, android.app.PendingIntent);
     method public android.os.Bundle getCarrierConfigValues();
     method public static android.telephony.SmsManager getDefault();
+    method public static android.telephony.SmsManager getSmsManagerUsingSubId(long);
+    method public long getSubId();
     method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(android.content.Context, android.net.Uri, java.lang.String, android.os.Bundle, android.app.PendingIntent);
