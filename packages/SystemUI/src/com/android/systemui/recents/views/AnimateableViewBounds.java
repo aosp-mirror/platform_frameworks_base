@@ -22,6 +22,7 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+
 import com.android.systemui.recents.RecentsConfiguration;
 
 /* An outline provider that has a clip and outline that can be animated. */
@@ -29,8 +30,10 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
 
     RecentsConfiguration mConfig;
 
-    View mSourceView;
+    TaskView mSourceView;
+    Rect mTmpRect = new Rect();
     Rect mClipRect = new Rect();
+    Rect mClipBounds = new Rect();
     Rect mOutlineClipRect = new Rect();
     int mCornerRadius;
     float mAlpha = 1f;
@@ -40,7 +43,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     ObjectAnimator mClipRightAnimator;
     ObjectAnimator mClipBottomAnimator;
 
-    public AnimateableViewBounds(View source, int cornerRadius) {
+    public AnimateableViewBounds(TaskView source, int cornerRadius) {
         mConfig = RecentsConfiguration.getInstance();
         mSourceView = source;
         mCornerRadius = cornerRadius;
@@ -53,8 +56,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     @Override
     public void getOutline(View view, Outline outline) {
         outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
-
-        // TODO: This doesn't work with fake shadows.
         outline.setRoundRect(Math.max(mClipRect.left, mOutlineClipRect.left),
                 Math.max(mClipRect.top, mOutlineClipRect.top),
                 mSourceView.getWidth() - Math.max(mClipRect.right, mOutlineClipRect.right),
@@ -90,6 +91,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         if (top != mClipRect.top) {
             mClipRect.top = top;
             mSourceView.invalidateOutline();
+            updateClipBounds();
         }
     }
 
@@ -115,6 +117,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         if (right != mClipRect.right) {
             mClipRect.right = right;
             mSourceView.invalidateOutline();
+            updateClipBounds();
         }
     }
 
@@ -140,6 +143,11 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         if (bottom != mClipRect.bottom) {
             mClipRect.bottom = bottom;
             mSourceView.invalidateOutline();
+            updateClipBounds();
+            if (!mConfig.useHardwareLayers) {
+                mSourceView.mThumbnailView.updateVisibility(
+                        bottom - mSourceView.getPaddingBottom());
+            }
         }
     }
 
@@ -159,5 +167,12 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     /** Gets the outline bottom clip. */
     public int getOutlineClipBottom() {
         return mOutlineClipRect.bottom;
+    }
+
+    private void updateClipBounds() {
+        mClipBounds.set(mClipRect.left, mClipRect.top,
+                mSourceView.getWidth() - mClipRect.right,
+                mSourceView.getHeight() - mClipRect.bottom);
+        mSourceView.setClipBounds(mClipBounds);
     }
 }
