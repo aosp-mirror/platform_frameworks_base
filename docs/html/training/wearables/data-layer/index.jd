@@ -28,7 +28,7 @@ the data layer:</p>
 
   <dt><b>Messages</b></dt>
   <dd>The <a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a> class
-  can send messages designed for "fire-and-forget" commands, such as controlling a handheld's
+  can send messages and is good for remote procedure calls (RPC), such as controlling a handheld's
   media player from the wearable or starting an intent on the wearable from the handheld.
   The system always delivers the message when the handheld and wearable are connected and delivers
   an error when the devices are disconnected. Messages are great for one-way requests or for a
