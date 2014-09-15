@@ -196,7 +196,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     final protected ArrayList<String> mAllSharedElementNames;
     final protected ArrayList<View> mSharedElements = new ArrayList<View>();
     final protected ArrayList<String> mSharedElementNames = new ArrayList<String>();
-    final protected ArrayList<View> mTransitioningViews = new ArrayList<View>();
+    protected ArrayList<View> mTransitioningViews = new ArrayList<View>();
     protected SharedElementCallback mListener;
     protected ResultReceiver mResultReceiver;
     final private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
@@ -222,7 +222,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
         mSharedElementNames.addAll(sharedElements.keySet());
         mSharedElements.addAll(sharedElements.values());
-        if (getViewsTransition() != null) {
+        if (getViewsTransition() != null && mTransitioningViews != null) {
             ViewGroup decorView = getDecor();
             if (decorView != null) {
                 decorView.captureTransitioningViews(mTransitioningViews);
@@ -233,6 +233,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void stripOffscreenViews() {
+        if (mTransitioningViews == null) {
+            return;
+        }
         Rect r = new Rect();
         for (int i = mTransitioningViews.size() - 1; i >= 0; i--) {
             View view = mTransitioningViews.get(i);
@@ -592,7 +595,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         // Clear the state so that we can't hold any references accidentally and leak memory.
         mWindow = null;
         mSharedElements.clear();
-        mTransitioningViews.clear();
+        mTransitioningViews = null;
         mOriginalAlphas.clear();
         mResultReceiver = null;
         mPendingTransition = null;
