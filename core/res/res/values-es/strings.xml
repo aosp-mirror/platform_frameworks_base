@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Seleccionar una aplicación en la pantalla de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Uitliza otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Seleccionar una aplicación para el dispositivo USB"</string>
@@ -1254,7 +1255,7 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumen de llamada"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen multimedia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumen de notificaciones"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Tono predeterminado"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Tono por defecto"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ninguno"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonos"</string>
@@ -1349,7 +1350,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para inhabilitar la depuración USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Seleccionar teclados"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Elegir teclados"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostrar método de entrada"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona un diseño de teclado"</string>
@@ -1761,19 +1762,28 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Para desactivar esta pantalla, mantén pulsados los botones para volver y de aplicaciones recientes al mismo tiempo."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Para desactivar esta pantalla, mantén pulsado el botón de aplicaciones recientes."</string>
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Para anular la fijación de esta pantalla, mantén pulsados los botones de volver y de aplicaciones recientes a la vez."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Para anular la fijación de esta pantalla, mantén pulsado el botón de aplicaciones recientes."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Se ha activado la pantalla. Tu organización no puede desactivarla."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"¿Usar la función para activar la pantalla?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Si activas la pantalla, esta se bloqueará en una vista única.\n\nPara salir, mantén pulsados los botones para volver y de aplicaciones recientes al mismo tiempo."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Si activas la pantalla, esta se bloqueará en una vista única.\n\nPara salir, mantén pulsado el botón de aplicaciones recientes."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"¿Quieres fijar esta pantalla?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Si fijas la pantalla se bloqueará en una vista única.\n\nPara salir, mantén pulsados los botones de volver y de aplicaciones recientes a la vez."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Si fijas la pantalla, se bloqueará en una vista única.\n\nPara salir, mantén pulsado el botón de aplicaciones recientes."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRACIAS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla activada"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla desactivada"</string>
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fijada"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"La pantalla ya no está fija"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para desactivar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para desactivar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para desactivar"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se carga."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hasta que el tiempo de inactividad finalice el <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Durante un minuto"</item>
+    <item quantity="other" msgid="6924190729213550991">"Durante %d minutos"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Durante 1 hora"</item>
+    <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
 </resources>

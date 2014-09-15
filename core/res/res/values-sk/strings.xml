@@ -183,9 +183,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Režim V lietadle"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim V lietadle je ZAPNUTÝ"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim V lietadle je VYPNUTÝ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Režim v lietadle"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim v lietadle je ZAPNUTÝ"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim v lietadle je VYPNUTÝ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nastavenia"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Uzamknúť"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -370,7 +370,7 @@
     <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Umožňuje aplikácii získať zhromaždené štatistické údaje o fungovaní aplikácií. Bežné aplikácie toto nastavenie nepoužívajú."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"upraviť štatistické údaje o fungovaní aplikácií"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Umožňuje aplikácii zmeniť zhromaždené štatistické údaje o fungovaní aplikácií. Bežné aplikácie toto nastavenie nepoužívajú."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"Ovládať zálohovanie a obnovu systému"</string>
+    <string name="permlab_backup" msgid="470013022865453920">"ovládať zálohovanie a obnovu systému"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Umožňuje aplikácii ovládať mechanizmus na zálohovanie a obnovu údajov systému. Bežné aplikácie toto nastavenie nepoužívajú."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"potvrdenie operácie úplnej zálohy alebo úplného obnovenia"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Umožňuje aplikácii spustiť používateľské rozhranie potvrdenia úplnej zálohy. Toto nastavenie by nemala používať žiadna aplikácia."</string>
@@ -762,17 +762,17 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globálny server proxy, ktorý sa bude používať po aktivácii pravidiel. Platný globálny server proxy nastavuje iba prvý správca zariadenia."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Nastaviť vypršanie hesla zámky"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Nastavte, ako často sa musí zmeniť heslo na uzamknutie obrazovky."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastaviť šifr. ukl. priestoru"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastaviť šifrovanie úložiska"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Zákaz funkcie v zámke kláves."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Zabrániť používaniu niektorých funkcií v zámke klávesov."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Zákaz funkcií pri zámke klávesov"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Zabrániť používaniu niektorých funkcií pri zámke klávesov."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domov"</item>
     <item msgid="869923650527136615">"Mobil"</item>
     <item msgid="7897544654242874543">"Práca"</item>
-    <item msgid="1103601433382158155">"Fax do práce"</item>
+    <item msgid="1103601433382158155">"Fax práca"</item>
     <item msgid="1735177144948329370">"Fax domov"</item>
     <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Iné"</item>
@@ -815,7 +815,7 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Domov"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Práca"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax do práce"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax práca"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax domov"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Iné"</string>
@@ -872,11 +872,11 @@
     <string name="relationTypeManager" msgid="6365677861610137895">"Manažér"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Matka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Rodič"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Partner(-ka)"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner(ka)"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Referencie od"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Príbuzný(-á)"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"Manžel(-ka)"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Manžel(ka)"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Vlastné"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domov"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Práca"</string>
@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Zdieľať v aplikácii %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskú aplikáciu"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použiť ako predvolené nastavenie pre túto akciu."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Použiť inú aplikáciu"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vymazať predvolené nastavenia v sekcii Nastavenia systému &gt; Aplikácie &gt; Stiahnuté položky."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Zvoľte akciu"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Zvoľte aplikáciu pre zariadenie USB"</string>
@@ -1255,7 +1256,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Hlasitosť médií"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hlasitosť upozornení"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Predvolený tón zvonenia"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený tón zvonenia (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Žiadny"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváňacie tóny"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy tón zvonenia"</string>
@@ -1577,7 +1578,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Bezdrôtový displej"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Preniesť"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Pripojenie k zariadeniu"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prenos obraz. do zariad."</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prenos obrazovky do zariadenia"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Prebieha vyhľadávanie zariadení…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Nastavenia"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Odpojiť"</string>
@@ -1639,7 +1640,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Zjednodušenie ovládania bolo zrušené."</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Prepína sa na používateľa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Chyba"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Správca túto zmenu zakázal"</string>
@@ -1764,9 +1765,9 @@
     <string name="lock_to_app_toast" msgid="1230563865743799321">"Ak chcete obrazovku uvoľniť, súčasne stlačte a podržte tlačidlá Späť a Nedávne."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Ak chcete obrazovku uvoľniť, stlačte a podržte tlačidlo Nedávne."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Obrazovka je pripnutá. Uvoľnenie vaša organizácia nepovoľuje."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Použiť pripnutie obrazovky?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Pripnutím obrazovky uzamknete displej v jednom zobrazení.\n\nRežim ukončíte súčasným klepnutím na tlačidlá Späť a Nedávne."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Pripnutím obrazovky uzamknete displej v jednom zobrazení.\n\nRežim ukončíte stlačením a podržaním tlačidla Nedávne."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Použiť pripnutie k obrazovke?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Pripnutím k obrazovke uzamknete displej v jednom zobrazení.\n\nRežim ukončíte súčasným klepnutím na tlačidlá Späť a Nedávne."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Pripnutím k obrazovke uzamknete displej v jednom zobrazení.\n\nRežim ukončíte stlačením a podržaním tlačidla Nedávne."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NIE, ĎAKUJEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SPUSTIŤ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
@@ -1774,6 +1775,15 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred uvoľnením požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrovanie a prenos údajov na pozadí, aby tak predĺžil výdrž batérie. E-maily, správy a ďalšie aplikácie, ktorú sú závislé od synchronizácie, sa nemusia aktualizovať, dokým ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrácie a prenos údajov na pozadí, aby tak predĺžil výdrž batérie. E-mail, správy a ďalšie aplikácie, ktorú používajú synchronizáciu, sa nemusia aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Na jednu minútu"</item>
+    <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Na jednu hodinu"</item>
+    <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Natrvalo"</string>
 </resources>

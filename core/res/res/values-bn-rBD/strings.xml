@@ -59,12 +59,12 @@
     <string name="mismatchPin" msgid="609379054496863419">"আপনার টাইপ করা PINগুলি মিলছে না৷"</string>
     <string name="invalidPin" msgid="3850018445187475377">"একটি PIN লিখুন যাতে ৪ থেকে ৮ নম্বর রয়েছে৷"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"৮ বা তার থেকে বেশি নম্বরেরে একটি PUK লিখুন৷"</string>
-    <string name="needPuk" msgid="919668385956251611">"আপনার SIM কার্ডটি PUK-কোড দিয়ে লক করা রয়েছে৷ এটিকে আনলক করতে PUK কোডটি লিখুন৷"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"SIM কার্ড অবরোধ মুক্ত করতে PUK2 লিখুন৷"</string>
-    <string name="enablePin" msgid="209412020907207950">"অসফল, SIM/RUIM লক সক্ষম করুন৷"</string>
+    <string name="needPuk" msgid="919668385956251611">"আপনার সিম কার্ডটি PUK-কোড দিয়ে লক করা রয়েছে৷ এটিকে আনলক করতে PUK কোডটি লিখুন৷"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"সিম কার্ড অবরোধ মুক্ত করতে PUK2 লিখুন৷"</string>
+    <string name="enablePin" msgid="209412020907207950">"অসফল, সিম/RUIM লক সক্ষম করুন৷"</string>
   <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM লক হয়ে যাবে৷"</item>
-    <item quantity="other" msgid="7530597808358774740">"আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM লক হয়ে যাবে৷"</item>
+    <item quantity="one" msgid="6596245285809790142">"আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম লক হয়ে যাবে৷"</item>
+    <item quantity="other" msgid="7530597808358774740">"আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম লক হয়ে যাবে৷"</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -289,11 +289,11 @@
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"বার্তার মাধ্যমে উত্তর দেওয়ার ইভেন্টগুলিকে পাঠায়"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"আগত কলগুলির জন্য বার্তার-মাধ্যমে-উত্তর দেওয়ার ঘটনাগুলিকে পরিচালনা করতে অ্যাপ্লিকেশানটিকে অন্যান্য বার্তাপ্রেরণ অ্যাপ্লিকেশানে অনুরোধ পাঠানোর অনুমতি দেয়৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার SIM কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"অ্যাপ্লিকেশানটিকে আপনার ফোনে বা আপনার SIM কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"অ্যাপ্লিকেশানটিকে আপনার ফোনে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"আপনার পাঠ্য বার্তা সম্পাদনা করুন (SMS বা MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"অ্যাপ্লিকেশানকে আপনার ট্যাবলেটে বা SIM কার্ডে SMS বার্তাগুলি লিখতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"অ্যাপ্লিকেশানকে আপনার ফোন বা SIM কার্ডে SMS বার্তাগুলি লিখতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"অ্যাপ্লিকেশানকে আপনার ট্যাবলেটে বা সিম কার্ডে SMS বার্তাগুলি লিখতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"অ্যাপ্লিকেশানকে আপনার ফোন বা সিম কার্ডে SMS বার্তাগুলি লিখতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"পাঠ্য বার্তা পান (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth বার্তা (MAP) গ্রহণ করুন"</string>
@@ -542,7 +542,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিও রেকর্ড করে"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"অ্যাপ্লিকেশানটিকে মাইক্রোফোনের দ্বারা অডিও রেকর্ড করার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার অনুমোদন ছাড়া যেকোনো সময় অডিও রেকর্ড করার অনুমতি দেয়৷"</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"sim যোগাযোগ"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"অ্যাপ্লিকেশানটিকে SIM কার্ডে কমান্ডগুলি পাঠানোর অনুমতি দেয়৷ এটি খুবই বিপজ্জনক৷"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"অ্যাপ্লিকেশানটিকে সিম কার্ডে কমান্ডগুলি পাঠানোর অনুমতি দেয়৷ এটি খুবই বিপজ্জনক৷"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ক্যামেরার সাহায্যে ছবি তুলতে ও ভিডিও তৈরি করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার নিশ্চয়তা ছাড়াই যেকোনো সময় ক্যামেরা ব্যবহার করতে মঞ্জুর করে৷"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"যখন ক্যামেরা ব্যবহারে থাকে তখন ট্রান্সমিট সূচক LED অক্ষম করে"</string>
@@ -907,13 +907,13 @@
     <string name="lockscreen_charged" msgid="321635745684060624">"চার্জ হয়েছে"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"আপনার চার্জার সংযুক্ত করুন৷"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"কোনো SIM কার্ড নেই"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ট্যাবলেটের মধ্যে কোনো SIM কার্ড নেই৷"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ফোনের মধ্যে কোনো SIM কার্ড নেই৷"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"একটি SIM কার্ড ঢোকান৷"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM কার্ডটি অনুপস্থিত বা পাঠযোগ্য নয়৷ একটি SIM কার্ড ঢোকান৷"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"ব্যবহার করার অযোগ্য SIM কার্ড৷"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"আপনার SIM কার্ড স্থায়ীভাবে অক্ষম করা হয়েছে৷\n অন্য একটি SIM কার্ড পেতে আপনার ওয়্যারলেস পরিষেবা প্রদানকারীর সাথে যোগাযোগ করুন৷"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"কোনো সিম কার্ড নেই"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ট্যাবলেটের মধ্যে কোনো সিম কার্ড নেই৷"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ফোনের মধ্যে কোনো সিম কার্ড নেই৷"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"একটি সিম কার্ড ঢোকান৷"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"সিম কার্ডটি অনুপস্থিত বা পাঠযোগ্য নয়৷ একটি সিম কার্ড ঢোকান৷"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"ব্যবহার করার অযোগ্য সিম কার্ড৷"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"আপনার সিম কার্ড স্থায়ীভাবে অক্ষম করা হয়েছে৷\n অন্য একটি সিম কার্ড পেতে আপনার ওয়্যারলেস পরিষেবা প্রদানকারীর সাথে যোগাযোগ করুন৷"</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"পূর্ববর্তী ট্র্যাক"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"পরবর্তী ট্র্যাক"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"বিরাম দিন"</string>
@@ -923,10 +923,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"দ্রুত সামনে এগোন"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"শুধুমাত্র জরুরী কল"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"নেটওয়ার্ক লক হয়েছে"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM কার্ডটি PUK কোড দিয়ে লক করা আছে৷"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"সিম কার্ডটি PUK কোড দিয়ে লক করা আছে৷"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"ব্যবহারকারীর নির্দেশিকা দেখুন বা গ্রাহক পরিষেবা কেন্দ্রে যোগাযোগ করুন৷"</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM কার্ড লক করা আছে৷"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM কার্ড আনলক করা হচ্ছে…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"সিম কার্ড লক করা আছে৷"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"সিম কার্ড আনলক করা হচ্ছে…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ \n\n<xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"আপনি আপনার পাসওয়ার্ড টাইপ করতে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ \n\n<xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"আপনি আপনার PIN টাইপ করতে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ \n\n<xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s এর সাথে ভাগ করুন"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"একটি হোম অ্যাপ্লিকেশান নির্বাচন করুন"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"এই ক্রিয়াটির জন্য এটিকে ডিফল্টরুপে ব্যবহার করুন৷"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"আলাদা কোনো অ্যাপ্লিকেশান ব্যবহার করুন"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"সিস্টেম সেটিংস &gt; অ্যাপ্স &gt; ডাউনলোড করাগুলি এ গিয়ে ডিফল্ট সরিয়ে দিন৷"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"একটি ক্রিয়া চয়ন করুন"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ডিভাইসটির জন্য একটি অ্যাপ্লিকেশান চয়ন করুন"</string>
@@ -1302,10 +1303,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"আপনি সেটিংস &gt; অ্যাপ্লিকেশানে এটি পরে পরিবর্তন করতে পারেন"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"সর্বদা অনুমতি দিন"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"কখনো অনুমতি দেবেন না"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"SIM কার্ড সরানো হয়েছে"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"আপনি একটি বৈধ SIM ঢুকিয়ে পুনর্সূচনা না করা পর্যন্ত সেলুলার নেটওয়ার্ক অনুপলব্ধ থাকবে।"</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"সিম কার্ড সরানো হয়েছে"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"আপনি একটি বৈধ সিম ঢুকিয়ে পুনর্সূচনা না করা পর্যন্ত সেলুলার নেটওয়ার্ক অনুপলব্ধ থাকবে।"</string>
     <string name="sim_done_button" msgid="827949989369963775">"সম্পন্ন হয়েছে"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"SIM কার্ড যোগ করা হয়েছে"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"সিম কার্ড যোগ করা হয়েছে"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"সেলুলার নেটওয়ার্ক অ্যাক্সেস করতে আপনার ডিভাইস পুনর্সূচনা করুন"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"পুনর্সূচনা"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"সময় সেট করুন"</string>
@@ -1603,13 +1604,13 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"ভুল PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"আপনার প্যাটার্ন আঁকুন"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN লিখুন"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"সিম PIN লিখুন"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN লিখুন"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"পাসওয়ার্ড লিখুন"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM এখন অক্ষম করা হয়েছে৷ অবিরত থাকতে PUK কোডটি লিখুন৷ বিশদ বিবরণের জন্য ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"সিম এখন অক্ষম করা হয়েছে৷ অবিরত থাকতে PUK কোডটি লিখুন৷ বিশদ বিবরণের জন্য ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"কাঙ্ক্ষিত PIN কোড লিখুন"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"কাঙ্ক্ষিত PIN কোড নিশ্চিত করুন"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM কার্ড আনলক করা হচ্ছে…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"সিম কার্ড আনলক করা হচ্ছে…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ভুল PIN কোড৷"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"৪ থেকে ৮টি সংখ্যার একটি PIN লিখুন৷"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK কোডকে ৮ সংখ্যার হতে হবে৷"</string>
@@ -1776,4 +1777,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ব্যাটারির আয়ু বাড়াতে সহায়তার জন্য, ব্যাটারি সঞ্চয়কারী আপনার ডিভাইসের কার্য-সম্পাদনা কমিয়ে আনবে এবং কম্পন ও পশ্চাদভূমি ডেটাকে সীমিত করবে। ইমেল, বার্তাপ্রেরণ ও অন্যান্য অ্যাপ্লিকেশান, যেগুলি সিঙ্ক হওয়ার উপর নির্ভরশীল সেগুলিকে আপনি না খোলা পর্যন্ত সেগুলি আপডেট নাও হতে পারে।\n\nআপনার ডিভাইস চার্জ হওয়ার সময় ব্যাটারি সঞ্চয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>টার সময়ে আপনার ডাউনটাইম শেষ হওয়া পর্যন্ত"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"এক মিনিটের জন্য"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d মিনিটের জন্য"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"এক ঘন্টার জন্য"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d ঘন্টার জন্য"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"অনির্দিষ্টভাবে"</string>
 </resources>

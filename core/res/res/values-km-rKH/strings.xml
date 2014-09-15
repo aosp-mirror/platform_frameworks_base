@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"ប្រើ​កម្មវិធី​ផ្សេង"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព​​"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ជ្រើស​កម្មវិធី​សម្រាប់​ឧបករណ៍​យូអេសប៊ី"</string>
@@ -1579,7 +1580,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"បង្ហាញ​បណ្ដាញ​ឥត​ខ្សែ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"បញ្ជូន"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ភ្ជាប់​ឧបករណ៍"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ចាត់​ថ្នាក់​អេក្រង់​ទៅ​ឧបករណ៍"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ខាស​អេក្រង់​ទៅ​ឧបករណ៍"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"កំពុង​ស្វែងរក​ឧបករណ៍..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ការ​កំណត់"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ផ្ដាច់"</string>
@@ -1777,5 +1778,14 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ដើម្បី​បង្កើន​អាយុ​ថ្ម កម្មវិធី​សន្សំ​ថ្ម​កាត់​បន្ថយ​ការអនុវត្ត​ឧបករណ៍​របស់​អ្នក​ ហើយ​​កម្រិត​ការ​ញ័រ និង​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ។ អ៊ីមែល, ការ​ផ្ញើ​សារ និង​កម្មវិធី​ផ្សេងៗ​ទៀត​ដែល​ផ្អែក​លើ​ការ​ធ្វើ​សម​កាល​កម្ម​​​មិន​អាច​ធ្វើ​បច្ចុប្បន្នភាព​លុះ​ត្រា​តែ​អ្នក​បើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យ​ប្រវត្តិ​ពេល​ឧបករណ៍​របស់​អ្នក​កំពុង​បញ្ចូល​ថ្ម។"</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​សម្រាក ឬរវល់​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"សម្រាប់​មួយ​នាទី"</item>
+    <item quantity="other" msgid="6924190729213550991">"សម្រាប់ %d នាទី"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"សម្រាប់​មួយ​ម៉ោង"</item>
+    <item quantity="other" msgid="5408537517529822157">"សម្រាប់ %d ម៉ោង"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"គ្មាន​​កំណត់"</string>
 </resources>

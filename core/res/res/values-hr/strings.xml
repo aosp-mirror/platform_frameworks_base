@@ -573,8 +573,8 @@
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Aplikaciji omogućuje preimenovanje interne pohrane."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"upravljanje vibracijom"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Aplikaciji omogućuje nadzor nad vibratorom."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"nadzor bljeskalice"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Aplikaciji omogućuje upravljanje bljeskalicom."</string>
+    <string name="permlab_flashlight" msgid="2155920810121984215">"upravljanje svjetiljkom"</string>
+    <string name="permdesc_flashlight" msgid="6522284794568368310">"Aplikaciji omogućuje upravljanje svjetiljkom."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"upravljanje postavkama i dozvolama za USB uređaje"</string>
     <string name="permdesc_manageUsb" msgid="7776155430218239833">"Aplikaciji omogućuje upravljanje postavkama i dozvolama za USB uređaje."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"Primjena MTP protokola"</string>
@@ -1203,6 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Dijeljenje pomoću aplikacije %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Odaberite aplikaciju na početnom zaslonu"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Koristi se kao zadana postavka za ovu lokaciju."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Upotrijebite neku drugu aplikaciju"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Izbrisati zadano u Postavkama sustava &gt; Aplikacije &gt; Preuzimanja."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Odaberi radnju"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Odabir aplikacije za USB uređaj"</string>
@@ -1427,7 +1428,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Upotrebljavate tu aplikaciju u radnom profilu"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Način unosa"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkronizacija"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Dostupnost"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Pristupačnost"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Pozadinska slika"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Promjena pozadinske slike"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Slušatelj obavijesti"</string>
@@ -1761,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Odabrana je stavka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Izbrisan je broj <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Da biste otkvačili ovaj zaslon, istovremeno dodirnite i zadržite prste na gumbima Natrag i Posljednje."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite prst na gumbu Posljednje."</string>
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Da biste otkvačili ovaj zaslon, istovremeno dodirnite i zadržite prste na gumbima Natrag i Nedavno."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite prst na gumbu Nedavno."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pričvršćen. Vaša organizacija ne dopušta otkvačivanje."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Želite li upotrijebiti pričvršćivanje?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Pričvršćivanje zaslona zaključava zaslon u jednom prikazu. \n\n Za izlaz istovremeno dodirnite i zadržite prste na gumbima Natrag i Posljednje."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Pričvršćivanje zaslona zaključava zaslon u jednom prikazu.\n\nZa izlazak dodirnite i zadržite prst na gumbu Posljednje."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Želite li upotrijebiti prikvačivanje?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Prikvačivanje zaslona zaključava zaslon u jednom prikazu. \n\n Za izlaz istovremeno dodirnite i zadržite prste na gumbima Natrag i Nedavno."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Prikvačivanje zaslona zaključava zaslon u jednom prikazu.\n\nZa izlazak dodirnite i zadržite prst na gumbu Nedavno."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NE, HVALA"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"POKRENI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pričvršćen"</string>
@@ -1776,4 +1777,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Traži zaporku radi otkvačivanja"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i ostalo koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dok razdoblje zastoja ne završi u <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Jednu minutu"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Jedan sat"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d h"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Neodređeno"</string>
 </resources>
