@@ -2104,7 +2104,26 @@ public final class ActiveServices {
                 // don't want to be thrashing around restarting processes that are only
                 // there to be cached.
                 for (int appi=b.apps.size()-1; appi>=0; appi--) {
-                    ProcessRecord proc = b.apps.keyAt(appi);
+                    final ProcessRecord proc = b.apps.keyAt(appi);
+                    // If the process is already gone, skip it.
+                    if (proc.killedByAm || proc.thread == null) {
+                        continue;
+                    }
+                    // Only do this for processes that have an auto-create binding;
+                    // otherwise the binding can be left, because it won't cause the
+                    // service to restart.
+                    final AppBindRecord abind = b.apps.valueAt(appi);
+                    boolean hasCreate = false;
+                    for (int conni=abind.connections.size()-1; conni>=0; conni--) {
+                        ConnectionRecord conn = abind.connections.valueAt(conni);
+                        if ((conn.flags&Context.BIND_AUTO_CREATE) != 0) {
+                            hasCreate = true;
+                            break;
+                        }
+                    }
+                    if (!hasCreate) {
+                        continue;
+                    }
                     if (proc != null && !proc.persistent && proc.thread != null
                             && proc.pid != 0 && proc.pid != ActivityManagerService.MY_PID
                             && proc.setProcState >= ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
