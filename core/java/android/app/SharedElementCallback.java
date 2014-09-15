@@ -23,6 +23,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Parcelable;
+import android.transition.TransitionUtils;
 import android.view.View;
 
 import java.util.List;
@@ -141,21 +142,12 @@ public abstract class SharedElementCallback {
      */
     public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix,
             RectF screenBounds) {
-        int bitmapWidth = Math.round(screenBounds.width());
-        int bitmapHeight = Math.round(screenBounds.height());
-        Bitmap bitmap = null;
-        if (bitmapWidth > 0 && bitmapHeight > 0) {
-            if (mTempMatrix == null) {
-                mTempMatrix = new Matrix();
-            }
+        if (mTempMatrix == null) {
+            mTempMatrix = new Matrix(viewToGlobalMatrix);
+        } else {
             mTempMatrix.set(viewToGlobalMatrix);
-            mTempMatrix.postTranslate(-screenBounds.left, -screenBounds.top);
-            bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            canvas.concat(mTempMatrix);
-            sharedElement.draw(canvas);
         }
-        return bitmap;
+        return TransitionUtils.createViewBitmap(sharedElement, mTempMatrix, screenBounds);
     }
 
     /**
