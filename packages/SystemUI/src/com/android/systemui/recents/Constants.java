@@ -68,7 +68,7 @@ public class Constants {
 
         public static class RecentsTaskLoader {
             // XXX: This should be calculated on the first load
-            public static final int PreloadFirstTasksCount = 5;
+            public static final int PreloadFirstTasksCount = 6;
         }
 
         public static class TaskStackView {
