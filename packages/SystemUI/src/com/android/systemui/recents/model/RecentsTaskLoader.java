@@ -29,6 +29,7 @@ import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -123,8 +124,8 @@ class TaskResourceLoader implements Runnable {
         mDefaultThumbnail = defaultThumbnail;
         mDefaultApplicationIcon = defaultApplicationIcon;
         mMainThreadHandler = new Handler();
-        mLoadThread = new HandlerThread("Recents-TaskResourceLoader");
-        mLoadThread.setPriority(Thread.NORM_PRIORITY - 1);
+        mLoadThread = new HandlerThread("Recents-TaskResourceLoader",
+                android.os.Process.THREAD_PRIORITY_DEFAULT - 1);
         mLoadThread.start();
         mLoadThreadHandler = new Handler(mLoadThread.getLooper());
         mLoadThreadHandler.post(this);
@@ -255,12 +256,10 @@ public class RecentsTaskLoader {
 
     /** Private Constructor */
     private RecentsTaskLoader(Context context) {
-        // Calculate the cache sizes, we just use a reasonable number here similar to those
-        // suggested in the Android docs, 1/6th for the thumbnail cache and 1/30 of the max memory
-        // for icons.
-        int maxMemory = (int) Runtime.getRuntime().maxMemory();
-        mMaxThumbnailCacheSize = maxMemory / 6;
-        mMaxIconCacheSize = mMaxThumbnailCacheSize / 5;
+        mMaxThumbnailCacheSize = context.getResources().getInteger(
+                R.integer.config_recents_max_thumbnail_count);
+        mMaxIconCacheSize = context.getResources().getInteger(
+                R.integer.config_recents_max_icon_count);
         int iconCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
                 mMaxIconCacheSize;
         int thumbnailCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
@@ -550,6 +549,12 @@ public class RecentsTaskLoader {
             case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
                 // Stop the loader immediately when the UI is no longer visible
                 stopLoader();
+                mThumbnailCache.trimToSize(Math.max(
+                        Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount,
+                        mMaxThumbnailCacheSize / 2));
+                mApplicationIconCache.trimToSize(Math.max(
+                        Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount,
+                        mMaxIconCacheSize / 2));
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
             case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
