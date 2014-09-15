@@ -1010,6 +1010,9 @@
          device is data-only. -->
     <bool name="config_voice_capable">true</bool>
 
+    <!-- Flag indicating if the user is notified when the mobile network access is restricted -->
+    <bool name="config_user_notification_of_restrictied_mobile_access">true</bool>
+
     <!-- Flag indicating whether the current device allows sms service.
          If true, this means that the device supports both sending and
          receiving sms via the telephony network.

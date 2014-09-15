@@ -45,6 +45,12 @@ interface IPhoneSubInfo {
     String getDeviceSvn();
 
     /**
+     * Retrieves the software version number of a subId for the device, e.g., IMEI/SV
+     * for GSM phones.
+     */
+    String getDeviceSvnUsingSubId(long subId);
+
+    /**
      * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
      */
     String getSubscriberId();

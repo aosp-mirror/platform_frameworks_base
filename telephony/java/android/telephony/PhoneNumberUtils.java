@@ -976,6 +976,8 @@ public class PhoneNumberUtils
             return 0xc;
         } else if (c == WILD) {
             return 0xd;
+        } else if (c == WAIT) {
+            return 0xe;
         } else {
             throw new RuntimeException ("invalid char for BCD " + c);
         }
@@ -1813,23 +1815,31 @@ public class PhoneNumberUtils
         // to the list.
         number = extractNetworkPortionAlt(number);
 
-        String numbers = "";
+        Rlog.d(LOG_TAG, "subId:" + subId + ", number: " +  number + ", defaultCountryIso:" +
+                ((defaultCountryIso == null) ? "NULL" : defaultCountryIso));
+
+        String emergencyNumbers = "";
         int slotId = SubscriptionManager.getSlotId(subId);
-        // retrieve the list of emergency numbers
-        // check read-write ecclist property first
-        String ecclist = (slotId <= 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
 
-        numbers = SystemProperties.get(ecclist);
+        if (slotId >= 0) {
+            // retrieve the list of emergency numbers
+            // check read-write ecclist property first
+            String ecclist = (slotId == 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
 
-        if (TextUtils.isEmpty(numbers)) {
-            // then read-only ecclist property since old RIL only uses this
-            numbers = SystemProperties.get("ro.ril.ecclist");
+            emergencyNumbers = SystemProperties.get(ecclist, "");
         }
 
-        if (!TextUtils.isEmpty(numbers)) {
+        Rlog.d(LOG_TAG, "slotId:" + slotId + ", emergencyNumbers: " +  emergencyNumbers);
+
+        if (TextUtils.isEmpty(emergencyNumbers)) {
+            // then read-only ecclist property since old RIL only uses this
+            emergencyNumbers = SystemProperties.get("ro.ril.ecclist");
+        }
+
+        if (!TextUtils.isEmpty(emergencyNumbers)) {
             // searches through the comma-separated list for a match,
             // return true if one is found.
-            for (String emergencyNum : numbers.split(",")) {
+            for (String emergencyNum : emergencyNumbers.split(",")) {
                 // It is not possible to append additional digits to an emergency number to dial
                 // the number in Brazil - it won't connect.
                 if (useExactMatch || "BR".equalsIgnoreCase(defaultCountryIso)) {
@@ -1849,6 +1859,23 @@ public class PhoneNumberUtils
         Rlog.d(LOG_TAG, "System property doesn't provide any emergency numbers."
                 + " Use embedded logic for determining ones.");
 
+        // If slot id is invalid, means that there is no sim card.
+        // According spec 3GPP TS22.101, the following numbers should be
+        // ECC numbers when SIM/USIM is not present.
+        emergencyNumbers = ((slotId < 0) ? "112,911,000,08,110,118,119,999" : "112,911");
+
+        for (String emergencyNum : emergencyNumbers.split(",")) {
+            if (useExactMatch) {
+                if (number.equals(emergencyNum)) {
+                    return true;
+                }
+            } else {
+                if (number.startsWith(emergencyNum)) {
+                    return true;
+                }
+            }
+        }
+
         // No ecclist system property, so use our own list.
         if (defaultCountryIso != null) {
             ShortNumberUtil util = new ShortNumberUtil();
@@ -1857,13 +1884,9 @@ public class PhoneNumberUtils
             } else {
                 return util.connectsToEmergencyNumber(number, defaultCountryIso);
             }
-        } else {
-            if (useExactMatch) {
-                return (number.equals("112") || number.equals("911"));
-            } else {
-                return (number.startsWith("112") || number.startsWith("911"));
-            }
         }
+
+        return false;
     }
 
     /**

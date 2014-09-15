@@ -36,7 +36,7 @@
             android:id="@+id/sub_short_number"
             android:layout_marginBottom="2dip"
             android:layout_marginEnd="4dip"
-            android:layout_alignParentEnd="true" 
+            android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:textSize="12sp"
             android:singleLine="true"
@@ -54,8 +54,6 @@
             android:id="@+id/sub_name"
             android:singleLine="true"
             android:ellipsize="none"
-            android:requiresFadingEdge="horizontal"
-            android:scrollHorizontally="true"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <TextView
             android:layout_width="wrap_content"
@@ -65,7 +63,6 @@
             android:layout_alignStart="@+id/sub_name"
             android:singleLine="true"
             android:ellipsize="none"
-            android:requiresFadingEdge="horizontal"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"/>
     </RelativeLayout>
