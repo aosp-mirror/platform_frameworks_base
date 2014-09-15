@@ -125,7 +125,7 @@ class TaskResourceLoader implements Runnable {
         mDefaultApplicationIcon = defaultApplicationIcon;
         mMainThreadHandler = new Handler();
         mLoadThread = new HandlerThread("Recents-TaskResourceLoader",
-                android.os.Process.THREAD_PRIORITY_DEFAULT - 1);
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
         mLoadThread.start();
         mLoadThreadHandler = new Handler(mLoadThread.getLooper());
         mLoadThreadHandler.post(this);
