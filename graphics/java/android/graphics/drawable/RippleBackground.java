@@ -122,6 +122,10 @@ class RippleBackground {
         mDensity = density;
     }
 
+    public boolean isHardwareAnimating() {
+        return mHardwareAnimating;
+    }
+
     public void onHotspotBoundsChanged() {
         if (!mHasMaxRadius) {
             final float halfWidth = mBounds.width() / 2.0f;
