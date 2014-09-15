@@ -109,7 +109,8 @@
     <color name="notification_guts_text_color">#b2FFFFFF</color>
     <color name="notification_guts_btn_color">#FFFFFFFF</color>
 
-    <color name="search_panel_card_color">#ffffff</color>
+    <color name="search_panel_circle_color">#ffffff</color>
+    <color name="search_panel_ripple_color">#ffbbbbbb</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
     <color name="doze_small_icon_background_color">#ff434343</color>
