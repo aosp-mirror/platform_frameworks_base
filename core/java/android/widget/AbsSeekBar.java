@@ -42,8 +42,9 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     private Drawable mThumb;
     private ColorStateList mThumbTintList = null;
-    private PorterDuff.Mode mThumbTintMode = PorterDuff.Mode.SRC_ATOP;
+    private PorterDuff.Mode mThumbTintMode = null;
     private boolean mHasThumbTint = false;
+    private boolean mHasThumbTintMode = false;
 
     private int mThumbOffset;
     private boolean mSplitTrack;
@@ -96,14 +97,15 @@ public abstract class AbsSeekBar extends ProgressBar {
         final Drawable thumb = a.getDrawable(com.android.internal.R.styleable.SeekBar_thumb);
         setThumb(thumb);
 
-        mThumbTintMode = Drawable.parseTintMode(a.getInt(
-                R.styleable.SeekBar_thumbTintMode, -1), mThumbTintMode);
+        if (a.hasValue(R.styleable.SeekBar_thumbTintMode)) {
+            mThumbTintMode = Drawable.parseTintMode(a.getInt(
+                    R.styleable.SeekBar_thumbTintMode, -1), mThumbTintMode);
+            mHasThumbTintMode = true;
+        }
 
         if (a.hasValue(R.styleable.SeekBar_thumbTint)) {
             mThumbTintList = a.getColorStateList(R.styleable.SeekBar_thumbTint);
             mHasThumbTint = true;
-
-            applyThumbTint();
         }
 
         // Guess thumb offset if thumb != null, but allow layout to override.
@@ -118,6 +120,8 @@ public abstract class AbsSeekBar extends ProgressBar {
                 com.android.internal.R.styleable.Theme, 0, 0);
         mDisabledAlpha = a.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
         a.recycle();
+
+        applyThumbTint();
 
         mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
@@ -189,7 +193,7 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     /**
      * Applies a tint to the thumb drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_ATOP} by default.
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
      * <p>
      * Subsequent calls to {@link #setThumb(Drawable)} will automatically
      * mutate the drawable and apply the specified tint and tint mode using
@@ -209,6 +213,8 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
+     * Returns the tint applied to the thumb drawable, if specified.
+     *
      * @return the tint applied to the thumb drawable
      * @attr ref android.R.styleable#SeekBar_thumbTint
      * @see #setThumbTintList(ColorStateList)
@@ -221,7 +227,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     /**
      * Specifies the blending mode used to apply the tint specified by
      * {@link #setThumbTintList(ColorStateList)}} to the thumb drawable. The
-     * default mode is {@link PorterDuff.Mode#SRC_ATOP}.
+     * default mode is {@link PorterDuff.Mode#SRC_IN}.
      *
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
@@ -232,11 +238,15 @@ public abstract class AbsSeekBar extends ProgressBar {
      */
     public void setThumbTintMode(@Nullable PorterDuff.Mode tintMode) {
         mThumbTintMode = tintMode;
+        mHasThumbTintMode = true;
 
         applyThumbTint();
     }
 
     /**
+     * Returns the blending mode used to apply the tint to the thumb drawable,
+     * if specified.
+     *
      * @return the blending mode used to apply the tint to the thumb drawable
      * @attr ref android.R.styleable#SeekBar_thumbTintMode
      * @see #setThumbTintMode(PorterDuff.Mode)
@@ -247,10 +257,16 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     private void applyThumbTint() {
-        if (mThumb != null && mHasThumbTint) {
+        if (mThumb != null && (mHasThumbTint || mHasThumbTintMode)) {
             mThumb = mThumb.mutate();
-            mThumb.setTintList(mThumbTintList);
-            mThumb.setTintMode(mThumbTintMode);
+
+            if (mHasThumbTint) {
+                mThumb.setTintList(mThumbTintList);
+            }
+
+            if (mHasThumbTintMode) {
+                mThumb.setTintMode(mThumbTintMode);
+            }
         }
     }
 

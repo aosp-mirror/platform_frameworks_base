@@ -54,8 +54,9 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     private Drawable mButtonDrawable;
     private ColorStateList mButtonTintList = null;
-    private PorterDuff.Mode mButtonTintMode = PorterDuff.Mode.SRC_ATOP;
+    private PorterDuff.Mode mButtonTintMode = null;
     private boolean mHasButtonTint = false;
+    private boolean mHasButtonTintMode = false;
 
     private OnCheckedChangeListener mOnCheckedChangeListener;
     private OnCheckedChangeListener mOnCheckedChangeWidgetListener;
@@ -87,14 +88,15 @@ public abstract class CompoundButton extends Button implements Checkable {
             setButtonDrawable(d);
         }
 
-        mButtonTintMode = Drawable.parseTintMode(a.getInt(
-                R.styleable.CompoundButton_buttonTintMode, -1), mButtonTintMode);
+        if (a.hasValue(R.styleable.CompoundButton_buttonTintMode)) {
+            mButtonTintMode = Drawable.parseTintMode(a.getInt(
+                    R.styleable.CompoundButton_buttonTintMode, -1), mButtonTintMode);
+            mHasButtonTintMode = true;
+        }
 
         if (a.hasValue(R.styleable.CompoundButton_buttonTint)) {
             mButtonTintList = a.getColorStateList(R.styleable.CompoundButton_buttonTint);
             mHasButtonTint = true;
-
-            applyButtonTint();
         }
 
         final boolean checked = a.getBoolean(
@@ -102,6 +104,8 @@ public abstract class CompoundButton extends Button implements Checkable {
         setChecked(checked);
 
         a.recycle();
+
+        applyButtonTint();
     }
 
     public void toggle() {
@@ -240,7 +244,7 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     /**
      * Applies a tint to the button drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_ATOP} by default.
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
      * <p>
      * Subsequent calls to {@link #setButtonDrawable(Drawable)} will
      * automatically mutate the drawable and apply the specified tint and tint
@@ -273,7 +277,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     /**
      * Specifies the blending mode used to apply the tint specified by
      * {@link #setButtonTintList(ColorStateList)}} to the button drawable. The
-     * default mode is {@link PorterDuff.Mode#SRC_ATOP}.
+     * default mode is {@link PorterDuff.Mode#SRC_IN}.
      *
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
@@ -283,6 +287,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      */
     public void setButtonTintMode(@Nullable PorterDuff.Mode tintMode) {
         mButtonTintMode = tintMode;
+        mHasButtonTintMode = true;
 
         applyButtonTint();
     }
@@ -298,10 +303,16 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     private void applyButtonTint() {
-        if (mButtonDrawable != null && mHasButtonTint) {
+        if (mButtonDrawable != null && (mHasButtonTint || mHasButtonTintMode)) {
             mButtonDrawable = mButtonDrawable.mutate();
-            mButtonDrawable.setTintList(mButtonTintList);
-            mButtonDrawable.setTintMode(mButtonTintMode);
+
+            if (mHasButtonTint) {
+                mButtonDrawable.setTintList(mButtonTintList);
+            }
+
+            if (mHasButtonTintMode) {
+                mButtonDrawable.setTintMode(mButtonTintMode);
+            }
         }
     }
 
