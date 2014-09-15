@@ -702,6 +702,7 @@ public class VectorDrawable extends Drawable {
                     bounds.height())) {
                 mCachedBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(),
                         Bitmap.Config.ARGB_8888);
+                mCacheDirty = true;
             }
 
         }
