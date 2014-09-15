@@ -117,6 +117,9 @@ void DisplayListRenderer::restoreToCount(int saveCount) {
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
         const SkPaint* paint, int flags) {
+    // force matrix/clip isolation for layer
+    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+
     paint = refPaint(paint);
     addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, paint, flags));
     return StatefulBaseRenderer::save(flags);
