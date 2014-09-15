@@ -37,6 +37,14 @@
     <string name="all_printers" msgid="5018829726861876202">"सभी प्रिंटर..."</string>
     <string name="print_dialog" msgid="32628687461331979">"प्रिंट डॉयलॉग"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
+    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> में से पृष्ठ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>"</string>
+    <string name="summary_template" msgid="8899734908625669193">"सारांश, प्रतियां <xliff:g id="COPIES">%1$s</xliff:g>, काग़ज़ का आकार <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"हैंडल विस्तृत करें"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"हैंडल संक्षिप्त करें"</string>
+    <string name="print_button" msgid="645164566271246268">"प्रिंट करें"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF में सहेजें"</string>
+    <string name="print_options_expanded" msgid="6944679157471691859">"प्रिंट विकल्पों को विस्तृत किया गया"</string>
+    <string name="print_options_collapsed" msgid="7455930445670414332">"प्रिंट विकल्पों को संक्षिप्त किया गया"</string>
     <string name="search" msgid="5421724265322228497">"खोजें"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सभी प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोड़ें"</string>
@@ -60,7 +68,7 @@
     <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> प्रिंट कार्य"</item>
     <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> प्रिंट कार्य"</item>
   </plurals>
-    <string name="cancel" msgid="4373674107267141885">"रद्द करें"</string>
+    <string name="cancel" msgid="4373674107267141885">"रहने दें"</string>
     <string name="restart" msgid="2472034227037808749">"पुन: आरंभ करें"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटर के लिए कोई कनेक्शन नहीं"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
