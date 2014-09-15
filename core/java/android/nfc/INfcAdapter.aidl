@@ -45,6 +45,8 @@ interface INfcAdapter
     boolean enableNdefPush();
     boolean disableNdefPush();
     boolean isNdefPushEnabled();
+    void pausePolling(int timeoutInMs);
+    void resumePolling();
 
     void setForegroundDispatch(in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
