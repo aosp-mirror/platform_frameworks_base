@@ -44,7 +44,7 @@ class Caches;
 class OpenGLRenderer;
 class DisplayList;
 class DeferredDisplayList;
-class DeferStateStruct;
+struct DeferStateStruct;
 
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.

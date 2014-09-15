@@ -2239,7 +2239,9 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
 
     const uint32_t count = meshWidth * meshHeight * 6;
 
-    ColorTextureVertex mesh[count];
+    Vector<ColorTextureVertex> meshVector; // TODO: use C++11 unique_ptr
+    meshVector.setCapacity(count);
+    ColorTextureVertex* mesh = meshVector.editArray();
     ColorTextureVertex* vertex = mesh;
 
     bool cleanupColors = false;

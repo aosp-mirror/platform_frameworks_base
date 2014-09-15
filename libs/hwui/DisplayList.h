@@ -57,9 +57,9 @@ class DisplayListOp;
 class DisplayListRenderer;
 class OpenGLRenderer;
 class Rect;
-class Layer;
-class SkiaColorFilter;
-class SkiaShader;
+struct Layer;
+struct SkiaColorFilter;
+struct SkiaShader;
 
 class ClipRectOp;
 class SaveLayerOp;
