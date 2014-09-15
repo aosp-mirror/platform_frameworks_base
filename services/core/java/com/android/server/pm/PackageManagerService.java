@@ -12118,14 +12118,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_VERSION);
             } else if ("k".equals(cmd) || "keysets".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_KEYSETS);
+            } else if ("installs".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_INSTALLS);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
                     pw.println("Settings written.");
                     return;
                 }
-            } else if ("installs".equals(cmd)) {
-                dumpState.setDump(DumpState.DUMP_INSTALLS);
             }
         }
 
@@ -12357,7 +12357,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.dumpSharedUsersLPr(pw, packageName, dumpState);
             }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS)) {
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
+                // XXX should handle packageName != null by dumping only install data that
+                // the given package is involved with.
                 if (dumpState.onTitlePrinted()) pw.println();
                 mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
             }
