@@ -121,7 +121,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
         mCecMessageCache.flushAll();
-        mIsActiveSource = false;
+        // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
         if (connected && mService.isPowerStandbyOrTransient()) {
             mService.wakeUp();
         }
