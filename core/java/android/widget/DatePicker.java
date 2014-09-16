@@ -392,10 +392,9 @@ public class DatePicker extends FrameLayout {
         mDelegate.setSpinnersShown(shown);
     }
 
-    // Override so we are in complete control of save / restore for this widget.
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        mDelegate.dispatchRestoreInstanceState(container);
+        dispatchThawSelfOnly(container);
     }
 
     @Override
@@ -406,7 +405,7 @@ public class DatePicker extends FrameLayout {
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
+        BaseSavedState ss = (BaseSavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         mDelegate.onRestoreInstanceState(ss);
     }
@@ -452,7 +451,6 @@ public class DatePicker extends FrameLayout {
 
         void onConfigurationChanged(Configuration newConfig);
 
-        void dispatchRestoreInstanceState(SparseArray<Parcelable> container);
         Parcelable onSaveInstanceState(Parcelable superState);
         void onRestoreInstanceState(Parcelable state);
 
@@ -845,11 +843,6 @@ public class DatePicker extends FrameLayout {
         @Override
         public void onConfigurationChanged(Configuration newConfig) {
             setCurrentLocale(newConfig.locale);
-        }
-
-        @Override
-        public void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-            mDelegator.dispatchThawSelfOnly(container);
         }
 
         @Override
