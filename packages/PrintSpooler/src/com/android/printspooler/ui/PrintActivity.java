@@ -816,6 +816,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensureProgressUiShown() {
+        if (isFinishing()) {
+            return;
+        }
         if (mUiState != UI_STATE_PROGRESS) {
             mUiState = UI_STATE_PROGRESS;
             mPrintPreviewController.setUiShown(false);
@@ -825,6 +828,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensurePreviewUiShown() {
+        if (isFinishing()) {
+            return;
+        }
         if (mUiState != UI_STATE_PREVIEW) {
             mUiState = UI_STATE_PREVIEW;
             mPrintPreviewController.setUiShown(true);
@@ -833,6 +839,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensureErrorUiShown(CharSequence message, int action) {
+        if (isFinishing()) {
+            return;
+        }
         if (mUiState != UI_STATE_ERROR) {
             mUiState = UI_STATE_ERROR;
             mPrintPreviewController.setUiShown(false);
