@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.telephony.DisconnectCause;
 import android.view.Surface;
 
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public abstract class Connection {
         public void onCallerDisplayNameChanged(
                 Connection c, String callerDisplayName, int presentation) {}
         public void onVideoStateChanged(Connection c, int videoState) {}
-        public void onDisconnected(Connection c, int cause, String message) {}
+        public void onDisconnected(Connection c, DisconnectCause disconnectCause) {}
         public void onPostDialWait(Connection c, String remaining) {}
         public void onRingbackRequested(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
@@ -473,8 +472,7 @@ public abstract class Connection {
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private int mVideoState;
-    private int mDisconnectCause;
-    private String mDisconnectMessage;
+    private DisconnectCause mDisconnectCause;
     private Conference mConference;
     private ConnectionService mConnectionService;
 
@@ -604,15 +602,8 @@ public abstract class Connection {
     /**
      * @return The {@link DisconnectCause} for this connection.
      */
-    public final int getDisconnectCause() {
+    public final DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
-    }
-
-    /**
-     * @return The disconnect message for this connection.
-     */
-    public final String getDisconnectMessage() {
-        return mDisconnectMessage;
     }
 
     /**
@@ -774,17 +765,15 @@ public abstract class Connection {
     /**
      * Sets state to disconnected.
      *
-     * @param cause The reason for the disconnection, any of
+     * @param disconnectCause The reason for the disconnection, as specified by
      *         {@link DisconnectCause}.
-     * @param message Optional call-service-provided message about the disconnect.
      */
-    public final void setDisconnected(int cause, String message) {
-        mDisconnectCause = cause;
-        mDisconnectMessage = message;
+    public final void setDisconnected(DisconnectCause disconnectCause) {
+        mDisconnectCause = disconnectCause;
         setState(STATE_DISCONNECTED);
-        Log.d(this, "Disconnected with cause %d message %s", cause, message);
+        Log.d(this, "Disconnected with cause %d message %s", disconnectCause);
         for (Listener l : mListeners) {
-            l.onDisconnected(this, cause, message);
+            l.onDisconnected(this, disconnectCause);
         }
     }
 
@@ -1071,26 +1060,24 @@ public abstract class Connection {
     }
 
     private static class FailureSignalingConnection extends Connection {
-        public FailureSignalingConnection(int cause, String message) {
-            setDisconnected(cause, message);
+        public FailureSignalingConnection(DisconnectCause disconnectCause) {
+            setDisconnected(disconnectCause);
         }
     }
 
     /**
      * Return a {@code Connection} which represents a failed connection attempt. The returned
-     * {@code Connection} will have a {@link #getDisconnectCause()} and
-     * {@link #getDisconnectMessage()} as specified, and a {@link #getState()} of
-     * {@link #STATE_DISCONNECTED}.
+     * {@code Connection} will have a {@link android.telecom.DisconnectCause} and as specified,
+     * and a {@link #getState()} of {@link #STATE_DISCONNECTED}.
      * <p>
      * The returned {@code Connection} can be assumed to {@link #destroy()} itself when appropriate,
      * so users of this method need not maintain a reference to its return value to destroy it.
      *
-     * @param cause The disconnect cause, ({@see DisconnectCause}).
-     * @param message A reason for why the connection failed (not intended to be shown to the user).
+     * @param disconnectCause The disconnect cause, ({@see android.telecomm.DisconnectCause}).
      * @return A {@code Connection} which indicates failure.
      */
-    public static Connection createFailedConnection(int cause, String message) {
-        return new FailureSignalingConnection(cause, message);
+    public static Connection createFailedConnection(DisconnectCause disconnectCause) {
+        return new FailureSignalingConnection(disconnectCause);
     }
 
     /**
@@ -1105,7 +1092,7 @@ public abstract class Connection {
      * @return A {@code Connection} which indicates that the underlying call should be canceled.
      */
     public static Connection createCanceledConnection() {
-        return new FailureSignalingConnection(DisconnectCause.OUTGOING_CANCELED, null);
+        return new FailureSignalingConnection(new DisconnectCause(DisconnectCause.CANCELED));
     }
 
     private final void  fireOnConferenceableConnectionsChanged() {
