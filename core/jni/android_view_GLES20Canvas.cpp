@@ -480,6 +480,20 @@ static void android_view_GLES20Canvas_drawRoundRect(JNIEnv* env, jobject clazz,
     renderer->drawRoundRect(left, top, right, bottom, rx, ry, paint);
 }
 
+static void android_view_GLES20Canvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
+        jlong bottomPropPtr, jlong rxPropPtr, jlong ryPropPtr, jlong paintPropPtr) {
+    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    CanvasPropertyPrimitive* leftProp = reinterpret_cast<CanvasPropertyPrimitive*>(leftPropPtr);
+    CanvasPropertyPrimitive* topProp = reinterpret_cast<CanvasPropertyPrimitive*>(topPropPtr);
+    CanvasPropertyPrimitive* rightProp = reinterpret_cast<CanvasPropertyPrimitive*>(rightPropPtr);
+    CanvasPropertyPrimitive* bottomProp = reinterpret_cast<CanvasPropertyPrimitive*>(bottomPropPtr);
+    CanvasPropertyPrimitive* rxProp = reinterpret_cast<CanvasPropertyPrimitive*>(rxPropPtr);
+    CanvasPropertyPrimitive* ryProp = reinterpret_cast<CanvasPropertyPrimitive*>(ryPropPtr);
+    CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
+    renderer->drawRoundRect(leftProp, topProp, rightProp, bottomProp, rxProp, ryProp, paintProp);
+}
+
 static void android_view_GLES20Canvas_drawCircle(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jfloat x, jfloat y, jfloat radius, jlong paintPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
@@ -912,6 +926,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawRect",          "(JFFFFJ)V",       (void*) android_view_GLES20Canvas_drawRect },
     { "nDrawRects",         "(JJJ)V",          (void*) android_view_GLES20Canvas_drawRegionAsRects },
     { "nDrawRoundRect",     "(JFFFFFFJ)V",     (void*) android_view_GLES20Canvas_drawRoundRect },
+    { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_GLES20Canvas_drawRoundRectProps },
     { "nDrawCircle",        "(JFFFJ)V",        (void*) android_view_GLES20Canvas_drawCircle },
     { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_GLES20Canvas_drawCircleProps },
     { "nDrawOval",          "(JFFFFJ)V",       (void*) android_view_GLES20Canvas_drawOval },
