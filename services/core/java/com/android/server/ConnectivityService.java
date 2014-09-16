@@ -1935,6 +1935,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             rematchNetworkAndRequests(nai);
                         }
                         updateInetCondition(nai, valid);
+                        // Let the NetworkAgent know the state of its network
+                        nai.asyncChannel.sendMessage(
+                                android.net.NetworkAgent.CMD_REPORT_NETWORK_STATUS,
+                                (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
+                                0, null);
                     }
                     break;
                 }
@@ -2517,6 +2522,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             nai = mNetworkForNetId.get(network.netId);
         }
         if (nai == null) return;
+        if (DBG) log("reportBadNetwork(" + nai.name() + ") by " + uid);
         synchronized (nai) {
             if (isNetworkBlocked(nai, uid)) return;
 
