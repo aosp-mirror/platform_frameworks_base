@@ -260,7 +260,7 @@ public class NetworkMonitor extends StateMachine {
         addState(mUserPromptedState, mDefaultState);
         addState(mCaptivePortalState, mDefaultState);
         addState(mLingeringState, mDefaultState);
-        setInitialState(mOfflineState);
+        setInitialState(mDefaultState);
 
         mServer = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_SERVER);

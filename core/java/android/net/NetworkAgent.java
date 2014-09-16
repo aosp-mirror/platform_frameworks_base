@@ -120,6 +120,18 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_UNBLOCK_ADDRESS_FAMILY = BASE + 8;
 
+    /**
+     * Sent by ConnectivitySerice to the NetworkAgent to inform the agent of the
+     * networks status - whether we could use the network or could not, due to
+     * either a bad network configuration (no internet link) or captive portal.
+     *
+     * arg1 = either {@code VALID_NETWORK} or {@code INVALID_NETWORK}
+     */
+    public static final int CMD_REPORT_NETWORK_STATUS = BASE + 9;
+
+    public static final int VALID_NETWORK = 1;
+    public static final int INVALID_NETWORK = 2;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -179,6 +191,14 @@ public abstract class NetworkAgent extends Handler {
             }
             case CMD_SUSPECT_BAD: {
                 log("Unhandled Message " + msg);
+                break;
+            }
+            case CMD_REPORT_NETWORK_STATUS: {
+                if (VDBG) {
+                    log("CMD_REPORT_NETWORK_STATUS(" +
+                            (msg.arg1 == VALID_NETWORK ? "VALID)" : "INVALID)"));
+                }
+                networkStatus(msg.arg1);
                 break;
             }
         }
@@ -267,6 +287,24 @@ public abstract class NetworkAgent extends Handler {
      * network won't be immediately requested again.
      */
     abstract protected void unwanted();
+
+    /**
+     * Called when the system determines the usefulness of this network.
+     *
+     * Networks claiming internet connectivity will have their internet
+     * connectivity verified.
+     *
+     * Currently there are two possible values:
+     * {@code VALID_NETWORK} if the system is happy with the connection,
+     * {@code INVALID_NETWORK} if the system is not happy.
+     * TODO - add indications of captive portal-ness and related success/failure,
+     * ie, CAPTIVE_SUCCESS_NETWORK, CAPTIVE_NETWORK for successful login and detection
+     *
+     * This may be called multiple times as the network status changes and may
+     * generate false negatives if we lose ip connectivity before the link is torn down.
+     */
+    protected void networkStatus(int status) {
+    }
 
     protected void log(String s) {
         Log.d(LOG_TAG, "NetworkAgent: " + s);
