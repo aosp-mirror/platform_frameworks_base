@@ -3325,7 +3325,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mLastY == Integer.MIN_VALUE) {
             rawDeltaY -= mMotionCorrection;
         }
-        if (dispatchNestedPreScroll(0, -rawDeltaY, mScrollConsumed, mScrollOffset)) {
+        if (dispatchNestedPreScroll(0, mLastY != Integer.MIN_VALUE ? mLastY - y : -rawDeltaY,
+                mScrollConsumed, mScrollOffset)) {
             rawDeltaY += mScrollConsumed[1];
             scrollOffsetCorrection = -mScrollOffset[1];
             scrollConsumedCorrection = mScrollConsumed[1];
