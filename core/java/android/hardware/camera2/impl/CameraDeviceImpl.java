@@ -578,6 +578,9 @@ public class CameraDeviceImpl extends CameraDevice {
             mFrameNumberRequestPairs.add(
                     new SimpleEntry<Long, Integer>(lastFrameNumber,
                             requestId));
+            // It is possible that the last frame has already arrived, so we need to check
+            // for sequence completion right away
+            checkAndFireSequenceComplete();
         }
     }
 
