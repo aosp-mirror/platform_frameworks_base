@@ -405,7 +405,7 @@ public class DatePicker extends FrameLayout {
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
-        BaseSavedState ss = (BaseSavedState) state;
+        SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         mDelegate.onRestoreInstanceState(ss);
     }
@@ -501,11 +501,6 @@ public class DatePicker extends FrameLayout {
             if (mValidationCallback != null) {
                 mValidationCallback.onValidationChanged(valid);
             }
-        }
-
-        @Override
-        public void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-            mDelegator.dispatchThawSelfOnly(container);
         }
     }
 
@@ -848,6 +843,11 @@ public class DatePicker extends FrameLayout {
         @Override
         public void onConfigurationChanged(Configuration newConfig) {
             setCurrentLocale(newConfig.locale);
+        }
+
+        @Override
+        public void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
+            mDelegator.dispatchThawSelfOnly(container);
         }
 
         @Override
