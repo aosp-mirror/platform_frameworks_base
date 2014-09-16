@@ -1666,6 +1666,9 @@
          2 - The device DOES NOT have a permanent menu key; ignore autodetection. -->
     <integer name="config_overrideHasPermanentMenuKey">0</integer>
 
+    <!-- Override the DPad detection behavior for configuration purposes -->
+    <bool name="config_hasPermanentDpad">false</bool>
+
     <!-- default window inset isRound property -->
     <bool name="config_windowIsRound">false</bool>
 
