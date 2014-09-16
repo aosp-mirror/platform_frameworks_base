@@ -323,9 +323,10 @@ public final class TvInputManagerService extends SystemService {
                 notifyInputAddedLocked(userState, inputId);
             } else if (updatedPackages != null) {
                 // Notify the package updates
-                TvInputState inputState = inputMap.get(inputId);
+                ComponentName component = inputMap.get(inputId).info.getComponent();
                 for (String updatedPackage : updatedPackages) {
-                    if (inputState.info.getComponent().getPackageName().equals(updatedPackage)) {
+                    if (component.getPackageName().equals(updatedPackage)) {
+                        updateServiceConnectionLocked(component, userId);
                         notifyInputUpdatedLocked(userState, inputId);
                         break;
                     }
@@ -551,18 +552,6 @@ public final class TvInputManagerService extends SystemService {
                     sessionState.info.getId(), null, null, sessionState.seq);
         }
         updateServiceConnectionLocked(serviceState.component, userId);
-    }
-
-    private ClientState createClientStateLocked(IBinder clientToken, int userId) {
-        UserState userState = getUserStateLocked(userId);
-        ClientState clientState = new ClientState(clientToken, userId);
-        try {
-            clientToken.linkToDeath(clientState, 0);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "client process has already died", e);
-        }
-        userState.clientStateMap.put(clientToken, clientState);
-        return clientState;
     }
 
     private void createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
@@ -1926,47 +1915,58 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class SessionCallback extends ITvInputSessionCallback.Stub {
-        private final SessionState sessionState;
+        private final SessionState mSessionState;
         private final InputChannel[] mChannels;
 
         SessionCallback(SessionState sessionState, InputChannel[] channels) {
-            this.sessionState = sessionState;
+            mSessionState = sessionState;
             mChannels = channels;
         }
 
         @Override
         public void onSessionCreated(ITvInputSession session, IBinder harewareSessionToken) {
             if (DEBUG) {
-                Slog.d(TAG, "onSessionCreated(inputId=" + sessionState.info.getId() + ")");
+                Slog.d(TAG, "onSessionCreated(inputId=" + mSessionState.info.getId() + ")");
             }
             synchronized (mLock) {
-                sessionState.session = session;
-                sessionState.hardwareSessionToken = harewareSessionToken;
-                if (session == null) {
-                    removeSessionStateLocked(sessionState.sessionToken, sessionState.userId);
-                    sendSessionTokenToClientLocked(sessionState.client,
-                            sessionState.info.getId(), null, null, sessionState.seq);
+                mSessionState.session = session;
+                mSessionState.hardwareSessionToken = harewareSessionToken;
+                if (session != null && addSessionTokenToClientStateLocked(session)) {
+                    sendSessionTokenToClientLocked(mSessionState.client,
+                            mSessionState.info.getId(), mSessionState.sessionToken, mChannels[0],
+                            mSessionState.seq);
                 } else {
-                    try {
-                        session.asBinder().linkToDeath(sessionState, 0);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "session process has already died", e);
-                    }
-
-                    IBinder clientToken = sessionState.client.asBinder();
-                    UserState userState = getUserStateLocked(sessionState.userId);
-                    ClientState clientState = userState.clientStateMap.get(clientToken);
-                    if (clientState == null) {
-                        clientState = createClientStateLocked(clientToken, sessionState.userId);
-                    }
-                    clientState.sessionTokens.add(sessionState.sessionToken);
-
-                    sendSessionTokenToClientLocked(sessionState.client,
-                            sessionState.info.getId(), sessionState.sessionToken, mChannels[0],
-                            sessionState.seq);
+                    removeSessionStateLocked(mSessionState.sessionToken, mSessionState.userId);
+                    sendSessionTokenToClientLocked(mSessionState.client,
+                            mSessionState.info.getId(), null, null, mSessionState.seq);
                 }
                 mChannels[0].dispose();
             }
+        }
+
+        private boolean addSessionTokenToClientStateLocked(ITvInputSession session) {
+            try {
+                session.asBinder().linkToDeath(mSessionState, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "session process has already died", e);
+                return false;
+            }
+
+            IBinder clientToken = mSessionState.client.asBinder();
+            UserState userState = getUserStateLocked(mSessionState.userId);
+            ClientState clientState = userState.clientStateMap.get(clientToken);
+            if (clientState == null) {
+                clientState = new ClientState(clientToken, mSessionState.userId);
+                try {
+                    clientToken.linkToDeath(clientState, 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "client process has already died", e);
+                    return false;
+                }
+                userState.clientStateMap.put(clientToken, clientState);
+            }
+            clientState.sessionTokens.add(mSessionState.sessionToken);
+            return true;
         }
 
         @Override
@@ -1975,7 +1975,7 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onChannelRetuned(" + channelUri + ")");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
@@ -1983,7 +1983,7 @@ public final class TvInputManagerService extends SystemService {
                     // that, how we can protect the watch log from malicious tv inputs should
                     // be addressed. e.g. add a field which represents where the channel change
                     // originated from.
-                    sessionState.client.onChannelRetuned(channelUri, sessionState.seq);
+                    mSessionState.client.onChannelRetuned(channelUri, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onChannelRetuned", e);
                 }
@@ -1996,11 +1996,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onTracksChanged(" + tracks + ")");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onTracksChanged(tracks, sessionState.seq);
+                    mSessionState.client.onTracksChanged(tracks, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onTracksChanged", e);
                 }
@@ -2013,11 +2013,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onTrackSelected(type=" + type + ", trackId=" + trackId + ")");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onTrackSelected(type, trackId, sessionState.seq);
+                    mSessionState.client.onTrackSelected(type, trackId, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onTrackSelected", e);
                 }
@@ -2030,11 +2030,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onVideoAvailable()");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onVideoAvailable(sessionState.seq);
+                    mSessionState.client.onVideoAvailable(mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoAvailable", e);
                 }
@@ -2047,11 +2047,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onVideoUnavailable(" + reason + ")");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onVideoUnavailable(reason, sessionState.seq);
+                    mSessionState.client.onVideoUnavailable(reason, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoUnavailable", e);
                 }
@@ -2064,11 +2064,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onContentAllowed()");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onContentAllowed(sessionState.seq);
+                    mSessionState.client.onContentAllowed(mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onContentAllowed", e);
                 }
@@ -2081,11 +2081,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onContentBlocked()");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onContentBlocked(rating, sessionState.seq);
+                    mSessionState.client.onContentBlocked(rating, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onContentBlocked", e);
                 }
@@ -2099,11 +2099,12 @@ public final class TvInputManagerService extends SystemService {
                     Slog.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top
                             + ", right=" + right + ", bottom=" + bottom + ",)");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onLayoutSurface(left, top, right, bottom, sessionState.seq);
+                    mSessionState.client.onLayoutSurface(left, top, right, bottom,
+                            mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onLayoutSurface", e);
                 }
@@ -2116,12 +2117,11 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "onEvent(what=" + eventType + ", data=" + eventArgs + ")");
                 }
-                if (sessionState.session == null || sessionState.client == null) {
+                if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    sessionState.client.onSessionEvent(eventType, eventArgs,
-                            sessionState.seq);
+                    mSessionState.client.onSessionEvent(eventType, eventArgs, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onSessionEvent", e);
                 }
