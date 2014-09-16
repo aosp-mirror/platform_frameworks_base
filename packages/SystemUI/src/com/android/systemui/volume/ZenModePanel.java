@@ -120,7 +120,10 @@ public class ZenModePanel extends LinearLayout {
         super.onFinishInflate();
 
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
-        addZenButtons();
+        mZenButtons.addButton(R.string.interruption_level_none, Global.ZEN_MODE_NO_INTERRUPTIONS);
+        mZenButtons.addButton(R.string.interruption_level_priority,
+                Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        mZenButtons.addButton(R.string.interruption_level_all, Global.ZEN_MODE_OFF);
         mZenButtons.setCallback(mZenButtonsCallback);
 
         mZenSubhead = findViewById(R.id.zen_subhead);
@@ -168,13 +171,6 @@ public class ZenModePanel extends LinearLayout {
         mSessionZen = -1;
         mSessionExitCondition = null;
         setExpanded(false);
-    }
-
-    private void addZenButtons() {
-        mZenButtons.addButton(R.string.interruption_level_none, Global.ZEN_MODE_NO_INTERRUPTIONS);
-        mZenButtons.addButton(R.string.interruption_level_priority,
-                Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-        mZenButtons.addButton(R.string.interruption_level_all, Global.ZEN_MODE_OFF);
     }
 
     public void setHidden(boolean hidden) {
@@ -238,8 +234,7 @@ public class ZenModePanel extends LinearLayout {
     }
 
     public void updateLocale() {
-        mZenButtons.removeAllViews();
-        addZenButtons();
+        mZenButtons.updateLocale();
     }
 
     private void setExitCondition(Condition exitCondition) {
