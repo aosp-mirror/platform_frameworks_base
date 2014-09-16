@@ -231,7 +231,7 @@ public final class ApduServiceInfo implements Parcelable {
                     String aid = a.getString(com.android.internal.R.styleable.AidFilter_name).
                             toUpperCase();
                     // Add wildcard char to indicate prefix
-                    aid.concat("*");
+                    aid = aid.concat("*");
                     if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
                         currentGroup.aids.add(aid);
                     } else {
