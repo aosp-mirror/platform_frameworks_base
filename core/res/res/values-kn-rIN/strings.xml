@@ -755,7 +755,7 @@
     <string name="policylab_watchLogin" msgid="914130646942199503">"ಪರದೆಯ-ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾನಿಟರ್ ಮಾಡಿ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್‌ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ, ಮತ್ತು ಟ್ಯಾಬ್ಲೆಟ್‌ ಅನ್ನು ಲಾಕ್‌ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್‌ ಮಾಡಿದ್ದರೆ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್‌ ಮಾಡಿದಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್‌ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ, ಮತ್ತು ಫೋನ್‌‌ ಅನ್ನು ಲಾಕ್‌ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್‌ ಮಾಡಿದ್ದರೆ ಫೋನ್‌‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"ಪರದೆ-ಅನ್‌ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಬದಲಾಯಿಸಿ"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"ಸ್ಕ್ರೀನ್‌-ಅನ್‌ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"ಪರದೆಯ-ಅನ್‍‍ಲಾಕ್ ಪಾಸ್‍ವರ್ಡ್ ಬದಲಾಯಿಸಿ."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ಪರದೆ ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ಪರದೆಯು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ಲಾಕ್ ಆಗಬೇಕೆಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ಹೋಮ್ ಅಪ್ಲಿಕೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ಈ ಕ್ರಿಯೆಗೆ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೆಯ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾದ ಡೀಫಾಲ್ಟ್‌‌ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ಸಾಧನಕ್ಕೆ ಅಪ್ಲಿಕೇಶನ್‌‌ವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1454,7 +1455,7 @@
     <string name="tethered_notification_message" msgid="6857031760103062982">"ಹೊಂದಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="back_button_label" msgid="2300470004503343439">"ಹಿಂದೆ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ಮುಂದಿನದು"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"ಬಿಟ್ಟುಬಿಡು"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"ಸ್ಕಿಪ್‌ ಮಾಡು"</string>
     <string name="no_matches" msgid="8129421908915840737">"ಯಾವುದೇ ಹೊಂದಿಕೆಗಳಿಲ್ಲ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ಪುಟದಲ್ಲಿ ಹುಡುಕಿ"</string>
   <plurals name="matches_found">
@@ -1768,16 +1769,25 @@
     <string name="lock_to_app_toast" msgid="1230563865743799321">"ಈ ಪರದೆ ಅನ್‌ಪಿನ್‌ ಮಾಡಲು, ಹಿಂದೆ ಹಾಗೂ ಇತ್ತೀಚಿನವು ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ಈ ಪರದೆ ಅನ್‌ಪಿನ್‌ ಮಾಡಲು, ಇತ್ತೀಚಿನವು ಬಟನ್‌ ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ಪರದೆ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ. ಅನ್‌ಪಿನ್‌ ಮಾಡಲು ನಿಮ್ಮ ಸಂಸ್ಥೆ ಅವಕಾಶ ಮಾಡಿಕೊಟ್ಟಿಲ್ಲ."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"ಪರದೆ ಪಿನ್ನಿಂಗ್‌ ಬಳಸುವುದೇ?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"ಪರದೆ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\n ಹೊರಹೋಗಲು, ಹಿಂದೆ ಹಾಗೂ ಇತ್ತೀಚಿನವು ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ, ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"ಪರದೆ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\nಹೊರಹೋಗಲು ಇತ್ತೀಚಿನವುಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್ನಿಂಗ್‌ ಬಳಸುವುದೇ?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\n ಹೊರಹೋಗಲು, ‘ಹಿಂದೆ’ ಹಾಗೂ ‘ಇತ್ತೀಚಿನವು’ ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ, ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"ಸ್ಕ್ರೀನ್‌‌ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\nಹೊರಹೋಗಲು  ‘ಇತ್ತೀಚಿನವು’ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ಬೇಡ, ಧನ್ಯವಾದಗಳು"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ಪ್ರಾರಂಭಿಸು"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"ಪರದೆಯನ್ನು ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="lock_to_app_start" msgid="6643342070839862795">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"ಸ್ಕ್ರೀನ್‌ ಅನ್‌ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು PIN ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಅನ್‌ಲಾಕ್ ನಮೂನೆಯನ್ನು ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ವೃದ್ದಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಕಂಪನವನ್ನು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕುಂಠಿತಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್‌‌ ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ನಿಮ್ಮ ಅಲಭ್ಯತೆ ಕೊನೆಗೊಳ್ಳುವವರೆಗೆ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"ಒಂದು ನಿಮಿಷದವರೆಗೆ"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d ನಿಮಿಷಗಳವರೆಗೆ"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"ಒಂದು ಗಂಟೆಯವರೆಗೆ"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d ಗಂಟೆಗಳವರೆಗೆ"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ಅನಿರ್ದಿಷ್ಟವಾಗಿ"</string>
 </resources>

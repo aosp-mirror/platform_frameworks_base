@@ -205,7 +205,7 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Zure kokapen fisikoa kontrolatzea."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Sare bidezko komunikazioa"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Sareko hainbat eginbide atzitzea."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetootha"</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Bluetooth bidez gailuak eta sareak atzitzea."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Audio-ezarpenak"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Audio-ezarpenak aldatzea."</string>
@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partekatu %1$s aplikazioarekin"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Hautatu hasierako pantailako aplikazio bat"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Erabili modu lehenetsian ekintza honetarako."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Erabili beste aplikazio bat"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Garbitu aplikazio lehenetsia Sistemaren ezarpenak &gt; Aplikazioak &gt; Deskargatutakoak atalean."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Aukeratu ekintza bat"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Aukeratu USB gailurako aplikazioa"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Eskatu pasahitza aingura kendu aurretik"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Bateriak gehiago iraun dezan, bateria aurrezteko aukerak gailuaren errendimendua murrizten du, eta dardara eta atzeko planoko datu gehienak mugatzen ditu. Baliteke posta elektronikoa, mezuak eta sinkronizatzen diren beste aplikazio batzuk ez eguneratzea, ireki ezean.\n\nBateria aurrezteko aukera automatikoki desaktibatzen da gailua kargatzen ari denean."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte iraungo du jarduerarik gabeko aldiak"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Minutu batez"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d minutuz"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Ordubetez"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d orduz"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Mugagabea"</string>
 </resources>

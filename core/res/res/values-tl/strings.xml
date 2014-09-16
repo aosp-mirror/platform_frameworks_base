@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Ibahagi gamit ang %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Pumili ng home app"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gamitin bilang default para sa pagkilos na ito."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Gumamit ng ibang app"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"I-clear ang default sa mga setting ng System &gt; Apps &gt; Na-download."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Pumili ng pagkilos"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Pumili ng isang app para sa USB device"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Humingi ng password bago mag-unpin"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Upang makatulong na mas mapatagal ang baterya, binabawasan ng battery saver ang pagganap ng iyong device at nililimitahan ang pag-vibrate at ang karamihan ng data ng background. Hindi maaaring ma-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung bubuksan mo ang mga ito.\n\nAwtomatikong mao-off ang battery saver kapag nagcha-charge ang iyong device."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hanggang sa matapos ang iyong downtime nang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Sa loob ng isang minuto"</item>
+    <item quantity="other" msgid="6924190729213550991">"Sa loob ng %d (na) minuto"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Sa loob ng isang oras"</item>
+    <item quantity="other" msgid="5408537517529822157">"Sa loob ng %d (na) oras"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Walang tiyak na katapusan"</string>
 </resources>

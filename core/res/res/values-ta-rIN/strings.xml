@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s மூலம் பகிர்"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"முகப்பு பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"இந்தச் செயலுக்கு இயல்பாகப் பயன்படுத்து."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"வேறு பயன்பாட்டைப் பயன்படுத்தவும்"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"முறைமை அமைப்பு &gt; பயன்பாடுகள் &gt; பதிவிறக்கியவை என்பதில் உள்ள இயல்பை அழிக்கவும்."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"செயலைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB சாதனத்திற்கான பயன்பாட்டைத் தேர்வுசெய்க"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>இல் செயல்படாத நேரம் முடியும் வரை"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"ஒரு மணி நேரம்"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d மணிநேரம்"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
 </resources>

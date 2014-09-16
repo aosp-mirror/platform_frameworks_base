@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏اشتراک‌گذاری با %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"انتخاب یک برنامه صفحه اصلی"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"استفاده به صورت پیش‌فرض برای این عملکرد."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"استتفاده از یک برنامه دیگر"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد دانلود شده پاک کنید."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"انتخاب عملکرد"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏انتخاب برنامه برای دستگاه USB"</string>
@@ -1768,10 +1769,10 @@
     <string name="lock_to_app_toast" msgid="1230563865743799321">"برای برداشتن پین این صفحه، کلید بازگشت و برنامه‌های اخیر را همزمان لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"برای برداشتن پین این صفحه، کلید برنامه‌های اخیر را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"صفحه پین شده است. سازمان شما برداشتن پین را غیرمجاز کرده است."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"از پین صفحه استفاده شود؟"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"از پین کردن صفحه استفاده شود؟"</string>
     <string name="lock_to_app_description" msgid="9076084599283282800">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای خروج، کلیدهای بازگشت و برنامه‌های اخیر را همزمان لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای خروج، کلید برنامه‌های اخیر را لمس کنید و نگه دارید."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"نه، سپاسگزارم"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"خیر، سپاسگزارم"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"شروع"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"پین صفحه برداشته شد"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"درخواست گذرواژه قبل از برداشتن پین"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"برای کمک به بهبود عمر باتری، ذخیره‌کننده باتری عملکرد دستگاه‌تان را کاهش می‌دهد و اغلب اطلاعات پس‌زمینه و لرزش را محدود می‌کند. ایمیل، پیام‌رسانی و سایر برنامه‌هایی که به همگام‌سازی وابسته هستند ممکن است به‌روز نشوند مگر اینکه آنها را باز کنید.\n\nوقتی دستگاه‌تان شارژ می‌شود، ذخیره‌کننده باتری به صورت خودکار خاموش می‌شود."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"تا زمانی که زمان استراحت در <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> به پایان برسد"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"برای یک دقیقه"</item>
+    <item quantity="other" msgid="6924190729213550991">"‏برای %d دقیقه"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"برای یک ساعت"</item>
+    <item quantity="other" msgid="5408537517529822157">"‏برای %d ساعت"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"نامحدود"</string>
 </resources>

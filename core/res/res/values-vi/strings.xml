@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Chia sẻ với %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Chọn ứng dụng gia đình"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Sử dụng theo mặc định đối với tác vụ này."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Sử dụng một ứng dụng khác"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Xóa mặc định trong Cài đặt hệ thống &gt; Ứng dụng &gt; Đã tải xuống."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Chọn một tác vụ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Chọn ứng dụng cho thiết bị USB"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Hỏi mật khẩu trước khi bỏ ghim"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế chế rung và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa không thể cập nhật trừ khi bạn mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Cho tới khi thời gian ngừng hoạt động của bạn kết thúc vào <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Trong một phút"</item>
+    <item quantity="other" msgid="6924190729213550991">"Trong %d phút"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Trong một giờ"</item>
+    <item quantity="other" msgid="5408537517529822157">"Trong %d giờ"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Không giới hạn"</string>
 </resources>

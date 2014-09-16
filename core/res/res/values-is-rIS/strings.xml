@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Deila með %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Veldu heimaforrit"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Nota sjálfgefið fyrir þessa aðgerð."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Nota annað forrit"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Hreinsa sjálfgefna stillingu í Kerfisstillingar &gt; Forrit &gt; Sótt."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Veldu aðgerð"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Veldu forrit fyrir USB-tækið"</string>
@@ -1772,7 +1773,7 @@
     <string name="lock_to_app_description" msgid="9076084599283282800">"Skjáfesting læsir skjánum á eina skjámynd.\n\nTil að hætta skaltu halda inni Til baka og Nýlegt samtímis."</string>
     <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Skjáfesting læsir skjánum á eina skjámynd.\n\nTil að hætta skaltu halda inni Nýlegt."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEI, TAKK"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"RÆSA"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"BYRJA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjár festur"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjár opnaður"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Biðja um PIN-númer til að losa"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Biðja um aðgangsorð til að losa"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Til að auka endingu rafhlöðunnar dregur rafhlöðusparnaður úr afköstum tækisins og takmarkar titring og flest bakgrunnsgögn. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu verði uppfærð fyrr en þú opnar þau.\n\nSjálfkrafa er slökkt á rafhlöðusparnaði þegar tækið er í hleðslu."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Þangað til niðritíma lýkur, <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Í eina mínútu"</item>
+    <item quantity="other" msgid="6924190729213550991">"Í %d mínútur"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Í eina klukkustund"</item>
+    <item quantity="other" msgid="5408537517529822157">"Í %d klukkustundir"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Án tímatakmarkana"</string>
 </resources>
