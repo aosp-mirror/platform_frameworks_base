@@ -32,6 +32,7 @@ import java.util.Objects;
 public class SegmentedButtons extends LinearLayout {
     private static final Typeface MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
     private static final Typeface BOLD = Typeface.create("sans-serif", Typeface.BOLD);
+    private static final int LABEL_RES_KEY = R.id.label;
 
     private final Context mContext;
     private final LayoutInflater mInflater;
@@ -69,6 +70,7 @@ public class SegmentedButtons extends LinearLayout {
 
     public void addButton(int labelResId, Object value) {
         final Button b = (Button) mInflater.inflate(R.layout.segmented_button, this, false);
+        b.setTag(LABEL_RES_KEY, labelResId);
         b.setText(labelResId);
         final LayoutParams lp = (LayoutParams) b.getLayoutParams();
         if (getChildCount() == 0) {
@@ -78,6 +80,14 @@ public class SegmentedButtons extends LinearLayout {
         addView(b);
         b.setTag(value);
         b.setOnClickListener(mClick);
+    }
+
+    public void updateLocale() {
+        for (int i = 0; i < getChildCount(); i++) {
+            final Button b = (Button) getChildAt(i);
+            final int labelResId = (Integer) b.getTag(LABEL_RES_KEY);
+            b.setText(labelResId);
+        }
     }
 
     private void fireOnSelected() {
