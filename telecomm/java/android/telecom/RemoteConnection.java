@@ -23,7 +23,6 @@ import com.android.internal.telecom.IVideoProvider;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.DisconnectCause;
 import android.view.Surface;
 
 import java.util.ArrayList;
@@ -55,15 +54,12 @@ public final class RemoteConnection {
          * Invoked when this {@code RemoteConnection} is disconnected.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
-         * @param disconnectCauseCode The failure code ({@see DisconnectCause}) associated with this
-         *         failed connection.
-         * @param disconnectCauseMessage The reason for the connection failure. This will not be
-         *         displayed to the user.
+         * @param disconnectCause The ({@see DisconnectCause}) associated with this failed
+         *     connection.
          */
         public void onDisconnected(
                 RemoteConnection connection,
-                int disconnectCauseCode,
-                String disconnectCauseMessage) {}
+                DisconnectCause disconnectCause) {}
 
         /**
          * Invoked when this {@code RemoteConnection} is requesting ringback. See
@@ -383,8 +379,7 @@ public final class RemoteConnection {
             Collections.unmodifiableList(mConferenceableConnections);
 
     private int mState = Connection.STATE_NEW;
-    private int mDisconnectCauseCode = DisconnectCause.NOT_VALID;
-    private String mDisconnectCauseMessage;
+    private DisconnectCause mDisconnectCause;
     private boolean mRingbackRequested;
     private boolean mConnected;
     private int mCallCapabilities;
@@ -396,8 +391,6 @@ public final class RemoteConnection {
     private int mAddressPresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
-    private int mFailureCode;
-    private String mFailureMessage;
     private RemoteConference mConference;
 
     /**
@@ -418,15 +411,14 @@ public final class RemoteConnection {
      * "real" purpose will almost certainly fail. Callers should note the failure and act
      * accordingly (moving on to another RemoteConnection, for example)
      *
-     * @param failureCode
-     * @param failureMessage
+     * @param disconnectCause The reason for the failed connection.
+     * @hide
      */
-    RemoteConnection(int failureCode, String failureMessage) {
+    RemoteConnection(DisconnectCause disconnectCause) {
         this("NULL", null, null);
         mConnected = false;
         mState = Connection.STATE_DISCONNECTED;
-        mFailureCode = DisconnectCause.OUTGOING_FAILURE;
-        mFailureMessage = failureMessage + " original code = " + failureCode;
+        mDisconnectCause = disconnectCause;
     }
 
     /**
@@ -463,16 +455,8 @@ public final class RemoteConnection {
      * disconnect cause expressed as a code chosen from among those declared in
      * {@link DisconnectCause}.
      */
-    public int getDisconnectCauseCode() {
-        return mDisconnectCauseCode;
-    }
-
-    /**
-     * @return For a {@link Connection#STATE_DISCONNECTED} {@code RemoteConnection}, an optional
-     * reason for disconnection expressed as a free text message.
-     */
-    public String getDisconnectCauseMessage() {
-        return mDisconnectCauseMessage;
+    public DisconnectCause getDisconnectCause() {
+        return mDisconnectCause;
     }
 
     /**
@@ -544,21 +528,6 @@ public final class RemoteConnection {
      */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
-    }
-
-    /**
-     * @return The failure code ({@see DisconnectCause}) associated with this failed
-     * {@code RemoteConnection}.
-     */
-    public int getFailureCode() {
-        return mFailureCode;
-    }
-
-    /**
-     * @return The reason for the connection failure. This will not be displayed to the user.
-     */
-    public String getFailureMessage() {
-        return mFailureMessage;
     }
 
     /**
@@ -779,14 +748,13 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setDisconnected(int cause, String message) {
+    void setDisconnected(DisconnectCause disconnectCause) {
         if (mState != Connection.STATE_DISCONNECTED) {
             mState = Connection.STATE_DISCONNECTED;
-            mDisconnectCauseCode = cause;
-            mDisconnectCauseMessage = message;
+            mDisconnectCause = disconnectCause;
 
             for (Callback c : mCallbacks) {
-                c.onDisconnected(this, cause, message);
+                c.onDisconnected(this, mDisconnectCause);
             }
         }
     }
@@ -820,7 +788,8 @@ public final class RemoteConnection {
         if (!mCallbacks.isEmpty()) {
             // Make sure that the callbacks are notified that the call is destroyed first.
             if (mState != Connection.STATE_DISCONNECTED) {
-                setDisconnected(DisconnectCause.ERROR_UNSPECIFIED, "Connection destroyed.");
+                setDisconnected(
+                        new DisconnectCause(DisconnectCause.ERROR, "Connection destroyed."));
             }
 
             for (Callback c : mCallbacks) {
@@ -923,7 +892,7 @@ public final class RemoteConnection {
      *
      * @hide
      */
-    public static RemoteConnection failure(int failureCode, String failureMessage) {
-        return new RemoteConnection(failureCode, failureMessage);
+    public static RemoteConnection failure(DisconnectCause disconnectCause) {
+        return new RemoteConnection(disconnectCause);
     }
 }

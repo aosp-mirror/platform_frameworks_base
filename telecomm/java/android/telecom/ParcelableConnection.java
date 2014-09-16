@@ -44,8 +44,7 @@ public final class ParcelableConnection implements Parcelable {
     private final boolean mRingbackRequested;
     private final boolean mIsVoipAudioMode;
     private final StatusHints mStatusHints;
-    private final int mDisconnectCause;
-    private final String mDisconnectMessage;
+    private final DisconnectCause mDisconnectCause;
     private final List<String> mConferenceableConnectionIds;
 
     /** @hide */
@@ -62,8 +61,7 @@ public final class ParcelableConnection implements Parcelable {
             boolean ringbackRequested,
             boolean isVoipAudioMode,
             StatusHints statusHints,
-            int disconnectCause,
-            String disconnectMessage,
+            DisconnectCause disconnectCause,
             List<String> conferenceableConnectionIds) {
         mPhoneAccount = phoneAccount;
         mState = state;
@@ -78,7 +76,6 @@ public final class ParcelableConnection implements Parcelable {
         mIsVoipAudioMode = isVoipAudioMode;
         mStatusHints = statusHints;
         mDisconnectCause = disconnectCause;
-        mDisconnectMessage = disconnectMessage;
         this.mConferenceableConnectionIds = conferenceableConnectionIds;
     }
 
@@ -131,12 +128,8 @@ public final class ParcelableConnection implements Parcelable {
         return mStatusHints;
     }
 
-    public final int getDisconnectCause() {
+    public final DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
-    }
-
-    public final String getDisconnectMessage() {
-        return mDisconnectMessage;
     }
 
     public final List<String> getConferenceableConnectionIds() {
@@ -174,8 +167,7 @@ public final class ParcelableConnection implements Parcelable {
             boolean ringbackRequested = source.readByte() == 1;
             boolean audioModeIsVoip = source.readByte() == 1;
             StatusHints statusHints = source.readParcelable(classLoader);
-            int disconnectCauseCode = source.readInt();
-            String disconnectCauseMessage = source.readString();
+            DisconnectCause disconnectCause = source.readParcelable(classLoader);
             List<String> conferenceableConnectionIds = new ArrayList<>();
             source.readStringList(conferenceableConnectionIds);
 
@@ -192,8 +184,7 @@ public final class ParcelableConnection implements Parcelable {
                     ringbackRequested,
                     audioModeIsVoip,
                     statusHints,
-                    disconnectCauseCode,
-                    disconnectCauseMessage,
+                    disconnectCause,
                     conferenceableConnectionIds);
         }
 
@@ -225,8 +216,7 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeByte((byte) (mRingbackRequested ? 1 : 0));
         destination.writeByte((byte) (mIsVoipAudioMode ? 1 : 0));
         destination.writeParcelable(mStatusHints, 0);
-        destination.writeInt(mDisconnectCause);
-        destination.writeString(mDisconnectMessage);
+        destination.writeParcelable(mDisconnectCause, 0);
         destination.writeStringList(mConferenceableConnectionIds);
     }
 }
