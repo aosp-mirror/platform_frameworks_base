@@ -19,6 +19,7 @@ package com.android.server.location;
 import android.content.Context;
 import android.net.Proxy;
 import android.net.http.AndroidHttpClient;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -42,12 +43,14 @@ import java.util.Random;
 public class GpsXtraDownloader {
 
     private static final String TAG = "GpsXtraDownloader";
-    static final boolean DEBUG = false;
-    
-    private Context mContext;
-    private String[] mXtraServers;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String DEFAULT_USER_AGENT = "Android";
+
+    private final Context mContext;
+    private final String[] mXtraServers;
     // to load balance our server requests
     private int mNextServerIndex;
+    private final String mUserAgent;
 
     GpsXtraDownloader(Context context, Properties properties) {
         mContext = context;
@@ -60,9 +63,18 @@ public class GpsXtraDownloader {
         if (server1 != null) count++;
         if (server2 != null) count++;
         if (server3 != null) count++;
-        
+
+        // Set User Agent from properties, if possible.
+        String agent = properties.getProperty("XTRA_USER_AGENT");
+        if (TextUtils.isEmpty(agent)) {
+            mUserAgent = DEFAULT_USER_AGENT;
+        } else {
+            mUserAgent = agent;
+        }
+
         if (count == 0) {
             Log.e(TAG, "No XTRA servers were specified in the GPS configuration");
+            mXtraServers = null;
             return;
         } else {
             mXtraServers = new String[count];
@@ -74,7 +86,7 @@ public class GpsXtraDownloader {
             // randomize first server
             Random random = new Random();
             mNextServerIndex = random.nextInt(count);
-        }       
+        }
     }
 
     byte[] downloadXtraData() {
@@ -91,7 +103,7 @@ public class GpsXtraDownloader {
         // load balance our requests among the available servers
         while (result == null) {
             result = doDownload(mXtraServers[mNextServerIndex], useProxy, proxyHost, proxyPort);
-            
+
             // increment mNextServerIndex and wrap around if necessary
             mNextServerIndex++;
             if (mNextServerIndex == mXtraServers.length) {
@@ -100,17 +112,18 @@ public class GpsXtraDownloader {
             // break if we have tried all the servers
             if (mNextServerIndex == startIndex) break;
         }
-    
+
         return result;
     }
 
-    protected static byte[] doDownload(String url, boolean isProxySet, 
+    protected byte[] doDownload(String url, boolean isProxySet,
             String proxyHost, int proxyPort) {
         if (DEBUG) Log.d(TAG, "Downloading XTRA data from " + url);
 
         AndroidHttpClient client = null;
         try {
-            client = AndroidHttpClient.newInstance("Android");
+            if (DEBUG) Log.d(TAG, "XTRA user agent: " + mUserAgent);
+            client = AndroidHttpClient.newInstance(mUserAgent);
             HttpUriRequest req = new HttpGet(url);
 
             if (isProxySet) {
