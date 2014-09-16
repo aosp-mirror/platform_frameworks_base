@@ -22,7 +22,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
@@ -30,15 +29,14 @@ import android.hardware.TriggerEventListener;
 import android.media.AudioAttributes;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.service.dreams.DreamService;
 import android.util.Log;
 import android.view.Display;
 
-import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.DozeParameters.PulseSchedule;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -72,6 +70,7 @@ public class DozeService extends DreamService {
     private PendingIntent mNotificationPulseIntent;
     private boolean mPowerSaveActive;
     private long mNotificationPulseTime;
+    private int mScheduleResetsRemaining;
 
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
@@ -90,6 +89,7 @@ public class DozeService extends DreamService {
         pw.print("  mNotificationLightOn: "); pw.println(mNotificationLightOn);
         pw.print("  mPowerSaveActive: "); pw.println(mPowerSaveActive);
         pw.print("  mNotificationPulseTime: "); pw.println(mNotificationPulseTime);
+        pw.print("  mScheduleResetsRemaining: "); pw.println(mScheduleResetsRemaining);
         mDozeParameters.dump(pw);
     }
 
@@ -107,16 +107,14 @@ public class DozeService extends DreamService {
         setWindowless(true);
 
         mSensors = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
-        mSigMotionSensor = new TriggerSensor(Sensor.TYPE_SIGNIFICANT_MOTION, "doze.pulse.sigmotion",
-                R.bool.doze_pulse_on_significant_motion);
-        mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE, "doze.pulse.pickup",
-                R.bool.doze_pulse_on_pick_up);
+        mSigMotionSensor = new TriggerSensor(Sensor.TYPE_SIGNIFICANT_MOTION,
+                mDozeParameters.getPulseOnSigMotion(), mDozeParameters.getVibrateOnSigMotion());
+        mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE,
+                mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup());
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        final Resources res = mContext.getResources();
-        mDisplayStateSupported = SystemProperties.getBoolean("doze.display.supported",
-                res.getBoolean(R.bool.doze_display_state_supported));
+        mDisplayStateSupported = mDozeParameters.getDisplayStateSupported();
         mNotificationPulseIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(NOTIFICATION_PULSE_ACTION).setPackage(getPackageName()),
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -142,6 +140,7 @@ public class DozeService extends DreamService {
         }
         mDreaming = true;
         listenForPulseSignals(true);
+        rescheduleNotificationPulse(false /*predicate*/);  // cancel any pending pulse alarms
         requestDoze();
     }
 
@@ -174,15 +173,21 @@ public class DozeService extends DreamService {
         mHandler.removeCallbacks(mDisplayOff);
     }
 
+    @Override
+    public void startDozing() {
+        if (DEBUG) Log.d(mTag, "startDozing");
+        super.startDozing();
+    }
+
     private void requestDoze() {
         if (mHost != null) {
             mHost.requestDoze(this);
         }
     }
 
-    private void requestPulse(boolean delayed) {
+    private void requestPulse() {
         if (mHost != null) {
-            mHost.requestPulse(delayed, this);
+            mHost.requestPulse(this);
         }
     }
 
@@ -222,24 +227,61 @@ public class DozeService extends DreamService {
     private void listenForNotifications(boolean listen) {
         if (mHost == null) return;
         if (listen) {
+            resetNotificationResets();
             mHost.addCallback(mHostCallback);
         } else {
             mHost.removeCallback(mHostCallback);
         }
     }
 
-    private void rescheduleNotificationPulse() {
-        mAlarmManager.cancel(mNotificationPulseIntent);
-        if (mNotificationLightOn) {
-            final long now = System.currentTimeMillis();
-            final long age = now - mNotificationPulseTime;
-            final long period = mDozeParameters.getPulsePeriod(age);
-            final long time = now + period;
-            if (period > 0) {
-                if (DEBUG) Log.d(TAG, "Scheduling pulse in " + period + " for " + new Date(time));
-                mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, mNotificationPulseIntent);
-            }
+    private void resetNotificationResets() {
+        if (DEBUG) Log.d(TAG, "resetNotificationResets");
+        mScheduleResetsRemaining = mDozeParameters.getPulseScheduleResets();
+    }
+
+    private void updateNotificationPulse() {
+        if (DEBUG) Log.d(TAG, "updateNotificationPulse");
+        if (!mDozeParameters.getPulseOnNotifications()) return;
+        if (mScheduleResetsRemaining <= 0) {
+            if (DEBUG) Log.d(TAG, "No more schedule resets remaining");
+            return;
         }
+        final long now = System.currentTimeMillis();
+        if ((now - mNotificationPulseTime) < mDozeParameters.getPulseDuration()) {
+            if (DEBUG) Log.d(TAG, "Recently updated, not resetting schedule");
+            return;
+        }
+        mScheduleResetsRemaining--;
+        if (DEBUG) Log.d(TAG, "mScheduleResetsRemaining = " + mScheduleResetsRemaining);
+        mNotificationPulseTime = now;
+        rescheduleNotificationPulse(true /*predicate*/);
+    }
+
+    private void rescheduleNotificationPulse(boolean predicate) {
+        if (DEBUG) Log.d(TAG, "rescheduleNotificationPulse predicate=" + predicate);
+        mAlarmManager.cancel(mNotificationPulseIntent);
+        if (!predicate) {
+            if (DEBUG) Log.d(TAG, "  don't reschedule: predicate is false");
+            return;
+        }
+        final PulseSchedule schedule = mDozeParameters.getPulseSchedule();
+        if (schedule == null) {
+            if (DEBUG) Log.d(TAG, "  don't reschedule: schedule is null");
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final long time = schedule.getNextTime(now, mNotificationPulseTime);
+        if (time <= 0) {
+            if (DEBUG) Log.d(TAG, "  don't reschedule: time is " + time);
+            return;
+        }
+        final long delta = time - now;
+        if (delta <= 0) {
+            if (DEBUG) Log.d(TAG, "  don't reschedule: delta is " + delta);
+            return;
+        }
+        if (DEBUG) Log.d(TAG, "Scheduling pulse in " + delta + "ms for " + new Date(time));
+        mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, mNotificationPulseIntent);
     }
 
     private static String triggerEventToString(TriggerEvent event) {
@@ -268,12 +310,12 @@ public class DozeService extends DreamService {
         public void onReceive(Context context, Intent intent) {
             if (PULSE_ACTION.equals(intent.getAction())) {
                 if (DEBUG) Log.d(mTag, "Received pulse intent");
-                requestPulse(false /*delayed*/);
+                requestPulse();
             }
             if (NOTIFICATION_PULSE_ACTION.equals(intent.getAction())) {
                 if (DEBUG) Log.d(mTag, "Received notification pulse intent");
-                requestPulse(true /*delayed*/);
-                rescheduleNotificationPulse();
+                requestPulse();
+                rescheduleNotificationPulse(mNotificationLightOn);
             }
         }
     };
@@ -288,8 +330,7 @@ public class DozeService extends DreamService {
         @Override
         public void onBuzzBeepBlinked() {
             if (DEBUG) Log.d(mTag, "onBuzzBeepBlinked");
-            mNotificationPulseTime = System.currentTimeMillis();
-            requestPulse(true /*delayed*/);
+            updateNotificationPulse();
         }
 
         @Override
@@ -298,10 +339,8 @@ public class DozeService extends DreamService {
             if (mNotificationLightOn == on) return;
             mNotificationLightOn = on;
             if (mNotificationLightOn) {
-                mNotificationPulseTime = System.currentTimeMillis();
-                requestPulse(true /*delayed*/);
+                updateNotificationPulse();
             }
-            rescheduleNotificationPulse();
         }
 
         @Override
@@ -317,7 +356,7 @@ public class DozeService extends DreamService {
         void addCallback(Callback callback);
         void removeCallback(Callback callback);
         void requestDoze(DozeService dozeService);
-        void requestPulse(boolean delayed, DozeService dozeService);
+        void requestPulse(DozeService dozeService);
         void dozingStopped(DozeService dozeService);
         boolean isPowerSaveActive();
 
@@ -332,13 +371,14 @@ public class DozeService extends DreamService {
     private class TriggerSensor extends TriggerEventListener {
         private final Sensor mSensor;
         private final boolean mConfigured;
+        private final boolean mDebugVibrate;
 
         private boolean mEnabled;
 
-        public TriggerSensor(int type, String sysPropConfig, int resConfig) {
+        public TriggerSensor(int type, boolean configured, boolean debugVibrate) {
             mSensor = mSensors.getDefaultSensor(type);
-            mConfigured = SystemProperties.getBoolean(sysPropConfig,
-                    mContext.getResources().getBoolean(resConfig));
+            mConfigured = configured;
+            mDebugVibrate = debugVibrate;
         }
 
         public void setListening(boolean listen) {
@@ -354,13 +394,14 @@ public class DozeService extends DreamService {
         @Override
         public String toString() {
             return new StringBuilder("{mEnabled=").append(mEnabled).append(", mConfigured=")
-                    .append(mConfigured).append(", mSensor=").append(mSensor).append("}").toString();
+                    .append(mConfigured).append(", mDebugVibrate=").append(mDebugVibrate)
+                    .append(", mSensor=").append(mSensor).append("}").toString();
         }
 
         @Override
         public void onTrigger(TriggerEvent event) {
             if (DEBUG) Log.d(mTag, "onTrigger: " + triggerEventToString(event));
-            if (DEBUG) {
+            if (mDebugVibrate) {
                 final Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
                 if (v != null) {
                     v.vibrate(1000, new AudioAttributes.Builder()
@@ -368,8 +409,9 @@ public class DozeService extends DreamService {
                             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build());
                 }
             }
-            requestPulse(false /*delayed*/);
+            requestPulse();
             setListening(true);  // reregister, this sensor only fires once
+            resetNotificationResets();
         }
     }
 }
