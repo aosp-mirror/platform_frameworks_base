@@ -333,6 +333,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mHaveInputMethods;
 
+    final boolean mHasPermanentDpad;
+
     final boolean mAllowBootMessages;
 
     final boolean mLimitedAlphaCompositing;
@@ -804,6 +806,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mOnlyCore = onlyCore;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
+        mHasPermanentDpad = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasPermanentDpad);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings(context);
@@ -7182,6 +7186,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            if (config.navigation == Configuration.NAVIGATION_NONAV && mHasPermanentDpad) {
+                config.navigation = Configuration.NAVIGATION_DPAD;
+                navigationPresence |= WindowManagerPolicy.PRESENCE_INTERNAL;
+            }
+
             // Determine whether a hard keyboard is available and enabled.
             boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
@@ -10976,6 +10985,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         pw.println();
         pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
+        pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
         if (mLastFocus != mCurrentFocus) {
             pw.print("  mLastFocus="); pw.println(mLastFocus);
