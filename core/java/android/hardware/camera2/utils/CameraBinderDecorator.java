@@ -19,6 +19,7 @@ package android.hardware.camera2.utils;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISABLED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISCONNECTED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+import static android.hardware.camera2.CameraAccessException.CAMERA_ERROR;
 import static android.hardware.camera2.CameraAccessException.MAX_CAMERAS_IN_USE;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DEPRECATED_HAL;
 
@@ -41,6 +42,7 @@ public class CameraBinderDecorator {
     public static final int BAD_VALUE = -22;
     public static final int DEAD_OBJECT = -32;
     public static final int INVALID_OPERATION = -38;
+    public static final int TIMED_OUT = -110;
 
     /**
      * TODO: add as error codes in Errors.h
@@ -112,6 +114,9 @@ public class CameraBinderDecorator {
                 throw new IllegalArgumentException("Bad argument passed to camera service");
             case DEAD_OBJECT:
                 throw new CameraRuntimeException(CAMERA_DISCONNECTED);
+            case TIMED_OUT:
+                throw new CameraRuntimeException(CAMERA_ERROR,
+                        "Operation timed out in camera service");
             case EACCES:
                 throw new CameraRuntimeException(CAMERA_DISABLED);
             case EBUSY:
@@ -123,7 +128,7 @@ public class CameraBinderDecorator {
             case EOPNOTSUPP:
                 throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
             case INVALID_OPERATION:
-                throw new IllegalStateException(
+                throw new CameraRuntimeException(CAMERA_ERROR,
                         "Illegal state encountered in camera service.");
         }
 
