@@ -210,10 +210,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPSမှတည်နေရာကိုအတည်ပြုသည်"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"တည်နေရာပြ တောင်းဆိုချက်များ အသက်ဝင်ရန်"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"သတိပေးချက်အားလုံးအား ဖယ်ရှားခြင်း။"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"အကြောင်းကြားချက် ဆက်တင်များ"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ဆက်တင်များ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ဖန်သားပြင်ပေါ်မှာ ပြသမှုက အလိုအလျောက် လှည့်သွားပါမည်"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ဖန်သားပြင် အနေအထားက အလျားလိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ဖန်သားပြင် အနေအထားက ဒေါင်လိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
@@ -299,7 +297,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"သော့ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ဖုန်း အတွက် ညာသို့ ပွတ်ဆွဲပါ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ကင်မရာ အတွက် ဘယ်သို့ ပွတ်ဆွဲပါ"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"အကန့်အသတ်မရှိစွာ"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"မရှိ"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"ဦးစားပေးမှု"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"အားလုံး"</string>
@@ -319,12 +316,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"သင်သည် သင်၏ ချိတ်ဆက်မှုကို ဆက်ပြုလုပ် လိုပါသလား?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"အစမှ ပြန်စပါ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ဟုတ်ကဲ့၊ ဆက်လုပ်ပါ"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"တစ်မိနစ် အတွင်း"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d မိနစ် အတွင်း"</item>
-  </plurals>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
+    <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူ အသစ်ကို ထည့်ရမလား?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် appများကို မွမ်းမံပေးနိုင်သည်။"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ဘက်ထရီ ချွေတာသူ ဖွင့်ထား"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"လုပ်ကိုင်မှုကို လျှော့ချလျက် နောက်ခံ ဒေတာကို ကန့်သတ်သည်"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ဘက်ထရီ ချွေတာမှုကို ပိတ်ထားရန်"</string>
