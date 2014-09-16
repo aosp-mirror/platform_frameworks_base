@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
@@ -1271,9 +1272,10 @@ class WindowStateAnimator {
             // not always reporting the correct system decor rect. In such
             // cases, we take into account the specified content insets as well.
             if ((w.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN)
-                    == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) {
+                    == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN
+                    || (w.mAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
                 // Don't apply the workaround to apps explicitly requesting
-                // fullscreen layout.
+                // fullscreen layout or when the bars are transparent.
                 clipRect.intersect(mClipRect);
             } else {
                 final int offsetTop = Math.max(clipRect.top, w.mContentInsets.top);
