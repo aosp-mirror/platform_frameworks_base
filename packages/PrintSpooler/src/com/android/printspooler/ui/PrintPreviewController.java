@@ -25,11 +25,9 @@ import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintDocumentInfo;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import com.android.internal.os.SomeArgs;
 import com.android.printspooler.R;
@@ -132,7 +130,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
     public void onContentUpdated(boolean documentChanged, int documentPageCount,
             PageRange[] writtenPages, PageRange[] selectedPages, MediaSize mediaSize,
             Margins minMargins) {
-                boolean contentChanged = false;
+        boolean contentChanged = false;
 
         if (documentChanged) {
             contentChanged = true;
@@ -153,7 +151,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
 
         // The content changed. In this case we have to invalidate
         // all rendered pages and reopen the file...
-        if (contentChanged && writtenPages != null) {
+        if ((contentChanged || !mPageAdapter.isOpened()) && writtenPages != null) {
             Message operation = mHandler.obtainMessage(MyHandler.MSG_OPEN);
             mHandler.enqueueOperation(operation);
         }

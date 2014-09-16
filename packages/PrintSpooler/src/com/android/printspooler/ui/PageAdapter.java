@@ -57,7 +57,7 @@ public final class PageAdapter extends Adapter implements
 
     private static final int MAX_PREVIEW_PAGES_BATCH = 50;
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {
             PageRange.ALL_PAGES
@@ -175,13 +175,19 @@ public final class PageAdapter extends Adapter implements
         return mPageContentRepository.getFilePageCount();
     }
 
-    public void open(ParcelFileDescriptor source, Runnable callback) {
+    public void open(ParcelFileDescriptor source, final Runnable callback) {
         throwIfNotClosed();
         mState = STATE_OPENED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_OPENED");
         }
-        mPageContentRepository.open(source, callback);
+        mPageContentRepository.open(source, new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+                callback.run();
+            }
+        });
     }
 
     public void update(PageRange[] writtenPages, PageRange[] selectedPages,
@@ -728,8 +734,8 @@ public final class PageAdapter extends Adapter implements
         if (provider != null) {
             page.init(null, null, null, null);
             mPageContentRepository.releasePageContentProvider(provider);
-            mBoundPagesInAdapter.remove(pageIndexInAdapter);
         }
+        mBoundPagesInAdapter.remove(pageIndexInAdapter);
         page.setTag(null);
     }
 
