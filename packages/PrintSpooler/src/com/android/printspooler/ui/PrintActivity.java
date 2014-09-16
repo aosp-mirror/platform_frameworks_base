@@ -312,6 +312,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (mState != STATE_INITIALIZING && mCurrentPrinter != null) {
+            mPrinterRegistry.setTrackedPrinter(mCurrentPrinter.getId());
+        }
+    }
+
+    @Override
     public void onPause() {
         PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
 
@@ -347,6 +355,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         mPrinterAvailabilityDetector.cancel();
+        mPrinterRegistry.setTrackedPrinter(null);
 
         super.onPause();
     }
