@@ -61,7 +61,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -2303,18 +2302,19 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    try {
-                        // It's OK to access the data members as they are
-                        // final and this code is the last one to touch
-                        // them as shredding is the very last step, so the
-                        // UI is not interactive at this point.
-                        shredPages(editor);
-                        updatePrintJob();
-                    } finally {
-                        mContext.unbindService(PageShredder.this);
-                        mCallback.run();
-                    }
+                    // It's OK to access the data members as they are
+                    // final and this code is the last one to touch
+                    // them as shredding is the very last step, so the
+                    // UI is not interactive at this point.
+                    shredPages(editor);
+                    updatePrintJob();
                     return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    mContext.unbindService(PageShredder.this);
+                    mCallback.run();
                 }
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
