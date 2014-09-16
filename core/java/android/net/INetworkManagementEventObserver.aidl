@@ -92,6 +92,13 @@ interface INetworkManagementEventObserver {
     void interfaceClassDataActivityChanged(String label, boolean active, long tsNanos);
 
     /**
+     * Message is received from network interface.
+     *
+     * @param message The message
+     */
+    void interfaceMessageRecevied(String message);
+
+    /**
      * Information about available DNS servers has been received.
      *
      * @param iface The interface on which the information was received.

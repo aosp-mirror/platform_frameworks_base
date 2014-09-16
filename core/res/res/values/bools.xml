@@ -29,4 +29,7 @@
     <!-- Whether to make default hotspot security NONE-->
     <bool name="set_wifi_hotspot_security_none">false</bool>
 
+    <!-- Whether to enable softap extention feature -->
+    <bool name="config_softap_extention">true</bool>
+
 </resources>

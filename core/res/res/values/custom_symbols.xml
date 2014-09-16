@@ -24,4 +24,11 @@
   <java-symbol type="string" name="def_wifi_wifihotspot_pass" />
   <java-symbol type="string" name="def_wifi_direct_name" />
   
+  <java-symbol type="string" name="tethered_notification_no_device_message" />
+  <java-symbol type="string" name="tethered_notification_one_device_message" />
+  <java-symbol type="string" name="tethered_notification_multi_device_message" />
+
+  <!-- config softap extention feature -->
+  <java-symbol type="bool" name="config_softap_extention" />
+  
 </resources>

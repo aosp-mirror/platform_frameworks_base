@@ -2036,4 +2036,13 @@
 
     <!-- Whether to start in touch mode -->
     <bool name="config_defaultInTouchMode">true</bool>
+
+    <!-- Configuration that determines if ACTIVATE_REJECT_GGSN is to be treated as
+     a permanent error -->
+    <bool name="config_reject_ggsn_perm_failure">true</bool>
+ 
+    <!-- Configuration that determines if PROTOCOL_ERRORS is to be treated as a
+    permanent error -->
+    <bool name="config_protocol_errors_perm_failure">true</bool>
+
 </resources>

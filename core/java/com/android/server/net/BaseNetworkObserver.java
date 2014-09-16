@@ -63,6 +63,11 @@ public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
     }
 
     @Override
+    public void interfaceMessageRecevied(String message) {
+        // default no-op
+    }
+
+    @Override
     public void limitReached(String limitName, String iface) {
         // default no-op
     }
