@@ -27,11 +27,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -499,7 +501,19 @@ public class LockPatternUtils {
      * @return true if lock screen is can be disabled
      */
     public boolean isLockScreenDisabled() {
-        return !isSecure() && getLong(DISABLE_LOCKSCREEN_KEY, 0) != 0;
+        if (!isSecure() && getLong(DISABLE_LOCKSCREEN_KEY, 0) != 0) {
+            // Check if the number of switchable users forces the lockscreen.
+            final List<UserInfo> users = UserManager.get(mContext).getUsers(true);
+            final int userCount = users.size();
+            int switchableUsers = 0;
+            for (int i = 0; i < userCount; i++) {
+                if (users.get(i).supportsSwitchTo()) {
+                    switchableUsers++;
+                }
+            }
+            return switchableUsers < 2;
+        }
+        return false;
     }
 
     /**
