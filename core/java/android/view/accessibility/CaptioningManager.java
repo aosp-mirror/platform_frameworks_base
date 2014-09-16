@@ -330,15 +330,30 @@ public class CaptioningManager {
          */
         public final String mRawTypeface;
 
+        private final boolean mHasForegroundColor;
+        private final boolean mHasBackgroundColor;
+        private final boolean mHasEdgeType;
+        private final boolean mHasEdgeColor;
+        private final boolean mHasWindowColor;
+
+        /** Lazily-created typeface based on the raw typeface string. */
         private Typeface mParsedTypeface;
 
         private CaptionStyle(int foregroundColor, int backgroundColor, int edgeType, int edgeColor,
                 int windowColor, String rawTypeface) {
-            this.foregroundColor = foregroundColor;
-            this.backgroundColor = backgroundColor;
-            this.edgeType = edgeType;
-            this.edgeColor = edgeColor;
-            this.windowColor = windowColor;
+            mHasForegroundColor = foregroundColor != COLOR_UNSPECIFIED;
+            mHasBackgroundColor = backgroundColor != COLOR_UNSPECIFIED;
+            mHasEdgeType = edgeType != EDGE_TYPE_UNSPECIFIED;
+            mHasEdgeColor = edgeColor != COLOR_UNSPECIFIED;
+            mHasWindowColor = windowColor != COLOR_UNSPECIFIED;
+
+            // Always use valid colors, even when no override is specified, to
+            // ensure backwards compatibility with apps targeting KitKat MR2.
+            this.foregroundColor = mHasForegroundColor ? foregroundColor : Color.WHITE;
+            this.backgroundColor = mHasBackgroundColor ? backgroundColor : Color.BLACK;
+            this.edgeType = mHasEdgeType ? edgeType : EDGE_TYPE_NONE;
+            this.edgeColor = mHasEdgeColor ? edgeColor : Color.BLACK;
+            this.windowColor = mHasWindowColor ? windowColor : COLOR_NONE_OPAQUE;
 
             mRawTypeface = rawTypeface;
         }
@@ -375,7 +390,7 @@ public class CaptioningManager {
          *         otherwise
          */
         public boolean hasBackgroundColor() {
-            return backgroundColor != COLOR_UNSPECIFIED;
+            return mHasBackgroundColor;
         }
 
         /**
@@ -384,7 +399,7 @@ public class CaptioningManager {
          *         otherwise
          */
         public boolean hasForegroundColor() {
-            return foregroundColor != COLOR_UNSPECIFIED;
+            return mHasForegroundColor;
         }
 
         /**
@@ -393,7 +408,7 @@ public class CaptioningManager {
          *         otherwise
          */
         public boolean hasEdgeType() {
-            return edgeType != EDGE_TYPE_UNSPECIFIED;
+            return mHasEdgeType;
         }
 
         /**
@@ -402,7 +417,7 @@ public class CaptioningManager {
          *         otherwise
          */
         public boolean hasEdgeColor() {
-            return edgeColor != COLOR_UNSPECIFIED;
+            return mHasEdgeColor;
         }
 
         /**
@@ -411,7 +426,7 @@ public class CaptioningManager {
          *         otherwise
          */
         public boolean hasWindowColor() {
-            return windowColor != COLOR_UNSPECIFIED;
+            return mHasWindowColor;
         }
 
         /**
