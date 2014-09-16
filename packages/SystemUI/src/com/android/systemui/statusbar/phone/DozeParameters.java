@@ -57,6 +57,7 @@ public class DozeParameters {
         pw.print("    getPulseOnNotifications(): "); pw.println(getPulseOnNotifications());
         pw.print("    getPulseSchedule(): "); pw.println(getPulseSchedule());
         pw.print("    getPulseScheduleResets(): "); pw.println(getPulseScheduleResets());
+        pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
     }
 
     public boolean getDisplayStateSupported() {
@@ -109,6 +110,10 @@ public class DozeParameters {
 
     public int getPulseScheduleResets() {
         return getInt("doze.pulse.schedule.resets", R.integer.doze_pulse_schedule_resets);
+    }
+
+    public int getPickupVibrationThreshold() {
+        return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
     }
 
     private boolean getBoolean(String propName, int resId) {
