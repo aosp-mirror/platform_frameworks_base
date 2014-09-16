@@ -27,6 +27,8 @@
         <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
         <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
 
+        <item name="android:listDivider">@*android:drawable/list_divider_material</item>
+
         <item name="android:windowActionBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowNoTitle">true</item>
