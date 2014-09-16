@@ -95,7 +95,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
         mTitle = toolbar.getTitle();
         mSubtitle = toolbar.getSubtitle();
-        mTitleSet = !TextUtils.isEmpty(mTitle);
+        mTitleSet = mTitle != null;
 
         if (style) {
             final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
