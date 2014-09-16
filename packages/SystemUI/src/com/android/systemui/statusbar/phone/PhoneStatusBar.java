@@ -316,8 +316,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int[] mPositionTmp = new int[2];
     boolean mExpandedVisible;
 
-    // on-screen navigation buttons
-    private NavigationBarView mNavigationBarView = null;
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
     // the tracker view
