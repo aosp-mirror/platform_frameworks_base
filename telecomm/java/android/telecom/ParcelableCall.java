@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.telephony.DisconnectCause;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,8 +35,7 @@ import com.android.internal.telecom.IVideoProvider;
 public final class ParcelableCall implements Parcelable {
     private final String mId;
     private final int mState;
-    private final int mDisconnectCauseCode;
-    private final String mDisconnectCauseMsg;
+    private final DisconnectCause mDisconnectCause;
     private final List<String> mCannedSmsResponses;
     private final int mCapabilities;
     private final int mProperties;
@@ -60,8 +58,7 @@ public final class ParcelableCall implements Parcelable {
     public ParcelableCall(
             String id,
             int state,
-            int disconnectCauseCode,
-            String disconnectCauseMsg,
+            DisconnectCause disconnectCause,
             List<String> cannedSmsResponses,
             int capabilities,
             int properties,
@@ -81,8 +78,7 @@ public final class ParcelableCall implements Parcelable {
             Bundle extras) {
         mId = id;
         mState = state;
-        mDisconnectCauseCode = disconnectCauseCode;
-        mDisconnectCauseMsg = disconnectCauseMsg;
+        mDisconnectCause = disconnectCause;
         mCannedSmsResponses = cannedSmsResponses;
         mCapabilities = capabilities;
         mProperties = properties;
@@ -113,19 +109,11 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /**
-     * Reason for disconnection, values are defined in {@link DisconnectCause}. Valid when call
-     * state is {@link CallState#DISCONNECTED}.
+     * Reason for disconnection, as described by {@link android.telecomm.DisconnectCause}. Valid
+     * when call state is {@link CallState#DISCONNECTED}.
      */
-    public int getDisconnectCauseCode() {
-        return mDisconnectCauseCode;
-    }
-
-    /**
-     * Further optional textual information about the reason for disconnection. Valid when call
-     * state is {@link CallState#DISCONNECTED}.
-     */
-    public String getDisconnectCauseMsg() {
-        return mDisconnectCauseMsg;
+    public DisconnectCause getDisconnectCause() {
+        return mDisconnectCause;
     }
 
     /**
@@ -252,8 +240,7 @@ public final class ParcelableCall implements Parcelable {
             ClassLoader classLoader = ParcelableCall.class.getClassLoader();
             String id = source.readString();
             int state = source.readInt();
-            int disconnectCauseCode = source.readInt();
-            String disconnectCauseMsg = source.readString();
+            DisconnectCause disconnectCause = source.readParcelable(classLoader);
             List<String> cannedSmsResponses = new ArrayList<>();
             source.readList(cannedSmsResponses, classLoader);
             int capabilities = source.readInt();
@@ -275,11 +262,27 @@ public final class ParcelableCall implements Parcelable {
             List<String> conferenceableCallIds = new ArrayList<>();
             source.readList(conferenceableCallIds, classLoader);
             Bundle extras = source.readParcelable(classLoader);
-            return new ParcelableCall(id, state, disconnectCauseCode, disconnectCauseMsg,
-                    cannedSmsResponses, capabilities, properties, connectTimeMillis, handle,
-                    handlePresentation, callerDisplayName, callerDisplayNamePresentation,
-                    gatewayInfo, accountHandle, videoCallProvider, parentCallId, childCallIds,
-                    statusHints, videoState, conferenceableCallIds, extras);
+            return new ParcelableCall(
+                    id,
+                    state,
+                    disconnectCause,
+                    cannedSmsResponses,
+                    capabilities,
+                    properties,
+                    connectTimeMillis,
+                    handle,
+                    handlePresentation,
+                    callerDisplayName,
+                    callerDisplayNamePresentation,
+                    gatewayInfo,
+                    accountHandle,
+                    videoCallProvider,
+                    parentCallId,
+                    childCallIds,
+                    statusHints,
+                    videoState,
+                    conferenceableCallIds,
+                    extras);
         }
 
         @Override
@@ -299,8 +302,7 @@ public final class ParcelableCall implements Parcelable {
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mId);
         destination.writeInt(mState);
-        destination.writeInt(mDisconnectCauseCode);
-        destination.writeString(mDisconnectCauseMsg);
+        destination.writeParcelable(mDisconnectCause, 0);
         destination.writeList(mCannedSmsResponses);
         destination.writeInt(mCapabilities);
         destination.writeInt(mProperties);

@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.DisconnectCause;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IConnectionService;
@@ -344,9 +343,9 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onDisconnected(Conference conference, int cause, String message) {
+        public void onDisconnected(Conference conference, DisconnectCause disconnectCause) {
             String id = mIdByConference.get(conference);
-            mAdapter.setDisconnected(id, cause, message);
+            mAdapter.setDisconnected(id, disconnectCause);
         }
 
         @Override
@@ -399,10 +398,10 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onDisconnected(Connection c, int cause, String message) {
+        public void onDisconnected(Connection c, DisconnectCause disconnectCause) {
             String id = mIdByConnection.get(c);
-            Log.d(this, "Adapter set disconnected %d %s", cause, message);
-            mAdapter.setDisconnected(id, cause, message);
+            Log.d(this, "Adapter set disconnected %d %s", disconnectCause);
+            mAdapter.setDisconnected(id, disconnectCause);
         }
 
         @Override
@@ -522,7 +521,8 @@ public abstract class ConnectionService extends Service {
                 : onCreateOutgoingConnection(callManagerAccount, request);
         Log.d(this, "createConnection, connection: %s", connection);
         if (connection == null) {
-            connection = Connection.createFailedConnection(DisconnectCause.OUTGOING_FAILURE, null);
+            connection = Connection.createFailedConnection(
+                    new DisconnectCause(DisconnectCause.ERROR));
         }
 
         if (connection.getState() != Connection.STATE_DISCONNECTED) {
@@ -555,7 +555,6 @@ public abstract class ConnectionService extends Service {
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
-                        connection.getDisconnectMessage(),
                         createConnectionIdList(connection.getConferenceableConnections())));
     }
 
@@ -836,7 +835,7 @@ public abstract class ConnectionService extends Service {
      *         making the connection.
      * @param request Details about the outgoing call.
      * @return The {@code Connection} object to satisfy this call, or the result of an invocation
-     *         of {@link Connection#createFailedConnection(int, String)} to not handle the call.
+     *         of {@link Connection#createFailedConnection(DisconnectCause)} to not handle the call.
      */
     public Connection onCreateOutgoingConnection(
             PhoneAccountHandle connectionManagerPhoneAccount,

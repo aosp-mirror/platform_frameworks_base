@@ -20,7 +20,6 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
-import android.telephony.DisconnectCause;
 
 import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IConnectionServiceAdapter;
@@ -107,14 +106,13 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setDisconnected(String callId, int disconnectCause,
-                String disconnectMessage) {
+        public void setDisconnected(String callId, DisconnectCause disconnectCause) {
             if (mConnectionById.containsKey(callId)) {
                 findConnectionForAction(callId, "setDisconnected")
-                        .setDisconnected(disconnectCause, disconnectMessage);
+                        .setDisconnected(disconnectCause);
             } else {
                 findConferenceForAction(callId, "setDisconnected")
-                        .setDisconnected(disconnectCause, disconnectMessage);
+                        .setDisconnected(disconnectCause);
             }
         }
 
@@ -351,8 +349,8 @@ final class RemoteConnectionService {
             });
             return connection;
         } catch (RemoteException e) {
-            return RemoteConnection
-                    .failure(DisconnectCause.ERROR_UNSPECIFIED, e.toString());
+            return RemoteConnection.failure(
+                    new DisconnectCause(DisconnectCause.ERROR, e.toString()));
         }
     }
 
