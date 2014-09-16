@@ -78,7 +78,7 @@ public final class AidGroup implements Parcelable {
     }
 
     /**
-     * @return the list of  AIDs in this group
+     * @return the list of AIDs in this group
      */
     public List<String> getAids() {
         return aids;
