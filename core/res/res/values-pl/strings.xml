@@ -1071,7 +1071,7 @@
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"godzinę temu"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godzin temu"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
   </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Ostatnie (<xliff:g id="COUNT">%d</xliff:g>) dni"</item>
@@ -1199,8 +1199,8 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otwórz w aplikacji %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edytuj w aplikacji %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Udostępnij w aplikacji"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Udostępnij w aplikacji %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Udostępnij przez"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Udostępnij przez %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Wybierz aplikację ekranu głównego"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Domyślne dla tej czynności"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Użyj innej aplikacji"</string>

@@ -1213,9 +1213,9 @@
     <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi.\n\nUnataka kuifunga?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> haijibu. Unataka kufunga?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Mchakato <xliff:g id="PROCESS">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli ya <xliff:g id="ACTIVITY">%1$s</xliff:g> haifanyi kazi.\n\nJe, ungependa kuifunga?"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> haifanyi kazi. Je, ungependa kuifunga?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> haufanyi kazi. \n\nJe, ungependa kuifunga?"</string>
     <string name="force_close" msgid="8346072094521265605">"Sawa"</string>
     <string name="report" msgid="4060218260984795706">"Ripoti"</string>
     <string name="wait" msgid="7147118217226317732">"Subiri"</string>

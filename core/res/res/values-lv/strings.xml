@@ -397,8 +397,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Ļauj īpašniekam izveidot savienojumu ar drukāšanas pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"izveidot savienojumu ar drukas spolētāja pakalpojumu"</string>
     <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Ļauj īpašniekam izveidot savienojumu ar drukas spolētāja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"Saistīt ar TDLS pakalpojumu"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Ļauj īpašniekam saistīt lietojumprogrammas, kas emulē TDLS kartes. Parastajām lietotnēm šī atļauja nav nepieciešama."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"Saistīt ar NFC pakalpojumu"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Ļauj īpašniekam saistīt lietojumprogrammas, kas emulē NFC kartes. Parastajām lietotnēm šī atļauja nav nepieciešama."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"saistīt ar īsziņu pakalpojumu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ļauj īpašniekam veikt saistīšanu ar īsziņu pakalpojuma augstākā līmeņa saskarni (piem., SpellCheckerService). Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"saistīt ar VPN pakalpojumu"</string>

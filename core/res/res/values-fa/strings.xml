@@ -1768,7 +1768,7 @@
     <string name="lock_to_app_title" msgid="1682643873107812874">"از پین کردن صفحه استفاده شود؟"</string>
     <string name="lock_to_app_description" msgid="9076084599283282800">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای خروج، کلیدهای بازگشت و برنامه‌های اخیر را همزمان لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای خروج، کلید برنامه‌های اخیر را لمس کنید و نگه دارید."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"نه، سپاسگزارم"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"خیر، سپاسگزارم"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"شروع"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"پین صفحه برداشته شد"</string>
