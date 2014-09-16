@@ -129,7 +129,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceBackgroundIndicator">?attr/selectableItemBackground</item>
         <item name="activatedBackgroundIndicator">@drawable/activated_background_material</item>
 
-        <item name="listDividerAlertDialog">@drawable/list_divider_material</item>
+        <item name="listDividerAlertDialog">@null</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">?attr/expandableListPreferredItemPaddingLeft</item>
@@ -481,7 +481,7 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredChildIndicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
 
-        <item name="listDividerAlertDialog">@drawable/list_divider_material</item>
+        <item name="listDividerAlertDialog">@null</item>
         <item name="findOnPageNextDrawable">@drawable/ic_find_next_material</item>
         <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_material</item>
 
@@ -1015,6 +1015,8 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemPaddingStart">16dip</item>
         <item name="listPreferredItemPaddingEnd">16dip</item>
 
+        <item name="listDivider">@null</item>
+
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
 
@@ -1126,6 +1128,8 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemPaddingRight">16dip</item>
         <item name="listPreferredItemPaddingStart">16dip</item>
         <item name="listPreferredItemPaddingEnd">16dip</item>
+
+        <item name="listDivider">@null</item>
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
