@@ -275,6 +275,23 @@ status_t DisplayListRenderer::drawRoundRect(float left, float top, float right, 
     return DrawGlInfo::kStatusDone;
 }
 
+status_t DisplayListRenderer::drawRoundRect(
+        CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+        CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+        CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+        CanvasPropertyPaint* paint) {
+    mDisplayListData->refProperty(left);
+    mDisplayListData->refProperty(top);
+    mDisplayListData->refProperty(right);
+    mDisplayListData->refProperty(bottom);
+    mDisplayListData->refProperty(rx);
+    mDisplayListData->refProperty(ry);
+    mDisplayListData->refProperty(paint);
+    addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
+            &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
+    return DrawGlInfo::kStatusDone;
+}
+
 status_t DisplayListRenderer::drawCircle(float x, float y, float radius, const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawCircleOp(x, y, radius, paint));
