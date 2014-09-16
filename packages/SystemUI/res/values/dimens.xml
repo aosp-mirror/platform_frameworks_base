@@ -292,7 +292,7 @@
     <dimen name="unlock_falsing_threshold">80dp</dimen>
 
     <!-- Lockscreen falsing threshold for quick settings. -->
-    <dimen name="qs_falsing_threshold">80dp</dimen>
+    <dimen name="qs_falsing_threshold">40dp</dimen>
 
     <!-- Falsing threshold used when dismissing notifications from the lockscreen. -->
     <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
@@ -492,4 +492,10 @@
 
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">95dp</dimen>
+    
+    <!-- Inset shadow for FakeShadowDrawable. It is used to avoid gaps between the card
+         and the shadow. -->
+    <dimen name="fake_shadow_inset">1dp</dimen>
+
+    <dimen name="fake_shadow_size">8dp</dimen>
 </resources>
