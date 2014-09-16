@@ -82,7 +82,7 @@ public class PackageInstaller {
      * may surface actions such as pause, resume, or cancel.
      * <p>
      * This should always be scoped to the installer package that owns the
-     * session. Clients should use {@link SessionInfo#getDetailsIntent()} to
+     * session. Clients should use {@link SessionInfo#createDetailsIntent()} to
      * build this intent correctly.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
@@ -1174,12 +1174,18 @@ public class PackageInstaller {
          *
          * @see PackageInstaller#ACTION_SESSION_DETAILS
          */
-        public @Nullable Intent getDetailsIntent() {
+        public @Nullable Intent createDetailsIntent() {
             final Intent intent = new Intent(PackageInstaller.ACTION_SESSION_DETAILS);
             intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
             intent.setPackage(installerPackageName);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             return intent;
+        }
+
+        /** {@hide} */
+        @Deprecated
+        public @Nullable Intent getDetailsIntent() {
+            return createDetailsIntent();
         }
 
         @Override
