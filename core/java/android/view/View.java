@@ -2400,6 +2400,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_NESTED_SCROLLING_ENABLED = 0x80;
 
+    /**
+     * Flag indicating that outline was invalidated and should be rebuilt the next time
+     * the DisplayList is updated.
+     */
+    static final int PFLAG3_OUTLINE_INVALID = 0x100;
+
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
@@ -11079,6 +11085,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setOutlineProvider(ViewOutlineProvider)
      */
     public void invalidateOutline() {
+        mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
+
+        notifySubtreeAccessibilityStateChangedIfNeeded();
+        invalidateViewProperty(false, false);
+    }
+
+    /**
+     * Internal version of {@link #invalidateOutline()} which invalidates the
+     * outline without invalidating the view itself. This is intended to be called from
+     * within methods in the View class itself which are the result of the view being
+     * invalidated already. For example, when we are drawing the background of a View,
+     * we invalidate the outline in case it changed in the meantime, but we do not
+     * need to invalidate the view because we're already drawing the background as part
+     * of drawing the view in response to an earlier invalidation of the view.
+     */
+    private void rebuildOutline() {
         // Unattached views ignore this signal, and outline is recomputed in onAttachedToWindow()
         if (mAttachInfo == null) return;
 
@@ -11093,9 +11115,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mOutlineProvider.getOutline(this, outline);
             mRenderNode.setOutline(outline);
         }
-
-        notifySubtreeAccessibilityStateChangedIfNeeded();
-        invalidateViewProperty(false, false);
     }
 
     /**
@@ -12936,7 +12955,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         resetSubtreeAccessibilityStateChanged();
 
-        invalidateOutline();
+        // rebuild, since Outline not maintained while View is detached
+        rebuildOutline();
 
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -14656,6 +14676,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     void setDisplayListProperties(RenderNode renderNode) {
         if (renderNode != null) {
+            if ((mPrivateFlags3 & PFLAG3_OUTLINE_INVALID) != 0) {
+                rebuildOutline();
+                mPrivateFlags3 &= ~PFLAG3_OUTLINE_INVALID;
+            }
             renderNode.setHasOverlappingRendering(hasOverlappingRendering());
             if (mParent instanceof ViewGroup) {
                 renderNode.setClipToBounds(
@@ -15305,7 +15329,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
-            invalidateOutline();
+            mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
         }
 
         // Attempt to use a display list if requested.
@@ -15680,7 +15704,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mOverlay.getOverlayView().setRight(newWidth);
             mOverlay.getOverlayView().setBottom(newHeight);
         }
-        invalidateOutline();
+        mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
     }
 
     /**
@@ -15717,7 +15741,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(dirty.left + scrollX, dirty.top + scrollY,
                     dirty.right + scrollX, dirty.bottom + scrollY);
 
-            invalidateOutline();
+            mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
         }
     }
 
