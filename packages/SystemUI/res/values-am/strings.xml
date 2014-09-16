@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"በ GPS የተዘጋጀ ሥፍራ"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"የአካባቢ ጥያቄዎች ነቅተዋል"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ሁሉንም ማሳወቂያዎች አጽዳ"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"የማሳወቂያ ቅንብሮች"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"የ<xliff:g id="APP_NAME">%s</xliff:g> ቅንብሮች"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ማያ ገጽ በራስ ሰር ይዞራል።"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ማያ ገጽ በወርድ ገፅ አቀማመጥ ተቆልፏል።"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ማያ ገጽ በቁም ገፅ አቀማመጥ ተቆልፏል።"</string>
@@ -301,14 +299,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"ለማስከፈት ወደ ላይ ያንሸራትቱ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ለስልክ ወደቀኝ ያንሸራትቱ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ለካሜራ ወደግራ ያንሸራትቱ"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"ያለገደብ"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"ምንም"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"ቅድሚያ"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"ሁሉም"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ሃይል በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> እስከሚሞላ ድረስ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ተጠቃሚ ቀይር"</string>
-    <!-- no translation found for accessibility_multi_user_switch_switcher_with_current (8434880595284601601) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ተጠቃሚ ይለውጡ፣ የአሁን ተጠቃሚ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"መገለጫ አሳይ"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ተጠቃሚ አክል"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"አዲስ ተጠቃሚ"</string>
@@ -322,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"ክፍለ-ጊዜዎን መቀጠል ይፈልጋሉ?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"እንደገና ጀምር"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"አዎ፣ ቀጥል"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ለአንድ ደቂቃ"</item>
-    <item quantity="other" msgid="6924190729213550991">"ለ%d ደቂቃዎች"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ለአንድ ሰዓት"</item>
-    <item quantity="other" msgid="5408537517529822157">"ለ%d ሰዓቶች"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"አዲስ ተጠቃሚ ይታከል?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"የባትሪ ኃይል ቆጣቢ በርቷል"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"አፈጻጸምን እና የጀርባ ውሂብ ይቀንሳል"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ባትሪ ቆጣቢን አጥፋ"</string>

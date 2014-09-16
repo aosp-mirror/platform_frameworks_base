@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"IU sistema"</string>
+    <string name="app_label" msgid="7164937344850004466">"Interfaz de usuario del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
@@ -144,7 +144,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Tipo Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Sin tarjeta SIM"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Anclaje de Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Anclaje por Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> por ciento de batería"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Ajustes del sistema"</string>
@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ubicación definida por GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ajustes de notificaciones"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Ajustes de <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla está bloqueada en modo vertical."</string>
@@ -301,11 +299,10 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Desliza el dedo hacia arriba para desbloquear"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Desliza el dedo hacia la izquierda para acceder al teléfono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Desliza el dedo hacia la izquierda para acceder a la cámara"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
-    <string name="interruption_level_none" msgid="3831278883136066646">"Ninguno"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Nada"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioridad"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Todo"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hasta completar)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para completar)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Cambiar de usuario"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Cambiar de usuario (usuario actual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Mostrar perfil"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"¿Quieres continuar con la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sí, continuar"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Durante un minuto"</item>
-    <item quantity="other" msgid="6924190729213550991">"Durante %d minutos"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Durante una hora"</item>
-    <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"¿Añadir usuario nuevo?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Al añadir un usuario nuevo, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y el envío de datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactivar ahorro de batería"</string>
