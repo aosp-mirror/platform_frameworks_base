@@ -202,24 +202,31 @@ public class RippleDrawable extends LayerDrawable {
     public void jumpToCurrentState() {
         super.jumpToCurrentState();
 
+        boolean needsDraw = false;
+
         if (mRipple != null) {
+            needsDraw |= mRipple.isHardwareAnimating();
             mRipple.jump();
         }
 
         if (mBackground != null) {
+            needsDraw |= mBackground.isHardwareAnimating();
             mBackground.jump();
         }
 
-        cancelExitingRipples();
+        needsDraw |= cancelExitingRipples();
 
-        mNeedsDraw = true;
+        mNeedsDraw = needsDraw;
         invalidateSelf();
     }
 
-    private void cancelExitingRipples() {
+    private boolean cancelExitingRipples() {
+        boolean needsDraw = false;
+
         final int count = mExitingRipplesCount;
         final Ripple[] ripples = mExitingRipples;
         for (int i = 0; i < count; i++) {
+            needsDraw |= ripples[i].isHardwareAnimating();
             ripples[i].cancel();
         }
 
@@ -227,6 +234,8 @@ public class RippleDrawable extends LayerDrawable {
             Arrays.fill(ripples, 0, count, null);
         }
         mExitingRipplesCount = 0;
+
+        return needsDraw;
     }
 
     @Override
@@ -546,19 +555,23 @@ public class RippleDrawable extends LayerDrawable {
      * background. Nothing will be drawn after this method is called.
      */
     private void clearHotspots() {
+        boolean needsDraw = false;
+
         if (mRipple != null) {
+            needsDraw |= mRipple.isHardwareAnimating();
             mRipple.cancel();
             mRipple = null;
         }
 
         if (mBackground != null) {
+            needsDraw |= mBackground.isHardwareAnimating();
             mBackground.cancel();
             mBackground = null;
         }
 
-        cancelExitingRipples();
+        needsDraw |= cancelExitingRipples();
 
-        mNeedsDraw = true;
+        mNeedsDraw = needsDraw;
         invalidateSelf();
     }
 
@@ -657,6 +670,10 @@ public class RippleDrawable extends LayerDrawable {
         // least draw a color so that hardware invalidation works correctly.
         if (contentLayer < 0 && backgroundLayer < 0 && rippleLayer < 0 && mNeedsDraw) {
             canvas.drawColor(Color.TRANSPARENT);
+
+            // Request another draw so we can avoid adding a transparent layer
+            // during the next display list refresh.
+            invalidateSelf();
         }
         mNeedsDraw = false;
 
