@@ -93,7 +93,7 @@ interface ITelephony {
      * TODO: this should be a oneway call (especially since it's called
      * directly from the key queue thread).
      */
-    void answerRingingCallUsingSubId(long subId);
+    void answerRingingCallForSubscriber(long subId);
 
     /**
      * Silence the ringer if an incoming call is currently ringing.
