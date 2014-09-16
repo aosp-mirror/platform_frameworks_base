@@ -502,6 +502,11 @@ public class DatePicker extends FrameLayout {
                 mValidationCallback.onValidationChanged(valid);
             }
         }
+
+        @Override
+        public void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
+            mDelegator.dispatchThawSelfOnly(container);
+        }
     }
 
     /**
