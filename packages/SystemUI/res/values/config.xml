@@ -203,6 +203,9 @@
     <!-- Doze: maximum number of times the notification pulse schedule can be reset -->
     <integer name="doze_pulse_schedule_resets">3</integer>
 
+    <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
+    <integer name="doze_pickup_vibration_threshold">2000</integer>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">1000</integer>
 
