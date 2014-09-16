@@ -239,16 +239,9 @@
         <item name="android:textColor">#60000000</item>
     </style>
 
-    <style name="SearchPanelCard">
+    <style name="SearchPanelCircle">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/search_panel_card_height</item>
-        <item name="android:layout_marginStart">8dp</item>
-        <item name="android:layout_marginEnd">8dp</item>
-        <item name="android:layout_gravity">bottom</item>
-    </style>
-
-    <style name="SearchPanelLogo">
-        <item name="android:layout_gravity">top|center_horizontal</item>
+        <item name="android:layout_height">match_parent</item>
     </style>
 
     <style name="SearchPanelScrim">

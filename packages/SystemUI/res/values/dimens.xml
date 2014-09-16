@@ -434,15 +434,20 @@
          from Keyguard. -->
     <dimen name="go_to_full_shade_appearing_translation">200dp</dimen>
 
-    <!-- The height of the search panel card. -->
-    <dimen name="search_panel_card_height">300dp</dimen>
+    <!-- The diameter of the search panel circle. -->
+    <dimen name="search_panel_circle_size">88dp</dimen>
 
-    <!-- The height of the scrim behind the search panel card. -->
+    <!-- The margin to the edge of the screen from where the circle starts to appear -->
+    <dimen name="search_panel_circle_base_margin">80dp</dimen>
+
+    <!-- The amount the circle translates when appearing -->
+    <dimen name="search_panel_circle_travel_distance">80dp</dimen>
+
+    <!-- The elevation of the search panel circle -->
+    <dimen name="search_panel_circle_elevation">12dp</dimen>
+
+    <!-- The height of the scrim behind the search panel circle. -->
     <dimen name="search_panel_scrim_height">250dp</dimen>
-
-    <!-- How much from the bottom of the screen the card should peek in when activating the search
-         panel -->
-    <dimen name="search_card_peek_height">100dp</dimen>
 
     <!-- How far the user needs to drag up to invoke search. -->
     <dimen name="search_panel_threshold">100dp</dimen>
