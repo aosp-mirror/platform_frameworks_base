@@ -129,20 +129,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         if (!mDozing) {
             cancelPulsing();
             mAnimateChange = true;
+        } else {
+            mAnimateChange = false;
         }
         scheduleUpdate();
     }
 
     /** When dozing, fade screen contents in and out using the front scrim. */
-    public long pulse(boolean delayed) {
+    public long pulse() {
         if (!mDozing) return 0;
         final long now = System.currentTimeMillis();
-        if (DEBUG) Log.d(TAG, "pulse delayed=" + delayed + " mPulseEndTime=" + mPulseEndTime
-                + " now=" + now);
+        if (DEBUG) Log.d(TAG, "pulse mPulseEndTime=" + mPulseEndTime + " now=" + now);
         if (mPulseEndTime != 0 && mPulseEndTime > now) return mPulseEndTime - now;
-        final long delay = delayed ? mDozeParameters.getPulseStartDelay() : 0;
-        mScrimInFront.postDelayed(mPulseIn, delay);
-        mPulseEndTime = now + delay + mDozeParameters.getPulseDuration();
+        mScrimInFront.post(mPulseIn);
+        mPulseEndTime = now + mDozeParameters.getPulseDuration();
         return mPulseEndTime - now;
     }
 
