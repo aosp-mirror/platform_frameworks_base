@@ -36,4 +36,5 @@ interface INfcCardEmulation
     List<ApduServiceInfo> getServices(int userHandle, in String category);
     boolean setPreferredService(in ComponentName service);
     boolean unsetPreferredService();
+    boolean supportsAidPrefixRegistration();
 }
