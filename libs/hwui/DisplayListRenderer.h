@@ -123,6 +123,10 @@ public:
     virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint* paint);
+    virtual status_t drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+                CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+                CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+                CanvasPropertyPaint* paint);
     virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint);
     virtual status_t drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
                 CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
