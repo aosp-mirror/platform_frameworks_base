@@ -864,7 +864,8 @@
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
 
-    <!-- @SystemApi Allows applications to pair bluetooth devices without user interaction.
+    <!-- @SystemApi Allows applications to pair bluetooth devices without user interaction, and to
+         allow or disallow phonebook access or message access.
          This is not available to third party applications. -->
     <permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
         android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
