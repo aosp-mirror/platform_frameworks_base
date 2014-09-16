@@ -139,6 +139,10 @@ class Ripple {
         clampStartingPosition();
     }
 
+    public boolean isHardwareAnimating() {
+        return mHardwareAnimating;
+    }
+
     private void clampStartingPosition() {
         final float cX = mBounds.exactCenterX();
         final float cY = mBounds.exactCenterY();
