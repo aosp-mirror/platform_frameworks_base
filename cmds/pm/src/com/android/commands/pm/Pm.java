@@ -1702,7 +1702,11 @@ public final class Pm {
         }
 
         public Intent getResult() {
-            return mResult.poll();
+            try {
+                return mResult.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
