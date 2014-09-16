@@ -1993,6 +1993,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             if ((isActive && gotCapab) || (becameActive && hasCapab)) {
                 if (hasCapab && capabChanged) {
                     updatePrintAttributesFromCapabilities(newCapab);
+                    updatePrintPreviewController(false);
                 }
                 onPrinterAvailable(newPrinterState);
             } else if ((becameInactive && hasCapab) || (isActive && lostCapab)) {
