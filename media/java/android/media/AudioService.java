@@ -666,6 +666,9 @@ public class AudioService extends IAudioService.Stub {
         if (mHdmiManager != null) {
             synchronized (mHdmiManager) {
                 mHdmiTvClient = mHdmiManager.getTvClient();
+                if (mHdmiTvClient != null) {
+                    mFixedVolumeDevices &= ~AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER;
+                }
                 mHdmiPlaybackClient = mHdmiManager.getPlaybackClient();
                 mHdmiCecSink = false;
             }
@@ -3089,8 +3092,15 @@ public class AudioService extends IAudioService.Stub {
             //  - one A2DP device + another device: happens with duplicated output. In this case
             // retain the device on the A2DP output as the other must not correspond to an active
             // selection if not the speaker.
+            //  - HDMI-CEC system audio mode only output: give priority to available item in order.
             if ((device & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
                 device = AudioSystem.DEVICE_OUT_SPEAKER;
+            } else if ((device & AudioSystem.DEVICE_OUT_HDMI_ARC) != 0) {
+                device = AudioSystem.DEVICE_OUT_HDMI_ARC;
+            } else if ((device & AudioSystem.DEVICE_OUT_SPDIF) != 0) {
+                device = AudioSystem.DEVICE_OUT_SPDIF;
+            } else if ((device & AudioSystem.DEVICE_OUT_AUX_LINE) != 0) {
+                device = AudioSystem.DEVICE_OUT_AUX_LINE;
             } else {
                 device &= AudioSystem.DEVICE_OUT_ALL_A2DP;
             }
