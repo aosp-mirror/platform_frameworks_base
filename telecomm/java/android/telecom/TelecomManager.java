@@ -673,10 +673,6 @@ public class TelecomManager {
      * {@link TelephonyManager#CALL_STATE_RINGING}
      * {@link TelephonyManager#CALL_STATE_OFFHOOK}
      * {@link TelephonyManager#CALL_STATE_IDLE}
-     *
-     * <p>
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
-     * </p>
      * @hide
      */
     @SystemApi
