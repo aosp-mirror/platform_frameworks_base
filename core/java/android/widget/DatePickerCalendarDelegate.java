@@ -529,11 +529,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     }
 
     @Override
-    public void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        // Nothing to do
-    }
-
-    @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
         final int year = mCurrentDate.get(Calendar.YEAR);
         final int month = mCurrentDate.get(Calendar.MONTH);
@@ -557,7 +552,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     public void onRestoreInstanceState(Parcelable state) {
         SavedState ss = (SavedState) state;
 
-        mCurrentDate.set(ss.getSelectedDay(), ss.getSelectedMonth(), ss.getSelectedYear());
+        mCurrentDate.set(ss.getSelectedYear(), ss.getSelectedMonth(), ss.getSelectedDay());
         mCurrentView = ss.getCurrentView();
         mMinDate.setTimeInMillis(ss.getMinDate());
         mMaxDate.setTimeInMillis(ss.getMaxDate());
