@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.hardware.input.InputManager;
@@ -32,11 +33,14 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.HapticFeedbackConstants;
+import android.view.HardwareCanvas;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.RenderNodeAnimator;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -44,6 +48,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import java.lang.Math;
+import java.util.ArrayList;
 
 import com.android.systemui.R;
 
@@ -56,22 +61,15 @@ public class KeyButtonView extends ImageView {
 
     // TODO: Get rid of this
     public static final float DEFAULT_QUIESCENT_ALPHA = 1f;
-    public static final float MAX_ALPHA = 0.15f;
-    public static final float GLOW_MAX_SCALE_FACTOR = 1.5f;
 
     private long mDownTime;
     private int mCode;
     private int mTouchSlop;
-    private float mGlowAlpha = 0f;
-    private float mGlowScale = 1f;
     private float mDrawingAlpha = 1f;
     private float mQuiescentAlpha = DEFAULT_QUIESCENT_ALPHA;
     private boolean mSupportsLongpress = true;
-    private AnimatorSet mPressedAnim;
-    private Animator mAnimateToQuiescent = new ObjectAnimator();
-    private Paint mRipplePaint;
-    private final TimeInterpolator mInterpolator = (TimeInterpolator) new LogInterpolator();
     private AudioManager mAudioManager;
+    private Animator mAnimateToQuiescent = new ObjectAnimator();
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -110,6 +108,7 @@ public class KeyButtonView extends ImageView {
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        setBackground(new KeyButtonRipple(context, this));
     }
 
     @Override
@@ -141,38 +140,6 @@ public class KeyButtonView extends ImageView {
         return super.performAccessibilityAction(action, arguments);
     }
 
-    private Paint getRipplePaint() {
-        if (mRipplePaint == null) {
-            mRipplePaint = new Paint();
-            mRipplePaint.setAntiAlias(true);
-            mRipplePaint.setColor(0xffffffff);
-        }
-        return mRipplePaint;
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        final Paint p = getRipplePaint();
-        p.setAlpha((int)(MAX_ALPHA * mDrawingAlpha * mGlowAlpha * 255));
-
-        final float w = getWidth();
-        final float h = getHeight();
-        final boolean horizontal = w > h;
-        final float diameter = (horizontal ? w : h) * mGlowScale;
-        final float radius = diameter * .5f;
-        final float cx = w * .5f;
-        final float cy = h * .5f;
-        final float rx = horizontal ? radius : cx;
-        final float ry = horizontal ? cy : radius;
-        final float corner = horizontal ? cy : cx;
-
-        canvas.drawRoundRect(cx - rx, cy - ry,
-                             cx + rx, cy + ry,
-                             corner, corner, p);
-
-        super.onDraw(canvas);
-    }
-
     public void setQuiescentAlpha(float alpha, boolean animate) {
         mAnimateToQuiescent.cancel();
         alpha = Math.min(Math.max(alpha, 0), 1);
@@ -202,76 +169,6 @@ public class KeyButtonView extends ImageView {
     public void setDrawingAlpha(float x) {
         setImageAlpha((int) (x * 255));
         mDrawingAlpha = x;
-    }
-
-    public float getGlowAlpha() {
-        return mGlowAlpha;
-    }
-
-    public void setGlowAlpha(float x) {
-        mGlowAlpha = x;
-        invalidate();
-    }
-
-    public float getGlowScale() {
-        return mGlowScale;
-    }
-
-    public void setGlowScale(float x) {
-        mGlowScale = x;
-        final float w = getWidth();
-        final float h = getHeight();
-        if (GLOW_MAX_SCALE_FACTOR <= 1.0f) {
-            // this only works if we know the glow will never leave our bounds
-            invalidate();
-        } else {
-            final float rx = (w * (GLOW_MAX_SCALE_FACTOR - 1.0f)) / 2.0f + 1.0f;
-            final float ry = (h * (GLOW_MAX_SCALE_FACTOR - 1.0f)) / 2.0f + 1.0f;
-            com.android.systemui.SwipeHelper.invalidateGlobalRegion(
-                    this,
-                    new RectF(getLeft() - rx,
-                              getTop() - ry,
-                              getRight() + rx,
-                              getBottom() + ry));
-
-            // also invalidate our immediate parent to help avoid situations where nearby glows
-            // interfere
-            ((View)getParent()).invalidate();
-        }
-    }
-
-    public void setPressed(boolean pressed) {
-        if (pressed != isPressed()) {
-            if (mPressedAnim != null && mPressedAnim.isRunning()) {
-                mPressedAnim.cancel();
-            }
-            final AnimatorSet as = mPressedAnim = new AnimatorSet();
-            final ObjectAnimator scaleAnimator = ObjectAnimator.ofFloat(this,
-                    "glowScale", GLOW_MAX_SCALE_FACTOR);
-            scaleAnimator.setInterpolator(mInterpolator);
-            if (pressed) {
-                mGlowScale = 0f;
-                if (mGlowAlpha < mQuiescentAlpha)
-                    mGlowAlpha = mQuiescentAlpha;
-                setDrawingAlpha(1f);
-                as.playTogether(
-                    ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
-                    scaleAnimator
-                );
-                as.setDuration(500);
-            } else {
-                mAnimateToQuiescent.cancel();
-                mAnimateToQuiescent = animateToQuiescent();
-                as.playTogether(
-                    ObjectAnimator.ofFloat(this, "glowAlpha", mGlowAlpha, mGlowAlpha * .2f, 0f),
-                    scaleAnimator,
-                    mAnimateToQuiescent
-                );
-                as.setDuration(500);
-            }
-            as.start();
-        }
-        super.setPressed(pressed);
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
@@ -354,17 +251,6 @@ public class KeyButtonView extends ImageView {
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
-
-    /**
-    * Interpolator with a smooth log deceleration
-    */
-    private static final class LogInterpolator implements TimeInterpolator {
-        @Override
-        public float getInterpolation(float input) {
-            return 1 - (float) Math.pow(400, -input * 1.4);
-        }
-    }
-
 }
 
 

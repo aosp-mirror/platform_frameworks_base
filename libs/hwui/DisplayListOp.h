@@ -1105,6 +1105,34 @@ private:
     float mRy;
 };
 
+class DrawRoundRectPropsOp : public DrawOp {
+public:
+    DrawRoundRectPropsOp(float* left, float* top, float* right, float* bottom,
+            float *rx, float *ry, const SkPaint* paint)
+            : DrawOp(paint), mLeft(left), mTop(top), mRight(right), mBottom(bottom),
+            mRx(rx), mRy(ry) {}
+
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
+        return renderer.drawRoundRect(*mLeft, *mTop, *mRight, *mBottom,
+                *mRx, *mRy, getPaint(renderer));
+    }
+
+    virtual void output(int level, uint32_t logFlags) const {
+        OP_LOG("Draw RoundRect Props " RECT_STRING ", rx %f, ry %f",
+                *mLeft, *mTop, *mRight, *mBottom, *mRx, *mRy);
+    }
+
+    virtual const char* name() { return "DrawRoundRectProps"; }
+
+private:
+    float* mLeft;
+    float* mTop;
+    float* mRight;
+    float* mBottom;
+    float* mRx;
+    float* mRy;
+};
+
 class DrawCircleOp : public DrawStrokableOp {
 public:
     DrawCircleOp(float x, float y, float radius, const SkPaint* paint)
