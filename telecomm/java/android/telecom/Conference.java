@@ -45,6 +45,7 @@ public abstract class Conference {
             Collections.unmodifiableList(mChildConnections);
 
     private PhoneAccountHandle mPhoneAccount;
+    private AudioState mAudioState;
     private int mState = Connection.STATE_NEW;
     private int mDisconnectCause = DisconnectCause.NOT_VALID;
     private int mCapabilities;
@@ -96,6 +97,15 @@ public abstract class Conference {
     }
 
     /**
+     * @return The audio state of the conference, describing how its audio is currently
+     *         being routed by the system. This is {@code null} if this Conference
+     *         does not directly know about its audio state.
+     */
+    public final AudioState getAudioState() {
+        return mAudioState;
+    }
+
+    /**
      * Invoked when the Conference and all it's {@link Connection}s should be disconnected.
      */
     public void onDisconnect() {}
@@ -128,6 +138,25 @@ public abstract class Conference {
      * capability {@link PhoneCapabilities#SWAP_CONFERENCE}.
      */
     public void onSwap() {}
+
+    /**
+     * Notifies this conference of a request to play a DTMF tone.
+     *
+     * @param c A DTMF character.
+     */
+    public void onPlayDtmfTone(char c) {}
+
+    /**
+     * Notifies this conference of a request to stop any currently playing DTMF tones.
+     */
+    public void onStopDtmfTone() {}
+
+    /**
+     * Notifies this conference that the {@link #getAudioState()} property has a new value.
+     *
+     * @param state The new call audio state.
+     */
+    public void onAudioStateChanged(AudioState state) {}
 
     /**
      * Sets state to be on hold.
@@ -253,6 +282,18 @@ public abstract class Conference {
     public final Conference removeListener(Listener listener) {
         mListeners.remove(listener);
         return this;
+    }
+
+    /**
+     * Inform this Conference that the state of its audio output has been changed externally.
+     *
+     * @param state The new audio state.
+     * @hide
+     */
+    final void setAudioState(AudioState state) {
+        Log.d(this, "setAudioState %s", state);
+        mAudioState = state;
+        onAudioStateChanged(state);
     }
 
     private void setState(int newState) {
