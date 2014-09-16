@@ -48,7 +48,9 @@ public class GhostView extends View {
             mView.mRecreateDisplayList = true;
             RenderNode renderNode = mView.getDisplayList();
             if (renderNode.isValid()) {
+                hwCanvas.insertReorderBarrier(); // enable shadow for this rendernode
                 hwCanvas.drawRenderNode(renderNode);
+                hwCanvas.insertInorderBarrier(); // re-disable reordering/shadows
             }
         }
     }
