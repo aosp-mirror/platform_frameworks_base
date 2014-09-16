@@ -8583,11 +8583,11 @@ package android.content.pm {
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
+    method public android.content.Intent createDetailsIntent();
     method public int describeContents();
     method public android.graphics.Bitmap getAppIcon();
     method public java.lang.CharSequence getAppLabel();
     method public java.lang.String getAppPackageName();
-    method public android.content.Intent getDetailsIntent();
     method public java.lang.String getInstallerPackageName();
     method public float getProgress();
     method public int getSessionId();
