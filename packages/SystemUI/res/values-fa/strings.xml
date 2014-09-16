@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏مکان تنظیم شده توسط GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"درخواست‌های موقعیت مکانی فعال است"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"تنظیمات اعلان"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"تنظیمات <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
@@ -233,7 +231,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"بلوتوث خاموش"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"هیچ دستگاه مرتبط شده‌ای موجود نیست"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"روشنایی"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"چرخش اتوماتیک"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"چرخش خودکار"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"چرخش قفل شد"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودی"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"افقی"</string>
@@ -301,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"برای باز کردن قفل سریع به بالا بکشید"</string>
     <string name="phone_hint" msgid="3101468054914424646">"برای تلفن انگشت را تند به سمت چپ بکشید"</string>
     <string name="camera_hint" msgid="5241441720959174226">"برای دوربین انگشت را تند به سمت راست بکشید"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"نامحدود"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"هیچ‌کدام"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"اولویت"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"همه"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"آیا می‌خواهید جلسه‌تان را ادامه دهید؟"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"شروع مجدد"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"بله، ادامه داده شود"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"برای یک دقیقه"</item>
-    <item quantity="other" msgid="6924190729213550991">"‏برای %d دقیقه"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"برای یک ساعت"</item>
-    <item quantity="other" msgid="5408537517529822157">"‏برای %d ساعت"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"کاربر جدیدی اضافه می‌کنید؟"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"وقتی کاربر جدیدی را اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ذخیره کننده باتری روشن است."</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"عملکرد و اطلاعات پس‌زمینه را کاهش می‌دهد"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"خاموش کردن ذخیره‌کننده باتری"</string>

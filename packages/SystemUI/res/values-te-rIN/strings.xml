@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"స్థానం GPS ద్వారా సెట్ చేయబడింది"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"స్థాన అభ్యర్థనలు సక్రియంగా ఉన్నాయి"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"నోటిఫికేషన్ సెట్టింగ్‌లు"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> సెట్టింగ్‌లు"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"స్క్రీన్ స్వయంచాలకంగా తిప్పబడుతుంది."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"స్క్రీన్ ల్యాండ్‌స్కేప్ దృగ్విన్యాసంలో లాక్ చేయబడుతుంది."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"స్క్రీన్ పోర్ట్రెయిట్ దృగ్విన్యాసంలో లాక్ చేయబడుతుంది."</string>
@@ -301,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"అన్‌లాక్ చేయడానికి ఎగువకు స్వైప్ చేయండి"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ఫోన్ కోసం కుడివైపుకి స్వైప్ చేయండి"</string>
     <string name="camera_hint" msgid="5241441720959174226">"కెమెరా కోసం ఎడమవైపుకి స్వైప్ చేయండి"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"నిరవధికంగా"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"వేటికీ వద్దు"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"ప్రాధాన్యత"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"అన్నిటికీ"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"అవును, కొనసాగించు"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ఒక నిమిషానికి"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d నిమిషాలకి"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ఒక గంటకు"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d గంటలకు"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"కొత్త వినియోగదారుని జోడించాలా?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"బ్యాటర్ సేవర్ ఆన్ చేయబడింది"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"బ్యాటరీ సేవర్‌ను ఆఫ్ చేయి"</string>

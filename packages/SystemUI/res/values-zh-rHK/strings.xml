@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"系統用戶介面"</string>
+    <string name="app_label" msgid="7164937344850004466">"系統使用者介面"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"從清單中移除"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"應用程式資訊"</string>
@@ -39,9 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支援 USB 充電功能。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"僅限使用裝置隨附的充電器。"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"設定"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"要開啟節約電池用量模式嗎？"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"要開啟省電模式嗎？"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"開啟"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"開啟節約電池用量模式"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"開啟省電模式"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"設定"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飛行模式"</string>
@@ -168,7 +168,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"上鎖畫面。"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"設定"</string>
     <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"最近的螢幕。"</string>
-    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用戶：<xliff:g id="USER">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"使用者：<xliff:g id="USER">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi 已關閉。"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"WiFi 已開啟。"</string>
@@ -214,10 +214,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS 已定位"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"位置要求啟動中"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"通知設定"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g>設定"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"螢幕會自動旋轉。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"螢幕已鎖定為橫向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"螢幕已鎖定為垂直模式。"</string>
@@ -248,8 +246,8 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"設定"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"時間"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"我"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"用戶"</string>
-    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"新用戶"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"使用者"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"新使用者"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未連線"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"沒有網絡"</string>
@@ -293,7 +291,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"不干擾 (即使鬧鐘也不例外)。"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"不允許干擾"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"僅限優先干擾"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"只限重要干擾"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"下次鬧鐘時間：<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"下次鬧鐘時間：<xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"您不會聽到<xliff:g id="ALARM_TIME">%s</xliff:g> 的鬧鐘"</string>
@@ -303,9 +301,8 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上快速滑動即可解鎖"</string>
     <string name="phone_hint" msgid="3101468054914424646">"向右快速滑動即可使用手機功能"</string>
     <string name="camera_hint" msgid="5241441720959174226">"向左快速滑動即可使用相機功能"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"無"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"優先順序"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"重要"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"全部"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中 (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>後完成充電)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"切換使用者"</string>
@@ -323,17 +320,11 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"您要繼續您的工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"重新開始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"是的，請繼續"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"1 分鐘"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d 分鐘"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"1 小時"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d 小時"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"新增使用者？"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"新增的使用者需要自行設定個人空間。\n\n任何使用者均可為其他所有使用者更新應用程式。"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低效能並限制背景數據傳輸"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"關閉節約電池用量模式"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"關閉省電模式"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"內容已隱藏"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取您的螢幕上顯示的內容。"</string>

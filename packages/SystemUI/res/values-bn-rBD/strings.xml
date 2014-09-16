@@ -143,7 +143,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"রোমিং"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"কোনো SIM নেই৷"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"কোনো সিম নেই৷"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth টিথারিং৷"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"বিমান মোড৷"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS এর দ্বারা সেট করা অবস্থান"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"অবস্থান অনুরোধ সক্রিয় রয়েছে"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"সমস্ত বিজ্ঞপ্তি সাফ করুন৷"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"বিজ্ঞপ্তির সেটিংস"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> সেটিংস"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"স্ক্রীন স্বয়ংক্রিয়ভাবে ঘুরে যাবে৷"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ভূদৃশ্য সজ্জাতে স্ক্রীন লক করা আছে৷"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"প্রতিকৃতি সজ্জাতে স্ক্রীন লক করা আছে৷"</string>
@@ -301,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"আনলক করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ফোনের জন্য ডানদিকে সোয়াইপ করুন"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ক্যামেরার জন্য ডানদিকে সোয়াইপ করুন"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"অনির্দিষ্টভাবে"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"কোনো কিছুই নয়"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"অগ্রাধিকার"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"সমস্ত"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"আপনি কি আপনার সেশনটি অবিরত রাখতে চান?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"আবার শুরু করুন"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"হ্যাঁ, অবিরত থাকুন"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"এক মিনিটের জন্য"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d মিনিটের জন্য"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"এক ঘন্টার জন্য"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d ঘন্টার জন্য"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ব্যাটারি সেভার চালু রয়েছে"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"কার্য-সম্পাদনা ও পশ্চাদপট ডেটাকে কমিয়ে দেয়"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ব্যাটারি সঞ্চয়কারী বন্ধ করুন"</string>

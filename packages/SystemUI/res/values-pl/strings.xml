@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokalizacja z GPSa"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Prośby o lokalizację są aktywne"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Usuń wszystkie powiadomienia."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ustawienia powiadomień"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Ustawienia aplikacji <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran zostanie obrócony automatycznie."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ekran jest zablokowany w orientacji poziomej."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ekran jest zablokowany w orientacji pionowej."</string>
@@ -291,7 +289,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Przesuń w lewo: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Żadnych powiadomień. Nawet alarmów."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Bez przerw"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"Tylko priorytetowe przerwy"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Tylko przerwy priorytetowe"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Następny alarm o <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Następny alarm: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Nie usłyszysz alarmu o <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -301,8 +299,7 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Przesuń w górę, by odblokować"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Przesuń w prawo, by przełączyć się na telefon"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Przesuń w lewo, by przełączyć się na aparat"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Na czas nieokreślony"</string>
-    <string name="interruption_level_none" msgid="3831278883136066646">"Brak"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Żadne"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Priorytet"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Wszystkie"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Ładuje się (pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Chcesz kontynuować sesję?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Rozpocznij nową"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Tak, kontynuuj"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Przez minutę"</item>
-    <item quantity="other" msgid="6924190729213550991">"Przez %d min"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Przez godzinę"</item>
-    <item quantity="other" msgid="5408537517529822157">"Przez %d godz."</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Dodać nowego użytkownika?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Oszczędzanie baterii jest włączone"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Zmniejsza wydajność i ogranicza dane w tle"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Wyłącz oszczędzanie baterii"</string>
