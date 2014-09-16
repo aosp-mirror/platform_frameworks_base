@@ -113,7 +113,7 @@ public class Toast {
         }
 
         INotificationManager service = getService();
-        String pkg = mContext.getPackageName();
+        String pkg = mContext.getOpPackageName();
         TN tn = mTN;
         tn.mNextView = mNextView;
 
@@ -387,6 +387,7 @@ public class Toast {
                 handleHide();
                 mView = mNextView;
                 Context context = mView.getContext().getApplicationContext();
+                String packageName = mView.getContext().getOpPackageName();
                 if (context == null) {
                     context = mView.getContext();
                 }
@@ -406,6 +407,7 @@ public class Toast {
                 mParams.y = mY;
                 mParams.verticalMargin = mVerticalMargin;
                 mParams.horizontalMargin = mHorizontalMargin;
+                mParams.packageName = packageName;
                 if (mView.getParent() != null) {
                     if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
                     mWM.removeView(mView);
