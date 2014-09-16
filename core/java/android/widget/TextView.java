@@ -8182,6 +8182,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @removed
      */
     public static ColorStateList getTextColors(Context context, TypedArray attrs) {
+        if (attrs == null) {
+            // Preserve behavior prior to removal of this API.
+            throw new NullPointerException();
+        }
+
         // It's not safe to use this method from apps. The parameter 'attrs'
         // must have been obtained using the TextView filter array which is not
         // available to the SDK. As such, we grab a default TypedArray with the
