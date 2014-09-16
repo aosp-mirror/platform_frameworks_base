@@ -16,8 +16,6 @@
 
 package android.telecom;
 
-import android.telephony.DisconnectCause;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +30,7 @@ public abstract class Conference {
     /** @hide */
     public abstract static class Listener {
         public void onStateChanged(Conference conference, int oldState, int newState) {}
-        public void onDisconnected(Conference conference, int cause, String message) {}
+        public void onDisconnected(Conference conference, DisconnectCause disconnectCause) {}
         public void onConnectionAdded(Conference conference, Connection connection) {}
         public void onConnectionRemoved(Conference conference, Connection connection) {}
         public void onDestroyed(Conference conference) {}
@@ -46,7 +44,7 @@ public abstract class Conference {
 
     private PhoneAccountHandle mPhoneAccount;
     private int mState = Connection.STATE_NEW;
-    private int mDisconnectCause = DisconnectCause.NOT_VALID;
+    private DisconnectCause mDisconnectCause;
     private int mCapabilities;
     private String mDisconnectMessage;
 
@@ -146,16 +144,14 @@ public abstract class Conference {
     /**
      * Sets state to disconnected.
      *
-     * @param cause The reason for the disconnection, any of
-     *         {@link android.telephony.DisconnectCause}.
-     * @param message Optional call-service-provided message about the disconnect.
+     * @param disconnectCause The reason for the disconnection, as described by
+     *     {@link android.telecom.DisconnectCause}.
      */
-    public final void setDisconnected(int cause, String message) {
-        mDisconnectCause = cause;
-        mDisconnectMessage = message;
+    public final void setDisconnected(DisconnectCause disconnectCause) {
+        mDisconnectCause = disconnectCause;;
         setState(Connection.STATE_DISCONNECTED);
         for (Listener l : mListeners) {
-            l.onDisconnected(this, mDisconnectCause, mDisconnectMessage);
+            l.onDisconnected(this, mDisconnectCause);
         }
     }
 
@@ -222,7 +218,7 @@ public abstract class Conference {
         // If not yet disconnected, set the conference call as disconnected first.
         if (mState != Connection.STATE_DISCONNECTED) {
             Log.d(this, "setting to disconnected");
-            setDisconnected(DisconnectCause.LOCAL, null);
+            setDisconnected(new DisconnectCause(DisconnectCause.LOCAL));
         }
 
         // ...and notify.

@@ -96,8 +96,7 @@ final class ConnectionServiceAdapterServant {
                 case MSG_SET_DISCONNECTED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        mDelegate.setDisconnected(
-                                (String) args.arg1, args.argi1, (String) args.arg2);
+                        mDelegate.setDisconnected((String) args.arg1, (DisconnectCause) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -234,11 +233,10 @@ final class ConnectionServiceAdapterServant {
 
         @Override
         public void setDisconnected(
-                String connectionId, int disconnectCause, String disconnectMessage) {
+                String connectionId, DisconnectCause disconnectCause) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = connectionId;
-            args.arg2 = disconnectMessage;
-            args.argi1 = disconnectCause;
+            args.arg2 = disconnectCause;
             mHandler.obtainMessage(MSG_SET_DISCONNECTED, args).sendToTarget();
         }
 
