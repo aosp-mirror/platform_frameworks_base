@@ -49,8 +49,6 @@ public class TimeController extends StateController {
     private final PendingIntent mDeadlineExpiredAlarmIntent;
     /** Set an alarm for the next job delay expiry. This*/
     private final PendingIntent mNextDelayExpiredAlarmIntent;
-    /** Constant time determining how near in the future we'll set an alarm for. */
-    private static final long MIN_WAKEUP_INTERVAL_MILLIS = 15 * 1000;
 
     private long mNextJobExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;
@@ -218,11 +216,7 @@ public class TimeController extends StateController {
      * This alarm <b>will not</b> wake up the phone.
      */
     private void setDelayExpiredAlarm(long alarmTimeElapsedMillis) {
-        final long earliestWakeupTimeElapsed =
-                SystemClock.elapsedRealtime() + MIN_WAKEUP_INTERVAL_MILLIS;
-        if (alarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
-            alarmTimeElapsedMillis = earliestWakeupTimeElapsed;
-        }
+        alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
         mNextDelayExpiredElapsedMillis = alarmTimeElapsedMillis;
         updateAlarmWithPendingIntent(mNextDelayExpiredAlarmIntent, mNextDelayExpiredElapsedMillis);
     }
@@ -233,13 +227,17 @@ public class TimeController extends StateController {
      * This alarm <b>will</b> wake up the phone.
      */
     private void setDeadlineExpiredAlarm(long alarmTimeElapsedMillis) {
-        final long earliestWakeupTimeElapsed =
-                SystemClock.elapsedRealtime() + MIN_WAKEUP_INTERVAL_MILLIS;
-        if (alarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
-            alarmTimeElapsedMillis = earliestWakeupTimeElapsed;
-        }
+        alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
         mNextJobExpiredElapsedMillis = alarmTimeElapsedMillis;
         updateAlarmWithPendingIntent(mDeadlineExpiredAlarmIntent, mNextJobExpiredElapsedMillis);
+    }
+
+    private long maybeAdjustAlarmTime(long proposedAlarmTimeElapsedMillis) {
+        final long earliestWakeupTimeElapsed = SystemClock.elapsedRealtime();
+        if (proposedAlarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
+            return earliestWakeupTimeElapsed;
+        }
+        return proposedAlarmTimeElapsedMillis;
     }
 
     private void updateAlarmWithPendingIntent(PendingIntent pi, long alarmTimeElapsed) {
