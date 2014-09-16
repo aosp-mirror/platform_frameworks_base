@@ -384,6 +384,10 @@ public final class PageAdapter extends Adapter implements
     }
 
     private void updatePreviewAreaPageSizeAndEmptyState() {
+        if (mMediaSize == null) {
+            return;
+        }
+
         final int availableWidth = mPreviewArea.getWidth();
         final int availableHeight = mPreviewArea.getHeight();
 
