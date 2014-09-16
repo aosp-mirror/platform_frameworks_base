@@ -70,7 +70,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره تصویر صفحه..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"تصویر صفحه ذخیره شد."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تصویر صفحه گرفته شد."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده تصویر صفحه خود، لمس کنید."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده عکس صفحه‌نمایشتان، لمس کنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه گرفته نشد."</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"به دلیل فضای ذخیره‌سازی کم یا عدم اجازه برنامه یا سازمانتان، نمی‌توان از صفحه عکس گرفت."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>

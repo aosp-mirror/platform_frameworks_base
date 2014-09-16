@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS байршил"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Байршлын хүсэлтүүд идэвхтэй"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Бүх мэдэгдлийг цэвэрлэх."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Мэдэгдлийн тохиргоо"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> тохиргоо"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Дэлгэц автоматаар эргэнэ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Дэлгэц хэвтээ чиглэлд түгжигдсэн."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Дэлгэц босоо чиглэлээр түгжигдсэн."</string>

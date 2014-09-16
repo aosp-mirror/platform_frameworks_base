@@ -314,7 +314,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ștergeți invitatul?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Ștergeți"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"Welcome back, guest!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"Bine ați revenit în sesiunea pentru invitați!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Vreți să continuați sesiunea?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Începeți din nou"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Da, continuați"</string>

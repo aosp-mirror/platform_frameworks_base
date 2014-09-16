@@ -22,5 +22,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="doze_pulse_period_function" msgid="3632386860508136337">"৬০০০০:১০০০০,৩০০০০০:৩০০০০,১৮০০০০০:৬০০০০,০"</string>
+    <string name="doze_pulse_schedule" msgid="1301215615981695214">"১সে.,১০সে.,৩০সে.,৬০সে.,১২০সে."</string>
 </resources>
