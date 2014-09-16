@@ -173,11 +173,10 @@ public class ImageView extends View {
             mDrawableTintList = a.getColorStateList(R.styleable.ImageView_tint);
             mHasDrawableTint = true;
 
-            // Prior to L, the tint mode was always SRC_ATOP.
-            if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.L) {
-                mDrawableTintMode = PorterDuff.Mode.SRC_ATOP;
-                mHasDrawableTintMode = true;
-            }
+            // Prior to L, this attribute would always set a color filter with
+            // blending mode SRC_ATOP. Preserve that default behavior.
+            mDrawableTintMode = PorterDuff.Mode.SRC_ATOP;
+            mHasDrawableTintMode = true;
         }
 
         if (a.hasValue(R.styleable.ImageView_tintMode)) {
