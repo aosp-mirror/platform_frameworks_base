@@ -23,6 +23,9 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.params.StreamConfiguration;
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.CameraRuntimeException;
@@ -35,6 +38,7 @@ import android.util.Size;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -56,11 +60,13 @@ public class LegacyCameraDevice implements AutoCloseable {
     public static final String DEBUG_PROP = "HAL1ShimLogging";
     private final String TAG;
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
     private final int mCameraId;
+    private final CameraCharacteristics mStaticCharacteristics;
     private final ICameraDeviceCallbacks mDeviceCallbacks;
     private final CameraDeviceState mDeviceState = new CameraDeviceState();
     private List<Surface> mConfiguredSurfaces;
+    private boolean mClosed = false;
 
     private final ConditionVariable mIdle = new ConditionVariable(/*open*/true);
 
@@ -87,14 +93,15 @@ public class LegacyCameraDevice implements AutoCloseable {
     private final CameraDeviceState.CameraDeviceStateListener mStateListener =
             new CameraDeviceState.CameraDeviceStateListener() {
         @Override
-        public void onError(final int errorCode, RequestHolder holder) {
+        public void onError(final int errorCode, final RequestHolder holder) {
             mIdle.open();
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (DEBUG) {
-                        Log.d(TAG, "doing onError callback.");
+                        Log.d(TAG, "doing onError callback for request " + holder.getRequestId() +
+                                ", with error code " + errorCode);
                     }
                     try {
                         mDeviceCallbacks.onDeviceError(errorCode, extras);
@@ -135,14 +142,15 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
 
         @Override
-        public void onCaptureStarted(RequestHolder holder, final long timestamp) {
+        public void onCaptureStarted(final RequestHolder holder, final long timestamp) {
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
 
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (DEBUG) {
-                        Log.d(TAG, "doing onCaptureStarted callback.");
+                        Log.d(TAG, "doing onCaptureStarted callback for request " +
+                                holder.getRequestId());
                     }
                     try {
                         mDeviceCallbacks.onCaptureStarted(extras, timestamp);
@@ -155,14 +163,15 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
 
         @Override
-        public void onCaptureResult(final CameraMetadataNative result, RequestHolder holder) {
+        public void onCaptureResult(final CameraMetadataNative result, final RequestHolder holder) {
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
 
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (DEBUG) {
-                        Log.d(TAG, "doing onCaptureResult callback.");
+                        Log.d(TAG, "doing onCaptureResult callback for request " +
+                                holder.getRequestId());
                     }
                     try {
                         mDeviceCallbacks.onResultReceived(result, extras);
@@ -216,6 +225,7 @@ public class LegacyCameraDevice implements AutoCloseable {
         mCallbackHandlerThread.start();
         mCallbackHandler = new Handler(mCallbackHandlerThread.getLooper());
         mDeviceState.setCameraDeviceCallbacks(mCallbackHandler, mStateListener);
+        mStaticCharacteristics = characteristics;
         mRequestThreadManager =
                 new RequestThreadManager(cameraId, camera, characteristics, mDeviceState);
         mRequestThreadManager.start();
@@ -239,6 +249,42 @@ public class LegacyCameraDevice implements AutoCloseable {
                     Log.e(TAG, "configureOutputs - null outputs are not allowed");
                     return BAD_VALUE;
                 }
+                StreamConfigurationMap streamConfigurations = mStaticCharacteristics.
+                        get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+                // Validate surface size and format.
+                try {
+                    Size s = getSurfaceSize(output);
+                    int surfaceType = detectSurfaceType(output);
+                    Size[] sizes = streamConfigurations.getOutputSizes(surfaceType);
+
+                    if (sizes == null) {
+                        // WAR: Override default format to IMPLEMENTATION_DEFINED for b/9487482
+                        if ((surfaceType >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
+                            surfaceType <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
+
+                            // YUV_420_888 is always present in LEGACY for all IMPLEMENTATION_DEFINED
+                            // output sizes, and is publicly visible in the API (i.e.
+                            // {@code #getOutputSizes} works here).
+                            sizes = streamConfigurations.getOutputSizes(ImageFormat.YUV_420_888);
+                        } else if (surfaceType == LegacyMetadataMapper.HAL_PIXEL_FORMAT_BLOB) {
+                            sizes = streamConfigurations.getOutputSizes(ImageFormat.JPEG);
+                        }
+                    }
+
+                    if (!ArrayUtils.contains(sizes, s)) {
+                        String reason = (sizes == null) ? "format is invalid." :
+                                ("size not in valid set: " + Arrays.toString(sizes));
+                        Log.e(TAG, String.format("Surface with size (w=%d, h=%d) and format 0x%x is"
+                                + " not valid, %s", s.getWidth(), s.getHeight(), surfaceType,
+                                reason));
+                        return BAD_VALUE;
+                    }
+                } catch (BufferQueueAbandonedException e) {
+                    Log.e(TAG, "Surface bufferqueue is abandoned, cannot configure as output: ", e);
+                    return BAD_VALUE;
+                }
+
             }
         }
 
@@ -248,7 +294,6 @@ public class LegacyCameraDevice implements AutoCloseable {
             error = mDeviceState.setIdle();
         }
 
-        // TODO: May also want to check the surfaces more deeply (e.g. state, formats, sizes..)
         if (error == NO_ERROR) {
             mConfiguredSurfaces = outputs != null ? new ArrayList<>(outputs) : null;
         }
@@ -342,6 +387,24 @@ public class LegacyCameraDevice implements AutoCloseable {
         mIdle.block();
     }
 
+    /**
+     * Flush any pending requests.
+     *
+     * @return the last frame number.
+     */
+    public long flush() {
+        long lastFrame = mRequestThreadManager.flush();
+        waitUntilIdle();
+        return lastFrame;
+    }
+
+    /**
+     * Return {@code true} if the device has been closed.
+     */
+    public boolean isClosed() {
+        return mClosed;
+    }
+
     @Override
     public void close() {
         mRequestThreadManager.quit();
@@ -362,7 +425,7 @@ public class LegacyCameraDevice implements AutoCloseable {
                     mResultThread.getName(), mResultThread.getId()));
         }
 
-        // TODO: throw IllegalStateException in every method after close has been called
+        mClosed = true;
     }
 
     @Override
