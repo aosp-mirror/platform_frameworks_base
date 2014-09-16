@@ -517,6 +517,27 @@ public final class BluetoothDevice implements Parcelable {
      */
     public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
 
+    /**
+     * For {@link #getPhonebookAccessPermission}, {@link #setPhonebookAccessPermission},
+     * {@link #getMessageAccessPermission} and {@link #setMessageAccessPermission}.
+     * @hide
+     */
+    public static final int ACCESS_UNKNOWN = 0;
+
+    /**
+     * For {@link #getPhonebookAccessPermission}, {@link #setPhonebookAccessPermission},
+     * {@link #getMessageAccessPermission} and {@link #setMessageAccessPermission}.
+     * @hide
+     */
+    public static final int ACCESS_ALLOWED = 1;
+
+    /**
+     * For {@link #getPhonebookAccessPermission}, {@link #setPhonebookAccessPermission},
+     * {@link #getMessageAccessPermission} and {@link #setMessageAccessPermission}.
+     * @hide
+     */
+    public static final int ACCESS_REJECTED = 2;
+
      /**
       * No preferrence of physical transport for GATT connections to remote dual-mode devices
       * @hide
@@ -952,39 +973,6 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Get trust state of a remote device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
-     * @hide
-     */
-    public boolean getTrustState() {
-        //TODO(BT)
-        /*
-        try {
-            return sService.getTrustState(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        }*/
-        return false;
-    }
-
-    /**
-     * Set trust state for a remote device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
-     * @param value the trust state value (true or false)
-     * @hide
-     */
-    public boolean setTrust(boolean value) {
-        //TODO(BT)
-        /*
-        try {
-            return sService.setTrust(this, value);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        }*/
-        return false;
-    }
-
-    /**
      * Returns the supported features (UUIDs) of the remote device.
      *
      * <p>This method does not start a service discovery procedure to retrieve the UUIDs
@@ -1131,6 +1119,82 @@ public final class BluetoothDevice implements Parcelable {
         try {
             return sService.isBluetoothDock(this);
         } catch (RemoteException e) {Log.e(TAG, "", e);}*/
+        return false;
+    }
+
+    /**
+     * Requires {@link android.Manifest.permission#BLUETOOTH}.
+     * @return Whether the phonebook access is allowed to this device. Can be
+     *         {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link #ACCESS_REJECTED}.
+     * @hide
+     */
+    public int getPhonebookAccessPermission() {
+        if (sService == null) {
+            return ACCESS_UNKNOWN;
+        }
+        try {
+            return sService.getPhonebookAccessPermission(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return ACCESS_UNKNOWN;
+    }
+
+    /**
+     * Sets whether the phonebook access is allowed to this device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
+     * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or
+     *              {@link #ACCESS_REJECTED}.
+     * @return Whether the value has been successfully set.
+     * @hide
+     */
+    public boolean setPhonebookAccessPermission(int value) {
+        if (sService == null) {
+            return false;
+        }
+        try {
+            return sService.setPhonebookAccessPermission(this, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
+    }
+
+    /**
+     * Requires {@link android.Manifest.permission#BLUETOOTH}.
+     * @return Whether the message access is allowed to this device. Can be
+     *         {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link #ACCESS_REJECTED}.
+     * @hide
+     */
+    public int getMessageAccessPermission() {
+        if (sService == null) {
+            return ACCESS_UNKNOWN;
+        }
+        try {
+            return sService.getMessageAccessPermission(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return ACCESS_UNKNOWN;
+    }
+
+    /**
+     * Sets whether the message access is allowed to this device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
+     * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or
+     *              {@link #ACCESS_REJECTED}.
+     * @return Whether the value has been successfully set.
+     * @hide
+     */
+    public boolean setMessageAccessPermission(int value) {
+        if (sService == null) {
+            return false;
+        }
+        try {
+            return sService.setMessageAccessPermission(this, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
         return false;
     }
 
@@ -1343,5 +1407,4 @@ public final class BluetoothDevice implements Parcelable {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
-
 }
