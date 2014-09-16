@@ -428,6 +428,7 @@ public final class HdmiControlService extends SystemService {
     private void allocateLogicalAddress(final ArrayList<HdmiCecLocalDevice> allocatingDevices,
             final int initiatedBy) {
         assertRunOnServiceThread();
+        mCecController.clearLogicalAddress();
         final ArrayList<HdmiCecLocalDevice> allocatedDevices = new ArrayList<>();
         final int[] finished = new int[1];
         for (final HdmiCecLocalDevice localDevice : allocatingDevices) {
