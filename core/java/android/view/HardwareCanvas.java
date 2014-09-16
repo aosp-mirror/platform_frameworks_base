@@ -113,6 +113,11 @@ public abstract class HardwareCanvas extends Canvas {
     public abstract void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint);
 
+    public abstract void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
+            CanvasProperty<Float> right, CanvasProperty<Float> bottom,
+            CanvasProperty<Float> rx, CanvasProperty<Float> ry,
+            CanvasProperty<Paint> paint);
+
     public static void setProperty(String name, String value) {
         GLES20Canvas.setProperty(name, value);
     }
