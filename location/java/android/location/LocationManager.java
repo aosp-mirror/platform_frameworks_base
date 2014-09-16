@@ -18,6 +18,7 @@ package android.location;
 
 import com.android.internal.location.ProviderProperties;
 
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -808,6 +809,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void requestLocationUpdates(LocationRequest request, LocationListener listener,
             Looper looper) {
         checkListener(listener);
@@ -835,6 +837,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void requestLocationUpdates(LocationRequest request, PendingIntent intent) {
         checkPendingIntent(intent);
         requestLocationUpdates(request, null, null, intent);
