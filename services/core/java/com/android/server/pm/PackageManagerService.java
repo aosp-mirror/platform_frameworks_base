@@ -4311,7 +4311,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * grantPermissions will assume the package update is trying to
                  * expand its permissions.
                  */
-                grantPermissionsLPw(pkg, true);
+                grantPermissionsLPw(pkg, true, pkg.packageName);
                 mSettings.disableSystemPackageLPw(pkg.packageName);
             }
         }
@@ -6696,17 +6696,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         if ((flags&UPDATE_PERMISSIONS_ALL) != 0) {
             for (PackageParser.Package pkg : mPackages.values()) {
                 if (pkg != pkgInfo) {
-                    grantPermissionsLPw(pkg, (flags&UPDATE_PERMISSIONS_REPLACE_ALL) != 0);
+                    grantPermissionsLPw(pkg, (flags&UPDATE_PERMISSIONS_REPLACE_ALL) != 0,
+                            changingPkg);
                 }
             }
         }
         
         if (pkgInfo != null) {
-            grantPermissionsLPw(pkgInfo, (flags&UPDATE_PERMISSIONS_REPLACE_PKG) != 0);
+            grantPermissionsLPw(pkgInfo, (flags&UPDATE_PERMISSIONS_REPLACE_PKG) != 0, changingPkg);
         }
     }
 
-    private void grantPermissionsLPw(PackageParser.Package pkg, boolean replace) {
+    private void grantPermissionsLPw(PackageParser.Package pkg, boolean replace,
+            String packageOfInterest) {
         final PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
             return;
@@ -6740,8 +6742,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (bp == null || bp.packageSetting == null) {
-                Slog.w(TAG, "Unknown permission " + name
-                        + " in package " + pkg.packageName);
+                if (packageOfInterest == null || packageOfInterest.equals(pkg.packageName)) {
+                    Slog.w(TAG, "Unknown permission " + name
+                            + " in package " + pkg.packageName);
+                }
                 continue;
             }
 
@@ -6806,9 +6810,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         gp.gids = appendInts(gp.gids, bp.gids);
                     }
                 } else {
-                    Slog.w(TAG, "Not granting permission " + perm
-                            + " to package " + pkg.packageName
-                            + " because it was previously installed without");
+                    if (packageOfInterest == null || packageOfInterest.equals(pkg.packageName)) {
+                        Slog.w(TAG, "Not granting permission " + perm
+                                + " to package " + pkg.packageName
+                                + " because it was previously installed without");
+                    }
                 }
             } else {
                 if (gp.grantedPermissions.remove(perm)) {
@@ -6822,11 +6828,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) == 0) {
                     // Don't print warning for app op permissions, since it is fine for them
                     // not to be granted, there is a UI for the user to decide.
-                    Slog.w(TAG, "Not granting permission " + perm
-                            + " to package " + pkg.packageName
-                            + " (protectionLevel=" + bp.protectionLevel
-                            + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                            + ")");
+                    if (packageOfInterest == null || packageOfInterest.equals(pkg.packageName)) {
+                        Slog.w(TAG, "Not granting permission " + perm
+                                + " to package " + pkg.packageName
+                                + " (protectionLevel=" + bp.protectionLevel
+                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
+                                + ")");
+                    }
                 }
             }
         }
