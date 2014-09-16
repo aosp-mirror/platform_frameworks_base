@@ -725,6 +725,19 @@ class GLES20Canvas extends HardwareCanvas {
             long propCy, long propRadius, long propPaint);
 
     @Override
+    public void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
+            CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
+            CanvasProperty<Float> ry, CanvasProperty<Paint> paint) {
+        nDrawRoundRect(mRenderer, left.getNativeContainer(), top.getNativeContainer(),
+                right.getNativeContainer(), bottom.getNativeContainer(),
+                rx.getNativeContainer(), ry.getNativeContainer(),
+                paint.getNativeContainer());
+    }
+
+    private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
+            long propRight, long propBottom, long propRx, long propRy, long propPaint);
+
+    @Override
     public void drawColor(int color) {
         drawColor(color, PorterDuff.Mode.SRC_OVER);
     }
