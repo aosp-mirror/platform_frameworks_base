@@ -34,6 +34,12 @@ public class ToneGenerator
      * the enum in ToneGenerator C++ class.     */
 
     /**
+     * Default value for an unknown or unspecified tone.
+     * @hide
+     */
+    public static final int TONE_UNKNOWN = -1;
+
+    /**
      * DTMF tone for key 0: 1336Hz, 941Hz, continuous</p>
      *
      * @see #ToneGenerator(int, int)

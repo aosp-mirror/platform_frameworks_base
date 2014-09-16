@@ -134,14 +134,13 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      * Sets a call's state to disconnected.
      *
      * @param callId The unique ID of the call whose state is changing to disconnected.
-     * @param disconnectCause The reason for the disconnection, any of
-     *            {@link android.telephony.DisconnectCause}.
-     * @param disconnectMessage Optional call-service-provided message about the disconnect.
+     * @param disconnectCause The reason for the disconnection, as described by
+     *            {@link android.telecomm.DisconnectCause}.
      */
-    void setDisconnected(String callId, int disconnectCause, String disconnectMessage) {
+    void setDisconnected(String callId, DisconnectCause disconnectCause) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setDisconnected(callId, disconnectCause, disconnectMessage);
+                adapter.setDisconnected(callId, disconnectCause);
             } catch (RemoteException e) {
             }
         }
