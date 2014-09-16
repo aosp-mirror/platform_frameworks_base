@@ -23,8 +23,8 @@ and attach the following items to the message:</p>
 </ul>
 <p>
 Unlike data items, there is no syncing between the handheld and wearable apps.
-Messages are a one-way communication mechanism that's meant for
-"fire-and-forget" tasks, such as sending a message to the wearable
+Messages are a one-way communication mechanism that's good for remote procedure calls (RPC),
+such as sending a message to the wearable
 to start an activity. You can also use messages in request/response model
 where one side of the connection sends a message, does some work,
 sends back a response message.</p>
