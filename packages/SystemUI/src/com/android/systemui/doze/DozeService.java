@@ -411,7 +411,15 @@ public class DozeService extends DreamService {
             }
             requestPulse();
             setListening(true);  // reregister, this sensor only fires once
-            resetNotificationResets();
+
+            // reset the notification pulse schedule, but only if we think we were not triggered
+            // by a notification-related vibration
+            final long timeSinceNotification = System.currentTimeMillis() - mNotificationPulseTime;
+            if (timeSinceNotification < mDozeParameters.getPickupVibrationThreshold()) {
+               if (DEBUG) Log.d(mTag, "Not resetting schedule, recent notification");
+            } else {
+                resetNotificationResets();
+            }
         }
     }
 }
