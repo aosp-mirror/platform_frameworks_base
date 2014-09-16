@@ -137,6 +137,11 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
 
     private boolean mIs24HourMode;
     private boolean mShowHours;
+
+    /**
+     * When in 24-hour mode, indicates that the current hour is between
+     * 1 and 12 (inclusive).
+     */
     private boolean mIsOnInnerCircle;
 
     private int mXCenter;
@@ -513,49 +518,53 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         mListener = listener;
     }
 
+    /**
+     * Sets the current hour in 24-hour time.
+     *
+     * @param hour the current hour between 0 and 23 (inclusive)
+     */
     public void setCurrentHour(int hour) {
         final int degrees = (hour % 12) * DEGREES_FOR_ONE_HOUR;
         mSelectionDegrees[HOURS] = degrees;
         mSelectionDegrees[HOURS_INNER] = degrees;
-        mAmOrPm = ((hour % 24) < 12) ? AM : PM;
+
+        // 0 is 12 AM (midnight) and 12 is 12 PM (noon).
+        mAmOrPm = (hour == 0 || (hour % 24) < 12) ? AM : PM;
+
         if (mIs24HourMode) {
-            mIsOnInnerCircle = (mAmOrPm == AM);
+            // Inner circle is 1 through 12.
+            mIsOnInnerCircle = hour >= 1 && hour <= 12;
         } else {
             mIsOnInnerCircle = false;
         }
+
         initData();
         updateLayoutData();
         invalidate();
     }
 
-    // Return hours in 0-23 range
+    /**
+     * Returns the current hour in 24-hour time.
+     *
+     * @return the current hour between 0 and 23 (inclusive)
+     */
     public int getCurrentHour() {
-        int hours =
-                mSelectionDegrees[mIsOnInnerCircle ? HOURS_INNER : HOURS] / DEGREES_FOR_ONE_HOUR;
+        int hour = (mSelectionDegrees[mIsOnInnerCircle ?
+                HOURS_INNER : HOURS] / DEGREES_FOR_ONE_HOUR) % 12;
         if (mIs24HourMode) {
-            if (mIsOnInnerCircle) {
-                hours = hours % 12;
-                if (hours == 0) {
-                    hours = 12;
-                }
-            } else {
-                if (hours != 0) {
-                    hours += 12;
-                }
+            // Convert the 12-hour value into 24-hour time based on where the
+            // selector is positioned.
+            if (mIsOnInnerCircle && hour == 0) {
+                // Inner circle is 1 through 12.
+                hour = 12;
+            } else if (hour != 0) {
+                // Outer circle is 13 through 23 and 0.
+                hour += 12;
             }
-        } else {
-            hours = hours % 12;
-            if (hours == 0) {
-                if (mAmOrPm == PM) {
-                    hours = 12;
-                }
-            } else {
-                if (mAmOrPm == PM) {
-                    hours += 12;
-                }
-            }
+        } else if (mAmOrPm == PM) {
+            hour += 12;
         }
-        return hours;
+        return hour;
     }
 
     public void setCurrentMinute(int minute) {
