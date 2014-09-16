@@ -461,6 +461,10 @@ public class AlertController {
         final View buttonPanel = mWindow.findViewById(R.id.buttonPanel);
         if (!hasButtons) {
             buttonPanel.setVisibility(View.GONE);
+            final View spacer = mWindow.findViewById(R.id.textSpacerNoButtons);
+            if (spacer != null) {
+                spacer.setVisibility(View.VISIBLE);
+            }
             mWindow.setCloseOnTouchOutsideIfNotSet(true);
         }
 
