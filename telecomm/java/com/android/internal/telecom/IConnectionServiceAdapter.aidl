@@ -19,6 +19,7 @@ package com.android.internal.telecom;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.telecom.ConnectionRequest;
+import android.telecom.DisconnectCause;
 import android.telecom.ParcelableConnection;
 import android.telecom.ParcelableConference;
 import android.telecom.StatusHints;
@@ -45,7 +46,7 @@ oneway interface IConnectionServiceAdapter {
 
     void setDialing(String callId);
 
-    void setDisconnected(String callId, int disconnectCause, String disconnectMessage);
+    void setDisconnected(String callId, in DisconnectCause disconnectCause);
 
     void setOnHold(String callId);
 
