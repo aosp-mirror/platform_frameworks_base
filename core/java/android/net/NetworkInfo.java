@@ -411,8 +411,7 @@ public class NetworkInfo implements Parcelable {
 
     /**
      * Report the extra information about the network state, if any was
-     * provided by the lower networking layers.,
-     * if one is available.
+     * provided by the lower networking layers.
      * @return the extra information, or null if not available
      */
     public String getExtraInfo() {
