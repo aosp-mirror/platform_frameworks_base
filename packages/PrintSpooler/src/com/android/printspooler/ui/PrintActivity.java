@@ -953,7 +953,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             // When the update is done we update the print preview.
             mProgressMessageController.post();
             return true;
-        } else  {
+        } else if (!willUpdate) {
             // Update preview.
             updatePrintPreviewController(false);
         }

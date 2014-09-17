@@ -275,7 +275,6 @@ public final class PageAdapter extends Adapter implements
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View page = mLayoutInflater.inflate(R.layout.preview_page, parent, false);
         ViewHolder holder = new MyViewHolder(page);
-        holder.setIsRecyclable(true);
         return holder;
     }
 
