@@ -1190,10 +1190,6 @@ public final class Pm {
             if (userId < 0) {
                 info = mUm.createUser(name, flags);
             } else {
-                if (Process.myUid() != 0) {
-                    System.err.println("Error: not running as root.");
-                    return;
-                }
                 info = mUm.createProfileForUser(name, flags, userId);
             }
             if (info != null) {
