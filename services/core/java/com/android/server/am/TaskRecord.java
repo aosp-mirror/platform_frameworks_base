@@ -58,6 +58,7 @@ final class TaskRecord {
     private static final String ATTR_ORIGACTIVITY = "orig_activity";
     private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
+    private static final String ATTR_ROOT_AFFINITY = "root_affinity";
     private static final String ATTR_ROOTHASRESET = "root_has_reset";
     private static final String ATTR_AUTOREMOVERECENTS = "auto_remove_recents";
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
@@ -84,7 +85,8 @@ final class TaskRecord {
     static final boolean IGNORE_RETURN_TO_RECENTS = true;
 
     final int taskId;       // Unique identifier for this task.
-    String affinity;        // The affinity name for this task, or null.
+    String affinity;        // The affinity name for this task, or null; may change identity.
+    String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
     final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
     final IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
     Intent intent;          // The original intent that started the task.
@@ -208,9 +210,9 @@ final class TaskRecord {
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
-            String _affinity, ComponentName _realActivity, ComponentName _origActivity,
-            boolean _rootWasReset, boolean _autoRemoveRecents, boolean _askedCompatMode,
-            int _taskType, int _userId, int _effectiveUid,
+            String _affinity, String _rootAffinity, ComponentName _realActivity,
+            ComponentName _origActivity, boolean _rootWasReset, boolean _autoRemoveRecents,
+            boolean _askedCompatMode, int _taskType, int _userId, int _effectiveUid,
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
@@ -224,6 +226,7 @@ final class TaskRecord {
         intent = _intent;
         affinityIntent = _affinityIntent;
         affinity = _affinity;
+        rootAffinity = _affinity;
         voiceSession = null;
         voiceInteractor = null;
         realActivity = _realActivity;
@@ -279,6 +282,12 @@ final class TaskRecord {
         }
 
         affinity = info.taskAffinity;
+        if (intent == null) {
+            // If this task already has an intent associated with it, don't set the root
+            // affinity -- we don't want it changing after initially set, but the initially
+            // set value may be null.
+            rootAffinity = affinity;
+        }
         effectiveUid = info.applicationInfo.uid;
         stringName = null;
 
@@ -840,8 +849,17 @@ final class TaskRecord {
         if (origActivity != null) {
             out.attribute(null, ATTR_ORIGACTIVITY, origActivity.flattenToShortString());
         }
+        // Write affinity, and root affinity if it is different from affinity.
+        // We use the special string "@" for a null root affinity, so we can identify
+        // later whether we were given a root affinity or should just make it the
+        // same as the affinity.
         if (affinity != null) {
             out.attribute(null, ATTR_AFFINITY, affinity);
+            if (!affinity.equals(rootAffinity)) {
+                out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
+            }
+        } else if (rootAffinity != null) {
+            out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
         }
         out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
         out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
@@ -901,6 +919,8 @@ final class TaskRecord {
         ComponentName realActivity = null;
         ComponentName origActivity = null;
         String affinity = null;
+        String rootAffinity = null;
+        boolean hasRootAffinity = false;
         boolean rootHasReset = false;
         boolean autoRemoveRecents = false;
         boolean askedCompatMode = false;
@@ -935,6 +955,9 @@ final class TaskRecord {
                 origActivity = ComponentName.unflattenFromString(attrValue);
             } else if (ATTR_AFFINITY.equals(attrName)) {
                 affinity = attrValue;
+            } else if (ATTR_ROOT_AFFINITY.equals(attrName)) {
+                rootAffinity = attrValue;
+                hasRootAffinity = true;
             } else if (ATTR_ROOTHASRESET.equals(attrName)) {
                 rootHasReset = Boolean.valueOf(attrValue);
             } else if (ATTR_AUTOREMOVERECENTS.equals(attrName)) {
@@ -1007,6 +1030,12 @@ final class TaskRecord {
                     createLastTaskDescriptionIconFilename(taskId, lastActiveTime)));
         }
 
+        if (!hasRootAffinity) {
+            rootAffinity = affinity;
+        } else if ("@".equals(rootAffinity)) {
+            rootAffinity = null;
+        }
+
         if (effectiveUid <= 0) {
             Intent checkIntent = intent != null ? intent : affinityIntent;
             effectiveUid = 0;
@@ -1028,7 +1057,7 @@ final class TaskRecord {
         }
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
-                affinityIntent, affinity, realActivity, origActivity, rootHasReset,
+                affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
@@ -1047,8 +1076,13 @@ final class TaskRecord {
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
                 pw.print(" mCallingUid="); UserHandle.formatUid(pw, mCallingUid);
                 pw.print(" mCallingPackage="); pw.println(mCallingPackage);
-        if (affinity != null) {
-            pw.print(prefix); pw.print("affinity="); pw.println(affinity);
+        if (affinity != null || rootAffinity != null) {
+            pw.print(prefix); pw.print("affinity="); pw.print(affinity);
+            if (affinity == null || !affinity.equals(rootAffinity)) {
+                pw.print(" root="); pw.println(rootAffinity);
+            } else {
+                pw.println();
+            }
         }
         if (voiceSession != null || voiceInteractor != null) {
             pw.print(prefix); pw.print("VOICE: session=0x");
