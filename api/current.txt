@@ -28459,7 +28459,6 @@ package android.telecom {
     method public android.net.Uri getSubscriptionAddress();
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean hasCapabilities(int);
-    method public boolean isEnabled();
     method public boolean supportsUriScheme(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
@@ -28589,21 +28588,19 @@ package android.telecom {
     method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
     method public void clearAccounts();
+    method public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
-    method public java.util.List<android.telecom.PhoneAccountHandle> getEnabledPhoneAccounts();
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean handleMmi(java.lang.String);
-    method public boolean hasMultipleEnabledAccounts();
+    method public boolean hasMultipleCallCapableAccounts();
     method public boolean isInCall();
     method public void registerPhoneAccount(android.telecom.PhoneAccount);
     method public void showInCallScreen(boolean);
     method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
-    field public static final java.lang.String ACTION_PHONE_ACCOUNT_DISABLED = "android.telecom.action.PHONE_ACCOUNT_DISABLED";
-    field public static final java.lang.String ACTION_PHONE_ACCOUNT_ENABLED = "android.telecom.action.PHONE_ACCOUNT_ENABLED";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecom.action.SHOW_CALL_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'

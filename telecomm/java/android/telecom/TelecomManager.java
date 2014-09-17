@@ -71,24 +71,6 @@ public class TelecomManager {
             "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
 
     /**
-     * The {@link android.content.Intent} action used to inform a
-     * {@link android.telecom.ConnectionService} that one of its {@link PhoneAccount}s has been
-     * enabled.  The {@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE} extra is used to indicate
-     * which {@link PhoneAccount} has been enabled.
-     */
-    public static final String ACTION_PHONE_ACCOUNT_ENABLED =
-            "android.telecom.action.PHONE_ACCOUNT_ENABLED";
-
-    /**
-     * The {@link android.content.Intent} action used to inform a
-     * {@link android.telecom.ConnectionService} that one of its {@link PhoneAccount}s has been
-     * disabled.  The {@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE} extra is used to indicate
-     * which {@link PhoneAccount} has been disabled.
-     */
-    public static final String ACTION_PHONE_ACCOUNT_DISABLED =
-            "android.telecom.action.PHONE_ACCOUNT_DISABLED";
-
-    /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
      * determines whether the speakerphone should be automatically turned on for an outgoing call.
      */
@@ -325,14 +307,14 @@ public class TelecomManager {
     /**
      * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
      * calls with a specified URI scheme. This {@code PhoneAccount} will always be a member of the
-     * list which is returned from calling {@link #getEnabledPhoneAccounts()}.
+     * list which is returned from calling {@link #getCallCapablePhoneAccounts()}.
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to initiate a
      * phone call must either create their {@link android.content.Intent#ACTION_CALL} or
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
      * {@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance to
-     * select one of the elements of {@link #getEnabledPhoneAccounts()}.
+     * select one of the elements of {@link #getCallCapablePhoneAccounts()}.
      * <p>
      * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
      * {@code Intent} with no {@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE} is valid, and
@@ -355,7 +337,7 @@ public class TelecomManager {
     /**
      * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
      * calls. This {@code PhoneAccount} will always be a member of the list which is returned from
-     * calling {@link #getEnabledPhoneAccounts()}
+     * calling {@link #getCallCapablePhoneAccounts()}
      *
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}.
@@ -389,19 +371,19 @@ public class TelecomManager {
     }
 
     /**
-     * Return a list of enabled {@link PhoneAccountHandle}s which can be used to make and receive
-     * phone calls.
+     * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
      */
-    public List<PhoneAccountHandle> getEnabledPhoneAccounts() {
+    public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getEnabledPhoneAccounts();
+                return getTelecomService().getCallCapablePhoneAccounts();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getEnabledPhoneAccounts", e);
+            Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts", e);
         }
         return new ArrayList<>();
     }
@@ -467,8 +449,8 @@ public class TelecomManager {
     }
 
     /**
-     * Returns a list of the enabled {@link PhoneAccountHandle}s which can be used to make and
-     * receive phone calls which support the specified URI scheme.
+     * Returns a list of the {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls which support the specified URI scheme.
      * <P>
      * For example, invoking with {@code "tel"} will find all {@link PhoneAccountHandle}s which
      * support telephone calls (e.g. URIs such as {@code tel:555-555-1212}).  Invoking with
@@ -490,13 +472,14 @@ public class TelecomManager {
     }
 
     /**
-     * Determine whether the device has more than one account registered and enabled.
+     * Determine whether the device has more than one account registered that can make and receive
+     * phone calls.
      *
-     * @return {@code true} if the device has more than one account registered and enabled and
-     * {@code false} otherwise.
+     * @return {@code true} if the device has more than one account registered and {@code false}
+     * otherwise.
      */
-    public boolean hasMultipleEnabledAccounts() {
-        return getEnabledPhoneAccounts().size() > 1;
+    public boolean hasMultipleCallCapableAccounts() {
+        return getCallCapablePhoneAccounts().size() > 1;
     }
 
     /**
@@ -518,9 +501,9 @@ public class TelecomManager {
     }
 
     /**
-     * Returns a count of enabled and disabled {@link PhoneAccount}s.
+     * Returns a count of all {@link PhoneAccount}s.
      *
-     * @return The count of enabled and disabled {@link PhoneAccount}s.
+     * @return The count of {@link PhoneAccount}s.
      * @hide
      */
     @SystemApi
@@ -569,24 +552,6 @@ public class TelecomManager {
             Log.e(TAG, "Error calling ITelecomService#getAllPhoneAccountHandles", e);
         }
         return Collections.EMPTY_LIST;
-    }
-
-    /**
-     * Enables or disables a {@link PhoneAccount}.
-     *
-     * @param account The {@link PhoneAccountHandle} to enable or disable.
-     * @param isEnabled {@code True} if the phone account should be enabled.
-     * @hide
-     */
-    @SystemApi
-    public void setPhoneAccountEnabled(PhoneAccountHandle account, boolean isEnabled) {
-        try {
-            if (isServiceConnected()) {
-                getTelecomService().setPhoneAccountEnabled(account, isEnabled);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#setPhoneAccountEnabled", e);
-        }
     }
 
     /**
@@ -797,9 +762,8 @@ public class TelecomManager {
     /**
      * Registers a new incoming call. A {@link ConnectionService} should invoke this method when it
      * has an incoming call. The specified {@link PhoneAccountHandle} must have been registered
-     * with {@link #registerPhoneAccount} and subsequently enabled by the user within the phone's
-     * settings. Once invoked, this method will cause the system to bind to the
-     * {@link ConnectionService} associated with the {@link PhoneAccountHandle} and request
+     * with {@link #registerPhoneAccount}. Once invoked, this method will cause the system to bind
+     * to the {@link ConnectionService} associated with the {@link PhoneAccountHandle} and request
      * additional information about the call (See
      * {@link ConnectionService#onCreateIncomingConnection}) before starting the incoming call UI.
      *
