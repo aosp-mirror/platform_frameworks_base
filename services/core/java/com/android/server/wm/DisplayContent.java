@@ -328,6 +328,7 @@ class DisplayContent {
                     for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                         AppWindowToken wtoken = tokens.get(tokenNdx);
                         if (wtoken.mDeferRemoval) {
+                            stack.mExitingAppTokens.remove(wtoken);
                             wtoken.mDeferRemoval = false;
                             mService.removeAppFromTaskLocked(wtoken);
                         }
