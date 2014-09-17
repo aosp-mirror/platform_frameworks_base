@@ -1402,6 +1402,20 @@ public class ConnectivityManager {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    /** {@hide */
+    public static final void enforceTetherChangePermission(Context context) {
+        if (context.getResources().getStringArray(
+                com.android.internal.R.array.config_mobile_hotspot_provision_app).length == 2) {
+            // Have a provisioning app - must only let system apps (which check this app)
+            // turn on tethering
+            context.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.CONNECTIVITY_INTERNAL, "ConnectivityService");
+        } else {
+            context.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.CHANGE_NETWORK_STATE, "ConnectivityService");
+        }
+    }
+
     /**
      * Get the set of tetherable, available interfaces.  This list is limited by
      * device configuration and current interface existence.
