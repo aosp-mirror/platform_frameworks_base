@@ -745,6 +745,11 @@ public class Activity extends ContextThemeWrapper
         public View findViewById(int id) {
             return Activity.this.findViewById(id);
         }
+        @Override
+        public boolean hasView() {
+            Window window = Activity.this.getWindow();
+            return (window != null && window.peekDecorView() != null);
+        }
     };
 
     // Most recent call to requestVisibleBehind().
