@@ -21828,7 +21828,7 @@ package android.os {
     field public static final int TRACE_COUNT_ALLOCS = 1; // 0x1
   }
 
-  public static class Debug.InstructionCount {
+  public static deprecated class Debug.InstructionCount {
     ctor public Debug.InstructionCount();
     method public boolean collect();
     method public int globalMethodInvocations();

@@ -1273,7 +1273,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *           + icount.globalMethodInvocations());
      *   }
      * </pre>
+     *
+     * @deprecated Instruction counting is no longer supported.
      */
+    @Deprecated
     public static class InstructionCount {
         private static final int NUM_INSTR =
             OpcodeInfo.MAXIMUM_PACKED_VALUE + 1;
