@@ -19,7 +19,6 @@ package android.telecom;
 import com.android.internal.telecom.IConnectionService;
 
 import android.os.RemoteException;
-import android.telephony.DisconnectCause;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +33,7 @@ public final class RemoteConference {
 
     public abstract static class Callback {
         public void onStateChanged(RemoteConference conference, int oldState, int newState) {}
-        public void onDisconnected(RemoteConference conference, int cause, String message) {}
+        public void onDisconnected(RemoteConference conference, DisconnectCause disconnectCause) {}
         public void onConnectionAdded(RemoteConference conference, RemoteConnection connection) {}
         public void onConnectionRemoved(RemoteConference conference, RemoteConnection connection) {}
         public void onCapabilitiesChanged(RemoteConference conference, int capabilities) {}
@@ -50,9 +49,8 @@ public final class RemoteConference {
             Collections.unmodifiableList(mChildConnections);
 
     private int mState = Connection.STATE_NEW;
-    private int mDisconnectCause = DisconnectCause.NOT_VALID;
+    private DisconnectCause mDisconnectCause;
     private int mCallCapabilities;
-    private String mDisconnectMessage;
 
     /** {@hide} */
     RemoteConference(String id, IConnectionService connectionService) {
@@ -127,13 +125,12 @@ public final class RemoteConference {
     }
 
     /** {@hide} */
-    void setDisconnected(int cause, String message) {
+    void setDisconnected(DisconnectCause disconnectCause) {
         if (mState != Connection.STATE_DISCONNECTED) {
-            mDisconnectCause = cause;
-            mDisconnectMessage = message;
+            mDisconnectCause = disconnectCause;
             setState(Connection.STATE_DISCONNECTED);
             for (Callback c : mCallbacks) {
-                c.onDisconnected(this, cause, message);
+                c.onDisconnected(this, disconnectCause);
             }
         }
     }
@@ -180,12 +177,8 @@ public final class RemoteConference {
         }
     }
 
-    public int getDisconnectCause() {
+    public DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
-    }
-
-    public String getDisconnectMessage() {
-        return mDisconnectMessage;
     }
 
     public final void registerCallback(Callback callback) {
