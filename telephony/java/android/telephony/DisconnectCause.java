@@ -263,7 +263,7 @@ public class DisconnectCause {
         case OUTGOING_CANCELED:
             return "OUTGOING_CANCELED";
         default:
-            return "INVALID";
+            return "INVALID: " + cause;
         }
     }
 }
