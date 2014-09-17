@@ -53,6 +53,9 @@ public class NetworkAgentInfo {
     // Penalty applied to scores of Networks that have not been validated.
     private static final int UNVALIDATED_SCORE_PENALTY = 40;
 
+    // Score for explicitly connected network.
+    private static final int EXPLICITLY_SELECTED_NETWORK_SCORE = 100;
+
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
     public final ArrayList<NetworkRequest> networkLingered = new ArrayList<NetworkRequest>();
@@ -95,8 +98,9 @@ public class NetworkAgentInfo {
         int score = currentScore;
 
         if (!validated) score -= UNVALIDATED_SCORE_PENALTY;
-
         if (score < 0) score = 0;
+
+        if (networkMisc.explicitlySelected) score = EXPLICITLY_SELECTED_NETWORK_SCORE;
 
         return score;
     }
@@ -110,7 +114,8 @@ public class NetworkAgentInfo {
                 network + "}  lp{" +
                 linkProperties + "}  nc{" +
                 networkCapabilities + "}  Score{" + getCurrentScore() + "} " +
-                "validated{" + validated + "} created{" + created + "} }";
+                "validated{" + validated + "} created{" + created + "} " +
+                "explicitlySelected{" + networkMisc.explicitlySelected + "} }";
     }
 
     public String name() {
