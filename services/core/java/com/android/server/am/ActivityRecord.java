@@ -917,6 +917,7 @@ final class ActivityRecord {
             if (displayStartTime != 0) {
                 reportLaunchTimeLocked(SystemClock.uptimeMillis());
             }
+            mStackSupervisor.sendWaitingVisibleReportLocked(this);
             startTime = 0;
             finishLaunchTickingLocked();
             if (task != null) {
