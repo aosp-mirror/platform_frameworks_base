@@ -50,19 +50,16 @@ public class SystemConfig {
 
     // These are the built-in uid -> permission mappings that were read from the
     // system configuration files.
-    final SparseArray<HashSet<String>> mSystemPermissions =
-            new SparseArray<HashSet<String>>();
+    final SparseArray<HashSet<String>> mSystemPermissions = new SparseArray<>();
 
     // These are the built-in shared libraries that were read from the
     // system configuration files.  Keys are the library names; strings are the
     // paths to the libraries.
-    final ArrayMap<String, String> mSharedLibraries
-            = new ArrayMap<String, String>();
+    final ArrayMap<String, String> mSharedLibraries  = new ArrayMap<>();
 
     // These are the features this devices supports that were read from the
     // system configuration files.
-    final HashMap<String, FeatureInfo> mAvailableFeatures =
-            new HashMap<String, FeatureInfo>();
+    final HashMap<String, FeatureInfo> mAvailableFeatures = new HashMap<>();
 
     public static final class PermissionEntry {
         public final String name;
@@ -75,12 +72,14 @@ public class SystemConfig {
 
     // These are the permission -> gid mappings that were read from the
     // system configuration files.
-    final ArrayMap<String, PermissionEntry> mPermissions =
-            new ArrayMap<String, PermissionEntry>();
+    final ArrayMap<String, PermissionEntry> mPermissions = new ArrayMap<>();
 
     // These are the packages that are white-listed to be able to run in the
     // background while in power save mode, as read from the configuration files.
-    final ArraySet<String> mAllowInPowerSave = new ArraySet<String>();
+    final ArraySet<String> mAllowInPowerSave = new ArraySet<>();
+
+    // These are the app package names that should not allow IME switching.
+    final ArraySet<String> mFixedImeApps = new ArraySet<>();
 
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
@@ -113,6 +112,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowInPowerSave() {
         return mAllowInPowerSave;
+    }
+
+    public ArraySet<String> getFixedImeApps() {
+        return mFixedImeApps;
     }
 
     SystemConfig() {
@@ -294,6 +297,17 @@ public class SystemConfig {
                                 + parser.getPositionDescription());
                     } else {
                         mAllowInPowerSave.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+
+                } else if ("fixed-ime-app".equals(name)) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<fixed-ime-app> without package at "
+                                + parser.getPositionDescription());
+                    } else {
+                        mFixedImeApps.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
