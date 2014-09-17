@@ -1351,6 +1351,16 @@ public class AudioService extends IAudioService.Stub {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
+        // If Hdmi-CEC system audio mode is on, show volume bar
+        // only when TV receives volume notification from Audio Receiver.
+        if (mHdmiTvClient != null && streamType == AudioSystem.STREAM_MUSIC) {
+            synchronized (mHdmiTvClient) {
+                if (mHdmiSystemAudioSupported &&
+                        ((flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0)) {
+                    flags &= ~AudioManager.FLAG_SHOW_UI;
+                }
+            }
+        }
         mVolumeController.postVolumeChanged(streamType, flags);
 
         if ((flags & AudioManager.FLAG_FIXED_VOLUME) == 0) {
