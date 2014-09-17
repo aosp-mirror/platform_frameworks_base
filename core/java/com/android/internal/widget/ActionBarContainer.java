@@ -260,6 +260,11 @@ public class ActionBarContainer extends FrameLayout {
         return view == null || view.getVisibility() == GONE || view.getMeasuredHeight() == 0;
     }
 
+    private int getMeasuredHeightWithMargins(View view) {
+        final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        return view.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+    }
+
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mActionBarView == null &&
@@ -271,26 +276,23 @@ public class ActionBarContainer extends FrameLayout {
 
         if (mActionBarView == null) return;
 
-        int nonTabMaxHeight = 0;
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child == mTabContainer) {
-                continue;
-            }
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            nonTabMaxHeight = Math.max(nonTabMaxHeight, isCollapsed(child) ? 0 :
-                    child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-        }
-
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
-            final int mode = MeasureSpec.getMode(heightMeasureSpec);
-            if (mode == MeasureSpec.AT_MOST) {
-                final int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
-                setMeasuredDimension(getMeasuredWidth(),
-                        Math.min(nonTabMaxHeight + mTabContainer.getMeasuredHeight(),
-                                maxHeight));
+            int nonTabMaxHeight = 0;
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                if (child == mTabContainer) {
+                    continue;
+                }
+                nonTabMaxHeight = Math.max(nonTabMaxHeight, isCollapsed(child) ? 0 :
+                        getMeasuredHeightWithMargins(child));
             }
+            final int mode = MeasureSpec.getMode(heightMeasureSpec);
+            final int maxHeight = mode == MeasureSpec.AT_MOST ?
+                    MeasureSpec.getSize(heightMeasureSpec) : Integer.MAX_VALUE;
+            setMeasuredDimension(getMeasuredWidth(),
+                    Math.min(nonTabMaxHeight + getMeasuredHeightWithMargins(mTabContainer),
+                            maxHeight));
         }
     }
 
@@ -303,8 +305,10 @@ public class ActionBarContainer extends FrameLayout {
 
         if (tabContainer != null && tabContainer.getVisibility() != GONE) {
             final int containerHeight = getMeasuredHeight();
+            final LayoutParams lp = (LayoutParams) tabContainer.getLayoutParams();
             final int tabHeight = tabContainer.getMeasuredHeight();
-            tabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
+            tabContainer.layout(l, containerHeight - tabHeight - lp.bottomMargin, r,
+                    containerHeight - lp.bottomMargin);
         }
 
         boolean needsInvalidate = false;
