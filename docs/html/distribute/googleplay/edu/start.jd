@@ -9,27 +9,23 @@ page.metaDescription=Join Google Play for Education in just a few simple steps.
 <div id="qv-wrapper"><div id="qv">
 <h2>Steps to Join</h2>
 <ol>
-<li><a href="#register">Register for a Publisher Account</li>
+<li><a href="#register">Register for a Publisher Account</a></li>
 <li><a href="#prepare">Prepare Your Apps</a></li>
 <li><a href="#publish">Publish Your Apps</a></li>
 <li><a href="#related-resources">Related Resources</a></li>
 </ol>
 </div></div>
 <p>
-  If you've got great Android apps for education and want to reach even more teachers
+  If you've got great Android and Chrome apps for education and want to reach even more teachers
   and students, you can join the <strong>Google Play for Education</strong>
   program in a few simple steps. You do everything using the familiar tools and
-  processes in Google Play.
+  processes you currently use to manage your Android or Chrome apps.
 </p>
 
 <p>
 Note that Google Play for Education is currently available to <strong>K-12 schools in the United
 States</strong> only.</p>
 
-<p>If you have an educational Chrome app instead of an Android app, you can learn more about
-Chrome Apps in Google Play for Education at <a href=
-"https://developers.google.com/edu">developers.google.com/edu</a>.
-</p>
 
 <img src="{@docRoot}images/gpfe-start-0.jpg" style=
   "border:1px solid #ddd;padding:0px" width="760" height="403">
@@ -43,23 +39,20 @@ Chrome Apps in Google Play for Education at <a href=
 </div>
 
 <p>
-  If you’re new to Google Play, review the information on <a href=
+  To publish an Android app in Google Play for Education, review the information on <a href=
   "{@docRoot}distribute/googleplay/start.html">getting started</a> with
   publishing on Google Play. You’ll gain access to the <a href=
   "{@docRoot}distribute/googleplay/developer-console.html">Developer
   Console</a>, where you’ll manage your details, apps, and payments.
 </p>
 
+<p>To publish a Chrome app in Google Play for Education, you'll need a
+<a href="https://developer.chrome.com/webstore/publish">Chrome Web Store account</a>.</p>
+
 <div class="headerLine">
   <h2 id="prepare">
     Prepare Your Apps
   </h2>
-
-
-</div>
-
-<div class="figure-right">
-  <img src="{@docRoot}images/gp-edu-process.png">
 </div>
 
 <p>
@@ -77,18 +70,26 @@ Chrome Apps in Google Play for Education at <a href=
   To prepare for a launch on Google Play for Education, start by reviewing the
   guidelines for educational apps in Google Play and the policies that apply to
   your apps. See the <a href=
-  "{@docRoot}distribute/essentials/gpfe-guidelines.html">Education
+  "https://developers.google.com/edu/guidelines">Education
   Guidelines</a> for details.
 </p>
 
 <p>
   Also, make sure that you're familiar with the policies that your app must
-  comply with, including <a href=
+  comply with. For Android, they include <a href=
   "http://play.google.com/about/developer-content-policy.html">content
   policies</a>, the <a href=
   "http://play.google.com/about/developer-distribution-agreement.html">Developer
   Distribution Agreement</a>, and <a href=
   "https://play.google.com/about/developer-distribution-agreement-addendum.html">
+  Google Play for Education Addendum</a>.
+</p>
+<p>For Chrome, they include <a href=
+  "https://developer.chrome.com/webstore/program_policies">content
+  policies</a>, the <a href=
+  "https://developer.chrome.com/webstore/terms">Developer
+  Distribution Agreement</a>, and <a href=
+  "https://developers.google.com/edu/chrome-d-d-a-addendum">
   Google Play for Education Addendum</a>.
 </p>
 
@@ -105,7 +106,7 @@ Chrome Apps in Google Play for Education at <a href=
 
 <p>
   Assess your app against the criteria listed in the <a href=
-  "{@docRoot}distribute/essentials/gpfe-guidelines.html">Education
+  "https://developers.google.com/edu/guidelines">Education
   Guidelines</a> and plan on supporting them to the greatest extent possible.
   In some cases you might need to modify the app’s features or UI to support
   classroom requirements. It's a good idea to identify any changes early in
@@ -113,7 +114,7 @@ Chrome Apps in Google Play for Education at <a href=
 </p>
 
 <p>
-  With Google Play for Education, optimizing your apps for tablets is crucial.
+  With Google Play for Education, optimizing your Android apps for tablets is crucial.
   A variety of resources are available to help you understand what you need to
   do — a good starting point is the <a href=
   "{@docRoot}distribute/essentials/quality/tablets.html">Tablet App Quality</a>
@@ -131,6 +132,11 @@ Chrome Apps in Google Play for Education at <a href=
   Play</a> and other stores.
 </p>
 
+<p>
+For Chrome apps, optimizing your apps for mouse, keyboard, and touch is just as important.
+Some students will use touch as their primary input method, and some will have Chromebooks
+without touch. Make sure your app works for all students.
+</p>
 <p>
   Comprehensive testing and quality assurance are key aspects of delivering
   great apps for teachers and students. Make sure you set up a <a href=
@@ -160,15 +166,13 @@ Chrome Apps in Google Play for Education at <a href=
     apps.
   </li>
 
-  <li>Publish your apps in the Developer Console as normal, but opt-in to
+  <li>Publish your apps in the Developer Console (for Android apps) or the Chrome Web Store
+  (for Chrome apps) as normal, but opt-in to
   Google Play for Education.
   </li>
 </ul>
 
-<h3 id="opt-in">
-  Opt-in to Google Play for Education and publish
-</h3>
-
+<h3>Opt-in to Google Play for Education and publish Android apps</h3>
 <p>
   Once you've built your release-ready APK upload it to the Developer Console,
   create your store listing, and set distribution options. If you aren't
@@ -231,7 +235,7 @@ Chrome Apps in Google Play for Education at <a href=
   will be shown to educators when they are browsing your app.
   </li>
 
-  <li>Click <strong>Save</strong>f to save your Pricing and Distribution
+  <li>Click <strong>Save</strong> to save your Pricing and Distribution
   changes.
   </li>
 </ol>
@@ -247,58 +251,55 @@ Chrome Apps in Google Play for Education at <a href=
 </div>
 
 <p>
-  Once you save changes and publish your app, the app will be submitted to our
-  third-party educator network for review and approval. If the app is already
-  published, it will be submitted for review as soon as you opt-in and save
-  your changes.
+  Once you save changes and publish your app, the app will be available on Google Play for
+  Education. We may submit your app to our
+  third-party educator network for additional review and to be featured and badged as
+  Educator-approved.
 </p>
 
 <p class="note">
   <strong>Note</strong>: Google Play for Education is part of Google Play. When
-  you publish an app that's opted-in to Google Play for Education, the app
-  becomes available to users in Google Play right away. After the app is
-  <a href="{@docRoot}distribute/essentials/gpfe-guidelines.html#e-value">review
-  and approval</a>, it then becomes available to educators in Google Play for
-  Education.
+  you publish an Android app that's opted-in to Google Play for Education, the app
+  becomes available to users in Google Play.
 </p>
 
-<h3>
-  Track your review and approval
-</h3>
-
+<h3>Opt-in to Google Play for Education and publish Chrome apps</h3>
 <p>
-  As soon as you opt-in to Google Play for Education and publish, your apps are
-  queued for review by our third-party educator network. The review and
-  approval process can take four weeks or more. You'll receive notification by
-  email (to your developer account address) when the review is complete, with a
-  summary of the review results.
+Once you've uploaded your app or extension to the Developer Dashboard, create your store listing
+and set distribution options.
 </p>
-
 <p>
-  At any time, you can check the review and approval status of your app in the
-  Developer Console, under "Google Play for Education" in the app's Pricing and
-  Distribution page. There are three approval states:
+When your apps are ready to publish, you opt-in to Google Play for Education directly from the
+<a href="https://chrome.google.com/webstore/developer/dashboard">Developer Dashboard</a>.
+Opt-in means that you want your apps to be made available to educators
+through Google Play for Education, including review, classification, and approval by our
+third-party educator network.
+</p>
+<p>
+Opt-in also confirms that your app complies with
+<a href="https://developer.chrome.com/webstore/program_policies">Chrome Web Store Program Policies</a>
+and the <a href="https://developer.chrome.com/webstore/terms">Terms of Service</a>, including a
+<a href="https://developers.google.com/edu/chrome-d-d-a-addendum">Google Play for Education Addendum</a>.
+If you are not familiar with these
+policy documents or the Addendum, make sure to read them before opting-in.
 </p>
 
-<ul>
-  <li>
-    <em>Pending</em> &mdash; Your app was sent for review and the review isn't
-    yet complete.
-  </li>
+<p>Here's how to opt-in to Google Play for Education for a specific app or extension:</p>
+<ol>
+<li>In the Developer Dashboard, click <b>Edit</b> on the app you want to opt-in.</li>
+<li>Scroll down to <b>Google Play for Education</b> and review the additional
+Developer Terms and Conditions.</li>
+<li>Select the checkbox to opt-in to include this item in Google Play for Education.</li>
+<li>Click <b>Publish Changes</b> to save your changes and submit your application.
+Once you save changes and publish your app, the app will be available on Google Play for Education.
+We may submit your app to our third-party educator network for additional review, and to be
+featured and badged as Educator-approved.</li>
+<p class="note"><b>Note:</b>
+When you publish an app that's opted-in to Google Play for Education,
+the app becomes available to users in the Chrome Web Store.
+</p>
+</ol>
 
-  <li>
-    <em>Approved</em> &mdash; Your app was reviewed and approved. The app will
-    be made available directly to educators through Google Play for Education.
-    Once your app is approved, you can update it at your convenience without
-    needing another full review.
-  </li>
-
-  <li>
-    <em>Not approved</em> &mdash; Your app was reviewed and not approved. Check
-    the notification email send for information about why the app wasn’t
-    approved. You can address any issues and opt-in again for another review.
-  </li>
-</ul>
 <div class="headerLine">
 <h2 id="related-resources">Related Resources</h2>
 </div>
