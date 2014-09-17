@@ -614,6 +614,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
+    public void onTaskLaunchFailed() {
+        // Return to Home
+        dismissRecentsToHomeRaw(true);
+    }
+
+    @Override
     public void onAllTaskViewsDismissed() {
         mFinishLaunchHomeRunnable.run();
     }

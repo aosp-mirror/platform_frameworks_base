@@ -57,6 +57,7 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 
 import java.io.IOException;
@@ -509,12 +510,18 @@ public class SystemServicesProxy {
         return takeScreenshot();
     }
 
-    public void startActivityFromRecents(int taskId, ActivityOptions options) {
+    /** Starts an activity from recents. */
+    public boolean startActivityFromRecents(Context context, int taskId, String taskName,
+            ActivityOptions options) {
         if (mIam != null) {
             try {
                 mIam.startActivityFromRecents(taskId, options == null ? null : options.toBundle());
-            } catch (RemoteException e) {
+                return true;
+            } catch (Exception e) {
+                Console.logError(context,
+                        context.getString(R.string.recents_launch_error_message, taskName));
             }
         }
+        return false;
     }
 }

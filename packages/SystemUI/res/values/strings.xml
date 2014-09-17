@@ -670,6 +670,8 @@
     <string name="recents_lock_to_app_button_label">lock to app</string>
     <!-- Recents: Temporary string for the button in the recents search bar. [CHAR LIMIT=NONE] -->
     <string name="recents_search_bar_label">search</string>
+    <!-- Recents: Launch error string. [CHAR LIMIT=NONE] -->
+    <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
 
 
     <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
