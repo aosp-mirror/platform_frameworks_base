@@ -2125,8 +2125,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    private final class DecorView extends FrameLayout implements RootViewSurfaceTaker,
-            View.OnSystemUiVisibilityChangeListener {
+    private final class DecorView extends FrameLayout implements RootViewSurfaceTaker {
         /* package */int mDefaultOpacity = PixelFormat.OPAQUE;
 
         /** The feature ID of the panel, or -1 if this is the application's DecorView */
@@ -2163,8 +2162,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private int mLastTopInset = 0;
         private int mLastBottomInset = 0;
         private int mLastRightInset = 0;
-        private int mLastSystemUiVisibility = 0;
-        private int mLastWindowSystemUiVisibility = 0;
 
 
         public DecorView(Context context, int featureId) {
@@ -2745,14 +2742,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
-        public void onSystemUiVisibilityChange(int visible) {
-            mLastSystemUiVisibility = visible;
-            updateColorViews(null /* insets */);
-        }
-
-        @Override
         public void onWindowSystemUiVisibilityChanged(int visible) {
-            mLastWindowSystemUiVisibility = visible;
             updateColorViews(null /* insets */);
         }
 
@@ -2774,6 +2764,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private WindowInsets updateColorViews(WindowInsets insets) {
+            WindowManager.LayoutParams attrs = getAttributes();
+            int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
+
             if (!mIsFloating && ActivityManager.isHighEndGfx()) {
                 if (insets != null) {
                     mLastTopInset = Math.min(insets.getStableInsetTop(),
@@ -2783,22 +2776,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mLastRightInset = Math.min(insets.getStableInsetRight(),
                             insets.getSystemWindowInsetRight());
                 }
-                mStatusColorView = updateColorViewInt(mStatusColorView,
+                mStatusColorView = updateColorViewInt(mStatusColorView, sysUiVisibility,
                         SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
                         mStatusBarColor, mLastTopInset, Gravity.TOP,
                         STATUS_BAR_BACKGROUND_TRANSITION_NAME,
                         com.android.internal.R.id.statusBarBackground,
                         (getAttributes().flags & FLAG_FULLSCREEN) != 0);
-                mNavigationColorView = updateColorViewInt(mNavigationColorView,
+                mNavigationColorView = updateColorViewInt(mNavigationColorView, sysUiVisibility,
                         SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
                         mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM,
                         NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
                         com.android.internal.R.id.navigationBarBackground,
                         false /* hiddenByWindowFlag */);
             }
-
-            WindowManager.LayoutParams attrs = getAttributes();
-            int sysUiVisibility = attrs.systemUiVisibility | mLastWindowSystemUiVisibility;
 
             // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
             // to ensure that the rest of the view hierarchy doesn't notice it, unless they've
@@ -2807,7 +2797,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             boolean consumingNavBar =
                     (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                             && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-                            && (mLastSystemUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+                            && (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
 
             int consumedRight = consumingNavBar ? mLastRightInset : 0;
             int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
@@ -2841,10 +2831,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return insets;
         }
 
-        private View updateColorViewInt(View view, int systemUiHideFlag, int translucentFlag,
-                int color, int height, int verticalGravity, String transitionName, int id,
-                boolean hiddenByWindowFlag) {
-            boolean show = height > 0 && (mLastSystemUiVisibility & systemUiHideFlag) == 0
+        private View updateColorViewInt(View view, int sysUiVis, int systemUiHideFlag,
+                int translucentFlag, int color, int height, int verticalGravity,
+                String transitionName, int id, boolean hiddenByWindowFlag) {
+            boolean show = height > 0 && (sysUiVis & systemUiHideFlag) == 0
                     && !hiddenByWindowFlag
                     && (getAttributes().flags & translucentFlag) == 0
                     && (color & Color.BLACK) != 0
@@ -3320,7 +3310,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 setFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS & ~getForcedWindowFlags());
             }
-            decor.setOnSystemUiVisibilityChangeListener(decor);
         }
         if (!mForcedStatusBarColor) {
             mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
