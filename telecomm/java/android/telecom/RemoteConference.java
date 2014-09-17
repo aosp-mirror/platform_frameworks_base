@@ -181,6 +181,27 @@ public final class RemoteConference {
         return mDisconnectCause;
     }
 
+    public void playDtmfTone(char digit) {
+        try {
+            mConnectionService.playDtmfTone(mId, digit);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void stopDtmfTone() {
+        try {
+            mConnectionService.stopDtmfTone(mId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void setAudioState(AudioState state) {
+        try {
+            mConnectionService.onAudioStateChanged(mId, state);
+        } catch (RemoteException e) {
+        }
+    }
+
     public final void registerCallback(Callback callback) {
         mCallbacks.add(callback);
     }
