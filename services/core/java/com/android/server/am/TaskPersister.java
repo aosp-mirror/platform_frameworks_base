@@ -51,6 +51,12 @@ public class TaskPersister {
      * task being launched a chance to load its resources without this occupying IO bandwidth. */
     private static final long PRE_TASK_DELAY_MS = 3000;
 
+    /** The maximum number of entries to keep in the queue before draining it automatically. */
+    private static final int MAX_WRITE_QUEUE_LENGTH = 6;
+
+    /** Special value for mWriteTime to mean don't wait, just write */
+    private static final long FLUSH_QUEUE = -1;
+
     private static final String RECENTS_FILENAME = "_task";
     private static final String TASKS_DIRNAME = "recent_tasks";
     private static final String TASK_EXTENSION = ".xml";
@@ -120,6 +126,31 @@ public class TaskPersister {
         mLazyTaskWriterThread.start();
     }
 
+    private void removeThumbnails(TaskRecord task) {
+        final String taskString = Integer.toString(task.taskId);
+        for (int queueNdx = mWriteQueue.size() - 1; queueNdx >= 0; --queueNdx) {
+            final WriteQueueItem item = mWriteQueue.get(queueNdx);
+            if (item instanceof ImageWriteQueueItem &&
+                    ((ImageWriteQueueItem) item).mFilename.startsWith(taskString)) {
+                if (DEBUG) Slog.d(TAG, "Removing " + ((ImageWriteQueueItem) item).mFilename +
+                        " from write queue");
+                mWriteQueue.remove(queueNdx);
+            }
+        }
+    }
+
+    private void yieldIfQueueTooDeep() {
+        boolean stall = false;
+        synchronized (this) {
+            if (mNextWriteTime == FLUSH_QUEUE) {
+                stall = true;
+            }
+        }
+        if (stall) {
+            Thread.yield();
+        }
+    }
+
     void wakeup(TaskRecord task, boolean flush) {
         synchronized (this) {
             if (task != null) {
@@ -128,6 +159,10 @@ public class TaskPersister {
                     final WriteQueueItem item = mWriteQueue.get(queueNdx);
                     if (item instanceof TaskWriteQueueItem &&
                             ((TaskWriteQueueItem) item).mTask == task) {
+                        if (!task.inRecents) {
+                            // This task is being removed.
+                            removeThumbnails(task);
+                        }
                         break;
                     }
                 }
@@ -138,15 +173,18 @@ public class TaskPersister {
                 // Dummy.
                 mWriteQueue.add(new WriteQueueItem());
             }
-            if (flush) {
-                mNextWriteTime = -1;
+            if (flush || mWriteQueue.size() > MAX_WRITE_QUEUE_LENGTH) {
+                mNextWriteTime = FLUSH_QUEUE;
             } else if (mNextWriteTime == 0) {
                 mNextWriteTime = SystemClock.uptimeMillis() + PRE_TASK_DELAY_MS;
             }
             if (DEBUG) Slog.d(TAG, "wakeup: task=" + task + " flush=" + flush + " mNextWriteTime="
-                    + mNextWriteTime + " Callers=" + Debug.getCallers(4));
+                    + mNextWriteTime + " mWriteQueue.size=" + mWriteQueue.size()
+                    + " Callers=" + Debug.getCallers(4));
             notifyAll();
         }
+
+        yieldIfQueueTooDeep();
     }
 
     void saveImage(Bitmap image, String filename) {
@@ -166,7 +204,9 @@ public class TaskPersister {
             if (queueNdx < 0) {
                 mWriteQueue.add(new ImageWriteQueueItem(filename, image));
             }
-            if (mNextWriteTime == 0) {
+            if (mWriteQueue.size() > MAX_WRITE_QUEUE_LENGTH) {
+                mNextWriteTime = FLUSH_QUEUE;
+            } else if (mNextWriteTime == 0) {
                 mNextWriteTime = SystemClock.uptimeMillis() + PRE_TASK_DELAY_MS;
             }
             if (DEBUG) Slog.d(TAG, "saveImage: filename=" + filename + " now=" +
@@ -174,6 +214,8 @@ public class TaskPersister {
                     mNextWriteTime + " Callers=" + Debug.getCallers(4));
             notifyAll();
         }
+
+        yieldIfQueueTooDeep();
     }
 
     Bitmap getThumbnail(String filename) {
@@ -425,7 +467,7 @@ public class TaskPersister {
                 // If mNextWriteTime, then don't delay between each call to saveToXml().
                 final WriteQueueItem item;
                 synchronized (TaskPersister.this) {
-                    if (mNextWriteTime >= 0) {
+                    if (mNextWriteTime != FLUSH_QUEUE) {
                         // The next write we don't have to wait so long.
                         mNextWriteTime = SystemClock.uptimeMillis() + INTER_WRITE_DELAY_MS;
                         if (DEBUG) Slog.d(TAG, "Next write time may be in " +
@@ -439,13 +481,14 @@ public class TaskPersister {
                             TaskPersister.this.wait();
                         } catch (InterruptedException e) {
                         }
-                        // Invariant: mNextWriteTime is either -1 or PRE_WRITE_DELAY_MS from now.
+                        // Invariant: mNextWriteTime is either FLUSH_QUEUE or PRE_WRITE_DELAY_MS
+                        // from now.
                     }
                     item = mWriteQueue.remove(0);
 
                     long now = SystemClock.uptimeMillis();
                     if (DEBUG) Slog.d(TAG, "LazyTaskWriter: now=" + now + " mNextWriteTime=" +
-                            mNextWriteTime);
+                            mNextWriteTime + " mWriteQueue.size=" + mWriteQueue.size());
                     while (now < mNextWriteTime) {
                         try {
                             if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting " +
@@ -484,7 +527,7 @@ public class TaskPersister {
                     TaskRecord task = ((TaskWriteQueueItem) item).mTask;
                     if (DEBUG) Slog.d(TAG, "Writing task=" + task);
                     synchronized (mService) {
-                        if (mService.mRecentTasks.contains(task)) {
+                        if (task.inRecents) {
                             // Still there.
                             try {
                                 if (DEBUG) Slog.d(TAG, "Saving task=" + task);
