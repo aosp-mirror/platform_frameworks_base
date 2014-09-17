@@ -607,17 +607,29 @@ public abstract class ConnectionService extends Service {
 
     private void onAudioStateChanged(String callId, AudioState audioState) {
         Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
-        findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+        } else {
+            findConferenceForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+        }
     }
 
     private void playDtmfTone(String callId, char digit) {
         Log.d(this, "playDtmfTone %s %c", callId, digit);
-        findConnectionForAction(callId, "playDtmfTone").onPlayDtmfTone(digit);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "playDtmfTone").onPlayDtmfTone(digit);
+        } else {
+            findConferenceForAction(callId, "playDtmfTone").onPlayDtmfTone(digit);
+        }
     }
 
     private void stopDtmfTone(String callId) {
         Log.d(this, "stopDtmfTone %s", callId);
-        findConnectionForAction(callId, "stopDtmfTone").onStopDtmfTone();
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "stopDtmfTone").onStopDtmfTone();
+        } else {
+            findConferenceForAction(callId, "stopDtmfTone").onStopDtmfTone();
+        }
     }
 
     private void conference(String callId1, String callId2) {
