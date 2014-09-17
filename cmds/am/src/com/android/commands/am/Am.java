@@ -48,6 +48,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -726,6 +727,7 @@ public class Am extends BaseCommand {
 
             IActivityManager.WaitResult result = null;
             int res;
+            final long startTime = SystemClock.uptimeMillis();
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, null, intent, mimeType,
                             null, null, 0, mStartFlags, profilerInfo, null, mUserId);
@@ -734,6 +736,7 @@ public class Am extends BaseCommand {
                 res = mAm.startActivityAsUser(null, null, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo, null, mUserId);
             }
+            final long endTime = SystemClock.uptimeMillis();
             PrintStream out = mWaitOption ? System.out : System.err;
             boolean launched = false;
             switch (res) {
@@ -811,6 +814,7 @@ public class Am extends BaseCommand {
                 if (result.totalTime >= 0) {
                     System.out.println("TotalTime: " + result.totalTime);
                 }
+                System.out.println("WaitTime: " + (endTime-startTime));
                 System.out.println("Complete");
             }
             mRepeat--;
