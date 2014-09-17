@@ -771,7 +771,7 @@ public abstract class Connection {
     public final void setDisconnected(DisconnectCause disconnectCause) {
         mDisconnectCause = disconnectCause;
         setState(STATE_DISCONNECTED);
-        Log.d(this, "Disconnected with cause %d message %s", disconnectCause);
+        Log.d(this, "Disconnected with cause %s", disconnectCause);
         for (Listener l : mListeners) {
             l.onDisconnected(this, disconnectCause);
         }
