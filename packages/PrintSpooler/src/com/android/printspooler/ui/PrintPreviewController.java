@@ -77,6 +77,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         mRecyclerView = (RecyclerView) activity.findViewById(R.id.preview_content);
         mRecyclerView.setLayoutManager(mLayoutManger);
         mRecyclerView.setAdapter(mPageAdapter);
+        mRecyclerView.setItemViewCacheSize(0);
         mPreloadController = new PreloadController(mRecyclerView);
         mRecyclerView.setOnScrollListener(mPreloadController);
 
@@ -348,8 +349,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
 
         public void startPreloadContent() {
             PageAdapter pageAdapter = (PageAdapter) mRecyclerView.getAdapter();
-
-            if (pageAdapter.isOpened()) {
+            if (pageAdapter != null && pageAdapter.isOpened()) {
                 PageRange shownPages = computeShownPages();
                 if (shownPages != null) {
                     pageAdapter.startPreloadContent(shownPages);
@@ -359,8 +359,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
 
         public void stopPreloadContent() {
             PageAdapter pageAdapter = (PageAdapter) mRecyclerView.getAdapter();
-
-            if (pageAdapter.isOpened()) {
+            if (pageAdapter != null && pageAdapter.isOpened()) {
                 pageAdapter.stopPreloadContent();
             }
         }
