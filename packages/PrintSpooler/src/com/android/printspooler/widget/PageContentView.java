@@ -52,12 +52,12 @@ public class PageContentView extends View
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        mContentRequested = false;
         requestPageContentIfNeeded();
     }
 
     @Override
     public void onPageContentAvailable(BitmapDrawable content) {
-        assert (getBackground() != content);
         setBackground(content);
     }
 
@@ -70,7 +70,7 @@ public class PageContentView extends View
         final boolean providerChanged = (mProvider == null)
                 ? provider != null : !mProvider.equals(provider);
         final boolean loadingDrawableChanged = (mEmptyState == null)
-                ? mEmptyState != null : !mEmptyState.equals(emptyState);
+                ? emptyState != null : !mEmptyState.equals(emptyState);
         final boolean mediaSizeChanged = (mMediaSize == null)
                 ? mediaSize != null : !mMediaSize.equals(mediaSize);
         final boolean marginsChanged = (mMinMargins == null)
