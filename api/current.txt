@@ -28073,14 +28073,18 @@ package android.telecom {
     ctor public Conference(android.telecom.PhoneAccountHandle);
     method public final boolean addConnection(android.telecom.Connection);
     method public final void destroy();
+    method public final android.telecom.AudioState getAudioState();
     method public final int getCapabilities();
     method public final java.util.List<android.telecom.Connection> getConnections();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public final int getState();
+    method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onDisconnect();
     method public void onHold();
     method public void onMerge();
+    method public void onPlayDtmfTone(char);
     method public void onSeparate(android.telecom.Connection);
+    method public void onStopDtmfTone();
     method public void onSwap();
     method public void onUnhold();
     method public final void removeConnection(android.telecom.Connection);
