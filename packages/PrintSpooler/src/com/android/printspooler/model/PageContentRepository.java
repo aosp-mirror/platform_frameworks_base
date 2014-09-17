@@ -526,7 +526,7 @@ public final class PageContentRepository {
                         callback.run();
                     }
                 }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
         public void close(final Runnable callback) {
@@ -552,7 +552,7 @@ public final class PageContentRepository {
                         callback.run();
                     }
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
         public void destroy() {
@@ -571,7 +571,7 @@ public final class PageContentRepository {
                     mPageContentCache.invalidate();
                     mPageContentCache.clear();
                 }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
         public void startPreload(int firstShownPage, int lastShownPage, RenderSpec renderSpec) {
@@ -687,7 +687,7 @@ public final class PageContentRepository {
             // Oh well, we will have work to do...
             renderTask = new RenderPageTask(pageIndex, renderSpec, callback);
             mPageToRenderTaskMap.put(pageIndex, renderTask);
-            renderTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+            renderTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
         public void cancelRendering(int pageIndex) {
