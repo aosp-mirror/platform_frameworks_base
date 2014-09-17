@@ -274,8 +274,7 @@ public final class PageAdapter extends Adapter implements
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View page = mLayoutInflater.inflate(R.layout.preview_page, parent, false);
-        ViewHolder holder = new MyViewHolder(page);
-        return holder;
+        return new MyViewHolder(page);
     }
 
     @Override
@@ -313,14 +312,8 @@ public final class PageAdapter extends Adapter implements
                         + ", pageIndexInFile: " + pageIndexInFile);
             }
 
-            // OK, there are bugs in recycler view which tries to bind views
-            // without recycling them which would give us a chance to clean up.
-            PageContentProvider boundProvider = mPageContentRepository
-                    .peekPageContentProvider(pageIndexInFile);
-            if (boundProvider != null) {
-                PageContentView owner = (PageContentView) boundProvider.getOwner();
-                owner.init(null, mEmptyState, mMediaSize, mMinMargins);
-                mPageContentRepository.releasePageContentProvider(boundProvider);
+            if (provider != null && provider.getPageIndex() != pageIndexInFile) {
+                mPageContentRepository.releasePageContentProvider(provider);
             }
 
             provider = mPageContentRepository.acquirePageContentProvider(
@@ -731,7 +724,7 @@ public final class PageAdapter extends Adapter implements
     private void recyclePageView(PageContentView page, int pageIndexInAdapter) {
         PageContentProvider provider = page.getPageContentProvider();
         if (provider != null) {
-            page.init(null, null, null, null);
+            page.init(null, mEmptyState, mMediaSize, mMinMargins);
             mPageContentRepository.releasePageContentProvider(provider);
         }
         mBoundPagesInAdapter.remove(pageIndexInAdapter);
