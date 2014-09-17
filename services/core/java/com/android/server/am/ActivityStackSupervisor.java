@@ -650,31 +650,47 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void reportActivityVisibleLocked(ActivityRecord r) {
+        sendWaitingVisibleReportLocked(r);
+        notifyActivityDrawnForKeyguard();
+    }
+
+    void sendWaitingVisibleReportLocked(ActivityRecord r) {
+        boolean changed = false;
         for (int i = mWaitingActivityVisible.size()-1; i >= 0; i--) {
             WaitResult w = mWaitingActivityVisible.get(i);
-            w.timeout = false;
-            if (r != null) {
-                w.who = new ComponentName(r.info.packageName, r.info.name);
+            if (w.who == null) {
+                changed = true;
+                w.timeout = false;
+                if (r != null) {
+                    w.who = new ComponentName(r.info.packageName, r.info.name);
+                }
+                w.totalTime = SystemClock.uptimeMillis() - w.thisTime;
+                w.thisTime = w.totalTime;
             }
-            w.totalTime = SystemClock.uptimeMillis() - w.thisTime;
-            w.thisTime = w.totalTime;
         }
-        mService.notifyAll();
-        notifyActivityDrawnForKeyguard();
+        if (changed) {
+            mService.notifyAll();
+        }
     }
 
     void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
             long thisTime, long totalTime) {
+        boolean changed = false;
         for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
             WaitResult w = mWaitingActivityLaunched.remove(i);
-            w.timeout = timeout;
-            if (r != null) {
-                w.who = new ComponentName(r.info.packageName, r.info.name);
+            if (w.who == null) {
+                changed = true;
+                w.timeout = timeout;
+                if (r != null) {
+                    w.who = new ComponentName(r.info.packageName, r.info.name);
+                }
+                w.thisTime = thisTime;
+                w.totalTime = totalTime;
             }
-            w.thisTime = thisTime;
-            w.totalTime = totalTime;
         }
-        mService.notifyAll();
+        if (changed) {
+            mService.notifyAll();
+        }
     }
 
     ActivityRecord topRunningActivityLocked() {
@@ -936,7 +952,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     } while (!outResult.timeout && outResult.who == null);
                 } else if (res == ActivityManager.START_TASK_TO_FRONT) {
                     ActivityRecord r = stack.topRunningActivityLocked(null);
-                    if (r.nowVisible) {
+                    if (r.nowVisible && r.state == ActivityState.RESUMED) {
                         outResult.timeout = false;
                         outResult.who = new ComponentName(r.info.packageName, r.info.name);
                         outResult.totalTime = 0;
