@@ -316,7 +316,6 @@ public final class WindowInsets {
                     top ? 0 : mSystemWindowInsets.top,
                     right ? 0 : mSystemWindowInsets.right,
                     bottom ? 0 : mSystemWindowInsets.bottom);
-            result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
             return result;
         }
         return this;
@@ -336,7 +335,6 @@ public final class WindowInsets {
             int right, int bottom) {
         final WindowInsets result = new WindowInsets(this);
         result.mSystemWindowInsets = new Rect(left, top, right, bottom);
-        result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
         return result;
     }
 
@@ -351,7 +349,6 @@ public final class WindowInsets {
     public WindowInsets replaceSystemWindowInsets(Rect systemWindowInsets) {
         final WindowInsets result = new WindowInsets(this);
         result.mSystemWindowInsets = new Rect(systemWindowInsets);
-        result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
         return result;
     }
 
@@ -376,7 +373,6 @@ public final class WindowInsets {
                     top ? 0 : mWindowDecorInsets.top,
                     right ? 0 : mWindowDecorInsets.right,
                     bottom ? 0 : mWindowDecorInsets.bottom);
-            result.mWindowDecorInsetsConsumed = !hasWindowDecorInsets();
             return result;
         }
         return this;
@@ -388,7 +384,6 @@ public final class WindowInsets {
     public WindowInsets replaceWindowDecorInsets(int left, int top, int right, int bottom) {
         final WindowInsets result = new WindowInsets(this);
         result.mWindowDecorInsets = new Rect(left, top, right, bottom);
-        result.mWindowDecorInsetsConsumed = !hasWindowDecorInsets();
         return result;
     }
 
