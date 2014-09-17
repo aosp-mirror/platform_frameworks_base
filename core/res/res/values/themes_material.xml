@@ -316,6 +316,8 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Material.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height_material</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Material.PopupWindow.ActionMode</item>
+        <item name="actionMenuTextAppearance">@style/TextAppearance.Material.Widget.ActionBar.Menu</item>
+        <item name="actionMenuTextColor">?attr/textColorPrimary</item>
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarPopupTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
