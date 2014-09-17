@@ -24,6 +24,8 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import libcore.util.EmptyArray;
+
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -169,6 +171,15 @@ public class NetworkStats implements Parcelable {
         } else {
             // Special case for use by NetworkStatsFactory to start out *really* empty.
             this.capacity = 0;
+            this.iface = EmptyArray.STRING;
+            this.uid = EmptyArray.INT;
+            this.set = EmptyArray.INT;
+            this.tag = EmptyArray.INT;
+            this.rxBytes = EmptyArray.LONG;
+            this.rxPackets = EmptyArray.LONG;
+            this.txBytes = EmptyArray.LONG;
+            this.txPackets = EmptyArray.LONG;
+            this.operations = EmptyArray.LONG;
         }
     }
 
