@@ -3360,7 +3360,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mStackSupervisor.startActivityLocked(null, intent, null, ri.activityInfo,
-                            null, null, null, null, 0, 0, 0, null, 0, null, false, null, null,
+                            null, null, null, null, 0, 0, 0, null, 0, 0, 0, null, false, null, null,
                             null);
                 }
             }
@@ -3759,8 +3759,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, aInfo, null, null, resultTo != null ? resultTo.appToken : null,
-                    resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage, 0,
-                    options, false, null, null, null);
+                    resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage,
+                    -1, r.launchedFromUid, 0, options, false, null, null, null);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
@@ -8482,7 +8482,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void moveTaskToFrontLocked(int taskId, int flags, Bundle options) {
         if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
-                Binder.getCallingUid(), "Task to front")) {
+                Binder.getCallingUid(), -1, -1, "Task to front")) {
             ActivityOptions.abort(options);
             return;
         }
@@ -8524,7 +8524,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ActivityStack stack = tr.stack;
                 if (stack.mResumedActivity != null && stack.mResumedActivity.task == tr) {
                     if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
-                            Binder.getCallingUid(), "Task to back")) {
+                            Binder.getCallingUid(), -1, -1, "Task to back")) {
                         return;
                     }
                 }
@@ -8576,7 +8576,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized(this) {
             if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
-                    Binder.getCallingUid(), "Task backwards")) {
+                    Binder.getCallingUid(), -1, -1, "Task backwards")) {
                 return;
             }
             final long origId = Binder.clearCallingIdentity();
@@ -10120,20 +10120,31 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    boolean checkAppSwitchAllowedLocked(int callingPid, int callingUid,
-            String name) {
+    boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
+            int callingPid, int callingUid, String name) {
         if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
             return true;
         }
 
-        final int perm = checkComponentPermission(
-                android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
-                callingUid, -1, true);
+        int perm = checkComponentPermission(
+                android.Manifest.permission.STOP_APP_SWITCHES, sourcePid,
+                sourceUid, -1, true);
         if (perm == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        
-        Slog.w(TAG, name + " request from " + callingUid + " stopped");
+
+        // If the actual IPC caller is different from the logical source, then
+        // also see if they are allowed to control app switches.
+        if (callingUid != -1 && callingUid != sourceUid) {
+            perm = checkComponentPermission(
+                    android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
+                    callingUid, -1, true);
+            if (perm == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+
+        Slog.w(TAG, name + " request from " + sourceUid + " stopped");
         return false;
     }
     
@@ -18944,13 +18955,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
                 if (tr.getRootActivity() != null) {
-                    long origId = Binder.clearCallingIdentity();
-                    try {
-                        moveTaskToFrontLocked(tr.taskId, 0, null);
-                        return;
-                    } finally {
-                        Binder.restoreCallingIdentity(origId);
-                    }
+                    moveTaskToFrontLocked(tr.taskId, 0, null);
                 }
             }
 
