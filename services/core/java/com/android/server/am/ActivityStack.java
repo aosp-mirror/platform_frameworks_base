@@ -550,10 +550,10 @@ final class ActivityStack {
 
             if (DEBUG_TASKS) Slog.d(TAG, "Comparing existing cls="
                     + taskIntent.getComponent().flattenToShortString()
-                    + "/aff=" + r.task.affinity + " to new cls="
+                    + "/aff=" + r.task.rootAffinity + " to new cls="
                     + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
-            if (!isDocument && !taskIsDocument && task.affinity != null) {
-                if (task.affinity.equals(target.taskAffinity)) {
+            if (!isDocument && !taskIsDocument && task.rootAffinity != null) {
+                if (task.rootAffinity.equals(target.taskAffinity)) {
                     if (DEBUG_TASKS) Slog.d(TAG, "Found matching affinity!");
                     return r;
                 }
