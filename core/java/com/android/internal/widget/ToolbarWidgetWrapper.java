@@ -578,7 +578,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
     @Override
     public void animateToVisibility(int visibility) {
         if (visibility == View.GONE) {
-            mToolbar.animate().translationY(mToolbar.getHeight()).alpha(0)
+            mToolbar.animate().alpha(0)
                     .setListener(new AnimatorListenerAdapter() {
                         private boolean mCanceled = false;
                         @Override
@@ -594,7 +594,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                         }
                     });
         } else if (visibility == View.VISIBLE) {
-            mToolbar.animate().translationY(0).alpha(1)
+            mToolbar.animate().alpha(1)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationStart(Animator animation) {
