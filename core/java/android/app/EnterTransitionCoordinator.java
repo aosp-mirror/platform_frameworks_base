@@ -306,7 +306,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         ArrayList<String> rejectedNames = new ArrayList<String>(mAllSharedElementNames);
         rejectedNames.removeAll(mSharedElementNames);
         ArrayList<View> rejectedSnapshots = createSnapshots(sharedElementState, rejectedNames);
-        mListener.onRejectSharedElements(rejectedSnapshots);
+        if (mListener != null) {
+            mListener.onRejectSharedElements(rejectedSnapshots);
+        }
         startRejectedAnimations(rejectedSnapshots);
 
         // Now start shared element transition
