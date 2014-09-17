@@ -64,9 +64,6 @@ public final class PageContentRepository {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private final ArrayMap<Integer, PageContentProvider> mPageContentProviders =
-            new ArrayMap<>();
-
     private final AsyncRenderer mRenderer;
 
     private RenderSpec mLastRenderSpec;
@@ -141,10 +138,6 @@ public final class PageContentRepository {
         return mRenderer.getPageCount();
     }
 
-    public PageContentProvider peekPageContentProvider(int pageIndex) {
-        return mPageContentProviders.get(pageIndex);
-    }
-
     public PageContentProvider acquirePageContentProvider(int pageIndex, View owner) {
         throwIfDestroyed();
 
@@ -152,15 +145,7 @@ public final class PageContentRepository {
             Log.i(LOG_TAG, "Acquiring provider for page: " + pageIndex);
         }
 
-        if (mPageContentProviders.get(pageIndex)!= null) {
-            throw new IllegalStateException("Already acquired for page: " + pageIndex);
-        }
-
-        PageContentProvider provider = new PageContentProvider(pageIndex, owner);
-
-        mPageContentProviders.put(pageIndex, provider);
-
-        return provider;
+        return new PageContentProvider(pageIndex, owner);
     }
 
     public void releasePageContentProvider(PageContentProvider provider) {
@@ -168,10 +153,6 @@ public final class PageContentRepository {
 
         if (DEBUG) {
             Log.i(LOG_TAG, "Releasing provider for page: " + provider.mPageIndex);
-        }
-
-        if (mPageContentProviders.remove(provider.mPageIndex) == null) {
-            throw new IllegalStateException("Not acquired");
         }
 
         provider.cancelLoad();
