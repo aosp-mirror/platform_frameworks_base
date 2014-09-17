@@ -785,8 +785,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
         moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE);
-        startActivityLocked(null, intent, null, aInfo, null, null, null, null, 0, 0, 0, null, 0,
-                null, false, null, null, null);
+        startActivityLocked(null, intent, null, aInfo, null, null, null, null, 0, 0, 0, null,
+                0, 0, 0, null, false, null, null, null);
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
@@ -810,12 +810,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityContainer container = (ActivityContainer)iContainer;
         synchronized (mService) {
+            final int realCallingPid = Binder.getCallingPid();
+            final int realCallingUid = Binder.getCallingUid();
             int callingPid;
             if (callingUid >= 0) {
                 callingPid = -1;
             } else if (caller == null) {
-                callingPid = Binder.getCallingPid();
-                callingUid = Binder.getCallingUid();
+                callingPid = realCallingPid;
+                callingUid = realCallingUid;
             } else {
                 callingPid = callingUid = -1;
             }
@@ -841,11 +843,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     if (mService.mHeavyWeightProcess != null &&
                             (mService.mHeavyWeightProcess.info.uid != aInfo.applicationInfo.uid ||
                             !mService.mHeavyWeightProcess.processName.equals(aInfo.processName))) {
-                        int realCallingUid = callingUid;
+                        int appCallingUid = callingUid;
                         if (caller != null) {
                             ProcessRecord callerApp = mService.getRecordForAppLocked(caller);
                             if (callerApp != null) {
-                                realCallingUid = callerApp.info.uid;
+                                appCallingUid = callerApp.info.uid;
                             } else {
                                 Slog.w(TAG, "Unable to find app for caller " + caller
                                       + " (pid=" + callingPid + ") when starting: "
@@ -857,7 +859,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
                         IIntentSender target = mService.getIntentSenderLocked(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, "android",
-                                realCallingUid, userId, null, null, 0, new Intent[] { intent },
+                                appCallingUid, userId, null, null, 0, new Intent[] { intent },
                                 new String[] { resolvedType }, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT, null);
 
@@ -903,7 +905,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             int res = startActivityLocked(caller, intent, resolvedType, aInfo,
                     voiceSession, voiceInteractor, resultTo, resultWho,
-                    requestCode, callingPid, callingUid, callingPackage, startFlags, options,
+                    requestCode, callingPid, callingUid, callingPackage,
+                    realCallingPid, realCallingUid, startFlags, options,
                     componentSpecified, null, container, inTask);
 
             Binder.restoreCallingIdentity(origId);
@@ -1017,7 +1020,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         theseOptions = null;
                     }
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
-                            aInfo, null, null, resultTo, null, -1, callingPid, callingUid, callingPackage,
+                            aInfo, null, null, resultTo, null, -1, callingPid, callingUid,
+                            callingPackage, callingPid, callingUid,
                             0, theseOptions, componentSpecified, outActivity, null, null);
                     if (res < 0) {
                         return res;
@@ -1248,7 +1252,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Intent intent, String resolvedType, ActivityInfo aInfo,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode,
-            int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
+            int callingPid, int callingUid, String callingPackage,
+            int realCallingPid, int realCallingUid, int startFlags, Bundle options,
             boolean componentSpecified, ActivityRecord[] outActivity, ActivityContainer container,
             TaskRecord inTask) {
         int err = ActivityManager.START_SUCCESS;
@@ -1293,8 +1298,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final int launchFlags = intent.getFlags();
 
-        if ((launchFlags&Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0
-                && sourceRecord != null) {
+        if ((launchFlags&Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0 && sourceRecord != null) {
             // Transfer the result target from the source activity to the new
             // one being started, including any failures.
             if (requestCode >= 0) {
@@ -1344,8 +1348,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
-                    if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
-                            intent, resolvedType)) {
+                    if (!AppGlobals.getPackageManager().activitySupportsIntent(
+                            intent.getComponent(), intent, resolvedType)) {
                         err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
                     }
                 } catch (RemoteException e) {
@@ -1439,7 +1443,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ActivityStack stack = getFocusedStack();
         if (voiceSession == null && (stack.mResumedActivity == null
                 || stack.mResumedActivity.info.applicationInfo.uid != callingUid)) {
-            if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
+            if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
+                    realCallingPid, realCallingUid, "Activity start")) {
                 PendingActivityLaunch pal =
                         new PendingActivityLaunch(r, sourceRecord, startFlags, stack);
                 mPendingActivityLaunches.add(pal);
