@@ -15,10 +15,9 @@
 -->
 <com.android.systemui.recents.views.TaskView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" 
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:focusable="true"
-    android:background="#FFffffff">
+    android:focusable="true">
     <com.android.systemui.recents.views.TaskViewThumbnail
         android:id="@+id/task_view_thumbnail"
         android:layout_width="match_parent"

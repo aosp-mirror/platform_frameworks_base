@@ -637,17 +637,31 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Returns the current dim. */
     public void setDim(int dim) {
         mDim = dim;
-        // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
-        if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
-            if (mDimAnimator != null) {
-                mDimAnimator.removeAllListeners();
-                mDimAnimator.cancel();
-            }
+        if (mDimAnimator != null) {
+            mDimAnimator.removeAllListeners();
+            mDimAnimator.cancel();
+        }
+        if (mConfig.useHardwareLayers) {
+            // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
+            if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
+                if (mDimAnimator != null) {
+                    mDimAnimator.removeAllListeners();
+                    mDimAnimator.cancel();
+                }
 
-            int inverse = 255 - mDim;
-            mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
-            mLayerPaint.setColorFilter(mDimColorFilter);
-            setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+                int inverse = 255 - mDim;
+                mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
+                mLayerPaint.setColorFilter(mDimColorFilter);
+                setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+            }
+        } else {
+            float dimAlpha = mDim / 255.0f;
+            if (mThumbnailView != null) {
+                mThumbnailView.setDimAlpha(dimAlpha);
+            }
+            if (mHeaderView != null) {
+                mHeaderView.setDimAlpha(dim);
+            }
         }
     }
 
