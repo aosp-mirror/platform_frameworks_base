@@ -400,7 +400,7 @@ public abstract class ConnectionService extends Service {
         @Override
         public void onDisconnected(Connection c, DisconnectCause disconnectCause) {
             String id = mIdByConnection.get(c);
-            Log.d(this, "Adapter set disconnected %d %s", disconnectCause);
+            Log.d(this, "Adapter set disconnected %s", disconnectCause);
             mAdapter.setDisconnected(id, disconnectCause);
         }
 
