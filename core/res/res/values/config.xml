@@ -355,9 +355,9 @@
 
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-60</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-72</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-82</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-60</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-87</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-77</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-65</integer>
