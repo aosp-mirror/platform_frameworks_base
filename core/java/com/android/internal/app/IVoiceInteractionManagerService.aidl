@@ -33,32 +33,44 @@ interface IVoiceInteractionManagerService {
     void finish(IBinder token);
 
     /**
-     * Lists the registered Sound model for keyphrase detection.
-     * May be null if no matching sound models exist.
+     * Gets the registered Sound model for keyphrase detection for the current user.
+     * May be null if no matching sound model exists.
+     *
+     * @param keyphraseId The unique identifier for the keyphrase.
+     * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
      */
-    SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId);
+    SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
     /**
-     * Updates the given keyphrase sound model. Adds the model if it doesn't exist currently.
+     * Add/Update the given keyphrase sound model.
      */
     int updateKeyphraseSoundModel(in SoundTrigger.KeyphraseSoundModel model);
     /**
-     * Deletes the given keyphrase sound model.
+     * Deletes the given keyphrase sound model for the current user.
+     *
+     * @param keyphraseId The unique identifier for the keyphrase.
+     * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
      */
-    int deleteKeyphraseSoundModel(int keyphraseId);
+    int deleteKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
 
-    /**
-     * Indicates if there's a keyphrase sound model available for the given keyphrase ID.
-     */
-    boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId);
     /**
      * Gets the properties of the DSP hardware on this device, null if not present.
      */
     SoundTrigger.ModuleProperties getDspModuleProperties(in IVoiceInteractionService service);
     /**
+     * Indicates if there's a keyphrase sound model available for the given keyphrase ID.
+     * This performs the check for the current user.
+     *
+     * @param service The current VoiceInteractionService.
+     * @param keyphraseId The unique identifier for the keyphrase.
+     * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
+     */
+    boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId,
+            String bcp47Locale);
+    /**
      * Starts a recognition for the given keyphrase.
      */
     int startRecognition(in IVoiceInteractionService service, int keyphraseId,
-            in IRecognitionStatusCallback callback,
+            in String bcp47Locale, in IRecognitionStatusCallback callback,
             in SoundTrigger.RecognitionConfig recognitionConfig);
     /**
      * Stops a recognition for the given keyphrase.
