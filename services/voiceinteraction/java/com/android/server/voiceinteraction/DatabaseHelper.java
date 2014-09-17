@@ -24,10 +24,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
-import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -37,8 +37,7 @@ import java.util.UUID;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     static final String TAG = "SoundModelDBHelper";
-    // TODO: Set to false.
-    static final boolean DBG = true;
+    static final boolean DBG = false;
 
     private static final String NAME = "sound_model.db";
     private static final int VERSION = 4;
@@ -67,11 +66,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + SoundModelContract.KEY_HINT_TEXT + " TEXT,"
             + SoundModelContract.KEY_USERS + " TEXT" + ")";
 
-    private final UserManager mUserManager;
-
     public DatabaseHelper(Context context) {
         super(context, NAME, null, VERSION);
-        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     @Override
@@ -122,17 +118,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Deletes the sound model and associated keyphrases.
      */
-    public boolean deleteKeyphraseSoundModel(UUID modelUuid) {
-        if (modelUuid == null) {
-            Slog.w(TAG, "Model UUID must be specified for deletion");
-            return false;
-        }
-
+    public boolean deleteKeyphraseSoundModel(int keyphraseId, int userHandle, String bcp47Locale) {
+        // Sanitize the locale to guard against SQL injection.
+        bcp47Locale = Locale.forLanguageTag(bcp47Locale).toLanguageTag();
         synchronized(this) {
-            SQLiteDatabase db = getWritableDatabase();
-            String soundModelClause = SoundModelContract.KEY_MODEL_UUID + "='"
-                    + modelUuid.toString() + "'";
+            KeyphraseSoundModel soundModel = getKeyphraseSoundModel(keyphraseId, userHandle,
+                    bcp47Locale);
+            if (soundModel == null) {
+                return false;
+            }
 
+            // Delete all sound models for the given keyphrase and specified user.
+            SQLiteDatabase db = getWritableDatabase();
+            String soundModelClause = SoundModelContract.KEY_MODEL_UUID
+                    + "='" + soundModel.uuid.toString() + "'";
             try {
                 return db.delete(SoundModelContract.TABLE, soundModelClause, null) != 0;
             } finally {
@@ -147,11 +146,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      *
      * TODO: We only support one keyphrase currently.
      */
-    public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId) {
+    public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, int userHandle,
+            String bcp47Locale) {
+        // Sanitize the locale to guard against SQL injection.
+        bcp47Locale = Locale.forLanguageTag(bcp47Locale).toLanguageTag();
         synchronized(this) {
             // Find the corresponding sound model ID for the keyphrase.
             String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE
-                    + " WHERE " + SoundModelContract.KEY_KEYPHRASE_ID + " = '" + keyphraseId + "'";
+                    + " WHERE " + SoundModelContract.KEY_KEYPHRASE_ID + "= '" + keyphraseId
+                    + "' AND " + SoundModelContract.KEY_LOCALE + "='" + bcp47Locale + "'";
             SQLiteDatabase db = getReadableDatabase();
             Cursor c = db.rawQuery(selectQuery, null);
 
@@ -160,14 +163,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     do {
                         int type = c.getInt(c.getColumnIndex(SoundModelContract.KEY_TYPE));
                         if (type != SoundTrigger.SoundModel.TYPE_KEYPHRASE) {
-                            Slog.w(TAG, "Ignoring sound model since it's type is incorrect");
+                            if (DBG) {
+                                Slog.w(TAG, "Ignoring SoundModel since it's type is incorrect");
+                            }
                             continue;
                         }
 
                         String modelUuid = c.getString(
                                 c.getColumnIndex(SoundModelContract.KEY_MODEL_UUID));
                         if (modelUuid == null) {
-                            Slog.w(TAG, "Ignoring sound model since it doesn't specify an ID");
+                            Slog.w(TAG, "Ignoring SoundModel since it doesn't specify an ID");
                             continue;
                         }
 
@@ -176,7 +181,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                                 c.getColumnIndex(SoundModelContract.KEY_RECOGNITION_MODES));
                         int[] users = getArrayForCommaSeparatedString(
                                 c.getString(c.getColumnIndex(SoundModelContract.KEY_USERS)));
-                        String locale = c.getString(
+                        String modelLocale = c.getString(
                                 c.getColumnIndex(SoundModelContract.KEY_LOCALE));
                         String text = c.getString(
                                 c.getColumnIndex(SoundModelContract.KEY_HINT_TEXT));
@@ -184,28 +189,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         // Only add keyphrases meant for the current user.
                         if (users == null) {
                             // No users present in the keyphrase.
-                            Slog.w(TAG, "Ignoring keyphrase since it doesn't specify users");
+                            Slog.w(TAG, "Ignoring SoundModel since it doesn't specify users");
                             continue;
                         }
 
                         boolean isAvailableForCurrentUser = false;
-                        int currentUser = mUserManager.getUserHandle();
                         for (int user : users) {
-                            if (currentUser == user) {
+                            if (userHandle == user) {
                                 isAvailableForCurrentUser = true;
                                 break;
                             }
                         }
                         if (!isAvailableForCurrentUser) {
-                            Slog.w(TAG, "Ignoring keyphrase since it's not for the current user");
+                            if (DBG) {
+                                Slog.w(TAG, "Ignoring SoundModel since user handles don't match");
+                            }
                             continue;
+                        } else {
+                            if (DBG) Slog.d(TAG, "Found a SoundModel for user: " + userHandle);
                         }
 
                         Keyphrase[] keyphrases = new Keyphrase[1];
                         keyphrases[0] = new Keyphrase(
-                                keyphraseId, recognitionModes, locale, text, users);
-                        return new KeyphraseSoundModel(UUID.fromString(modelUuid),
+                                keyphraseId, recognitionModes, modelLocale, text, users);
+                        KeyphraseSoundModel model = new KeyphraseSoundModel(
+                                UUID.fromString(modelUuid),
                                 null /* FIXME use vendor UUID */, data, keyphrases);
+                        if (DBG) {
+                            Slog.d(TAG, "Found SoundModel for the given keyphrase/locale/user: "
+                                    + model);
+                        }
+                        return model;
                     } while (c.moveToNext());
                 }
                 Slog.w(TAG, "No SoundModel available for the given keyphrase");
@@ -218,15 +232,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private static String getCommaSeparatedString(int[] users) {
-        if (users == null || users.length == 0) {
+        if (users == null) {
             return "";
         }
-        String csv = "";
-        for (int user : users) {
-            csv += String.valueOf(user);
-            csv += ",";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < users.length; i++) {
+            if (i != 0) {
+                sb.append(',');
+            }
+            sb.append(users[i]);
         }
-        return csv.substring(0, csv.length() - 1);
+        return sb.toString();
     }
 
     private static int[] getArrayForCommaSeparatedString(String text) {
