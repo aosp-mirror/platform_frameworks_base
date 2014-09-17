@@ -866,14 +866,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
         mDecorToolbar.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
         mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
-        if (mTabScrollView != null && !mDecorToolbar.hasEmbeddedTabs() &&
-                isCollapsed(mDecorToolbar.getViewGroup())) {
-            mTabScrollView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    private boolean isCollapsed(View view) {
-        return view == null || view.getVisibility() == View.GONE || view.getMeasuredHeight() == 0;
+        // mTabScrollView's visibility is not affected by action mode.
     }
 
     public Context getThemedContext() {
