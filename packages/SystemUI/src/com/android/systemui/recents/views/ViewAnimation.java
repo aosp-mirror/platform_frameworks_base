@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
@@ -27,6 +28,8 @@ public class ViewAnimation {
         // A trigger to run some logic when all the animations complete.  This works around the fact
         // that it is difficult to coordinate ViewPropertyAnimators
         ReferenceCountedTrigger postAnimationTrigger;
+        // An update listener to notify as the enter animation progresses (used for the home transition)
+        ValueAnimator.AnimatorUpdateListener updateListener;
 
         // These following properties are updated for each task view we start the enter animation on
 
