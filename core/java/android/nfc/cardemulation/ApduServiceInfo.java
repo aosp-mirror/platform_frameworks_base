@@ -311,7 +311,7 @@ public final class ApduServiceInfo implements Parcelable {
     public String getCategoryForAid(String aid) {
         ArrayList<AidGroup> groups = getAidGroups();
         for (AidGroup group : groups) {
-            if (group.aids.contains(aid)) {
+            if (group.aids.contains(aid.toUpperCase())) {
                 return group.category;
             }
         }
@@ -425,7 +425,7 @@ public final class ApduServiceInfo implements Parcelable {
         public ApduServiceInfo createFromParcel(Parcel source) {
             ResolveInfo info = ResolveInfo.CREATOR.createFromParcel(source);
             String description = source.readString();
-            boolean onHost = (source.readInt() != 0) ? true : false;
+            boolean onHost = source.readInt() != 0;
             ArrayList<AidGroup> staticAidGroups = new ArrayList<AidGroup>();
             int numStaticGroups = source.readInt();
             if (numStaticGroups > 0) {
@@ -436,7 +436,7 @@ public final class ApduServiceInfo implements Parcelable {
             if (numDynamicGroups > 0) {
                 source.readTypedList(dynamicAidGroups, AidGroup.CREATOR);
             }
-            boolean requiresUnlock = (source.readInt() != 0) ? true : false;
+            boolean requiresUnlock = source.readInt() != 0;
             int bannerResource = source.readInt();
             int uid = source.readInt();
             return new ApduServiceInfo(info, onHost, description, staticAidGroups,
