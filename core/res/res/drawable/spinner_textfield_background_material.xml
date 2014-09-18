@@ -17,17 +17,29 @@
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
        android:inset="@dimen/control_inset_material">
     <selector android:autoMirrored="true">
-        <item android:state_checked="true">
-            <nine-patch android:src="@drawable/spinner_textfield_activated_mtrl_alpha"
-                android:tint="?attr/colorControlActivated" />
-        </item>
-        <item android:state_pressed="true">
-            <nine-patch android:src="@drawable/spinner_textfield_activated_mtrl_alpha"
-                android:tint="?attr/colorControlActivated" />
+        <item android:state_checked="false" android:state_pressed="false">
+            <layer-list android:paddingMode="stack">
+                <item>
+                    <nine-patch android:src="@drawable/textfield_default_mtrl_alpha"
+                        android:tint="?attr/colorControlNormal" />
+                </item>
+                <item>
+                    <nine-patch android:src="@drawable/spinner_mtrl_am_alpha"
+                        android:tint="?attr/colorControlNormal" />
+                </item>
+            </layer-list>
         </item>
         <item>
-            <nine-patch android:src="@drawable/spinner_textfield_default_mtrl_alpha"
-                android:tint="?attr/colorControlNormal" />
+            <layer-list android:paddingMode="stack">
+                <item>
+                    <nine-patch android:src="@drawable/textfield_activated_mtrl_alpha"
+                        android:tint="?attr/colorControlActivated" />
+                </item>
+                <item>
+                    <nine-patch android:src="@drawable/spinner_mtrl_am_alpha"
+                        android:tint="?attr/colorControlActivated" />
+                </item>
+            </layer-list>
         </item>
     </selector>
 </inset>
