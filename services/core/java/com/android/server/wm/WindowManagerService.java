@@ -3356,7 +3356,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 isFullScreen =
                         ((win.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) ==
-                                SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN);
+                                SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) ||
+                                ((win.mAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0);
             }
 
             if (atoken.mLaunchTaskBehind) {
