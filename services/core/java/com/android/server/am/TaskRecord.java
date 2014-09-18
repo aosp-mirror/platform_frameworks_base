@@ -327,8 +327,8 @@ final class TaskRecord {
             }
         }
 
-        if (intent != null &&
-                (intent.getFlags()&Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
+        final int intentFlags = intent == null ? 0 : intent.getFlags();
+        if ((intentFlags & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
             // Once we are set to an Intent with this flag, we count this
             // task as having a true root activity.
             rootWasReset = true;
@@ -338,8 +338,8 @@ final class TaskRecord {
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
-        } else if ((intent.getFlags()&(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-                |Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS)) == Intent.FLAG_ACTIVITY_NEW_DOCUMENT) {
+        } else if ((intentFlags & (Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS)) == Intent.FLAG_ACTIVITY_NEW_DOCUMENT) {
             // If the caller has not asked for the document to be retained, then we may
             // want to turn on auto-remove, depending on whether the target has set its
             // own document launch mode.
