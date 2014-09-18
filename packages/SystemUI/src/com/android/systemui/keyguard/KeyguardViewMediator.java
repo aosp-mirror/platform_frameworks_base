@@ -170,6 +170,8 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mSwitchingUser;
 
     private boolean mSystemReady;
+    private boolean mBootCompleted;
+    private boolean mBootSendUserPresent;
 
     // Whether the next call to playSounds() should be skipped.  Defaults to
     // true because the first lock (on boot) should be silent.
@@ -1145,8 +1147,14 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void sendUserPresentBroadcast() {
-        final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
-        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, currentUser);
+        synchronized (this) {
+            if (mBootCompleted) {
+                final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
+                mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, currentUser);
+            } else {
+                mBootSendUserPresent = true;
+            }
+        }
     }
 
     /**
@@ -1406,6 +1414,12 @@ public class KeyguardViewMediator extends SystemUI {
 
     public void onBootCompleted() {
         mUpdateMonitor.dispatchBootCompleted();
+        synchronized (this) {
+            mBootCompleted = true;
+            if (mBootSendUserPresent) {
+                sendUserPresentBroadcast();
+            }
+        }
     }
 
     public StatusBarKeyguardViewManager registerStatusBar(PhoneStatusBar phoneStatusBar,
