@@ -8375,10 +8375,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.taskDescription = td;
+                r.setTaskDescription(td);
                 r.task.updateTaskDescription();
             }
         }
+    }
+
+    @Override
+    public Bitmap getTaskDescriptionIcon(String filename) {
+        return mTaskPersister.getTaskDescriptionIcon(filename);
     }
 
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
