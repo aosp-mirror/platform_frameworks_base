@@ -222,19 +222,31 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestDisplayStateLocked(int state) {
+        public Runnable requestDisplayStateLocked(final int state) {
             if (mState != state) {
+                final int displayId = mBuiltInDisplayId;
+                final IBinder token = getDisplayTokenLocked();
                 final int mode = getPowerModeForState(state);
-                Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
-                        + Display.stateToString(state) + ", id=" + mBuiltInDisplayId + ")");
-                try {
-                    SurfaceControl.setDisplayPowerMode(getDisplayTokenLocked(), mode);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
-                }
                 mState = state;
                 updateDeviceInfoLocked();
+
+                // Defer actually setting the display power mode until we have exited
+                // the critical section since it can take hundreds of milliseconds
+                // to complete.
+                return new Runnable() {
+                    @Override
+                    public void run() {
+                        Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
+                                + Display.stateToString(state) + ", id=" + displayId + ")");
+                        try {
+                            SurfaceControl.setDisplayPowerMode(token, mode);
+                        } finally {
+                            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        }
+                    }
+                };
             }
+            return null;
         }
 
         @Override
