@@ -14,6 +14,7 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
+  <li><strong>IAB v2 shutdown</strong>&mdash;In-app Billing v2 API is deprecated and will be shut down in January 2015. If your app is still using In-app Billing v2, please migrate to the v3 API as soon as possible.</li>
   <li><strong>Seasonal subscriptions</strong>&mdash;You can now set up a
     recurring <a href="billing_subscriptions.html#user-billing">seasonal
     subscription</a> that starts and ends on the same date each year (for
@@ -41,7 +42,7 @@ and features, and more. You can use In-app Billing to sell products as</p>
 
 <ul>
 <li>Standard in-app products (one-time billing), or</li>
-<li>Subscriptions, (recurring, automated billing)</li>
+<li>Subscriptions (recurring, automated billing)</li>
 </ul>
 
 <p>When you use the in-app billing service to sell an item,
