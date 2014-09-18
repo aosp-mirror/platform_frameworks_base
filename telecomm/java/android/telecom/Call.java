@@ -80,6 +80,15 @@ public final class Call {
      */
     public static final int STATE_CONNECTING = 9;
 
+    /**
+     * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
+     * extras. Used to pass the phone accounts to display on the front end to the user in order to
+     * select phone accounts to (for example) place a call.
+     *
+     * @hide
+     */
+    public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
+
     public static class Details {
         private final Uri mHandle;
         private final int mHandlePresentation;

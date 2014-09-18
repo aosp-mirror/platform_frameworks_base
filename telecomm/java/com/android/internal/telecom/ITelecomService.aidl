@@ -60,6 +60,11 @@ interface ITelecomService {
     List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme);
 
     /**
+     * @see TelecomManager#getPhoneAccountsForPackage
+     */
+    List<PhoneAccountHandle> getPhoneAccountsForPackage(in String packageName);
+
+    /**
      * @see TelecomManager#getPhoneAccount
      */
     PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
