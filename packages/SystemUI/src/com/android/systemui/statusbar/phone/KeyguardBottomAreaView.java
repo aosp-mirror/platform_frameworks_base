@@ -25,6 +25,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -90,6 +92,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private PhoneStatusBar mPhoneStatusBar;
 
     private final TrustDrawable mTrustDrawable;
+
+    private int mLastUnlockIconRes = 0;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -380,7 +384,17 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 ? com.android.internal.R.drawable.ic_account_circle
                 : mUnlockMethodCache.isMethodInsecure() ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
-        mLockIcon.setImageResource(iconRes);
+        if (mLastUnlockIconRes != iconRes) {
+            Drawable icon = mContext.getDrawable(iconRes);
+            int iconHeight = getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_affordance_icon_height);
+            int iconWidth = getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_affordance_icon_width);
+            if (icon.getIntrinsicHeight() != iconHeight || icon.getIntrinsicWidth() != iconWidth) {
+                icon = new IntrinsicSizeDrawable(icon, iconWidth, iconHeight);
+            }
+            mLockIcon.setImageDrawable(icon);
+        }
         boolean trustManaged = mUnlockMethodCache.isTrustManaged();
         mTrustDrawable.setTrustManaged(trustManaged);
         updateLockIconClickability();
@@ -468,5 +482,31 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void setKeyguardIndicationController(
             KeyguardIndicationController keyguardIndicationController) {
         mIndicationController = keyguardIndicationController;
+    }
+
+
+    /**
+     * A wrapper around another Drawable that overrides the intrinsic size.
+     */
+    private static class IntrinsicSizeDrawable extends InsetDrawable {
+
+        private final int mIntrinsicWidth;
+        private final int mIntrinsicHeight;
+
+        public IntrinsicSizeDrawable(Drawable drawable, int intrinsicWidth, int intrinsicHeight) {
+            super(drawable, 0);
+            mIntrinsicWidth = intrinsicWidth;
+            mIntrinsicHeight = intrinsicHeight;
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return mIntrinsicWidth;
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return mIntrinsicHeight;
+        }
     }
 }
