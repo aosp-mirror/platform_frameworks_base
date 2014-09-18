@@ -44,7 +44,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         mConfig = RecentsConfiguration.getInstance();
         mSourceView = source;
         mCornerRadius = cornerRadius;
-        mSourceView.setClipToOutline(true);
         setClipTop(getClipTop());
         setClipRight(getClipRight());
         setClipBottom(getClipBottom());
