@@ -405,6 +405,22 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mConfig.updateOnConfigurationChange();
             onConfigurationChange();
         }
+
+        // Start listening for widget package changes if there is one bound, post it since we don't
+        // want it stalling the startup
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> callback =
+                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(this);
+            mRecentsView.post(new Runnable() {
+                @Override
+                public void run() {
+                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = callback.get();
+                    if (cb != null) {
+                        mAppWidgetHost.startListening(cb);
+                    }
+                }
+            });
+        }
     }
 
     /** Inflates the debug overlay if debug mode is enabled. */
@@ -464,22 +480,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onResume() {
         super.onResume();
 
-        // Start listening for widget package changes if there is one bound, post it since we don't
-        // want it stalling the startup
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> callback =
-                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(this);
-            mRecentsView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = callback.get();
-                    if (cb != null) {
-                        mAppWidgetHost.startListening(cb);
-                    }
-                }
-            }, 1);
-        }
-
         // Mark Recents as visible
         mVisible = true;
     }
@@ -496,11 +496,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Unregister any broadcast receivers for the task loader
         RecentsTaskLoader.getInstance().unregisterReceivers();
-
-        // Stop listening for widget package changes if there was one bound
-        if (mAppWidgetHost.isListening()) {
-            mAppWidgetHost.stopListening();
-        }
     }
 
     @Override
@@ -509,6 +504,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Unregister the system broadcast receivers
         unregisterReceiver(mSystemBroadcastReceiver);
+
+        // Stop listening for widget package changes if there was one bound
+        if (mAppWidgetHost.isListening()) {
+            mAppWidgetHost.stopListening();
+        }
     }
 
     @Override
