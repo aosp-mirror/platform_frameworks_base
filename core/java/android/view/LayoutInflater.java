@@ -606,9 +606,9 @@ public abstract class LayoutInflater {
             constructor.setAccessible(true);
             final View view = constructor.newInstance(args);
             if (view instanceof ViewStub) {
-                // always use ourselves when inflating ViewStub later
+                // Use the same context when inflating ViewStub later.
                 final ViewStub viewStub = (ViewStub) view;
-                viewStub.setLayoutInflater(this);
+                viewStub.setLayoutInflater(cloneInContext((Context) args[0]));
             }
             return view;
 
