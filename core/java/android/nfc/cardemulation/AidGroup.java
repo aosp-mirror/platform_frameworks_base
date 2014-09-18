@@ -15,10 +15,6 @@ import android.util.Log;
 /**
  * The AidGroup class represents a group of Application Identifiers (AIDs).
  *
- * <p>An instance of this object can be used with
- * {@link CardEmulation#registerAidsForService(android.content.ComponentName, String, java.util.List)}
- * to tell the OS which AIDs are handled by your HCE- or SE-based service.
- *
  * <p>The format of AIDs is defined in the ISO/IEC 7816-4 specification. This class
  * requires the AIDs to be input as a hexadecimal string, with an even amount of
  * hexadecimal characters, e.g. "F014811481".
@@ -60,7 +56,10 @@ public final class AidGroup implements Parcelable {
         } else {
             this.category = CardEmulation.CATEGORY_OTHER;
         }
-        this.aids = aids;
+        this.aids = new ArrayList<String>(aids.size());
+        for (String aid : aids) {
+            this.aids.add(aid.toUpperCase());
+        }
         this.description = null;
     }
 
@@ -144,7 +143,7 @@ public final class AidGroup implements Parcelable {
                     if (inGroup) {
                         String aid = parser.getAttributeValue(null, "value");
                         if (aid != null) {
-                            aids.add(aid);
+                            aids.add(aid.toUpperCase());
                         }
                     } else {
                         Log.d(TAG, "Ignoring <aid> tag while not in group");
