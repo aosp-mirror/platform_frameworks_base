@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Предоставлять доступ с помощью приложения \"%1$s\""</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Выберите приложение"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Другое приложение"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Удаляет настройки по умолчанию в меню \"Настройки &gt; Приложения &gt; Загруженные\"."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Выберите действие"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Выбор приложения для USB-устройства"</string>
@@ -1297,12 +1298,12 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; отправляет большое количество SMS. Разрешить приложению и дальше отправлять сообщения?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Разрешить"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Запретить"</string>
-    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"Приложение &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; собирается отправить сообщение на адрес &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="5873295990846059400">"С вашего мобильного счета "<b>"могут быть списаны средства"</b>"."</string>
-    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"С вашего мобильного счета будут списаны средства."</b></string>
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"Из приложения &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; будет отправлено сообщение на номер &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Со счета вашего мобильного телефона "<b>"могут быть списаны средства"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Со счета вашего мобильного телефона будут списаны средства."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Отправить"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Отмена"</string>
-    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запомнить выбранный телефон"</string>
+    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запомнить выбор"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Это можно изменить позже в разделе настроек \"Приложения\"."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Всегда разрешать"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Не разрешать"</string>
@@ -1643,7 +1644,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Специальные возможности включены."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Специальные возможности не будут включены."</string>
     <string name="user_switched" msgid="3768006783166984410">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Переход в профиль пользователя <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Смена профиля на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Владелец"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ошибка"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Это действие запрещено администратором"</string>
@@ -1778,6 +1779,15 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения будут отключены некоторые функции, в том числе вибросигнал, и ограничена передача данных в фоновом режиме. Электронная почта, обмен сообщениями и другие инструменты, требующие синхронизации, могут не работать, пока вы их не запустите.\n\nРежим энергосбережения отключается автоматически, когда устройство заряжается."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибросигнала и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Когда период простоя завершится (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1 мин."</item>
+    <item quantity="other" msgid="6924190729213550991">"%d мин."</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1 ч."</item>
+    <item quantity="other" msgid="5408537517529822157">"%d ч."</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Бессрочно"</string>
 </resources>

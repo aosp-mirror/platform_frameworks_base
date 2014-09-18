@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Delen met %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Een startscherm-app selecteren"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standaard gebruiken voor deze actie."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Een andere app gebruiken"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Standaardinstelling wissen via Systeeminstellingen &gt; Apps &gt; Gedownload."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Een actie selecteren"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Een app voor het USB-apparaat selecteren"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vragen om wachtwoord voordat items worden losgemaakt"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Accubesparing beperkt de prestaties van uw apparaat, de trilfunctie en de meeste achtergrondgegevens om de accuduur te verlengen.\n\nAccubesparing wordt automatisch uitgeschakeld wanneer uw apparaat wordt opgeladen."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Totdat uw downtime eindigt om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Eén minuut"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d minuten"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Eén uur"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d uur"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Voor onbepaalde tijd"</string>
 </resources>

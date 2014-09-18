@@ -281,7 +281,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"modtage nødudsendelser"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillader, at appen kan modtage og behandle nødtransmissioner. Denne tilladelse er kun tilgængelig for systemapps."</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillader, at appen kan modtage og behandle nødudsendelser. Denne tilladelse er kun tilgængelig for systemapps."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-beskeder"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-beskeder, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-beskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-besked om en nødsituation."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sende sms-beskeder"</string>
@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Del med %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vælg en startapp"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Brug en anden app"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ryd standard i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Vælg en handling"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Vælg en app til USB-enheden"</string>
@@ -1440,9 +1441,9 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN aktiveres af <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Tryk for at administrere netværket."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"Forbundet til <xliff:g id="SESSION">%s</xliff:g>. Tryk for at administrere netværket."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til Always-on VPN…"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til altid aktiveret VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN er forbundet"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i Always-on VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i altid aktiveret VPN"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"Tryk for at konfigurere"</string>
     <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
@@ -1768,16 +1769,25 @@
     <string name="lock_to_app_toast" msgid="1230563865743799321">"Hvis du vil frigøre dette skærmbillede, skal du trykke på og holde Tilbage og Seneste nede på samme tid."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Hvis du vil frigøre dette skærmbillede, skal du trykke på og holde Seneste nede."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skærmen er fastgjort. Frigørelse er ikke tilladt af din organisation."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruge skærmfastholdelse?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Skærmfastholdelse låser skærmen i en enkelt visning.\n\nAfslut ved at trykke på og holde Tilbage og Seneste nede på samme tid."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Skærmfastholdelse låser skærmen i en enkelt visning.\n\nHvis du vil afslutte, skal du trykke på og holde Seneste nede."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruge Bliv i app?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Bliv i app låser skærmen i en enkelt visning.\n\nAfslut ved at trykke på Tilbage og Seneste samtidig og holde dem nede."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Bliv i app låser skærmen i en enkelt visning.\n\nHvis du vil afslutte, skal du trykke på knappen Seneste og holde den nede."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TAK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skærmen blev frigjort"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bed om oplåsningsmønster inden frigørelse"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bed om oplåsningsmønster ved deaktivering"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bed om adgangskode inden frigørelse"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"For at forbedre batteriets levetid reducerer batterisparefunktionen enhedens ydeevne og begrænser vibrationer og de fleste baggrundsdata. E-mail, beskeder og andre apps, der benytter synkronisering, opdateres ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplades."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Indtil din nedetid slutter kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"I ét minut"</item>
+    <item quantity="other" msgid="6924190729213550991">"I %d minutter"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"I én time"</item>
+    <item quantity="other" msgid="5408537517529822157">"I %d timer"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Uendeligt"</string>
 </resources>

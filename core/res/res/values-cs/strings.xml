@@ -1207,6 +1207,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Sdílet v aplikaci %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskou aplikaci"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Použít jinou aplikaci"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v sekci Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Vyberte akci"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Vyberte aplikaci pro zařízení USB"</string>
@@ -1780,4 +1781,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Za účelem zvýšení životnosti baterie spořič baterie sníží výkon vašeho zařízení a omezí vibrace a většinu dat na pozadí. E-mail, zprávy a další aplikace, které používají synchronizaci, nemusejí být aktualizovány, dokud je nespustíte.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokud v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí pozastavení"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Na jednu minutu"</item>
+    <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Na 1 h"</item>
+    <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Na dobu neurčitou"</string>
 </resources>
