@@ -912,8 +912,8 @@
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Hakuna SIM kadi"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Hakuna SIM kadi katika kompyuta ndogo."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Hakuna SIM kadi kwenye simu."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Ingiza SIM kadi."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM kadi haipatikani au haisomeki. Tafadhali ingiza SIM kadi."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Weka SIM kadi."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM kadi haipatikani au haisomeki. Tafadhali weka SIM kadi."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM kadi isiyotumika."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kadi yako imelemezwa kabisa.\n Wasiliana na mtoa huduma wako wa pasi waya ili upate SIM kadi nyingine."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Wimbo uliotangulia"</string>
@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Shiriki na %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Chagua programu ya nyumbani"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Tumia kama chaguo-msingi la kitendo hiki."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Tumia programu tofauti"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Futa chaguo-msingi katika mipangilio ya Mfumo &gt; Apps &gt; iliyopakuliwa."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Chagua kitendo"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Chagua programu ya kifaa cha USB"</string>
@@ -1214,9 +1215,9 @@
     <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi.\n\nUnataka kuifunga?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> haijibu. Unataka kufunga?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Mchakato <xliff:g id="PROCESS">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli ya <xliff:g id="ACTIVITY">%1$s</xliff:g> haifanyi kazi.\n\nJe, ungependa kuifunga?"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> haifanyi kazi. Je, ungependa kuifunga?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> haufanyi kazi. \n\nJe, ungependa kuifunga?"</string>
     <string name="force_close" msgid="8346072094521265605">"Sawa"</string>
     <string name="report" msgid="4060218260984795706">"Ripoti"</string>
     <string name="wait" msgid="7147118217226317732">"Subiri"</string>
@@ -1776,6 +1777,15 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Omba PIN kabla hujabandua"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Omba mchoro wa kufungua kabla hujabandua"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Omba nenosiri kabla hujabandua"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Ili kusaidia kuokoa muda wa matumizi wa betri, kiokoa betri hupunguza utendaji wa kifaa chako na kuzuia kutetema na data nyingi ya chinichini. Barua pepe, utumaji ujumbe, na programu nyingine zinazotegemea usawazishaji huenda hazitasasisha usipozifungua.\n\nKiokoa betri huwashwa otomatiki kifaa kinapokuwa kinachaji."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Ili kusaidia kuokoa muda wa matumizi wa betri, kiokoa betri hupunguza utendaji wa kifaa chako na kuzuia kutetema na data nyingi ya chinichini. Barua pepe, kutuma ujumbe na programu zingine zinazotegemea usawazishaji huenda hazitasasisha usipozifungua.\n\nKiokoa betri hujizima kiotomatiki kifaa chako kikianza kuchajiwa."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> wakati wa kutotenda kazi kwa kifaa chako unapoisha"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Kwa dakika moja"</item>
+    <item quantity="other" msgid="6924190729213550991">"Kwa dakika %d"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Kwa saa moja"</item>
+    <item quantity="other" msgid="5408537517529822157">"Kwa saa %d"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Bila kikomo"</string>
 </resources>

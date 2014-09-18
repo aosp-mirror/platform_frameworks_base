@@ -1073,7 +1073,7 @@
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"godzinę temu"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godzin temu"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
   </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Ostatnie (<xliff:g id="COUNT">%d</xliff:g>) dni"</item>
@@ -1201,10 +1201,11 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otwórz w aplikacji %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edytuj w aplikacji %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Udostępnij w aplikacji"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Udostępnij w aplikacji %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Udostępnij przez"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Udostępnij przez %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Wybierz aplikację ekranu głównego"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Domyślne dla tej czynności"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Użyj innej aplikacji"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Wyczyść wartości domyślne w: Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Wybierz czynność"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Wybierz aplikację dla urządzenia USB"</string>
@@ -1770,12 +1771,21 @@
     <string name="lock_to_app_description" msgid="9076084599283282800">"Przypięcie ekranu blokuje na nim jeden widok.\n\nAby zakończyć ten tryb, kliknij i przytrzymaj jednocześnie Wróć i Ostatnie."</string>
     <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Przypięcie ekranu blokuje na nim jeden widok.\n\nAby zakończyć ten tryb, kliknij i przytrzymaj Ostatnie."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NIE, DZIĘKUJĘ"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"TAK"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran przypięty"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran odpięty"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Przed odpięciem poproś o PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Przed odpięciem poproś o wzór odblokowania"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Przed odpięciem poproś o hasło"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Aby odpiąć, poproś o PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Aby odpiąć, poproś o wzór odblokowania"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Aby odpiąć, poproś o hasło"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje i przetwarzanie większości danych w tle. Poczta, SMS i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Do zakończenia przestoju o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Przez minutę"</item>
+    <item quantity="other" msgid="6924190729213550991">"Przez %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Przez 1 godz."</item>
+    <item quantity="other" msgid="5408537517529822157">"Przez %d godz."</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Na czas nieokreślony"</string>
 </resources>
