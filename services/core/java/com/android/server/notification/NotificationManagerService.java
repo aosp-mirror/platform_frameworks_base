@@ -1610,6 +1610,30 @@ public class NotificationManagerService extends SystemService {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
                     idReceived, userId);
         }
+
+        @Override
+        public void removeForegroundServiceFlagFromNotification(String pkg, int notificationId,
+                int userId) {
+            checkCallerIsSystem();
+            synchronized (mNotificationList) {
+                int i = indexOfNotificationLocked(pkg, null, notificationId, userId);
+                if (i < 0) {
+                    Log.d(TAG, "stripForegroundServiceFlag: Could not find notification with "
+                            + "pkg=" + pkg + " / id=" + notificationId + " / userId=" + userId);
+                    return;
+                }
+                NotificationRecord r = mNotificationList.get(i);
+                StatusBarNotification sbn = r.sbn;
+                // NoMan adds flags FLAG_NO_CLEAR and FLAG_ONGOING_EVENT when it sees
+                // FLAG_FOREGROUND_SERVICE. Hence it's not enough to remove FLAG_FOREGROUND_SERVICE,
+                // we have to revert to the flags we received initially *and* force remove
+                // FLAG_FOREGROUND_SERVICE.
+                sbn.getNotification().flags =
+                        (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
+                mRankingHelper.sort(mNotificationList);
+                mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
+            }
+        }
     };
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
