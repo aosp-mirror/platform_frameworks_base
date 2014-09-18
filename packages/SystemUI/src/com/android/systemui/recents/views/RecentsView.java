@@ -393,7 +393,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Upfront the processing of the thumbnail
         TaskViewTransform transform = new TaskViewTransform();
-        View sourceView = tv;
+        View sourceView;
         int offsetX = 0;
         int offsetY = 0;
         float stackScroll = stackView.getScroller().getStackScroll();
@@ -406,6 +406,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             offsetX = transform.rect.left;
             offsetY = mConfig.displayRect.height();
         } else {
+            sourceView = tv.mThumbnailView;
             transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
         }
 
