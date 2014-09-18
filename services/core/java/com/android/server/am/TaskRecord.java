@@ -25,6 +25,7 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskThumbnail;
+import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -70,15 +71,12 @@ final class TaskRecord {
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
-    private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
-    private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
     private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
     private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
     private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
-    private static final String LAST_ACTIVITY_ICON_SUFFIX = "_last_activity_icon_";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
@@ -113,8 +111,7 @@ final class TaskRecord {
 
     // This represents the last resolved activity values for this task
     // NOTE: This value needs to be persisted with each task
-    ActivityManager.TaskDescription lastTaskDescription =
-            new ActivityManager.TaskDescription();
+    TaskDescription lastTaskDescription = new TaskDescription();
 
     /** List of all activities in the task arranged in history order */
     final ArrayList<ActivityRecord> mActivities;
@@ -180,7 +177,7 @@ final class TaskRecord {
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            ActivityManager.TaskDescription _taskDescription) {
+            TaskDescription _taskDescription) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -215,7 +212,7 @@ final class TaskRecord {
             boolean _askedCompatMode, int _taskType, int _userId, int _effectiveUid,
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
-            ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
+            TaskDescription _lastTaskDescription, int taskAffiliation,
             int prevTaskId, int nextTaskId, int taskAffiliationColor, int callingUid,
             String callingPackage) {
         mService = service;
@@ -441,7 +438,7 @@ final class TaskRecord {
         thumbs.mainThumbnail = mLastThumbnail;
         thumbs.thumbnailFileDescriptor = null;
         if (mLastThumbnail == null) {
-            thumbs.mainThumbnail = mService.mTaskPersister.getThumbnail(mFilename);
+            thumbs.mainThumbnail = mService.mTaskPersister.getImageFromWriteQueue(mFilename);
         }
         // Only load the thumbnail file if we don't have a thumbnail
         if (thumbs.mainThumbnail == null && mLastThumbnailFile.exists()) {
@@ -759,7 +756,7 @@ final class TaskRecord {
             // recent activity values, then we do not fall back to the last set
             // values in the TaskRecord.
             String label = null;
-            Bitmap icon = null;
+            String iconFilename = null;
             int colorPrimary = 0;
             for (--activityNdx; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = mActivities.get(activityNdx);
@@ -767,15 +764,15 @@ final class TaskRecord {
                     if (label == null) {
                         label = r.taskDescription.getLabel();
                     }
-                    if (icon == null) {
-                        icon = r.taskDescription.getIcon();
+                    if (iconFilename == null) {
+                        iconFilename = r.taskDescription.getIconFilename();
                     }
                     if (colorPrimary == 0) {
                         colorPrimary = r.taskDescription.getPrimaryColor();
                     }
                 }
             }
-            lastTaskDescription = new ActivityManager.TaskDescription(label, icon, colorPrimary);
+            lastTaskDescription = new TaskDescription(label, colorPrimary, iconFilename);
             // Update the task affiliation color if we are the parent of the group
             if (taskId == mAffiliatedTaskId) {
                 mAffiliatedTaskColor = lastTaskDescription.getPrimaryColor();
@@ -802,41 +799,6 @@ final class TaskRecord {
         final int effectiveRootIndex = findEffectiveRootIndex();
         final ActivityRecord r = mActivities.get(effectiveRootIndex);
         setIntent(r);
-    }
-
-    void saveTaskDescription(ActivityManager.TaskDescription taskDescription,
-            String iconFilename, XmlSerializer out) throws IOException {
-        if (taskDescription != null) {
-            final String label = taskDescription.getLabel();
-            if (label != null) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, label);
-            }
-            final int colorPrimary = taskDescription.getPrimaryColor();
-            if (colorPrimary != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(colorPrimary));
-            }
-            final Bitmap icon = taskDescription.getIcon();
-            if (icon != null) {
-                mService.mTaskPersister.saveImage(icon, iconFilename);
-            }
-        }
-    }
-
-    static boolean readTaskDescriptionAttribute(ActivityManager.TaskDescription taskDescription,
-            String attrName, String attrValue) {
-        if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
-            taskDescription.setLabel(attrValue);
-        } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
-            taskDescription.setPrimaryColor((int) Long.parseLong(attrValue, 16));
-        } else {
-            return false;
-        }
-        return true;
-    }
-
-    private static String createLastTaskDescriptionIconFilename(int taskId, long lastActiveTime) {
-        return String.valueOf(taskId) + LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime +
-                TaskPersister.IMAGE_EXTENSION;
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
@@ -875,8 +837,7 @@ final class TaskRecord {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
         if (lastTaskDescription != null) {
-            saveTaskDescription(lastTaskDescription, createLastTaskDescriptionIconFilename(taskId,
-                    lastActiveTime), out);
+            lastTaskDescription.saveToXml(out);
         }
         out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
@@ -934,7 +895,7 @@ final class TaskRecord {
         boolean neverRelinquishIdentity = true;
         int taskId = -1;
         final int outerDepth = in.getDepth();
-        ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription();
+        TaskDescription taskDescription = new TaskDescription();
         int taskAffiliation = -1;
         int taskAffiliationColor = 0;
         int prevTaskId = -1;
@@ -980,8 +941,8 @@ final class TaskRecord {
                 lastTimeOnTop = Long.valueOf(attrValue);
             } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
                 neverRelinquishIdentity = Boolean.valueOf(attrValue);
-            } else if (readTaskDescriptionAttribute(taskDescription, attrName, attrValue)) {
-                // Completed in TaskPersister.readTaskDescriptionAttribute()
+            } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
+                taskDescription.restoreFromXml(attrName, attrValue);
             } else if (ATTR_TASK_AFFILIATION.equals(attrName)) {
                 taskAffiliation = Integer.valueOf(attrValue);
             } else if (ATTR_PREV_AFFILIATION.equals(attrName)) {
@@ -1023,11 +984,6 @@ final class TaskRecord {
                     XmlUtils.skipCurrentTag(in);
                 }
             }
-        }
-
-        if (lastActiveTime >= 0) {
-            taskDescription.setIcon(TaskPersister.restoreImage(
-                    createLastTaskDescriptionIconFilename(taskId, lastActiveTime)));
         }
 
         if (!hasRootAffinity) {

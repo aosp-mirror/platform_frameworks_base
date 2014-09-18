@@ -56,9 +56,11 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Size;
 import android.util.Slog;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -508,8 +510,18 @@ public class ActivityManager {
      * Information you can set and retrieve about the current activity within the recent task list.
      */
     public static class TaskDescription implements Parcelable {
+        /** @hide */
+        public static final String ATTR_TASKDESCRIPTION_PREFIX = "task_description_";
+        private static final String ATTR_TASKDESCRIPTIONLABEL =
+                ATTR_TASKDESCRIPTION_PREFIX + "label";
+        private static final String ATTR_TASKDESCRIPTIONCOLOR =
+                ATTR_TASKDESCRIPTION_PREFIX + "color";
+        private static final String ATTR_TASKDESCRIPTIONICONFILENAME =
+                ATTR_TASKDESCRIPTION_PREFIX + "icon_filename";
+
         private String mLabel;
         private Bitmap mIcon;
+        private String mIconFilename;
         private int mColorPrimary;
 
         /**
@@ -527,6 +539,12 @@ public class ActivityManager {
             mLabel = label;
             mIcon = icon;
             mColorPrimary = colorPrimary;
+        }
+
+        /** @hide */
+        public TaskDescription(String label, int colorPrimary, String iconFilename) {
+            this(label, null, colorPrimary);
+            mIconFilename = iconFilename;
         }
 
         /**
@@ -559,7 +577,10 @@ public class ActivityManager {
          * Creates a copy of another TaskDescription.
          */
         public TaskDescription(TaskDescription td) {
-            this(td.getLabel(), td.getIcon(), td.getPrimaryColor());
+            mLabel = td.mLabel;
+            mIcon = td.mIcon;
+            setPrimaryColor(td.mColorPrimary);
+            mIconFilename = td.mIconFilename;
         }
 
         private TaskDescription(Parcel source) {
@@ -579,7 +600,7 @@ public class ActivityManager {
          * @hide
          */
         public void setPrimaryColor(int primaryColor) {
-            mColorPrimary = primaryColor;
+            mColorPrimary = 0xFF000000 | primaryColor;
         }
 
         /**
@@ -588,6 +609,16 @@ public class ActivityManager {
          */
         public void setIcon(Bitmap icon) {
             mIcon = icon;
+        }
+
+        /**
+         * Moves the icon bitmap reference from an actual Bitmap to a file containing the
+         * bitmap.
+         * @hide
+         */
+        public void setIconFilename(String iconFilename) {
+            mIconFilename = iconFilename;
+            mIcon = null;
         }
 
         /**
@@ -601,7 +632,22 @@ public class ActivityManager {
          * @return The icon that represents the current state of this task.
          */
         public Bitmap getIcon() {
-            return mIcon;
+            if (mIcon != null) {
+                return mIcon;
+            }
+            if (mIconFilename != null) {
+                try {
+                    return ActivityManagerNative.getDefault().
+                            getTaskDescriptionIcon(mIconFilename);
+                } catch (RemoteException e) {
+                }
+            }
+            return null;
+        }
+
+        /** @hide */
+        public String getIconFilename() {
+            return mIconFilename;
         }
 
         /**
@@ -609,6 +655,30 @@ public class ActivityManager {
          */
         public int getPrimaryColor() {
             return mColorPrimary;
+        }
+
+        /** @hide */
+        public void saveToXml(XmlSerializer out) throws IOException {
+            if (mLabel != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, mLabel);
+            }
+            if (mColorPrimary != 0) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(mColorPrimary));
+            }
+            if (mIconFilename != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONICONFILENAME, mIconFilename);
+            }
+        }
+
+        /** @hide */
+        public void restoreFromXml(String attrName, String attrValue) {
+            if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
+                setLabel(attrValue);
+            } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
+                setPrimaryColor((int) Long.parseLong(attrValue, 16));
+            } else if (ATTR_TASKDESCRIPTIONICONFILENAME.equals(attrName)) {
+                setIconFilename(attrValue);
+            }
         }
 
         @Override
@@ -631,12 +701,19 @@ public class ActivityManager {
                 mIcon.writeToParcel(dest, 0);
             }
             dest.writeInt(mColorPrimary);
+            if (mIconFilename == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                dest.writeString(mIconFilename);
+            }
         }
 
         public void readFromParcel(Parcel source) {
             mLabel = source.readInt() > 0 ? source.readString() : null;
             mIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
             mColorPrimary = source.readInt();
+            mIconFilename = source.readInt() > 0 ? source.readString() : null;
         }
 
         public static final Creator<TaskDescription> CREATOR
