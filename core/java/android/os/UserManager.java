@@ -19,6 +19,7 @@ import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -430,7 +431,8 @@ public class UserManager {
      * @return whether the user making this call is a goat
      */
     public boolean isUserAGoat() {
-        return false;
+        return mContext.getPackageManager()
+                .isPackageAvailable("com.coffeestainstudios.goatsimulator");
     }
 
     /**
