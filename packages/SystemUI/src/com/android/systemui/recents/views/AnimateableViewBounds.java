@@ -53,10 +53,12 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     @Override
     public void getOutline(View view, Outline outline) {
         outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
+
+        // TODO: This doesn't work with fake shadows.
         outline.setRoundRect(Math.max(mClipRect.left, mOutlineClipRect.left),
                 Math.max(mClipRect.top, mOutlineClipRect.top),
-                mSourceView.getMeasuredWidth() - Math.max(mClipRect.right, mOutlineClipRect.right),
-                mSourceView.getMeasuredHeight() - Math.max(mClipRect.bottom, mOutlineClipRect.bottom),
+                mSourceView.getWidth() - Math.max(mClipRect.right, mOutlineClipRect.right),
+                mSourceView.getHeight() - Math.max(mClipRect.bottom, mOutlineClipRect.bottom),
                 mCornerRadius);
     }
 
