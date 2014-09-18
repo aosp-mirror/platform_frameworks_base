@@ -1537,7 +1537,9 @@ class AlarmManagerService extends SystemService {
         for (int i=0; i<triggerList.size(); i++) {
             Alarm alarm = triggerList.get(i);
             try {
-                Slog.v(TAG, "sending alarm " + alarm);
+                if (localLOGV) {
+                    Slog.v(TAG, "sending alarm " + alarm);
+                }
                 alarm.operation.send(getContext(), 0,
                         mBackgroundIntent.putExtra(
                                 Intent.EXTRA_ALARM_COUNT, alarm.count),
