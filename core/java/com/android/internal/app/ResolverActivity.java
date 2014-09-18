@@ -491,8 +491,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     }
 
     private boolean versionNumberAtLeastL(int versionNumber) {
-        // TODO: remove "|| true" once the build code for L is fixed.
-        return versionNumber >= Build.VERSION_CODES.L || true;
+        return versionNumber >= Build.VERSION_CODES.L;
     }
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
