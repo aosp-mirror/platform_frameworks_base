@@ -26,6 +26,8 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -106,9 +108,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mMaxDimScale = mConfig.taskStackMaxDim / 255f;
         mClipViewInStack = true;
         mViewBounds = new AnimateableViewBounds(this, mConfig.taskViewRoundedCornerRadiusPx);
-        setOutlineProvider(mViewBounds);
         setTaskProgress(getTaskProgress());
         setDim(getDim());
+        if (mConfig.fakeShadows) {
+            setBackground(new FakeShadowDrawable(context.getResources(), mConfig));
+        }
+        setOutlineProvider(mViewBounds);
     }
 
     /** Set callback */
@@ -150,24 +155,30 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
+        int widthWithoutPadding = width - mPaddingLeft - mPaddingRight;
+        int heightWithoutPadding = height - mPaddingTop - mPaddingBottom;
         // Measure the bar view, thumbnail, and footer
-        mHeaderView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+        mHeaderView.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
         if (mFooterView != null) {
-            mFooterView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+            mFooterView.measure(
+                    MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mConfig.taskViewLockToAppButtonHeight,
                             MeasureSpec.EXACTLY));
         }
-        mActionButtonView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
+        mActionButtonView.measure(
+                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.AT_MOST));
         if (mIsFullScreenView) {
             // Measure the thumbnail height to be the full dimensions
-            mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            mThumbnailView.measure(
+                    MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
         } else {
             // Measure the thumbnail to be square
-            mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY));
+            mThumbnailView.measure(
+                    MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
         }
         setMeasuredDimension(width, height);
         invalidateOutline();
@@ -178,7 +189,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // If we are a full screen view, then only update the Z to keep it in order
         // XXX: Also update/animate the dim as well
         if (mIsFullScreenView) {
-            if (Constants.DebugFlags.App.EnableShadows &&
+            if (!mConfig.fakeShadows &&
                     toTransform.hasTranslationZChangedFrom(getTranslationZ())) {
                 setTranslationZ(toTransform.translationZ);
             }
@@ -186,7 +197,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
 
         // Apply the transform
-        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false);
+        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false,
+                !mConfig.fakeShadows);
 
         // Update the task progress
         if (mTaskProgressAnimator != null) {
@@ -258,9 +270,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else if (mConfig.launchedFromHome) {
             // Move the task view off screen (below) so we can animate it in
             setTranslationY(offscreenY);
-            if (Constants.DebugFlags.App.EnableShadows) {
-                setTranslationZ(0);
-            }
+            setTranslationZ(0);
             setScaleX(1f);
             setScaleY(1f);
         }
@@ -413,7 +423,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
             int delay = mConfig.taskViewEnterFromHomeDelay +
                     frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay;
-            if (Constants.DebugFlags.App.EnableShadows) {
+            if (!mConfig.fakeShadows) {
                 animate().translationZ(transform.translationZ);
             }
             animate()

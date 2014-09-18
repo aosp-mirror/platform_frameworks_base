@@ -39,8 +39,6 @@ public class Constants {
             public static final boolean EnableDevAppInfoOnLongPress = true;
             // Enables the search bar layout
             public static final boolean EnableSearchLayout = true;
-            // Enables the dynamic shadows behind each task
-            public static final boolean EnableShadows = true;
             // Enables the thumbnail alpha on the front-most task
             public static final boolean EnableThumbnailAlphaOnFrontmost = false;
             // This disables the bitmap and icon caches

@@ -81,6 +81,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStartEnterAnimationCompleted;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
     int[] mTmpVisibleRange = new int[2];
+    Rect mTmpRect = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<Task, TaskView>();
     LayoutInflater mInflater;
@@ -537,10 +538,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (tv.isFullScreenView()) {
                 tv.measure(widthMeasureSpec, heightMeasureSpec);
             } else {
+                if (tv.getBackground() != null) {
+                    tv.getBackground().getPadding(mTmpRect);
+                } else {
+                    mTmpRect.setEmpty();
+                }
                 tv.measure(
-                    MeasureSpec.makeMeasureSpec(mLayoutAlgorithm.mTaskRect.width(),
+                    MeasureSpec.makeMeasureSpec(
+                            mLayoutAlgorithm.mTaskRect.width() + mTmpRect.left + mTmpRect.right,
                             MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(mLayoutAlgorithm.mTaskRect.height() +
+                    MeasureSpec.makeMeasureSpec(
+                            mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom +
                             tv.getMaxFooterHeight(), MeasureSpec.EXACTLY));
             }
         }
@@ -562,8 +570,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (tv.isFullScreenView()) {
                 tv.layout(left, top, left + tv.getMeasuredWidth(), top + tv.getMeasuredHeight());
             } else {
-                tv.layout(mLayoutAlgorithm.mTaskRect.left, mLayoutAlgorithm.mTaskRect.top,
-                        mLayoutAlgorithm.mTaskRect.right, mLayoutAlgorithm.mTaskRect.bottom +
+                if (tv.getBackground() != null) {
+                    tv.getBackground().getPadding(mTmpRect);
+                } else {
+                    mTmpRect.setEmpty();
+                }
+                tv.layout(mLayoutAlgorithm.mTaskRect.left - mTmpRect.left,
+                        mLayoutAlgorithm.mTaskRect.top - mTmpRect.top,
+                        mLayoutAlgorithm.mTaskRect.right + mTmpRect.right,
+                        mLayoutAlgorithm.mTaskRect.bottom + mTmpRect.bottom +
                                 tv.getMaxFooterHeight());
             }
         }
