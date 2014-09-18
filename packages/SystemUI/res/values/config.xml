@@ -39,6 +39,8 @@
     <!-- The number of app icons we keep in memory -->
     <integer name="config_recents_max_icon_count">20</integer>
 
+    <!-- Whether to use cheap, less good looking shadows for recents -->
+    <bool name="config_recents_fake_shadows">false</bool>
 
     <!-- The theme to use for RecentsActivity. -->
     <item type="style" name="config_recents_activity_theme">@style/RecentsTheme.Wallpaper</item>
