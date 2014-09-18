@@ -94,7 +94,7 @@ public final class Dpm extends BaseCommand {
             mDevicePolicyManager.removeActiveAdmin(component, UserHandle.USER_OWNER);
             throw e;
         }
-        System.out.println("Device owner set to package " + packageName);
+        System.out.println("Success: Device owner set to package " + packageName);
         System.out.println("Active admin set to component " + component.toShortString());
     }
 
@@ -113,8 +113,8 @@ public final class Dpm extends BaseCommand {
             mDevicePolicyManager.removeActiveAdmin(component, userId);
             throw e;
         }
-        System.out.println("Active admin and profile owner set to " + component.toShortString() +
-                " for user " + userId);
+        System.out.println("Success: Active admin and profile owner set to "
+                + component.toShortString() + " for user " + userId);
     }
 
     private ComponentName parseComponentName(String component) {
