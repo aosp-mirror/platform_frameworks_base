@@ -145,9 +145,18 @@ public class Fade extends Visibility {
         private final View mView;
         private boolean mCanceled = false;
         private float mPausedAlpha = -1;
+        private boolean mLayerTypeChanged = false;
 
         public FadeAnimatorListener(View view) {
             mView = view;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animator) {
+            if (mView.hasOverlappingRendering() && mView.getLayerType() == View.LAYER_TYPE_NONE) {
+                mLayerTypeChanged = true;
+                mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            }
         }
 
         @Override
@@ -162,6 +171,9 @@ public class Fade extends Visibility {
         public void onAnimationEnd(Animator animator) {
             if (!mCanceled) {
                 mView.setTransitionAlpha(1);
+            }
+            if (mLayerTypeChanged) {
+                mView.setLayerType(View.LAYER_TYPE_NONE, null);
             }
         }
 
