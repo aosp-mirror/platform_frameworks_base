@@ -147,11 +147,19 @@ public class AppCompatibility extends InstrumentationTestCase {
      *         during the app launch.
      */
     private ProcessErrorStateInfo launchActivity(String packageName) {
+        // the recommended way to see if this is a tv or not.
+        boolean isleanback = !mPackageManager.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
+            && !mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
         homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        Intent intent = mPackageManager.getLaunchIntentForPackage(packageName);
+        Intent intent;
+        if (isleanback) {
+            Log.d(TAG, "Leanback and relax!");
+            intent = mPackageManager.getLeanbackLaunchIntentForPackage(packageName);
+        } else {
+            intent = mPackageManager.getLaunchIntentForPackage(packageName);
+        }
         // Skip if the apk does not have a launch intent.
         if (intent == null) {
             Log.d(TAG, "Skipping " + packageName + "; missing launch intent");
