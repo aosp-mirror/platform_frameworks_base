@@ -207,6 +207,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         FontSizeUtils.updateFontSize(mAmPm, R.dimen.qs_time_collapsed_size);
         FontSizeUtils.updateFontSize(this, R.id.empty_time_view, R.dimen.qs_time_expanded_size);
 
+        mEmergencyCallsOnly.setText(com.android.internal.R.string.emergency_calls_only);
+
         mClockCollapsedSize = getResources().getDimensionPixelSize(R.dimen.qs_time_collapsed_size);
         mClockExpandedSize = getResources().getDimensionPixelSize(R.dimen.qs_time_expanded_size);
         mClockCollapsedScaleFactor = (float) mClockCollapsedSize / (float) mClockExpandedSize;
