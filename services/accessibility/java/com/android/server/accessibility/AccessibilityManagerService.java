@@ -3277,7 +3277,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         // But we still have not gotten the window state from the
                         // window manager, so delay the notification until then.
                         AccessibilityWindowInfo window = findWindowById(event.getWindowId());
-                        if (window == null || !window.isFocused()) {
+                        if (window == null) {
                             mShowingFocusedWindowEvent = AccessibilityEvent.obtain(event);
                             return false;
                         }
@@ -3377,7 +3377,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (mShowingFocusedWindowEvent != null) {
                 final int windowId = mShowingFocusedWindowEvent.getWindowId();
                 AccessibilityWindowInfo window = findWindowById(windowId);
-                if (window != null && window.isFocused()) {
+                if (window != null) {
                     // Sending does the recycle.
                     sendAccessibilityEvent(mShowingFocusedWindowEvent, mCurrentUserId);
                 }
