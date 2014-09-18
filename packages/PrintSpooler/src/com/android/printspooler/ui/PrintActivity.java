@@ -595,7 +595,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
             });
         } else if (resultCode == RESULT_CANCELED) {
-            setState(STATE_CONFIGURING);
+            mState = STATE_CONFIGURING;
             updateOptionsUi();
         } else {
             setState(STATE_CREATE_FILE_FAILED);
@@ -2335,7 +2335,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     mContext.unbindService(PageShredder.this);
                     mCallback.run();
                 }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
         @Override
