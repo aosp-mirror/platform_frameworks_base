@@ -318,8 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Դուք ցանկանու՞մ եք շարունակել ձեր գործողությունը:"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Սկսել"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Այո, շարունակել"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"Ավելացնե՞լ նոր օգտվող:"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Երբ նոր օգտվող եք ավելացնում, նա պետք է կարգավորի իր տարածքը:\n\nՑանկացած օգտվող կարող է թարմացնել ծրագրերը՝ մյուս բոլոր օգտվողների համար:"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Ավելացնե՞լ նոր պրոֆիլ:"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Երբ նոր օգտվող եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտվող կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Մարտկոցի տնտեսումը միացված է"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Նվազեցնում է ծանրաբեռնվածությունը և ֆոնային տվյալները"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Անջատել մարտկոցի տնտեսումը"</string>

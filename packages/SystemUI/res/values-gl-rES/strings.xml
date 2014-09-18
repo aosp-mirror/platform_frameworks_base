@@ -301,9 +301,9 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Pasa o dedo cara arriba para desbloquear"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Pasa o dedo cara á dereita para acceder ao teléfono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Pasa o dedo cara á esquerda para abrir a cámara"</string>
-    <string name="interruption_level_none" msgid="3831278883136066646">"Nunca"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Ningún"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioridade"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Sempre"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Todas"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para finalizar a carga)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Cambiar usuario, usuario actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>

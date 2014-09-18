@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏مقام متعین کیا گیا بذریعہ GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"مقام کی درخواستیں فعال ہیں"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"سبھی اطلاعات صاف کریں۔"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"اطلاع کی ترتیبات"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ترتیبات"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"اسکرین خود بخود گردش کرے گی۔"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"اسکرین لینڈ اسکیپ سمت بندی میں مقفل ہے۔"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"اسکرین پورٹریٹ سمت بندی میں مقفل ہے۔"</string>
@@ -321,7 +319,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"دوبارہ شروع کریں"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ہاں، جاری رکھیں"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"نیا صارف شامل کریں؟"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے۔\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"بیٹری سیور آن ہے"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"کارکردگی اور پس منظر کا ڈیٹا کم کر دیتا ہے"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"بیٹری کی بچت آف کریں"</string>
