@@ -56,6 +56,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
         public void onTaskViewClicked();
+        public void onTaskLaunchFailed();
         public void onAllTaskViewsDismissed();
         public void onExitToHomeAnimationTriggered();
     }
@@ -471,13 +472,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     // Bring an active task to the foreground
                     ssp.moveTaskToFront(task.key.id, launchOpts);
                 } else {
-                    try {
-                        ssp.startActivityFromRecents(task.key.id, launchOpts);
+                    if (ssp.startActivityFromRecents(getContext(), task.key.id,
+                            task.activityLabel, launchOpts)) {
                         if (launchOpts == null && lockToTask) {
                             ssp.lockCurrentTask();
                         }
-                    } catch (ActivityNotFoundException anfe) {
-                        Console.logError(getContext(), "Could not start Activity");
+                    } else {
+                        // Dismiss the task and return the user to home if we fail to
+                        // launch the task
+                        onTaskViewDismissed(task);
+                        if (mCb != null) {
+                            mCb.onTaskLaunchFailed();
+                        }
                     }
                 }
             }

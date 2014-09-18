@@ -222,9 +222,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Bring an active task to the foreground
             mSystemServicesProxy.moveTaskToFront(toTask.key.id, launchOpts);
         } else {
-            try {
-                mSystemServicesProxy.startActivityFromRecents(toTask.key.id, launchOpts);
-            } catch (ActivityNotFoundException anfe) {}
+            mSystemServicesProxy.startActivityFromRecents(mContext, toTask.key.id,
+                    toTask.activityLabel, launchOpts);
         }
     }
 
