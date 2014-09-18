@@ -172,7 +172,7 @@ android:imeOptions}</a> attribute. For example, here's how you can specify the S
 are any subsequent <a
 href="{@docRoot}reference/android/view/View.html#attr_android:focusable">{@code
 android:focusable}</a> fields. If any focusable fields are found following this one, the system
-applies the (@code actionNext} action to the current {@link android.widget.EditText} so the user can
+applies the {@code "actionNext"} action to the current {@link android.widget.EditText} so the user can
 select Next to move to the next field. If there's no subsequent focusable field, the system applies
 the {@code "actionDone"} action. You can override this by setting the <a
 href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
@@ -263,7 +263,7 @@ disabled with {@code android:imeOptions="flagNoExtractUi"}.</p>
 
 <p>If you want to provide suggestions to users as they type, you can use a subclass of {@link
 android.widget.EditText} called {@link android.widget.AutoCompleteTextView}. To implement
-auto-complete, you must specify an (@link android.widget.Adapter) that provides the text
+auto-complete, you must specify an {@link android.widget.Adapter} that provides the text
 suggestions. There are several kinds of adapters available, depending on where the data is coming
 from, such as from a database or an array.</p>
 
