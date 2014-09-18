@@ -212,10 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Vị trí đặt bởi GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Yêu cầu về thông tin vị trí đang hoạt động"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Xóa tất cả thông báo."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
-    <skip />
-    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Cài đặt thông báo"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Cài đặt <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Màn hình sẽ xoay tự động."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Màn hình hiện bị khóa theo hướng ngang."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Màn hình hiện bị khóa theo hướng dọc."</string>
@@ -301,7 +299,6 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Vuốt lên để mở khóa"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Vuốt sang phải để mở điện thoại"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Vuốt sang trái để mở máy ảnh"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Không giới hạn"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Không có"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Ưu tiên"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Tất cả"</string>
@@ -321,14 +318,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Bắt đầu lại"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Có, tiếp tục"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Trong một phút"</item>
-    <item quantity="other" msgid="6924190729213550991">"Trong %d phút"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Trong một giờ"</item>
-    <item quantity="other" msgid="5408537517529822157">"Trong %d giờ"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Thêm người dùng mới?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Khi bạn thêm người dùng mới, người dùng đó cần thiết lập dung lượng lưu trữ của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Trình tiết kiệm pin đang bật"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Giảm hiệu suất và dữ liệu nền"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Tắt trình tiết kiệm pin"</string>
