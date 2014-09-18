@@ -121,6 +121,7 @@ public class RecentsConfiguration {
     /** Misc **/
     public boolean useHardwareLayers;
     public int altTabKeyDelay;
+    public boolean fakeShadows;
 
     /** Dev options and global settings */
     public boolean lockToAppEnabled;
@@ -274,6 +275,7 @@ public class RecentsConfiguration {
         // Misc
         useHardwareLayers = res.getBoolean(R.bool.config_recents_use_hardware_layers);
         altTabKeyDelay = res.getInteger(R.integer.recents_alt_tab_key_delay);
+        fakeShadows = res.getBoolean(R.bool.config_recents_fake_shadows);
     }
 
     /** Updates the system insets */
