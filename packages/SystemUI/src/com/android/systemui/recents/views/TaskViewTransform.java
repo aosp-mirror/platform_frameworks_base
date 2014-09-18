@@ -77,7 +77,8 @@ public class TaskViewTransform {
     }
 
     /** Applies this transform to a view. */
-    public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers) {
+    public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers,
+            boolean allowShadows) {
         // Check to see if any properties have changed, and update the task view
         if (duration > 0) {
             ViewPropertyAnimator anim = v.animate();
@@ -87,8 +88,7 @@ public class TaskViewTransform {
             if (hasTranslationYChangedFrom(v.getTranslationY())) {
                 anim.translationY(translationY);
             }
-            if (Constants.DebugFlags.App.EnableShadows &&
-                    hasTranslationZChangedFrom(v.getTranslationZ())) {
+            if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
                 anim.translationZ(translationZ);
             }
             if (hasScaleChangedFrom(v.getScaleX())) {
@@ -113,8 +113,7 @@ public class TaskViewTransform {
             if (hasTranslationYChangedFrom(v.getTranslationY())) {
                 v.setTranslationY(translationY);
             }
-            if (Constants.DebugFlags.App.EnableShadows &&
-                    hasTranslationZChangedFrom(v.getTranslationZ())) {
+            if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
                 v.setTranslationZ(translationZ);
             }
             if (hasScaleChangedFrom(v.getScaleX())) {
@@ -131,9 +130,7 @@ public class TaskViewTransform {
     public static void reset(View v) {
         v.setTranslationX(0f);
         v.setTranslationY(0f);
-        if (Constants.DebugFlags.App.EnableShadows) {
-            v.setTranslationZ(0f);
-        }
+        v.setTranslationZ(0f);
         v.setScaleX(1f);
         v.setScaleY(1f);
         v.setAlpha(1f);
