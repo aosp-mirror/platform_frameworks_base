@@ -32,6 +32,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -115,8 +116,8 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -587,7 +588,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         startKeyguard();
 
         mDozeServiceHost = new DozeServiceHost();
-        putComponent(DozeService.Host.class, mDozeServiceHost);
+        putComponent(DozeHost.class, mDozeServiceHost);
         putComponent(PhoneStatusBar.class, this);
 
         setControllerUsers();
@@ -3994,8 +3995,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void wakeUpIfDozing(long time) {
-        if (mDozeServiceHost != null && mDozeServiceHost.isDozing()
-                && mScrimController.isPulsing()) {
+        if (mDozing && mScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time);
         }
@@ -4027,7 +4027,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private final class DozeServiceHost implements DozeService.Host {
+    private final class DozeServiceHost implements DozeHost {
         // Amount of time to allow to update the time shown on the screen before releasing
         // the wakelock.  This timeout is design to compensate for the fact that we don't
         // currently have a way to know when time display contents have actually been
@@ -4037,16 +4037,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
         private final H mHandler = new H();
 
-        private DozeService mCurrentDozeService;
-
         @Override
         public String toString() {
-            return "PSB.DozeServiceHost[mCallbacks=" + mCallbacks.size() + " mCurrentDozeService="
-                    + mCurrentDozeService + "]";
-        }
-
-        public boolean isDozing() {
-            return mCurrentDozeService != null;
+            return "PSB.DozeServiceHost[mCallbacks=" + mCallbacks.size() + "]";
         }
 
         public void firePowerSaveChanged(boolean active) {
@@ -4074,32 +4067,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         @Override
-        public void addCallback(Callback callback) {
+        public void addCallback(@NonNull Callback callback) {
             mCallbacks.add(callback);
         }
 
         @Override
-        public void removeCallback(Callback callback) {
+        public void removeCallback(@NonNull Callback callback) {
             mCallbacks.remove(callback);
         }
 
         @Override
-        public void requestDoze(DozeService dozeService) {
-            if (dozeService == null) return;
-            mHandler.obtainMessage(H.REQUEST_DOZE, dozeService).sendToTarget();
+        public void startDozing(@NonNull Runnable ready) {
+            mHandler.obtainMessage(H.MSG_START_DOZING, ready).sendToTarget();
         }
 
         @Override
-        public void requestPulse(DozeService dozeService) {
-            if (dozeService == null) return;
-            dozeService.stayAwake(PROCESSING_TIME);
-            mHandler.obtainMessage(H.REQUEST_PULSE, dozeService).sendToTarget();
+        public void pulseWhileDozing(@NonNull PulseCallback callback) {
+            mHandler.obtainMessage(H.MSG_PULSE_WHILE_DOZING, callback).sendToTarget();
         }
 
         @Override
-        public void dozingStopped(DozeService dozeService) {
-            if (dozeService == null) return;
-            mHandler.obtainMessage(H.DOZING_STOPPED, dozeService).sendToTarget();
+        public void stopDozing() {
+            mHandler.obtainMessage(H.MSG_STOP_DOZING).sendToTarget();
         }
 
         @Override
@@ -4107,26 +4096,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return mBatteryController != null && mBatteryController.isPowerSave();
         }
 
-        private void handleRequestDoze(DozeService dozeService) {
-            mCurrentDozeService = dozeService;
+        private void handleStartDozing(@NonNull Runnable ready) {
             if (!mDozing) {
                 mDozing = true;
                 DozeLog.traceDozing(mContext, mDozing);
                 updateDozingState();
             }
-            mCurrentDozeService.startDozing();
+            ready.run();
         }
 
-        private void handleRequestPulse(DozeService dozeService) {
-            if (!dozeService.equals(mCurrentDozeService)) return;
-            final long stayAwake = mScrimController.pulse();
-            mCurrentDozeService.stayAwake(stayAwake);
+        private void handlePulseWhileDozing(@NonNull PulseCallback callback) {
+            mScrimController.pulse(callback);
         }
 
-        private void handleDozingStopped(DozeService dozeService) {
-            if (dozeService.equals(mCurrentDozeService)) {
-                mCurrentDozeService = null;
-            }
+        private void handleStopDozing() {
             if (mDozing) {
                 mDozing = false;
                 DozeLog.traceDozing(mContext, mDozing);
@@ -4135,18 +4118,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         private final class H extends Handler {
-            private static final int REQUEST_DOZE = 1;
-            private static final int REQUEST_PULSE = 2;
-            private static final int DOZING_STOPPED = 3;
+            private static final int MSG_START_DOZING = 1;
+            private static final int MSG_PULSE_WHILE_DOZING = 2;
+            private static final int MSG_STOP_DOZING = 3;
 
             @Override
             public void handleMessage(Message msg) {
-                if (msg.what == REQUEST_DOZE) {
-                    handleRequestDoze((DozeService) msg.obj);
-                } else if (msg.what == REQUEST_PULSE) {
-                    handleRequestPulse((DozeService) msg.obj);
-                } else if (msg.what == DOZING_STOPPED) {
-                    handleDozingStopped((DozeService) msg.obj);
+                switch (msg.what) {
+                    case MSG_START_DOZING:
+                        handleStartDozing((Runnable) msg.obj);
+                        break;
+                    case MSG_PULSE_WHILE_DOZING:
+                        handlePulseWhileDozing((PulseCallback) msg.obj);
+                        break;
+                    case MSG_STOP_DOZING:
+                        handleStopDozing();
+                        break;
                 }
             }
         }
