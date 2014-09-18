@@ -814,8 +814,8 @@ public abstract class Transition implements Cloneable {
             }
         }
         if (mTargetIds.size() == 0 && mTargets.size() == 0 &&
-                (mTargetTypes == null || mTargetTypes.isEmpty() &&
-                (mTargetNames == null || mTargetNames.isEmpty()))) {
+                (mTargetTypes == null || mTargetTypes.isEmpty()) &&
+                (mTargetNames == null || mTargetNames.isEmpty())) {
             return true;
         }
         if (mTargetIds.contains(targetId) || mTargets.contains(target)) {
