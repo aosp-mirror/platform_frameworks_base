@@ -78,7 +78,7 @@ public class TaskViewTransform {
 
     /** Applies this transform to a view. */
     public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers,
-            boolean allowShadows) {
+            boolean allowShadows, ValueAnimator.AnimatorUpdateListener updateCallback) {
         // Check to see if any properties have changed, and update the task view
         if (duration > 0) {
             ViewPropertyAnimator anim = v.animate();
@@ -103,6 +103,11 @@ public class TaskViewTransform {
             }
             if (requiresLayers && allowLayers) {
                 anim.withLayer();
+            }
+            if (updateCallback != null) {
+                anim.setUpdateListener(updateCallback);
+            } else {
+                anim.setUpdateListener(null);
             }
             anim.setStartDelay(startDelay)
                     .setDuration(duration)

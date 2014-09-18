@@ -52,6 +52,8 @@ public class TaskViewThumbnail extends View {
     private BitmapShader mBitmapShader;
     private float mBitmapAlpha;
     private float mDimAlpha;
+    private View mTaskBar;
+    private boolean mInvisible;
     private ValueAnimator mAlphaAnimator;
     private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener
             = new ValueAnimator.AnimatorUpdateListener() {
@@ -85,6 +87,9 @@ public class TaskViewThumbnail extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mInvisible) {
+            return;
+        }
         canvas.drawRoundRect(0,
                 0,
                 getWidth(),
@@ -101,6 +106,9 @@ public class TaskViewThumbnail extends View {
     }
 
     private void updateFilter() {
+        if (mInvisible) {
+            return;
+        }
         int mul = (int) ((1.0f - mDimAlpha) * mBitmapAlpha * 255);
         int add = (int) ((1.0f - mDimAlpha) * (1 - mBitmapAlpha) * 255);
         if (mBitmapShader != null) {
@@ -118,16 +126,22 @@ public class TaskViewThumbnail extends View {
 
     /** Updates the clip rect based on the given task bar. */
     void enableTaskBarClip(View taskBar) {
+        mTaskBar = taskBar;
         int top = (int) Math.max(0, taskBar.getTranslationY() +
                 taskBar.getMeasuredHeight() - 1);
         mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
         setClipBounds(mClipRect);
     }
 
-    /** Disables the task bar clipping. */
-    void disableTaskBarClip() {
-        mClipRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
-        setClipBounds(mClipRect);
+    void updateVisibility(int clipBottom) {
+        boolean invisible = mTaskBar != null && getHeight() - clipBottom < mTaskBar.getHeight();
+        if (invisible != mInvisible) {
+            mInvisible = invisible;
+            if (!mInvisible) {
+                updateFilter();
+            }
+            invalidate();
+        }
     }
 
     /** Binds the thumbnail view to the screenshot. */
