@@ -1485,7 +1485,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateClearAll();
         updateEmptyShadeView();
 
-        mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned());
+        // Disable QS if device not provisioned.
+        // If the user switcher is simple then disable QS during setup because
+        // the user intends to use the lock screen user switcher, QS in not needed.
+        mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned()
+                && (!mUserSwitcherController.isSimpleUserSwitcher() || mUserSetup));
         mShadeUpdates.check();
     }
 
