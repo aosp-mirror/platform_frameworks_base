@@ -711,10 +711,17 @@ public final class ViewRootImpl implements ViewParent,
             // can be used by code on the system process to escape that and enable
             // HW accelerated drawing.  (This is basically for the lock screen.)
 
+            final boolean fakeHwAccelerated = (attrs.privateFlags &
+                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED) != 0;
             final boolean forceHwAccelerated = (attrs.privateFlags &
                     WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED) != 0;
 
-            if (!HardwareRenderer.sRendererDisabled
+            if (fakeHwAccelerated) {
+                // This is exclusively for the preview windows the window manager
+                // shows for launching applications, so they will look more like
+                // the app being launched.
+                mAttachInfo.mHardwareAccelerationRequested = true;
+            } else if (!HardwareRenderer.sRendererDisabled
                     || (HardwareRenderer.sSystemRendererDisabled && forceHwAccelerated)) {
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.destroy();
@@ -2479,8 +2486,7 @@ public final class ViewRootImpl implements ViewParent,
                 dirty.setEmpty();
 
                 mBlockResizeBuffer = false;
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this,
-                        params.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
