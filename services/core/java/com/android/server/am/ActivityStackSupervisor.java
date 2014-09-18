@@ -3689,7 +3689,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        private void detachLocked() {
+        protected void detachLocked() {
             if (DEBUG_STACK) Slog.d(TAG, "detachLocked: " + this + " from display="
                     + mActivityDisplay + " Callers=" + Debug.getCallers(2));
             if (mActivityDisplay != null) {
@@ -3813,12 +3813,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         void onTaskListEmptyLocked() {
-            mHandler.removeMessages(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
-            if (!mStack.isHomeStack()) {
-                detachLocked();
-                deleteActivityContainer(this);
-            }
-            mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
         }
 
         @Override
@@ -3905,6 +3899,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         @Override
         boolean isEligibleForNewTasks() {
             return false;
+        }
+
+        void onTaskListEmptyLocked() {
+            mHandler.removeMessages(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
+            detachLocked();
+            deleteActivityContainer(this);
+            mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
         }
 
         private void setSurfaceIfReadyLocked() {
