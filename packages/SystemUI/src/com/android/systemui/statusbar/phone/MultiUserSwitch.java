@@ -67,8 +67,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        final UserManager um = UserManager.get(getContext());
-        if (um.isUserSwitcherEnabled()) {
+        if (opensUserSwitcherWhenClicked()) {
             if (mKeyguardMode) {
                 if (mKeyguardUserSwitcher != null) {
                     mKeyguardUserSwitcher.show(true /* animate */);
@@ -92,9 +91,8 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         super.onPopulateAccessibilityEvent(event);
 
         if (isClickable()) {
-            final UserManager um = UserManager.get(getContext());
             String text;
-            if (um.isUserSwitcherEnabled()) {
+            if (opensUserSwitcherWhenClicked()) {
                 String currentUser = null;
                 if (mQsPanel != null) {
                     UserSwitcherController controller = mQsPanel.getHost()
@@ -121,5 +119,10 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    private boolean opensUserSwitcherWhenClicked() {
+        UserManager um = UserManager.get(getContext());
+        return UserManager.supportsMultipleUsers() && um.isUserSwitcherEnabled();
     }
 }
