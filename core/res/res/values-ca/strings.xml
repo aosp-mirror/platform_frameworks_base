@@ -1203,8 +1203,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Comparteix amb %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Selecciona una aplicació d\'inici"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
-    <!-- no translation found for use_a_different_app (8134926230585710243) -->
-    <skip />
+    <string name="use_a_different_app" msgid="8134926230585710243">"Fes servir una altra aplicació"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Tria una acció"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Tria una aplicació per al dispositiu USB"</string>
