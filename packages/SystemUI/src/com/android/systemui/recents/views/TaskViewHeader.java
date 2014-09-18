@@ -30,10 +30,13 @@ import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,17 +61,20 @@ public class TaskViewHeader extends FrameLayout {
     TextView mActivityDescription;
 
     RippleDrawable mBackground;
-    ColorDrawable mBackgroundColor;
+    GradientDrawable mBackgroundColorDrawable;
+    int mBackgroundColor;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
     AnimatorSet mFocusAnimator;
     ValueAnimator backgroundColorAnimator;
+    PorterDuffColorFilter mDimFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
 
     boolean mIsFullscreen;
     boolean mCurrentPrimaryColorIsDark;
     int mCurrentPrimaryColor;
 
     static Paint sHighlightPaint;
+    private Paint mDimPaint = new Paint();
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -140,13 +146,14 @@ public class TaskViewHeader extends FrameLayout {
             }
         }
 
-        mBackgroundColor = new ColorDrawable(0);
+        mBackgroundColorDrawable = (GradientDrawable) getContext().getDrawable(R.drawable
+                .recents_task_view_header_bg_color);
         // Copy the ripple drawable since we are going to be manipulating it
         mBackground = (RippleDrawable)
                 getContext().getDrawable(R.drawable.recents_task_view_header_bg);
         mBackground = (RippleDrawable) mBackground.mutate().getConstantState().newDrawable();
         mBackground.setColor(ColorStateList.valueOf(0));
-        mBackground.setDrawableByLayerId(mBackground.getId(0), mBackgroundColor);
+        mBackground.setDrawableByLayerId(mBackground.getId(0), mBackgroundColorDrawable);
         setBackground(mBackground);
     }
 
@@ -197,7 +204,8 @@ public class TaskViewHeader extends FrameLayout {
         int existingBgColor = (getBackground() instanceof ColorDrawable) ?
                 ((ColorDrawable) getBackground()).getColor() : 0;
         if (existingBgColor != t.colorPrimary) {
-            mBackgroundColor.setColor(t.colorPrimary);
+            mBackgroundColorDrawable.setColor(t.colorPrimary);
+            mBackgroundColor = t.colorPrimary;
         }
         mCurrentPrimaryColor = t.colorPrimary;
         mCurrentPrimaryColorIsDark = t.useLightOnPrimaryColor;
@@ -276,7 +284,7 @@ public class TaskViewHeader extends FrameLayout {
             mBackground.setColor(new ColorStateList(states, colors));
             mBackground.setState(newStates);
             // Pulse the background color
-            int currentColor = mBackgroundColor.getColor();
+            int currentColor = mBackgroundColor;
             int lightPrimaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
                     lightPrimaryColor, currentColor);
@@ -289,7 +297,9 @@ public class TaskViewHeader extends FrameLayout {
             backgroundColor.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    mBackgroundColor.setColor((Integer) animation.getAnimatedValue());
+                    int color = (int) animation.getAnimatedValue();
+                    mBackgroundColorDrawable.setColor(color);
+                    mBackgroundColor = color;
                 }
             });
             backgroundColor.setRepeatCount(ValueAnimator.INFINITE);
@@ -307,13 +317,15 @@ public class TaskViewHeader extends FrameLayout {
         } else {
             if (isRunning) {
                 // Restore the background color
-                int currentColor = mBackgroundColor.getColor();
+                int currentColor = mBackgroundColor;
                 ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
                         currentColor, mCurrentPrimaryColor);
                 backgroundColor.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        mBackgroundColor.setColor((Integer) animation.getAnimatedValue());
+                        int color = (int) animation.getAnimatedValue();
+                        mBackgroundColorDrawable.setColor(color);
+                        mBackgroundColor = color;
                     }
                 });
                 // Restore the translation
@@ -328,5 +340,12 @@ public class TaskViewHeader extends FrameLayout {
                 setTranslationZ(0f);
             }
         }
+    }
+
+    public void setDimAlpha(int alpha) {
+        int color = Color.argb(alpha, 0, 0, 0);
+        mDimFilter.setColor(color);
+        mDimPaint.setColorFilter(mDimFilter);
+        setLayerType(LAYER_TYPE_HARDWARE, mDimPaint);
     }
 }
