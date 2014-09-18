@@ -781,18 +781,19 @@ final class TaskRecord {
     }
 
     int findEffectiveRootIndex() {
-        int activityNdx;
+        int effectiveNdx = 0;
         final int topActivityNdx = mActivities.size() - 1;
-        for (activityNdx = 0; activityNdx < topActivityNdx; ++activityNdx) {
+        for (int activityNdx = 0; activityNdx < topActivityNdx; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
             if (r.finishing) {
                 continue;
             }
+            effectiveNdx = activityNdx;
             if ((r.info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
                 break;
             }
         }
-        return activityNdx;
+        return effectiveNdx;
     }
 
     void updateEffectiveIntent() {
