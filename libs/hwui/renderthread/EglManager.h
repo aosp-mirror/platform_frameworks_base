@@ -47,7 +47,7 @@ public:
     // Returns true if the current surface changed, false if it was already current
     bool makeCurrent(EGLSurface surface);
     void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
-    void swapBuffers(EGLSurface surface);
+    bool swapBuffers(EGLSurface surface);
 
     bool enableDirtyRegions(EGLSurface surface);
 
