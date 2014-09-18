@@ -162,6 +162,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
 
+    // The AGPS SUPL mode
+    private static final int AGPS_SUPL_MODE_MSA = 0x02;
+    private static final int AGPS_SUPL_MODE_MSB = 0x01;
+
     // these need to match AGpsType enum in gps.h
     private static final int AGPS_TYPE_SUPL = 1;
     private static final int AGPS_TYPE_C2K = 2;
@@ -486,12 +490,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
             } else if (action.equals(SIM_STATE_CHANGED)) {
                 TelephonyManager phone = (TelephonyManager)
                         mContext.getSystemService(Context.TELEPHONY_SERVICE);
-                int simState = phone.getSimState();
-                Log.d(TAG, "SIM STATE CHANGED to " + simState);
                 String mccMnc = phone.getSimOperator();
-                if (simState == TelephonyManager.SIM_STATE_READY &&
-                    !TextUtils.isEmpty(mccMnc)) {
-                    Log.d(TAG, "SIM STATE is ready, SIM MCC/MNC is " + mccMnc);
+                if (!TextUtils.isEmpty(mccMnc)) {
+                    Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
                     synchronized (mLock) {
                         reloadGpsProperties(context, mProperties);
                         mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
@@ -922,6 +923,39 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
+    /**
+     * Checks what SUPL mode to use, according to the AGPS mode as well as the
+     * allowed mode from properties.
+     *
+     * @param properties GPS properties
+     * @param agpsEnabled whether AGPS is enabled by settings value
+     * @param singleShot whether "singleshot" is needed
+     * @return SUPL mode (MSA vs MSB vs STANDALONE)
+     */
+    private int getSuplMode(Properties properties, boolean agpsEnabled, boolean singleShot) {
+        if (agpsEnabled) {
+            String modeString = properties.getProperty("SUPL_MODE");
+            int suplMode = 0;
+            if (!TextUtils.isEmpty(modeString)) {
+                try {
+                    suplMode = Integer.parseInt(modeString);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "unable to parse SUPL_MODE: " + modeString);
+                    return GPS_POSITION_MODE_STANDALONE;
+                }
+            }
+            if (singleShot
+                    && hasCapability(GPS_CAPABILITY_MSA)
+                    && (suplMode & AGPS_SUPL_MODE_MSA) != 0) {
+                return GPS_POSITION_MODE_MS_ASSISTED;
+            } else if (hasCapability(GPS_CAPABILITY_MSB)
+                    && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
+                return GPS_POSITION_MODE_MS_BASED;
+            }
+        }
+        return GPS_POSITION_MODE_STANDALONE;
+    }
+
     private void handleEnable() {
         if (DEBUG) Log.d(TAG, "handleEnable");
 
@@ -1199,14 +1233,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
             mSingleShot = singleShot;
             mPositionMode = GPS_POSITION_MODE_STANDALONE;
 
-             if (Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0) {
-                if (singleShot && hasCapability(GPS_CAPABILITY_MSA)) {
-                    mPositionMode = GPS_POSITION_MODE_MS_ASSISTED;
-                } else if (hasCapability(GPS_CAPABILITY_MSB)) {
-                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
-                }
-            }
+            boolean agpsEnabled =
+                    (Settings.Global.getInt(mContext.getContentResolver(),
+                                            Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0);
+            mPositionMode = getSuplMode(mProperties, agpsEnabled, singleShot);
 
             if (DEBUG) {
                 String mode;
