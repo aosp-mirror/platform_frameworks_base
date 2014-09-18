@@ -176,7 +176,16 @@ public class TaskPersister {
         }
     }
 
-    Bitmap getThumbnail(String filename) {
+    Bitmap getTaskDescriptionIcon(String filename) {
+        // See if it is in the write queue
+        final Bitmap icon = getImageFromWriteQueue(filename);
+        if (icon != null) {
+            return icon;
+        }
+        return restoreImage(filename);
+    }
+
+    Bitmap getImageFromWriteQueue(String filename) {
         synchronized (this) {
             for (int queueNdx = mWriteQueue.size() - 1; queueNdx >= 0; --queueNdx) {
                 final WriteQueueItem item = mWriteQueue.get(queueNdx);

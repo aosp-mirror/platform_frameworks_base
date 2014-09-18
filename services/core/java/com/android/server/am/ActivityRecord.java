@@ -205,13 +205,17 @@ final class ActivityRecord {
                     pw.print(" resultWho="); pw.print(resultWho);
                     pw.print(" resultCode="); pw.println(requestCode);
         }
-        if (taskDescription.getIcon() != null || taskDescription.getLabel() != null ||
+        final String iconFilename = taskDescription.getIconFilename();
+        if (iconFilename != null || taskDescription.getLabel() != null ||
                 taskDescription.getPrimaryColor() != 0) {
             pw.print(prefix); pw.print("taskDescription:");
-                    pw.print(" icon="); pw.print(taskDescription.getIcon());
+                    pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                     pw.print(" label=\""); pw.print(taskDescription.getLabel()); pw.print("\"");
                     pw.print(" color=");
                     pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
+        }
+        if (iconFilename == null && taskDescription.getIcon() != null) {
+            pw.print(prefix); pw.println("taskDescription contains Bitmap");
         }
         if (results != null) {
             pw.print(prefix); pw.print("results="); pw.println(results);
@@ -1092,6 +1096,17 @@ final class ActivityRecord {
                 TaskPersister.IMAGE_EXTENSION;
     }
 
+    void setTaskDescription(TaskDescription _taskDescription) {
+        Bitmap icon;
+        if (_taskDescription.getIconFilename() == null &&
+                (icon = _taskDescription.getIcon()) != null) {
+            final String iconFilename = createImageFilename(createTime, task.taskId);
+            mStackSupervisor.mService.mTaskPersister.saveImage(icon, iconFilename);
+            _taskDescription.setIconFilename(iconFilename);
+        }
+        taskDescription = _taskDescription;
+    }
+
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         out.attribute(null, ATTR_ID, String.valueOf(createTime));
         out.attribute(null, ATTR_LAUNCHEDFROMUID, String.valueOf(launchedFromUid));
@@ -1105,8 +1120,7 @@ final class ActivityRecord {
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
 
         if (taskDescription != null) {
-            task.saveTaskDescription(taskDescription, createImageFilename(createTime, task.taskId),
-                    out);
+            taskDescription.saveToXml(out);
         }
 
         out.startTag(null, TAG_INTENT);
@@ -1150,9 +1164,8 @@ final class ActivityRecord {
                 componentSpecified = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
                 userId = Integer.valueOf(attrValue);
-            } else if (TaskRecord.readTaskDescriptionAttribute(taskDescription, attrName,
-                    attrValue)) {
-                // Completed in TaskRecord.readTaskDescriptionAttribute()
+            } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
+                taskDescription.restoreFromXml(attrName, attrValue);
             } else {
                 Log.d(TAG, "Unknown ActivityRecord attribute=" + attrName);
             }
@@ -1196,11 +1209,6 @@ final class ActivityRecord {
                 null, null, 0, componentSpecified, stackSupervisor, null, null);
 
         r.persistentState = persistentState;
-
-        if (createTime >= 0) {
-            taskDescription.setIcon(TaskPersister.restoreImage(createImageFilename(createTime,
-                    taskId)));
-        }
         r.taskDescription = taskDescription;
         r.createTime = createTime;
 
