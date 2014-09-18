@@ -1357,13 +1357,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 "ConnectivityService");
     }
 
-    // TODO Make this a special check when it goes public
-    private void enforceTetherChangePermission() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE,
-                "ConnectivityService");
-    }
-
     private void enforceTetherAccessPermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE,
@@ -2389,8 +2382,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // javadoc from interface
     public int tether(String iface) {
-        enforceTetherChangePermission();
-
+        ConnectivityManager.enforceTetherChangePermission(mContext);
         if (isTetheringSupported()) {
             return mTethering.tether(iface);
         } else {
@@ -2400,7 +2392,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // javadoc from interface
     public int untether(String iface) {
-        enforceTetherChangePermission();
+        ConnectivityManager.enforceTetherChangePermission(mContext);
 
         if (isTetheringSupported()) {
             return mTethering.untether(iface);
@@ -2449,7 +2441,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public int setUsbTethering(boolean enable) {
-        enforceTetherChangePermission();
+        ConnectivityManager.enforceTetherChangePermission(mContext);
         if (isTetheringSupported()) {
             return mTethering.setUsbTethering(enable);
         } else {
