@@ -2253,6 +2253,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_TASK_DESCRIPTION_ICON_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String filename = data.readString();
+            Bitmap icon = getTaskDescriptionIcon(filename);
+            reply.writeNoException();
+            if (icon == null) {
+                reply.writeInt(0);
+            } else {
+                reply.writeInt(1);
+                icon.writeToParcel(reply, 0);
+            }
+            return true;
+        }
+
         case REQUEST_VISIBLE_BEHIND_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -5238,6 +5252,20 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    @Override
+    public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(filename);
+        mRemote.transact(GET_TASK_DESCRIPTION_ICON_TRANSACTION, data, reply, 0);
+        reply.readException();
+        final Bitmap icon = reply.readInt() == 0 ? null : Bitmap.CREATOR.createFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+        return icon;
     }
 
     @Override

@@ -5066,7 +5066,7 @@ public class Activity extends ContextThemeWrapper
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
         ActivityManager.TaskDescription td;
         // Scale the icon down to something reasonable if it is provided
-        if (taskDescription.getIcon() != null) {
+        if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
             final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
             final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size, true);
             td = new ActivityManager.TaskDescription(taskDescription.getLabel(), icon,
