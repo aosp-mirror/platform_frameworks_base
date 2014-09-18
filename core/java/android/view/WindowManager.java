@@ -1024,6 +1024,26 @@ public interface WindowManager extends ViewManager {
         public int flags;
 
         /**
+         * If the window has requested hardware acceleration, but this is not
+         * allowed in the process it is in, then still render it as if it is
+         * hardware accelerated.  This is used for the starting preview windows
+         * in the system process, which don't need to have the overhead of
+         * hardware acceleration (they are just a static rendering), but should
+         * be rendered as such to match the actual window of the app even if it
+         * is hardware accelerated.
+         * Even if the window isn't hardware accelerated, still do its rendering
+         * as if it was.
+         * Like {@link #FLAG_HARDWARE_ACCELERATED} except for trusted system windows
+         * that need hardware acceleration (e.g. LockScreen), where hardware acceleration
+         * is generally disabled. This flag must be specified in addition to 
+         * {@link #FLAG_HARDWARE_ACCELERATED} to enable hardware acceleration for system
+         * windows.
+         * 
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED = 0x00000001;
+
+        /**
          * In the system process, we globally do not use hardware acceleration
          * because there are many threads doing UI there and they conflict.
          * If certain parts of the UI that really do want to use hardware
