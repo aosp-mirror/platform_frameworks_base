@@ -306,22 +306,16 @@ public class TelecomManager {
 
     /**
      * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
-     * calls with a specified URI scheme. This {@code PhoneAccount} will always be a member of the
-     * list which is returned from calling {@link #getCallCapablePhoneAccounts()}.
+     * calls with a specified URI scheme.
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
-     * exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to initiate a
-     * phone call must either create their {@link android.content.Intent#ACTION_CALL} or
-     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
-     * {@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance to
-     * select one of the elements of {@link #getCallCapablePhoneAccounts()}.
+     * exists no user-chosen default {@code PhoneAccount}.
      * <p>
-     * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
-     * {@code Intent} with no {@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE} is valid, and
-     * subsequent steps in the phone call flow are responsible for presenting the user with an
-     * affordance, if necessary, to choose a {@code PhoneAccount}.
-     *
      * @param uriScheme The URI scheme.
+     * @return The {@link PhoneAccountHandle} corresponding to the user-chosen default for outgoing
+     * phone calls for a specified URI scheme.
+     *
+     * @hide
      */
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
@@ -368,24 +362,6 @@ public class TelecomManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#setUserSelectedOutgoingPhoneAccount");
         }
-    }
-
-    /**
-     * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
-     * calls.
-     *
-     * @see #EXTRA_PHONE_ACCOUNT_HANDLE
-     * @return A list of {@code PhoneAccountHandle} objects.
-     */
-    public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
-        try {
-            if (isServiceConnected()) {
-                return getTelecomService().getCallCapablePhoneAccounts();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts", e);
-        }
-        return new ArrayList<>();
     }
 
     /**
@@ -459,6 +435,8 @@ public class TelecomManager {
      *
      * @param uriScheme The URI scheme.
      * @return A list of {@code PhoneAccountHandle} objects supporting the URI scheme.
+     *
+     * @hide
      */
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
         try {
@@ -467,6 +445,27 @@ public class TelecomManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getPhoneAccountsSupportingScheme", e);
+        }
+        return new ArrayList<>();
+    }
+
+
+    /**
+     * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls.
+     *
+     * @see #EXTRA_PHONE_ACCOUNT_HANDLE
+     * @return A list of {@code PhoneAccountHandle} objects.
+     *
+     * @hide
+     */
+    public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getCallCapablePhoneAccounts();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts", e);
         }
         return new ArrayList<>();
     }
@@ -480,6 +479,22 @@ public class TelecomManager {
      */
     public boolean hasMultipleCallCapableAccounts() {
         return getCallCapablePhoneAccounts().size() > 1;
+    }
+
+    /**
+     *  Returns a list of all {@link PhoneAccount}s registered for the calling package.
+     *
+     * @return A list of {@code PhoneAccountHandle} objects.
+     */
+    public List<PhoneAccountHandle> getPhoneAccountsForPackage() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getPhoneAccountsForPackage(mContext.getPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getPhoneAccountsForPackage", e);
+        }
+        return null;
     }
 
     /**
