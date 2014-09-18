@@ -18,26 +18,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true">
-    <com.android.systemui.recents.views.TaskViewThumbnail
-        android:id="@+id/task_view_thumbnail"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <include layout="@layout/recents_task_view_header" />
     <FrameLayout
-        android:id="@+id/lock_to_app_fab"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="bottom|right"
-        android:layout_marginRight="15dp"
-        android:layout_marginBottom="15dp"
-        android:translationZ="3dp"
-        android:contentDescription="@string/recents_lock_to_app_button_label"
-        android:background="@drawable/recents_lock_to_task_button_bg">
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:src="@drawable/recents_lock_to_app_pin" />
+        android:id="@+id/task_view_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.android.systemui.recents.views.TaskViewThumbnail
+            android:id="@+id/task_view_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <include layout="@layout/recents_task_view_header" />
+        <FrameLayout
+            android:id="@+id/lock_to_app_fab"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="15dp"
+            android:translationZ="2dp"
+            android:contentDescription="@string/recents_lock_to_app_button_label"
+            android:background="@drawable/recents_lock_to_task_button_bg">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/recents_lock_to_app_pin" />
+        </FrameLayout>
     </FrameLayout>
 </com.android.systemui.recents.views.TaskView>
 

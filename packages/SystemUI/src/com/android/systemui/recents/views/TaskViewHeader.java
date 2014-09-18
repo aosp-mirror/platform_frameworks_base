@@ -259,6 +259,14 @@ public class TaskViewHeader extends FrameLayout {
         }
     }
 
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+
+        // Don't forward our state to the drawable - we do it manually in onTaskViewFocusChanged.
+        // This is to prevent layer trashing when the view is pressed.
+        return new int[] {};
+    }
+
     /** Notifies the associated TaskView has been focused. */
     void onTaskViewFocusChanged(boolean focused) {
         boolean isRunning = false;
