@@ -29,6 +29,10 @@
      ImageView -->
     <bool name="config_recents_thumbnail_image_fits_to_xy">false</bool>
 
+    <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
+    for devices where the java drawing of round rects may be slow -->
+    <bool name="config_recents_use_hardware_layers">false</bool>
+
     <!-- The number of app thumbnails we keep in memory -->
     <integer name="config_recents_max_thumbnail_count">10</integer>
 
