@@ -452,9 +452,13 @@
     <!-- How far the user needs to drag up to invoke search. -->
     <dimen name="search_panel_threshold">100dp</dimen>
 
-    <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
+    <!-- The width/height of the phone/camera/unlock icon view on keyguard. -->
     <dimen name="keyguard_affordance_height">56dp</dimen>
     <dimen name="keyguard_affordance_width">56dp</dimen>
+
+    <!-- The width/height of the phone/camera/unlock icon drawable on keyguard. -->
+    <dimen name="keyguard_affordance_icon_height">24dp</dimen>
+    <dimen name="keyguard_affordance_icon_width">24dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
 
