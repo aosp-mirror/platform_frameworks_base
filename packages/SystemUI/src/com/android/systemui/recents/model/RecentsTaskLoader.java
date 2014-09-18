@@ -204,7 +204,8 @@ class TaskResourceLoader implements Runnable {
                     if (!mCancelled) {
                         // Notify that the task data has changed
                         final Drawable newIcon = cachedIcon;
-                        final Bitmap newThumbnail = cachedThumbnail;
+                        final Bitmap newThumbnail = cachedThumbnail == mDefaultThumbnail
+                                ? null : cachedThumbnail;
                         mMainThreadHandler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -252,7 +253,6 @@ public class RecentsTaskLoader {
 
     BitmapDrawable mDefaultApplicationIcon;
     Bitmap mDefaultThumbnail;
-    Bitmap mLoadingThumbnail;
 
     /** Private Constructor */
     private RecentsTaskLoader(Context context) {
@@ -271,9 +271,6 @@ public class RecentsTaskLoader {
         mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         mDefaultThumbnail.setHasAlpha(false);
         mDefaultThumbnail.eraseColor(0xFFffffff);
-        mLoadingThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        mLoadingThumbnail.setHasAlpha(false);
-        mLoadingThumbnail.eraseColor(0xFFffffff);
         mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
 
         // Initialize the proxy, cache and loaders
@@ -500,17 +497,16 @@ public class RecentsTaskLoader {
         // use the default assets in their place until they load
         boolean requiresLoad = (applicationIcon == null) || (thumbnail == null);
         applicationIcon = applicationIcon != null ? applicationIcon : mDefaultApplicationIcon;
-        thumbnail = thumbnail != null ? thumbnail : mDefaultThumbnail;
         if (requiresLoad) {
             mLoadQueue.addTask(t);
         }
-        t.notifyTaskDataLoaded(thumbnail, applicationIcon);
+        t.notifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? null : thumbnail, applicationIcon);
     }
 
     /** Releases the task resource data back into the pool. */
     public void unloadTaskData(Task t) {
         mLoadQueue.removeTask(t);
-        t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultApplicationIcon);
+        t.notifyTaskDataUnloaded(null, mDefaultApplicationIcon);
     }
 
     /** Completely removes the resource data from the pool. */
@@ -519,7 +515,7 @@ public class RecentsTaskLoader {
         mThumbnailCache.remove(t.key);
         mApplicationIconCache.remove(t.key);
         if (notifyTaskDataUnloaded) {
-            t.notifyTaskDataUnloaded(mDefaultThumbnail, mDefaultApplicationIcon);
+            t.notifyTaskDataUnloaded(null, mDefaultApplicationIcon);
         }
     }
 

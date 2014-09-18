@@ -119,6 +119,7 @@ public class RecentsConfiguration {
     public int launchedToTaskId;
 
     /** Misc **/
+    public boolean useHardwareLayers;
     public int altTabKeyDelay;
 
     /** Dev options and global settings */
@@ -271,6 +272,7 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_nav_bar_scrim_enter_duration);
 
         // Misc
+        useHardwareLayers = res.getBoolean(R.bool.config_recents_use_hardware_layers);
         altTabKeyDelay = res.getInteger(R.integer.recents_alt_tab_key_delay);
     }
 
