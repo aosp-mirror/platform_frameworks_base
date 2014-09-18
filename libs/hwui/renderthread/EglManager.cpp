@@ -254,11 +254,23 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
     eglBeginFrame(mEglDisplay, surface);
 }
 
-void EglManager::swapBuffers(EGLSurface surface) {
+bool EglManager::swapBuffers(EGLSurface surface) {
     eglSwapBuffers(mEglDisplay, surface);
     EGLint err = eglGetError();
-    LOG_ALWAYS_FATAL_IF(err != EGL_SUCCESS,
-            "Encountered EGL error %d %s during rendering", err, egl_error_str(err));
+    if (CC_LIKELY(err == EGL_SUCCESS)) {
+        return true;
+    }
+    if (err == EGL_BAD_SURFACE) {
+        // For some reason our surface was destroyed out from under us
+        // This really shouldn't happen, but if it does we can recover easily
+        // by just not trying to use the surface anymore
+        ALOGW("swapBuffers encountered EGL_BAD_SURFACE on %p, halting rendering...", surface);
+        return false;
+    }
+    LOG_ALWAYS_FATAL("Encountered EGL error %d %s during rendering",
+            err, egl_error_str(err));
+    // Impossible to hit this, but the compiler doesn't know that
+    return false;
 }
 
 bool EglManager::enableDirtyRegions(EGLSurface surface) {

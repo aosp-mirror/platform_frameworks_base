@@ -91,7 +91,9 @@ void CanvasContext::setSurface(ANativeWindow* window) {
 }
 
 void CanvasContext::swapBuffers() {
-    mEglManager.swapBuffers(mEglSurface);
+    if (CC_UNLIKELY(!mEglManager.swapBuffers(mEglSurface))) {
+        setSurface(NULL);
+    }
     mHaveNewSurface = false;
 }
 
@@ -102,8 +104,8 @@ void CanvasContext::requireSurface() {
 }
 
 bool CanvasContext::initialize(ANativeWindow* window) {
-    if (mCanvas) return false;
     setSurface(window);
+    if (mCanvas) return false;
     mCanvas = new OpenGLRenderer(mRenderThread.renderState());
     mCanvas->initProperties();
     return true;
