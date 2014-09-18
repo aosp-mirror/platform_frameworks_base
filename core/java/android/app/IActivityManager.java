@@ -451,6 +451,7 @@ public interface IActivityManager extends IInterface {
 
     public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException;
+    public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException;
 
     public boolean requestVisibleBehind(IBinder token, boolean visible) throws RemoteException;
     public boolean isBackgroundVisibleBehind(IBinder token) throws RemoteException;
@@ -775,4 +776,5 @@ public interface IActivityManager extends IInterface {
     int RELEASE_ACTIVITY_INSTANCE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+235;
     int RELEASE_SOME_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+236;
     int BOOT_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+237;
+    int GET_TASK_DESCRIPTION_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+238;
 }
