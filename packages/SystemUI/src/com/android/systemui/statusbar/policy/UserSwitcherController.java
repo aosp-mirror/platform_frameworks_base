@@ -227,7 +227,14 @@ public class UserSwitcherController {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
-            id = mUserManager.createGuest(mContext, mContext.getString(R.string.guest_nickname)).id;
+            UserInfo guest = mUserManager.createGuest(
+                    mContext, mContext.getString(R.string.guest_nickname));
+            if (guest == null) {
+                // Couldn't create guest, most likely because there already exists one, we just
+                // haven't reloaded the user list yet.
+                return;
+            }
+            id = guest.id;
         } else if (record.isAddUser) {
             showAddUserDialog();
             return;
@@ -564,8 +571,14 @@ public class UserSwitcherController {
                 cancel();
             } else {
                 dismiss();
-                int id = mUserManager.createUser(
-                        mContext.getString(R.string.user_new_user_name), 0 /* flags */).id;
+                UserInfo user = mUserManager.createUser(
+                        mContext.getString(R.string.user_new_user_name), 0 /* flags */);
+                if (user == null) {
+                    // Couldn't create user, most likely because there are too many, but we haven't
+                    // been able to reload the list yet.
+                    return;
+                }
+                int id = user.id;
                 Bitmap icon = UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
                         id, /* light= */ false));
                 mUserManager.setUserIcon(id, icon);
