@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.graphics.Color;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -268,8 +267,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         view.mRecreateDisplayList = false;
     }
 
-    private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks,
-            boolean isStartingWindow) {
+    private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
         updateViewTreeDisplayList(view);
 
@@ -281,12 +279,6 @@ public class ThreadedRenderer extends HardwareRenderer {
                 callbacks.onHardwarePreDraw(canvas);
 
                 canvas.insertReorderBarrier();
-                if (isStartingWindow) {
-                    // Compensate for some situations in which a hw-accelerated surface
-                    // will not be filled with anything by default; this is equivalent
-                    // to the old behavior when the system process was not hw-accelerated
-                    canvas.drawColor(Color.BLACK);
-                }
                 canvas.drawRenderNode(view.getDisplayList());
                 canvas.insertInorderBarrier();
 
@@ -306,8 +298,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
-            boolean isStartingWindow) {
+    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
         attachInfo.mIgnoreDirtyState = true;
         long frameTimeNanos = mChoreographer.getFrameTimeNanos();
         attachInfo.mDrawingTime = frameTimeNanos / TimeUtils.NANOS_PER_MS;
@@ -317,7 +308,7 @@ public class ThreadedRenderer extends HardwareRenderer {
             recordDuration = System.nanoTime();
         }
 
-        updateRootDisplayList(view, callbacks, isStartingWindow);
+        updateRootDisplayList(view, callbacks);
 
         if (mProfilingEnabled) {
             recordDuration = System.nanoTime() - recordDuration;
