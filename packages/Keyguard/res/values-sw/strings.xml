@@ -39,8 +39,8 @@
     <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Hakuna SIM kadi"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Hakuna SIM kadi katika kompyuta ndogo."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Hakuna SIM kadi kwenye simu."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Ingiza SIM kadi."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM kadi haiko au haisomeki. Ingiza SIM kadi."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Weka SIM kadi."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM kadi haiko au haisomeki. Weka SIM kadi."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM kadi isiyotumika."</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM kadi yako imefungwa kabisa.\n Wasiliana na mtoa huduma wako wa pasi waya ili upate SIM kadi nyingine."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM kadi imefungwa."</string>
