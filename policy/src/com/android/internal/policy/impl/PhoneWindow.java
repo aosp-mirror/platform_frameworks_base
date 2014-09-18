@@ -2640,19 +2640,35 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 if (mActionModeView == null) {
                     if (isFloating()) {
-                        mActionModeView = new ActionBarContextView(mContext);
-                        mActionModePopup = new PopupWindow(mContext, null,
+                        // Use the action bar theme.
+                        final TypedValue outValue = new TypedValue();
+                        final Theme baseTheme = mContext.getTheme();
+                        baseTheme.resolveAttribute(R.attr.actionBarTheme, outValue, true);
+
+                        final Context actionBarContext;
+                        if (outValue.resourceId != 0) {
+                            final Theme actionBarTheme = mContext.getResources().newTheme();
+                            actionBarTheme.setTo(baseTheme);
+                            actionBarTheme.applyStyle(outValue.resourceId, true);
+
+                            actionBarContext = new ContextThemeWrapper(mContext, 0);
+                            actionBarContext.getTheme().setTo(actionBarTheme);
+                        } else {
+                            actionBarContext = mContext;
+                        }
+
+                        mActionModeView = new ActionBarContextView(actionBarContext);
+                        mActionModePopup = new PopupWindow(actionBarContext, null,
                                 R.attr.actionModePopupWindowStyle);
                         mActionModePopup.setWindowLayoutType(
                                 WindowManager.LayoutParams.TYPE_APPLICATION);
                         mActionModePopup.setContentView(mActionModeView);
                         mActionModePopup.setWidth(MATCH_PARENT);
 
-                        TypedValue heightValue = new TypedValue();
-                        mContext.getTheme().resolveAttribute(
-                                R.attr.actionBarSize, heightValue, true);
-                        final int height = TypedValue.complexToDimensionPixelSize(heightValue.data,
-                                mContext.getResources().getDisplayMetrics());
+                        actionBarContext.getTheme().resolveAttribute(
+                                R.attr.actionBarSize, outValue, true);
+                        final int height = TypedValue.complexToDimensionPixelSize(outValue.data,
+                                actionBarContext.getResources().getDisplayMetrics());
                         mActionModeView.setContentHeight(height);
                         mActionModePopup.setHeight(WRAP_CONTENT);
                         mShowActionModePopup = new Runnable() {
@@ -2673,8 +2689,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                 if (mActionModeView != null) {
                     mActionModeView.killMode();
-                    mode = new StandaloneActionMode(getContext(), mActionModeView, wrappedCallback,
-                            mActionModePopup == null);
+                    mode = new StandaloneActionMode(mActionModeView.getContext(), mActionModeView,
+                            wrappedCallback, mActionModePopup == null);
                     if (callback.onCreateActionMode(mode, mode.getMenu())) {
                         mode.invalidate();
                         mActionModeView.initForMode(mode);

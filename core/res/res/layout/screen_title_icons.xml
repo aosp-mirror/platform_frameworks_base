@@ -28,7 +28,8 @@ This is the basic layout for a screen, with all of its features enabled.
               android:inflatedId="@+id/action_mode_bar"
               android:layout="@layout/action_mode_bar"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content" />
+              android:layout_height="wrap_content"
+              android:theme="?attr/actionBarTheme"/>
     <RelativeLayout android:id="@android:id/title_container"
         style="?android:attr/windowTitleBackgroundStyle"
         android:layout_width="match_parent"
