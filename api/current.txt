@@ -28973,6 +28973,7 @@ package android.telephony {
     field public static final java.lang.String MMS_CONFIG_UA_PROF_TAG_NAME = "uaProfTagName";
     field public static final java.lang.String MMS_CONFIG_UA_PROF_URL = "uaProfUrl";
     field public static final java.lang.String MMS_CONFIG_USER_AGENT = "userAgent";
+    field public static final int MMS_ERROR_CONFIGURATION_ERROR = 7; // 0x7
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
     field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
     field public static final int MMS_ERROR_IO_ERROR = 5; // 0x5
