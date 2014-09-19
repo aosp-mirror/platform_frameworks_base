@@ -22,6 +22,7 @@ include $(all-subdir-makefiles)
 # Build main libfilterfw
 
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE := libfilterfw
 
@@ -30,7 +31,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw_jni \
                                 libfilterfw_native
 
-LOCAL_SHARED_LIBRARIES := libstlport \
+LOCAL_SHARED_LIBRARIES := \
                           libGLESv2 \
                           libEGL \
                           libgui \
@@ -48,4 +49,5 @@ LOCAL_SHARED_LIBRARIES := libstlport \
 # part of a system image.
 LOCAL_PRELINK_MODULE := false
 
+include external/stlport/libstlport.mk
 include $(BUILD_SHARED_LIBRARY)
