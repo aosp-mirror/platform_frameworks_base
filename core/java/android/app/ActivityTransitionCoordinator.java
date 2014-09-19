@@ -219,7 +219,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected void viewsReady(ArrayMap<String, View> sharedElements) {
         sharedElements.retainAll(mAllSharedElementNames);
-        mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
+        if (mListener != null) {
+            mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
+        }
         mSharedElementNames.addAll(sharedElements.keySet());
         mSharedElements.addAll(sharedElements.values());
         if (getViewsTransition() != null && mTransitioningViews != null) {
@@ -461,7 +463,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (sharedElementState != null) {
             Matrix tempMatrix = new Matrix();
             RectF tempRect = new RectF();
-            for (int i = 0; i < mSharedElementNames.size(); i++) {
+            final int numSharedElements = mSharedElements.size();
+            for (int i = 0; i < numSharedElements; i++) {
                 View sharedElement = mSharedElements.get(i);
                 String name = mSharedElementNames.get(i);
                 SharedElementOriginalState originalState = getOldSharedElementState(sharedElement,
@@ -471,12 +474,16 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                         tempMatrix, tempRect, null);
             }
         }
-        mListener.onSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
+        if (mListener != null) {
+            mListener.onSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
+        }
         return originalImageState;
     }
 
     protected void notifySharedElementEnd(ArrayList<View> snapshots) {
-        mListener.onSharedElementEnd(mSharedElementNames, mSharedElements, snapshots);
+        if (mListener != null) {
+            mListener.onSharedElementEnd(mSharedElementNames, mSharedElements, snapshots);
+        }
     }
 
     protected void scheduleSetSharedElementEnd(final ArrayList<View> snapshots) {
@@ -544,7 +551,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             if (sharedElementBundle != null) {
                 Parcelable parcelable = sharedElementBundle.getParcelable(KEY_SNAPSHOT);
                 View snapshot = null;
-                if (parcelable != null) {
+                if (parcelable != null && mListener != null) {
                     snapshot = mListener.onCreateSnapshotView(context, parcelable);
                 }
                 if (snapshot != null) {
@@ -659,7 +666,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
         sharedElementBundle.putFloat(KEY_ELEVATION, view.getElevation());
 
-        Parcelable bitmap = mListener.onCaptureSharedElementSnapshot(view, tempMatrix, tempBounds);
+        Parcelable bitmap = null;
+        if (mListener != null) {
+            bitmap = mListener.onCaptureSharedElementSnapshot(view, tempMatrix, tempBounds);
+        }
+
         if (bitmap != null) {
             sharedElementBundle.putParcelable(KEY_SNAPSHOT, bitmap);
         }
