@@ -298,10 +298,11 @@ public class QSTileView extends ViewGroup {
         if (mDual) {
             mDualLabel.setText(state.label);
             mDualLabel.setContentDescription(state.dualLabelContentDescription);
+            mTopBackgroundView.setContentDescription(state.contentDescription);
         } else {
             mLabel.setText(state.label);
+            setContentDescription(state.contentDescription);
         }
-        setContentDescription(state.contentDescription);
     }
 
     public void onStateChanged(QSTile.State state) {
