@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar.policy;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
@@ -33,26 +33,26 @@ public class BrightnessMirrorController {
     public long TRANSITION_DURATION_OUT = 150;
     public long TRANSITION_DURATION_IN = 200;
 
-    private final View mScrimBehind;
+    private final ScrimView mScrimBehind;
     private final View mBrightnessMirror;
     private final View mPanelHolder;
     private final int[] mInt2Cache = new int[2];
 
     public BrightnessMirrorController(StatusBarWindowView statusBarWindow) {
-        mScrimBehind = statusBarWindow.findViewById(R.id.scrim_behind);
+        mScrimBehind = (ScrimView) statusBarWindow.findViewById(R.id.scrim_behind);
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mPanelHolder = statusBarWindow.findViewById(R.id.panel_holder);
     }
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
-        outAnimation(mScrimBehind.animate());
+        mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, PhoneStatusBar.ALPHA_OUT);
         outAnimation(mPanelHolder.animate())
                 .withLayer();
     }
 
     public void hideMirror() {
-        inAnimation(mScrimBehind.animate());
+        mScrimBehind.animateViewAlpha(1.0f, TRANSITION_DURATION_IN, PhoneStatusBar.ALPHA_IN);
         inAnimation(mPanelHolder.animate())
                 .withLayer()
                 .withEndAction(new Runnable() {
