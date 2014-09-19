@@ -16,9 +16,9 @@
 <resources>
 
     <!-- Use the default title sizes on tablets. -->
-    <dimen name="text_size_title_material_toolbar">@dimen/text_size_title_material</dimen>
+    <dimen name="text_size_title_material_toolbar">20dp</dimen>
     <!-- Use the default subtitle sizes on tablets. -->
-    <dimen name="text_size_subtitle_material_toolbar">@dimen/text_size_subhead_material</dimen>
+    <dimen name="text_size_subtitle_material_toolbar">16dp</dimen>
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height_material">64dp</dimen>
     <!-- Default padding of an action bar. -->
