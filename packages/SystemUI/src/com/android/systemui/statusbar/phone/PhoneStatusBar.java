@@ -51,7 +51,9 @@ import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Xfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
@@ -120,6 +122,7 @@ import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DismissView;
@@ -131,6 +134,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
+import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -431,8 +435,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
-    private FrameLayout mBackdrop;
+    private BackDropView mBackdrop;
     private ImageView mBackdropFront, mBackdropBack;
+    private PorterDuffXfermode mSrcXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
+    private PorterDuffXfermode mSrcOverXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
     private MediaSessionManager mMediaSessionManager;
     private MediaController mMediaController;
@@ -723,8 +729,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setDismissView(mDismissView);
         mExpandedContents = mStackScroller;
 
-        mScrimController = new ScrimController(mStatusBarWindow.findViewById(R.id.scrim_behind),
-                mStatusBarWindow.findViewById(R.id.scrim_in_front));
+        mBackdrop = (BackDropView) mStatusBarWindow.findViewById(R.id.backdrop);
+        mBackdropFront = (ImageView) mBackdrop.findViewById(R.id.backdrop_front);
+        mBackdropBack = (ImageView) mBackdrop.findViewById(R.id.backdrop_back);
+
+        ScrimView scrimBehind = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_behind);
+        ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
+        mScrimController = new ScrimController(scrimBehind, scrimInFront);
+        mScrimController.setBackDropView(mBackdrop);
         mStatusBarView.setScrimController(mScrimController);
 
         mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
@@ -862,10 +874,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
             });
         }
-
-        mBackdrop = (FrameLayout) mStatusBarWindow.findViewById(R.id.backdrop);
-        mBackdropFront = (ImageView) mBackdrop.findViewById(R.id.backdrop_front);
-        mBackdropBack = (ImageView) mBackdrop.findViewById(R.id.backdrop_back);
 
         // User info. Trigger first load.
         mHeader.setUserInfoController(mUserInfoController);
@@ -1852,7 +1860,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             if (metaDataChanged) {
                 if (mBackdropBack.getDrawable() != null) {
-                    mBackdropFront.setImageDrawable(mBackdropBack.getDrawable());
+                    Drawable drawable = mBackdropBack.getDrawable();
+                    mBackdropFront.setImageDrawable(drawable);
+                    mBackdropFront.getDrawable().mutate().setXfermode(mSrcOverXferMode);
                     mBackdropFront.setAlpha(1f);
                     mBackdropFront.setVisibility(View.VISIBLE);
                 } else {
@@ -1867,6 +1877,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 } else {
                     mBackdropBack.setImageBitmap(artworkBitmap);
                 }
+                mBackdropBack.getDrawable().mutate().setXfermode(mSrcXferMode);
 
                 if (mBackdropFront.getVisibility() == View.VISIBLE) {
                     if (DEBUG_MEDIA) {
