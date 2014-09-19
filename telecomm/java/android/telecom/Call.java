@@ -161,7 +161,7 @@ public final class Call {
 
         /**
          * @return For a {@link #STATE_DISCONNECTED} {@code Call}, the disconnect cause expressed
-         * by {@link android.telecomm.DisconnectCause}.
+         * by {@link android.telecom.DisconnectCause}.
          */
         public DisconnectCause getDisconnectCause() {
             return mDisconnectCause;
