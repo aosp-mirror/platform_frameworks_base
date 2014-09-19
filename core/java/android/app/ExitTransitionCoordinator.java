@@ -181,7 +181,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
-        mListener.onSharedElementEnd(mSharedElementNames, mSharedElements, sharedElementSnapshots);
+        if (mListener != null) {
+            mListener.onSharedElementEnd(mSharedElementNames, mSharedElements,
+                    sharedElementSnapshots);
+        }
         TransitionManager.beginDelayedTransition(decorView, transition);
         scheduleGhostVisibilityChange(View.VISIBLE);
         setGhostVisibility(View.VISIBLE);
