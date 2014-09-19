@@ -63,6 +63,5 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     libui \
-    libstlport
 
 include $(BUILD_NATIVE_TEST)
