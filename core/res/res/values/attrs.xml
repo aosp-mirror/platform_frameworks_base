@@ -1020,6 +1020,9 @@
         <!-- The color applied to framework switch thumbs in their normal state. -->
         <attr name="colorSwitchThumbNormal" format="color" />
 
+        <!-- The color applied to the edge effect on scrolling containers. -->
+        <attr name="colorEdgeEffect" format="color" />
+
         <!-- =================== -->
         <!-- Lighting properties -->
         <!-- =================== -->
@@ -7435,7 +7438,7 @@
 
     <!-- Used as a filter array on the theme to pull out only the EdgeEffect-relevant bits. -->
     <declare-styleable name="EdgeEffect">
-        <attr name="colorPrimary" />
+        <attr name="colorEdgeEffect" />
     </declare-styleable>
 
     <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes a
