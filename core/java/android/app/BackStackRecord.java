@@ -1110,7 +1110,8 @@ final class BackStackRecord extends FragmentTransaction implements
             final Transition enterTransition, final Transition sharedElementTransition,
             final Transition overallTransition, final View container,
             final Fragment inFragment, final Fragment outFragment,
-            final ArrayList<View> hiddenFragmentViews, final boolean isBack) {
+            final ArrayList<View> hiddenFragmentViews, final boolean isBack,
+            final ArrayList<View> sharedElementTargets) {
         if (enterTransition == null && sharedElementTransition == null &&
                 overallTransition == null) {
             return null;
@@ -1129,6 +1130,15 @@ final class BackStackRecord extends FragmentTransaction implements
                         ArrayMap<String, View> namedViews = null;
                         if (sharedElementTransition != null) {
                             namedViews = mapSharedElementsIn(state, isBack, inFragment);
+                            removeTargets(sharedElementTransition, sharedElementTargets);
+                            sharedElementTargets.clear();
+                            if (namedViews.isEmpty()) {
+                                sharedElementTargets.add(state.nonExistentView);
+                            } else {
+                                sharedElementTargets.addAll(namedViews.values());
+                            }
+
+                            addTargets(sharedElementTransition, sharedElementTargets);
 
                             setEpicenterIn(namedViews, state);
 
@@ -1209,11 +1219,17 @@ final class BackStackRecord extends FragmentTransaction implements
         Transition transition;
         if (overlap) {
             // Regular transition -- do it all together
-            transition = TransitionUtils.mergeTransitions(enterTransition, exitTransition,
-                    sharedElementTransition);
-            if (!(transition instanceof TransitionSet)) {
-                transition = new TransitionSet().addTransition(transition);
+            TransitionSet transitionSet = new TransitionSet();
+            if (enterTransition != null) {
+                transitionSet.addTransition(enterTransition);
             }
+            if (exitTransition != null) {
+                transitionSet.addTransition(exitTransition);
+            }
+            if (sharedElementTransition != null) {
+                transitionSet.addTransition(sharedElementTransition);
+            }
+            transition = transitionSet;
         } else {
             // First do exit, then enter, but allow shared element transition to happen
             // during both.
@@ -1274,8 +1290,15 @@ final class BackStackRecord extends FragmentTransaction implements
                 enterTransition.addTarget(state.nonExistentView);
             }
             ArrayMap<String, View> namedViews = null;
+            ArrayList<View> sharedElementTargets = new ArrayList<View>();
             if (sharedElementTransition != null) {
                 namedViews = remapSharedElements(state, outFragment, isBack);
+                if (namedViews.isEmpty()) {
+                    sharedElementTargets.add(state.nonExistentView);
+                } else {
+                    sharedElementTargets.addAll(namedViews.values());
+                }
+                addTargets(sharedElementTransition, sharedElementTargets);
 
                 // Notify the start of the transition.
                 SharedElementCallback callback = isBack ?
@@ -1312,7 +1335,7 @@ final class BackStackRecord extends FragmentTransaction implements
                 ArrayList<View> hiddenFragments = new ArrayList<View>();
                 ArrayList<View> enteringViews = addTransitionTargets(state, enterTransition,
                         sharedElementTransition, transition, sceneRoot, inFragment, outFragment,
-                        hiddenFragments, isBack);
+                        hiddenFragments, isBack, sharedElementTargets);
 
                 transition.setNameOverrides(state.nameOverrides);
                 // We want to exclude hidden views later, so we need a non-null list in the
@@ -1324,7 +1347,7 @@ final class BackStackRecord extends FragmentTransaction implements
                 // Remove the view targeting after the transition starts
                 removeTargetedViewsFromTransitions(sceneRoot, state.nonExistentView,
                         enterTransition, enteringViews, exitTransition, exitingViews,
-                        transition, hiddenFragments);
+                        sharedElementTransition, sharedElementTargets, transition, hiddenFragments);
             }
         }
     }
@@ -1337,8 +1360,9 @@ final class BackStackRecord extends FragmentTransaction implements
             final ViewGroup sceneRoot, final View nonExistingView,
             final Transition enterTransition, final ArrayList<View> enteringViews,
             final Transition exitTransition, final ArrayList<View> exitingViews,
+            final Transition sharedElementTransition, final ArrayList<View> sharedElementTargets,
             final Transition overallTransition, final ArrayList<View> hiddenViews) {
-        if (enterTransition != null || exitTransition != null) {
+        if (overallTransition != null) {
             sceneRoot.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
@@ -1349,6 +1373,9 @@ final class BackStackRecord extends FragmentTransaction implements
                     }
                     if (exitTransition != null) {
                         removeTargets(exitTransition, exitingViews);
+                    }
+                    if (sharedElementTransition != null) {
+                        removeTargets(sharedElementTransition, sharedElementTargets);
                     }
                     int numViews = hiddenViews.size();
                     for (int i = 0; i < numViews; i++) {
