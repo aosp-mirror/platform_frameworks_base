@@ -1205,7 +1205,6 @@ class FastScroller {
         if (!hasSections || !mMatchDragPosition) {
             return (float) firstVisibleItem / (totalItemCount - visibleItemCount);
         }
-
         // Ignore headers.
         firstVisibleItem -= mHeaderCount;
         if (firstVisibleItem < 0) {
@@ -1255,9 +1254,19 @@ class FastScroller {
         // across the last item account for whatever space is remaining.
         if (firstVisibleItem > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
             final View lastChild = mList.getChildAt(visibleItemCount - 1);
-            final float lastItemVisible = (float) (mList.getHeight() - mList.getPaddingBottom()
-                    - lastChild.getTop()) / lastChild.getHeight();
-            result += (1 - result) * lastItemVisible;
+            final int bottomPadding = mList.getPaddingBottom();
+            final int maxSize;
+            final int currentVisibleSize;
+            if (mList.getClipToPadding()) {
+                maxSize = lastChild.getHeight();
+                currentVisibleSize = mList.getHeight() - bottomPadding - lastChild.getTop();
+            } else {
+                maxSize = lastChild.getHeight() + bottomPadding;
+                currentVisibleSize = mList.getHeight() - lastChild.getTop();
+            }
+            if (currentVisibleSize > 0 && maxSize > 0) {
+                result += (1 - result) * ((float) currentVisibleSize / maxSize );
+            }
         }
 
         return result;
