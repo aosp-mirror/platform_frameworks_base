@@ -123,7 +123,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from transferring files over
-     * USB. This can only be set by device owners. The default value is <code>false</code>.
+     * USB. This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -178,8 +179,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from configuring Tethering
-     * & portable hotspots. This can only be set by device owners. The default value is
-     * <code>false</code>.
+     * & portable hotspots. This can only be set by device owners and profile owners on the
+     * primary user. The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -190,8 +191,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from factory resetting
-     * from Settings. This can only be set by device owners. The default value is
-     * <code>false</code>.
+     * from Settings. This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -202,7 +203,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adding new users and
-     * profiles. This can only be set by device owners. The default value is <code>false</code>.
+     * profiles. This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -224,7 +226,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from configuring cell
-     * broadcasts. This can only be set by device owners. The default value is <code>false</code>.
+     * broadcasts. This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -235,7 +238,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from configuring mobile
-     * networks. This can only be set by device owners. The default value is <code>false</code>.
+     * networks. This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -266,8 +270,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from mounting
-     * physical external media. This can only be set by device owners. The default value is
-     * <code>false</code>.
+     * physical external media. This can only be set by device owners and profile owners on the
+     * primary user. The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -278,8 +282,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adjusting microphone
-     * volume. If set, the microphone will be muted. This can only be set by device owners.
-     * The default value is <code>false</code>.
+     * volume. If set, the microphone will be muted. This can only be set by device owners
+     * and profile owners on the primary user. The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -290,8 +294,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adjusting the master
-     * volume. If set, the master volume will be muted. This can only be set by device owners.
-     * The default value is <code>false</code>.
+     * volume. If set, the master volume will be muted. This can only be set by device owners
+     * and profile owners on the primary user. The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -314,7 +318,7 @@ public class UserManager {
 
     /**
      * Specifies that the user is not allowed to send or receive
-     * SMS messages. This can only be set by device owners. The default value is <code>false</code>.
+     * SMS messages. The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -333,7 +337,8 @@ public class UserManager {
      * <li>{@link LayoutParams#TYPE_SYSTEM_ERROR}</li>
      * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
      *
-     * <p>This can only be set by device owners. The default value is <code>false</code>.
+     * <p>This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean

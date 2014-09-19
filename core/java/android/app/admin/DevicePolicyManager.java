@@ -2408,8 +2408,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets the name of the Managed profile. In the device owner case it sets the name of the user
-     * which it is called from. Only the profile owner or device owner can call this. If this is
+     * Sets the name of the profile. In the device owner case it sets the name of the user
+     * which it is called from. Only a profile owner or device owner can call this. If this is
      * never called by the profile or device owner, the name will be set to default values.
      *
      * @see #isProfileOwnerApp
@@ -2428,9 +2428,9 @@ public class DevicePolicyManager {
 }
 
     /**
-     * Used to determine if a particular package is registered as the Profile Owner for the
+     * Used to determine if a particular package is registered as the profile owner for the
      * current user. A profile owner is a special device admin that has additional privileges
-     * within the managed profile.
+     * within the profile.
      *
      * @param packageName The package name of the app to compare with the registered profile owner.
      * @return Whether or not the package is registered as the profile owner.
@@ -2568,7 +2568,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile or device owner to set the application restrictions for a given target
-     * application running in the managed profile.
+     * application running in the profile.
      *
      * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be
      * boolean, int, String, or String[].
@@ -2643,8 +2643,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to set whether caller-Id information from the managed
-     * profile will be shown for incoming calls.
+     * Called by a profile owner of a managed profile to set whether caller-Id information from
+     * the managed profile will be shown in the parent profile, for incoming calls.
      *
      * <p>The calling device admin must be a profile owner. If it is not, a
      * security exception will be thrown.
@@ -2663,7 +2663,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not caller-Id information has been disabled.
+     * Called by a profile owner of a managed profile to determine whether or not caller-Id
+     * information has been disabled.
      *
      * <p>The calling device admin must be a profile owner. If it is not, a
      * security exception will be thrown.
@@ -2699,8 +2700,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner so that some intents sent in the managed profile can also be
-     * resolved in the parent, or vice versa.
+     * Called by the profile owner of a managed profile so that some intents sent in the managed
+     * profile can also be resolved in the parent, or vice versa.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
      * other profile
@@ -2718,8 +2719,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to remove the cross-profile intent filters that go from the
-     * managed profile to the parent, or from the parent to the managed profile.
+     * Called by a profile owner of a managed profile to remove the cross-profile intent filters
+     * that go from the managed profile to the parent, or from the parent to the managed profile.
      * Only removes those that have been set by the profile owner.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      */
@@ -2980,7 +2981,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile or device owner to get the application restrictions for a given target
-     * application running in the managed profile.
+     * application running in the profile.
      *
      * <p>The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
@@ -3088,8 +3089,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by profile or device owner to re-enable a system app that was disabled by default
-     * when the managed profile was created. This can only be called from a profile or device
-     * owner running within a managed profile.
+     * when the user was initialized.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package to be re-enabled in the current profile.
@@ -3106,8 +3106,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by profile or device owner to re-enable system apps by intent that were disabled
-     * by default when the managed profile was created. This can only be called from a profile
-     * or device owner running within a managed profile.
+     * by default when the user was initialized.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param intent An intent matching the app(s) to be installed. All apps that resolve for this
@@ -3389,10 +3388,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner to enable widget providers from a given package
-     * to be available in the parent profile. As a result the user will be able to
+     * Called by the profile owner of a managed profile to enable widget providers from a
+     * given package to be available in the parent profile. As a result the user will be able to
      * add widgets from the white-listed package running under the profile to a widget
-     * host which runs under the device owner, for example the home screen. Note that
+     * host which runs under the parent profile, for example the home screen. Note that
      * a package may have zero or more provider components, where each component
      * provides a different widget type.
      * <p>
@@ -3418,8 +3417,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner to disable widget providers from a given package
-     * to be available in the parent profile. For this method to take effect the
+     * Called by the profile owner of a managed profile to disable widget providers from a given
+     * package to be available in the parent profile. For this method to take effect the
      * package should have been added via {@link #addCrossProfileWidgetProvider(
      * android.content.ComponentName, String)}.
      * <p>
@@ -3446,7 +3445,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner to query providers from which packages are
+     * Called by the profile owner of a managed profile to query providers from which packages are
      * available in the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
