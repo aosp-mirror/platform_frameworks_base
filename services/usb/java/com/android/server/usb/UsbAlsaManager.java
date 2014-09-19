@@ -20,12 +20,15 @@ import android.alsa.AlsaCardsParser;
 import android.alsa.AlsaDevicesParser;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.media.AudioSystem;
 import android.media.IAudioService;
+import android.midi.MidiDeviceInfo;
 import android.os.FileObserver;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -72,6 +75,9 @@ public final class UsbAlsaManager {
     private UsbAudioDevice mAccessoryAudioDevice = null;
 
     private UsbAudioDevice mSelectedAudioDevice = null;
+
+    // UsbMidiDevice for USB peripheral mode (gadget) device
+    private UsbMidiDevice mPeripheralMidiDevice = null;
 
     private final class AlsaDevice {
         public static final int TYPE_UNKNOWN = 0;
@@ -391,7 +397,17 @@ public final class UsbAlsaManager {
                 int device = mDevicesParser.getDefaultDeviceNum(addedCard);
                 AlsaDevice alsaDevice = waitForAlsaDevice(addedCard, device, AlsaDevice.TYPE_MIDI);
                 if (alsaDevice != null) {
-                    UsbMidiDevice usbMidiDevice = UsbMidiDevice.create(mContext, usbDevice,
+                    Bundle properties = new Bundle();
+                    properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER,
+                            usbDevice.getManufacturerName());
+                    properties.putString(MidiDeviceInfo.PROPERTY_MODEL, usbDevice.getProductName());
+                    properties.putString(MidiDeviceInfo.PROPERTY_SERIAL_NUMBER,
+                            usbDevice.getSerialNumber());
+                    properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, alsaDevice.mCard);
+                    properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, alsaDevice.mDevice);
+                    properties.putParcelable(MidiDeviceInfo.PROPERTY_USB_DEVICE, usbDevice);
+
+                    UsbMidiDevice usbMidiDevice = UsbMidiDevice.create(mContext, properties,
                             alsaDevice.mCard, alsaDevice.mDevice);
                     if (usbMidiDevice != null) {
                         mMidiDevices.put(usbDevice, usbMidiDevice);
@@ -436,6 +452,23 @@ public final class UsbAlsaManager {
             mAccessoryAudioDevice = null;
         }
     }
+
+   /* package */ void setPeripheralMidiState(boolean enabled, int card, int device) {
+        if (enabled) {
+            Bundle properties = new Bundle();
+            Resources r = mContext.getResources();
+            properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, r.getString(
+                    com.android.internal.R.string.usb_midi_peripheral_manufacturer_name));
+            properties.putString(MidiDeviceInfo.PROPERTY_MODEL, r.getString(
+                    com.android.internal.R.string.usb_midi_peripheral_model_name));
+            properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, card);
+            properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, device);
+            mPeripheralMidiDevice = UsbMidiDevice.create(mContext, properties, card, device);
+        } else if (mPeripheralMidiDevice != null) {
+            IoUtils.closeQuietly(mPeripheralMidiDevice);
+            mPeripheralMidiDevice = null;
+        }
+   }
 
     //
     // Devices List

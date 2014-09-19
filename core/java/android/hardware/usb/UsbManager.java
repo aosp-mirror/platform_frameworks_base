@@ -68,6 +68,8 @@ public class UsbManager {
      * accessory function is enabled
      * <li> {@link #USB_FUNCTION_AUDIO_SOURCE} boolean extra indicating whether the
      * audio source function is enabled
+     * <li> {@link #USB_FUNCTION_MIDI} boolean extra indicating whether the
+     * MIDI function is enabled
      * </ul>
      *
      * {@hide}
@@ -186,6 +188,14 @@ public class UsbManager {
      * {@hide}
      */
     public static final String USB_FUNCTION_AUDIO_SOURCE = "audio_source";
+
+    /**
+     * Name of the MIDI USB function.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
+     */
+    public static final String USB_FUNCTION_MIDI = "midi";
 
     /**
      * Name of the Accessory USB function.

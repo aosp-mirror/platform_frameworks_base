@@ -31,6 +31,7 @@ import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
+import android.midi.MidiDeviceInfo;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -85,6 +86,8 @@ public class UsbDeviceManager {
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
     private static final String AUDIO_SOURCE_PCM_PATH =
             "/sys/class/android_usb/android0/f_audio_source/pcm";
+    private static final String MIDI_ALSA_PATH =
+            "/sys/class/android_usb/android0/f_midi/alsa";
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
@@ -124,6 +127,7 @@ public class UsbDeviceManager {
     private boolean mUseUsbNotification;
     private boolean mAdbEnabled;
     private boolean mAudioSourceEnabled;
+    private boolean mMidiEnabled;
     private Map<String, List<Pair<String, String>>> mOemModeMap;
     private String[] mAccessoryStrings;
     private UsbDebuggingManager mDebuggingManager;
@@ -618,6 +622,31 @@ public class UsbDeviceManager {
             }
         }
 
+        private void updateMidiFunction() {
+            boolean enabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MIDI);
+            if (enabled != mMidiEnabled) {
+                int card = -1;
+                int device = -1;
+
+                if (enabled) {
+                    Scanner scanner = null;
+                    try {
+                        scanner = new Scanner(new File(MIDI_ALSA_PATH));
+                        card = scanner.nextInt();
+                        device = scanner.nextInt();
+                    } catch (FileNotFoundException e) {
+                        Slog.e(TAG, "could not open MIDI PCM file", e);
+                    } finally {
+                        if (scanner != null) {
+                            scanner.close();
+                        }
+                    }
+                }
+                mUsbAlsaManager.setPeripheralMidiState(enabled, card, device);
+                mMidiEnabled = enabled;
+            }
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -636,6 +665,7 @@ public class UsbDeviceManager {
                     if (mBootCompleted) {
                         updateUsbState();
                         updateAudioSourceFunction();
+                        updateMidiFunction();
                     }
                     break;
                 case MSG_ENABLE_ADB:
@@ -651,6 +681,7 @@ public class UsbDeviceManager {
                     updateAdbNotification();
                     updateUsbState();
                     updateAudioSourceFunction();
+                    updateMidiFunction();
                     break;
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;

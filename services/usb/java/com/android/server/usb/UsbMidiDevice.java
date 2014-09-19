@@ -17,7 +17,6 @@
 package com.android.server.usb;
 
 import android.content.Context;
-import android.hardware.usb.UsbDevice;
 import android.midi.MidiDeviceInfo;
 import android.midi.MidiDeviceServer;
 import android.midi.MidiManager;
@@ -50,7 +49,7 @@ public final class UsbMidiDevice implements Closeable {
     // streams for writing to ALSA driver
     private final FileOutputStream[] mOutputStreams;
 
-    public static UsbMidiDevice create(Context context, UsbDevice usbDevice, int card, int device) {
+    public static UsbMidiDevice create(Context context, Bundle properties, int card, int device) {
         MidiManager midiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
         if (midiManager == null) {
             Log.e(TAG, "No MidiManager in UsbMidiDevice.create()");
@@ -71,13 +70,6 @@ public final class UsbMidiDevice implements Closeable {
             return null;
         }
 
-        Bundle properties = new Bundle();
-        properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, usbDevice.getManufacturerName());
-        properties.putString(MidiDeviceInfo.PROPERTY_MODEL, usbDevice.getProductName());
-        properties.putString(MidiDeviceInfo.PROPERTY_SERIAL_NUMBER, usbDevice.getSerialNumber());
-        properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, card);
-        properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, device);
-        properties.putParcelable(MidiDeviceInfo.PROPERTY_USB_DEVICE, usbDevice);
         MidiDeviceServer server = midiManager.createDeviceServer(subDevices, subDevices, properties,
                 false, MidiDeviceInfo.TYPE_USB);
         if (server == null) {
