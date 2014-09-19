@@ -20,4 +20,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="def_device_name" msgid="6309317409634339402">"%1$s %2$s"</string>
+    <string name="def_device_name_simple" msgid="9037785625140748221">"%1$s"</string>
 </resources>
