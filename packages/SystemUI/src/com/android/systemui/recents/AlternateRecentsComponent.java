@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -32,6 +33,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import com.android.systemui.R;
@@ -118,6 +120,22 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // Load the header bar layout
         reloadHeaderBarLayout();
         mBootCompleted = true;
+
+        // Try and pre-emptively bind the search widget on startup to ensure that we
+        // have the right thumbnail bounds to animate to.
+        if (Constants.DebugFlags.App.EnableSearchLayout) {
+            // If there is no id, then bind a new search app widget
+            if (mConfig.searchBarAppWidgetId < 0) {
+                AppWidgetHost host = new RecentsAppWidgetHost(mContext,
+                        Constants.Values.App.AppWidgetHostId);
+                Pair<Integer, AppWidgetProviderInfo> widgetInfo =
+                        mSystemServicesProxy.bindSearchAppWidget(host);
+                if (widgetInfo != null) {
+                    // Save the app widget id into the settings
+                    mConfig.updateSearchBarAppWidgetId(mContext, widgetInfo.first);
+                }
+            }
+        }
     }
 
     /** Shows the recents */
