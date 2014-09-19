@@ -12230,6 +12230,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    package [PACKAGE_NAME]: all state related to given package");
                 pw.println("    all: dump all activities");
                 pw.println("    top: dump the top activity");
+                pw.println("    write: write all pending state to storage");
                 pw.println("  cmd may also be a COMP_SPEC to dump activities.");
                 pw.println("  COMP_SPEC may be a component name (com.foo/.myApp),");
                 pw.println("    a partial substring in a component name, a");
@@ -12364,6 +12365,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     mServices.dumpServicesLocked(fd, pw, args, opti, true, dumpClient, null);
                 }
+            } else if ("write".equals(cmd)) {
+                mTaskPersister.flush();
+                pw.println("All tasks persisted.");
+                return;
             } else {
                 // Dumping a single activity?
                 if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
