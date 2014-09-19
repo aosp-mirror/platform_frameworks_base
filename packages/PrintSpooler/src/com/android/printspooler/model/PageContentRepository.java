@@ -110,13 +110,13 @@ public final class PageContentRepository {
         mRenderer.close(callback);
     }
 
-    public void destroy() {
+    public void destroy(Runnable callback) {
         throwIfNotClosed();
         mState = STATE_DESTROYED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
-        doDestroy();
+        doDestroy(callback);
     }
 
     public void startPreload(int firstShownPage, int lastShownPage) {
@@ -163,19 +163,19 @@ public final class PageContentRepository {
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                doDestroy();
+                doDestroy(null);
             }
         } finally {
             super.finalize();
         }
     }
 
-    private void doDestroy() {
+    private void doDestroy(Runnable callback) {
         mState = STATE_DESTROYED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
-        mRenderer.destroy();
+        mRenderer.destroy(callback);
     }
 
     private void throwIfNotOpened() {
@@ -536,7 +536,7 @@ public final class PageContentRepository {
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
-        public void destroy() {
+        public void destroy(final Runnable callback) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -551,6 +551,10 @@ public final class PageContentRepository {
                     }
                     mPageContentCache.invalidate();
                     mPageContentCache.clear();
+                    if (callback != null) {
+                        callback.run();
+                    }
+
                 }
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
