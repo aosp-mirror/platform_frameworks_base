@@ -209,7 +209,7 @@ public abstract class LayoutInflater {
         mFactory = original.mFactory;
         mFactory2 = original.mFactory2;
         mPrivateFactory = original.mPrivateFactory;
-        mFilter = original.mFilter;
+        setFilter(original.mFilter);
     }
     
     /**
