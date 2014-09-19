@@ -44,4 +44,8 @@
     <bool name="config_carrier_volte_vt_available">false</bool>
 
     <bool name="config_auto_attach_data_on_creation">false</bool>
+    <!-- service number convert map in roaming network. -->
+    <string-array translatable="false" name="dial_string_replace">
+        <item>"*611:+19085594899,"</item>
+    </string-array>
 </resources>
