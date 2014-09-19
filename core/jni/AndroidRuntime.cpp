@@ -905,6 +905,20 @@ char* AndroidRuntime::toSlashClassName(const char* className)
     return result;
 }
 
+/** Create a Java string from an ASCII or Latin-1 string */
+jstring AndroidRuntime::NewStringLatin1(JNIEnv* env, const char* bytes) {
+    if (!bytes) return NULL;
+    int length = strlen(bytes);
+    jchar* buffer = (jchar *)alloca(length * sizeof(jchar));
+    if (!buffer) return NULL;
+    jchar* chp = buffer;
+    for (int i = 0; i < length; i++) {
+        *chp++ = *bytes++;
+    }
+    return env->NewString(buffer, length);
+}
+
+
 /*
  * Start the Android runtime.  This involves starting the virtual machine
  * and calling the "static void main(String[] args)" method in the class
