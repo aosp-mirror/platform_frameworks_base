@@ -192,12 +192,15 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         });
     }
 
-    public void destroy() {
+    public void destroy(Runnable callback) {
         if (mPageAdapter.isOpened()) {
-            mPageAdapter.close(null);
+            Message operation = mHandler.obtainMessage(MyHandler.MSG_CLOSE);
+            mHandler.enqueueOperation(operation);
         }
-        mRecyclerView.setAdapter(null);
-        mPageAdapter.destroy();
+
+        Message operation = mHandler.obtainMessage(MyHandler.MSG_DESTROY);
+        operation.obj = callback;
+        mHandler.enqueueOperation(operation);
     }
 
     @Override
@@ -292,7 +295,9 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
                 } break;
 
                 case MSG_DESTROY: {
-                    mPageAdapter.destroy();
+                    Runnable callback = (Runnable) message.obj;
+                    mRecyclerView.setAdapter(null);
+                    mPageAdapter.destroy(callback);
                     handleNextOperation();
                 } break;
 
