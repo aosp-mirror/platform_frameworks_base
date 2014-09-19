@@ -4,6 +4,7 @@ LOCAL_PATH:= $(call my-dir)
 ifeq ($(HOST_OS),linux)
 
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE_TAGS := optional
 
@@ -21,6 +22,7 @@ endif
 
 # Build for device
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE_TAGS := optional
 
