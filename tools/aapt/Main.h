@@ -62,4 +62,7 @@ int dumpResources(Bundle* bundle);
 
 status_t writeDependencyPreReqs(Bundle* bundle, const sp<AaptAssets>& assets,
                                 FILE* fp, bool includeRaw);
+
+android::String8 parseResourceName(const String8& pathLeaf);
+
 #endif // __MAIN_H
