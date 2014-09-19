@@ -29,7 +29,7 @@ import java.net.SocketOptions;
  */
 public class LocalSocket implements Closeable {
 
-    private LocalSocketImpl impl;
+    private final LocalSocketImpl impl;
     private volatile boolean implCreated;
     private LocalSocketAddress localAddress;
     private boolean isBound;
