@@ -2571,9 +2571,7 @@ public class DevicePolicyManager {
      * application running in the managed profile.
      *
      * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be
-     * boolean, int, String, or String[]. The recommended format for keys
-     * is "com.example.packagename/example-setting" to avoid naming conflicts with library
-     * components such as {@link android.webkit.WebView}.
+     * boolean, int, String, or String[].
      *
      * <p>The application restrictions are only made visible to the target application and the
      * profile or device owner.
