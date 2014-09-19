@@ -82,10 +82,6 @@ public class NetworkMonitor extends StateMachine {
     private static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
             "android.permission.ACCESS_NETWORK_CONDITIONS";
 
-    // Intent broadcast when user selects sign-in notification.
-    private static final String ACTION_SIGN_IN_REQUESTED =
-            "android.net.netmon.sign_in_requested";
-
     // Keep these in sync with CaptivePortalLoginActivity.java.
     // Intent broadcast from CaptivePortalLogin indicating sign-in is complete.
     // Extras:
@@ -404,38 +400,42 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    private class UserPromptedState extends State {
-        private class UserRespondedBroadcastReceiver extends BroadcastReceiver {
-            private final int mToken;
-            UserRespondedBroadcastReceiver(int token) {
-                mToken = token;
-            }
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (Integer.parseInt(intent.getStringExtra(Intent.EXTRA_TEXT)) ==
-                        mNetworkAgentInfo.network.netId) {
-                    sendMessage(obtainMessage(CMD_USER_WANTS_SIGN_IN, mToken));
-                }
-            }
+    // BroadcastReceiver that waits for a particular Intent and then posts a message.
+    private class CustomIntentReceiver extends BroadcastReceiver {
+        private final Message mMessage;
+        private final String mAction;
+        CustomIntentReceiver(String action, int token, int message) {
+            mMessage = obtainMessage(message, token);
+            mAction = action + "_" + mNetworkAgentInfo.network.netId + "_" + token;
+            mContext.registerReceiver(this, new IntentFilter(mAction));
         }
+        public PendingIntent getPendingIntent() {
+            return PendingIntent.getBroadcast(mContext, 0, new Intent(mAction), 0);
+        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(mAction)) sendMessage(mMessage);
+        }
+    }
 
-        private UserRespondedBroadcastReceiver mUserRespondedBroadcastReceiver;
+    private class UserPromptedState extends State {
+        // Intent broadcast when user selects sign-in notification.
+        private static final String ACTION_SIGN_IN_REQUESTED =
+                "android.net.netmon.sign_in_requested";
+
+        private CustomIntentReceiver mUserRespondedBroadcastReceiver;
 
         @Override
         public void enter() {
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
             // Wait for user to select sign-in notifcation.
-            mUserRespondedBroadcastReceiver = new UserRespondedBroadcastReceiver(
-                    ++mUserPromptedToken);
-            IntentFilter filter = new IntentFilter(ACTION_SIGN_IN_REQUESTED);
-            mContext.registerReceiver(mUserRespondedBroadcastReceiver, filter);
+            mUserRespondedBroadcastReceiver = new CustomIntentReceiver(ACTION_SIGN_IN_REQUESTED,
+                    ++mUserPromptedToken, CMD_USER_WANTS_SIGN_IN);
             // Initiate notification to sign-in.
-            Intent intent = new Intent(ACTION_SIGN_IN_REQUESTED);
-            intent.putExtra(Intent.EXTRA_TEXT, String.valueOf(mNetworkAgentInfo.network.netId));
             Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 1,
                     mNetworkAgentInfo.network.netId,
-                    PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                    mUserRespondedBroadcastReceiver.getPendingIntent());
             mConnectivityServiceHandler.sendMessage(message);
         }
 
@@ -530,33 +530,15 @@ public class NetworkMonitor extends StateMachine {
 
     private class LingeringState extends State {
         private static final String ACTION_LINGER_EXPIRED = "android.net.netmon.lingerExpired";
-        private static final String EXTRA_NETID = "lingerExpiredNetId";
-        private static final String EXTRA_TOKEN = "lingerExpiredToken";
 
-        private class LingerExpiredBroadcastReceiver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(ACTION_LINGER_EXPIRED) &&
-                        Integer.parseInt(intent.getStringExtra(EXTRA_NETID)) ==
-                        mNetworkAgentInfo.network.netId) {
-                    sendMessage(CMD_LINGER_EXPIRED,
-                            Integer.parseInt(intent.getStringExtra(EXTRA_TOKEN)));
-                }
-            }
-        }
-
-        private BroadcastReceiver mBroadcastReceiver;
+        private CustomIntentReceiver mBroadcastReceiver;
         private PendingIntent mIntent;
 
         @Override
         public void enter() {
-            mBroadcastReceiver = new LingerExpiredBroadcastReceiver();
-            mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(ACTION_LINGER_EXPIRED));
-
-            Intent intent = new Intent(ACTION_LINGER_EXPIRED, null);
-            intent.putExtra(EXTRA_NETID, String.valueOf(mNetworkAgentInfo.network.netId));
-            intent.putExtra(EXTRA_TOKEN, String.valueOf(++mLingerToken));
-            mIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+            mBroadcastReceiver = new CustomIntentReceiver(ACTION_LINGER_EXPIRED, ++mLingerToken,
+                    CMD_LINGER_EXPIRED);
+            mIntent = mBroadcastReceiver.getPendingIntent();
             long wakeupTime = SystemClock.elapsedRealtime() + mLingerDelayMs;
             mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime,
                     // Give a specific window so we aren't subject to unknown inexactitude.
