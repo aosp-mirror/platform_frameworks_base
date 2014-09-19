@@ -7528,8 +7528,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Does the caller have this permission on the URI?
         if (!checkHoldingPermissionsLocked(pm, pi, grantUri, callingUid, modeFlags)) {
-            // Have they don't have direct access to the URI, then revoke any URI
-            // permissions that have been granted to them.
+            // If they don't have direct access to the URI, then revoke any
+            // ownerless URI permissions that have been granted to them.
             final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
             if (perms != null) {
                 boolean persistChanged = false;
@@ -7538,10 +7538,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (perm.uri.sourceUserId == grantUri.sourceUserId
                             && perm.uri.uri.isPathPrefixMatch(grantUri.uri)) {
                         if (DEBUG_URI_PERMISSION)
-                            Slog.v(TAG,
-                                    "Revoking " + perm.targetUid + " permission to " + perm.uri);
+                            Slog.v(TAG, "Revoking non-owned " + perm.targetUid +
+                                    " permission to " + perm.uri);
                         persistChanged |= perm.revokeModes(
-                                modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                                modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION, false);
                         if (perm.modeFlags == 0) {
                             it.remove();
                         }
@@ -7573,7 +7573,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.v(TAG,
                                 "Revoking " + perm.targetUid + " permission to " + perm.uri);
                     persistChanged |= perm.revokeModes(
-                            modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                            modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION, true);
                     if (perm.modeFlags == 0) {
                         it.remove();
                     }
@@ -7661,8 +7661,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Only inspect grants matching package
                     if (packageName == null || perm.sourcePkg.equals(packageName)
                             || perm.targetPkg.equals(packageName)) {
-                        persistChanged |= perm.revokeModes(
-                                persistable ? ~0 : ~Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                        persistChanged |= perm.revokeModes(persistable
+                                ? ~0 : ~Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION, true);
 
                         // Only remove when no modes remain; any persisted grants
                         // will keep this alive.
