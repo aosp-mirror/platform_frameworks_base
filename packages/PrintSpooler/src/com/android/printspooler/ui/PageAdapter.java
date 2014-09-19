@@ -488,9 +488,9 @@ public final class PageAdapter extends Adapter implements
         return selectedPages;
     }
 
-    public void destroy() {
+    public void destroy(Runnable callback) {
         throwIfNotClosed();
-        doDestroy();
+        doDestroy(callback);
     }
 
     @Override
@@ -498,7 +498,7 @@ public final class PageAdapter extends Adapter implements
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                doDestroy();
+                doDestroy(null);
             }
         } finally {
             super.finalize();
@@ -745,8 +745,8 @@ public final class PageAdapter extends Adapter implements
         mPageContentRepository.stopPreload();
     }
 
-    private void doDestroy() {
-        mPageContentRepository.destroy();
+    private void doDestroy(Runnable callback) {
+        mPageContentRepository.destroy(callback);
         mCloseGuard.close();
         mState = STATE_DESTROYED;
         if (DEBUG) {
