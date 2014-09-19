@@ -4295,7 +4295,7 @@ public class Intent implements Parcelable, Cloneable {
                 int j = uri.indexOf(')', i);
                 while (i < j) {
                     int sep = uri.indexOf('!', i);
-                    if (sep < 0) sep = j;
+                    if (sep < 0 || sep > j) sep = j;
                     if (i < sep) {
                         intent.addCategory(uri.substring(i, sep));
                     }
