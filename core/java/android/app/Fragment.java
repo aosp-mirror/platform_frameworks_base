@@ -2015,6 +2015,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                 }
                 return mView.findViewById(id);
             }
+
+            @Override
+            public boolean hasView() {
+                return (mView != null);
+            }
         }, this);
     }
 
