@@ -1807,7 +1807,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     public String getPackage() {
-        return mApplication.packageName;
+        return (mApplication != null) ? mApplication.packageName : null;
     }
 
     /**
@@ -2663,6 +2663,10 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private static ApplicationInfo getApplicationInfo(String packageName, int userId) {
+        if (packageName == null) {
+            return null;
+        }
+
         // Get the application for the passed in package and user.
         Application application = ActivityThread.currentApplication();
         if (application == null) {
