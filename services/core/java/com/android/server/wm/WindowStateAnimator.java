@@ -536,6 +536,9 @@ class WindowStateAnimator {
             mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
+            synchronized (sSurfaces) {
+                sSurfaces.add(0, this);
+            }
         }
 
         @Override
@@ -557,15 +560,17 @@ class WindowStateAnimator {
             }
             super.setLayer(zorder);
 
-            sSurfaces.remove(this);
-            int i;
-            for (i = sSurfaces.size() - 1; i >= 0; i--) {
-                SurfaceTrace s = sSurfaces.get(i);
-                if (s.mLayer < zorder) {
-                    break;
+            synchronized (sSurfaces) {
+                sSurfaces.remove(this);
+                int i;
+                for (i = sSurfaces.size() - 1; i >= 0; i--) {
+                    SurfaceTrace s = sSurfaces.get(i);
+                    if (s.mLayer < zorder) {
+                        break;
+                    }
                 }
+                sSurfaces.add(i + 1, this);
             }
-            sSurfaces.add(i + 1, this);
         }
 
         @Override
@@ -655,7 +660,9 @@ class WindowStateAnimator {
         public void destroy() {
             super.destroy();
             Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by " + Debug.getCallers(3));
-            sSurfaces.remove(this);
+            synchronized (sSurfaces) {
+                sSurfaces.remove(this);
+            }
         }
 
         @Override
@@ -663,13 +670,40 @@ class WindowStateAnimator {
             super.release();
             Slog.v(SURFACE_TAG, "release: " + this + ". Called by "
                     + Debug.getCallers(3));
-            sSurfaces.remove(this);
+            synchronized (sSurfaces) {
+                sSurfaces.remove(this);
+            }
         }
 
-        static void dumpAllSurfaces() {
-            final int N = sSurfaces.size();
-            for (int i = 0; i < N; i++) {
-                Slog.i(TAG, "SurfaceDump: " + sSurfaces.get(i));
+        static void dumpAllSurfaces(PrintWriter pw, String header) {
+            synchronized (sSurfaces) {
+                final int N = sSurfaces.size();
+                if (N <= 0) {
+                    return;
+                }
+                if (header != null) {
+                    pw.println(header);
+                }
+                pw.println("WINDOW MANAGER SURFACES (dumpsys window surfaces)");
+                for (int i = 0; i < N; i++) {
+                    SurfaceTrace s = sSurfaces.get(i);
+                    pw.print("  Surface #"); pw.print(i); pw.print(": #");
+                            pw.print(Integer.toHexString(System.identityHashCode(s)));
+                            pw.print(" "); pw.println(s.mName);
+                    pw.print("    mLayerStack="); pw.print(s.mLayerStack);
+                            pw.print(" mLayer="); pw.println(s.mLayer);
+                    pw.print("    mShown="); pw.print(s.mShown); pw.print(" mAlpha=");
+                            pw.print(s.mSurfaceTraceAlpha); pw.print(" mIsOpaque=");
+                            pw.println(s.mIsOpaque);
+                    pw.print("    mPosition="); pw.print(s.mPosition.x); pw.print(",");
+                            pw.print(s.mPosition.y);
+                            pw.print(" mSize="); pw.print(s.mSize.x); pw.print("x");
+                            pw.println(s.mSize.y);
+                    pw.print("    mCrop="); s.mWindowCrop.printShortString(pw); pw.println();
+                    pw.print("    Transform: ("); pw.print(s.mDsdx); pw.print(", ");
+                            pw.print(s.mDtdx); pw.print(", "); pw.print(s.mDsdy);
+                            pw.print(", "); pw.print(s.mDtdy); pw.println(")");
+                }
             }
         }
 
