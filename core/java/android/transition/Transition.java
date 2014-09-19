@@ -1443,9 +1443,9 @@ public abstract class Transition implements Cloneable {
                 values.targetedTransitions.add(this);
                 capturePropagationValues(values);
                 if (start) {
-                    mStartValues.viewValues.put(view, values);
+                    addViewValues(mStartValues, view, values);
                 } else {
-                    mEndValues.viewValues.put(view, values);
+                    addViewValues(mEndValues, view, values);
                 }
             }
         } else {
