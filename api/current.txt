@@ -29049,6 +29049,44 @@ package android.telephony {
     field public byte[] encodedScAddress;
   }
 
+  public class SubInfoRecord implements android.os.Parcelable {
+    ctor public SubInfoRecord();
+    ctor public SubInfoRecord(long, java.lang.String, int, java.lang.String, int, int, java.lang.String, int, int, int[], int, int);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public int color;
+    field public int dataRoaming;
+    field public java.lang.String displayName;
+    field public int displayNumberFormat;
+    field public java.lang.String iccId;
+    field public int mcc;
+    field public int mnc;
+    field public int nameSource;
+    field public java.lang.String number;
+    field public int[] simIconRes;
+    field public int slotId;
+    field public long subId;
+  }
+
+  public class SubscriptionManager implements android.provider.BaseColumns {
+    method public static java.util.List<android.telephony.SubInfoRecord> getActiveSubInfoList();
+    method public static long getDefaultSmsSubId();
+    method public static int getSlotId(long);
+    method public static java.util.List<android.telephony.SubInfoRecord> getSubInfoUsingSlotId(int);
+    method public static android.telephony.SubInfoRecord getSubInfoUsingSubId(long);
+    method public static boolean isValidSubId(long);
+    field public static final long ASK_USER_SUB_ID = -1001L; // 0xfffffffffffffc17L
+    field public static final int DEFAULT_PHONE_ID = 2147483647; // 0x7fffffff
+    field public static final long DEFAULT_SUB_ID = 9223372036854775807L; // 0x7fffffffffffffffL
+    field public static final int INVALID_PHONE_ID = -1000; // 0xfffffc18
+    field public static final int INVALID_SLOT_ID = -1000; // 0xfffffc18
+    field public static final long INVALID_SUB_ID = -1000L; // 0xfffffffffffffc18L
+    field public static final java.lang.String MCC = "mcc";
+    field public static final java.lang.String MNC = "mnc";
+    field public static final int SIM_NOT_INSERTED = -1; // 0xffffffff
+  }
+
   public class TelephonyManager {
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();

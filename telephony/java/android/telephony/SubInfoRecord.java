@@ -21,7 +21,6 @@ import android.os.Parcelable;
 
 /**
  * A Parcelable class for Subscription Information.
- * @hide - to be unhidden
  */
 public class SubInfoRecord implements Parcelable {
 
