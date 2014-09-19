@@ -372,9 +372,9 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">aboveThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
-        <item name="colorPrimary">@color/material_blue_grey_800</item>
-        <item name="colorAccent">@color/material_deep_teal_200</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="colorPrimary">@color/primary_material_dark</item>
+        <item name="colorAccent">@color/accent_material_dark</item>
         <item name="colorEdgeEffect">?attr/colorPrimary</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
@@ -716,9 +716,9 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">aboveThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/material_blue_grey_100</item>
-        <item name="colorPrimary">@color/material_blue_grey_50</item>
-        <item name="colorAccent">@color/material_deep_teal_500</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_light</item>
+        <item name="colorPrimary">@color/primary_material_light</item>
+        <item name="colorAccent">@color/accent_material_light</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
@@ -736,8 +736,8 @@ please see themes_device_defaults.xml.
         <item name="actionBarTheme">@style/ThemeOverlay.Material.Dark.ActionBar</item>
         <item name="actionBarPopupTheme">@style/ThemeOverlay.Material.Light</item>
 
-        <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
-        <item name="colorPrimary">@color/material_blue_grey_800</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="colorPrimary">@color/primary_material_dark</item>
     </style>
 
     <style name="ThemeOverlay" />
@@ -995,6 +995,8 @@ please see themes_device_defaults.xml.
     <eat-comment />
 
     <style name="Theme.Material.BaseDialog">
+        <item name="colorBackground">@color/background_floating_material_dark</item>
+
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
@@ -1109,6 +1111,8 @@ please see themes_device_defaults.xml.
     <!-- Light material dialog themes -->
 
     <style name="Theme.Material.Light.BaseDialog">
+        <item name="colorBackground">@color/background_floating_material_light</item>
+
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
