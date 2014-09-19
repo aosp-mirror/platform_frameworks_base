@@ -781,12 +781,18 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
     if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
             bundle->getVersionName(), errorOnFailedInsert, replaceVersion)) {
         return UNKNOWN_ERROR;
+    } else {
+        const XMLNode::attribute_entry* attr = root->getAttribute(
+                String16(RESOURCES_ANDROID_NAMESPACE), String16("versionName"));
+        if (attr != NULL) {
+            bundle->setVersionName(strdup(String8(attr->string).string()));
+        }
     }
     
+    sp<XMLNode> vers = root->getChildElement(String16(), String16("uses-sdk"));
     if (bundle->getMinSdkVersion() != NULL
             || bundle->getTargetSdkVersion() != NULL
             || bundle->getMaxSdkVersion() != NULL) {
-        sp<XMLNode> vers = root->getChildElement(String16(), String16("uses-sdk"));
         if (vers == NULL) {
             vers = XMLNode::newElement(root->getFilename(), String16(), String16("uses-sdk"));
             root->insertChildAt(vers, 0);
@@ -803,6 +809,14 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         if (!addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "maxSdkVersion",
                 bundle->getMaxSdkVersion(), errorOnFailedInsert)) {
             return UNKNOWN_ERROR;
+        }
+    }
+
+    if (vers != NULL) {
+        const XMLNode::attribute_entry* attr = vers->getAttribute(
+                String16(RESOURCES_ANDROID_NAMESPACE), String16("minSdkVersion"));
+        if (attr != NULL) {
+            bundle->setMinSdkVersion(strdup(String8(attr->string).string()));
         }
     }
 
@@ -973,8 +987,8 @@ static ssize_t extractPlatformBuildVersion(ResXMLTree& tree, Bundle* bundle) {
 static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle) {
     int32_t cookie = getPlatformAssetCookie(assets);
     if (cookie == 0) {
-        fprintf(stderr, "ERROR: Platform package not found\n");
-        return UNKNOWN_ERROR;
+        // No platform was loaded.
+        return NO_ERROR;
     }
 
     ResXMLTree tree;
@@ -1498,6 +1512,10 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     err = compileXmlFile(assets, manifestTree, manifestFile, &table);
     if (err < NO_ERROR) {
         return err;
+    }
+
+    if (table.modifyForCompat(bundle) != NO_ERROR) {
+        return UNKNOWN_ERROR;
     }
 
     //block.restart();
