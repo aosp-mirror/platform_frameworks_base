@@ -2887,32 +2887,35 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionModeView.getLayoutParams() instanceof MarginLayoutParams) {
                     MarginLayoutParams mlp = (MarginLayoutParams) mActionModeView.getLayoutParams();
                     boolean mlpChanged = false;
-                    final boolean nonOverlayShown =
-                            (getLocalFeatures() & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0
-                            && mActionModeView.isShown();
-                    if (nonOverlayShown) {
-                        // set top margin to top insets, show status guard
+                    if (mActionModeView.isShown()) {
+                        final boolean nonOverlay = (getLocalFeatures()
+                                & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0;
                         if (mlp.topMargin != insets.getSystemWindowInsetTop()) {
                             mlpChanged = true;
                             mlp.topMargin = insets.getSystemWindowInsetTop();
-                            if (mStatusGuard == null) {
-                                mStatusGuard = new View(mContext);
-                                mStatusGuard.setBackgroundColor(mContext.getResources()
-                                        .getColor(R.color.input_method_navigation_guard));
-                                addView(mStatusGuard, indexOfChild(mStatusColorView),
-                                        new LayoutParams(LayoutParams.MATCH_PARENT, mlp.topMargin,
-                                                Gravity.START | Gravity.TOP));
-                            } else {
-                                LayoutParams lp = (LayoutParams) mStatusGuard.getLayoutParams();
-                                if (lp.height != mlp.topMargin) {
-                                    lp.height = mlp.topMargin;
-                                    mStatusGuard.setLayoutParams(lp);
+
+                            // Only show status guard for non-overlay modes.
+                            if (nonOverlay) {
+                                if (mStatusGuard == null) {
+                                    mStatusGuard = new View(mContext);
+                                    mStatusGuard.setBackgroundColor(mContext.getResources()
+                                            .getColor(R.color.input_method_navigation_guard));
+                                    addView(mStatusGuard, indexOfChild(mStatusColorView),
+                                            new LayoutParams(LayoutParams.MATCH_PARENT,
+                                                    mlp.topMargin,
+                                                    Gravity.START | Gravity.TOP));
+                                } else {
+                                    LayoutParams lp = (LayoutParams) mStatusGuard.getLayoutParams();
+                                    if (lp.height != mlp.topMargin) {
+                                        lp.height = mlp.topMargin;
+                                        mStatusGuard.setLayoutParams(lp);
+                                    }
                                 }
                             }
                         }
                         insets = insets.consumeSystemWindowInsets(
-                                false, true /* top */, false, false);
-                        showStatusGuard = true;
+                                false, nonOverlay /* top */, false, false);
+                        showStatusGuard = nonOverlay;
                     } else {
                         // reset top margin
                         if (mlp.topMargin != 0) {
