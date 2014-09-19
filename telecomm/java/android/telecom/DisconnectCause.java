@@ -85,6 +85,17 @@ public final class DisconnectCause implements Parcelable {
 
     /**
      * Creates a new DisconnectCause.
+     * @param label The localized label to show to the user to explain the disconnect.
+     * @param code The code for the disconnect cause.
+     * @param description The localized description to show to the user to explain the disconnect.
+     * @param reason The reason for the disconnect.
+     */
+    public DisconnectCause(int code, CharSequence label, CharSequence description, String reason) {
+        this(code, label, description, reason, ToneGenerator.TONE_UNKNOWN);
+    }
+
+    /**
+     * Creates a new DisconnectCause.
      *
      * @param code The code for the disconnect cause.
      * @param label The localized label to show to the user to explain the disconnect.
