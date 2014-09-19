@@ -33,6 +33,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
 
@@ -347,6 +348,8 @@ public abstract class PanelView extends FrameLayout {
                     if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
                         Log.i(TAG, "Flinging: expand=" + expand);
                     }
+                    DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
+                            mStatusBar.isFalsingThresholdNeeded());
                     fling(vel, expand);
                     mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
                     if (mUpdateFlingOnLayout) {
