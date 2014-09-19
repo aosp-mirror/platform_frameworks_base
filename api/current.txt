@@ -410,6 +410,7 @@ package android {
     field public static final int colorControlActivated = 16843818; // 0x101042a
     field public static final int colorControlHighlight = 16843820; // 0x101042c
     field public static final int colorControlNormal = 16843817; // 0x1010429
+    field public static final int colorEdgeEffect = 16843982; // 0x10104ce
     field public static final int colorFocusedHighlight = 16843663; // 0x101038f
     field public static final int colorForeground = 16842800; // 0x1010030
     field public static final int colorForegroundInverse = 16843270; // 0x1010206
