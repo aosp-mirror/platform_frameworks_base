@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
@@ -4801,17 +4802,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
 
             try {
-                UserManager um = UserManager.get(mContext);
-                if (!um.getUserInfo(userId).isManagedProfile()) {
-                    throw new IllegalStateException(
-                            "Only call this method from a managed profile.");
-                }
-
-                UserInfo primaryUser = um.getProfileParent(userId);
-
                 if (DBG) {
                     Slog.v(LOG_TAG, "installing " + packageName + " for "
                             + userId);
+                }
+
+                UserManager um = UserManager.get(mContext);
+                UserInfo primaryUser = um.getProfileParent(userId);
+
+                // Call did not come from a managed profile
+                if (primaryUser == null) {
+                    primaryUser = um.getUserInfo(userId);
                 }
 
                 IPackageManager pm = AppGlobals.getPackageManager();
@@ -4847,12 +4848,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             try {
                 UserManager um = UserManager.get(mContext);
-                if (!um.getUserInfo(userId).isManagedProfile()) {
-                    throw new IllegalStateException(
-                            "Only call this method from a managed profile.");
-                }
-
                 UserInfo primaryUser = um.getProfileParent(userId);
+
+                // Call did not come from a managed profile.
+                if (primaryUser == null) {
+                    primaryUser = um.getUserInfo(userId);
+                }
 
                 IPackageManager pm = AppGlobals.getPackageManager();
                 List<ResolveInfo> activitiesToEnable = pm.queryIntentActivities(intent,
@@ -4890,7 +4891,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isSystemApp(IPackageManager pm, String packageName, int userId)
             throws RemoteException {
-        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0, userId);
+        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, GET_UNINSTALLED_PACKAGES,
+                userId);
         return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0;
     }
 
