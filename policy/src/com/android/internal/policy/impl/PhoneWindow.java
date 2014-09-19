@@ -1241,6 +1241,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         st.decorView = new DecorView(getContext(), st.featureId);
         st.gravity = Gravity.CENTER | Gravity.BOTTOM;
         st.setStyle(getContext());
+        TypedArray a = getContext().obtainStyledAttributes(null,
+                R.styleable.Window, 0, st.listPresenterTheme);
+        final float elevation = a.getDimension(R.styleable.Window_windowElevation, 0);
+        if (elevation != 0) {
+            st.decorView.setElevation(elevation);
+        }
+        a.recycle();
 
         return true;
     }
