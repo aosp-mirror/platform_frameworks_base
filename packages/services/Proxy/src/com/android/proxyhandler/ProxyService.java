@@ -33,8 +33,6 @@ public class ProxyService extends Service {
     /** Keep these values up-to-date with PacManager.java */
     public static final String KEY_PROXY = "keyProxy";
     public static final String HOST = "localhost";
-    // STOPSHIP This being a static port means it can be hijacked by other apps.
-    public static final int PORT = 8182;
     public static final String EXCL_LIST = "";
 
     @Override
