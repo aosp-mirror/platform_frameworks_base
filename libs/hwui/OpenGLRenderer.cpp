@@ -134,6 +134,8 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         , mExtensions(Extensions::getInstance())
         , mRenderState(renderState)
         , mScissorOptimizationDisabled(false)
+        , mSuppressTiling(false)
+        , mFirstFrameAfterResize(true)
         , mCountOverdraw(false)
         , mLightCenter((Vector3){FLT_MIN, FLT_MIN, FLT_MIN})
         , mLightRadius(FLT_MIN)
@@ -179,6 +181,7 @@ void OpenGLRenderer::onViewportInitialized() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glEnableVertexAttribArray(Program::kBindingPosition);
+    mFirstFrameAfterResize = true;
 }
 
 void OpenGLRenderer::setupFrameState(float left, float top,
@@ -202,7 +205,9 @@ status_t OpenGLRenderer::startFrame() {
     // Functors break the tiling extension in pretty spectacular ways
     // This ensures we don't use tiling when a functor is going to be
     // invoked during the frame
-    mSuppressTiling = mCaches.hasRegisteredFunctors();
+    mSuppressTiling = mCaches.hasRegisteredFunctors()
+            || mFirstFrameAfterResize;
+    mFirstFrameAfterResize = false;
 
     startTilingCurrentClip(true);
 
