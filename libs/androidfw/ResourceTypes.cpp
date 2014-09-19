@@ -5393,6 +5393,44 @@ const char16_t* StringPoolRef::string16(size_t* outLen) const {
     return NULL;
 }
 
+bool ResTable::getResourceFlags(uint32_t resID, uint32_t* outFlags) const {
+    if (mError != NO_ERROR) {
+        return false;
+    }
+
+    const ssize_t p = getResourcePackageIndex(resID);
+    const int t = Res_GETTYPE(resID);
+    const int e = Res_GETENTRY(resID);
+
+    if (p < 0) {
+        if (Res_GETPACKAGE(resID)+1 == 0) {
+            ALOGW("No package identifier when getting flags for resource number 0x%08x", resID);
+        } else {
+            ALOGW("No known package when getting flags for resource number 0x%08x", resID);
+        }
+        return false;
+    }
+    if (t < 0) {
+        ALOGW("No type identifier when getting flags for resource number 0x%08x", resID);
+        return false;
+    }
+
+    const PackageGroup* const grp = mPackageGroups[p];
+    if (grp == NULL) {
+        ALOGW("Bad identifier when getting flags for resource number 0x%08x", resID);
+        return false;
+    }
+
+    Entry entry;
+    status_t err = getEntry(grp, t, e, NULL, &entry);
+    if (err != NO_ERROR) {
+        return false;
+    }
+
+    *outFlags = entry.specFlags;
+    return true;
+}
+
 status_t ResTable::getEntry(
         const PackageGroup* packageGroup, int typeIndex, int entryIndex,
         const ResTable_config* config,
