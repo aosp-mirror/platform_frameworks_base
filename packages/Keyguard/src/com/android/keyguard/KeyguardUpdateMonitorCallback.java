@@ -146,7 +146,7 @@ public class KeyguardUpdateMonitorCallback {
     /**
      * Called when the emergency call button is pressed.
      */
-    void onEmergencyCallAction() { }
+    public void onEmergencyCallAction() { }
 
     /**
      * Called when the transport background changes.
