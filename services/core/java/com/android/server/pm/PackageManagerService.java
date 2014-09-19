@@ -11370,15 +11370,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (cur.mPref.mAlways && cur.mPref.mComponent.equals(activity)
                             && cur.mPref.mMatch == (match&IntentFilter.MATCH_CATEGORY_MASK)
                             && cur.mPref.sameSet(set)) {
+                        // Setting the preferred activity to what it happens to be already
                         if (DEBUG_PREFERRED) {
                             Slog.i(TAG, "Replacing with same preferred activity "
                                     + cur.mPref.mShortComponent + " for user "
                                     + userId + ":");
                             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                        } else {
-                            Slog.i(TAG, "Replacing with same preferred activity "
-                                    + cur.mPref.mShortComponent + " for user "
-                                    + userId);
                         }
                         return;
                     }
