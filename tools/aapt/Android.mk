@@ -31,6 +31,7 @@ aapt_src_files := \
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_SRC_FILES := $(aapt_src_files)
 
@@ -73,14 +74,12 @@ include $(BUILD_HOST_EXECUTABLE)
 # =========================================================
 ifneq ($(SDK_ONLY),true)
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_SRC_FILES := $(aapt_src_files)
 
 LOCAL_MODULE := aapt
 
-LOCAL_C_INCLUDES += bionic
-LOCAL_C_INCLUDES += bionic/libstdc++/include
-LOCAL_C_INCLUDES += external/stlport/stlport
 LOCAL_C_INCLUDES += external/libpng
 LOCAL_C_INCLUDES += external/zlib
 
@@ -95,9 +94,9 @@ LOCAL_SHARED_LIBRARIES := \
         libz
 
 LOCAL_STATIC_LIBRARIES := \
-        libstlport_static \
         libexpat_static
 
+include external/stlport/libstlport.mk
 include $(BUILD_EXECUTABLE)
 endif
 

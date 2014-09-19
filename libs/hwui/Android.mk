@@ -1,5 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 # Only build libhwui when USE_OPENGL_RENDERER is
 # defined in the current device/board configuration
@@ -65,14 +66,12 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 
 	ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
 		LOCAL_CFLAGS += -DANDROID_ENABLE_RENDERSCRIPT
-		LOCAL_SHARED_LIBRARIES += libRS libRScpp libstlport
+		LOCAL_SHARED_LIBRARIES += libRS libRScpp
 		LOCAL_C_INCLUDES += \
 			$(intermediates) \
 			frameworks/rs/cpp \
 			frameworks/rs \
-			external/stlport/stlport \
-			bionic/ \
-			bionic/libstdc++/include
+
 	endif
 
 	ifndef HWUI_COMPILE_SYMBOLS
@@ -83,6 +82,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		LOCAL_CFLAGS += -fno-omit-frame-pointer -marm -mapcs
 	endif
 
+	include external/stlport/libstlport.mk
 	include $(BUILD_SHARED_LIBRARY)
 
 	include $(call all-makefiles-under,$(LOCAL_PATH))

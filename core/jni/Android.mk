@@ -1,5 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_CFLAGS += -DHAVE_CONFIG_H -DKHTML_NO_EXCEPTIONS -DGKWQ_NO_JAVA
 LOCAL_CFLAGS += -DNO_SUPPORT_JS_BINDING -DQT_NO_WHEELEVENT -DKHTML_NO_XBL
@@ -218,9 +219,10 @@ endif
 
 LOCAL_SHARED_LIBRARIES += \
 	libdl
+
 # we need to access the private Bionic header
 # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
-LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+LOCAL_C_INCLUDES += bionic/libc/private
 
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
 	LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
