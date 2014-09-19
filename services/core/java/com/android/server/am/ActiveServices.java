@@ -2116,7 +2116,8 @@ public final class ActiveServices {
                     boolean hasCreate = false;
                     for (int conni=abind.connections.size()-1; conni>=0; conni--) {
                         ConnectionRecord conn = abind.connections.valueAt(conni);
-                        if ((conn.flags&Context.BIND_AUTO_CREATE) != 0) {
+                        if ((conn.flags&(Context.BIND_AUTO_CREATE|Context.BIND_ALLOW_OOM_MANAGEMENT
+                                |Context.BIND_WAIVE_PRIORITY)) == Context.BIND_AUTO_CREATE) {
                             hasCreate = true;
                             break;
                         }
