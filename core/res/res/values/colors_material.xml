@@ -16,11 +16,21 @@
 
 <!-- Colors specific to Material themes. -->
 <resources>
-    <color name="background_material_dark">#ff212121</color>
-    <color name="background_material_light">#fffafafa</color>
+    <color name="background_material_dark">#ff303030</color>
+    <color name="background_material_light">#ffeeeeee</color>
+    <color name="background_floating_material_dark">#ff424242</color>
+    <color name="background_floating_material_light">#ffeeeeee</color>
 
-    <color name="ripple_material_light">#40000000</color>
+    <color name="primary_material_dark">#ff212121</color>
+    <color name="primary_material_light">#ffbdbdbd</color>
+    <color name="primary_dark_material_dark">#ff000000</color>
+    <color name="primary_dark_material_light">#ff757575</color>
+
     <color name="ripple_material_dark">#40ffffff</color>
+    <color name="ripple_material_light">#40000000</color>
+
+    <color name="accent_material_light">@color/material_deep_teal_500</color>
+    <color name="accent_material_dark">@color/material_deep_teal_200</color>
 
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
@@ -73,8 +83,6 @@
     <color name="material_deep_teal_200">#ff80cbc4</color>
     <color name="material_deep_teal_500">#ff009688</color>
 
-    <color name="material_blue_grey_50">#ffeceff1</color>
-    <color name="material_blue_grey_100">#ffcfd8dc</color>
     <color name="material_blue_grey_800">#ff37474f</color>
     <color name="material_blue_grey_900">#ff263238</color>
     <color name="material_blue_grey_950">#ff21272b</color>
