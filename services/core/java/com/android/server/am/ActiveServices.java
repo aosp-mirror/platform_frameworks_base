@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
@@ -590,6 +591,8 @@ public final class ActiveServices {
                         r.cancelNotification();
                         r.foregroundId = 0;
                         r.foregroundNoti = null;
+                    } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.L) {
+                        r.stripForegroundServiceFlagFromNotification();
                     }
                 }
             }
