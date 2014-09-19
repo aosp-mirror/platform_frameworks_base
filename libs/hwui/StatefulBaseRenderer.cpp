@@ -49,6 +49,13 @@ void StatefulBaseRenderer::setViewport(int width, int height) {
     mHeight = height;
     mFirstSnapshot->initializeViewport(width, height);
     onViewportInitialized();
+
+    // create a temporary 1st snapshot, so old snapshots are released,
+    // and viewport can be queried safely.
+    // TODO: remove, combine viewport + save stack initialization
+    mSnapshot = new Snapshot(mFirstSnapshot,
+            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    mSaveCount = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
