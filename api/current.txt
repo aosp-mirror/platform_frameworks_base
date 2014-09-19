@@ -10708,9 +10708,6 @@ package android.graphics {
   public class ColorMatrixColorFilter extends android.graphics.ColorFilter {
     ctor public ColorMatrixColorFilter(android.graphics.ColorMatrix);
     ctor public ColorMatrixColorFilter(float[]);
-    method public android.graphics.ColorMatrix getColorMatrix();
-    method public void setColorMatrix(android.graphics.ColorMatrix);
-    method public void setColorMatrix(float[]);
   }
 
   public class ComposePathEffect extends android.graphics.PathEffect {
@@ -10787,10 +10784,6 @@ package android.graphics {
 
   public class LightingColorFilter extends android.graphics.ColorFilter {
     ctor public LightingColorFilter(int, int);
-    method public int getColorAdd();
-    method public int getColorMultiply();
-    method public void setColorAdd(int);
-    method public void setColorMultiply(int);
   }
 
   public class LinearGradient extends android.graphics.Shader {
@@ -11296,8 +11289,6 @@ package android.graphics {
 
   public class PorterDuffColorFilter extends android.graphics.ColorFilter {
     ctor public PorterDuffColorFilter(int, android.graphics.PorterDuff.Mode);
-    method public int getColor();
-    method public android.graphics.PorterDuff.Mode getMode();
   }
 
   public class PorterDuffXfermode extends android.graphics.Xfermode {

@@ -44,9 +44,6 @@ public class LightingColorFilter extends ColorFilter {
      * Create a colorfilter that multiplies the RGB channels by one color,
      * and then adds a second color. The alpha components of the mul and add
      * arguments are ignored.
-     *
-     * @see #setColorMultiply(int)
-     * @see #setColorAdd(int)
      */
     public LightingColorFilter(int mul, int add) {
         mMul = mul;
@@ -59,6 +56,8 @@ public class LightingColorFilter extends ColorFilter {
      * color filter is applied.
      *
      * @see #setColorMultiply(int)
+     *
+     * @hide
      */
     public int getColorMultiply() {
         return mMul;
@@ -70,6 +69,8 @@ public class LightingColorFilter extends ColorFilter {
      * The alpha channel of this color is ignored.
      *
      * @see #getColorMultiply()
+     *
+     * @hide
      */
     public void setColorMultiply(int mul) {
         mMul = mul;
@@ -81,6 +82,8 @@ public class LightingColorFilter extends ColorFilter {
      * when the color filter is applied.
      *
      * @see #setColorAdd(int)
+     *
+     * @hide
      */
     public int getColorAdd() {
         return mAdd;
@@ -92,6 +95,8 @@ public class LightingColorFilter extends ColorFilter {
      * The alpha channel of this color is ignored.
      *
      * @see #getColorAdd()
+     *
+     * @hide
      */
     public void setColorAdd(int add) {
         mAdd = add;
