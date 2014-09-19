@@ -201,6 +201,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -5940,25 +5941,26 @@ public class PackageManagerService extends IPackageManager.Stub {
                 p.group = mPermissionGroups.get(p.info.group);
                 if (p.info.group == null || p.group != null) {
                     BasePermission bp = permissionMap.get(p.info.name);
+
+                    // Allow system apps to redefine non-system permissions
+                    if (bp != null && !Objects.equals(bp.sourcePackage, p.info.packageName)) {
+                        final boolean currentOwnerIsSystem = (bp.perm != null
+                                && isSystemApp(bp.perm.owner));
+                        if (isSystemApp(p.owner) && !currentOwnerIsSystem) {
+                            String msg = "New decl " + p.owner + " of permission  "
+                                    + p.info.name + " is system; overriding " + bp.sourcePackage;
+                            reportSettingsProblem(Log.WARN, msg);
+                            bp = null;
+                        }
+                    }
+
                     if (bp == null) {
                         bp = new BasePermission(p.info.name, p.info.packageName,
                                 BasePermission.TYPE_NORMAL);
                         permissionMap.put(p.info.name, bp);
                     }
+
                     if (bp.perm == null) {
-                        if (bp.sourcePackage != null
-                                && !bp.sourcePackage.equals(p.info.packageName)) {
-                            // If this is a permission that was formerly defined by a non-system
-                            // app, but is now defined by a system app (following an upgrade),
-                            // discard the previous declaration and consider the system's to be
-                            // canonical.
-                            if (isSystemApp(p.owner)) {
-                                String msg = "New decl " + p.owner + " of permission  "
-                                        + p.info.name + " is system";
-                                reportSettingsProblem(Log.WARN, msg);
-                                bp.sourcePackage = null;
-                            }
-                        }
                         if (bp.sourcePackage == null
                                 || bp.sourcePackage.equals(p.info.packageName)) {
                             BasePermission tree = findPermissionTreeLP(p.info.name);
@@ -5967,6 +5969,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 bp.packageSetting = pkgSetting;
                                 bp.perm = p;
                                 bp.uid = pkg.applicationInfo.uid;
+                                bp.sourcePackage = p.info.packageName;
                                 if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
                                     if (r == null) {
                                         r = new StringBuilder(256);
