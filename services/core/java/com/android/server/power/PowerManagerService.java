@@ -1767,6 +1767,7 @@ public final class PowerManagerService extends SystemService
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
+            boolean wasBlockerNeeded = isScreenOnBlockerNeededLocked(mDisplayPowerRequest);
             mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
             int screenBrightness = mScreenBrightnessSettingDefault;
@@ -1803,8 +1804,6 @@ public final class PowerManagerService extends SystemService
 
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
 
-            mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
-
             mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
@@ -1815,6 +1814,12 @@ public final class PowerManagerService extends SystemService
                 mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
                 mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             }
+
+            if (!wasBlockerNeeded && isScreenOnBlockerNeededLocked(mDisplayPowerRequest)
+                    && !mScreenOnBlocker.isHeld()) {
+                mNotifier.onScreenTurningOn();
+            }
+            mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
 
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
@@ -1830,6 +1835,17 @@ public final class PowerManagerService extends SystemService
             }
         }
         return mDisplayReady && !oldDisplayReady;
+    }
+
+    private static boolean isScreenOnBlockerNeededLocked(DisplayPowerRequest req) {
+        switch (req.policy) {
+            case DisplayPowerRequest.POLICY_OFF:
+                return false;
+            case DisplayPowerRequest.POLICY_DOZE:
+                return req.dozeScreenState != Display.STATE_OFF;
+            default:
+                return true;
+        }
     }
 
     private static boolean isValidBrightness(int value) {
