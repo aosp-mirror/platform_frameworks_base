@@ -165,6 +165,8 @@ public:
     size_t numLocalResources() const;
     bool hasResources() const;
 
+    status_t modifyForCompat(const Bundle* bundle);
+
     sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
             const bool isBase);
 
@@ -281,6 +283,9 @@ public:
             : mName(name), mType(TYPE_UNKNOWN),
               mItemFormat(ResTable_map::TYPE_ANY), mNameIndex(-1), mPos(pos)
         { }
+
+        Entry(const Entry& entry);
+
         virtual ~Entry() { }
 
         enum type {
@@ -310,6 +315,8 @@ public:
                           const Vector<StringPool::entry_style_span>* style = NULL,
                           bool replace=false, bool isId = false,
                           int32_t format = ResTable_map::TYPE_ANY);
+
+        status_t removeFromBag(const String16& key);
 
         // Index of the entry's name string in the key pool.
         int32_t getNameIndex() const { return mNameIndex; }
@@ -523,6 +530,7 @@ private:
     const Item* getItem(uint32_t resID, uint32_t attrID) const;
     bool getItemValue(uint32_t resID, uint32_t attrID,
                       Res_value* outValue);
+    bool isAttributeFromL(uint32_t attrId);
 
 
     String16 mAssetsPackage;

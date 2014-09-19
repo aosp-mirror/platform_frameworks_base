@@ -12,6 +12,7 @@
 
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
+#include <utils/TypeHelpers.h>
 #include <stdarg.h>
 
 #define NOISY(x) //x
@@ -3287,6 +3288,18 @@ ResourceTable::Item::Item(const SourcePos& _sourcePos,
     }
 }
 
+ResourceTable::Entry::Entry(const Entry& entry)
+    : RefBase()
+    , mName(entry.mName)
+    , mParent(entry.mParent)
+    , mType(entry.mType)
+    , mItem(entry.mItem)
+    , mItemFormat(entry.mItemFormat)
+    , mBag(entry.mBag)
+    , mNameIndex(entry.mNameIndex)
+    , mParentId(entry.mParentId)
+    , mPos(entry.mPos) {}
+
 status_t ResourceTable::Entry::makeItABag(const SourcePos& sourcePos)
 {
     if (mType == TYPE_BAG) {
@@ -3370,6 +3383,17 @@ status_t ResourceTable::Entry::addToBag(const SourcePos& sourcePos,
 
     mBag.add(key, item);
     return NO_ERROR;
+}
+
+status_t ResourceTable::Entry::removeFromBag(const String16& key) {
+    if (mType != Entry::TYPE_BAG) {
+        return NO_ERROR;
+    }
+
+    if (mBag.removeItem(key) >= 0) {
+        return NO_ERROR;
+    }
+    return UNKNOWN_ERROR;
 }
 
 status_t ResourceTable::Entry::emptyBag(const SourcePos& sourcePos)
@@ -4112,4 +4136,176 @@ bool ResourceTable::getItemValue(
         item->evaluating = false;
     }
     return res;
+}
+
+/**
+ * Returns true if the given attribute ID comes from
+ * a platform version from or after L.
+ */
+bool ResourceTable::isAttributeFromL(uint32_t attrId) {
+    const uint32_t baseAttrId = 0x010103f7;
+    if ((attrId & 0xffff0000) != (baseAttrId & 0xffff0000)) {
+        return false;
+    }
+
+    uint32_t specFlags;
+    if (!mAssets->getIncludedResources().getResourceFlags(attrId, &specFlags)) {
+        return false;
+    }
+
+    return (specFlags & ResTable_typeSpec::SPEC_PUBLIC) != 0 &&
+        (attrId & 0x0000ffff) >= (baseAttrId & 0x0000ffff);
+}
+
+/**
+ * Modifies the entries in the resource table to account for compatibility
+ * issues with older versions of Android.
+ *
+ * This primarily handles the issue of private/public attribute clashes
+ * in framework resources.
+ *
+ * AAPT has traditionally assigned resource IDs to public attributes,
+ * and then followed those public definitions with private attributes.
+ *
+ * --- PUBLIC ---
+ * | 0x01010234 | attr/color
+ * | 0x01010235 | attr/background
+ *
+ * --- PRIVATE ---
+ * | 0x01010236 | attr/secret
+ * | 0x01010237 | attr/shhh
+ *
+ * Each release, when attributes are added, they take the place of the private
+ * attributes and the private attributes are shifted down again.
+ *
+ * --- PUBLIC ---
+ * | 0x01010234 | attr/color
+ * | 0x01010235 | attr/background
+ * | 0x01010236 | attr/shinyNewAttr
+ * | 0x01010237 | attr/highlyValuedFeature
+ *
+ * --- PRIVATE ---
+ * | 0x01010238 | attr/secret
+ * | 0x01010239 | attr/shhh
+ *
+ * Platform code may look for private attributes set in a theme. If an app
+ * compiled against a newer version of the platform uses a new public
+ * attribute that happens to have the same ID as the private attribute
+ * the older platform is expecting, then the behavior is undefined.
+ *
+ * We get around this by detecting any newly defined attributes (in L),
+ * copy the resource into a -v21 qualified resource, and delete the
+ * attribute from the original resource. This ensures that older platforms
+ * don't see the new attribute, but when running on L+ platforms, the
+ * attribute will be respected.
+ */
+status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
+    if (bundle->getMinSdkVersion() != NULL) {
+        // If this app will only ever run on L+ devices,
+        // we don't need to do any compatibility work.
+
+        if (String8("L") == bundle->getMinSdkVersion()) {
+            // Code-name for the v21 release.
+            return NO_ERROR;
+        }
+
+        const int minSdk = atoi(bundle->getMinSdkVersion());
+        if (minSdk >= SDK_L) {
+            return NO_ERROR;
+        }
+    }
+
+    const String16 attr16("attr");
+
+    const size_t packageCount = mOrderedPackages.size();
+    for (size_t pi = 0; pi < packageCount; pi++) {
+        sp<Package> p = mOrderedPackages.itemAt(pi);
+        if (p == NULL || p->getTypes().size() == 0) {
+            // Empty, skip!
+            continue;
+        }
+
+        const size_t typeCount = p->getOrderedTypes().size();
+        for (size_t ti = 0; ti < typeCount; ti++) {
+            sp<Type> t = p->getOrderedTypes().itemAt(ti);
+            if (t == NULL) {
+                continue;
+            }
+
+            const size_t configCount = t->getOrderedConfigs().size();
+            for (size_t ci = 0; ci < configCount; ci++) {
+                sp<ConfigList> c = t->getOrderedConfigs().itemAt(ci);
+                if (c == NULL) {
+                    continue;
+                }
+
+                Vector<key_value_pair_t<ConfigDescription, sp<Entry> > > entriesToAdd;
+                const DefaultKeyedVector<ConfigDescription, sp<Entry> >& entries =
+                        c->getEntries();
+                const size_t entryCount = entries.size();
+                for (size_t ei = 0; ei < entryCount; ei++) {
+                    sp<Entry> e = entries.valueAt(ei);
+                    if (e == NULL || e->getType() != Entry::TYPE_BAG) {
+                        continue;
+                    }
+
+                    const ConfigDescription& config = entries.keyAt(ei);
+                    if (config.sdkVersion >= SDK_L) {
+                        // We don't need to do anything if the resource is
+                        // already qualified for version 21 or higher.
+                        continue;
+                    }
+
+                    Vector<String16> attributesToRemove;
+                    const KeyedVector<String16, Item>& bag = e->getBag();
+                    const size_t bagCount = bag.size();
+                    for (size_t bi = 0; bi < bagCount; bi++) {
+                        const Item& item = bag.valueAt(bi);
+                        const uint32_t attrId = getResId(bag.keyAt(bi), &attr16);
+                        if (isAttributeFromL(attrId)) {
+                            attributesToRemove.add(bag.keyAt(bi));
+                        }
+                    }
+
+                    if (attributesToRemove.isEmpty()) {
+                        continue;
+                    }
+
+                    // Duplicate the entry under the same configuration
+                    // but with sdkVersion == SDK_L.
+                    ConfigDescription newConfig(config);
+                    newConfig.sdkVersion = SDK_L;
+                    entriesToAdd.add(key_value_pair_t<ConfigDescription, sp<Entry> >(
+                            newConfig, new Entry(*e)));
+
+                    // Remove the attribute from the original.
+                    for (size_t i = 0; i < attributesToRemove.size(); i++) {
+                        e->removeFromBag(attributesToRemove[i]);
+                    }
+                }
+
+                const size_t entriesToAddCount = entriesToAdd.size();
+                for (size_t i = 0; i < entriesToAddCount; i++) {
+                    if (entries.indexOfKey(entriesToAdd[i].key) >= 0) {
+                        // An entry already exists for this config.
+                        // That means that any attributes that were
+                        // defined in L in the original bag will be overriden
+                        // anyways on L devices, so we do nothing.
+                        continue;
+                    }
+
+                    entriesToAdd[i].value->getPos()
+                            .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
+                                    SDK_L,
+                                    String8(p->getName()).string(),
+                                    String8(t->getName()).string(),
+                                    String8(entriesToAdd[i].value->getName()).string(),
+                                    entriesToAdd[i].key.toString().string());
+
+                    c->addEntry(entriesToAdd[i].key, entriesToAdd[i].value);
+                }
+            }
+        }
+    }
+    return NO_ERROR;
 }

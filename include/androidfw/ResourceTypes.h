@@ -1521,6 +1521,8 @@ public:
 
     bool getResourceName(uint32_t resID, bool allowUtf8, resource_name* outName) const;
 
+    bool getResourceFlags(uint32_t resID, uint32_t* outFlags) const;
+
     /**
      * Retrieve the value of a resource.  If the resource is found, returns a
      * value >= 0 indicating the table it is in (for use with
