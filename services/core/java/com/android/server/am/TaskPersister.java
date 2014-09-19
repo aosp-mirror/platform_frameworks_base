@@ -187,6 +187,19 @@ public class TaskPersister {
         yieldIfQueueTooDeep();
     }
 
+    void flush() {
+        synchronized (this) {
+            mNextWriteTime = FLUSH_QUEUE;
+            notifyAll();
+            do {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            } while (mNextWriteTime == FLUSH_QUEUE);
+        }
+    }
+
     void saveImage(Bitmap image, String filename) {
         synchronized (this) {
             int queueNdx;
@@ -483,8 +496,12 @@ public class TaskPersister {
                                 INTER_WRITE_DELAY_MS + " msec. (" + mNextWriteTime + ")");
                     }
 
+
                     while (mWriteQueue.isEmpty()) {
-                        mNextWriteTime = 0; // idle.
+                        if (mNextWriteTime != 0) {
+                            mNextWriteTime = 0; // idle.
+                            TaskPersister.this.notifyAll(); // wake up flush() if needed.
+                        }
                         try {
                             if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting indefinitely.");
                             TaskPersister.this.wait();
