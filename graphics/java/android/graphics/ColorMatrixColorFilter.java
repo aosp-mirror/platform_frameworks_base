@@ -58,6 +58,8 @@ public class ColorMatrixColorFilter extends ColorFilter {
      * any effect until you call {@link #setColorMatrix(ColorMatrix)}.
      *
      * @see #setColorMatrix(ColorMatrix)
+     *
+     * @hide
      */
     public ColorMatrix getColorMatrix() {
         return mMatrix;
@@ -73,6 +75,8 @@ public class ColorMatrixColorFilter extends ColorFilter {
      * @see #getColorMatrix()
      * @see android.graphics.ColorMatrix#reset()
      * @see #setColorMatrix(float[])
+     *
+     * @hide
      */
     public void setColorMatrix(ColorMatrix matrix) {
         if (matrix == null) {
@@ -98,6 +102,8 @@ public class ColorMatrixColorFilter extends ColorFilter {
      *
      * @throws ArrayIndexOutOfBoundsException if the specified array's
      *         length is < 20
+     *
+     * @hide
      */
     public void setColorMatrix(float[] array) {
         if (array == null) {
