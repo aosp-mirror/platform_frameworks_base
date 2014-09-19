@@ -4662,7 +4662,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             boolean isDeviceOwner = isDeviceOwner(activeAdmin.info.getPackageName());
-            if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
+            if (!isDeviceOwner && userHandle != UserHandle.USER_OWNER
+                    && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                 throw new SecurityException("Profile owners cannot set user restriction " + key);
             }
             boolean alreadyRestricted = mUserManager.hasUserRestriction(key, user);
