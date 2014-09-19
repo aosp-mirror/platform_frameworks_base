@@ -395,6 +395,7 @@ final class FragmentManagerState implements Parcelable {
  */
 interface FragmentContainer {
     public View findViewById(int id);
+    public boolean hasView();
 }
 
 /**
