@@ -27,6 +27,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -421,7 +422,7 @@ public final class InputMethodInfo implements Parcelable {
             }
             final Resources res = context.createPackageContext(getPackageName(), 0).getResources();
             return res.getBoolean(getIsDefaultResourceId());
-        } catch (NameNotFoundException e) {
+        } catch (NameNotFoundException | NotFoundException e) {
             return false;
         }
     }
