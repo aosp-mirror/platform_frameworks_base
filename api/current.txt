@@ -29073,8 +29073,8 @@ package android.telephony {
     method public static java.util.List<android.telephony.SubInfoRecord> getActiveSubInfoList();
     method public static long getDefaultSmsSubId();
     method public static int getSlotId(long);
+    method public static android.telephony.SubInfoRecord getSubInfoForSubscriber(long);
     method public static java.util.List<android.telephony.SubInfoRecord> getSubInfoUsingSlotId(int);
-    method public static android.telephony.SubInfoRecord getSubInfoUsingSubId(long);
     method public static boolean isValidSubId(long);
     field public static final long ASK_USER_SUB_ID = -1001L; // 0xfffffffffffffc17L
     field public static final int DEFAULT_PHONE_ID = 2147483647; // 0x7fffffff
