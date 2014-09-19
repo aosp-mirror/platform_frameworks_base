@@ -71,7 +71,7 @@ public class PacManager {
     public static final String KEY_PROXY = "keyProxy";
     private String mCurrentPac;
     @GuardedBy("mProxyLock")
-    private Uri mPacUrl;
+    private Uri mPacUrl = Uri.EMPTY;
 
     private AlarmManager mAlarmManager;
     @GuardedBy("mProxyLock")
@@ -175,7 +175,7 @@ public class PacManager {
         } else {
             getAlarmManager().cancel(mPacRefreshIntent);
             synchronized (mProxyLock) {
-                mPacUrl = null;
+                mPacUrl = Uri.EMPTY;
                 mCurrentPac = null;
                 if (mProxyService != null) {
                     try {
