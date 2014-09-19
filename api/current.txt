@@ -28174,6 +28174,7 @@ package android.telecom {
   public final class DisconnectCause implements android.os.Parcelable {
     ctor public DisconnectCause(int);
     ctor public DisconnectCause(int, java.lang.String);
+    ctor public DisconnectCause(int, java.lang.CharSequence, java.lang.CharSequence, java.lang.String);
     ctor public DisconnectCause(int, java.lang.CharSequence, java.lang.CharSequence, java.lang.String, int);
     method public int describeContents();
     method public int getCode();
