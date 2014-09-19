@@ -978,6 +978,7 @@ please see themes_device_defaults.xml.
         <item name="listViewStyle">@style/Widget.Material.ListView</item>
         <item name="windowAnimationStyle">@style/Animation.DropDownUp</item>
         <item name="background">@null</item>
+        <item name="windowElevation">@dimen/floating_window_z</item>
     </style>
 
     <style name="Theme.Material.Light.CompactMenu">
@@ -986,6 +987,7 @@ please see themes_device_defaults.xml.
         <item name="listViewStyle">@style/Widget.Material.Light.ListView</item>
         <item name="windowAnimationStyle">@style/Animation.DropDownUp</item>
         <item name="background">@null</item>
+        <item name="windowElevation">@dimen/floating_window_z</item>
     </style>
 
     <!-- Dialog themes for Material -->
