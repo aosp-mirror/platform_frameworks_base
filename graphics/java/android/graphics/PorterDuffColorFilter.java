@@ -46,6 +46,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @see Color
      * @see #setColor(int)
+     *
+     * @hide
      */
     public int getColor() {
         return mColor;
@@ -74,6 +76,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @see PorterDuff
      * @see #setMode(android.graphics.PorterDuff.Mode)
+     *
+     * @hide
      */
     public PorterDuff.Mode getMode() {
         return mMode;
