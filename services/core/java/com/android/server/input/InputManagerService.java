@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -806,8 +807,8 @@ public class InputManagerService extends IInputManager.Stub
         final HashSet<String> availableKeyboardLayouts = new HashSet<String>();
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, String collection, int keyboardLayoutResId) {
+            public void visitKeyboardLayout(Resources resources, String descriptor, String label,
+                    String collection, int keyboardLayoutResId, int priority) {
                 availableKeyboardLayouts.add(descriptor);
             }
         });
@@ -840,9 +841,9 @@ public class InputManagerService extends IInputManager.Stub
         final ArrayList<KeyboardLayout> list = new ArrayList<KeyboardLayout>();
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, String collection, int keyboardLayoutResId) {
-                list.add(new KeyboardLayout(descriptor, label, collection));
+            public void visitKeyboardLayout(Resources resources, String descriptor, String label,
+                    String collection, int keyboardLayoutResId, int priority) {
+                list.add(new KeyboardLayout(descriptor, label, collection, priority));
             }
         });
         return list.toArray(new KeyboardLayout[list.size()]);
@@ -857,9 +858,9 @@ public class InputManagerService extends IInputManager.Stub
         final KeyboardLayout[] result = new KeyboardLayout[1];
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, String collection, int keyboardLayoutResId) {
-                result[0] = new KeyboardLayout(descriptor, label, collection);
+            public void visitKeyboardLayout(Resources resources, String descriptor,
+                    String label, String collection, int keyboardLayoutResId, int priority) {
+                result[0] = new KeyboardLayout(descriptor, label, collection, priority);
             }
         });
         if (result[0] == null) {
@@ -874,7 +875,9 @@ public class InputManagerService extends IInputManager.Stub
         Intent intent = new Intent(InputManager.ACTION_QUERY_KEYBOARD_LAYOUTS);
         for (ResolveInfo resolveInfo : pm.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA)) {
-            visitKeyboardLayoutsInPackage(pm, resolveInfo.activityInfo, null, visitor);
+            final ActivityInfo activityInfo = resolveInfo.activityInfo;
+            final int priority = resolveInfo.priority;
+            visitKeyboardLayoutsInPackage(pm, activityInfo, null, priority, visitor);
         }
     }
 
@@ -887,14 +890,14 @@ public class InputManagerService extends IInputManager.Stub
                 ActivityInfo receiver = pm.getReceiverInfo(
                         new ComponentName(d.packageName, d.receiverName),
                         PackageManager.GET_META_DATA);
-                visitKeyboardLayoutsInPackage(pm, receiver, d.keyboardLayoutName, visitor);
+                visitKeyboardLayoutsInPackage(pm, receiver, d.keyboardLayoutName, 0, visitor);
             } catch (NameNotFoundException ex) {
             }
         }
     }
 
     private void visitKeyboardLayoutsInPackage(PackageManager pm, ActivityInfo receiver,
-            String keyboardName, KeyboardLayoutVisitor visitor) {
+            String keyboardName, int requestedPriority, KeyboardLayoutVisitor visitor) {
         Bundle metaData = receiver.metaData;
         if (metaData == null) {
             return;
@@ -909,6 +912,12 @@ public class InputManagerService extends IInputManager.Stub
 
         CharSequence receiverLabel = receiver.loadLabel(pm);
         String collection = receiverLabel != null ? receiverLabel.toString() : "";
+        int priority;
+        if ((receiver.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            priority = requestedPriority;
+        } else {
+            priority = 0;
+        }
 
         try {
             Resources resources = pm.getResourcesForApplication(receiver.applicationInfo);
@@ -943,7 +952,7 @@ public class InputManagerService extends IInputManager.Stub
                                         receiver.packageName, receiver.name, name);
                                 if (keyboardName == null || name.equals(keyboardName)) {
                                     visitor.visitKeyboardLayout(resources, descriptor,
-                                            label, collection, keyboardLayoutResId);
+                                            label, collection, keyboardLayoutResId, priority);
                                 }
                             }
                         } finally {
@@ -1550,8 +1559,8 @@ public class InputManagerService extends IInputManager.Stub
         final String[] result = new String[2];
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, String collection, int keyboardLayoutResId) {
+            public void visitKeyboardLayout(Resources resources, String descriptor, String label,
+                    String collection, int keyboardLayoutResId, int priority) {
                 try {
                     result[0] = descriptor;
                     result[1] = Streams.readFully(new InputStreamReader(
@@ -1699,8 +1708,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private interface KeyboardLayoutVisitor {
-        void visitKeyboardLayout(Resources resources,
-                String descriptor, String label, String collection, int keyboardLayoutResId);
+        void visitKeyboardLayout(Resources resources, String descriptor, String label,
+                String collection, int keyboardLayoutResId, int priority);
     }
 
     private final class InputDevicesChangedListenerRecord implements DeathRecipient {
