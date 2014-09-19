@@ -81,6 +81,7 @@ please see themes_device_defaults.xml.
         <item name="colorControlNormal">@color/holo_control_normal</item>
         <item name="colorControlHighlight">@color/holo_button_pressed</item>
         <item name="colorButtonNormal">@color/holo_button_normal</item>
+        <item name="colorEdgeEffect">?attr/colorPrimary</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Holo</item>

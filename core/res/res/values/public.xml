@@ -2291,6 +2291,7 @@
     <public type="attr" name="strokeAlpha" id="0x010104cb" />
     <public type="attr" name="fillAlpha" id="0x010104cc" />
     <public type="attr" name="windowActivityTransitions" id="0x010104cd" />
+    <public type="attr" name="colorEdgeEffect" id="0x010104ce" />
 
     <public type="id" name="mask" id="0x0102002e" />
     <public type="id" name="statusBarBackground" id="0x0102002f" />
