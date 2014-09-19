@@ -434,6 +434,14 @@ public final class MediaController {
         return mSessionBinder;
     }
 
+    /**
+     * @hide
+     */
+    public boolean controlsSameSession(MediaController other) {
+        if (other == null) return false;
+        return mSessionBinder.asBinder() == other.getSessionBinder().asBinder();
+    }
+
     private void addCallbackLocked(Callback cb, Handler handler) {
         if (getHandlerForCallbackLocked(cb) != null) {
             Log.w(TAG, "Callback is already added, ignoring");

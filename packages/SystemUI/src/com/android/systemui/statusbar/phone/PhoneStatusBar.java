@@ -1748,7 +1748,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
             }
 
-            if (controller != mMediaController) {
+            if (!sameSessions(mMediaController, controller)) {
                 // We have a new media session
 
                 if (mMediaController != null) {
@@ -1795,6 +1795,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         updateMediaMetaData(metaDataChanged);
+    }
+
+    private boolean sameSessions(MediaController a, MediaController b) {
+        if (a == b) return true;
+        if (a == null) return false;
+        return a.controlsSameSession(b);
     }
 
     /**
