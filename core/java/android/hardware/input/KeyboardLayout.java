@@ -29,6 +29,7 @@ public final class KeyboardLayout implements Parcelable,
     private final String mDescriptor;
     private final String mLabel;
     private final String mCollection;
+    private final int mPriority;
 
     public static final Parcelable.Creator<KeyboardLayout> CREATOR =
             new Parcelable.Creator<KeyboardLayout>() {
@@ -40,16 +41,18 @@ public final class KeyboardLayout implements Parcelable,
         }
     };
 
-    public KeyboardLayout(String descriptor, String label, String collection) {
+    public KeyboardLayout(String descriptor, String label, String collection, int priority) {
         mDescriptor = descriptor;
         mLabel = label;
         mCollection = collection;
+        mPriority = priority;
     }
 
     private KeyboardLayout(Parcel source) {
         mDescriptor = source.readString();
         mLabel = source.readString();
         mCollection = source.readString();
+        mPriority = source.readInt();
     }
 
     /**
@@ -90,11 +93,17 @@ public final class KeyboardLayout implements Parcelable,
         dest.writeString(mDescriptor);
         dest.writeString(mLabel);
         dest.writeString(mCollection);
+        dest.writeInt(mPriority);
     }
 
     @Override
     public int compareTo(KeyboardLayout another) {
-        int result = mLabel.compareToIgnoreCase(another.mLabel);
+        // Note that these arguments are intentionally flipped since you want higher priority
+        // keyboards to be listed before lower priority keyboards.
+        int result = Integer.compare(another.mPriority, mPriority);
+        if (result == 0) {
+            result = mLabel.compareToIgnoreCase(another.mLabel);
+        }
         if (result == 0) {
             result = mCollection.compareToIgnoreCase(another.mCollection);
         }
