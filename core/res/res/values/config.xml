@@ -1814,4 +1814,9 @@
 
     <!--SIM does not save, but the voice mail number to be changed. -->
     <bool name="editable_voicemailnumber">false</bool>
+
+    <!-- service number convert map in roaming network. -->
+    <!-- [dialstring],[replacement][,optional gid] -->
+    <string-array translatable="false" name="dial_string_replace">
+    </string-array>
 </resources>
