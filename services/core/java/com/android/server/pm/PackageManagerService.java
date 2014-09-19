@@ -2161,7 +2161,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         userId);
             }
             if (mResolveComponentName.equals(component)) {
-                return mResolveActivity;
+                return PackageParser.generateActivityInfo(mResolveActivity, flags,
+                        new PackageUserState(), userId);
             }
         }
         return null;

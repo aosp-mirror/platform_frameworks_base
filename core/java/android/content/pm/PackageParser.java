@@ -4675,6 +4675,28 @@ public class PackageParser {
         return ai;
     }
 
+    public static ApplicationInfo generateApplicationInfo(ApplicationInfo ai, int flags,
+            PackageUserState state, int userId) {
+        if (ai == null) return null;
+        if (!checkUseInstalledOrHidden(flags, state)) {
+            return null;
+        }
+        // This is only used to return the ResolverActivity; we will just always
+        // make a copy.
+        ai = new ApplicationInfo(ai);
+        if (userId != 0) {
+            ai.uid = UserHandle.getUid(userId, ai.uid);
+            ai.dataDir = PackageManager.getDataDirForUser(userId, ai.packageName);
+        }
+        if (state.stopped) {
+            ai.flags |= ApplicationInfo.FLAG_STOPPED;
+        } else {
+            ai.flags &= ~ApplicationInfo.FLAG_STOPPED;
+        }
+        updateApplicationInfo(ai, flags, state);
+        return ai;
+    }
+
     public static final PermissionInfo generatePermissionInfo(
             Permission p, int flags) {
         if (p == null) return null;
@@ -4735,6 +4757,19 @@ public class PackageParser {
         ActivityInfo ai = new ActivityInfo(a.info);
         ai.metaData = a.metaData;
         ai.applicationInfo = generateApplicationInfo(a.owner, flags, state, userId);
+        return ai;
+    }
+
+    public static final ActivityInfo generateActivityInfo(ActivityInfo ai, int flags,
+            PackageUserState state, int userId) {
+        if (ai == null) return null;
+        if (!checkUseInstalledOrHidden(flags, state)) {
+            return null;
+        }
+        // This is only used to return the ResolverActivity; we will just always
+        // make a copy.
+        ai = new ActivityInfo(ai);
+        ai.applicationInfo = generateApplicationInfo(ai.applicationInfo, flags, state, userId);
         return ai;
     }
 
