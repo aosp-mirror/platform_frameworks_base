@@ -113,6 +113,9 @@ public:
     /** return a new string corresponding to 'className' with all '.'s replaced by '/'s. */
     static char* toSlashClassName(const char* className);
 
+    /** Create a Java string from an ASCII or Latin-1 string */
+    static jstring NewStringLatin1(JNIEnv* env, const char* bytes);
+
 private:
     static int startReg(JNIEnv* env);
     bool parseRuntimeOption(const char* property,
