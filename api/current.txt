@@ -25767,6 +25767,7 @@ package android.provider {
     field public static final java.lang.String STATUS = "st";
     field public static final java.lang.String SUBJECT = "sub";
     field public static final java.lang.String SUBJECT_CHARSET = "sub_cs";
+    field public static final java.lang.String SUB_ID = "sub_id";
     field public static final java.lang.String TEXT_ONLY = "text_only";
     field public static final java.lang.String THREAD_ID = "thread_id";
     field public static final java.lang.String TRANSACTION_ID = "tr_id";
@@ -25799,6 +25800,7 @@ package android.provider {
     field public static final java.lang.String PROXY = "proxy";
     field public static final java.lang.String ROAMING_PROTOCOL = "roaming_protocol";
     field public static final java.lang.String SERVER = "server";
+    field public static final java.lang.String SUB_ID = "sub_id";
     field public static final java.lang.String TYPE = "type";
     field public static final java.lang.String USER = "user";
   }
@@ -25899,6 +25901,7 @@ package android.provider {
     field public static final java.lang.String MSG_TYPE = "msg_type";
     field public static final java.lang.String PROTO_TYPE = "proto_type";
     field public static final java.lang.String RETRY_INDEX = "retry_index";
+    field public static final java.lang.String SUB_ID = "pending_sub_id";
   }
 
   public static final class Telephony.Sms implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
