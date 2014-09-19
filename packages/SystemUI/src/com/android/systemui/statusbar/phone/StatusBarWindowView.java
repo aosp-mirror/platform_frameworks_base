@@ -20,12 +20,17 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -45,11 +50,14 @@ public class StatusBarWindowView extends FrameLayout {
     private View mBrightnessMirror;
 
     PhoneStatusBar mService;
+    private final Paint mTransparentSrcPaint = new Paint();
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
-        setWillNotDraw(!DEBUG);
+        setWillNotDraw(false);
+        mTransparentSrcPaint.setColor(0);
+        mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
 
     @Override
@@ -93,6 +101,15 @@ public class StatusBarWindowView extends FrameLayout {
         if (root != null) {
             root.setDrawDuringWindowsAnimating(true);
         }
+
+        // We need to ensure that our window doesn't suffer from overdraw which would normally
+        // occur if our window is translucent. Since we are drawing the whole window anyway with
+        // the scrim, we don't need the window to be cleared in the beginning.
+        IBinder windowToken = getWindowToken();
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
+        lp.token = windowToken;
+        setLayoutParams(lp);
+        WindowManagerGlobal.getInstance().changeCanvasOpacity(windowToken, true);
     }
 
     @Override
@@ -182,6 +199,24 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        // We need to ensure that our window is always drawn fully even when we have paddings,
+        // since we simulate it to be opaque.
+        int paddedBottom = getHeight() - getPaddingBottom();
+        int paddedRight = getWidth() - getPaddingRight();
+        if (getPaddingTop() != 0) {
+            canvas.drawRect(0, 0, getWidth(), getPaddingTop(), mTransparentSrcPaint);
+        }
+        if (getPaddingBottom() != 0) {
+            canvas.drawRect(0, paddedBottom, getWidth(), getHeight(), mTransparentSrcPaint);
+        }
+        if (getPaddingLeft() != 0) {
+            canvas.drawRect(0, getPaddingTop(), getPaddingLeft(), paddedBottom,
+                    mTransparentSrcPaint);
+        }
+        if (getPaddingRight() != 0) {
+            canvas.drawRect(paddedRight, getPaddingTop(), getWidth(), paddedBottom,
+                    mTransparentSrcPaint);
+        }
         if (DEBUG) {
             Paint pt = new Paint();
             pt.setColor(0x80FFFF00);

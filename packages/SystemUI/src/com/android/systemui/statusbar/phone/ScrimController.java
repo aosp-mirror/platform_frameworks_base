@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -31,6 +30,8 @@ import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.statusbar.BackDropView;
+import com.android.systemui.statusbar.ScrimView;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
@@ -48,8 +49,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
 
-    private final View mScrimBehind;
-    private final View mScrimInFront;
+    private final ScrimView mScrimBehind;
+    private final ScrimView mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
     private final DozeParameters mDozeParameters;
 
@@ -70,8 +71,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private long mPulseEndTime;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
     private final Interpolator mLinearOutSlowInInterpolator;
+    private BackDropView mBackDropView;
 
-    public ScrimController(View scrimBehind, View scrimInFront) {
+    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         final Context context = scrimBehind.getContext();
@@ -230,17 +232,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         }
     }
 
-    private void setScrimColor(View scrim, float alpha) {
+    private void setScrimColor(ScrimView scrim, float alpha) {
         int color = Color.argb((int) (alpha * 255), 0, 0, 0);
         if (mAnimateChange) {
             startScrimAnimation(scrim, color);
         } else {
-            scrim.setBackgroundColor(color);
+            scrim.setScrimColor(color);
         }
     }
 
-    private void startScrimAnimation(final View scrim, int targetColor) {
-        int current = getBackgroundAlpha(scrim);
+    private void startScrimAnimation(final ScrimView scrim, int targetColor) {
+        int current = Color.alpha(scrim.getScrimColor());
         int target = Color.alpha(targetColor);
         if (current == targetColor) {
             return;
@@ -254,7 +256,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int value = (int) animation.getAnimatedValue();
-                scrim.setBackgroundColor(Color.argb(value, 0, 0, 0));
+                scrim.setScrimColor(Color.argb(value, 0, 0, 0));
             }
         });
         anim.setInterpolator(mAnimateKeyguardFadingOut
@@ -276,15 +278,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         anim.start();
         scrim.setTag(TAG_KEY_ANIM, anim);
         mAnimationStarted = true;
-    }
-
-    private int getBackgroundAlpha(View scrim) {
-        if (scrim.getBackground() instanceof ColorDrawable) {
-            ColorDrawable drawable = (ColorDrawable) scrim.getBackground();
-            return Color.alpha(drawable.getColor());
-        } else {
-            return 0;
-        }
     }
 
     @Override
@@ -349,4 +342,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             mPulseEndTime = 0;
         }
     };
+
+    public void setBackDropView(BackDropView backDropView) {
+        mBackDropView = backDropView;
+        mBackDropView.setOnVisibilityChangedRunnable(new Runnable() {
+            @Override
+            public void run() {
+                updateScrimBehindDrawingMode();
+            }
+        });
+        updateScrimBehindDrawingMode();
+    }
+
+    private void updateScrimBehindDrawingMode() {
+        boolean asSrc = mBackDropView.getVisibility() != View.VISIBLE;
+        mScrimBehind.setDrawAsSrc(asSrc);
+    }
 }
