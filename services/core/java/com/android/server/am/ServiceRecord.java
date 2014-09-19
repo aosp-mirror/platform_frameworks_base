@@ -517,6 +517,31 @@ final class ServiceRecord extends Binder {
             });
         }
     }
+
+    public void stripForegroundServiceFlagFromNotification() {
+        if (foregroundId == 0) {
+            return;
+        }
+
+        final int localForegroundId = foregroundId;
+        final int localUserId = userId;
+        final String localPackageName = packageName;
+
+        // Do asynchronous communication with notification manager to
+        // avoid deadlocks.
+        ams.mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                NotificationManagerInternal nmi = LocalServices.getService(
+                        NotificationManagerInternal.class);
+                if (nmi == null) {
+                    return;
+                }
+                nmi.removeForegroundServiceFlagFromNotification(localPackageName, localForegroundId,
+                        localUserId);
+            }
+        });
+    }
     
     public void clearDeliveredStartsLocked() {
         for (int i=deliveredStarts.size()-1; i>=0; i--) {
