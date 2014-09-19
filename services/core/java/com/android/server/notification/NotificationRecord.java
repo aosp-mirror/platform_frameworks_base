@@ -45,6 +45,8 @@ import java.util.Objects;
  */
 public final class NotificationRecord {
     final StatusBarNotification sbn;
+    final int mOriginalFlags;
+
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
     int score;
@@ -73,6 +75,7 @@ public final class NotificationRecord {
     {
         this.sbn = sbn;
         this.score = score;
+        mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
     }
 
