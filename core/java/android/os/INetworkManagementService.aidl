@@ -410,7 +410,4 @@ interface INetworkManagementService
 
     void addInterfaceToLocalNetwork(String iface, in List<RouteInfo> routes);
     void removeInterfaceFromLocalNetwork(String iface);
-
-    void blockAddressFamily(int family, int netId, String iface);
-    void unblockAddressFamily(int family, int netId, String iface);
 }

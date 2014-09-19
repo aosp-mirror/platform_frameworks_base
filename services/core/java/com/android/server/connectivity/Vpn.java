@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.os.UserHandle.PER_USER_RANGE;
 import static android.net.RouteInfo.RTN_THROW;
+import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
@@ -107,8 +108,6 @@ public class Vpn {
     private String mPackage;
     private int mOwnerUID;
     private String mInterface;
-    private boolean mAllowIPv4;
-    private boolean mAllowIPv6;
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
@@ -344,31 +343,45 @@ public class Vpn {
         return mNetworkInfo;
     }
 
-    private void agentConnect() {
+    private LinkProperties makeLinkProperties() {
+        boolean allowIPv4 = mConfig.allowIPv4;
+        boolean allowIPv6 = mConfig.allowIPv6;
+
         LinkProperties lp = new LinkProperties();
+
         lp.setInterfaceName(mInterface);
 
-        boolean hasDefaultRoute = false;
-        for (RouteInfo route : mConfig.routes) {
-            lp.addRoute(route);
-            if (route.isDefaultRoute()) hasDefaultRoute = true;
+        if (mConfig.addresses != null) {
+            for (LinkAddress address : mConfig.addresses) {
+                lp.addLinkAddress(address);
+                allowIPv4 |= address.getAddress() instanceof Inet4Address;
+                allowIPv6 |= address.getAddress() instanceof Inet6Address;
+            }
         }
-        if (hasDefaultRoute) {
-            mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        } else {
-            mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+
+        if (mConfig.routes != null) {
+            for (RouteInfo route : mConfig.routes) {
+                lp.addRoute(route);
+                InetAddress address = route.getDestination().getAddress();
+                allowIPv4 |= address instanceof Inet4Address;
+                allowIPv6 |= address instanceof Inet6Address;
+            }
         }
 
         if (mConfig.dnsServers != null) {
             for (String dnsServer : mConfig.dnsServers) {
                 InetAddress address = InetAddress.parseNumericAddress(dnsServer);
                 lp.addDnsServer(address);
-                if (address instanceof Inet4Address) {
-                    mAllowIPv4 = true;
-                } else {
-                    mAllowIPv6 = true;
-                }
+                allowIPv4 |= address instanceof Inet4Address;
+                allowIPv6 |= address instanceof Inet6Address;
             }
+        }
+
+        if (!allowIPv4) {
+            lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
+        }
+        if (!allowIPv6) {
+            lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
         }
 
         // Concatenate search domains into a string.
@@ -379,6 +392,20 @@ public class Vpn {
             }
         }
         lp.setDomains(buffer.toString().trim());
+
+        // TODO: Stop setting the MTU in jniCreate and set it here.
+
+        return lp;
+    }
+
+    private void agentConnect() {
+        LinkProperties lp = makeLinkProperties();
+
+        if (lp.hasIPv4DefaultRoute() || lp.hasIPv6DefaultRoute()) {
+            mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        } else {
+            mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        }
 
         mNetworkInfo.setIsAvailable(true);
         mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
@@ -397,13 +424,6 @@ public class Vpn {
                         };
         } finally {
             Binder.restoreCallingIdentity(token);
-        }
-
-        if (!mAllowIPv4) {
-            mNetworkAgent.blockAddressFamily(AF_INET);
-        }
-        if (!mAllowIPv6) {
-            mNetworkAgent.blockAddressFamily(AF_INET6);
         }
 
         addVpnUserLocked(mUserHandle);
@@ -491,8 +511,6 @@ public class Vpn {
         NetworkAgent oldNetworkAgent = mNetworkAgent;
         mNetworkAgent = null;
         List<UidRange> oldUsers = mVpnUsers;
-        boolean oldAllowIPv4 = mAllowIPv4;
-        boolean oldAllowIPv6 = mAllowIPv6;
 
         // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
@@ -525,8 +543,6 @@ public class Vpn {
 
             // Set up forwarding and DNS rules.
             mVpnUsers = new ArrayList<UidRange>();
-            mAllowIPv4 = mConfig.allowIPv4;
-            mAllowIPv6 = mConfig.allowIPv6;
 
             agentConnect();
 
@@ -556,8 +572,6 @@ public class Vpn {
             mVpnUsers = oldUsers;
             mNetworkAgent = oldNetworkAgent;
             mInterface = oldInterface;
-            mAllowIPv4 = oldAllowIPv4;
-            mAllowIPv6 = oldAllowIPv6;
             throw e;
         }
         Log.i(TAG, "Established by " + config.user + " on " + mInterface);
@@ -780,25 +794,9 @@ public class Vpn {
             return false;
         }
         boolean success = jniAddAddress(mInterface, address, prefixLength);
-        if (success && (!mAllowIPv4 || !mAllowIPv6)) {
-            try {
-                InetAddress inetAddress = InetAddress.parseNumericAddress(address);
-                if ((inetAddress instanceof Inet4Address) && !mAllowIPv4) {
-                    mAllowIPv4 = true;
-                    mNetworkAgent.unblockAddressFamily(AF_INET);
-                } else if ((inetAddress instanceof Inet6Address) && !mAllowIPv6) {
-                    mAllowIPv6 = true;
-                    mNetworkAgent.unblockAddressFamily(AF_INET6);
-                }
-            } catch (IllegalArgumentException e) {
-                // ignore
-            }
+        if (mNetworkAgent != null) {
+            mNetworkAgent.sendLinkProperties(makeLinkProperties());
         }
-        // Ideally, we'd call mNetworkAgent.sendLinkProperties() here to notify ConnectivityService
-        // that the LinkAddress has changed. But we don't do so for two reasons: (1) We don't set
-        // LinkAddresses on the LinkProperties we establish in the first place (see agentConnect())
-        // and (2) CS doesn't do anything with LinkAddresses anyway (see updateLinkProperties()).
-        // TODO: Maybe fix this.
         return success;
     }
 
@@ -807,11 +805,9 @@ public class Vpn {
             return false;
         }
         boolean success = jniDelAddress(mInterface, address, prefixLength);
-        // Ideally, we'd call mNetworkAgent.sendLinkProperties() here to notify ConnectivityService
-        // that the LinkAddress has changed. But we don't do so for two reasons: (1) We don't set
-        // LinkAddresses on the LinkProperties we establish in the first place (see agentConnect())
-        // and (2) CS doesn't do anything with LinkAddresses anyway (see updateLinkProperties()).
-        // TODO: Maybe fix this.
+        if (mNetworkAgent != null) {
+            mNetworkAgent.sendLinkProperties(makeLinkProperties());
+        }
         return success;
     }
 
@@ -1284,8 +1280,6 @@ public class Vpn {
                     // Now INetworkManagementEventObserver is watching our back.
                     mInterface = mConfig.interfaze;
                     mVpnUsers = new ArrayList<UidRange>();
-                    mAllowIPv4 = mConfig.allowIPv4;
-                    mAllowIPv6 = mConfig.allowIPv6;
 
                     agentConnect();
 
