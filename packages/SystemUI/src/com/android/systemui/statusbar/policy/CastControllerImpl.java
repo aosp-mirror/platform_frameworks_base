@@ -55,6 +55,7 @@ public class CastControllerImpl implements CastController {
     private final Object mProjectionLock = new Object();
 
     private boolean mDiscovering;
+    private boolean mCallbackRegistered;
     private MediaProjectionInfo mProjection;
 
     public CastControllerImpl(Context context) {
@@ -70,6 +71,7 @@ public class CastControllerImpl implements CastController {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("CastController state:");
         pw.print("  mDiscovering="); pw.println(mDiscovering);
+        pw.print("  mCallbackRegistered="); pw.println(mCallbackRegistered);
         pw.print("  mCallbacks.size="); pw.println(mCallbacks.size());
         pw.print("  mRoutes.size="); pw.println(mRoutes.size());
         for (int i = 0; i < mRoutes.size(); i++) {
@@ -83,11 +85,17 @@ public class CastControllerImpl implements CastController {
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
         fireOnCastDevicesChanged(callback);
+        synchronized (mDiscoveringLock) {
+            handleDiscoveryChangeLocked();
+        }
     }
 
     @Override
     public void removeCallback(Callback callback) {
         mCallbacks.remove(callback);
+        synchronized (mDiscoveringLock) {
+            handleDiscoveryChangeLocked();
+        }
     }
 
     @Override
@@ -96,12 +104,23 @@ public class CastControllerImpl implements CastController {
             if (mDiscovering == request) return;
             mDiscovering = request;
             if (DEBUG) Log.d(TAG, "setDiscovering: " + request);
-            if (request) {
-                mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
-                        MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
-            } else {
-                mMediaRouter.removeCallback(mMediaCallback);
-            }
+            handleDiscoveryChangeLocked();
+        }
+    }
+
+    private void handleDiscoveryChangeLocked() {
+        if (mCallbackRegistered) {
+            mMediaRouter.removeCallback(mMediaCallback);
+            mCallbackRegistered = false;
+        }
+        if (mDiscovering) {
+            mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
+                    MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+            mCallbackRegistered = true;
+        } else if (mCallbacks.size() != 0) {
+            mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
+                    MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
+            mCallbackRegistered = true;
         }
     }
 
