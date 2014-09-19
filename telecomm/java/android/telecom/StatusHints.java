@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -29,7 +30,9 @@ import java.util.Objects;
 
 /**
  * Contains status label and icon displayed in the in-call UI.
+ * @hide
  */
+@SystemApi
 public final class StatusHints implements Parcelable {
 
     private final ComponentName mPackageName;
