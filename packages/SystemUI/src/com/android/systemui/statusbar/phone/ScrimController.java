@@ -30,6 +30,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeLog;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
@@ -309,6 +310,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing);
             if (!mDozing) return;
+            DozeLog.tracePulseStart();
             mDurationOverride = mDozeParameters.getPulseInDuration();
             mAnimationDelay = 0;
             mAnimateChange = true;
@@ -343,6 +345,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         @Override
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse out finished");
+            DozeLog.tracePulseFinish();
             mPulseEndTime = 0;
         }
     };

@@ -49,6 +49,7 @@ public class DozeService extends DreamService {
     private static final String ACTION_BASE = "com.android.systemui.doze";
     private static final String PULSE_ACTION = ACTION_BASE + ".pulse";
     private static final String NOTIFICATION_PULSE_ACTION = ACTION_BASE + ".notification_pulse";
+    private static final String EXTRA_INSTANCE = "instance";
 
     private final String mTag = String.format(TAG + ".%08x", hashCode());
     private final Context mContext = this;
@@ -67,7 +68,6 @@ public class DozeService extends DreamService {
     private boolean mDisplayStateSupported;
     private int mDisplayStateWhenOn;
     private boolean mNotificationLightOn;
-    private PendingIntent mNotificationPulseIntent;
     private boolean mPowerSaveActive;
     private long mNotificationPulseTime;
     private int mScheduleResetsRemaining;
@@ -115,9 +115,6 @@ public class DozeService extends DreamService {
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mDisplayStateSupported = mDozeParameters.getDisplayStateSupported();
-        mNotificationPulseIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(NOTIFICATION_PULSE_ACTION).setPackage(getPackageName()),
-                PendingIntent.FLAG_UPDATE_CURRENT);
         mDisplayStateWhenOn = mDisplayStateSupported ? Display.STATE_DOZE : Display.STATE_ON;
         mDisplayOff.run();
     }
@@ -257,9 +254,17 @@ public class DozeService extends DreamService {
         rescheduleNotificationPulse(true /*predicate*/);
     }
 
+    private PendingIntent notificationPulseIntent(long instance) {
+        return PendingIntent.getBroadcast(mContext, 0,
+                new Intent(NOTIFICATION_PULSE_ACTION).setPackage(getPackageName())
+                        .putExtra(EXTRA_INSTANCE, instance),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
     private void rescheduleNotificationPulse(boolean predicate) {
         if (DEBUG) Log.d(TAG, "rescheduleNotificationPulse predicate=" + predicate);
-        mAlarmManager.cancel(mNotificationPulseIntent);
+        final PendingIntent notificationPulseIntent = notificationPulseIntent(0);
+        mAlarmManager.cancel(notificationPulseIntent);
         if (!predicate) {
             if (DEBUG) Log.d(TAG, "  don't reschedule: predicate is false");
             return;
@@ -280,8 +285,10 @@ public class DozeService extends DreamService {
             if (DEBUG) Log.d(TAG, "  don't reschedule: delta is " + delta);
             return;
         }
-        if (DEBUG) Log.d(TAG, "Scheduling pulse in " + delta + "ms for " + new Date(time));
-        mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, mNotificationPulseIntent);
+        final long instance = time - mNotificationPulseTime;
+        if (DEBUG) Log.d(TAG, "Scheduling pulse " + instance + " in " + delta + "ms for "
+                + new Date(time));
+        mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, notificationPulseIntent(instance));
     }
 
     private static String triggerEventToString(TriggerEvent event) {
@@ -313,7 +320,9 @@ public class DozeService extends DreamService {
                 requestPulse();
             }
             if (NOTIFICATION_PULSE_ACTION.equals(intent.getAction())) {
-                if (DEBUG) Log.d(mTag, "Received notification pulse intent");
+                final long instance = intent.getLongExtra(EXTRA_INSTANCE, -1);
+                if (DEBUG) Log.d(mTag, "Received notification pulse intent instance=" + instance);
+                DozeLog.traceNotificationPulse(instance);
                 requestPulse();
                 rescheduleNotificationPulse(mNotificationLightOn);
             }
@@ -415,10 +424,15 @@ public class DozeService extends DreamService {
             // reset the notification pulse schedule, but only if we think we were not triggered
             // by a notification-related vibration
             final long timeSinceNotification = System.currentTimeMillis() - mNotificationPulseTime;
-            if (timeSinceNotification < mDozeParameters.getPickupVibrationThreshold()) {
+            final boolean withinVibrationThreshold =
+                    timeSinceNotification < mDozeParameters.getPickupVibrationThreshold();
+            if (withinVibrationThreshold) {
                if (DEBUG) Log.d(mTag, "Not resetting schedule, recent notification");
             } else {
                 resetNotificationResets();
+            }
+            if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
+                DozeLog.tracePickupPulse(withinVibrationThreshold);
             }
         }
     }

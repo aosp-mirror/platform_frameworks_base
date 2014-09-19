@@ -115,6 +115,7 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
@@ -2101,8 +2102,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean isFalsingThresholdNeeded() {
         boolean onKeyguard = getBarState() == StatusBarState.KEYGUARD;
-        boolean isMethodInSecure = mUnlockMethodCache.isMethodInsecure();
-        return onKeyguard && isMethodInSecure;
+        boolean isMethodInsecure = mUnlockMethodCache.isMethodInsecure();
+        return onKeyguard && (isMethodInsecure || mDozing);
     }
 
     @Override  // NotificationData.Environment
@@ -2873,6 +2874,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             pw.print  ("      ");
             mNotificationPanel.dump(fd, pw, args);
         }
+
+        DozeLog.dump(pw);
 
         if (DUMPTRUCK) {
             synchronized (mNotificationData) {
@@ -4108,6 +4111,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mCurrentDozeService = dozeService;
             if (!mDozing) {
                 mDozing = true;
+                DozeLog.traceDozing(mContext, mDozing);
                 updateDozingState();
             }
             mCurrentDozeService.startDozing();
@@ -4125,6 +4129,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             if (mDozing) {
                 mDozing = false;
+                DozeLog.traceDozing(mContext, mDozing);
                 updateDozingState();
             }
         }
