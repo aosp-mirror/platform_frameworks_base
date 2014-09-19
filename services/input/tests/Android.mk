@@ -16,19 +16,10 @@ shared_libraries := \
     libhardware_legacy \
     libui \
     libskia \
-    libstlport \
     libinput \
     libinputservice
 
-static_libraries := \
-    libgtest \
-    libgtest_main
-
 c_includes := \
-    bionic \
-    bionic/libstdc++/include \
-    external/gtest/include \
-    external/stlport/stlport \
     external/skia/include/core
 
 module_tags := eng tests
