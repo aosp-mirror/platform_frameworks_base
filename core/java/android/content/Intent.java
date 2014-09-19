@@ -3587,7 +3587,7 @@ public class Intent implements Parcelable, Cloneable {
      * creating new document tasks.
      *
      * <p>This flag is ignored if one of {@link #FLAG_ACTIVITY_NEW_TASK} or
-     * {@link #FLAG_ACTIVITY_NEW_TASK} is not also set.
+     * {@link #FLAG_ACTIVITY_NEW_DOCUMENT} is not also set.
      *
      * <p>See
      * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
