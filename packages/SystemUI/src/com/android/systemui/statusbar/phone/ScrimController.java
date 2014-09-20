@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -29,6 +30,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.ScrimView;
@@ -68,7 +70,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private Runnable mOnAnimationFinished;
     private boolean mAnimationStarted;
     private boolean mDozing;
-    private long mPulseEndTime;
+    private DozeHost.PulseCallback mPulseCallback;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
     private final Interpolator mLinearOutSlowInInterpolator;
     private BackDropView mBackDropView;
@@ -139,25 +141,48 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     /** When dozing, fade screen contents in and out using the front scrim. */
-    public long pulse() {
-        if (!mDozing) return 0;
-        final long now = System.currentTimeMillis();
-        if (DEBUG) Log.d(TAG, "pulse mPulseEndTime=" + mPulseEndTime + " now=" + now);
-        if (mPulseEndTime != 0 && mPulseEndTime > now) return mPulseEndTime - now;
+    public void pulse(@NonNull DozeHost.PulseCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+
+        if (!mDozing || mPulseCallback != null) {
+            // Pulse suppressed.
+            mPulseCallback.onPulseFinished();
+            return;
+        }
+
+        // Begin pulse.  Note that it's very important that the pulse finished callback
+        // be invoked when we're done so that the caller can drop the pulse wakelock.
+        mPulseCallback = callback;
         mScrimInFront.post(mPulseIn);
-        mPulseEndTime = now + mDozeParameters.getPulseDuration();
-        return mPulseEndTime - now;
     }
 
     public boolean isPulsing() {
-        return mDozing && mPulseEndTime != 0;
+        return mPulseCallback != null;
     }
 
     private void cancelPulsing() {
         if (DEBUG) Log.d(TAG, "Cancel pulsing");
-        mScrimInFront.removeCallbacks(mPulseIn);
-        mScrimInFront.removeCallbacks(mPulseOut);
-        mPulseEndTime = 0;
+
+        if (mPulseCallback != null) {
+            mScrimInFront.removeCallbacks(mPulseIn);
+            mScrimInFront.removeCallbacks(mPulseOut);
+            pulseFinished();
+        }
+    }
+
+    private void pulseStarted() {
+        if (mPulseCallback != null) {
+            mPulseCallback.onPulseStarted();
+        }
+    }
+
+    private void pulseFinished() {
+        if (mPulseCallback != null) {
+            mPulseCallback.onPulseFinished();
+            mPulseCallback = null;
+        }
     }
 
     private void scheduleUpdate() {
@@ -265,7 +290,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         anim.setStartDelay(mAnimationDelay);
         anim.setDuration(mDurationOverride != -1 ? mDurationOverride : ANIMATION_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
-
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (mOnAnimationFinished != null) {
@@ -309,6 +333,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             mAnimateChange = true;
             mOnAnimationFinished = mPulseInFinished;
             setScrimColor(mScrimInFront, 0);
+
+            // Signal that the pulse is ready to turn the screen on and draw.
+            pulseStarted();
         }
     };
 
@@ -339,7 +366,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse out finished");
             DozeLog.tracePulseFinish();
-            mPulseEndTime = 0;
+
+            // Signal that the pulse is all finished so we can turn the screen off now.
+            pulseFinished();
         }
     };
 
