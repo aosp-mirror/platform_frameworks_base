@@ -89,17 +89,20 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * @param network the NetworkAgentInfo corresponding to the network.
      * @return true if the network requires clat, false otherwise.
      */
-    public boolean requiresClat(NetworkAgentInfo network) {
-        int netType = network.networkInfo.getType();
-        LinkProperties lp = network.linkProperties;
+    public static boolean requiresClat(NetworkAgentInfo nai) {
+        final int netType = nai.networkInfo.getType();
+        final boolean connected = nai.networkInfo.isConnected();
+        final boolean hasIPv4Address =
+                (nai.linkProperties != null) ? nai.linkProperties.hasIPv4Address() : false;
+        Slog.d(TAG, "requiresClat: netType=" + netType +
+                    ", connected=" + connected +
+                    ", hasIPv4Address=" + hasIPv4Address);
         // Only support clat on mobile for now.
-        Slog.d(TAG, "requiresClat: netType=" + netType + ", hasIPv4Address=" +
-               lp.hasIPv4Address());
-        return netType == TYPE_MOBILE && !lp.hasIPv4Address();
+        return netType == TYPE_MOBILE && connected && !hasIPv4Address;
     }
 
-    public static boolean isRunningClat(LinkProperties lp) {
-      return lp != null && lp.getAllInterfaceNames().contains(CLAT_INTERFACE_NAME);
+    public boolean isRunningClat(NetworkAgentInfo network) {
+        return mNetworkMessenger == network.messenger;
     }
 
     /**
@@ -149,20 +152,27 @@ public class Nat464Xlat extends BaseNetworkObserver {
         }
     }
 
-    public boolean isStarted() {
-        return mIsStarted;
-    }
-
-    public boolean isRunning() {
-        return mIsRunning;
-    }
-
     private void updateConnectivityService() {
         Message msg = mHandler.obtainMessage(
             NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED, mBaseLP);
         msg.replyTo = mNetworkMessenger;
         Slog.i(TAG, "sending message to ConnectivityService: " + msg);
         msg.sendToTarget();
+    }
+
+    // Copies the stacked clat link in oldLp, if any, to the LinkProperties in nai.
+    public void fixupLinkProperties(NetworkAgentInfo nai, LinkProperties oldLp) {
+        if (isRunningClat(nai) &&
+                nai.linkProperties != null &&
+                !nai.linkProperties.getAllInterfaceNames().contains(CLAT_INTERFACE_NAME)) {
+            Slog.d(TAG, "clatd running, updating NAI for " + nai.linkProperties.getInterfaceName());
+            for (LinkProperties stacked: oldLp.getStackedLinks()) {
+                if (CLAT_INTERFACE_NAME.equals(stacked.getInterfaceName())) {
+                    nai.linkProperties.addStackedLink(stacked);
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -175,17 +185,18 @@ public class Nat464Xlat extends BaseNetworkObserver {
             // Create the LinkProperties for the clat interface by fetching the
             // IPv4 address for the interface and adding an IPv4 default route,
             // then stack the LinkProperties on top of the link it's running on.
-            // Although the clat interface is a point-to-point tunnel, we don't
-            // point the route directly at the interface because some apps don't
-            // understand routes without gateways (see, e.g., http://b/9597256
-            // http://b/9597516). Instead, set the next hop of the route to the
-            // clat IPv4 address itself (for those apps, it doesn't matter what
-            // the IP of the gateway is, only that there is one).
             try {
                 InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
                 LinkAddress clatAddress = config.getLinkAddress();
                 mLP.clear();
                 mLP.setInterfaceName(iface);
+
+                // Although the clat interface is a point-to-point tunnel, we don't
+                // point the route directly at the interface because some apps don't
+                // understand routes without gateways (see, e.g., http://b/9597256
+                // http://b/9597516). Instead, set the next hop of the route to the
+                // clat IPv4 address itself (for those apps, it doesn't matter what
+                // the IP of the gateway is, only that there is one).
                 RouteInfo ipv4Default = new RouteInfo(new LinkAddress(Inet4Address.ANY, 0),
                                                       clatAddress.getAddress(), iface);
                 mLP.addRoute(ipv4Default);

@@ -4243,13 +4243,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         LinkProperties newLp = networkAgent.linkProperties;
         int netId = networkAgent.network.netId;
 
+        // The NetworkAgentInfo does not know whether clatd is running on its network or not. Before
+        // we do anything else, make sure its LinkProperties are accurate.
+        mClat.fixupLinkProperties(networkAgent, oldLp);
+
         updateInterfaces(newLp, oldLp, netId);
         updateMtu(newLp, oldLp);
-        updateTcpBufferSizes(networkAgent);
         // TODO - figure out what to do for clat
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
 //            updateMtu(lp, null);
 //        }
+        updateTcpBufferSizes(networkAgent);
         final boolean flushDns = updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId, flushDns);
         updateClat(newLp, oldLp, networkAgent);
@@ -4257,23 +4261,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo na) {
-        // Update 464xlat state.
-        if (mClat.requiresClat(na)) {
+        final boolean wasRunningClat = mClat.isRunningClat(na);
+        final boolean shouldRunClat = Nat464Xlat.requiresClat(na);
 
-            // If the connection was previously using clat, but is not using it now, stop the clat
-            // daemon. Normally, this happens automatically when the connection disconnects, but if
-            // the disconnect is not reported, or if the connection's LinkProperties changed for
-            // some other reason (e.g., handoff changes the IP addresses on the link), it would
-            // still be running. If it's not running, then stopping it is a no-op.
-            if (Nat464Xlat.isRunningClat(oldLp) && !Nat464Xlat.isRunningClat(newLp)) {
-                mClat.stopClat();
-            }
-            // If the link requires clat to be running, then start the daemon now.
-            if (na.networkInfo.isConnected()) {
-                mClat.startClat(na);
-            } else {
-                mClat.stopClat();
-            }
+        if (!wasRunningClat && shouldRunClat) {
+            // Start clatd. If it's already been started but is not running yet, this is a no-op.
+            mClat.startClat(na);
+        } else if (wasRunningClat && !shouldRunClat) {
+            mClat.stopClat();
         }
     }
 
