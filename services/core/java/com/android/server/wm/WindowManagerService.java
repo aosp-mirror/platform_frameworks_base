@@ -3474,7 +3474,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean okToDisplay() {
-        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully();
+        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isAwake();
     }
 
     AppWindowToken findAppWindowToken(IBinder token) {
@@ -10397,7 +10397,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (!mDisplayReady || !mPolicy.isScreenOnFully()) {
+        if (!mDisplayReady || !mPolicy.isAwake()) {
             // No need to freeze the screen before the system is ready or if
             // the screen is off.
             return;
@@ -11569,6 +11569,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        @Override
         public void waitForAllWindowsDrawn(Runnable callback, long timeout) {
             synchronized (mWindowMap) {
                 mWaitingForDrawnCallback = callback;

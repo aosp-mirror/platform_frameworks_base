@@ -351,8 +351,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mLidControlsSleep;
     int mShortPressOnPowerBehavior = -1;
     int mLongPressOnPowerBehavior = -1;
-    boolean mScreenOnEarly = false;
-    boolean mScreenOnFully = false;
+    boolean mAwakeEarly = false;
+    boolean mAwakeFully = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
@@ -548,6 +548,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
     private static final int MSG_HIDE_BOOT_MESSAGE = 11;
     private static final int MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
+    private static final int MSG_SCREEN_TURNING_ON = 13;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -573,28 +574,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_KEYGUARD_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mKeyguardDrawComplete");
-                    mKeyguardDrawComplete = true;
-                    finishScreenTurningOn();
+                    finishKeyguardDrawn();
                     break;
                 case MSG_KEYGUARD_DRAWN_TIMEOUT:
                     Slog.w(TAG, "Keyguard drawn timeout. Setting mKeyguardDrawComplete");
-                    mKeyguardDrawComplete = true;
-                    finishScreenTurningOn();
+                    finishKeyguardDrawn();
                     break;
                 case MSG_WINDOW_MANAGER_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mWindowManagerDrawComplete");
-                    mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
-                    mWindowManagerDrawComplete = true;
-                    finishScreenTurningOn();
+                    finishWindowsDrawn();
                     break;
                 case MSG_WAKING_UP:
-                    handleWakingUp((ScreenOnListener) msg.obj);
+                    handleWakingUp();
                     break;
                 case MSG_HIDE_BOOT_MESSAGE:
                     handleHideBootMessage();
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock(msg.arg1 != 0);
+                    break;
+                case MSG_SCREEN_TURNING_ON:
+                    handleScreenTurningOn((ScreenOnListener)msg.obj);
                     break;
             }
         }
@@ -766,11 +766,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         //Could have been invoked due to screen turning on or off or
         //change of the currently visible window's orientation
-        if (localLOGV) Slog.v(TAG, "Screen status="+mScreenOnEarly+
+        if (localLOGV) Slog.v(TAG, "Screen status="+mAwakeEarly+
                 ", current orientation="+mCurrentAppOrientation+
                 ", SensorEnabled="+mOrientationSensorEnabled);
         boolean disable = true;
-        if (mScreenOnEarly) {
+        if (mAwakeEarly) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
@@ -1332,7 +1332,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldEnableWakeGestureLp() {
-        return mWakeGestureEnabledSetting && !mScreenOnEarly
+        return mWakeGestureEnabledSetting && !mAwakeEarly
                 && (!mLidControlsSleep || mLidState != LID_CLOSED)
                 && mWakeGestureListener.isSupported();
     }
@@ -4731,9 +4731,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void goingToSleep(int why) {
         EventLog.writeEvent(70000, 0);
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Going to sleep...");
         synchronized (mLock) {
-            mScreenOnEarly = false;
-            mScreenOnFully = false;
+            mAwakeEarly = false;
+            mAwakeFully = false;
         }
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onScreenTurnedOff(why);
@@ -4746,70 +4747,101 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void wakingUp(final ScreenOnListener screenOnListener) {
+    public void wakingUp() {
         EventLog.writeEvent(70000, 1);
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turning on...",
-                new RuntimeException("here").fillInStackTrace());
-        mHandler.obtainMessage(MSG_WAKING_UP, screenOnListener).sendToTarget();
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Waking up...");
+        mHandler.obtainMessage(MSG_WAKING_UP).sendToTarget();
     }
 
     // Called on the mHandler thread.
-    private void handleWakingUp(final ScreenOnListener screenOnListener) {
-        if (screenOnListener != null) {
-            mScreenOnListener = screenOnListener;
-        }
-
+    private void handleWakingUp() {
         synchronized (mLock) {
-            mScreenOnEarly = true;
+            mAwakeEarly = true;
             updateWakeGestureListenerLp();
             updateOrientationListenerLp();
             updateLockScreenTimeout();
         }
 
         mKeyguardDrawComplete = false;
-        mWindowManagerDrawComplete = false;
+        mWindowManagerDrawComplete = false; // wait for later call to screenTurningOn
         if (mKeyguardDelegate != null) {
             mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
             mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
             mKeyguardDelegate.onScreenTurnedOn(mKeyguardDelegateCallback);
+            // ... eventually calls finishKeyguardDrawn
         } else {
             if (DEBUG_WAKEUP) Slog.d(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
-            mKeyguardDrawComplete = true;
+            finishKeyguardDrawn();
         }
+    }
+
+    // Called on the mHandler thread.
+    private void finishKeyguardDrawn() {
+        if (!mKeyguardDrawComplete) {
+            mKeyguardDrawComplete = true;
+            mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
+            finishScreenTurningOn();
+        }
+    }
+
+    @Override
+    public void screenTurningOn(final ScreenOnListener screenOnListener) {
+        EventLog.writeEvent(70000, 1);
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turning on...");
+        mHandler.obtainMessage(MSG_SCREEN_TURNING_ON, screenOnListener).sendToTarget();
+    }
+
+    // Called on the mHandler thread.
+    private void handleScreenTurningOn(ScreenOnListener screenOnListener) {
+        mScreenOnListener = screenOnListener;
+
+        mWindowManagerDrawComplete = false;
         mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback,
                 WAITING_FOR_DRAWN_TIMEOUT);
+        // ... eventually calls finishWindowsDrawn
+    }
+
+    // Called on the mHandler thread.
+    private void finishWindowsDrawn() {
+        if (!mWindowManagerDrawComplete) {
+            mWindowManagerDrawComplete = true;
+            finishScreenTurningOn();
+        }
     }
 
     // Called on the mHandler thread.
     private void finishScreenTurningOn() {
         if (DEBUG_WAKEUP) Slog.d(TAG,
-                "finishScreenTurningOn: mKeyguardDrawComplete=" + mKeyguardDrawComplete
+                "finishScreenTurningOn: mAwakeEarly=" + mAwakeEarly
+                        + " mKeyguardDrawComplete=" + mKeyguardDrawComplete
                         + " mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
-        if (!mKeyguardDrawComplete || !mWindowManagerDrawComplete) {
-            return;
+        boolean awake;
+        synchronized (mLock) {
+            if ((mAwakeEarly && !mKeyguardDrawComplete)
+                    || !mWindowManagerDrawComplete) {
+                return;
+            }
+
+            if (mAwakeEarly) {
+                mAwakeFully = true;
+            }
+            awake = mAwakeFully;
         }
 
-        ScreenOnListener screenOnListener;
-        synchronized (mLock) {
-            mScreenOnFully = true;
-            screenOnListener = mScreenOnListener;
+        if (DEBUG_WAKEUP) Slog.i(TAG, "Finished screen turning on...");
+
+        if (mScreenOnListener != null) {
+            mScreenOnListener.onScreenOn();
             mScreenOnListener = null;
         }
 
-        try {
-            mWindowManager.setEventDispatching(true);
-        } catch (RemoteException unhandled) {
-        }
+        if (awake) {
+            setKeyguardDrawnFirstTime();
 
-        if (screenOnListener != null) {
-            screenOnListener.onScreenOn();
-        }
-
-        setKeyguardDrawn();
-
-        if (mBootMessageNeedsHiding) {
-            handleHideBootMessage();
-            mBootMessageNeedsHiding = false;
+            if (mBootMessageNeedsHiding) {
+                handleHideBootMessage();
+                mBootMessageNeedsHiding = false;
+            }
         }
     }
 
@@ -4829,13 +4861,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isScreenOnEarly() {
-        return mScreenOnEarly;
-    }
-
-    @Override
-    public boolean isScreenOnFully() {
-        return mScreenOnFully;
+    public boolean isAwake() {
+        return mAwakeFully;
     }
 
     /** {@inheritDoc} */
@@ -4909,7 +4936,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void setKeyguardDrawn() {
+    private void setKeyguardDrawnFirstTime() {
         synchronized (mLock) {
             mKeyguardDrawn = true;
         }
@@ -5222,7 +5249,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mSystemBooted = true;
         }
-        wakingUp(null);
+        wakingUp();
+        screenTurningOn(null);
     }
 
     ProgressDialog mBootMsgDialog = null;
@@ -5352,7 +5380,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void updateLockScreenTimeout() {
         synchronized (mScreenLockTimeout) {
-            boolean enable = (mAllowLockscreenWhenOn && mScreenOnEarly &&
+            boolean enable = (mAllowLockscreenWhenOn && mAwakeEarly &&
                     mKeyguardDelegate != null && mKeyguardDelegate.isSecure());
             if (mLockScreenTimerActive != enable) {
                 if (enable) {
@@ -5890,8 +5918,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print("mShortPressOnPowerBehavior="); pw.print(mShortPressOnPowerBehavior);
                 pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
         pw.print(prefix); pw.print("mHasSoftInput="); pw.println(mHasSoftInput);
-        pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
-                pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);
+        pw.print(prefix); pw.print("mAwakeEarly="); pw.print(mAwakeEarly);
+                pw.print(" mAwakeFully="); pw.print(mAwakeFully);
                 pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);
         pw.print(prefix); pw.print("mOverscanScreen=("); pw.print(mOverscanScreenLeft);
                 pw.print(","); pw.print(mOverscanScreenTop);
