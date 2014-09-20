@@ -11190,6 +11190,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    p[policy]: policy state");
                 pw.println("    a[animator]: animator state");
                 pw.println("    s[essions]: active sessions");
+                pw.println("    surfaces: active surfaces (debugging enabled only)");
                 pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
@@ -11227,6 +11228,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("sessions".equals(cmd) || "s".equals(cmd)) {
                 synchronized(mWindowMap) {
                     dumpSessionsLocked(pw, true);
+                }
+                return;
+            } else if ("surfaces".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    WindowStateAnimator.SurfaceTrace.dumpAllSurfaces(pw, null);
                 }
                 return;
             } else if ("displays".equals(cmd) || "d".equals(cmd)) {
@@ -11280,6 +11286,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpSessionsLocked(pw, dumpAll);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            WindowStateAnimator.SurfaceTrace.dumpAllSurfaces(pw, dumpAll ?
+                    "-------------------------------------------------------------------------------"
+                    : null);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
