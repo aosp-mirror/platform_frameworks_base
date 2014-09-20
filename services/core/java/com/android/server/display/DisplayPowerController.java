@@ -349,8 +349,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * was turned off by the proximity sensor.
      * @return True if display is ready, false if there are important changes that must
      * be made asynchronously (such as turning the screen on), in which case the caller
-     * should grab a wake lock, watch for {@link Callbacks#onStateChanged()} then try
-     * the request again later until the state converges.
+     * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
+     * then try the request again later until the state converges.
      */
     public boolean requestPowerState(DisplayPowerRequest request,
             boolean waitForNegativeProximity) {
@@ -628,97 +628,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
         }
 
-        // Animate the screen on or off unless blocked.
-        if (state == Display.STATE_ON) {
-            // Want screen on.
-            // Wait for previous off animation to complete beforehand.
-            // It is relatively short but if we cancel it and switch to the
-            // on animation immediately then the results are pretty ugly.
-            if (!mColorFadeOffAnimator.isStarted()) {
-                // Turn the screen on.  The contents of the screen may not yet
-                // be visible if the electron beam has not been dismissed because
-                // its last frame of animation is solid black.
-                setScreenState(Display.STATE_ON);
-                if (mPowerRequest.blockScreenOn
-                        && mPowerState.getColorFadeLevel() == 0.0f) {
-                    blockScreenOn();
-                } else {
-                    unblockScreenOn();
-                    if (USE_COLOR_FADE_ON_ANIMATION && mPowerRequest.isBrightOrDim()) {
-                        // Perform screen on animation.
-                        if (!mColorFadeOnAnimator.isStarted()) {
-                            if (mPowerState.getColorFadeLevel() == 1.0f) {
-                                mPowerState.dismissColorFade();
-                            } else if (mPowerState.prepareColorFade(mContext,
-                                    mColorFadeFadesConfig ?
-                                            ColorFade.MODE_FADE :
-                                                    ColorFade.MODE_WARM_UP)) {
-                                mColorFadeOnAnimator.start();
-                            } else {
-                                mColorFadeOnAnimator.end();
-                            }
-                        }
-                    } else {
-                        // Skip screen on animation.
-                        mPowerState.setColorFadeLevel(1.0f);
-                        mPowerState.dismissColorFade();
-                    }
-                }
-            }
-        } else if (state == Display.STATE_DOZE) {
-            // Want screen dozing.
-            // Wait for brightness animation to complete beforehand when entering doze
-            // from screen on.
-            unblockScreenOn();
-            if (!mScreenBrightnessRampAnimator.isAnimating()
-                    || mPowerState.getScreenState() != Display.STATE_ON) {
-                // Set screen state and dismiss the black surface without fanfare.
-                setScreenState(state);
-                mPowerState.setColorFadeLevel(1.0f);
-                mPowerState.dismissColorFade();
-            }
-        } else if (state == Display.STATE_DOZE_SUSPEND) {
-            // Want screen dozing and suspended.
-            // Wait for brightness animation to complete beforehand unless already
-            // suspended because we may not be able to change it after suspension.
-            unblockScreenOn();
-            if (!mScreenBrightnessRampAnimator.isAnimating()
-                    || mPowerState.getScreenState() == Display.STATE_DOZE_SUSPEND) {
-                // Set screen state and dismiss the black surface without fanfare.
-                setScreenState(state);
-                mPowerState.setColorFadeLevel(1.0f);
-                mPowerState.dismissColorFade();
-            }
-        } else {
-            // Want screen off.
-            // Wait for previous on animation to complete beforehand.
-            unblockScreenOn();
-            if (!mColorFadeOnAnimator.isStarted()) {
-                if (performScreenOffTransition) {
-                    // Perform screen off animation.
-                    if (!mColorFadeOffAnimator.isStarted()) {
-                        if (mPowerState.getColorFadeLevel() == 0.0f) {
-                            setScreenState(Display.STATE_OFF);
-                        } else if (mPowerState.prepareColorFade(mContext,
-                                mColorFadeFadesConfig ?
-                                        ColorFade.MODE_FADE :
-                                                ColorFade.MODE_COOL_DOWN)
-                                && mPowerState.getScreenState() != Display.STATE_OFF) {
-                            mColorFadeOffAnimator.start();
-                        } else {
-                            mColorFadeOffAnimator.end();
-                        }
-                    }
-                } else {
-                    // Skip screen off animation.
-                    setScreenState(Display.STATE_OFF);
-                }
-            }
-        }
+        // Animate the screen state change unless already animating.
+        animateScreenStateChange(state, performScreenOffTransition);
 
-        // Report whether the display is ready for use.
-        // We mostly care about the screen state here, ignoring brightness changes
-        // which will be handled asynchronously.
+        // Report whether the display is ready for use and all changes have been applied.
         if (mustNotify
                 && !mScreenOnWasBlocked
                 && !mColorFadeOnAnimator.isStarted()
@@ -783,6 +696,96 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mBatteryStats.noteScreenBrightness(target);
             } catch (RemoteException ex) {
                 // same process
+            }
+        }
+    }
+
+    private void animateScreenStateChange(int target, boolean performScreenOffTransition) {
+        // If there is already an animation in progress, don't interfere with it.
+        if (mColorFadeOnAnimator.isStarted()
+                || mColorFadeOffAnimator.isStarted()) {
+            return;
+        }
+
+        // Temporarily block turning the screen on if requested and there is already a
+        // black surface covering the screen.
+        if (mPowerRequest.blockScreenOn
+                && mPowerState.getColorFadeLevel() == 0.0f
+                && target != Display.STATE_OFF) {
+            blockScreenOn();
+            return;
+        }
+
+        if (target == Display.STATE_ON) {
+            // Want screen on.  The contents of the screen may not yet
+            // be visible if the electron beam has not been dismissed because
+            // its last frame of animation is solid black.
+            unblockScreenOn();
+            setScreenState(Display.STATE_ON);
+            if (USE_COLOR_FADE_ON_ANIMATION && mPowerRequest.isBrightOrDim()) {
+                // Perform screen on animation.
+                if (mPowerState.getColorFadeLevel() == 1.0f) {
+                    mPowerState.dismissColorFade();
+                } else if (mPowerState.prepareColorFade(mContext,
+                        mColorFadeFadesConfig ?
+                                ColorFade.MODE_FADE :
+                                        ColorFade.MODE_WARM_UP)) {
+                    mColorFadeOnAnimator.start();
+                } else {
+                    mColorFadeOnAnimator.end();
+                }
+            } else {
+                // Skip screen on animation.
+                mPowerState.setColorFadeLevel(1.0f);
+                mPowerState.dismissColorFade();
+            }
+        } else if (target == Display.STATE_DOZE) {
+            // Want screen dozing.
+            // Wait for brightness animation to complete beforehand when entering doze
+            // from screen on to prevent a perceptible jump because brightness may operate
+            // differently when the display is configured for dozing.
+            if (mScreenBrightnessRampAnimator.isAnimating()
+                    && mPowerState.getScreenState() == Display.STATE_ON) {
+                return;
+            }
+
+            // Set screen state and dismiss the black surface without fanfare.
+            unblockScreenOn();
+            setScreenState(Display.STATE_DOZE);
+            mPowerState.setColorFadeLevel(1.0f);
+            mPowerState.dismissColorFade();
+        } else if (target == Display.STATE_DOZE_SUSPEND) {
+            // Want screen dozing and suspended.
+            // Wait for brightness animation to complete beforehand unless already
+            // suspended because we may not be able to change it after suspension.
+            if (mScreenBrightnessRampAnimator.isAnimating()
+                    && mPowerState.getScreenState() != Display.STATE_DOZE_SUSPEND) {
+                return;
+            }
+
+            // Set screen state and dismiss the black surface without fanfare.
+            unblockScreenOn();
+            setScreenState(Display.STATE_DOZE_SUSPEND);
+            mPowerState.setColorFadeLevel(1.0f);
+            mPowerState.dismissColorFade();
+        } else {
+            // Want screen off.
+            unblockScreenOn();
+            if (mPowerState.getColorFadeLevel() == 0.0f) {
+                // Turn the screen off.
+                // A black surface is already hiding the contents of the screen.
+                setScreenState(Display.STATE_OFF);
+            } else if (performScreenOffTransition
+                    && mPowerState.prepareColorFade(mContext,
+                            mColorFadeFadesConfig ?
+                                    ColorFade.MODE_FADE : ColorFade.MODE_COOL_DOWN)
+                    && mPowerState.getScreenState() != Display.STATE_OFF) {
+                // Perform the screen off animation.
+                mColorFadeOffAnimator.start();
+            } else {
+                // Skip the screen off animation and add a black surface to hide the
+                // contents of the screen.
+                mColorFadeOffAnimator.end();
             }
         }
     }
