@@ -9958,7 +9958,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     void goingToSleep() {
         synchronized(this) {
             mWentToSleep = true;
-            updateEventDispatchingLocked();
             goToSleepIfNeededLocked();
         }
     }
@@ -10056,7 +10055,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     void wakingUp() {
         synchronized(this) {
             mWentToSleep = false;
-            updateEventDispatchingLocked();
             comeOutOfSleepIfNeededLocked();
         }
     }
