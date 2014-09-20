@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Yabelana no-%1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Khetha uhlelo lokusebenza lwasekhaya"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Sebenzisa ngokuzenzakalelayo kulesenzo."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Sebenzisa uhlelo lokusebenza oluhlukile"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Susa izilungiselelo zesistimu; Izinhlelo zokusebenza &amp; Okulandiwe"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Khetha okufanele kwenziwe"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Kheth uhlelo lokusebenza yedivayisi ye-USB"</string>
@@ -1767,8 +1768,8 @@
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Ukuze ususe ukuphina lesi sikrini, thinta futhi ubambe u-Kwakamuva."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Isikrini siphiniwe. Ukususa ukuphina akuvumelekile inhlangano yakho."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Sebenzisa ukuphina isikrini?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Ukuphini isikrini kukhiya isibonisi ngokubuka okukodwa.\n\nUkuze ushiye, thinta futhi ubambe u-Emuva no-Kwakamuca ngesikhathi esisodwa."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Ukuphini isikrini kukhiya isibonisi ngokubuka okukodwa.\n\nUkuze uphume, thinta futhi ubambe u-Kwakamuva."</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Ukuphina isikrini kukhiya isibonisi ngokubuka okukodwa.\n\nUkuze ushiye, thinta futhi ubambe u-Emuva no-Kwakamuca ngesikhathi esisodwa."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Ukuphina isikrini kukhiya isibonisi ngokubuka okukodwa.\n\nUkuze uphume, thinta futhi ubambe u-Kwakamuva."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"CHA, NGIYABONGA"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"QALA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Isikrini siphiniwe"</string>
@@ -1778,4 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Cela iphasiwedi ngaphambi kokususa ukuphina"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Ukuze usize ukwenza kangcono impilo yebhethri, isilondolozi sebhethri sehlisa ukusebenza kwedivayisi yakho futhi sikhawulela ukudlidliza nedatha eningi yangasemuva. I-imeyili, imilayezo, nezinye izinhlelo zokusebenza ezincike ekuvumelaniseni kungenzeka zingabuyekezi ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri sivaleka ngokuzenzakalelayo uma idivayisi yakho ishaja."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Kuze kuphele isikhathi sakho ngo-<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Iminithi elilodwa"</item>
+    <item quantity="other" msgid="6924190729213550991">"Amaminithi angu-%d"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Ihora elilodwa"</item>
+    <item quantity="other" msgid="5408537517529822157">"Amahora angu-%d"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Unaphakade"</string>
 </resources>

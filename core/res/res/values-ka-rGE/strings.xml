@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s-თან გაზიარება"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"აირჩიეთ საშინაო აპი"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ამ ქმედებისთვის ნაგულისხმევად გამოყენება."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"სხვა აპის გამოყენება"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ნაგულისხმევი პარამეტრების წაშლა სისტემის პარამეტრებში &gt; აპებში &gt; ჩამოტვირთულებში."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"აირჩიეთ მოქმედება"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB მოწყობილობისათვის აპის შერჩევა"</string>
@@ -1778,4 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ბატარეის გამძლეობის გასახანგრძლივებლად, ბატარეის დამზოგი ამცირებს თქვენი მოწყობილობის წარმადობას და ზღუდავს ვიბრაციასა და უმეტეს ფონურ მონაცემს. თუ არ განაახლებთ, შეიძლება არ გაიხსნას ელფოსტა, შეტყობინებები და სხვა აპები, რომლებიც სინქრონიზაციაზეა დამოკიდებული.\n\nბატარეის დამზოგი ავტომატურად გამოირთვება, როდესაც თქვენი მოწყობილობა იტენება."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"დანამ თქვენი კავშირგარეშე დრო დასრულდებოდეს <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ზე"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"ერთი წუთით"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d წუთით"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"ერთი საათით"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d საათით"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"სამუდამოდ"</string>
 </resources>
