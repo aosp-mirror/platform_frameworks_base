@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Condividi con %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Seleziona un\'app home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usa come predefinita per questa azione."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Utilizza un\'app diversa"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Cancella l\'applicazione predefinita in Impostazioni di sistema &gt; Applicazioni &gt; Scaricate."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Scegli un\'azione"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Scegli un\'applicazione per il dispositivo USB"</string>
@@ -1243,7 +1244,7 @@
     <string name="new_app_description" msgid="1932143598371537340">"Interrompi la vecchia applicazione senza salvare."</string>
     <string name="sendText" msgid="5209874571959469142">"Scegli un\'azione per il testo"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume suoneria"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Volume app. multimediali"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Volume contenuti multimediali"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Riproduzione tramite Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Suoneria silenziosa impostata"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume chiamate"</string>
@@ -1766,9 +1767,9 @@
     <string name="lock_to_app_toast" msgid="1230563865743799321">"Per sbloccare questa schermata, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Per sbloccare questa schermata, tocca e tieni premuto Recenti."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La schermata è bloccata. La tua organizzazione non ne consente lo sblocco."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare blocco schermata?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Il blocco schermata fissa la visualizzazione su una stessa immagine.\n\nPer uscire, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Il blocco schermata fissa la visualizzazione su una stessa immagine.\n\nPer uscire, tocca e tieni premuto Recenti."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare il blocco su schermo?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Il blocco su schermo fissa la visualizzazione attuale sullo schermo.\n\nPer uscire, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Il blocco su schermo fissa la visualizzazione attuale sullo schermo.\n\nPer uscire, tocca e tieni premuto Recenti."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRAZIE"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"AVVIA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
@@ -1778,4 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggi e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fino al termine del periodo di inattività previsto per le <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Per un minuto"</item>
+    <item quantity="other" msgid="6924190729213550991">"Per %d minuti"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Per un\'ora"</item>
+    <item quantity="other" msgid="5408537517529822157">"Per %d ore"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Sempre"</string>
 </resources>

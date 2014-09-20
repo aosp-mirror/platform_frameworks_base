@@ -300,7 +300,7 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permet que l\'aplicació rebi i processi missatges de Bluetooth MAP. Això vol dir que l\'aplicació pot controlar o suprimir missatges que s\'hagin enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupera les aplicacions en execució"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet que l\'aplicació recuperi informació sobre les tasques que s\'executen actualment i les que s\'han executat recentment. Aquesta acció pot permetre que l\'aplicació descobreixi informació sobre les aplicacions que s\'utilitzen al dispositiu."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"inicia una tasca recent"</string>
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"inicia una tasca des de recents"</string>
     <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Permet que l\'aplicació utilitzi un objecte ActivityManager.RecentTaskInfo per iniciar una tasca obsoleta que ActivityManager.getRecentTaskList() ha retornat."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interacciona entre usuaris"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet que l\'aplicació dugui a terme accions en diferents usuaris del dispositiu. Les aplicacions malicioses poden fer servir aquest permís per infringir la protecció entre usuaris."</string>
@@ -573,8 +573,8 @@
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Permet que l\'aplicació canviï el nom de l\'emmagatzematge intern."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permet que l\'aplicació controli el vibrador."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"controlar el flaix"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Permet que l\'aplicació controli el flaix."</string>
+    <string name="permlab_flashlight" msgid="2155920810121984215">"controla la llanterna"</string>
+    <string name="permdesc_flashlight" msgid="6522284794568368310">"Permet que l\'aplicació controli la llanterna."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"gestiona les preferències i els permisos dels dispositius USB"</string>
     <string name="permdesc_manageUsb" msgid="7776155430218239833">"Permet que l\'aplicació gestioni les preferències i els permisos dels dispositius USB."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementa el protocol MTP"</string>
@@ -602,7 +602,7 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"llegeix els estats exactes del telèfon"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permet que l\'aplicació accedeixi als estats exactes del telèfon. Amb aquest permís, l\'aplicació pot determinar l\'estat real de la trucada, si la trucada està activa o en segon pla, si s\'ha produït algun error, l\'estat exacte de la connexió de dades i els errors de la connexió de dades."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode d\'inactivitat"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode de repòs"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir que el telèfon entri en mode de repòs"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permet que l\'aplicació impedeixi que el telèfon entri en repòs."</string>
@@ -618,7 +618,7 @@
     <string name="permlab_factoryTest" msgid="3715225492696416187">"executar en mode de proves de fàbrica"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Executa com a prova de perfil baix del fabricant que permet accés complet al maquinari de la tauleta. Només està disponible quan la tauleta s\'executa en mode de prova del fabricant."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"S\'executa com a prova del fabricant de baix nivell, cosa que permet l\'accés total al maquinari del telèfon. Només està disponible quan un telèfon s\'executa en mode de proves del fabricant."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"definir fons de pantalla"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"establir fons de pantalla"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permet que l\'aplicació estableixi el fons de pantalla del sistema."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ajustament de la mida del fons de pantalla"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Permet que l\'aplicació defineixi els suggeriments de mida del fons de pantalla."</string>
@@ -784,13 +784,13 @@
     <item msgid="8073994352956129127">"Casa"</item>
     <item msgid="7084237356602625604">"Feina"</item>
     <item msgid="1112044410659011023">"Altres"</item>
-    <item msgid="2374913952870110618">"Personalitzada"</item>
+    <item msgid="2374913952870110618">"Personalitza"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Casa"</item>
     <item msgid="5629153956045109251">"Feina"</item>
     <item msgid="4966604264500343469">"Altres"</item>
-    <item msgid="4932682847595299369">"Personalitzada"</item>
+    <item msgid="4932682847595299369">"Personalitza"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Casa"</item>
@@ -832,18 +832,18 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mòbil de la feina"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersones de la feina"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Auxiliar"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Personalitzats"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Personalitza"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Aniversari"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversari"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Altres"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Personalitzada"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Personalitzat"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Feina"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Altres"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mòbil"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Personalitzada"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Personalitza"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Casa"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Feina"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Altres"</string>
@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Comparteix amb %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Selecciona una aplicació d\'inici"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Fes servir una altra aplicació"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Tria una acció"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Tria una aplicació per al dispositiu USB"</string>
@@ -1259,7 +1260,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"To predeterminat"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"To predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Cap"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Sons de trucada"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Sons"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"To desconegut"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"Xarxa Wi-fi disponible"</item>
@@ -1765,17 +1766,26 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="lock_to_app_toast" msgid="1230563865743799321">"Per desfixar aquesta pantalla, mantén premuts Enrere i Recents alhora."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Per desfixar aquesta pantalla, mantén premut Recents."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La pantalla està desfixada. La teva organització no permet la cancel·lació de la fixació."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Vols utilitzar la fixació de pantalla?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"La fixació de pantalla bloqueja la pantalla en una sola visualització.\n\nPer sortir-ne, mantén premuts Enrere i Recents alhora."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"La fixació de pantalla bloqueja la pantalla en una sola visualització.\n\nPer sortir-ne, mantén premut Recents."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"S\'ha fixat la pantalla. La teva organització no permet anul·lar-ne la fixació."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Vols fixar aquesta pantalla?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"La fixació de pantalla bloqueja la pantalla en una visualització única.\n\nPer sortir-ne, mantén premuts els botons de tornar enrere i d\'aplicacions recents."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"La fixació de pantalla bloqueja la pantalla en una visualització única.\n\nPer sortir-ne, mantén premut el botó d\'aplicacions recents."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRÀCIES"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"INICI"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla desfixada"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demana el codi PIN abans d\'anul·lar la fixació"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demana el patró de desbloqueig abans d\'anul·lar la fixació"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per anul·lar la fixació"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya abans d\'anul·lar la fixació"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Per tal d\'augmentar la durada de la bateria, l\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fins que no finalitzi la inactivitat a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>."</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Durant un minut"</item>
+    <item quantity="other" msgid="6924190729213550991">"Durant %d minuts"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Durant una hora"</item>
+    <item quantity="other" msgid="5408537517529822157">"Durant %d hores"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidament"</string>
 </resources>
