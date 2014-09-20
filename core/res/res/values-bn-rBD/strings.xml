@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> সেকেন্ড"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> সেকেন্ড"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;শিরোনামহীন&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(কোনো ফোন নম্বর নেই)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(অজানা)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ভয়েসমেল"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB প্রটোকল বাস্তবায়ন করতে কার্নেল MTP ড্রাইভারে অ্যাক্সেসের অনুমতি দেয়৷"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"হার্ডওয়্যার পরীক্ষা করে"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"অ্যাপ্লিকেশান কে হার্ডওয়্যারগুলি পরীক্ষা করার উদ্দেশ্যে বিভিন্ন যন্ত্রানুষঙ্গ নিয়ন্ত্রণ করতে দেয়৷"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM রেডিও অ্যাক্সেস করে"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"প্রোগ্রামগুলিতে শুনতে অ্যাপ্লিকেশানকে FM রেডিও অ্যাক্সেস করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"অ্যাপ্লিকেশানটিকে আপনার হস্তক্ষেপ ছাড়াই ফোন নম্বরগুলিতে কল করতে মঞ্জুর করে৷ এটি অপ্রত্যাশিত পরিমাণ খরচা বা কলের কারণ হতে পারে৷ মনে রাখবেন, এটি অ্যাপ্লিকেশানটির দ্বারা জরুরি নম্বরগুলিতে কল করাকে অনুমতি দেয় না৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার সম্মতি ছাড়াই কল করার ফলে আপনাকে অহেতুক অর্থ প্রদান করতে হতে পারে৷"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"সরাসরি যেকোনো ফোন নম্বরে কল করে"</string>

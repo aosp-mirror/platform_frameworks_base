@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sek"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sek"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Uten navn&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Mangler telefonnummer)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Ukjent)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Telefonsvarer"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Tillater tilgang til kjerne-MTP-driver for implementering av MTP USB-protokollen."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"teste maskinvare"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Lar appen styre ulike eksterne enheter for å teste maskinvare."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"bruke FM-radio"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Lar appen bruke FM-radioen for å muliggjøre avspilling av programmer."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe telefonnummer direkte"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lar appen ringe telefonnumre uten at du gjør noe. Dette kan resultere i uventede oppringninger og kostnader. Appen kan imidlertid ikke ringe nødnumre. Merk at skadelige apper kan påføre deg kostnader ved å ringe uten bekreftelse fra deg."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ringe vilkårlige telefonnummer direkte"</string>

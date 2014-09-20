@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sec"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sec"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Fără titlu&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Niciun număr de telefon)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Necunoscut)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mesaj vocal"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite accesul la driverul MTP al nucleului pentru a implementa protocolul USB pentru MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testare hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permite aplicaţiei să controleze diverse periferice în scopul testării componentelor hardware."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"accesează radiouri FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Permite aplicației să acceseze radiouri FM pentru a asculta diverse programe."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"apelare directă numere de telefon"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite aplicaţiei să apeleze numere de telefon fără intervenţia dvs. Acest lucru poate determina apariţia unor taxe sau a unor apeluri neaşteptate. Cu această permisiune aplicaţia nu poate apela numerele de urgenţă. Aplicaţiile rău intenţionate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"apelare directă a oricărui număr de telefon"</string>

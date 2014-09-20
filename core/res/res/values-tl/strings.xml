@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> (na) seg"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> (na) seg"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Walang pamagat&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Walang numero ng telepono)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Hindi kilala)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Voicemail"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Pinapayagan ang access sa kernel MTP driver upang maipatupad ang MTP USB protocol."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"subukan ang hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Pinapayagan ang app na kontrolin ang iba\'t ibang mga peripheral para sa layunin ng pagsubok sa hardware."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"mag-access ng FM radio"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Pinapayagan ang app na mag-access ng FM radio upang makinig sa mga programa."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktang tawagan ang mga numero ng telepono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Pinapayagan ang app na tumawag sa mga numero ng telepono nang wala ng iyong panghihimasok. Maaari itong magresulta sa mga hindi inaasahang pagsingil o tawag. Tandaan na hindi nito pinapayagan ang app na tumawag sa mga numerong pang-emergency. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagtawag nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"direktang tawagan ang anumang numero ng telepono"</string>

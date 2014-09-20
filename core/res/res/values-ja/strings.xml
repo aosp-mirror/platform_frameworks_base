@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;新規&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"..."</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"（電話番号なし）"</string>
     <string name="unknownName" msgid="2277556546742746522">"（名前）"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ボイスメール"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"カーネルMTPドライバにアクセスしてMTP USBプロトコルを実装することを許可します。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ハードウェアのテスト"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ハードウェアのテストのために各種周辺機器を制御することをアプリに許可します。"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FMラジオへのアクセス"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"プログラムを聴くためにFMラジオにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"電話番号発信"</string>

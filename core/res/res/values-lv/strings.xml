@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez nosaukuma&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nav tālruņa numura)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Nezināms)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Balss pasts"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Ļauj piekļūt kodola MTP dzinim, lai ieviestu MTP USB protokolu."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"pārbaudīt aparatūru"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Ļauj lietotnei kontrolēt dažādas perifērijas ierīces, lai pārbaudītu aparatūru."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"Piekļuve FM radio"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Ļauj lietotnei piekļūt FM radio, lai klausītos programmas."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"tieši zvanīt uz tālruņa numuriem"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ļauj lietotnei zvanīt uz tālruņa numuriem bez jūsu iejaukšanās. Tas var radīt neparedzētas izmaksas vai zvanus. Ņemiet vērā, ka lietotnei nav atļauts zvanīt uz tālruņa numuriem ārkārtas situācijām. Ļaunprātīgas lietotnes var radīt jums izmaksas, veicot zvanus bez jūsu apstiprinājuma."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"tieši zvanīt uz jebkuriem tālruņa numuriem"</string>

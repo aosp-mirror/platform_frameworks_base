@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடிகள்"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடி"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;பெயரிடப்படாதது&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(தொலைபேசி எண் இல்லை)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(அறியப்படாதது)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"குரலஞ்சல்"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB நெறிமுறையைச் செயற்படுத்த கெர்னல் MTP இயக்கிக்கான அணுகலை அனுமதிக்கிறது."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"வன்பொருளைச் சோதனை செய்தல்"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"வன்பொருள் சோதனைக்காக பல்வேறு பாகங்களைக் கட்டுப்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM ரேடியோவை அணுகுதல்"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"நிகழ்ச்சிகளைக் கேட்பதற்கான FM ரேடியோவை அணுக, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது பயன்பாட்டை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் பயன்பாடுகள், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"எந்தத் தொலைபேசி எண்களையும் நேரடியாக அழைத்தல்"</string>
@@ -1451,7 +1451,7 @@
     <string name="submit" msgid="1602335572089911941">"சமர்ப்பி"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"கார் பயன்முறை இயக்கப்பட்டது"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"கார் பயன்முறையிலிருந்து வெளியேற தொடவும்."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"இணைப்பு முறை அல்லது செயலில் உள்ள ஹாட்ஸ்பாட்"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"டெதெரிங்/ஹாட்ஸ்பாட் இயங்குகிறது"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"அமைக்க, தொடவும்."</string>
     <string name="back_button_label" msgid="2300470004503343439">"முந்தையது"</string>
     <string name="next_button_label" msgid="1080555104677992408">"அடுத்து"</string>
@@ -1607,7 +1607,7 @@
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"தவறான பின்"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"உங்கள் வடிவத்தை வரையவும்"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"வடிவத்தை வரையவும்"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"சிம் பின்னை உள்ளிடவும்"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"பின்னை உள்ளிடுக"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"கடவுச்சொல்லை உள்ளிடவும்"</string>
@@ -1780,7 +1780,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>இல் செயல்படாத நேரம் முடியும் வரை"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
     <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>

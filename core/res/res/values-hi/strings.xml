@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंड"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंड"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;शीर्षक-रहित&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(अज्ञात)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ध्वनिमेल"</string>
@@ -353,11 +351,11 @@
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"सभी ऐप्स की लॉन्‍चिंग की निगरानी करें और उसे नियंत्रित करें"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"ऐप्स  को यह निगरानी और नियंत्रित करने देता है कि सिस्टम कैसे गतिविधियां लॉन्च करता है. दुर्भावनापूर्ण ऐप्स  सिस्टम को पूरी तरह से जोखिम में डाल सकते हैं. इस अनुमति की आवश्यकता केवल विकास के लिए है, सामान्य उपयोग के लिए कभी नहीं."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"पैकेज निकाले गए प्रसारण भेजें"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"ऐप्स  को कोई ऐसी सूचना प्रसारित करने देता है जिसे किसी ऐप्स  पैकेज ने निकाल दिया गया हो. दुर्भावनापूर्ण ऐप्स  इसका उपयोग चल रहे अन्य ऐप्स  को समाप्त करने के लिए कर सकते हैं."</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"ऐप्स  को कोई ऐसी नोटिफिकेशन प्रसारित करने देता है जिसे किसी ऐप्स  पैकेज ने निकाल दिया गया हो. दुर्भावनापूर्ण ऐप्स  इसका उपयोग चल रहे अन्य ऐप्स  को समाप्त करने के लिए कर सकते हैं."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS-प्राप्त प्रसार भेजें"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ऐप्स  को वह सूचना प्रसारित करने देता है जो SMS संदेश ने प्राप्त की है. दुर्भावनापूर्ण ऐप्स  इसका उपयोग नकली इनकमिंग संदेश गढ़ने के लिए कर सकते हैं."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ऐप्स  को वह नोटिफिकेशन प्रसारित करने देता है जो SMS संदेश ने प्राप्त की है. दुर्भावनापूर्ण ऐप्स  इसका उपयोग नकली इनकमिंग संदेश गढ़ने के लिए कर सकते हैं."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-प्राप्त प्रसारण भेजें"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ऐप्स  को वह सूचना प्रसारित करने देता है जो WAP PUSH संदेश को प्राप्त हुआ है. दुर्भावनापूर्ण ऐप्स  इसका उपयोग नकली MMS संदेश प्राप्त करने या किसी वेबपृष्ठ की सामग्री को दुर्भावनापूर्ण दूसरे रूप से चुपचाप प्रतिस्थापित करने के लिए कर सकते हैं."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ऐप्स  को वह नोटिफिकेशन प्रसारित करने देता है जो WAP PUSH संदेश को प्राप्त हुआ है. दुर्भावनापूर्ण ऐप्स  इसका उपयोग नकली MMS संदेश प्राप्त करने या किसी वेबपृष्ठ की सामग्री को दुर्भावनापूर्ण दूसरे रूप से चुपचाप प्रतिस्थापित करने के लिए कर सकते हैं."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"चल रही प्रक्रियाओं की संख्‍या सीमित करें"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ऐप्स  को चलाई जाने वाली अधिकतम प्रक्रियाओं को नियंत्रित करने देता है. सामान्य ऐप्स  के लिए कभी आवश्यक नहीं होती."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"पृष्ठभूमि ऐप्स को बलपूर्वक बंद करें"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB प्रोटोकॉल लागू करने के लिए कर्नेल MTP ड्राइवर में पहुंच की अनुमति देता है."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"परीक्षण हार्डवेयर"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ऐप्स को हार्डवेयर परीक्षण के लिए विविध सहायक डिवाइस को नियंत्रित करने देता है."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM रेडियो एक्सेस करें"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"कार्यक्रमों को सुनने के लिए ऐप्स को FM रेडियो एक्सेस करने देती है."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"फ़ोन नंबर पर सीधे कॉल करें"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ऐप्स  को आपके हस्‍तक्षेप के बिना फ़ोन नंबर पर कॉल करने देता है. इसके परिणाम अप्रत्‍याशित शुल्‍क या कॉल हो सकते हैं. ध्यान दें कि यह ऐप्स  को आपातकालीन नंबर पर कॉल नहीं करने देता. दुर्भावनापूर्ण ऐप्स  आपकी पुष्टि के बिना कॉल करके आपका धन व्‍यय कर सकते हैं."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"किसी भी फ़ोन नंबर पर सीधे कॉल करें"</string>
@@ -730,8 +730,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ऐप्स  को यह संशोधित करने देता है कि ऐप्स की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"सूचनाओं तक पहुंचें"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप्स  को सूचनाओं को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य ऐप्स  के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"सूचना श्रवणकर्ता सेवा से जुड़ें"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को सूचना श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"नोटिफिकेशन श्रवणकर्ता सेवा से जुड़ें"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को नोटिफिकेशन श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"किसी स्थिति प्रदाता सेवा से आबद्ध हों"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"धारक को किसी स्थिति प्रदाता सेवा के शीर्ष-स्तर के इंटरफ़ेस से आबद्ध होने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"मीडिया रूट सेवा से आबद्ध हों"</string>
@@ -1252,13 +1252,13 @@
     <string name="volume_call" msgid="3941680041282788711">"कॉल के दौरान वॉल्‍यूम"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"ब्लूटूथ कॉल के दौरान वॉल्‍यूम"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"अलार्म आवाज़"</string>
-    <string name="volume_notification" msgid="2422265656744276715">"सूचना वॉल्‍यूम"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"नोटिफिकेशन वॉल्‍यूम"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"आवाज़"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ब्लूटूथ वॉल्‍यूम"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"रिंगटोन वॉल्‍यूम"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"कॉल वॉल्‍यूम"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"मीडिया वॉल्‍यूम"</string>
-    <string name="volume_icon_description_notification" msgid="7044986546477282274">"सूचना वॉल्‍यूम"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"नोटिफिकेशन वॉल्‍यूम"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"डिफ़ॉल्‍ट रिंगटोन"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"डिफ़ॉल्‍ट रिंगटोन (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"कोई नहीं"</string>
@@ -1435,7 +1435,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"सरल उपयोग"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
-    <string name="notification_listener_binding_label" msgid="2014162835481906429">"सूचना श्रवणकर्ता"</string>
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"नोटिफिकेशन श्रवणकर्ता"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"स्थिति प्रदाता"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN सक्रिय"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN को <xliff:g id="APP">%s</xliff:g> द्वारा सक्रिय किया गया है"</string>
@@ -1772,7 +1772,7 @@
     <string name="lock_to_app_title" msgid="1682643873107812874">"स्‍क्रीन पिन करने का उपयोग करें?"</string>
     <string name="lock_to_app_description" msgid="9076084599283282800">"स्‍क्रीन को पिन करने से प्रदर्शन एकल दृश्‍य में लॉक हो जाता है.\n\nबाहर निकलने के लिए, वापस और हाल ही के एक साथ दबाकर रखें."</string>
     <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"स्‍क्रीन को पिन करने से प्रदर्शन एकल दृश्‍य में लॉक हो जाता है.\n\nबाहर निकलने के लिए, हाल ही के दबाकर रखें."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"नहीं, धन्यवाद"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"रहने दें"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ करें"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्‍क्रीन अनपिन की गई"</string>
