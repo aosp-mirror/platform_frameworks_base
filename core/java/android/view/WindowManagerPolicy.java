@@ -930,7 +930,12 @@ public interface WindowManagerPolicy {
      * A new window has been focused.
      */
     public int focusChangedLw(WindowState lastFocus, WindowState newFocus);
-    
+
+    /**
+     * Called when the device is waking up.
+     */
+    public void wakingUp();
+
     /**
      * Called when the device is going to sleep.
      *
@@ -939,26 +944,25 @@ public interface WindowManagerPolicy {
      */
     public void goingToSleep(int why);
 
+    /**
+     * Called when the device is about to turn on the screen to show content.
+     * When waking up, this method will be called once after the call to wakingUp().
+     * When dozing, the method will be called sometime after the call to goingToSleep() and
+     * may be called repeatedly in the case where the screen is pulsing on and off.
+     *
+     * Must call back on the listener to tell it when the higher-level system
+     * is ready for the screen to go on (i.e. the lock screen is shown).
+     */
+    public void screenTurningOn(ScreenOnListener screenOnListener);
+
     public interface ScreenOnListener {
         void onScreenOn();
     }
 
     /**
-     * Called when the device is waking up.
-     * Must call back on the listener to tell it when the higher-level system
-     * is ready for the screen to go on (i.e. the lock screen is shown).
+     * Return whether the system is awake.
      */
-    public void wakingUp(ScreenOnListener screenOnListener);
-
-    /**
-     * Return whether the screen is about to turn on or is currently on.
-     */
-    public boolean isScreenOnEarly();
-
-    /**
-     * Return whether the screen is fully turned on.
-     */
-    public boolean isScreenOnFully();
+    public boolean isAwake();
 
     /**
      * Tell the policy that the lid switch has changed state.
