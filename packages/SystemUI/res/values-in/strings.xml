@@ -212,7 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasi yang disetel oleh GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Permintaan lokasi aktif"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Menghapus semua pemberitahuan."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Setelan"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Setelan pemberitahuan"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> setelan"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Layar akan diputar secara otomatis."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Layar dikunci dalam orientasi lanskap."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Layar dikunci dalam orientasi potret."</string>
@@ -278,6 +279,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Info Aplikasi"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"kunci ke aplikasi"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"telusuri"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Terisi"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Mengisi daya"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> sampai penuh"</string>
@@ -298,12 +301,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Gesek ke atas untuk membuka kunci"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Gesek ke kanan untuk menelepon"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Gesek ke kiri untuk kamera"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Tidak ditentukan"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Tidak ada"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritas"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Semua"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Mengisi daya (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hingga penuh)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Beralih pengguna"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Ganti pengguna, pengguna saat ini <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Tampilkan profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Tambahkan pengguna"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Pengguna baru"</string>
@@ -317,14 +320,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Lanjutkan sesi Anda?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Mulai"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ya, lanjutkan"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Selama satu menit"</item>
-    <item quantity="other" msgid="6924190729213550991">"Selama %d menit"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Selama satu jam"</item>
-    <item quantity="other" msgid="5408537517529822157">"Selama %d jam"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\n1Pengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Penghemat baterai aktif"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Mengurangi kinerja dan data latar belakang"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Nonaktifkan penghemat baterai"</string>

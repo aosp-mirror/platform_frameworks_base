@@ -212,7 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS-i määratud asukoht"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Asukoha taotlused on aktiivsed"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Kustuta kõik teatised."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Seaded"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Märguandeseaded"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Rakenduse <xliff:g id="APP_NAME">%s</xliff:g> seaded"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekraani pööramine toimub automaatselt."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ekraan on lukustatud horisontaalsuunas."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ekraan on lukustatud vertikaalsuunas."</string>
@@ -278,6 +279,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduste teave"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"lukusta rakendusele"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"otsing"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Laetud"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Laadimine"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Täislaadimiseks kulub <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -298,12 +301,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Lukustuse tühistamiseks pühkige üles"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Telefoni kasutamiseks pühkige paremale"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Kaamera kasutamiseks pühkige vasakule"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Määramata ajaks"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Puudub"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioriteet"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Kõik"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Kasutaja vahetamine"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Kasutaja vahetamine, praegune kasutaja: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Kuva profiil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Kasutaja lisamine"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Uus kasutaja"</string>
@@ -317,14 +320,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Kas soovite seansiga jätkata?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Alusta uuesti"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Jah, jätka"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Üheks minutiks"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d minutiks"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Üheks tunniks"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d tunniks"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Kas lisada uus kasutaja?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Kui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab värskendada rakendusi kõigi kasutajate jaoks."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akusäästja on sisse lülitatud"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vähendab jõudlust ja taustaandmeid"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Akusäästja väljalülitamine"</string>

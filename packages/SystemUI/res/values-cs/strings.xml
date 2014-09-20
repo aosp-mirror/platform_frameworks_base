@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Zapnout úsporu baterie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavení"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Režim V letadle"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Režim Letadlo"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Autom. otočení obrazovky"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ZTLUM."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTOM."</string>
@@ -144,8 +144,8 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Žádná SIM karta."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering přes Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim V letadle."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Sdílené připojení přes Bluetooth."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim Letadlo."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
@@ -174,10 +174,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Připojení Wi-Fi je zapnuto."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobil: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Baterie: <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Režim V letadle je vypnutý."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Režim V letadle je zapnutý."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Režim V letadle je vypnutý."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Režim V letadle je zapnutý."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Režim Letadlo je vypnutý."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Režim Letadlo je zapnutý."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Režim Letadlo je vypnutý."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Režim Letadlo je zapnutý."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Rozhraní Bluetooth je vypnuto."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Rozhraní Bluetooth je zapnuto."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Probíhá připojování rozhraní Bluetooth."</string>
@@ -214,7 +214,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavena pomocí systému GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivní žádosti o polohu"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazat všechna oznámení."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Nastavení"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Nastavení oznámení"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Nastavení aplikace <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka se automaticky otočí."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Obrazovka je uzamčena v orientaci na šířku."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Obrazovka je uzamčena v orientaci na výšku."</string>
@@ -224,7 +225,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Pult se sladkostmi"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Spořič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Režim V letadle"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Režim Letadlo"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Nabíjení, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Nabito"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -280,6 +281,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informace o aplikaci"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"uzamknout v aplikaci"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"vyhledat"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Nabito"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Nabíjení"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do plného nabití"</string>
@@ -300,12 +303,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Zařízení odemknete přejetím prstem nahoru"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Telefon otevřete přejetím prstem vpravo."</string>
     <string name="camera_hint" msgid="5241441720959174226">"Fotoaparát otevřete přejetím prstem vlevo."</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Na dobu neurčitou"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Žádné"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritní"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Vše"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Nabíjení (plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Přepnout uživatele"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Přepnout uživatele, aktuální uživatel: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Zobrazit profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Přidat uživatele"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nový uživatel"</string>
@@ -319,14 +322,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Chcete v relaci pokračovat?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Začít znovu"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ano, pokračovat"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Na jednu minutu"</item>
-    <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Na jednu hodinu"</item>
-    <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Přidat nového uživatele?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Když přidáte nového uživatele, musí si nastavit vlastní prostor.\n\nJakýkoli uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Režim Úspora baterie je zapnutý."</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Omezuje výkon a data na pozadí"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Vypnout úsporu baterie"</string>

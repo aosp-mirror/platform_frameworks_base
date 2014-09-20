@@ -70,7 +70,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره تصویر صفحه..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"تصویر صفحه ذخیره شد."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تصویر صفحه گرفته شد."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده تصویر صفحه خود، لمس کنید."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده عکس صفحه‌نمایشتان، لمس کنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه گرفته نشد."</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"به دلیل فضای ذخیره‌سازی کم یا عدم اجازه برنامه یا سازمانتان، نمی‌توان از صفحه عکس گرفت."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>
@@ -212,7 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏مکان تنظیم شده توسط GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"درخواست‌های موقعیت مکانی فعال است"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"تنظیمات"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"تنظیمات اعلان"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"تنظیمات <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
@@ -230,7 +231,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"بلوتوث خاموش"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"هیچ دستگاه مرتبط شده‌ای موجود نیست"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"روشنایی"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"چرخش اتوماتیک"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"چرخش خودکار"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"چرخش قفل شد"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودی"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"افقی"</string>
@@ -278,6 +279,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"اطلاعات برنامه"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"قفل به برنامه"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"جستجو"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"شارژ کامل شد"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"در حال شارژ شدن"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> مانده تا شارژ کامل شود"</string>
@@ -298,12 +301,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"برای باز کردن قفل سریع به بالا بکشید"</string>
     <string name="phone_hint" msgid="3101468054914424646">"برای تلفن انگشت را تند به سمت چپ بکشید"</string>
     <string name="camera_hint" msgid="5241441720959174226">"برای دوربین انگشت را تند به سمت راست بکشید"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"نامحدود"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"هیچ‌کدام"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"اولویت"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"همه"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"در حال شارژ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> تا شارژ کامل)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"تغییر کاربر"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"تعویض کاربر، کاربر کنونی <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"نمایش نمایه"</string>
     <string name="user_add_user" msgid="5110251524486079492">"افزودن کاربر"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"کاربر جدید"</string>
@@ -317,18 +320,12 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"آیا می‌خواهید جلسه‌تان را ادامه دهید؟"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"شروع مجدد"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"بله، ادامه داده شود"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"برای یک دقیقه"</item>
-    <item quantity="other" msgid="6924190729213550991">"‏برای %d دقیقه"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"برای یک ساعت"</item>
-    <item quantity="other" msgid="5408537517529822157">"‏برای %d ساعت"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"کاربر جدیدی اضافه می‌کنید؟"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"وقتی کاربر جدیدی را اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ذخیره کننده باتری روشن است."</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"عملکرد و اطلاعات پس‌زمینه را کاهش می‌دهد"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"خاموش کردن ذخیره‌کننده باتری"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>٪٪"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع به ضبط هر چیزی می‌کند که در صفحه‌نمایش شما نمایش داده می‌شود."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوباره نشان داده نشود"</string>
