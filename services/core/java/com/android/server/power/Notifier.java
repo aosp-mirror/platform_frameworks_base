@@ -256,16 +256,11 @@ final class Notifier {
                 if (mActualPowerState != POWER_STATE_AWAKE) {
                     mActualPowerState = POWER_STATE_AWAKE;
                     mPendingWakeUpBroadcast = true;
-                    if (mPendingScreenOnUnblocker == null) {
-                        mScreenOnBlocker.acquire();
-                    }
-                    final ScreenOnUnblocker unblocker = new ScreenOnUnblocker();
-                    mPendingScreenOnUnblocker = unblocker;
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
-                            mPolicy.wakingUp(unblocker);
+                            mPolicy.wakingUp();
                             mActivityManagerInternal.wakingUp();
                         }
                     });
@@ -334,6 +329,21 @@ final class Notifier {
             try {
                 mBatteryStats.noteInteractive(false);
             } catch (RemoteException ex) { }
+        }
+    }
+
+    /**
+     * Notifies that screen is about to be turned on (any state other than off).
+     */
+    public void onScreenTurningOn() {
+        synchronized (mLock) {
+            final ScreenOnUnblocker unblocker = blockScreenOnLocked();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mPolicy.screenTurningOn(unblocker);
+                }
+            });
         }
     }
 
@@ -458,6 +468,14 @@ final class Notifier {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
         }
+    }
+
+    private ScreenOnUnblocker blockScreenOnLocked() {
+        if (mPendingScreenOnUnblocker == null) {
+            mScreenOnBlocker.acquire();
+        }
+        mPendingScreenOnUnblocker = new ScreenOnUnblocker();
+        return mPendingScreenOnUnblocker;
     }
 
     private final class ScreenOnUnblocker implements WindowManagerPolicy.ScreenOnListener {
