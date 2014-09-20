@@ -917,6 +917,15 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
+     * Helper function, idenfity if a configuration should be treated as an enterprise network
+     * @hide
+     */
+    public boolean isEnterprise() {
+        return allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
+            allowedKeyManagement.get(KeyMgmt.IEEE8021X);
+    }
+
+    /**
      * most recent time we have seen this configuration
      * @return most recent scanResult
      * @hide
