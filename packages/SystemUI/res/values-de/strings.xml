@@ -214,7 +214,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Standort durch GPS festgelegt"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Standortanfragen aktiv"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle Benachrichtigungen löschen"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Einstellungen"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Benachrichtigungseinstellungen"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Einstellungen von <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Bildschirm wird automatisch gedreht."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Bildschirm bleibt im Querformat."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Bildschirm bleibt im Hochformat."</string>
@@ -280,6 +281,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"App-Info"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"App-Verriegelung"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Aufgeladen"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Wird aufgeladen"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Voll in <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -300,12 +303,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Zum Entsperren nach oben wischen"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Zum Öffnen des Telefons nach rechts wischen"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Zum Öffnen der Kamera nach links wischen"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Unbegrenzt"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Keine"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Wichtig"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Wird aufgeladen (voll in <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Nutzer wechseln"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Nutzer wechseln. Aktueller Nutzer: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Profil öffnen"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Nutzer hinzufügen"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Neuer Nutzer"</string>
@@ -319,14 +322,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Möchten Sie Ihre Sitzung fortsetzen?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Von vorn"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, weiter"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Für eine Minute"</item>
-    <item quantity="other" msgid="6924190729213550991">"Für %d Minuten"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Für eine Stunde"</item>
-    <item quantity="other" msgid="5408537517529822157">"Für %d Stunden"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Neuen Nutzer hinzufügen?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wenn Sie einen neuen Nutzer hinzufügen, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Energiesparmodus deaktivieren"</string>

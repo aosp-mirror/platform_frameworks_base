@@ -212,7 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS-ით დადგენილი მდებარეობა"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"მდებარეობის მოთხოვნები აქტიურია"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ყველა შეტყობინების წაშლა"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"პარამეტრები"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"შეტყობინების პარამეტრები"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> პარამეტრები"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ეკრანი შეტრიალდება ავტომატურად."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ეკრანი დაბლოკილია თარაზულ ორიენტაციაში"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ეკრანი დაბლოკილია პორტრეტის ორიენტაციაში."</string>
@@ -278,6 +279,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"აპლიკაციის შესახებ"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"აპზე ფიქსაცია"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ძიება"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"დატენილია"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"მიმდინარეობს დატენვა"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> სრულად დატენვამდე"</string>
@@ -298,12 +301,12 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"გაასრიალეთ ზევით განსაბლოკად"</string>
     <string name="phone_hint" msgid="3101468054914424646">"გადაფურცლეთ მარჯვნივ ტელეფონისთვის"</string>
     <string name="camera_hint" msgid="5241441720959174226">"კამერისთვის მარცხენა შენაცვლება"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"სამუდამოდ"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"არცერთი"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"პრიორიტეტი"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"ყველა"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>-ის შეცვლა დასრულებამდე)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"მომხმარებლის გადართვა"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"მომხმარებლის გდართვა. ამჟამინდელი მომხმარებელი <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"პროფილის ჩვენება"</string>
     <string name="user_add_user" msgid="5110251524486079492">"მომხმარებლის დამატება"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ახალი მომხმარებელი"</string>
@@ -317,14 +320,8 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"გსურთ, თქვენი სესიის გაგრძელება?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ხელახლა დაწყება"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"დიახ, გავაგრძელოთ"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ერთი წუთით"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d წუთით"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ერთი საათით"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d საათით"</item>
-  </plurals>
+    <string name="user_add_user_title" msgid="4553596395824132638">"დაემატოს ახალი მომხმარებელი?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ბატარეის დამზოგი ჩართულია"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ამცირებს წარმადობას და უკანა ფონის მონაცემებს"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ბატარეის დაზოგვის გამორთვა"</string>
@@ -350,10 +347,10 @@
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ამ მოწყობილობის მმართველი არის:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტების, აპების და უსაფრთხო საიტების. დამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს.\n\nასევე, თქვენ დაკავშირებული ხართ VPN-თან („<xliff:g id="APPLICATION">%2$s</xliff:g>“). თქვენს VPN სერვისის პროვაიდერს ასევე შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი."</string>
     <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"ამ პროფილის მმართველია:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს."</string>
     <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"ამ მოწყობილობის მმართველია:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nთქვენი პროფილის მმართველია:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"ამ პროფილის მმართველია:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების. დამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს.\n\nასევე, თქვენ მიანიჭეთ „<xliff:g id="APPLICATION">%2$s</xliff:g>“-ს VPN კავშირის დაყენება. ამ აპს ასევე შეუძლია ქსელის მონიტორინგი."</string>
-    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"ამ პროფილის მმართველია:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტების, აპების და უსაფრთხო საიტების. დამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს.\n\nასევე, თქვენ დაკავშირებული ხართ VPN-თან („<xliff:g id="APPLICATION">%2$s</xliff:g>“). თქვენს VPN სერვისის მომწოდებელს ასევე შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"ამ მოწყობილობის მმართველია:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nთქვენი პროფილის მმართველია:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების. დამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს.\n\nასევე, თქვენ მიანიჭეთ „<xliff:g id="APPLICATION">%3$s</xliff:g>“-ს VPN კავშირის დაყენება. ამ აპს ასევე შეუძლია ქსელის მონიტორინგი."</string>
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"ამ მოწყობილობის მმართველია:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nთქვენი პროფილის მმართველია:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების. დამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს.\n\nასევე, თქვენ დაკავშირებული ხართ VPN-თან („<xliff:g id="APPLICATION">%3$s</xliff:g>“). თქვენს VPN სერვისის მომწოდებელს ასევე შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"ამ პროფილის მმართველია:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების. დამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს.\n\nასევე, თქვენ მიანიჭეთ „<xliff:g id="APPLICATION">%2$s</xliff:g>“-ს VPN კავშირის დაყენება. ამ აპს ასევე შეუძლია ქსელის მონიტორ."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"ამ პროფილის მმართველია:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nთქვენს ადმინ.-ს შეუძლია თქვენი ქსელის აქტივობის მონიტორ., მათ შორის ელფოსტების, აპების და უსაფრთხო საიტების. დამატ. ინფორმ.-თვის, დაუკავშირდით თქვენს ადმინ.-ს.\n\nასევე, თქვ. დაკავშ.-ლი ხართ VPN-თან („<xliff:g id="APPLICATION">%2$s</xliff:g>“). თქვენს VPN სერვისის მომწოდებელს ასევე შეუძლია თქვ. ქსელის აქტივობის მონიტორ."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"ამ მოწყობილობის მმართველია:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nთქვ. პროფილის მმართველია:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nთქვენს ადმინ.-ს შეუძლია თქვ. მოწყ.-ისა და ქსელის აქტივობის მონიტ., მათ შორის ელფოსტის, აპების და უსაფრთხო საიტების. დამატებითი ინფორმ.-თვის, დაუკავშირდით ადმინ.-ს.\n\nასევე, თქვენ მიანიჭეთ „<xliff:g id="APPLICATION">%3$s</xliff:g>“-ს VPN კავშირის დაყენება. ამ აპს ასევე შეუძლია ქსელის მონიტ."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"ამ მოწყ.-ის მმართ.-ია:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nთქვ. პროფ-ის მმართ-ია:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nთქვ. ადმინ.-ს შეუძლია თქვ. მოწყ.-ისა და ქსელის აქტივ.-ის მონიტ., მ. შ. ელფოსტის, აპების და უსაფრთხო საიტების. დამატებ. ინფორმ.-თვის, დაუკავშირდით ადმინ.-ს.\n\nასევე, თქვ. დაკავშირ. ხართ VPN-თან („<xliff:g id="APPLICATION">%3$s</xliff:g>“). თქვ. VPN სრვს-ის მომწ.-ს ასევე შეუძლია თქვ. ქსელის აქტ.-ის მონიტორ.."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"მოწყობილობის დარჩება ჩაკეტილი, სანამ ხელით არ გახსნით"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"შეტყობინებების უფრო სწრაფად მიღება"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"იხილეთ განბლოკვამდე"</string>
