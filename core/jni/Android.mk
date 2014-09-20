@@ -261,10 +261,6 @@ LOCAL_SHARED_LIBRARIES += \
 # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
 LOCAL_C_INCLUDES += bionic/libc/private
 
-ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
-	LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
-endif
-
 LOCAL_MODULE:= libandroid_runtime
 
 include external/stlport/libstlport.mk
