@@ -48,10 +48,6 @@ include $(wildcard $(LOCAL_PATH)/*/jni/Android.mk)
 
 LOCAL_CFLAGS += -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
 
-ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
-    LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
-endif
-
 LOCAL_MODULE:= libandroid_servers
 
 include $(BUILD_SHARED_LIBRARY)
