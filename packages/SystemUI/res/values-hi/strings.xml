@@ -29,7 +29,7 @@
     <item quantity="one" msgid="5854176083865845541">"1 हाल ही का ऐप्स"</item>
     <item quantity="other" msgid="1040784359794890744">"%d हाल ही के ऐप्स"</item>
   </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कोई सूचना नहीं"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कोई नोटिफिकेशन नहीं"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"बैटरी कम है"</string>
@@ -149,7 +149,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"सूचनाएं."</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ़ करें"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"नोटिफिकेशन साफ़ करें"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS सक्षम."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करना."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"टेलीटाइपराइटर सक्षम."</string>
@@ -160,8 +160,8 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> को ख़ारिज करें."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> खा़रिज कर दिया गया."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ हो रहा है."</string>
-    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना खारिज की गई."</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"नोटिफिकेशन खारिज की गई."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"नोटिफिकेशन शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"त्वरित सेटिंग."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"सेटिंग"</string>
@@ -212,7 +212,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोध सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"सूचना सेटिंग"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"नोटिफिकेशन सेटिंग"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिंग"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्‍क्रीन लैंडस्केप अभिविन्यास में लॉक है."</string>
@@ -279,6 +279,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"एप्‍लिकेशन जानकारी"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"ऐप्स पर लॉक करें"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"खोज"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हो रही है"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"पूर्ण होने में <xliff:g id="CHARGING_TIME">%s</xliff:g> शेष"</string>
@@ -329,7 +331,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ करें"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब प्रारंभ करें"</string>
-    <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"कोई नोटिफिकेशन नहीं"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण को मॉनीटर किया जा सकता है"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
