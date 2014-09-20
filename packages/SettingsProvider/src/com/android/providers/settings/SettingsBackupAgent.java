@@ -352,9 +352,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (scanAlways != 0) {
                     Settings.Global.putInt(cr,
                             Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
-                    // !!! Give the wifi stack a moment to quiesce
-                    try { Thread.sleep(1000); } catch (InterruptedException e) {}
                 }
+                // !!! Give the wifi stack a moment to quiesce
+                try { Thread.sleep(1500); } catch (InterruptedException e) {}
                 if (restoredSupplicantData != null) {
                     restoreWifiSupplicant(FILE_WIFI_SUPPLICANT,
                             restoredSupplicantData, restoredSupplicantData.length);
