@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ашиглан хуваалцах"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Нүүр апп-г сонгоно уу"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Энэ ажиллагааг үндсэн болгох."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Өөр апп ашиглах"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Систем тохиргоо &gt; Апп &gt; Татаж авсан хэсгийн үндсэн утгуудыг цэвэрлэх"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Үйлдэл сонгох"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB төхөөрөмжийн апп-г сонгох"</string>
@@ -1778,4 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Нэг минутын турш"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d минутын турш"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Нэг цагийн турш"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d цагийн турш"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Тодорхойгүй"</string>
 </resources>
