@@ -281,6 +281,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"應用程式鎖定"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後完成充電"</string>
@@ -321,7 +323,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"重新開始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"是的，請繼續"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新增使用者？"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"新增的使用者需要自行設定個人空間。\n\n任何使用者均可為其他所有使用者更新應用程式。"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"新增的使用者需要自行設定個人空間。\n\n任何使用者均可為所有其他使用者更新應用程式。"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"關閉省電模式"</string>
