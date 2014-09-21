@@ -49,6 +49,9 @@ public class CameraDeviceState {
     private static final int STATE_IDLE = 3;
     private static final int STATE_CAPTURING = 4;
 
+    private static final String[] sStateNames = { "ERROR", "UNCONFIGURED", "CONFIGURING", "IDLE",
+            "CAPTURING"};
+
     private int mCurrentState = STATE_UNCONFIGURED;
     private int mCurrentError = CameraBinderDecorator.NO_ERROR;
 
@@ -57,6 +60,11 @@ public class CameraDeviceState {
     private Handler mCurrentHandler = null;
     private CameraDeviceStateListener mCurrentListener = null;
 
+    /**
+     * Error code used by {@link #setCaptureStart} and {@link #setCaptureResult} to indicate that no
+     * error has occurred.
+     */
+    public static final int NO_CAPTURE_ERROR = -1;
 
     /**
      * CameraDeviceStateListener callbacks to be called after state transitions.
@@ -126,11 +134,15 @@ public class CameraDeviceState {
      *
      * @param request A {@link RequestHolder} containing the request for the current capture.
      * @param timestamp The timestamp of the capture start in nanoseconds.
+     * @param captureError Report a recoverable error for a single request using a valid
+     *                     error code for {@code ICameraDeviceCallbacks}, or
+     *                     {@link #NO_CAPTURE_ERROR}
      * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
-    public synchronized int setCaptureStart(final RequestHolder request, long timestamp) {
+    public synchronized int setCaptureStart(final RequestHolder request, long timestamp,
+                                            int captureError) {
         mCurrentRequest = request;
-        doStateTransition(STATE_CAPTURING, timestamp);
+        doStateTransition(STATE_CAPTURING, timestamp, captureError);
         return mCurrentError;
     }
 
@@ -144,12 +156,16 @@ public class CameraDeviceState {
      * the {@code ERROR} state,
      * </p>
      *
-     * @param request the {@link RequestHolder} request that created this result.
-     * @param result the {@link CameraMetadataNative} result to set.
+     * @param request The {@link RequestHolder} request that created this result.
+     * @param result The {@link CameraMetadataNative} result to set.
+     * @param captureError Report a recoverable error for a single buffer or result using a valid
+     *                     error code for {@code ICameraDeviceCallbacks}, or
+     *                     {@link #NO_CAPTURE_ERROR}.
      * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
     public synchronized int setCaptureResult(final RequestHolder request,
-                                             final CameraMetadataNative result) {
+                                             final CameraMetadataNative result,
+                                             final int captureError) {
         if (mCurrentState != STATE_CAPTURING) {
             Log.e(TAG, "Cannot receive result while in state: " + mCurrentState);
             mCurrentError = CameraBinderDecorator.INVALID_OPERATION;
@@ -158,12 +174,21 @@ public class CameraDeviceState {
         }
 
         if (mCurrentHandler != null && mCurrentListener != null) {
-            mCurrentHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mCurrentListener.onCaptureResult(result, request);
-                }
-            });
+            if (captureError != NO_CAPTURE_ERROR) {
+                mCurrentHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCurrentListener.onError(captureError, request);
+                    }
+                });
+            } else {
+                mCurrentHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCurrentListener.onCaptureResult(result, request);
+                    }
+                });
+            }
         }
         return mCurrentError;
     }
@@ -181,14 +206,16 @@ public class CameraDeviceState {
     }
 
     private void doStateTransition(int newState) {
-        doStateTransition(newState, /*timestamp*/0);
+        doStateTransition(newState, /*timestamp*/0, CameraBinderDecorator.NO_ERROR);
     }
 
-    private void doStateTransition(int newState, final long timestamp) {
-        if (DEBUG) {
-            if (newState != mCurrentState) {
-                Log.d(TAG, "Transitioning to state " + newState);
+    private void doStateTransition(int newState, final long timestamp, final int error) {
+        if (newState != mCurrentState) {
+            String stateName = "UNKNOWN";
+            if (newState >= 0 && newState < sStateNames.length) {
+                stateName = sStateNames[newState];
             }
+            Log.i(TAG, "Legacy camera service transitioning to state " + stateName);
         }
         switch(newState) {
             case STATE_ERROR:
@@ -251,13 +278,23 @@ public class CameraDeviceState {
                     doStateTransition(STATE_ERROR);
                     break;
                 }
+
                 if (mCurrentHandler != null && mCurrentListener != null) {
-                    mCurrentHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCurrentListener.onCaptureStarted(mCurrentRequest, timestamp);
-                        }
-                    });
+                    if (error != NO_CAPTURE_ERROR) {
+                        mCurrentHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mCurrentListener.onError(error, mCurrentRequest);
+                            }
+                        });
+                    } else {
+                        mCurrentHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mCurrentListener.onCaptureStarted(mCurrentRequest, timestamp);
+                            }
+                        });
+                    }
                 }
                 mCurrentState = STATE_CAPTURING;
                 break;

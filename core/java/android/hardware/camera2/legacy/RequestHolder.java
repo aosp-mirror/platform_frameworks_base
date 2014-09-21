@@ -26,7 +26,9 @@ import java.util.Collection;
 import static com.android.internal.util.Preconditions.*;
 
 /**
- * Immutable container for a single capture request and associated information.
+ * Semi-immutable container for a single capture request and associated information,
+ * the only mutable characteristic of this container is whether or not is has been
+ * marked as "failed" using {@code #failRequest}.
  */
 public class RequestHolder {
     private static final String TAG = "RequestHolder";
@@ -36,8 +38,9 @@ public class RequestHolder {
     private final int mRequestId;
     private final int mSubsequeceId;
     private final long mFrameNumber;
-    private final boolean mHasJpegTargets;
-    private final boolean mHasPreviewTargets;
+    private final int mNumJpegTargets;
+    private final int mNumPreviewTargets;
+    private volatile boolean mFailed = false;
 
     /**
      * Returns true if the given surface requires jpeg buffers.
@@ -71,36 +74,37 @@ public class RequestHolder {
     }
 
     /**
-     * Returns true if any of the surfaces targeted by the contained request require jpeg buffers.
+     * Returns the number of surfaces targeted by the request that require jpeg buffers.
      */
-    private static boolean requestContainsJpegTargets(CaptureRequest request) {
+    private static int numJpegTargets(CaptureRequest request) {
+        int count = 0;
         for (Surface s : request.getTargets()) {
             try {
                 if (jpegType(s)) {
-                    return true;
+                    ++count;
                 }
             } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                 Log.w(TAG, "Surface abandoned, skipping...", e);
             }
         }
-        return false;
+        return count;
     }
 
     /**
-     * Returns true if any of the surfaces targeted by the contained request require a
-     * non-jpeg buffer type.
+     * Returns the number of surfaces targeted by the request that require non-jpeg buffers.
      */
-    private static boolean requestContainsPreviewTargets(CaptureRequest request) {
+    private static int numPreviewTargets(CaptureRequest request) {
+        int count = 0;
         for (Surface s : request.getTargets()) {
             try {
                 if (previewType(s)) {
-                    return true;
+                    ++count;
                 }
             } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                 Log.w(TAG, "Surface abandoned, skipping...", e);
             }
         }
-        return false;
+        return count;
     }
 
     /**
@@ -115,8 +119,8 @@ public class RequestHolder {
         private final int mSubsequenceId;
         private final CaptureRequest mRequest;
         private final boolean mRepeating;
-        private final boolean mHasJpegTargets;
-        private final boolean mHasPreviewTargets;
+        private final int mNumJpegTargets;
+        private final int mNumPreviewTargets;
 
         /**
          * Construct a new {@link Builder} to generate {@link RequestHolder} objects.
@@ -134,8 +138,8 @@ public class RequestHolder {
             mSubsequenceId = subsequenceId;
             mRequest = request;
             mRepeating = repeating;
-            mHasJpegTargets = requestContainsJpegTargets(mRequest);
-            mHasPreviewTargets = requestContainsPreviewTargets(mRequest);
+            mNumJpegTargets = numJpegTargets(mRequest);
+            mNumPreviewTargets = numPreviewTargets(mRequest);
         }
 
         /**
@@ -147,20 +151,20 @@ public class RequestHolder {
          */
         public RequestHolder build(long frameNumber) {
             return new RequestHolder(mRequestId, mSubsequenceId, mRequest, mRepeating, frameNumber,
-                    mHasJpegTargets, mHasPreviewTargets);
+                    mNumJpegTargets, mNumPreviewTargets);
         }
     }
 
     private RequestHolder(int requestId, int subsequenceId, CaptureRequest request,
-                          boolean repeating, long frameNumber, boolean hasJpegTargets,
-                          boolean hasPreviewTargets) {
+                          boolean repeating, long frameNumber, int numJpegTargets,
+                          int numPreviewTargets) {
         mRepeating = repeating;
         mRequest = request;
         mRequestId = requestId;
         mSubsequeceId = subsequenceId;
         mFrameNumber = frameNumber;
-        mHasJpegTargets = hasJpegTargets;
-        mHasPreviewTargets = hasPreviewTargets;
+        mNumJpegTargets = numJpegTargets;
+        mNumPreviewTargets = numPreviewTargets;
     }
 
     /**
@@ -209,7 +213,7 @@ public class RequestHolder {
      * Returns true if any of the surfaces targeted by the contained request require jpeg buffers.
      */
     public boolean hasJpegTargets() {
-        return mHasJpegTargets;
+        return mNumJpegTargets > 0;
     }
 
     /**
@@ -217,7 +221,36 @@ public class RequestHolder {
      * non-jpeg buffer type.
      */
     public boolean hasPreviewTargets(){
-        return mHasPreviewTargets;
+        return mNumPreviewTargets > 0;
+    }
+
+    /**
+     * Return the number of jpeg-type surfaces targeted by this request.
+     */
+    public int numJpegTargets() {
+        return mNumJpegTargets;
+    }
+
+    /**
+     * Return the number of non-jpeg-type surfaces targeted by this request.
+     */
+    public int numPreviewTargets() {
+        return mNumPreviewTargets;
+    }
+
+    /**
+     * Mark this request as failed.
+     */
+    public void failRequest() {
+        Log.w(TAG, "Capture failed for request: " + getRequestId());
+        mFailed = true;
+    }
+
+    /**
+     * Return {@code true} if this request failed.
+     */
+    public boolean requestFailed() {
+        return mFailed;
     }
 
 }
