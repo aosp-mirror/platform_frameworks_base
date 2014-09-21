@@ -399,8 +399,9 @@ public class LegacyRequestMapper {
 
         // jpeg.orientation
         {
-            int orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-            params.setRotation(ParamsUtils.getOrDefault(request, JPEG_ORIENTATION, orientation));
+            Integer orientation = request.get(CaptureRequest.JPEG_ORIENTATION);
+            params.setRotation(ParamsUtils.getOrDefault(request, JPEG_ORIENTATION,
+                    (orientation == null) ? 0 : orientation));
         }
 
         // jpeg.quality
