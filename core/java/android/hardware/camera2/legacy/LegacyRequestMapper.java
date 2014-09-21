@@ -497,6 +497,11 @@ public class LegacyRequestMapper {
             }
         }
 
+        if (meteringRectangleList.size() == 0) {
+            Log.w(TAG, "Only received metering rectangles with weight 0.");
+            return Arrays.asList(ParameterUtils.CAMERA_AREA_DEFAULT);
+        }
+
         // Ignore any regions beyond our maximum supported count
         int countMeteringAreas =
                 Math.min(maxNumMeteringAreas, meteringRectangleList.size());
