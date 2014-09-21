@@ -183,9 +183,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Režim V letadle"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim V letadle je ZAPNUTÝ"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim V letadle je VYPNUTÝ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Režim Letadlo"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim Letadlo je ZAPNUTÝ"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim Letadlo je VYPNUTÝ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nastavení"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Zamknout"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -280,10 +280,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Umožňuje aplikaci přijmout a zpracovat zprávy SMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"příjem textových zpráv (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"příjem nouzového vysílání"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Umožňuje aplikaci přijmout a zpracovat zprávy tísňového vysílání. Toto oprávnění je dostupné pouze pro systémové aplikace."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čtení zpráv informační služby"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informační služby přijaté ve vašem zařízení. Upozornění informační služby jsou v některých oblastech odesílána za účelem varování před mimořádnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informační služby."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"příjem výstražných zpráv o výjimečné situaci"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Umožňuje aplikaci přijmout a zpracovat výstražné zprávy o výjimečných situacích. Toto oprávnění je dostupné pouze pro systémové aplikace."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čtení zpráv informačních služeb"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"odesílání událostí typu „odpovězte zprávou“"</string>
@@ -774,7 +774,7 @@
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
     <item msgid="7897544654242874543">"Práce"</item>
-    <item msgid="1103601433382158155">"Pracovní fax"</item>
+    <item msgid="1103601433382158155">"Fax práce"</item>
     <item msgid="1735177144948329370">"Fax domů"</item>
     <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Ostatní"</item>
@@ -829,7 +829,7 @@
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Jiný fax"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radiotelefon"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Telefon pro sluchově postižené (TTY/TDD)"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Pracovní mobil"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pracovní pager"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistent"</string>
@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Sdílet v aplikaci %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskou aplikaci"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Použít jinou aplikaci"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v sekci Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Vyberte akci"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Vyberte aplikaci pro zařízení USB"</string>
@@ -1257,7 +1258,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Hlasitost médií"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hlasitost oznámení"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Výchozí vyzváněcí tón"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Výchozí vyzváněcí tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Výchozí tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Žádné"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváněcí tóny"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámý vyzváněcí tón"</string>
@@ -1641,7 +1642,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Usnadnění přístupu je aktivováno."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Usnadnění zrušeno."</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuální uživatel je <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Přepínání na uživatele <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Přepínání na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Chyba"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Administrátor tuto změnu zakázal"</string>
@@ -1776,6 +1777,15 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o kód PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Před uvolněním požádat o bezpečnostní gesto"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Za účelem zvýšení životnosti baterie režim úspory baterie sníží výkon vašeho zařízení a omezí vibrace a většinu dat na pozadí. E-mail, zprávy a další aplikace, které používají synchronizaci, nemusejí být aktualizovány, dokud je nespustíte.\n\nPři nabíjení zařízení se režim úspory baterie automaticky vypne."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Za účelem zvýšení životnosti baterie spořič baterie sníží výkon vašeho zařízení a omezí vibrace a většinu dat na pozadí. E-mail, zprávy a další aplikace, které používají synchronizaci, nemusejí být aktualizovány, dokud je nespustíte.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokud v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí pozastavení"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Na jednu minutu"</item>
+    <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Na 1 h"</item>
+    <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Na dobu neurčitou"</string>
 </resources>

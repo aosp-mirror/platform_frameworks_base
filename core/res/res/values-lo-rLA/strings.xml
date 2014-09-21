@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ແບ່ງ​ປັນ​ກັບ %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ເລືອກແອັບຯ Home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"ນຳໃຊ້ແອັບຯອື່ນ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ລຶບລ້າງຄ່າເລີ່ມຕົ້ນ ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ເລືອກການເຮັດວຽກ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ເລືອກແອັບຯສໍາລັບອຸປະກອນ USB"</string>
@@ -1778,4 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸງ​ອາ​ຍຸ​ແບັດ​ເຕ​ີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​​ຂອງ​ອຸ​ປະ​ກອນ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນເຕືອນ ຮວມ​ເຖິງຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່​ນຳ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ພວກ​ມັນ​ຂຶ້ນ​ມາ.\n\n​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ​ເມື່ອ​ມີ​ອຸ​ປະ​ກອນ​ຖືກ​ສາກ​ໄຟ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
+    <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"ເປັນ​ເວລາ​ນຶ່ງ​ຊົ່ວ​ໂມງ"</item>
+    <item quantity="other" msgid="5408537517529822157">"ເປັນ​ເວລາ %d ຊົ່ວ​ໂມງ"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ຢ່າງ​ບໍ່​ມີ​ກຳນົດ"</string>
 </resources>

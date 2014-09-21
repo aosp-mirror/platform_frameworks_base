@@ -211,7 +211,7 @@
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"שינוי הגדרות האודיו."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"השפעה על הסוללה"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"שימוש בתכונות שיכולות לרוקן את הסוללה במהירות."</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"לוח שנה"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"יומן"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"גישה ישירה ללוח השנה ולאירועים."</string>
     <string name="permgrouplab_dictionary" msgid="4148597128843641379">"קריאת מילון משתמש"</string>
     <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"קריאת מילים במילון משתמש."</string>
@@ -500,11 +500,11 @@
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"כתיבה בזרם החברתי שלך"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"מאפשר לאפליקציה להציג עדכונים חברתיים מהחברים שלך. היזהר בעת שיתוף מידע -- הדבר מאפשר לאפליקציה ליצור הודעות שעשויות להיראות כאילו שנשלחו מחבר. שים לב: ייתכן אישור זה לא נאכף בכל הרשתות החברתיות."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי יומן וגם מידע סודי"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"מאפשר לאפליקציה לקרוא את כל אירועי לוח השנה המאוחסנים בטאבלט, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני לוח השנה שלך, ללא התחשבות בסודיות או ברגישות."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"מאפשר לאפליקציה לקרוא את כל אירועי לוח השנה המאוחסנים בטלפון, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני לוח השנה שלך, ללא התחשבות בסודיות או ברגישות."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"מאפשר לאפליקציה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני היומן שלך, ללא התחשבות בסודיות או ברגישות."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"מאפשר לאפליקציה לקרוא את כל אירועי היומן המאוחסנים בטלפון, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני היומן שלך, ללא התחשבות בסודיות או ברגישות."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי יומן ושליחת דוא\"ל לאורחים ללא ידיעת הבעלים"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטאבלט, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי לוח שנה או לשנות אירועים ללא ידיעת הבעלים."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטלפון, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי לוח שנה או לשנות אירועים ללא ידיעת הבעלים."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטאבלט, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי יומן או לשנות אירועים ללא ידיעת הבעלים."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטלפון, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי יומן או לשנות אירועים ללא ידיעת הבעלים."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"צור מקורות מיקום מדומים לצורך בדיקה"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"‏צור מקורות מיקום מדומים לבדיקה, או התקן ספק מיקום חדש. פעולה זו מאפשרת לאפליקציה לעקוף את המיקום ו/או הסטטוס המוחזרים על ידי מקורות מיקום אחרים כמו GPS או ספקי מיקום."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
@@ -1205,6 +1205,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏שתף באמצעות %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"בחר אפליקציה לדף הבית"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"השתמש כברירת מחדל עבור פעולה זו."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"השתמש באפליקציה אחרת"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏נקה את הגדרת המחדל ב\'הגדרות מערכת\' &lt;‏ Google Apps‏ &lt; \'הורדות\'."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"בחירת פעולה"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏בחר אפליקציה עבור התקן ה-USB"</string>
@@ -1778,4 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"כדי לעזור בהארכת חיי הסוללה, תכונת \'חיסכון בסוללה\' מצמצמת את פעילות המכשיר ומגבילה את השימוש ברטט וברוב נתוני הרקע. ייתכן שדוא\"ל, שליחת הודעות ואפליקציות אחרות המסתמכות על סנכרון לא יתעדכנו, אלא אם תפתח אותן.\n\nתכונת \'חיסכון בסוללה\' מופסקת אוטומטית כשהמכשיר מחובר לחשמל."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"עד לסיום ההשבתה בשעה <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"למשך דקה אחת"</item>
+    <item quantity="other" msgid="6924190729213550991">"‏למשך %d דקות"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"למשך שעה אחת"</item>
+    <item quantity="other" msgid="5408537517529822157">"‏למשך %d שעות"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ללא הגבלה"</string>
 </resources>
