@@ -144,7 +144,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"வைஃபை"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"சிம் இல்லை."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் இணைப்பு முறை."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் டெதெரிங்."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"பேட்டரி சக்தி <xliff:g id="NUMBER">%d</xliff:g> சதவிகிதம் உள்ளது."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"கணினி அமைப்பு."</string>
@@ -221,7 +221,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"தற்போது திரை அகலவாக்குத் திசையமைப்பில் பூட்டப்பட்டுள்ளது."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"தற்போது திரை நீளவாக்குத் திசையமைப்பில் பூட்டப்பட்டுள்ளது."</string>
     <string name="dessert_case" msgid="1295161776223959221">"இனிப்பு வடிவங்கள்"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"முழுநேர இயக்கம்"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"பகல்கனா"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ஈதர்நெட்"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"விமானப் பயன்முறை"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"சார்ஜ் ஏற்றுகிறது, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -264,7 +264,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"முடிந்தது"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"இணைக்கப்பட்டது"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"இணைக்கிறது..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"இணைப்பு முறை"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"டெதெரிங்"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ஹாட்ஸ்பாட்"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"அறிவிப்புகள்"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ஃபிளாஷ்லைட்"</string>
@@ -279,6 +279,8 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"பயன்பாட்டு தகவல்"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"லாக்-டு-ஆப்"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"தேடு"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"சார்ஜ் செய்யப்பட்டது"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"சார்ஜாகிறது"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"முழுவதும் சார்ஜாக <xliff:g id="CHARGING_TIME">%s</xliff:g> ஆகும்"</string>
@@ -287,9 +289,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"தேடு"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> க்கு மேலாக இழுக்கவும்."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> க்கு இடதுபக்கமாக இழுக்கவும்."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"குறுக்கீடுகளும் இல்லை. அலாரங்களும் இல்லை."</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"குறுக்கீடுகள் இல்லை"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"முதன்மையான குறுக்கீடுகள் மட்டும்"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"அறிவிப்பும் இல்லை. அலாரங்களும் இல்லை."</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"தெரிவிக்காதே"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"முக்கிய அறிவிப்புகள் மட்டும்"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"அடுத்த அலாரம் - <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"அடுத்த அலாரம் - <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g> க்கு அலாரத்தைக் கேட்க மாட்டீர்கள்"</string>
