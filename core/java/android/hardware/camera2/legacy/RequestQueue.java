@@ -80,10 +80,25 @@ public class RequestQueue {
             ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
                     mCurrentRepeatingFrameNumber - 1;
             mCurrentRepeatingFrameNumber = INVALID_FRAME;
+            Log.i(TAG, "Repeating capture request cancelled.");
         } else {
             Log.e(TAG, "cancel failed: no repeating request exists for request id: " + requestId);
         }
         return ret;
+    }
+
+    /**
+     * Cancel a repeating request.
+     *
+     * @return the last frame to be returned from the HAL for the given repeating request, or
+     *          {@code INVALID_FRAME} if none exists.
+     */
+    public synchronized long stopRepeating() {
+        if (mRepeatingRequest == null) {
+            Log.e(TAG, "cancel failed: no repeating request exists.");
+            return INVALID_FRAME;
+        }
+        return stopRepeating(mRepeatingRequest.getRequestId());
     }
 
     /**
@@ -105,6 +120,7 @@ public class RequestQueue {
         BurstHolder burst = new BurstHolder(requestId, repeating, requests);
         long ret = INVALID_FRAME;
         if (burst.isRepeating()) {
+            Log.i(TAG, "Repeating capture request set.");
             if (mRepeatingRequest != null) {
                 ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
                         mCurrentRepeatingFrameNumber - 1;
