@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> វិនាទី"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> វិនាទី"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;គ្មាន​ចំណង​ជើង&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(គ្មាន​លេខ​ទូរស័ព្ទ)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(មិន​ស្គាល់)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"សារ​ជា​សំឡេង"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"ចូល​ដំណើរការ​កម្មវិធី​បញ្ជា kernel MTP ដើម្បី​អនុវត្ត​ពិធីការ​យូអេសប៊ី MTP ។"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"សាកល្បង​ផ្នែក​រឹង"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ឲ្យ​កម្មវិធី​ពិនិត្យ​គ្រឿង​ផ្សេងៗ​​សម្រាប់​សាកល្បង​ផ្នែក​រឹង។"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"ចូល​ដំណើរការ​វិទ្យុ FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​វិទ្យុ FM ដើម្បី​ស្ដាប់​កម្មវិធី។"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ឲ្យ​កម្មវិធី​ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​គ្មាន​សកម្មភាព​របស់​អ្នក។​ វា​អាច​កាត់​លុយ​ ឬ​ហៅ​ដោយ​មិន​រំពឹង​ទុក។ ចំណាំ​ថា​ វា​មិន​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ហៅ​លេខ​ពេល​អាសន្ន​ទេ។ កម្មវិធី​ព្យាបាទ​អាច​កាត់​លុយ​របស់​អ្នក​ ដោយ​ធ្វើការ​ហៅ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ហៅ​លេខ​ទូរស័ព្ទ​ណាមួយ​ដោយ​ផ្ទាល់"</string>

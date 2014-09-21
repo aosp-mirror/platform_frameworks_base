@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> seconden"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> seconde"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Zonder titel&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Geen telefoonnummer)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Onbekend)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Voicemail"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Staat toegang tot de kernel van de MTP-driver toe voor het implementeren van het MTP-USB-protocol."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardware testen"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Hiermee kan de app verschillende randapparaten beheren om de hardware te testen."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"toegang tot FM-radio"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Hiermee krijgt de app toegang tot FM-radio om naar programma\'s te luisteren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Hiermee kan de app zonder uw tussenkomst telefoonnummers bellen. Dit kan tot onverwachte kosten of oproepen leiden. De app kan hiermee geen noodnummers bellen. Schadelijke apps kunnen u geld kosten door nummers te bellen zonder om uw bevestiging te vragen."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"alle telefoonnummers rechtstreeks bellen"</string>

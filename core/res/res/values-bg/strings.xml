@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> сек"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> сек"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без заглавие&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Няма телефонен номер)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Неизвестно)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Гласова поща"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Разрешава достъп до MTP драйвера на ядрото за внедряване на протокола MTP през USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тест на хардуера"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Разрешава на приложението да контролира различни периферни устройства с цел тестване на хардуера."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"достъп до FM радио"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Разрешава на приложението да осъществява достъп до FM радио за слушане на програми."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно обаждане до телефонни номера"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Разрешава на приложението да се обажда без ваша намеса до телефонни номера, което може да доведе до неочаквано таксуване или обаждания. Обърнете внимание, че това не му позволява да извършва обаждания до спешните служби. Злонамерените приложения могат да ви въвлекат в разходи, като извършват обаждания без потвърждение от ваша страна."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"директно обаждане до всички телефонни номера"</string>

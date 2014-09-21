@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ثانية"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> ثانية"</string>
     <string name="untitled" msgid="4638956954852782576">"‏&lt;بلا عنوان&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ليس هناك رقم هاتف)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(غير معروف)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"البريد الصوتي"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"‏لإتاحة الدخول إلى برنامج تشغيل kernel MTP لتنفيذ بروتوكول MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"اختبار الأجهزة"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"للسماح للتطبيق بالتحكم في الأجهزة الطرفية المتنوعة بغرض اختبار الأجهزة."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"‏الدخول إلى راديو FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"‏السماح للتطبيق بالدخول إلى راديو FM للاستماع الى البرامج."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"اتصال مباشر بأي رقم من أرقام الهواتف"</string>

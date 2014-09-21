@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;未命名&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"..."</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"（无电话号码）"</string>
     <string name="unknownName" msgid="2277556546742746522">"（未知）"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"语音信箱"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"允许访问内核MTP驱动程序，以便实现MTP USB协议。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"测试硬件"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"允许应用控制各种外围设备以进行硬件测试。"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"接收FM电台"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"允许应用接收FM电台以收听节目。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允许该应用在您未执行操作的情况下拨打电话号码。此权限可能会导致意外收费或呼叫。请注意，此权限不允许该应用拨打紧急电话号码。恶意应用可通过拨打电话产生相关费用，而无需您的确认。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接呼叫任何电话号码"</string>
@@ -1135,7 +1135,7 @@
     <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> 天后"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"日期：<xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"时间：<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"年份：<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"天"</string>
     <string name="days" msgid="4774547661021344602">"天"</string>

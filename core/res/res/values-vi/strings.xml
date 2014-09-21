@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> giây"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> giây"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Không có tiêu đề&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Không có số điện thoại nào)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Không xác định)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Thư thoại"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Cho phép truy cập tới trình điều khiển MTP nhân hệ điều hành để triển khai giao thức MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"kiểm tra phần cứng"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Cho phép ứng dụng kiểm soát các thiết bị ngoại vi khác nhau nhằm mục đích kiểm tra phần cứng."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"truy cập đài FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Cho phép ứng dụng truy cập đài FM để nghe các chương trình."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Cho phép ứng dụng gọi các số điện thoại mà không cần sự can thiệp của bạn. Việc này có thể dẫn đến các khoản phí hoặc cuộc gọi không mong muốn. Lưu ý rằng quyền này không cho phép ứng dụng gọi các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn tốn tiền do thực hiện cuộc gọi mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"gọi trực tiếp số điện thoại bất kỳ"</string>

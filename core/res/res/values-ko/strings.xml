@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>초"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g>초"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;제목 없음&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(전화번호 없음)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(알 수 없음)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"음성메일"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"커널 MTP 드라이버에 액세스하여 MTP USB 프로토콜을 구현할 수 있도록 허용합니다."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"하드웨어 테스트"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"앱이 하드웨어를 테스트할 목적으로 다양한 주변기기를 제어할 수 있도록 허용합니다."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM 라디오 액세스"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"앱에서 FM 라디오에 액세스할 수 있도록 허용하여 프로그램을 청취합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"모든 전화번호 자동 연결"</string>

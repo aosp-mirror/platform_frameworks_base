@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ಶೀರ್ಷಿಕೆ ರಹಿತ&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ಯಾವುದೇ ಫೋನ್ ಸಂಖ್ಯೆಯಿಲ್ಲ)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(ಅಜ್ಞಾತ)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ಧ್ವನಿಮೇಲ್"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB ಪ್ರೊಟೊಕಾಲ್ ಜಾರಿಗೊಳಿಸಲು ಕೆರ್ನಲ್ MTP ಡ್ರೈವರ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ಹಾರ್ಡ್‌ವೇರ್ ಪರೀಕ್ಷಿಸಿ"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ಹಾರ್ಡ್‌ವೇರ್‌‌ ಪರೀಕ್ಷೆಯ ಉದ್ದೇಶಕ್ಕಾಗಿ ವಿವಿಧ ಬಾಹ್ಯೋಪಕರಣಗಳನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM ರೇಡಿಯೋ ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"ಕಾರ್ಯಕ್ರಮಗಳನ್ನು ಕೇಳಲು FM ರೇಡಿಯೋ ಪ್ರವೇಶಕ್ಕೆ ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ನೇರವಾಗಿ ಕರೆ ಮಾಡಿ"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ನಿಮ್ಮ ಹಸ್ತಕ್ಷೇಪ ಇಲ್ಲದೆಯೇ ಫೋನ್‍ ಸಂಖ್ಯೆಗಳಿಗೆ ಕರೆ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಅನಿರೀಕ್ಷಿತ ಶುಲ್ಕಗಳು ಅಥವಾ ಕರೆಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ತುರ್ತು ಸಂಖ್ಯೆಗಳಿಗೆ ಕರೆಮಾಡಲು ಈ ಅಪ್ಲಿಕೇಶನ್‍ ಅನುಮತಿಸುವುದಿಲ್ಲ ಎಂಬುದು ಗಮನದಲ್ಲಿರಲಿ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ಖಾತರಿ ಇಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡುವುದರ ಮೂಲಕ ನಿಮ್ಮ ಹಣ ಖರ್ಚಾಗಬಹುದು."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ಯಾವುದೇ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ನೇರವಾಗಿ ಕರೆ ಮಾಡಿ"</string>

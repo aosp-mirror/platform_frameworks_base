@@ -39,8 +39,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> സെക്കൻഡ്"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> സെക്കൻഡ്"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ശീർഷകമില്ലാത്ത&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ഫോൺ നമ്പറില്ല)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(അജ്ഞാതം)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"വോയ്സ് മെയില്‍"</string>
@@ -583,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB പ്രോട്ടോകോൾ നടപ്പിലാക്കുന്നതിനായി പ്രധാന MTP ഡ്രൈവറിലേക്ക് ആക്‌സസ്സ് അനുവദിക്കുക."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ഹാർഡ്‌വെയർ പരിശോധിക്കുക"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ഹാർഡ്‌വെയർ പരിശോധനയ്‌ക്കുള്ള വ്യത്യസ്‌ത പെരിഫെറലുകൾ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM റേഡിയോയ്‌ക്കുള്ള ആക്‌സസ്സ്"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"പരിപാടികൾ കേൾക്കുന്നതിനുള്ള FM റേഡിയോ ആക്‌സസ്സ് ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ ഫോൺ നമ്പറുകളിലേക്ക് കോൾ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിത നിരക്കുകൾക്കോ കോളുകൾക്കോ ഇടയാക്കാം. ഇത് അടിയന്തര നമ്പറുകളിലേക്ക് വിളിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ കോളുകൾ ചെയ്യുന്നത് പണച്ചെലവിനിടയാക്കാം."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ഏത് ഫോൺ നമ്പറുകളിലേക്കും നേരിട്ട് വിളിക്കുക"</string>
