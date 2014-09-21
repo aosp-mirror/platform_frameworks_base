@@ -1447,7 +1447,7 @@
     <string name="submit" msgid="1602335572089911941">"சமர்ப்பி"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"கார் பயன்முறை இயக்கப்பட்டது"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"கார் பயன்முறையிலிருந்து வெளியேற தொடவும்."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"இணைப்பு முறை அல்லது செயலில் உள்ள ஹாட்ஸ்பாட்"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"டெதெரிங்/ஹாட்ஸ்பாட் இயங்குகிறது"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"அமைக்க, தொடவும்."</string>
     <string name="back_button_label" msgid="2300470004503343439">"முந்தையது"</string>
     <string name="next_button_label" msgid="1080555104677992408">"அடுத்து"</string>
@@ -1603,7 +1603,7 @@
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"தவறான பின்"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"உங்கள் வடிவத்தை வரையவும்"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"வடிவத்தை வரையவும்"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"சிம் பின்னை உள்ளிடவும்"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"பின்னை உள்ளிடுக"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"கடவுச்சொல்லை உள்ளிடவும்"</string>
@@ -1776,7 +1776,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>இல் செயல்படாத நேரம் முடியும் வரை"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
     <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
