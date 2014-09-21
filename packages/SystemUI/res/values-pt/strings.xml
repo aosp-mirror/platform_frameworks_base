@@ -22,12 +22,12 @@
     <string name="app_label" msgid="7164937344850004466">"Interf sist"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do aplicativo"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do app"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Suas telas recentes aparecem aqui"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar aplicativos recentes"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar apps recentes"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 aplicativo recente"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d aplicativos recentes"</item>
+    <item quantity="one" msgid="5854176083865845541">"1 app recente"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d apps recentes"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em andamento"</string>
@@ -52,8 +52,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth vinculado"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclado físico"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permitir que o aplicativo <xliff:g id="APPLICATION">%1$s</xliff:g> acesse o dispositivo USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permitir que o aplicativo <xliff:g id="APPLICATION">%1$s</xliff:g> acesse o acessório USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse o dispositivo USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse o acessório USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Abrir <xliff:g id="ACTIVITY">%1$s</xliff:g> quando este dispositivo USB estiver conectado?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Abrir <xliff:g id="ACTIVITY">%1$s</xliff:g> quando este acessório USB estiver conectado?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Nenhum apl. instalado funciona com o USB. Saiba mais sobre o acessório em <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -278,9 +278,11 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limite: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Suas telas recentes aparecem aqui"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informações do aplicativo"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informações do app"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"bloquear no app"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pesquisar"</string>
+    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Carregando"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> até concluir"</string>
