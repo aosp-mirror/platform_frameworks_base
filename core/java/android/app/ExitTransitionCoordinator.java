@@ -255,6 +255,16 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
+    public void stop() {
+        if (mIsReturning && mActivity != null) {
+            // Override the previous ActivityOptions. We don't want the
+            // activity to have options since we're essentially canceling the
+            // transition and finishing right now.
+            mActivity.convertToTranslucent(null, null);
+            finish();
+        }
+    }
+
     private void startExitTransition() {
         Transition transition = getExitTransition();
         ViewGroup decorView = getDecor();
@@ -425,13 +435,14 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void finish() {
         stopCancel();
-        mActivity.mActivityTransitionState.clear();
+        if (mActivity != null) {
+            mActivity.mActivityTransitionState.clear();
+            mActivity.finish();
+            mActivity.overridePendingTransition(0, 0);
+            mActivity = null;
+        }
         // Clear the state so that we can't hold any references accidentally and leak memory.
-        mHandler.removeMessages(MSG_CANCEL);
         mHandler = null;
-        mActivity.finish();
-        mActivity.overridePendingTransition(0, 0);
-        mActivity = null;
         mSharedElementBundle = null;
         if (mBackgroundAnimator != null) {
             mBackgroundAnimator.cancel();

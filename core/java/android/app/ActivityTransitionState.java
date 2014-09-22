@@ -67,6 +67,12 @@ class ActivityTransitionState {
     private ExitTransitionCoordinator mCalledExitCoordinator;
 
     /**
+     * The ExitTransitionCoordinator used to return to a previous Activity when called with
+     * {@link android.app.Activity#finishAfterTransition()}.
+     */
+    private ExitTransitionCoordinator mReturnExitCoordinator;
+
+    /**
      * We must be able to cancel entering transitions to stop changing the Window to
      * opaque when we exit before making the Window opaque.
      */
@@ -218,6 +224,10 @@ class ActivityTransitionState {
             mEnterTransitionCoordinator.stop();
             mEnterTransitionCoordinator = null;
         }
+        if (mReturnExitCoordinator != null) {
+            mReturnExitCoordinator.stop();
+            mReturnExitCoordinator = null;
+        }
     }
 
     public void onResume() {
@@ -260,12 +270,12 @@ class ActivityTransitionState {
                     }
                 }
 
-                ExitTransitionCoordinator exitCoordinator =
+                mReturnExitCoordinator =
                         new ExitTransitionCoordinator(activity, mEnteringNames, null, null, true);
                 if (enterViewsTransition != null && decor != null) {
                     enterViewsTransition.resume(decor);
                 }
-                exitCoordinator.startExit(activity.mResultCode, activity.mResultData);
+                mReturnExitCoordinator.startExit(activity.mResultCode, activity.mResultData);
             }
             return true;
         }

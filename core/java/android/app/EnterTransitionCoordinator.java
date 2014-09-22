@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 
 import java.util.ArrayList;
 
@@ -265,10 +266,14 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     protected void prepareEnter() {
+        ViewGroup decorView = getDecor();
+        if (mActivity == null || decorView == null) {
+            return;
+        }
         mActivity.overridePendingTransition(0, 0);
         if (!mIsReturning) {
             mWasOpaque = mActivity.convertToTranslucent(null, null);
-            Drawable background = getDecor().getBackground();
+            Drawable background = decorView.getBackground();
             if (background != null) {
                 getWindow().setBackgroundDrawable(null);
                 background = background.mutate();
@@ -282,18 +287,26 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     @Override
     protected Transition getViewsTransition() {
+        Window window = getWindow();
+        if (window == null) {
+            return null;
+        }
         if (mIsReturning) {
-            return getWindow().getReenterTransition();
+            return window.getReenterTransition();
         } else {
-            return getWindow().getEnterTransition();
+            return window.getEnterTransition();
         }
     }
 
     protected Transition getSharedElementTransition() {
+        Window window = getWindow();
+        if (window == null) {
+            return null;
+        }
         if (mIsReturning) {
-            return getWindow().getSharedElementReenterTransition();
+            return window.getSharedElementReenterTransition();
         } else {
-            return getWindow().getSharedElementEnterTransition();
+            return window.getSharedElementEnterTransition();
         }
     }
 
@@ -518,15 +531,29 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void stop() {
-        makeOpaque();
-        mIsCanceled = true;
-        mResultReceiver = null;
+        // Restore the background to its previous state since the
+        // Activity is stopping.
         if (mBackgroundAnimator != null) {
             mBackgroundAnimator.end();
             mBackgroundAnimator = null;
+        } else if (mWasOpaque) {
+            ViewGroup decorView = getDecor();
+            if (decorView != null) {
+                Drawable drawable = decorView.getBackground();
+                if (drawable != null) {
+                    drawable.setAlpha(1);
+                }
+            }
         }
+        makeOpaque();
+        mIsCanceled = true;
+        mResultReceiver = null;
         mActivity = null;
         moveSharedElementsFromOverlay();
+        if (mTransitioningViews != null) {
+            showViews(mTransitioningViews, true);
+        }
+        showViews(mSharedElements, true);
         clearState();
     }
 
