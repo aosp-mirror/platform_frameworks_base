@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -634,6 +635,25 @@ public class InputMethodUtils {
                                 (TextUtils.isEmpty(imiLabel) ?
                                         "" : " - " + imiLabel))
                 : imiLabel;
+    }
+
+    /**
+     * Returns true if a package name belongs to a UID.
+     *
+     * <p>This is a simple wrapper of {@link AppOpsManager#checkPackage(int, String)}.</p>
+     * @param appOpsManager the {@link AppOpsManager} object to be used for the validation.
+     * @param uid the UID to be validated.
+     * @param packageName the package name.
+     * @return {@code true} if the package name belongs to the UID.
+     */
+    public static boolean checkIfPackageBelongsToUid(final AppOpsManager appOpsManager,
+            final int uid, final String packageName) {
+        try {
+            appOpsManager.checkPackage(uid, packageName);
+            return true;
+        } catch (SecurityException e) {
+            return false;
+        }
     }
 
     /**
