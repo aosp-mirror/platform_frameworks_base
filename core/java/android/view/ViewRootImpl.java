@@ -804,6 +804,9 @@ public final class ViewRootImpl implements ViewParent,
         if (mAppVisible != visible) {
             mAppVisible = visible;
             scheduleTraversals();
+            if (!mAppVisible) {
+                WindowManagerGlobal.trimForeground();
+            }
         }
     }
 
