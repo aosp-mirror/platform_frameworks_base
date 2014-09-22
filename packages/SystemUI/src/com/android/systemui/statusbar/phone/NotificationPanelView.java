@@ -1738,6 +1738,10 @@ public class NotificationPanelView extends PanelView implements
         updateKeyguardStatusBarVisibility();
     }
 
+    public boolean isDozing() {
+        return mDozing;
+    }
+
     private static void setBackgroundColorAlpha(final View target, int rgb, int targetAlpha,
             boolean animate) {
         int currentAlpha = getBackgroundAlpha(target);
