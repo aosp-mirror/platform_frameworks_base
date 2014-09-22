@@ -2351,7 +2351,7 @@ public final class ActiveServices {
     void serviceTimeout(ProcessRecord proc) {
         String anrMessage = null;
 
-        synchronized(this) {
+        synchronized(mAm) {
             if (proc.executingServices.size() == 0 || proc.thread == null) {
                 return;
             }
@@ -2647,7 +2647,7 @@ public final class ActiveServices {
             int opti, boolean dumpAll) {
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
 
-        synchronized (this) {
+        synchronized (mAm) {
             int[] users = mAm.getUsersLocked();
             if ("all".equals(name)) {
                 for (int user : users) {
@@ -2721,7 +2721,7 @@ public final class ActiveServices {
     private void dumpService(String prefix, FileDescriptor fd, PrintWriter pw,
             final ServiceRecord r, String[] args, boolean dumpAll) {
         String innerPrefix = prefix + "  ";
-        synchronized (this) {
+        synchronized (mAm) {
             pw.print(prefix); pw.print("SERVICE ");
                     pw.print(r.shortName); pw.print(" ");
                     pw.print(Integer.toHexString(System.identityHashCode(r)));
