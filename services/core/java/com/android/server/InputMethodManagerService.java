@@ -40,6 +40,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AlertDialog;
+import android.app.AppOpsManager;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -175,6 +176,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodFileManager mFileManager;
     private final HardKeyboardListener mHardKeyboardListener;
     private final WindowManagerService mWindowManagerService;
+    private final AppOpsManager mAppOpsManager;
 
     final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1, -1);
 
@@ -643,6 +645,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }, true /*asyncHandler*/);
         mWindowManagerService = windowManager;
+        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mHardKeyboardListener = new HardKeyboardListener();
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
@@ -1744,6 +1747,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + id);
+        }
+
+        if (mCurClient != null && mCurAttribute != null) {
+            final int uid = mCurClient.uid;
+            final String packageName = mCurAttribute.packageName;
+            if (SystemConfig.getInstance().getFixedImeApps().contains(packageName)) {
+                if (InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, uid, packageName)) {
+                    return;
+                }
+                // TODO: Do we need to lock the input method when the application reported an
+                // incorrect package name?
+                Slog.e(TAG, "Ignoring FixedImeApps due to the validation failure. uid=" + uid
+                        + " package=" + packageName);
+            }
         }
 
         // See if we need to notify a subtype change within the same IME.
