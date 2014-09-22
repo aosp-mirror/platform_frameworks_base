@@ -709,10 +709,10 @@ final public class MediaCodec {
         }
 
         /**
-         * Retrieve a human readable diagnostic information string
-         * associated with the exception. DO NOT SHOW THIS TO END-USERS!
-         * This string will not be localized or generally comprehensible
-         * to end-users.
+         * Retrieve a developer-readable diagnostic information string
+         * associated with the exception. Do not show this to end-users,
+         * since this string will not be localized or generally
+         * comprehensible to end-users.
          */
         public String getDiagnosticInfo() {
             return mDiagnosticInfo;

@@ -190,6 +190,9 @@ public final class MediaDrm {
         private final int mErrorCode;
         private final String mDiagnosticInfo;
 
+        /**
+         * @hide
+         */
         public MediaDrmStateException(int errorCode, String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
@@ -211,9 +214,9 @@ public final class MediaDrm {
         }
 
         /**
-         * Retrieve a human readable diagnostic information string
-         * associated with the exception. DO NOT SHOW THIS TO END-USERS!
-         * This string will not be localized or generally comprehensible
+         * Retrieve a developer-readable diagnostic information string
+         * associated with the exception. Do not show this to end-users,
+         * since this string will not be localized or generally comprehensible
          * to end-users.
          */
         public String getDiagnosticInfo() {
