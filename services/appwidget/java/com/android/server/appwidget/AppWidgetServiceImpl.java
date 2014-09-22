@@ -434,6 +434,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
         }
 
+        clearProvidersAndHostsTagsLocked();
+
         loadGroupWidgetProvidersLocked(newProfileIds);
         loadGroupStateLocked(newProfileIds);
     }
@@ -2369,6 +2371,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         for (int i = 0; i < hostCount; i++) {
             Host host = mHosts.get(i);
             host.tag = i;
+        }
+    }
+
+    private void clearProvidersAndHostsTagsLocked() {
+        final int providerCount = mProviders.size();
+        for (int i = 0; i < providerCount; i++) {
+            Provider provider = mProviders.get(i);
+            provider.tag = TAG_UNDEFINED;
+        }
+
+        final int hostCount = mHosts.size();
+        for (int i = 0; i < hostCount; i++) {
+            Host host = mHosts.get(i);
+            host.tag = TAG_UNDEFINED;
         }
     }
 
