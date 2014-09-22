@@ -98,6 +98,7 @@ public class RequestThreadManager {
     private SurfaceTexture mDummyTexture;
     private Surface mDummySurface;
 
+    private final Object mIdleLock = new Object();
     private final FpsCounter mPrevCounter = new FpsCounter("Incoming Preview");
     private final FpsCounter mRequestCounter = new FpsCounter("Incoming Requests");
 
@@ -172,6 +173,14 @@ public class RequestThreadManager {
             mDummySurface = new Surface(mDummyTexture);
         }
     }
+
+    private final Camera.ErrorCallback mErrorCallback = new Camera.ErrorCallback() {
+        @Override
+        public void onError(int i, Camera camera) {
+            Log.e(TAG, "Received error " + i + " from the Camera1 ErrorCallback");
+            mDeviceState.setError(CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+        }
+    };
 
     private final ConditionVariable mReceivedJpeg = new ConditionVariable(false);
 
@@ -405,7 +414,7 @@ public class RequestThreadManager {
 
         // TODO: Detect and optimize single-output paths here to skip stream teeing.
         if (mGLThreadManager == null) {
-            mGLThreadManager = new GLThreadManager(mCameraId, facing);
+            mGLThreadManager = new GLThreadManager(mCameraId, facing, mDeviceState);
             mGLThreadManager.start();
         }
         mGLThreadManager.waitUntilStarted();
@@ -617,9 +626,20 @@ public class RequestThreadManager {
                                     CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
                             break;
                         }
-                        mDeviceState.setIdle();
-                        break;
-                    } else {
+
+                        synchronized (mIdleLock) {
+                            // Retry the the request queue.
+                            nextBurst = mRequestQueue.getNext();
+
+                            // If we still have no queued requests, go idle.
+                            if (nextBurst == null) {
+                                mDeviceState.setIdle();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (nextBurst != null) {
                         // Queue another capture if we did not get the last burst.
                         handler.sendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST);
                     }
@@ -831,6 +851,7 @@ public class RequestThreadManager {
         mFaceDetectMapper = new LegacyFaceDetectMapper(mCamera, mCharacteristics);
         mCaptureCollector = new CaptureCollector(MAX_IN_FLIGHT_REQUESTS, mDeviceState);
         mRequestThread = new RequestHandlerThread(name, mRequestHandlerCb);
+        mCamera.setErrorCallback(mErrorCallback);
     }
 
     /**
@@ -883,8 +904,11 @@ public class RequestThreadManager {
     public int submitCaptureRequests(List<CaptureRequest> requests, boolean repeating,
             /*out*/LongParcelable frameNumber) {
         Handler handler = mRequestThread.waitAndGetHandler();
-        int ret = mRequestQueue.submit(requests, repeating, frameNumber);
-        handler.sendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST);
+        int ret;
+        synchronized (mIdleLock) {
+            ret = mRequestQueue.submit(requests, repeating, frameNumber);
+            handler.sendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST);
+        }
         return ret;
     }
 
