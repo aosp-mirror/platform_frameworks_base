@@ -186,6 +186,18 @@ public abstract class HardwareRenderer {
         }
     }
 
+    public static boolean sTrimForeground = false;
+
+    /**
+     * Controls whether or not the hardware renderer should aggressively
+     * trim memory. Note that this must not be set for any process that
+     * uses WebView! This should be only used by system_process or similar
+     * that do not go into the background.
+     */
+    public static void enableForegroundTrimming() {
+        sTrimForeground = true;
+    }
+
     /**
      * Indicates whether hardware acceleration is available under any form for
      * the view hierarchy.
