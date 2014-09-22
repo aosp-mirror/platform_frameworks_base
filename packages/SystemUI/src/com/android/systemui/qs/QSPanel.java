@@ -30,6 +30,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -360,6 +361,7 @@ public class QSPanel extends ViewGroup {
             listener = mTeardownDetailWhenDone;
             fireScanStateChanged(false);
         }
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         fireShowingDetail(show ? detailAdapter : null);
         mClipper.animateCircularClip(x, y, show, listener);
     }
