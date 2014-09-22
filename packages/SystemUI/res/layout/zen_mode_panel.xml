@@ -76,7 +76,7 @@
             android:layout_alignParentEnd="true"
             android:background="@drawable/btn_borderless_rect"
             android:clickable="true"
-            android:contentDescription="@null"
+            android:contentDescription="@string/accessibility_desc_settings"
             android:scaleType="center"
             android:src="@drawable/ic_settings" />
 
