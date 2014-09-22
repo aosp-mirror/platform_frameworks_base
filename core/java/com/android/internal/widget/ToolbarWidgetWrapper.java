@@ -84,6 +84,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     private int mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
     private int mDefaultNavigationContentDescription = 0;
+    private Drawable mDefaultNavigationIcon;
 
     public ToolbarWidgetWrapper(Toolbar toolbar, boolean style) {
         this(toolbar, style, R.string.action_bar_up_description);
@@ -96,11 +97,10 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
         mTitle = toolbar.getTitle();
         mSubtitle = toolbar.getSubtitle();
         mTitleSet = mTitle != null;
-
+        final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
+                R.styleable.ActionBar, R.attr.actionBarStyle, 0);
+        mDefaultNavigationIcon = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
         if (style) {
-            final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
-                    R.styleable.ActionBar, R.attr.actionBarStyle, 0);
-
             final CharSequence title = a.getText(R.styleable.ActionBar_title);
             if (!TextUtils.isEmpty(title)) {
                 setTitle(title);
@@ -120,12 +120,9 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             if (icon != null) {
                 setIcon(icon);
             }
-
-            final Drawable navIcon = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
-            if (navIcon != null) {
-                setNavigationIcon(navIcon);
+            if (mDefaultNavigationIcon != null) {
+                setNavigationIcon(mDefaultNavigationIcon);
             }
-
             setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, 0));
 
             final int customNavId = a.getResourceId(
@@ -167,11 +164,10 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             if (popupTheme != 0) {
                 mToolbar.setPopupTheme(popupTheme);
             }
-
-            a.recycle();
         } else {
             mDisplayOpts = detectDisplayOptions();
         }
+        a.recycle();
 
         setDefaultNavigationContentDescription(defaultNavigationContentDescription);
         mHomeDescription = mToolbar.getNavigationContentDescription();
@@ -204,6 +200,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                 ActionBar.DISPLAY_USE_LOGO;
         if (mToolbar.getNavigationIcon() != null) {
             opts |= ActionBar.DISPLAY_HOME_AS_UP;
+            mDefaultNavigationIcon = mToolbar.getNavigationIcon();
         }
         return opts;
     }
@@ -410,11 +407,9 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
         if (changed != 0) {
             if ((changed & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                 if ((newOpts & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                    mToolbar.setNavigationIcon(mNavIcon);
                     updateHomeAccessibility();
-                } else {
-                    mToolbar.setNavigationIcon(null);
                 }
+                updateNavigationIcon();
             }
 
             if ((changed & AFFECTS_LOGO_MASK) != 0) {
@@ -607,14 +602,28 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
     @Override
     public void setNavigationIcon(Drawable icon) {
         mNavIcon = icon;
-        if ((mDisplayOpts & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-            mToolbar.setNavigationIcon(icon);
-        }
+        updateNavigationIcon();
     }
 
     @Override
     public void setNavigationIcon(int resId) {
         setNavigationIcon(resId != 0 ? mToolbar.getContext().getDrawable(resId) : null);
+    }
+
+    @Override
+    public void setDefaultNavigationIcon(Drawable defaultNavigationIcon) {
+        if (mDefaultNavigationIcon != defaultNavigationIcon) {
+            mDefaultNavigationIcon = defaultNavigationIcon;
+            updateNavigationIcon();
+        }
+    }
+
+    private void updateNavigationIcon() {
+        if ((mDisplayOpts & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+            mToolbar.setNavigationIcon(mNavIcon != null ? mNavIcon : mDefaultNavigationIcon);
+        } else {
+            mToolbar.setNavigationIcon(null);
+        }
     }
 
     @Override
