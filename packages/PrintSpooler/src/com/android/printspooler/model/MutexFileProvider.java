@@ -93,7 +93,7 @@ public final class MutexFileProvider {
     public void releaseFile() {
         synchronized (mLock) {
             if (mOwnerThread != Thread.currentThread()) {
-                throw new IllegalStateException("Not acquired");
+                return;
             }
 
             if (DEBUG) {
