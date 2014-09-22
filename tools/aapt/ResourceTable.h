@@ -12,8 +12,9 @@
 #include "SourcePos.h"
 #include "ResourceFilter.h"
 
-#include <set>
 #include <map>
+#include <queue>
+#include <set>
 
 using namespace std;
 
@@ -33,18 +34,24 @@ enum {
             | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES
 };
 
-status_t compileXmlFile(const sp<AaptAssets>& assets,
+status_t compileXmlFile(const Bundle* bundle,
+                        const sp<AaptAssets>& assets,
+                        const String16& resourceName,
                         const sp<AaptFile>& target,
                         ResourceTable* table,
                         int options = XML_COMPILE_STANDARD_RESOURCE);
 
-status_t compileXmlFile(const sp<AaptAssets>& assets,
+status_t compileXmlFile(const Bundle* bundle,
+                        const sp<AaptAssets>& assets,
+                        const String16& resourceName,
                         const sp<AaptFile>& target,
                         const sp<AaptFile>& outTarget,
                         ResourceTable* table,
                         int options = XML_COMPILE_STANDARD_RESOURCE);
 
-status_t compileXmlFile(const sp<AaptAssets>& assets,
+status_t compileXmlFile(const Bundle* bundle,
+                        const sp<AaptAssets>& assets,
+                        const String16& resourceName,
                         const sp<XMLNode>& xmlTree,
                         const sp<AaptFile>& target,
                         ResourceTable* table,
@@ -71,6 +78,14 @@ struct AccessorCookie
     }
 };
 
+// Holds the necessary information to compile the
+// resource.
+struct CompileResourceWorkItem {
+    String16 resourceName;
+    String8 resPath;
+    sp<AaptFile> file;
+};
+
 class ResourceTable : public ResTable::Accessor
 {
 public:
@@ -90,6 +105,18 @@ public:
 
     const String16& getAssetsPackage() const {
         return mAssetsPackage;
+    }
+
+    /**
+     * Returns the queue of resources that need to be compiled.
+     * This is only used for resources that have been generated
+     * during the compilation phase. If they were just added
+     * to the AaptAssets, then they may be skipped over
+     * and would mess up iteration order for the existing
+     * resources.
+     */
+    queue<CompileResourceWorkItem>& getWorkQueue() {
+        return mWorkQueue;
     }
 
     status_t addIncludedResources(Bundle* bundle, const sp<AaptAssets>& assets);
@@ -166,6 +193,10 @@ public:
     bool hasResources() const;
 
     status_t modifyForCompat(const Bundle* bundle);
+    status_t modifyForCompat(const Bundle* bundle,
+                             const String16& resourceName,
+                             const sp<AaptFile>& file,
+                             const sp<XMLNode>& root);
 
     sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
             const bool isBase);
@@ -527,6 +558,9 @@ private:
                        bool doSetIndex = false);
     sp<const Entry> getEntry(uint32_t resID,
                              const ResTable_config* config = NULL) const;
+    sp<ConfigList> getConfigList(const String16& package,
+                                 const String16& type,
+                                 const String16& name) const;
     const Item* getItem(uint32_t resID, uint32_t attrID) const;
     bool getItemValue(uint32_t resID, uint32_t attrID,
                       Res_value* outValue);
@@ -545,6 +579,7 @@ private:
     
     // key = string resource name, value = set of locales in which that name is defined
     map<String16, map<String8, SourcePos> > mLocalizations;
+    queue<CompileResourceWorkItem> mWorkQueue;
 };
 
 #endif

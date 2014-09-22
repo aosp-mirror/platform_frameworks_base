@@ -1483,7 +1483,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     return NO_ERROR;
 }
 
-status_t postProcessImage(const sp<AaptAssets>& assets,
+status_t postProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
                           ResourceTable* table, const sp<AaptFile>& file)
 {
     String8 ext(file->getPath().getPathExtension());
@@ -1491,7 +1491,8 @@ status_t postProcessImage(const sp<AaptAssets>& assets,
     // At this point, now that we have all the resource data, all we need to
     // do is compile XML files.
     if (strcmp(ext.string(), ".xml") == 0) {
-        return compileXmlFile(assets, file, table);
+        String16 resourceName(parseResourceName(file->getPath().getPathLeaf()));
+        return compileXmlFile(bundle, assets, resourceName, file, table);
     }
 
     return NO_ERROR;
