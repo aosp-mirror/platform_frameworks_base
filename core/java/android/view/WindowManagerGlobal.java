@@ -375,6 +375,9 @@ public final class WindowManagerGlobal {
                 mDyingViews.remove(view);
             }
         }
+        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+            doTrimForeground();
+        }
     }
 
     private int findViewLocked(View view, boolean required) {
@@ -413,6 +416,35 @@ public final class WindowManagerGlobal {
             }
 
             HardwareRenderer.trimMemory(level);
+
+            if (HardwareRenderer.sTrimForeground) {
+                doTrimForeground();
+            }
+        }
+    }
+
+    public static void trimForeground() {
+        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+            WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
+            wm.doTrimForeground();
+        }
+    }
+
+    private void doTrimForeground() {
+        boolean hasVisibleWindows = false;
+        synchronized (mLock) {
+            for (int i = mRoots.size() - 1; i >= 0; --i) {
+                if (mRoots.get(i).getHostVisibility() == View.VISIBLE
+                        && mRoots.get(i).mAttachInfo.mHardwareRenderer != null) {
+                    hasVisibleWindows = true;
+                } else {
+                    mRoots.get(i).destroyHardwareResources();
+                }
+            }
+        }
+        if (!hasVisibleWindows) {
+            HardwareRenderer.trimMemory(
+                    ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         }
     }
 
@@ -428,7 +460,7 @@ public final class WindowManagerGlobal {
                 for (int i = 0; i < count; i++) {
                     ViewRootImpl root = mRoots.get(i);
                     String name = getWindowName(root);
-                    pw.printf("\n\t%s", name);
+                    pw.printf("\n\t%s (visibility=%d)", name, root.getHostVisibility());
 
                     HardwareRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
