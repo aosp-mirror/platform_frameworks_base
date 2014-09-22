@@ -27282,7 +27282,7 @@ package android.speech.tts {
     method public boolean isSpeaking();
     method public int playEarcon(java.lang.String, int, android.os.Bundle, java.lang.String);
     method public deprecated int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
-    method public int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
+    method public int playSilence(long, int, java.lang.String);
     method public deprecated int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public int setAudioAttributes(android.media.AudioAttributes);
     method public deprecated int setEngineByPackageName(java.lang.String);
@@ -27370,7 +27370,7 @@ package android.speech.tts {
   public abstract class TextToSpeechService extends android.app.Service {
     ctor public TextToSpeechService();
     method public android.os.IBinder onBind(android.content.Intent);
-    method protected java.lang.String onGetDefaultVoiceNameFor(java.lang.String, java.lang.String, java.lang.String);
+    method public java.lang.String onGetDefaultVoiceNameFor(java.lang.String, java.lang.String, java.lang.String);
     method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract java.lang.String[] onGetLanguage();
     method public java.util.List<android.speech.tts.Voice> onGetVoices();
@@ -27400,6 +27400,7 @@ package android.speech.tts {
     method public int getQuality();
     method public boolean isNetworkConnectionRequired();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int LATENCY_HIGH = 400; // 0x190
     field public static final int LATENCY_LOW = 200; // 0xc8
     field public static final int LATENCY_NORMAL = 300; // 0x12c
