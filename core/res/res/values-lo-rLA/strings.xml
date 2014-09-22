@@ -1229,7 +1229,7 @@
     <string name="smv_application" msgid="3307209192155442829">"ແອັບຯ <xliff:g id="APPLICATION">%1$s</xliff:g> (ໂປຣເຊສ <xliff:g id="PROCESS">%2$s</xliff:g>) ໄດ້ລະເມີດນະໂຍບາຍ StrictMode ທີ່ບັງຄັບໃຊ້ດ້ວຍໂຕເອງ."</string>
     <string name="smv_process" msgid="5120397012047462446">"ໂປຣເຊສ <xliff:g id="PROCESS">%1$s</xliff:g> ລະເມີດນະໂຍບາຍບັງຄັບໃຊ້ເອງ StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"ກຳລັງອັບເກຣດ Android..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"ກຳລັງປັບປຸງປະສິດຕິພາບແອັບຯທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກທັງໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"ກຳລັງ​ປັບປຸງ​ປະສິດທິພາບ​ແອັບຯ​ທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກ​ທັງ​ໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ແອັບຯ."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກ"</string>
