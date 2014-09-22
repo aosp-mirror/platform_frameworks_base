@@ -50,7 +50,7 @@ public:
 // ==========================================================================
 // ==========================================================================
 
-static String8 parseResourceName(const String8& leaf)
+String8 parseResourceName(const String8& leaf)
 {
     const char* firstDot = strchr(leaf.string(), '.');
     const char* str = leaf.string();
@@ -1088,7 +1088,7 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
     manifest->addChild(app);
     root->addChild(manifest);
 
-    int err = compileXmlFile(assets, root, outFile, table);
+    int err = compileXmlFile(bundle, assets, String16(), root, outFile, table);
     if (err < NO_ERROR) {
         return err;
     }
@@ -1336,7 +1336,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         ResourceDirIterator it(layouts, String8("layout"));
         while ((err=it.next()) == NO_ERROR) {
             String8 src = it.getFile()->getPrintableSource();
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err == NO_ERROR) {
                 ResXMLTree block;
                 block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
@@ -1355,7 +1356,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (anims != NULL) {
         ResourceDirIterator it(anims, String8("anim"));
         while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1370,7 +1372,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (animators != NULL) {
         ResourceDirIterator it(animators, String8("animator"));
         while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1385,7 +1388,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (interpolators != NULL) {
         ResourceDirIterator it(interpolators, String8("interpolator"));
         while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1400,7 +1404,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (transitions != NULL) {
         ResourceDirIterator it(transitions, String8("transition"));
         while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1415,7 +1420,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (xmls != NULL) {
         ResourceDirIterator it(xmls, String8("xml"));
         while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1430,7 +1436,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (drawables != NULL) {
         ResourceDirIterator it(drawables, String8("drawable"));
         while ((err=it.next()) == NO_ERROR) {
-            err = postProcessImage(assets, &table, it.getFile());
+            err = postProcessImage(bundle, assets, &table, it.getFile());
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1445,7 +1451,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (colors != NULL) {
         ResourceDirIterator it(colors, String8("color"));
         while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
@@ -1461,7 +1468,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         ResourceDirIterator it(menus, String8("menu"));
         while ((err=it.next()) == NO_ERROR) {
             String8 src = it.getFile()->getPrintableSource();
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                    it.getFile(), &table, xmlFlags);
             if (err == NO_ERROR) {
                 ResXMLTree block;
                 block.setTo(it.getFile()->getData(), it.getFile()->getSize(), true);
@@ -1475,6 +1483,22 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             hasErrors = true;
         }
         err = NO_ERROR;
+    }
+
+    // Now compile any generated resources.
+    std::queue<CompileResourceWorkItem>& workQueue = table.getWorkQueue();
+    while (!workQueue.empty()) {
+        CompileResourceWorkItem& workItem = workQueue.front();
+        err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.file, &table, xmlFlags);
+        if (err == NO_ERROR) {
+            assets->addResource(workItem.resPath.getPathLeaf(),
+                    workItem.resPath,
+                    workItem.file,
+                    workItem.file->getResourceType());
+        } else {
+            hasErrors = true;
+        }
+        workQueue.pop();
     }
 
     if (table.validateLocalizations()) {
@@ -1509,7 +1533,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (err < NO_ERROR) {
         return err;
     }
-    err = compileXmlFile(assets, manifestTree, manifestFile, &table);
+    err = compileXmlFile(bundle, assets, String16(), manifestTree, manifestFile, &table);
     if (err < NO_ERROR) {
         return err;
     }
@@ -1599,7 +1623,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     sp<AaptFile> outManifestFile = new AaptFile(manifestFile->getSourceFile(),
             manifestFile->getGroupEntry(),
             manifestFile->getResourceType());
-    err = compileXmlFile(assets, manifestFile,
+    err = compileXmlFile(bundle, assets, String16(), manifestFile,
             outManifestFile, &table,
             XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
             | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES);
