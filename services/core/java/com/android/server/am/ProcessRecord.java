@@ -100,6 +100,7 @@ final class ProcessRecord {
     boolean treatLikeActivity;  // Bound using BIND_TREAT_LIKE_ACTIVITY
     boolean bad;                // True if disabled in the bad process list
     boolean killedByAm;         // True when proc has been killed by activity manager, not for RAM
+    boolean killed;             // True once we know the process has been killed
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
@@ -303,8 +304,9 @@ final class ProcessRecord {
                 pw.print(" lastLowMemory=");
                 TimeUtils.formatDuration(lastLowMemory, now, pw);
                 pw.print(" reportLowMemory="); pw.println(reportLowMemory);
-        if (killedByAm || waitingToKill != null) {
-            pw.print(prefix); pw.print("killedByAm="); pw.print(killedByAm);
+        if (killed || killedByAm || waitingToKill != null) {
+            pw.print(prefix); pw.print("killed="); pw.print(killed);
+                    pw.print(" killedByAm="); pw.print(killedByAm);
                     pw.print(" waitingToKill="); pw.println(waitingToKill);
         }
         if (debugging || crashing || crashDialog != null || notResponding
@@ -514,6 +516,7 @@ final class ProcessRecord {
             Process.killProcessQuiet(pid);
             Process.killProcessGroup(info.uid, pid);
             if (!persistent) {
+                killed = true;
                 killedByAm = true;
             }
         }
