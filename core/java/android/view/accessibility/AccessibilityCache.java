@@ -63,22 +63,6 @@ final class AccessibilityCache {
         }
     }
 
-    public void clearWindows() {
-        synchronized (mLock) {
-            final int windowCount = mWindowCache.size();
-            for (int i = windowCount - 1; i >= 0; i--) {
-                AccessibilityWindowInfo window = mWindowCache.valueAt(i);
-                if (window != null) {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Removing window: " + window.getId());
-                    }
-                    window.recycle();
-                    mWindowCache.removeAt(i);
-                }
-            }
-        }
-    }
-
     /**
      * Notifies the cache that the something in the UI changed. As a result
      * the cache will either refresh some nodes or evict some nodes.
@@ -115,8 +99,9 @@ final class AccessibilityCache {
                     clearSubTreeLocked(event.getWindowId(), event.getSourceNodeId());
                 } break;
 
-                case AccessibilityEvent.TYPE_WINDOWS_CHANGED: {
-                    clearWindows();
+                case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
+                    clear();
                 } break;
             }
         }
@@ -287,7 +272,7 @@ final class AccessibilityCache {
 
     private void clearNodesForWindowLocked(int windowId) {
         if (DEBUG) {
-            Log.i(LOG_TAG, "clearWindowLocked(" + windowId + ")");
+            Log.i(LOG_TAG, "clearNodesForWindowLocked(" + windowId + ")");
         }
         LongSparseArray<AccessibilityNodeInfo> nodes = mNodeCache.get(windowId);
         if (nodes == null) {
@@ -440,7 +425,7 @@ final class AccessibilityCache {
                             }
                         }
                         if (!childOfItsParent) {
-                            Log.e(LOG_TAG, "Invalid parent-child ralation between parent: "
+                            Log.e(LOG_TAG, "Invalid parent-child relation between parent: "
                                     + nodeParent + " and child: " + node);
                         }
                     }
@@ -452,7 +437,7 @@ final class AccessibilityCache {
                         if (child != null) {
                             AccessibilityNodeInfo parent = nodes.get(child.getParentNodeId());
                             if (parent != node) {
-                                Log.e(LOG_TAG, "Invalid child-parent ralation between child: "
+                                Log.e(LOG_TAG, "Invalid child-parent relation between child: "
                                         + node + " and parent: " + nodeParent);
                             }
                         }
