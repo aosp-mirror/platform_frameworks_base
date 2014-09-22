@@ -17,7 +17,9 @@
 
 #define NOISY(x) //x
 
-status_t compileXmlFile(const sp<AaptAssets>& assets,
+status_t compileXmlFile(const Bundle* bundle,
+                        const sp<AaptAssets>& assets,
+                        const String16& resourceName,
                         const sp<AaptFile>& target,
                         ResourceTable* table,
                         int options)
@@ -27,10 +29,12 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
         return UNKNOWN_ERROR;
     }
 
-    return compileXmlFile(assets, root, target, table, options);
+    return compileXmlFile(bundle, assets, resourceName, root, target, table, options);
 }
 
-status_t compileXmlFile(const sp<AaptAssets>& assets,
+status_t compileXmlFile(const Bundle* bundle,
+                        const sp<AaptAssets>& assets,
+                        const String16& resourceName,
                         const sp<AaptFile>& target,
                         const sp<AaptFile>& outTarget,
                         ResourceTable* table,
@@ -41,10 +45,12 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
         return UNKNOWN_ERROR;
     }
     
-    return compileXmlFile(assets, root, outTarget, table, options);
+    return compileXmlFile(bundle, assets, resourceName, root, outTarget, table, options);
 }
 
-status_t compileXmlFile(const sp<AaptAssets>& assets,
+status_t compileXmlFile(const Bundle* bundle,
+                        const sp<AaptAssets>& assets,
+                        const String16& resourceName,
                         const sp<XMLNode>& root,
                         const sp<AaptFile>& target,
                         ResourceTable* table,
@@ -75,6 +81,10 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
     }
 
     if (hasErrors) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (table->modifyForCompat(bundle, resourceName, target, root) != NO_ERROR) {
         return UNKNOWN_ERROR;
     }
     
@@ -4028,6 +4038,39 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
     return t->getEntry(name, sourcePos, config, doSetIndex, overlay, mBundle->getAutoAddOverlay());
 }
 
+sp<ResourceTable::ConfigList> ResourceTable::getConfigList(const String16& package,
+        const String16& type, const String16& name) const
+{
+    const size_t packageCount = mOrderedPackages.size();
+    for (size_t pi = 0; pi < packageCount; pi++) {
+        const sp<Package>& p = mOrderedPackages[pi];
+        if (p == NULL || p->getName() != package) {
+            continue;
+        }
+
+        const Vector<sp<Type> >& types = p->getOrderedTypes();
+        const size_t typeCount = types.size();
+        for (size_t ti = 0; ti < typeCount; ti++) {
+            const sp<Type>& t = types[ti];
+            if (t == NULL || t->getName() != type) {
+                continue;
+            }
+
+            const Vector<sp<ConfigList> >& configs = t->getOrderedConfigs();
+            const size_t configCount = configs.size();
+            for (size_t ci = 0; ci < configCount; ci++) {
+                const sp<ConfigList>& cl = configs[ci];
+                if (cl == NULL || cl->getName() != name) {
+                    continue;
+                }
+
+                return cl;
+            }
+        }
+    }
+    return NULL;
+}
+
 sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,
                                                        const ResTable_config* config) const
 {
@@ -4157,6 +4200,22 @@ bool ResourceTable::isAttributeFromL(uint32_t attrId) {
         (attrId & 0x0000ffff) >= (baseAttrId & 0x0000ffff);
 }
 
+static bool isMinSdkVersionLOrAbove(const Bundle* bundle) {
+    if (bundle->getMinSdkVersion() != NULL && strlen(bundle->getMinSdkVersion()) > 0) {
+        const char firstChar = bundle->getMinSdkVersion()[0];
+        if (firstChar >= 'L' && firstChar <= 'Z') {
+            // L is the code-name for the v21 release.
+            return true;
+        }
+
+        const int minSdk = atoi(bundle->getMinSdkVersion());
+        if (minSdk >= SDK_L) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Modifies the entries in the resource table to account for compatibility
  * issues with older versions of Android.
@@ -4200,19 +4259,10 @@ bool ResourceTable::isAttributeFromL(uint32_t attrId) {
  * attribute will be respected.
  */
 status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
-    if (bundle->getMinSdkVersion() != NULL) {
+    if (isMinSdkVersionLOrAbove(bundle)) {
         // If this app will only ever run on L+ devices,
         // we don't need to do any compatibility work.
-
-        if (String8("L") == bundle->getMinSdkVersion()) {
-            // Code-name for the v21 release.
-            return NO_ERROR;
-        }
-
-        const int minSdk = atoi(bundle->getMinSdkVersion());
-        if (minSdk >= SDK_L) {
-            return NO_ERROR;
-        }
+        return NO_ERROR;
     }
 
     const String16 attr16("attr");
@@ -4307,5 +4357,106 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
             }
         }
     }
+    return NO_ERROR;
+}
+
+status_t ResourceTable::modifyForCompat(const Bundle* bundle,
+                                        const String16& resourceName,
+                                        const sp<AaptFile>& target,
+                                        const sp<XMLNode>& root) {
+    if (isMinSdkVersionLOrAbove(bundle)) {
+        return NO_ERROR;
+    }
+
+    if (target->getResourceType() == "" || target->getGroupEntry().toParams().sdkVersion >= SDK_L) {
+        // Skip resources that have no type (AndroidManifest.xml) or are already version qualified with v21
+        // or higher.
+        return NO_ERROR;
+    }
+
+    Vector<key_value_pair_t<sp<XMLNode>, size_t> > attrsToRemove;
+
+    Vector<sp<XMLNode> > nodesToVisit;
+    nodesToVisit.push(root);
+    while (!nodesToVisit.isEmpty()) {
+        sp<XMLNode> node = nodesToVisit.top();
+        nodesToVisit.pop();
+
+        const Vector<XMLNode::attribute_entry>& attrs = node->getAttributes();
+        const size_t attrCount = attrs.size();
+        for (size_t i = 0; i < attrCount; i++) {
+            const XMLNode::attribute_entry& attr = attrs[i];
+            if (isAttributeFromL(attr.nameResId)) {
+                attrsToRemove.add(key_value_pair_t<sp<XMLNode>, size_t>(node, i));
+            }
+        }
+
+        // Schedule a visit to the children.
+        const Vector<sp<XMLNode> >& children = node->getChildren();
+        const size_t childCount = children.size();
+        for (size_t i = 0; i < childCount; i++) {
+            nodesToVisit.push(children[i]);
+        }
+    }
+
+    if (attrsToRemove.isEmpty()) {
+        return NO_ERROR;
+    }
+
+    ConfigDescription newConfig(target->getGroupEntry().toParams());
+    newConfig.sdkVersion = SDK_L;
+
+    // Look to see if we already have an overriding v21 configuration.
+    sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
+            String16(target->getResourceType()), resourceName);
+    if (cl->getEntries().indexOfKey(newConfig) < 0) {
+        // We don't have an overriding entry for v21, so we must duplicate this one.
+        sp<XMLNode> newRoot = root->clone();
+        sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
+                AaptGroupEntry(newConfig), target->getResourceType());
+        String8 resPath = String8::format("res/%s/%s",
+                newFile->getGroupEntry().toDirName(target->getResourceType()).string(),
+                target->getPath().getPathLeaf().string());
+        resPath.convertToResPath();
+
+        // Add a resource table entry.
+        SourcePos(target->getSourceFile(), -1).printf(
+                "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
+                SDK_L,
+                mAssets->getPackage().string(),
+                newFile->getResourceType().string(),
+                String8(resourceName).string(),
+                newConfig.toString().string());
+
+        addEntry(SourcePos(),
+                String16(mAssets->getPackage()),
+                String16(target->getResourceType()),
+                resourceName,
+                String16(resPath),
+                NULL,
+                &newConfig);
+
+        // Schedule this to be compiled.
+        CompileResourceWorkItem item;
+        item.resourceName = resourceName;
+        item.resPath = resPath;
+        item.file = newFile;
+        mWorkQueue.push(item);
+    }
+
+    const size_t removeCount = attrsToRemove.size();
+    for (size_t i = 0; i < removeCount; i++) {
+        sp<XMLNode> node = attrsToRemove[i].key;
+        size_t attrIndex = attrsToRemove[i].value;
+        const XMLNode::attribute_entry& ae = node->getAttributes()[attrIndex];
+        SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
+                "removing attribute %s%s%s from <%s>",
+                String8(ae.ns).string(),
+                (ae.ns.size() == 0 ? "" : ":"),
+                String8(ae.name).string(),
+                String8(node->getElementName()).string());
+        node->removeAttribute(attrIndex);
+    }
+
     return NO_ERROR;
 }
