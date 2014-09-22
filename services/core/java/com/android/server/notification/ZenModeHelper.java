@@ -182,6 +182,12 @@ public class ZenModeHelper {
                 }
                 return shouldInterceptAudience(record);
             }
+            if (isEvent(record)) {
+                if (!mConfig.allowEvents) {
+                    ZenLog.traceIntercepted(record, "!allowEvents");
+                    return true;
+                }
+            }
             ZenLog.traceIntercepted(record, "!allowed");
             return true;
         }
@@ -328,15 +334,18 @@ public class ZenModeHelper {
         }
     }
 
-    private boolean isSystem(NotificationRecord record) {
+    private static boolean isSystem(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_SYSTEM);
     }
 
-    private boolean isAlarm(NotificationRecord record) {
+    private static boolean isAlarm(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_ALARM)
-                || record.isCategory(Notification.CATEGORY_EVENT)
                 || record.isAudioStream(AudioManager.STREAM_ALARM)
                 || record.isAudioAttributesUsage(AudioAttributes.USAGE_ALARM);
+    }
+
+    private static boolean isEvent(NotificationRecord record) {
+        return record.isCategory(Notification.CATEGORY_EVENT);
     }
 
     private boolean isCall(NotificationRecord record) {
