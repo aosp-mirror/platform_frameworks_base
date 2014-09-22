@@ -199,7 +199,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"मोबाइल हॉटस्‍पॉट को बंद किया गया."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"मोबाइल हॉटस्‍पॉट को चालू किया गया."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"स्‍क्रीन कास्‍ट करना रुक गया."</string>
-    <string name="accessibility_brightness" msgid="8003681285547803095">"स्क्रीन की चमक"</string>
+    <string name="accessibility_brightness" msgid="8003681285547803095">"स्क्रीन की स्क्रीन की रोशनी"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G डेटा बंद है"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G डेटा बंद है"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"सेल्युलर डेटा बंद है"</string>
@@ -279,8 +279,7 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"एप्‍लिकेशन जानकारी"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"ऐप्स पर लॉक करें"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"खोज"</string>
-    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
-    <skip />
+    <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ नहीं किया जा सका."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हो रही है"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"पूर्ण होने में <xliff:g id="CHARGING_TIME">%s</xliff:g> शेष"</string>
