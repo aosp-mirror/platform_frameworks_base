@@ -142,6 +142,7 @@ public class ScrollView extends FrameLayout {
      */
     private final int[] mScrollOffset = new int[2];
     private final int[] mScrollConsumed = new int[2];
+    private int mNestedYOffset;
 
     /**
      * The StrictMode "critical time span" objects to catch animation
@@ -516,6 +517,7 @@ public class ScrollView extends FrameLayout {
                     mLastMotionY = y;
                     initVelocityTrackerIfNotExists();
                     mVelocityTracker.addMovement(ev);
+                    mNestedYOffset = 0;
                     if (mScrollStrictSpan == null) {
                         mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
                     }
@@ -586,9 +588,14 @@ public class ScrollView extends FrameLayout {
 
         MotionEvent vtev = MotionEvent.obtain(ev);
 
-        final int action = ev.getAction();
+        final int actionMasked = ev.getActionMasked();
 
-        switch (action & MotionEvent.ACTION_MASK) {
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            mNestedYOffset = 0;
+        }
+        vtev.offsetLocation(0, mNestedYOffset);
+
+        switch (actionMasked) {
             case MotionEvent.ACTION_DOWN: {
                 if (getChildCount() == 0) {
                     return false;
@@ -630,6 +637,7 @@ public class ScrollView extends FrameLayout {
                 if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset)) {
                     deltaY -= mScrollConsumed[1];
                     vtev.offsetLocation(0, mScrollOffset[1]);
+                    mNestedYOffset += mScrollOffset[1];
                 }
                 if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
                     final ViewParent parent = getParent();
@@ -666,6 +674,7 @@ public class ScrollView extends FrameLayout {
                     if (dispatchNestedScroll(0, scrolledDeltaY, 0, unconsumedY, mScrollOffset)) {
                         mLastMotionY -= mScrollOffset[1];
                         vtev.offsetLocation(0, mScrollOffset[1]);
+                        mNestedYOffset += mScrollOffset[1];
                     } else if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
                         if (pulledToY < 0) {
