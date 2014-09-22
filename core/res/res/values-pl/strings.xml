@@ -1642,7 +1642,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Włączono ułatwienia dostępu."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ułatwienia dostępu zostały anulowane."</string>
     <string name="user_switched" msgid="3768006783166984410">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Przełączam na <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Przełączam na użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Właściciel"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Błąd"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Ta zmiana nie jest dozwolona przez administratora"</string>
