@@ -281,8 +281,7 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"應用程式鎖定"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
-    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
-    <skip />
+    <string name="recents_launch_error_message" msgid="2969287838120550506">"無法啟動「<xliff:g id="APP">%s</xliff:g>」。"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後完成充電"</string>
