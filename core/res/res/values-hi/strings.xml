@@ -106,7 +106,7 @@
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <string name="roamingText0" msgid="7170335472198694945">"रोमिंग संकेतक चालू"</string>
     <string name="roamingText1" msgid="5314861519752538922">"रोमिंग संकेतक बंद"</string>
-    <string name="roamingText2" msgid="8969929049081268115">"रोमिंग संकेतक चमक रहा है"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"रोमिंग संकेतक स्क्रीन की रोशनी रहा है"</string>
     <string name="roamingText3" msgid="5148255027043943317">"मोहल्‍ले से बाहर"</string>
     <string name="roamingText4" msgid="8808456682550796530">"भवन से बाहर"</string>
     <string name="roamingText5" msgid="7604063252850354350">"रोमिंग - पसंदीदा सिस्‍टम"</string>
@@ -590,7 +590,7 @@
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"सीधे CDMA टेबलेट सेटअप प्रारंभ करें"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"सीधे CDMA फ़ोन सेटअप प्रारंभ करें"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"ऐप्स को CDMA प्रावधान प्रारंभ करने देता है. दुर्भावनापूर्ण ऐप्स अनावश्‍यक रूप से CDMA प्रावधान प्रारंभ कर सकते हैं."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"स्‍थान के बारे में नई जानकारी की सूचनाओं को नियंत्रित करें"</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"स्‍थान के बारे में नई जानकारी की नोटिफिकेशन को नियंत्रित करें"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"एप को रेडियो से स्‍थान के बारे में नई जानकारी की सूचनाएं सक्षम/अक्षम करने देता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"चेकइन गुणों में पहुंचें"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"ऐप्स  को चेकइन सेवा द्वारा अपलोड किए गए गुणों पर पढ़ें/लिखें पहुंच देता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
@@ -728,8 +728,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ऐप्स को नेटवर्क नीतियां प्रबंधित करने और ऐप्स-विशिष्‍ट नियमों को परिभाषित करने देता है."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क उपयोग हिसाब बदलें"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ऐप्स  को यह संशोधित करने देता है कि ऐप्स की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"सूचनाओं तक पहुंचें"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप्स  को सूचनाओं को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य ऐप्स  के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"नोटिफिकेशन तक पहुंचें"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप्स  को नोटिफिकेशन को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य ऐप्स  के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"नोटिफिकेशन श्रवणकर्ता सेवा से जुड़ें"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को नोटिफिकेशन श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"किसी स्थिति प्रदाता सेवा से आबद्ध हों"</string>
