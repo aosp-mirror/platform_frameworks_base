@@ -497,4 +497,13 @@ public class KeyguardAffordanceView extends ImageView {
     public void setIsLeft(boolean left) {
         mIsLeft = left;
     }
+
+    @Override
+    public boolean performClick() {
+        if (isClickable()) {
+            return super.performClick();
+        } else {
+            return false;
+        }
+    }
 }
