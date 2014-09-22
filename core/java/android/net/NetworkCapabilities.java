@@ -19,16 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
-
 import java.lang.IllegalArgumentException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * This class represents the capabilities of a network.  This is used both to specify
@@ -36,15 +27,12 @@ import java.util.Set;
  *
  * Note that this replaces the old {@link ConnectivityManager#TYPE_MOBILE} method
  * of network selection.  Rather than indicate a need for Wi-Fi because an application
- * needs high bandwidth and risk obselence when a new, fast network appears (like LTE),
+ * needs high bandwidth and risk obsolescence when a new, fast network appears (like LTE),
  * the application should specify it needs high bandwidth.  Similarly if an application
  * needs an unmetered network for a bulk transfer it can specify that rather than assuming
  * all cellular based connections are metered and all Wi-Fi based connections are not.
  */
 public final class NetworkCapabilities implements Parcelable {
-    private static final String TAG = "NetworkCapabilities";
-    private static final boolean DBG = false;
-
     /**
      * @hide
      */
@@ -541,9 +529,11 @@ public final class NetworkCapabilities implements Parcelable {
                 (TextUtils.isEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.hashCode() * 17));
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mNetworkCapabilities);
         dest.writeLong(mTransportTypes);
@@ -553,6 +543,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
     public static final Creator<NetworkCapabilities> CREATOR =
         new Creator<NetworkCapabilities>() {
+            @Override
             public NetworkCapabilities createFromParcel(Parcel in) {
                 NetworkCapabilities netCap = new NetworkCapabilities();
 
@@ -563,11 +554,13 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mNetworkSpecifier = in.readString();
                 return netCap;
             }
+            @Override
             public NetworkCapabilities[] newArray(int size) {
                 return new NetworkCapabilities[size];
             }
         };
 
+    @Override
     public String toString() {
         int[] types = getTransportTypes();
         String transports = (types.length > 0 ? " Transports: " : "");
