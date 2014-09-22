@@ -3620,6 +3620,14 @@
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
 
+    <!-- A notification is shown the first time a connection is attempted on an app owned AP -->
+    <!-- title for this message -->
+    <string name="wifi_connect_alert_title">Allow connection?</string>
+    <!-- message explaining who is connecting to what -->
+    <string name="wifi_connect_alert_message">%1$s would like to connect to %2$s</string>
+    <!-- default application in case name can not be found -->
+    <string name="wifi_connect_default_application">An application</string>
+
     <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
     <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot.</string>
     <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct.</string>

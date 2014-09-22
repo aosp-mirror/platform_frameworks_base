@@ -832,6 +832,14 @@
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="signature|system" />
 
+    <!-- @SystemApi @hide Allows an application to modify any wifi configuration, even if created
+	 by another application. Once reconfigured the original creator canot make any further
+	 modifications.
+	 <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.OVERRIDE_WIFI_CONFIG"
+	android:permissionGroup="android.permission-group.NETWORK"
+	android:protectionLevel="signature|system" />
+
     <!-- @hide -->
     <permission android:name="android.permission.ACCESS_WIMAX_STATE"
         android:permissionGroup="android.permission-group.NETWORK"
