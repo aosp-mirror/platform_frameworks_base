@@ -317,7 +317,7 @@ public abstract class TextToSpeechService extends Service {
 
      * @return A name of the default voice for a given locale.
      */
-    protected String onGetDefaultVoiceNameFor(String lang, String country, String variant) {
+    public String onGetDefaultVoiceNameFor(String lang, String country, String variant) {
         int localeStatus = onIsLanguageAvailable(lang, country, variant);
         Locale iso3Locale = null;
         switch (localeStatus) {
