@@ -20,6 +20,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.utils.SizeAreaComparator;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -33,7 +34,6 @@ import android.util.Pair;
 import android.util.Size;
 import android.view.Surface;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -284,10 +284,9 @@ public class RequestThreadManager {
         startPreview();
     }
 
-    private void configureOutputs(Collection<Surface> outputs) throws IOException {
+    private void configureOutputs(Collection<Surface> outputs) {
         if (DEBUG) {
             String outputsStr = outputs == null ? "null" : (outputs.size() + " surfaces");
-
             Log.d(TAG, "configureOutputs with " + outputsStr);
         }
 
@@ -297,7 +296,11 @@ public class RequestThreadManager {
          * using a different one; this also reduces the likelihood of getting into a deadlock
          * when disconnecting from the old previous texture at a later time.
          */
-        mCamera.setPreviewTexture(/*surfaceTexture*/null);
+        try {
+            mCamera.setPreviewTexture(/*surfaceTexture*/null);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to clear prior SurfaceTexture, may cause GL deadlock: ", e);
+        }
 
         if (mGLThreadManager != null) {
             mGLThreadManager.waitUntilStarted();
@@ -568,26 +571,23 @@ public class RequestThreadManager {
                 case MSG_CONFIGURE_OUTPUTS:
                     ConfigureHolder config = (ConfigureHolder) msg.obj;
                     int sizes = config.surfaces != null ? config.surfaces.size() : 0;
-                    Log.i(TAG, "Configure outputs: " + sizes +
-                            " surfaces configured.");
+                    Log.i(TAG, "Configure outputs: " + sizes + " surfaces configured.");
 
                     try {
                         boolean success = mCaptureCollector.waitForEmpty(JPEG_FRAME_TIMEOUT,
                                 TimeUnit.MILLISECONDS);
                         if (!success) {
                             Log.e(TAG, "Timed out while queueing configure request.");
+                            mCaptureCollector.failAll();
                         }
                     } catch (InterruptedException e) {
-                        // TODO: report error to CameraDevice
                         Log.e(TAG, "Interrupted while waiting for requests to complete.");
+                        mDeviceState.setError(
+                                CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                        break;
                     }
 
-                    try {
-                        configureOutputs(config.surfaces);
-                    } catch (IOException e) {
-                        // TODO: report error to CameraDevice
-                        throw new IOError(e);
-                    }
+                    configureOutputs(config.surfaces);
                     config.condition.open();
                     if (DEBUG) {
                         long totalTime = SystemClock.elapsedRealtimeNanos() - startTime;
@@ -599,16 +599,23 @@ public class RequestThreadManager {
 
                     // Get the next burst from the request queue.
                     Pair<BurstHolder, Long> nextBurst = mRequestQueue.getNext();
+
                     if (nextBurst == null) {
+                        // If there are no further requests queued, wait for any currently executing
+                        // requests to complete, then switch to idle state.
                         try {
                             boolean success = mCaptureCollector.waitForEmpty(JPEG_FRAME_TIMEOUT,
                                     TimeUnit.MILLISECONDS);
                             if (!success) {
-                                Log.e(TAG, "Timed out while waiting for empty.");
+                                Log.e(TAG,
+                                        "Timed out while waiting for prior requests to complete.");
+                                mCaptureCollector.failAll();
                             }
                         } catch (InterruptedException e) {
-                            // TODO: report error to CameraDevice
-                            Log.e(TAG, "Interrupted while waiting for requests to complete.");
+                            Log.e(TAG, "Interrupted while waiting for requests to complete: ", e);
+                            mDeviceState.setError(
+                                    CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                            break;
                         }
                         mDeviceState.setIdle();
                         break;
@@ -625,27 +632,39 @@ public class RequestThreadManager {
 
                         boolean paramsChanged = false;
 
-                        // Lazily process the rest of the request
+                        // Only update parameters if the request has changed
                         if (mLastRequest == null || mLastRequest.captureRequest != request) {
 
                             // The intermediate buffer is sometimes null, but we always need
-                            // the camera1's configured preview size
+                            // the Camera1 API configured preview size
                             Size previewSize = ParameterUtils.convertSize(mParams.getPreviewSize());
 
-                            LegacyRequest legacyRequest = new LegacyRequest(
-                                    mCharacteristics, request, previewSize,
-                                    mParams); // params are copied
+                            LegacyRequest legacyRequest = new LegacyRequest(mCharacteristics,
+                                    request, previewSize, mParams); // params are copied
 
-                            mLastRequest = legacyRequest;
+
                             // Parameters are mutated as a side-effect
                             LegacyMetadataMapper.convertRequestMetadata(/*inout*/legacyRequest);
 
+                            // If the parameters have changed, set them in the Camera1 API.
                             if (!mParams.same(legacyRequest.parameters)) {
-                                mParams = legacyRequest.parameters;
-                                mCamera.setParameters(mParams);
-
+                                try {
+                                    mCamera.setParameters(legacyRequest.parameters);
+                                } catch (RuntimeException e) {
+                                    // If setting the parameters failed, report a request error to
+                                    // the camera client, and skip any further work for this request
+                                    Log.e(TAG, "Exception while setting camera parameters: ", e);
+                                    holder.failRequest();
+                                    mDeviceState.setCaptureStart(holder, /*timestamp*/0,
+                                            CameraDeviceImpl.CameraDeviceCallbacks.
+                                                    ERROR_CAMERA_REQUEST);
+                                    continue;
+                                }
                                 paramsChanged = true;
+                                mParams = legacyRequest.parameters;
                             }
+
+                            mLastRequest = legacyRequest;
                         }
 
                         try {
@@ -653,19 +672,27 @@ public class RequestThreadManager {
                                     mLastRequest, JPEG_FRAME_TIMEOUT, TimeUnit.MILLISECONDS);
 
                             if (!success) {
+                                // Report a request error if we timed out while queuing this.
                                 Log.e(TAG, "Timed out while queueing capture request.");
+                                holder.failRequest();
+                                mDeviceState.setCaptureStart(holder, /*timestamp*/0,
+                                        CameraDeviceImpl.CameraDeviceCallbacks.
+                                                ERROR_CAMERA_REQUEST);
+                                continue;
                             }
+
                             // Starting the preview needs to happen before enabling
                             // face detection or auto focus
                             if (holder.hasPreviewTargets()) {
                                 doPreviewCapture(holder);
                             }
                             if (holder.hasJpegTargets()) {
-                                success = mCaptureCollector.
-                                        waitForPreviewsEmpty(PREVIEW_FRAME_TIMEOUT *
-                                                MAX_IN_FLIGHT_REQUESTS, TimeUnit.MILLISECONDS);
-                                if (!success) {
-                                    Log.e(TAG, "Timed out waiting for prior requests to complete.");
+                                while(!mCaptureCollector.waitForPreviewsEmpty(PREVIEW_FRAME_TIMEOUT,
+                                        TimeUnit.MILLISECONDS)) {
+                                    // Fail preview requests until the queue is empty.
+                                    Log.e(TAG, "Timed out while waiting for preview requests to " +
+                                            "complete.");
+                                    mCaptureCollector.failNextPreview();
                                 }
                                 mReceivedJpeg.close();
                                 doJpegCapturePrepare(holder);
@@ -686,17 +713,21 @@ public class RequestThreadManager {
                             if (holder.hasJpegTargets()) {
                                 doJpegCapture(holder);
                                 if (!mReceivedJpeg.block(JPEG_FRAME_TIMEOUT)) {
-                                    // TODO: report error to CameraDevice
                                     Log.e(TAG, "Hit timeout for jpeg callback!");
+                                    mCaptureCollector.failNextJpeg();
                                 }
                             }
 
                         } catch (IOException e) {
-                            // TODO: report error to CameraDevice
-                            throw new IOError(e);
+                            Log.e(TAG, "Received device exception: ", e);
+                            mDeviceState.setError(
+                                    CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                            break;
                         } catch (InterruptedException e) {
-                            // TODO: report error to CameraDevice
-                            Log.e(TAG, "Interrupted during capture.", e);
+                            Log.e(TAG, "Interrupted during capture: ", e);
+                            mDeviceState.setError(
+                                    CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                            break;
                         }
 
                         if (paramsChanged) {
@@ -717,10 +748,13 @@ public class RequestThreadManager {
 
                             if (!success) {
                                 Log.e(TAG, "Timed out while waiting for request to complete.");
+                                mCaptureCollector.failAll();
                             }
                         } catch (InterruptedException e) {
-                         // TODO: report error to CameraDevice
-                            Log.e(TAG, "Interrupted during request completition.", e);
+                            Log.e(TAG, "Interrupted waiting for request completion: ", e);
+                            mDeviceState.setError(
+                                    CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                            break;
                         }
 
                         CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
@@ -736,7 +770,10 @@ public class RequestThreadManager {
                         // Update face-related results
                         mFaceDetectMapper.mapResultFaces(result, mLastRequest);
 
-                        mDeviceState.setCaptureResult(holder, result);
+                        if (!holder.requestFailed()) {
+                            mDeviceState.setCaptureResult(holder, result,
+                                    CameraDeviceState.NO_CAPTURE_ERROR);
+                        }
                     }
                     if (DEBUG) {
                         long totalTime = SystemClock.elapsedRealtimeNanos() - startTime;
@@ -751,10 +788,12 @@ public class RequestThreadManager {
                                 TimeUnit.MILLISECONDS);
                         if (!success) {
                             Log.e(TAG, "Timed out while queueing cleanup request.");
+                            mCaptureCollector.failAll();
                         }
                     } catch (InterruptedException e) {
-                        // TODO: report error to CameraDevice
-                        Log.e(TAG, "Interrupted while waiting for requests to complete.");
+                        Log.e(TAG, "Interrupted while waiting for requests to complete: ", e);
+                        mDeviceState.setError(
+                                CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
                     }
                     if (mGLThreadManager != null) {
                         mGLThreadManager.quit();
@@ -802,11 +841,15 @@ public class RequestThreadManager {
     }
 
     /**
-     * Flush the pending requests.
+     * Flush any pending requests.
+     *
+     * @return the last frame number.
      */
-    public void flush() {
-        // TODO: Implement flush.
-        Log.e(TAG, "flush not yet implemented.");
+    public long flush() {
+        Log.i(TAG, "Flushing all pending requests.");
+        long lastFrame = mRequestQueue.stopRepeating();
+        mCaptureCollector.failAll();
+        return lastFrame;
     }
 
     /**
@@ -855,7 +898,6 @@ public class RequestThreadManager {
     public long cancelRepeating(int requestId) {
         return mRequestQueue.stopRepeating(requestId);
     }
-
 
     /**
      * Configure with the current list of output Surfaces.

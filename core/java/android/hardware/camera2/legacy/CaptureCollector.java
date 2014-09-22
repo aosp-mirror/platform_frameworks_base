@@ -15,12 +15,14 @@
  */
 package android.hardware.camera2.legacy;
 
+import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.util.Log;
 import android.util.MutableLong;
 import android.util.Pair;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +46,7 @@ public class CaptureCollector {
 
     private static final int MAX_JPEGS_IN_FLIGHT = 1;
 
-    private class CaptureHolder {
+    private class CaptureHolder implements Comparable<CaptureHolder>{
         private final RequestHolder mRequest;
         private final LegacyRequest mLegacy;
         public final boolean needsJpeg;
@@ -53,6 +55,10 @@ public class CaptureCollector {
         private long mTimestamp = 0;
         private int mReceivedFlags = 0;
         private boolean mHasStarted = false;
+        private boolean mFailedJpeg = false;
+        private boolean mFailedPreview = false;
+        private boolean mCompleted = false;
+        private boolean mPreviewCompleted = false;
 
         public CaptureHolder(RequestHolder request, LegacyRequest legacyHolder) {
             mRequest = request;
@@ -74,11 +80,43 @@ public class CaptureCollector {
         }
 
         public void tryComplete() {
-            if (isCompleted()) {
-                if (needsPreview && isPreviewCompleted()) {
-                    CaptureCollector.this.onPreviewCompleted();
+            if (!mPreviewCompleted && needsPreview && isPreviewCompleted()) {
+                CaptureCollector.this.onPreviewCompleted();
+                mPreviewCompleted = true;
+            }
+
+            if (isCompleted() && !mCompleted) {
+                if (mFailedPreview || mFailedJpeg) {
+                    if (!mHasStarted) {
+                        // Send a request error if the capture has not yet started.
+                        mRequest.failRequest();
+                        CaptureCollector.this.mDeviceState.setCaptureStart(mRequest, mTimestamp,
+                                CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_REQUEST);
+                    } else {
+                        // Send buffer dropped errors for each pending buffer if the request has
+                        // started.
+                        if (mFailedPreview) {
+                            Log.w(TAG, "Preview buffers dropped for request: " +
+                                    mRequest.getRequestId());
+                            for (int i = 0; i < mRequest.numPreviewTargets(); i++) {
+                                CaptureCollector.this.mDeviceState.setCaptureResult(mRequest,
+                                    /*result*/null,
+                                        CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_BUFFER);
+                            }
+                        }
+                        if (mFailedJpeg) {
+                            Log.w(TAG, "Jpeg buffers dropped for request: " +
+                                    mRequest.getRequestId());
+                            for (int i = 0; i < mRequest.numJpegTargets(); i++) {
+                                CaptureCollector.this.mDeviceState.setCaptureResult(mRequest,
+                                    /*result*/null,
+                                        CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_BUFFER);
+                            }
+                        }
+                    }
                 }
-                CaptureCollector.this.onRequestCompleted(this);
+                CaptureCollector.this.onRequestCompleted(CaptureHolder.this);
+                mCompleted = true;
             }
         }
 
@@ -103,7 +141,8 @@ public class CaptureCollector {
 
             if (!mHasStarted) {
                 mHasStarted = true;
-                CaptureCollector.this.mDeviceState.setCaptureStart(mRequest, mTimestamp);
+                CaptureCollector.this.mDeviceState.setCaptureStart(mRequest, mTimestamp,
+                        CameraDeviceState.NO_CAPTURE_ERROR);
             }
 
             tryComplete();
@@ -123,6 +162,20 @@ public class CaptureCollector {
             }
 
             mReceivedFlags |= FLAG_RECEIVED_JPEG;
+            tryComplete();
+        }
+
+        public void setJpegFailed() {
+            if (DEBUG) {
+                Log.d(TAG, "setJpegFailed - called for request " + mRequest.getRequestId());
+            }
+            if (!needsJpeg || isJpegCompleted()) {
+                return;
+            }
+            mFailedJpeg = true;
+
+            mReceivedFlags |= FLAG_RECEIVED_JPEG;
+            mReceivedFlags |= FLAG_RECEIVED_JPEG_TS;
             tryComplete();
         }
 
@@ -148,7 +201,8 @@ public class CaptureCollector {
             if (!needsJpeg) {
                 if (!mHasStarted) {
                     mHasStarted = true;
-                    CaptureCollector.this.mDeviceState.setCaptureStart(mRequest, mTimestamp);
+                    CaptureCollector.this.mDeviceState.setCaptureStart(mRequest, mTimestamp,
+                            CameraDeviceState.NO_CAPTURE_ERROR);
                 }
             }
 
@@ -171,8 +225,37 @@ public class CaptureCollector {
             mReceivedFlags |= FLAG_RECEIVED_PREVIEW;
             tryComplete();
         }
+
+        public void setPreviewFailed() {
+            if (DEBUG) {
+                Log.d(TAG, "setPreviewFailed - called for request " + mRequest.getRequestId());
+            }
+            if (!needsPreview || isPreviewCompleted()) {
+                return;
+            }
+            mFailedPreview = true;
+
+            mReceivedFlags |= FLAG_RECEIVED_PREVIEW;
+            mReceivedFlags |= FLAG_RECEIVED_PREVIEW_TS;
+            tryComplete();
+        }
+
+        // Comparison and equals based on frame number.
+        @Override
+        public int compareTo(CaptureHolder captureHolder) {
+            return (mRequest.getFrameNumber() > captureHolder.mRequest.getFrameNumber()) ? 1 :
+                    ((mRequest.getFrameNumber() == captureHolder.mRequest.getFrameNumber()) ? 0 :
+                            -1);
+        }
+
+        // Comparison and equals based on frame number.
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof CaptureHolder && compareTo((CaptureHolder) o) == 0;
+        }
     }
 
+    private final TreeSet<CaptureHolder> mActiveRequests;
     private final ArrayDeque<CaptureHolder> mJpegCaptureQueue;
     private final ArrayDeque<CaptureHolder> mJpegProduceQueue;
     private final ArrayDeque<CaptureHolder> mPreviewCaptureQueue;
@@ -200,6 +283,7 @@ public class CaptureCollector {
         mJpegProduceQueue = new ArrayDeque<>(MAX_JPEGS_IN_FLIGHT);
         mPreviewCaptureQueue = new ArrayDeque<>(mMaxInFlight);
         mPreviewProduceQueue = new ArrayDeque<>(mMaxInFlight);
+        mActiveRequests = new TreeSet<>();
         mIsEmpty = mLock.newCondition();
         mNotFull = mLock.newCondition();
         mPreviewsEmpty = mLock.newCondition();
@@ -263,7 +347,7 @@ public class CaptureCollector {
                 mPreviewProduceQueue.add(h);
                 mInFlightPreviews++;
             }
-
+            mActiveRequests.add(h);
 
             mInFlight++;
             return true;
@@ -440,7 +524,9 @@ public class CaptureCollector {
         try {
             CaptureHolder h = mPreviewCaptureQueue.poll();
             if (h == null) {
-                Log.w(TAG, "previewCaptured called with no preview request on queue!");
+                if (DEBUG) {
+                    Log.d(TAG, "previewCaptured called with no preview request on queue!");
+                }
                 return null;
             }
             h.setPreviewTimestamp(timestamp);
@@ -471,6 +557,81 @@ public class CaptureCollector {
         }
     }
 
+    /**
+     * Called to alert the {@link CaptureCollector} that the next pending preview capture has failed.
+     */
+    public void failNextPreview() {
+        final ReentrantLock lock = this.mLock;
+        lock.lock();
+        try {
+            CaptureHolder h1 = mPreviewCaptureQueue.peek();
+            CaptureHolder h2 = mPreviewProduceQueue.peek();
+
+            // Find the request with the lowest frame number.
+            CaptureHolder h = (h1 == null) ? h2 :
+                              ((h2 == null) ? h1 :
+                              ((h1.compareTo(h2) <= 0) ? h1 :
+                              h2));
+
+            if (h != null) {
+                mPreviewCaptureQueue.remove(h);
+                mPreviewProduceQueue.remove(h);
+                mActiveRequests.remove(h);
+                h.setPreviewFailed();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Called to alert the {@link CaptureCollector} that the next pending jpeg capture has failed.
+     */
+    public void failNextJpeg() {
+        final ReentrantLock lock = this.mLock;
+        lock.lock();
+        try {
+            CaptureHolder h1 = mJpegCaptureQueue.peek();
+            CaptureHolder h2 = mJpegProduceQueue.peek();
+
+            // Find the request with the lowest frame number.
+            CaptureHolder h = (h1 == null) ? h2 :
+                              ((h2 == null) ? h1 :
+                              ((h1.compareTo(h2) <= 0) ? h1 :
+                              h2));
+
+            if (h != null) {
+                mJpegCaptureQueue.remove(h);
+                mJpegProduceQueue.remove(h);
+                mActiveRequests.remove(h);
+                h.setJpegFailed();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Called to alert the {@link CaptureCollector} all pending captures have failed.
+     */
+    public void failAll() {
+        final ReentrantLock lock = this.mLock;
+        lock.lock();
+        try {
+            CaptureHolder h;
+            while ((h = mActiveRequests.pollFirst()) != null) {
+                h.setPreviewFailed();
+                h.setJpegFailed();
+            }
+            mPreviewCaptureQueue.clear();
+            mPreviewProduceQueue.clear();
+            mJpegCaptureQueue.clear();
+            mJpegProduceQueue.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
+
     private void onPreviewCompleted() {
         mInFlightPreviews--;
         if (mInFlightPreviews < 0) {
@@ -496,6 +657,7 @@ public class CaptureCollector {
         }
 
         mCompletedRequests.add(capture);
+        mActiveRequests.remove(capture);
 
         mNotFull.signalAll();
         if (mInFlight == 0) {

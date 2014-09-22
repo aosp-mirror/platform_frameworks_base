@@ -17,6 +17,7 @@
 package android.hardware.camera2.legacy;
 
 import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -61,8 +62,10 @@ public class LegacyMetadataMapper {
     private static final long NS_PER_MS = 1000000;
 
     // from graphics.h
-    private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
-    private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
+    public static final int HAL_PIXEL_FORMAT_RGBA_8888 = PixelFormat.RGBA_8888;
+    public static final int HAL_PIXEL_FORMAT_BGRA_8888 = 0x5;
+    public static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
+    public static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
 
     // for metadata
     private static final float LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS = 0.0f;
@@ -1170,7 +1173,7 @@ public class LegacyMetadataMapper {
             Rect activeArray = c.get(SENSOR_INFO_ACTIVE_ARRAY_SIZE);
             MeteringRectangle[] activeRegions =  new MeteringRectangle[] {
                     new MeteringRectangle(/*x*/0, /*y*/0, /*width*/activeArray.width() - 1,
-                    /*height*/activeArray.height() - 1,/*weight*/1)};
+                    /*height*/activeArray.height() - 1,/*weight*/0)};
             m.set(CaptureRequest.CONTROL_AE_REGIONS, activeRegions);
             m.set(CaptureRequest.CONTROL_AWB_REGIONS, activeRegions);
             m.set(CaptureRequest.CONTROL_AF_REGIONS, activeRegions);
@@ -1273,6 +1276,11 @@ public class LegacyMetadataMapper {
 
         // flash.mode
         m.set(CaptureRequest.FLASH_MODE, FLASH_MODE_OFF);
+
+        /*
+         * noiseReduction.*
+         */
+        m.set(CaptureRequest.NOISE_REDUCTION_MODE, NOISE_REDUCTION_MODE_FAST);
 
         /*
          * lens.*
