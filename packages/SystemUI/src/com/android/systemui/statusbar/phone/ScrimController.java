@@ -148,7 +148,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
 
         if (!mDozing || mPulseCallback != null) {
             // Pulse suppressed.
-            mPulseCallback.onPulseFinished();
+            callback.onPulseFinished();
             return;
         }
 
