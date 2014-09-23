@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.ComponentName;
@@ -42,7 +43,9 @@ import java.util.UUID;
 /**
  * A {@link android.app.Service} that provides telephone connections to processes running on an
  * Android device.
+ * @hide
  */
+@SystemApi
 public abstract class ConnectionService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.

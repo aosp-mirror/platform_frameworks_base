@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,7 +24,9 @@ import java.util.Locale;
 
 /**
  *  Encapsulates all audio states during a call.
+ *  @hide
  */
+@SystemApi
 public final class AudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
     public static final int ROUTE_EARPIECE      = 0x00000001;
