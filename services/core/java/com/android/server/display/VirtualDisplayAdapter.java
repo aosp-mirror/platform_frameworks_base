@@ -188,7 +188,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestDisplayStateLocked(int state) {
+        public Runnable requestDisplayStateLocked(int state) {
             if (state != mDisplayState) {
                 mDisplayState = state;
                 if (state == Display.STATE_OFF) {
@@ -197,6 +197,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                     mCallback.dispatchDisplayResumed();
                 }
             }
+            return null;
         }
 
         @Override

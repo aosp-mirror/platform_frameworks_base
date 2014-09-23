@@ -108,8 +108,12 @@ abstract class DisplayDevice {
 
     /**
      * Sets the display state, if supported.
+     *
+     * @return A runnable containing work to be deferred until after we have
+     * exited the critical section, or null if none.
      */
-    public void requestDisplayStateLocked(int state) {
+    public Runnable requestDisplayStateLocked(int state) {
+        return null;
     }
 
     /**
