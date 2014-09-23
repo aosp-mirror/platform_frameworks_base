@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.os.UserHandle.PER_USER_RANGE;
+import static android.net.RouteInfo.RTN_THROW;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
@@ -38,6 +39,7 @@ import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LocalSocket;
@@ -1220,7 +1222,7 @@ public class Vpn {
 
                 // Now we are connected. Read and parse the new state.
                 String[] parameters = FileUtils.readTextFile(state, 0, null).split("\n", -1);
-                if (parameters.length != 6) {
+                if (parameters.length != 7) {
                     throw new IllegalStateException("Cannot parse the state");
                 }
 
@@ -1246,6 +1248,23 @@ public class Vpn {
                     String searchDomains = parameters[4].trim();
                     if (!searchDomains.isEmpty()) {
                         mConfig.searchDomains = Arrays.asList(searchDomains.split(" "));
+                    }
+                }
+
+                // Add a throw route for the VPN server endpoint, if one was specified.
+                String endpoint = parameters[5];
+                if (!endpoint.isEmpty()) {
+                    try {
+                        InetAddress addr = InetAddress.parseNumericAddress(endpoint);
+                        if (addr instanceof Inet4Address) {
+                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 32), RTN_THROW));
+                        } else if (addr instanceof Inet6Address) {
+                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 128), RTN_THROW));
+                        } else {
+                            Log.e(TAG, "Unknown IP address family for VPN endpoint: " + endpoint);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "Exception constructing throw route to " + endpoint + ": " + e);
                     }
                 }
 
