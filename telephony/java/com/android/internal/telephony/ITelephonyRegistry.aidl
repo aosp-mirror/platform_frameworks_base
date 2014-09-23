@@ -34,12 +34,10 @@ interface ITelephonyRegistry {
             boolean notifyNow);
     void notifyCallState(int state, String incomingNumber);
     void notifyCallStateForSubscriber(in long subId, int state, String incomingNumber);
-    void notifyServiceState(in ServiceState state);
-    void notifyServiceStateForSubscriber(in long subId, in ServiceState state);
+    void notifyServiceStateForPhoneId(in int phoneId, in long subId, in ServiceState state);
     void notifySignalStrength(in SignalStrength signalStrength);
     void notifySignalStrengthForSubscriber(in long subId, in SignalStrength signalStrength);
-    void notifyMessageWaitingChanged(boolean mwi);
-    void notifyMessageWaitingChangedForSubscriber(in long subId, boolean mwi);
+    void notifyMessageWaitingChangedForPhoneId(in int phoneId, in long subId, in boolean mwi);
     void notifyCallForwardingChanged(boolean cfi);
     void notifyCallForwardingChangedForSubscriber(in long subId, boolean cfi);
     void notifyDataActivity(int state);
