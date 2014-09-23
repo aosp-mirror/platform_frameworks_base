@@ -34,7 +34,6 @@ import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.ListUtils;
 import android.hardware.camera2.utils.ParamsUtils;
-import android.hardware.camera2.utils.SizeAreaComparator;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -88,6 +87,9 @@ public class LegacyMetadataMapper {
 
     static final int UNKNOWN_MODE = -1;
 
+    // Maximum difference between a preview size aspect ratio and a jpeg size aspect ratio
+    private static final float PREVIEW_ASPECT_RATIO_TOLERANCE = 0.01f;
+
     /*
      * Development hijinks: Lie about not supporting certain capabilities
      *
@@ -102,6 +104,7 @@ public class LegacyMetadataMapper {
     static final boolean LIE_ABOUT_AF_MAX_REGIONS = false;
     static final boolean LIE_ABOUT_AWB_STATE = false;
     static final boolean LIE_ABOUT_AWB = false;
+
 
     /**
      * Create characteristics for a legacy device by mapping the {@code parameters}
@@ -262,6 +265,64 @@ public class LegacyMetadataMapper {
          * remapping to public format constants.
          */
         List<Camera.Size> previewSizes = p.getSupportedPreviewSizes();
+        List<Camera.Size> jpegSizes = p.getSupportedPictureSizes();
+        /*
+         * Work-around for b/17589233:
+         * - Some HALs's largest preview size aspect ratio does not match the largest JPEG size AR
+         * - This causes a large amount of problems with focus/metering because it's relative to
+         *   preview, making the difference between the JPEG and preview viewport inaccessible
+         * - This boils down to metering or focusing areas being "arbitrarily" cropped
+         *   in the capture result.
+         * - Work-around the HAL limitations by removing all of the largest preview sizes
+         *   until we get one with the same aspect ratio as the jpeg size.
+         */
+        {
+            SizeAreaComparator areaComparator = new SizeAreaComparator();
+
+            // Sort preview to min->max
+            Collections.sort(previewSizes, areaComparator);
+
+            Camera.Size maxJpegSize = SizeAreaComparator.findLargestByArea(jpegSizes);
+            float jpegAspectRatio = maxJpegSize.width * 1.0f / maxJpegSize.height;
+
+            if (VERBOSE) {
+                Log.v(TAG, String.format("mapScalerStreamConfigs - largest JPEG area %dx%d, AR=%f",
+                        maxJpegSize.width, maxJpegSize.height, jpegAspectRatio));
+            }
+
+            // Now remove preview sizes from the end (largest->smallest) until aspect ratio matches
+            while (!previewSizes.isEmpty()) {
+                int index = previewSizes.size() - 1; // max is always at the end
+                Camera.Size size = previewSizes.get(index);
+
+                float previewAspectRatio = size.width * 1.0f / size.height;
+
+                if (Math.abs(jpegAspectRatio - previewAspectRatio) >=
+                        PREVIEW_ASPECT_RATIO_TOLERANCE) {
+                    previewSizes.remove(index); // Assume removing from end is O(1)
+
+                    if (VERBOSE) {
+                        Log.v(TAG, String.format(
+                                "mapScalerStreamConfigs - removed preview size %dx%d, AR=%f "
+                                        + "was not the same",
+                                size.width, size.height, previewAspectRatio));
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if (previewSizes.isEmpty()) {
+                // Fall-back to the original faulty behavior, but at least work
+                Log.w(TAG, "mapScalerStreamConfigs - failed to find any preview size matching " +
+                        "JPEG aspect ratio " + jpegAspectRatio);
+                previewSizes = p.getSupportedPreviewSizes();
+            }
+
+            // Sort again, this time in descending order max->min
+            Collections.sort(previewSizes, Collections.reverseOrder(areaComparator));
+        }
+
         appendStreamConfig(availableStreamConfigs,
                 HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, previewSizes);
         appendStreamConfig(availableStreamConfigs,
@@ -279,7 +340,6 @@ public class LegacyMetadataMapper {
             }
         }
 
-        List<Camera.Size> jpegSizes = p.getSupportedPictureSizes();
         appendStreamConfig(availableStreamConfigs,
                 HAL_PIXEL_FORMAT_BLOB, p.getSupportedPictureSizes());
         /*
@@ -620,7 +680,7 @@ public class LegacyMetadataMapper {
 
         if (thumbnailSizes != null) {
             Size[] sizes = convertSizeListToArray(thumbnailSizes);
-            Arrays.sort(sizes, new SizeAreaComparator());
+            Arrays.sort(sizes, new android.hardware.camera2.utils.SizeAreaComparator());
             m.set(JPEG_AVAILABLE_THUMBNAIL_SIZES, sizes);
         }
     }
