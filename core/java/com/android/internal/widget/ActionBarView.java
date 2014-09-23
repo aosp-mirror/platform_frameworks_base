@@ -1316,6 +1316,11 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         mHomeLayout.setUpIndicator(indicator);
     }
 
+    @Override
+    public void setDefaultNavigationIcon(Drawable icon) {
+        mHomeLayout.setDefaultUpIndicator(icon);
+    }
+
     public void setNavigationIcon(int resId) {
         mHomeLayout.setUpIndicator(resId);
     }
@@ -1380,6 +1385,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         private int mStartOffset;
         private int mUpIndicatorRes;
         private Drawable mDefaultUpIndicator;
+        private Drawable mUpIndicator;
 
         private static final long DEFAULT_TRANSITION_DURATION = 150;
 
@@ -1409,13 +1415,30 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         }
 
         public void setUpIndicator(Drawable d) {
-            mUpView.setImageDrawable(d != null ? d : mDefaultUpIndicator);
+            mUpIndicator = d;
             mUpIndicatorRes = 0;
+            updateUpIndicator();
+        }
+
+        public void setDefaultUpIndicator(Drawable d) {
+            mDefaultUpIndicator = d;
+            updateUpIndicator();
         }
 
         public void setUpIndicator(int resId) {
             mUpIndicatorRes = resId;
-            mUpView.setImageDrawable(resId != 0 ? getContext().getDrawable(resId) : null);
+            mUpIndicator = null;
+            updateUpIndicator();
+        }
+
+        private void updateUpIndicator() {
+            if (mUpIndicator != null) {
+                mUpView.setImageDrawable(mUpIndicator);
+            } else if (mUpIndicatorRes != 0) {
+                mUpView.setImageDrawable(getContext().getDrawable(mUpIndicatorRes));
+            } else {
+                mUpView.setImageDrawable(mDefaultUpIndicator);
+            }
         }
 
         @Override
@@ -1423,7 +1446,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
             super.onConfigurationChanged(newConfig);
             if (mUpIndicatorRes != 0) {
                 // Reload for config change
-                setUpIndicator(mUpIndicatorRes);
+                updateUpIndicator();
             }
         }
 
