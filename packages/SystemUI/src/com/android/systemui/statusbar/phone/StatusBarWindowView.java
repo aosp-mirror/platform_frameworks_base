@@ -132,7 +132,7 @@ public class StatusBarWindowView extends FrameLayout {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (down) {
-                    mService.wakeUpIfDozing(event.getEventTime());
+                    mService.wakeUpIfDozing(event.getEventTime(), false);
                 }
         }
         if (mService.interceptMediaKey(event)) {
@@ -164,7 +164,7 @@ public class StatusBarWindowView extends FrameLayout {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
             // wake up on a touch down event, if dozing
             if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                mService.wakeUpIfDozing(ev.getEventTime());
+                mService.wakeUpIfDozing(ev.getEventTime(), true);
             }
         }
         if (!intercept) {

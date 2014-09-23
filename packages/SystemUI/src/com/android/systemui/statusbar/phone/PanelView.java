@@ -317,7 +317,7 @@ public abstract class PanelView extends FrameLayout {
                     }
                     mJustPeeked = false;
                 }
-                if (-h >= mUnlockFalsingThreshold) {
+                if (-h >= getFalsingThreshold()) {
                     mTouchAboveFalsingThreshold = true;
                 }
                 if (!mJustPeeked && (!waitForTouchSlop || mTracking) && !isTrackingBlocked()) {
@@ -368,6 +368,11 @@ public abstract class PanelView extends FrameLayout {
                 break;
         }
         return !waitForTouchSlop || mTracking;
+    }
+
+    private int getFalsingThreshold() {
+        float factor = mStatusBar.isScreenOnComingFromTouch() ? 1.5f : 1.0f;
+        return (int) (mUnlockFalsingThreshold * factor);
     }
 
     protected abstract boolean hasConflictingGestures();

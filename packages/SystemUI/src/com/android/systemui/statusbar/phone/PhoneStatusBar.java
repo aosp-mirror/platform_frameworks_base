@@ -262,6 +262,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
     private DozeServiceHost mDozeServiceHost;
+    private boolean mScreenOnComingFromTouch;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -2118,10 +2119,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mNotificationPanel.isQsExpanded();
     }
 
+    public boolean isScreenOnComingFromTouch() {
+        return mScreenOnComingFromTouch;
+    }
+
     public boolean isFalsingThresholdNeeded() {
         boolean onKeyguard = getBarState() == StatusBarState.KEYGUARD;
         boolean isMethodInsecure = mUnlockMethodCache.isMethodInsecure();
-        return onKeyguard && (isMethodInsecure || mDozing);
+        return onKeyguard && (isMethodInsecure || mDozing || mScreenOnComingFromTouch);
     }
 
     @Override  // NotificationData.Environment
@@ -3909,6 +3914,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onScreenTurnedOff() {
         mScreenOnFromKeyguard = false;
+        mScreenOnComingFromTouch = false;
         mStackScroller.setAnimationsEnabled(false);
     }
 
@@ -4011,10 +4017,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
-    public void wakeUpIfDozing(long time) {
+    public void wakeUpIfDozing(long time, boolean fromTouch) {
         if (mDozing && mScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time);
+            if (fromTouch) {
+                mScreenOnComingFromTouch = true;
+            }
         }
     }
 
