@@ -3641,7 +3641,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updateDozingState() {
-        if (mState != StatusBarState.KEYGUARD) {
+        if (mState != StatusBarState.KEYGUARD && !mNotificationPanel.isDozing()) {
             return;
         }
         mNotificationPanel.setDozing(mDozing);
