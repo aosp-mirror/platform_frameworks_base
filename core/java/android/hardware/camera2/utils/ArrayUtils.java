@@ -32,7 +32,7 @@ public class ArrayUtils {
 
     /** Return the index of {@code needle} in the {@code array}, or else {@code -1} */
     public static <T> int getArrayIndex(T[] array, T needle) {
-        if (needle == null) {
+        if (array == null) {
             return -1;
         }
 
@@ -164,6 +164,17 @@ public class ArrayUtils {
      * @return {@code true} if the given element is contained
      */
     public static boolean contains(int[] array, int elem) {
+        return getArrayIndex(array, elem) != -1;
+    }
+
+    /**
+     * Returns true if the given {@code array} contains the given element.
+     *
+     * @param array {@code array} to check for {@code elem}
+     * @param elem {@code elem} to test for
+     * @return {@code true} if the given element is contained
+     */
+    public static <T> boolean contains(T[] array, T elem) {
         return getArrayIndex(array, elem) != -1;
     }
 

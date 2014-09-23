@@ -652,7 +652,9 @@ public class SurfaceTextureRenderer {
 
         // No preview request queued, drop frame.
         if (captureHolder == null) {
-            Log.w(TAG, "Dropping preview frame.");
+            if (DEBUG) {
+                Log.d(TAG, "Dropping preview frame.");
+            }
             if (doTiming) {
                 endGlTiming();
             }

@@ -341,6 +341,10 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             Log.d(TAG, "disconnect called.");
         }
 
+        if (mLegacyDevice.isClosed()) {
+            Log.w(TAG, "Cannot disconnect, device has already been closed.");
+        }
+
         try {
             mLegacyDevice.close();
         } finally {
@@ -355,6 +359,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "submitRequest called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot submit request, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (mConfiguring) {
                 Log.e(TAG, "Cannot submit request, configuration change in progress.");
@@ -370,6 +379,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "submitRequestList called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot submit request list, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (mConfiguring) {
                 Log.e(TAG, "Cannot submit request, configuration change in progress.");
@@ -384,6 +398,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "cancelRequest called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot cancel request, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (mConfiguring) {
                 Log.e(TAG, "Cannot cancel request, configuration change in progress.");
@@ -400,6 +419,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "beginConfigure called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot begin configure, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (mConfiguring) {
                 Log.e(TAG, "Cannot begin configure, configuration change already in progress.");
@@ -415,6 +439,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "endConfigure called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot end configure, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         ArrayList<Surface> surfaces = null;
         synchronized(mConfigureLock) {
             if (!mConfiguring) {
@@ -438,6 +467,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "deleteStream called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot delete stream, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (!mConfiguring) {
                 Log.e(TAG, "Cannot delete stream, beginConfigure hasn't been called yet.");
@@ -458,6 +492,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "createStream called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot create stream, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (!mConfiguring) {
                 Log.e(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
@@ -473,6 +512,10 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     public int createDefaultRequest(int templateId, /*out*/CameraMetadataNative request) {
         if (DEBUG) {
             Log.d(TAG, "createDefaultRequest called.");
+        }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot create default request, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
         }
 
         CameraMetadataNative template;
@@ -503,6 +546,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "waitUntilIdle called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot wait until idle, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (mConfiguring) {
                 Log.e(TAG, "Cannot wait until idle, configuration change in progress.");
@@ -518,13 +566,21 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "flush called.");
         }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot flush, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
         synchronized(mConfigureLock) {
             if (mConfiguring) {
                 Log.e(TAG, "Cannot flush, configuration change in progress.");
                 return CameraBinderDecorator.INVALID_OPERATION;
             }
         }
-        // TODO: implement flush.
+        long lastFrame = mLegacyDevice.flush();
+        if (lastFrameNumber != null) {
+            lastFrameNumber.setNumber(lastFrame);
+        }
         return CameraBinderDecorator.NO_ERROR;
     }
 

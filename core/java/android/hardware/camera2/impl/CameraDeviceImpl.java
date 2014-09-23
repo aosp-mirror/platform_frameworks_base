@@ -51,7 +51,6 @@ import java.util.TreeSet;
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
  */
 public class CameraDeviceImpl extends CameraDevice {
-
     private final String TAG;
     private final boolean DEBUG;
 
@@ -1136,7 +1135,6 @@ public class CameraDeviceImpl extends CameraDevice {
     }
 
     public class CameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
-
         //
         // Constants below need to be kept up-to-date with
         // frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
@@ -1149,34 +1147,29 @@ public class CameraDeviceImpl extends CameraDevice {
         /**
          * Camera has been disconnected
          */
-        static final int ERROR_CAMERA_DISCONNECTED = 0;
-
+        public static final int ERROR_CAMERA_DISCONNECTED = 0;
         /**
          * Camera has encountered a device-level error
          * Matches CameraDevice.StateCallback#ERROR_CAMERA_DEVICE
          */
-        static final int ERROR_CAMERA_DEVICE = 1;
-
+        public static final int ERROR_CAMERA_DEVICE = 1;
         /**
          * Camera has encountered a service-level error
          * Matches CameraDevice.StateCallback#ERROR_CAMERA_SERVICE
          */
-        static final int ERROR_CAMERA_SERVICE = 2;
-
+        public static final int ERROR_CAMERA_SERVICE = 2;
         /**
          * Camera has encountered an error processing a single request.
          */
-        static final int ERROR_CAMERA_REQUEST = 3;
-
+        public static final int ERROR_CAMERA_REQUEST = 3;
         /**
          * Camera has encountered an error producing metadata for a single capture
          */
-        static final int ERROR_CAMERA_RESULT = 4;
-
+        public static final int ERROR_CAMERA_RESULT = 4;
         /**
          * Camera has encountered an error producing an image buffer for a single capture
          */
-        static final int ERROR_CAMERA_BUFFER = 5;
+        public static final int ERROR_CAMERA_BUFFER = 5;
 
         @Override
         public IBinder asBinder() {
@@ -1187,9 +1180,9 @@ public class CameraDeviceImpl extends CameraDevice {
         public void onDeviceError(final int errorCode, CaptureResultExtras resultExtras) {
             if (DEBUG) {
                 Log.d(TAG, String.format(
-                    "Device error received, code %d, frame number %d, request ID %d, subseq ID %d",
-                    errorCode, resultExtras.getFrameNumber(), resultExtras.getRequestId(),
-                    resultExtras.getSubsequenceId()));
+                        "Device error received, code %d, frame number %d, request ID %d, subseq ID %d",
+                        errorCode, resultExtras.getFrameNumber(), resultExtras.getRequestId(),
+                        resultExtras.getSubsequenceId()));
             }
 
             synchronized(mInterfaceLock) {
