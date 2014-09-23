@@ -391,9 +391,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Not all the auto-focus modes may be supported by a
      * given camera device. This entry lists the valid modes for
      * {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} for this camera device.</p>
-     * <p>All camera devices will support OFF mode, and all camera devices with
-     * adjustable focuser units (<code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>)
-     * will support AUTO mode.</p>
+     * <p>All LIMITED and FULL mode camera devices will support OFF mode, and all
+     * camera devices with adjustable focuser units
+     * (<code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>) will support AUTO mode.</p>
      *
      * @see CaptureRequest#CONTROL_AF_MODE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
