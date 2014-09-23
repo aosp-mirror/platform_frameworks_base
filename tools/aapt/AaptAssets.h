@@ -104,6 +104,9 @@ private:
 struct AaptGroupEntry
 {
 public:
+    AaptGroupEntry() {}
+    AaptGroupEntry(const ConfigDescription& config) : mParams(config) {}
+
     bool initFromDirName(const char* dir, String8* resType);
 
     inline const ConfigDescription& toParams() const { return mParams; }

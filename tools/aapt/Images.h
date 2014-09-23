@@ -20,7 +20,7 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
 
 status_t preProcessImageToCache(const Bundle* bundle, const String8& source, const String8& dest);
 
-status_t postProcessImage(const sp<AaptAssets>& assets,
+status_t postProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
                           ResourceTable* table, const sp<AaptFile>& file);
 
 #endif

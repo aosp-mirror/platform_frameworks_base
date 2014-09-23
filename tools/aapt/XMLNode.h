@@ -116,6 +116,8 @@ public:
     status_t addAttribute(const String16& ns, const String16& name,
                           const String16& value);
 
+    status_t removeAttribute(size_t index);
+
     void setAttributeResID(size_t attrIdx, uint32_t resId);
 
     status_t appendChars(const String16& chars);
@@ -136,6 +138,8 @@ public:
 
     status_t flatten(const sp<AaptFile>& dest, bool stripComments,
             bool stripRawValues) const;
+
+    sp<XMLNode> clone() const;
 
     void print(int indent=0);
 
@@ -163,6 +167,9 @@ private:
     static void XMLCALL
     commentData(void *userData, const char *comment);
     
+    // For cloning
+    XMLNode();
+
     // Creating an element node.
     XMLNode(const String8& filename, const String16& s1, const String16& s2, bool isNamespace);
     
