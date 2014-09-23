@@ -35,10 +35,10 @@ import com.android.internal.telecom.RemoteServiceCallback;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link android.app.Service} that provides telephone connections to processes running on an
@@ -77,10 +77,10 @@ public abstract class ConnectionService extends Service {
 
     private static Connection sNullConnection;
 
-    private final Map<String, Connection> mConnectionById = new HashMap<>();
-    private final Map<Connection, String> mIdByConnection = new HashMap<>();
-    private final Map<String, Conference> mConferenceById = new HashMap<>();
-    private final Map<Conference, String> mIdByConference = new HashMap<>();
+    private final Map<String, Connection> mConnectionById = new ConcurrentHashMap<>();
+    private final Map<Connection, String> mIdByConnection = new ConcurrentHashMap<>();
+    private final Map<String, Conference> mConferenceById = new ConcurrentHashMap<>();
+    private final Map<Conference, String> mIdByConference = new ConcurrentHashMap<>();
     private final RemoteConnectionManager mRemoteConnectionManager =
             new RemoteConnectionManager(this);
     private final List<Runnable> mPreInitializationConnectionRequests = new ArrayList<>();
