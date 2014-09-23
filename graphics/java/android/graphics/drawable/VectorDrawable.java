@@ -1456,12 +1456,12 @@ public class VectorDrawable extends Drawable {
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
         @SuppressWarnings("unused")
-        int getStroke() {
+        int getStrokeColor() {
             return mStrokeColor;
         }
 
         @SuppressWarnings("unused")
-        void setStroke(int strokeColor) {
+        void setStrokeColor(int strokeColor) {
             mStrokeColor = strokeColor;
         }
 
@@ -1476,32 +1476,32 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
-        float getstrokeAlpha() {
+        float getStrokeAlpha() {
             return mStrokeAlpha;
         }
 
         @SuppressWarnings("unused")
-        void setstrokeAlpha(float strokeAlpha) {
+        void setStrokeAlpha(float strokeAlpha) {
             mStrokeAlpha = strokeAlpha;
         }
 
         @SuppressWarnings("unused")
-        int getFill() {
+        int getFillColor() {
             return mFillColor;
         }
 
         @SuppressWarnings("unused")
-        void setFill(int fillColor) {
+        void setFillColor(int fillColor) {
             mFillColor = fillColor;
         }
 
         @SuppressWarnings("unused")
-        float getfillAlpha() {
+        float getFillAlpha() {
             return mFillAlpha;
         }
 
         @SuppressWarnings("unused")
-        void setfillAlpha(float fillAlpha) {
+        void setFillAlpha(float fillAlpha) {
             mFillAlpha = fillAlpha;
         }
 
