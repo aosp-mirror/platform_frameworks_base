@@ -25,5 +25,35 @@
         android:valueFrom="@string/round_box"
         android:valueTo="@string/heart"
         android:valueType="pathType" />
+    <objectAnimator
+        android:duration="8000"
+        android:propertyName="fillAlpha"
+        android:repeatCount="-1"
+        android:valueFrom="1.0"
+        android:valueTo="0.0" />
+    <objectAnimator
+        android:duration="8000"
+        android:propertyName="strokeAlpha"
+        android:repeatCount="-1"
+        android:valueFrom="1.0"
+        android:valueTo="0.0" />
+    <objectAnimator
+        android:duration="8000"
+        android:propertyName="strokeColor"
+        android:repeatCount="-1"
+        android:valueFrom="#FF0000FF"
+        android:valueTo="#FF00FF00" />
+    <objectAnimator
+        android:duration="8000"
+        android:propertyName="strokeWidth"
+        android:repeatCount="-1"
+        android:valueFrom="5"
+        android:valueTo="20" />
+    <objectAnimator
+        android:duration="8000"
+        android:propertyName="fillColor"
+        android:repeatCount="-1"
+        android:valueFrom="#FFFF0000"
+        android:valueTo="#FF00FF00" />
 
 </set>
