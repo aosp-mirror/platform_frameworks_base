@@ -84,7 +84,6 @@ final class Notifier {
     private final IBatteryStats mBatteryStats;
     private final IAppOpsService mAppOps;
     private final SuspendBlocker mSuspendBlocker;
-    private final ScreenOnBlocker mScreenOnBlocker;
     private final WindowManagerPolicy mPolicy;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
@@ -110,18 +109,13 @@ final class Notifier {
     // True if a user activity message should be sent.
     private boolean mUserActivityPending;
 
-    // The currently active screen on listener. This field is non-null whenever the
-    // ScreenOnBlocker has been acquired and we are awaiting a callback to release it.
-    private ScreenOnUnblocker mPendingScreenOnUnblocker;
-
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
-            IAppOpsService appOps, SuspendBlocker suspendBlocker, ScreenOnBlocker screenOnBlocker,
+            IAppOpsService appOps, SuspendBlocker suspendBlocker,
             WindowManagerPolicy policy) {
         mContext = context;
         mBatteryStats = batteryStats;
         mAppOps = appOps;
         mSuspendBlocker = suspendBlocker;
-        mScreenOnBlocker = screenOnBlocker;
         mPolicy = policy;
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
@@ -333,21 +327,6 @@ final class Notifier {
     }
 
     /**
-     * Notifies that screen is about to be turned on (any state other than off).
-     */
-    public void onScreenTurningOn() {
-        synchronized (mLock) {
-            final ScreenOnUnblocker unblocker = blockScreenOnLocked();
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mPolicy.screenTurningOn(unblocker);
-                }
-            });
-        }
-    }
-
-    /**
      * Called when there has been user activity.
      */
     public void onUserActivity(int event, int uid) {
@@ -467,26 +446,6 @@ final class Notifier {
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
-        }
-    }
-
-    private ScreenOnUnblocker blockScreenOnLocked() {
-        if (mPendingScreenOnUnblocker == null) {
-            mScreenOnBlocker.acquire();
-        }
-        mPendingScreenOnUnblocker = new ScreenOnUnblocker();
-        return mPendingScreenOnUnblocker;
-    }
-
-    private final class ScreenOnUnblocker implements WindowManagerPolicy.ScreenOnListener {
-        @Override
-        public void onScreenOn() {
-            synchronized (mLock) {
-                if (mPendingScreenOnUnblocker == this) {
-                    mPendingScreenOnUnblocker = null;
-                    mScreenOnBlocker.release();
-                }
-            }
         }
     }
 
