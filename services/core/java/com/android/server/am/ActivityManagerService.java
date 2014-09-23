@@ -937,13 +937,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean mRunningVoice = false;
 
     /**
-     * Set while the keyguard is waiting for an activity to draw.
-     * In this state, if we are sleeping, we allow Activities to launch
-     * so that they can draw before Keyguard dismisses itself.
-     */
-    private boolean mKeyguardWaitingForDraw = false;
-
-    /**
      * State of external calls telling us if the device is asleep.
      */
     private boolean mWentToSleep = false;
@@ -6256,7 +6249,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 if (DEBUG_LOCKSCREEN) logLockScreen("");
                 mWindowManager.keyguardWaitingForActivityDrawn();
-                mKeyguardWaitingForDraw = true;
+                if (mLockScreenShown) {
+                    mLockScreenShown = false;
+                    comeOutOfSleepIfNeededLocked();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -9959,7 +9955,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public boolean isSleeping() {
-        return mSleeping && !mKeyguardWaitingForDraw;
+        return mSleeping;
     }
 
     void goingToSleep() {
@@ -9980,7 +9976,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mWentToSleep && !mRunningVoice) {
             if (!mSleeping) {
                 mSleeping = true;
-                mKeyguardWaitingForDraw = false;
                 mStackSupervisor.goingToSleepLocked();
 
                 // Initialize the wake times of all processes.
@@ -10089,7 +10084,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (DEBUG_LOCKSCREEN) logLockScreen(" shown=" + shown);
                 mLockScreenShown = shown;
-                mKeyguardWaitingForDraw = false;
                 comeOutOfSleepIfNeededLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
