@@ -71,7 +71,7 @@ public:
     static inline bool paintWillNotDraw(const SkPaint& paint) {
         return paint.getAlpha() == 0
                 && !paint.getColorFilter()
-                && getXfermode(paint.getXfermode()) != SkXfermode::kClear_Mode;
+                && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
     }
 
     // TODO: move to a method on android:Paint
