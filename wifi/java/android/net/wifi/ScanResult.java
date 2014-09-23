@@ -107,6 +107,12 @@ public class ScanResult implements Parcelable {
     public int autoJoinStatus;
 
     /**
+     * num IP configuration failures
+     * @hide
+     */
+    public int numIpConfigFailures;
+
+    /**
      * @hide
      * Last time we blacklisted the ScanResult
      */
@@ -256,6 +262,7 @@ public class ScanResult implements Parcelable {
             untrusted = source.untrusted;
             numConnection = source.numConnection;
             numUsage = source.numUsage;
+            numIpConfigFailures = source.numIpConfigFailures;
         }
     }
 
@@ -320,6 +327,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(untrusted ? 1 : 0);
         dest.writeInt(numConnection);
         dest.writeInt(numUsage);
+        dest.writeInt(numIpConfigFailures);
         if (informationElements != null) {
             dest.writeInt(informationElements.length);
             for (int i = 0; i < informationElements.length; i++) {
@@ -355,6 +363,7 @@ public class ScanResult implements Parcelable {
                 sr.untrusted = in.readInt() != 0;
                 sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
+                sr.numIpConfigFailures = in.readInt();
                 int n = in.readInt();
                 if (n != 0) {
                     sr.informationElements = new InformationElement[n];
