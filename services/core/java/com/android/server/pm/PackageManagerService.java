@@ -5589,9 +5589,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         // update the package settings accordingly.
         pkg.cpuAbiOverride = cpuAbiOverride;
 
-        Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
-                + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
-                + pkg.applicationInfo.nativeLibraryRootRequiresIsa);
+        if (DEBUG_ABI_SELECTION) {
+            Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
+                    + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
+                    + pkg.applicationInfo.nativeLibraryRootRequiresIsa);
+        }
 
         // Push the derived path down into PackageSettings so we know what to
         // clean up at uninstall time.
