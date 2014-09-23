@@ -25,6 +25,7 @@ import com.android.internal.location.ProviderRequest;
 import com.android.internal.R;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.TelephonyIntents;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -227,6 +228,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_GEOFENCE_ERROR_INVALID_TRANSITION = -103;
     private static final int GPS_GEOFENCE_ERROR_GENERIC = -149;
 
+    // TCP/IP constants.
+    // Valid TCP/UDP port range is (0, 65535].
+    private static final int TCP_MIN_PORT = 0;
+    private static final int TCP_MAX_PORT = 0xffff;
+
     // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
     private static final int BATTERY_SAVER_MODE_NO_CHANGE = 0;
     // Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
@@ -332,7 +338,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
     private String mSuplServerHost;
-    private int mSuplServerPort;
+    private int mSuplServerPort = TCP_MIN_PORT;
     private String mC2KServerHost;
     private int mC2KServerPort;
     private boolean mSuplEsEnabled = false;
@@ -487,7 +493,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     || Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 updateLowPowerMode();
-            } else if (action.equals(SIM_STATE_CHANGED)) {
+            } else if (action.equals(SIM_STATE_CHANGED)
+                    || action.equals(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE)
+                    || action.equals(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED)) {
+                Log.d(TAG, "received SIM realted action: " + action);
                 TelephonyManager phone = (TelephonyManager)
                         mContext.getSystemService(Context.TELEPHONY_SERVICE);
                 String mccMnc = phone.getSimOperator();
@@ -497,6 +506,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         reloadGpsProperties(context, mProperties);
                         mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
                     }
+                } else {
+                    Log.d(TAG, "SIM MCC/MNC is still not available");
                 }
             }
         }
@@ -709,6 +720,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(SIM_STATE_CHANGED);
+        // TODO: remove the use TelephonyIntents. We are using it because SIM_STATE_CHANGED
+        // is not reliable at the moment.
+        intentFilter.addAction(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE);
+        intentFilter.addAction(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
     }
 
@@ -921,6 +936,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
             }
         }
+        if (mSuplServerHost != null
+                && mSuplServerPort > TCP_MIN_PORT
+                && mSuplServerPort <= TCP_MAX_PORT) {
+            native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+        }
     }
 
     /**
@@ -963,6 +983,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         if (enabled) {
             mSupportsXtra = native_supports_xtra();
+
+            // TODO: remove the following native calls if we can make sure they are redundant.
             if (mSuplServerHost != null) {
                 native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
             }
