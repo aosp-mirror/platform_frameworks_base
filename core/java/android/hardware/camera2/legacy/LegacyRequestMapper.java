@@ -399,8 +399,9 @@ public class LegacyRequestMapper {
 
         // jpeg.orientation
         {
-            int orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-            params.setRotation(ParamsUtils.getOrDefault(request, JPEG_ORIENTATION, orientation));
+            Integer orientation = request.get(CaptureRequest.JPEG_ORIENTATION);
+            params.setRotation(ParamsUtils.getOrDefault(request, JPEG_ORIENTATION,
+                    (orientation == null) ? 0 : orientation));
         }
 
         // jpeg.quality
@@ -494,6 +495,11 @@ public class LegacyRequestMapper {
             if (rect.getMeteringWeight() != MeteringRectangle.METERING_WEIGHT_DONT_CARE) {
                 meteringRectangleList.add(rect);
             }
+        }
+
+        if (meteringRectangleList.size() == 0) {
+            Log.w(TAG, "Only received metering rectangles with weight 0.");
+            return Arrays.asList(ParameterUtils.CAMERA_AREA_DEFAULT);
         }
 
         // Ignore any regions beyond our maximum supported count
