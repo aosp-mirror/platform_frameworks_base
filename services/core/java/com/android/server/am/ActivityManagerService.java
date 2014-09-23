@@ -2623,6 +2623,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void removeLruProcessLocked(ProcessRecord app) {
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui >= 0) {
+            if (!app.killed) {
+                Slog.wtf(TAG, "Removing process that hasn't been killed: " + app);
+                Process.killProcessQuiet(app.pid);
+                Process.killProcessGroup(app.info.uid, app.pid);
+            }
             if (lrui <= mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
             }
@@ -3206,6 +3211,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.setPid(startResult.pid);
             app.usingWrapper = startResult.usingWrapper;
             app.removed = false;
+            app.killed = false;
             app.killedByAm = false;
             checkTime(startTime, "startProcess: starting to update pids map");
             synchronized (mPidsSelfLocked) {
@@ -4804,15 +4810,16 @@ public final class ActivityManagerService extends ActivityManagerNative
        appDiedLocked(app, app.pid, app.thread);
     }
 
-    final void appDiedLocked(ProcessRecord app, int pid,
-            IApplicationThread thread) {
+    final void appDiedLocked(ProcessRecord app, int pid, IApplicationThread thread) {
 
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         synchronized (stats) {
             stats.noteProcessDiedLocked(app.info.uid, pid);
         }
 
+        Process.killProcessQuiet(pid);
         Process.killProcessGroup(app.info.uid, pid);
+        app.killed = true;
 
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
