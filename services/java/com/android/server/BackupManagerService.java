@@ -3578,6 +3578,14 @@ class BackupManagerService extends IBackupManager.Stub {
                                 break;
                         }
 
+                        // The path needs to be canonical
+                        if (info.path.contains("..") || info.path.contains("//")) {
+                            if (MORE_DEBUG) {
+                                Slog.w(TAG, "Dropping invalid path " + info.path);
+                            }
+                            okay = false;
+                        }
+
                         // If the policy is satisfied, go ahead and set up to pipe the
                         // data to the agent.
                         if (DEBUG && okay && mAgent != null) {
