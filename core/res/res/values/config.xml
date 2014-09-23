@@ -992,9 +992,11 @@
     <!-- 2 means give warning -->
     <integer name="config_datause_notification_type">2</integer>
 
-    <!-- If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 this is the value
-         that should be used instead. A value of RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means
-         there is no replacement value and VoLTE is assumed to be supported -->
+    <!-- If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or
+         RIL_RADIO_TECHNOLOGY_UNKNOWN:0 this is the value that should be used instead.
+         A configuration value of RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means
+         there is no replacement value and that the default assumption
+         for phone type (GSM) should be used. -->
     <integer name="config_volte_replacement_rat">0</integer>
 
     <!-- Flag indicating whether the current device is "voice capable".
