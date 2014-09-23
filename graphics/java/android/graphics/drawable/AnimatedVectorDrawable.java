@@ -137,8 +137,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     private boolean mMutated;
 
     public AnimatedVectorDrawable() {
-        mAnimatedVectorState = new AnimatedVectorDrawableState(
-                new AnimatedVectorDrawableState(null));
+        mAnimatedVectorState = new AnimatedVectorDrawableState(null);
     }
 
     private AnimatedVectorDrawable(AnimatedVectorDrawableState state, Resources res,
@@ -160,7 +159,13 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     @Override
     public ConstantState getConstantState() {
+        mAnimatedVectorState.mChangingConfigurations = getChangingConfigurations();
         return mAnimatedVectorState;
+    }
+
+    @Override
+    public int getChangingConfigurations() {
+        return super.getChangingConfigurations() | mAnimatedVectorState.mChangingConfigurations;
     }
 
     @Override
@@ -347,6 +352,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                         mTargetNameMap.put(animClone, targetName);
                     }
                 }
+            } else {
+                mVectorDrawable = new VectorDrawable();
             }
         }
 
