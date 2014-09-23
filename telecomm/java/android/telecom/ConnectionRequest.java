@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -24,7 +25,9 @@ import android.os.Parcelable;
 /**
  * Simple data container encapsulating a request to some entity to
  * create a new {@link Connection}.
+ * @hide
  */
+@SystemApi
 public final class ConnectionRequest implements Parcelable {
 
     // TODO: Token to limit recursive invocations

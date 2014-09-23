@@ -19,6 +19,7 @@ package android.telecom;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -43,7 +44,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Implementations are then responsible for updating the state of the {@code Connection}, and
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
+ * @hide
  */
+@SystemApi
 public abstract class Connection {
 
     public static final int STATE_INITIALIZING = 0;
@@ -873,7 +876,7 @@ public abstract class Connection {
         return mUnmodifiableConferenceableConnections;
     }
 
-    /*
+    /**
      * @hide
      */
     public final void setConnectionService(ConnectionService connectionService) {
