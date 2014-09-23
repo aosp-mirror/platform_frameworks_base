@@ -979,12 +979,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         final ArrayList<NetworkInfo> result = Lists.newArrayList();
-        synchronized (mRulesLock) {
-            for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
-                    networkType++) {
-                if (getNetworkInfoForType(networkType) != null) {
-                    result.add(getFilteredNetworkInfo(networkType, uid));
-                }
+        for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
+                networkType++) {
+            if (getNetworkInfoForType(networkType) != null) {
+                result.add(getFilteredNetworkInfo(networkType, uid));
             }
         }
         return result.toArray(new NetworkInfo[result.size()]);
@@ -1078,15 +1076,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         final ArrayList<NetworkState> result = Lists.newArrayList();
-        synchronized (mRulesLock) {
-            for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
-                    networkType++) {
-                if (getNetworkInfoForType(networkType) != null) {
-                    final NetworkInfo info = getFilteredNetworkInfo(networkType, uid);
-                    final LinkProperties lp = getLinkPropertiesForTypeInternal(networkType);
-                    final NetworkCapabilities netcap = getNetworkCapabilitiesForType(networkType);
-                    result.add(new NetworkState(info, lp, netcap));
-                }
+        for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
+                networkType++) {
+            if (getNetworkInfoForType(networkType) != null) {
+                final NetworkInfo info = getFilteredNetworkInfo(networkType, uid);
+                final LinkProperties lp = getLinkPropertiesForTypeInternal(networkType);
+                final NetworkCapabilities netcap = getNetworkCapabilitiesForType(networkType);
+                result.add(new NetworkState(info, lp, netcap));
             }
         }
         return result.toArray(new NetworkState[result.size()]);
@@ -4132,8 +4128,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
                 == false) {
             final int uidRules;
+            final int uid = Binder.getCallingUid();
             synchronized(mRulesLock) {
-                uidRules = mUidRules.get(Binder.getCallingUid(), RULE_ALLOW_ALL);
+                uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             }
             if ((uidRules & RULE_REJECT_METERED) != 0) {
                 // we could silently fail or we can filter the available nets to only give
