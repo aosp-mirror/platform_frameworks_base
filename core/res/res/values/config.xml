@@ -1826,4 +1826,14 @@
     <!-- Flag indicating whether radio is to be restarted on the error of
          PDP_FAIL_REGULAR_DEACTIVATION/0x24 -->
     <bool name="config_restart_radio_on_pdp_fail_regular_deactivation">false</bool>
+
+    <!-- networks that don't want data deactivate when shutdown the phone
+         note this is dependent on the operator of the network we're on,
+         not operator on the SIM -->
+    <string-array translatable="false" name="networks_not_clear_data">
+        <item>71203</item>
+        <item>71606</item>
+        <item>71610</item>
+        <item>732101</item>
+    </string-array>
 </resources>
