@@ -62,6 +62,23 @@ public final class RouteInfo implements Parcelable {
      */
     private final String mInterface;
 
+
+    /** Unicast route. @hide */
+    public static final int RTN_UNICAST = 1;
+
+    /** Unreachable route. @hide */
+    public static final int RTN_UNREACHABLE = 7;
+
+    /** Throw route. @hide */
+    public static final int RTN_THROW = 9;
+
+    /**
+     * The type of this route; one of the RTN_xxx constants above.
+     */
+    private final int mType;
+
+    // Derived data members.
+    // TODO: remove these.
     private final boolean mIsHost;
     private final boolean mHasGateway;
 
@@ -82,7 +99,26 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
-    public RouteInfo(IpPrefix destination, InetAddress gateway, String iface) {
+    public RouteInfo(IpPrefix destination, InetAddress gateway, String iface, int type) {
+        switch (type) {
+            case RTN_UNICAST:
+            case RTN_UNREACHABLE:
+            case RTN_THROW:
+                // TODO: It would be nice to ensure that route types that don't have nexthops or
+                // interfaces, such as unreachable or throw, can't be created if an interface or
+                // a gateway is specified. This is a bit too complicated to do at the moment
+                // because:
+                //
+                // - LinkProperties sets the interface on routes added to it, and modifies the
+                //   interfaces of all the routes when its interface name changes.
+                // - Even when the gateway is null, we store a non-null gateway here.
+                //
+                // For now, we just rely on the code that sets routes to do things properly.
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown route type " + type);
+        }
+
         if (destination == null) {
             if (gateway != null) {
                 if (gateway instanceof Inet4Address) {
@@ -117,7 +153,15 @@ public final class RouteInfo implements Parcelable {
         mDestination = destination;  // IpPrefix objects are immutable.
         mGateway = gateway;          // InetAddress objects are immutable.
         mInterface = iface;          // Strings are immutable.
+        mType = type;
         mIsHost = isHost();
+    }
+
+    /**
+     *  @hide
+     */
+    public RouteInfo(IpPrefix destination, InetAddress gateway, String iface) {
+        this(destination, gateway, iface, RTN_UNICAST);
     }
 
     /**
@@ -150,6 +194,8 @@ public final class RouteInfo implements Parcelable {
 
     /**
      * @hide
+     *
+     * TODO: Remove this.
      */
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         this(destination, gateway, null);
@@ -183,6 +229,13 @@ public final class RouteInfo implements Parcelable {
      */
     public RouteInfo(LinkAddress destination) {
         this(destination, null, null);
+    }
+
+    /**
+     * @hide
+     */
+    public RouteInfo(IpPrefix destination, int type) {
+        this(destination, null, null, type);
     }
 
     /**
@@ -249,12 +302,23 @@ public final class RouteInfo implements Parcelable {
     }
 
     /**
+     * Retrieves the type of this route.
+     *
+     * @return The type of this route; one of the {@code RTN_xxx} constants defined in this class.
+     *
+     * @hide
+     */
+    public int getType() {
+        return mType;
+    }
+
+    /**
      * Indicates if this route is a default route (ie, has no destination specified).
      *
      * @return {@code true} if the destination has a prefix length of 0.
      */
     public boolean isDefaultRoute() {
-        return mDestination.getPrefixLength() == 0;
+        return mType == RTN_UNICAST && mDestination.getPrefixLength() == 0;
     }
 
     /**
@@ -345,9 +409,18 @@ public final class RouteInfo implements Parcelable {
     public String toString() {
         String val = "";
         if (mDestination != null) val = mDestination.toString();
-        val += " ->";
-        if (mGateway != null) val += " " + mGateway.getHostAddress();
-        if (mInterface != null) val += " " + mInterface;
+        if (mType == RTN_UNREACHABLE) {
+            val += " unreachable";
+        } else if (mType == RTN_THROW) {
+            val += " throw";
+        } else {
+            val += " ->";
+            if (mGateway != null) val += " " + mGateway.getHostAddress();
+            if (mInterface != null) val += " " + mInterface;
+            if (mType != RTN_UNICAST) {
+                val += " unknown type " + mType;
+            }
+        }
         return val;
     }
 
@@ -364,7 +437,8 @@ public final class RouteInfo implements Parcelable {
 
         return Objects.equals(mDestination, target.getDestination()) &&
                 Objects.equals(mGateway, target.getGateway()) &&
-                Objects.equals(mInterface, target.getInterface());
+                Objects.equals(mInterface, target.getInterface()) &&
+                mType == target.getType();
     }
 
     /**
@@ -373,7 +447,8 @@ public final class RouteInfo implements Parcelable {
     public int hashCode() {
         return (mDestination.hashCode() * 41)
                 + (mGateway == null ? 0 :mGateway.hashCode() * 47)
-                + (mInterface == null ? 0 :mInterface.hashCode() * 67);
+                + (mInterface == null ? 0 :mInterface.hashCode() * 67)
+                + (mType * 71);
     }
 
     /**
@@ -391,6 +466,7 @@ public final class RouteInfo implements Parcelable {
         byte[] gatewayBytes = (mGateway == null) ? null : mGateway.getAddress();
         dest.writeByteArray(gatewayBytes);
         dest.writeString(mInterface);
+        dest.writeInt(mType);
     }
 
     /**
@@ -408,8 +484,9 @@ public final class RouteInfo implements Parcelable {
             } catch (UnknownHostException e) {}
 
             String iface = in.readString();
+            int type = in.readInt();
 
-            return new RouteInfo(dest, gateway, iface);
+            return new RouteInfo(dest, gateway, iface, type);
         }
 
         public RouteInfo[] newArray(int size) {
