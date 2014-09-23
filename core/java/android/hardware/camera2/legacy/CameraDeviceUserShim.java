@@ -87,6 +87,15 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         mSurfaceIdCounter = 0;
     }
 
+    private static int translateErrorsFromCamera1(int errorCode) {
+        switch (errorCode) {
+            case CameraBinderDecorator.EACCES:
+                return CameraBinderDecorator.PERMISSION_DENIED;
+            default:
+                return errorCode;
+        }
+    }
+
     /**
      * Create a separate looper/thread for the camera to run on; open the camera.
      *
@@ -130,8 +139,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             // Save the looper so that we can terminate this thread
             // after we are done with it.
             mLooper = Looper.myLooper();
-            mInitErrors = mCamera.cameraInitUnspecified(mCameraId);
-
+            mInitErrors = translateErrorsFromCamera1(mCamera.cameraInitUnspecified(mCameraId));
             mStartDone.open();
             Looper.loop();  // Blocks forever until #close is called.
         }
