@@ -26,6 +26,7 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.ArrayUtils;
+import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.CameraRuntimeException;
@@ -288,17 +289,18 @@ public class LegacyCameraDevice implements AutoCloseable {
             }
         }
 
-        int error = mDeviceState.setConfiguring();
-        if (error == NO_ERROR) {
+        boolean success = false;
+        if (mDeviceState.setConfiguring()) {
             mRequestThreadManager.configure(outputs);
-            error = mDeviceState.setIdle();
+            success = mDeviceState.setIdle();
         }
 
-        if (error == NO_ERROR) {
+        if (success) {
             mConfiguredSurfaces = outputs != null ? new ArrayList<>(outputs) : null;
+        } else {
+            return CameraBinderDecorator.INVALID_OPERATION;
         }
-
-        return error;
+        return CameraBinderDecorator.NO_ERROR;
     }
 
     /**

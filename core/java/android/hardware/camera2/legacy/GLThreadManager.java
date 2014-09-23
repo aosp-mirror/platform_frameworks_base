@@ -17,6 +17,7 @@
 package android.hardware.camera2.legacy;
 
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Message;
@@ -41,6 +42,8 @@ public class GLThreadManager {
     private static final int MSG_ALLOW_FRAMES = 5;
 
     private CaptureCollector mCaptureCollector;
+
+    private final CameraDeviceState mDeviceState;
 
     private final SurfaceTextureRenderer mTextureRenderer;
 
@@ -76,42 +79,47 @@ public class GLThreadManager {
             if (mCleanup) {
                 return true;
             }
-            switch (msg.what) {
-                case MSG_NEW_CONFIGURATION:
-                    ConfigureHolder configure = (ConfigureHolder) msg.obj;
-                    mTextureRenderer.cleanupEGLContext();
-                    mTextureRenderer.configureSurfaces(configure.surfaces);
-                    mCaptureCollector = checkNotNull(configure.collector);
-                    configure.condition.open();
-                    mConfigured = true;
-                    break;
-                case MSG_NEW_FRAME:
-                    if (mDroppingFrames) {
-                        Log.w(TAG, "Ignoring frame.");
+            try {
+                switch (msg.what) {
+                    case MSG_NEW_CONFIGURATION:
+                        ConfigureHolder configure = (ConfigureHolder) msg.obj;
+                        mTextureRenderer.cleanupEGLContext();
+                        mTextureRenderer.configureSurfaces(configure.surfaces);
+                        mCaptureCollector = checkNotNull(configure.collector);
+                        configure.condition.open();
+                        mConfigured = true;
                         break;
-                    }
-                    if (DEBUG) {
-                        mPrevCounter.countAndLog();
-                    }
-                    if (!mConfigured) {
-                        Log.e(TAG, "Dropping frame, EGL context not configured!");
-                    }
-                    mTextureRenderer.drawIntoSurfaces(mCaptureCollector);
-                    break;
-                case MSG_CLEANUP:
-                    mTextureRenderer.cleanupEGLContext();
-                    mCleanup = true;
-                    mConfigured = false;
-                    break;
-                case MSG_DROP_FRAMES:
-                    mDroppingFrames = true;
-                    break;
-                case MSG_ALLOW_FRAMES:
-                    mDroppingFrames = false;
-                    break;
-                default:
-                    Log.e(TAG, "Unhandled message " + msg.what + " on GLThread.");
-                    break;
+                    case MSG_NEW_FRAME:
+                        if (mDroppingFrames) {
+                            Log.w(TAG, "Ignoring frame.");
+                            break;
+                        }
+                        if (DEBUG) {
+                            mPrevCounter.countAndLog();
+                        }
+                        if (!mConfigured) {
+                            Log.e(TAG, "Dropping frame, EGL context not configured!");
+                        }
+                        mTextureRenderer.drawIntoSurfaces(mCaptureCollector);
+                        break;
+                    case MSG_CLEANUP:
+                        mTextureRenderer.cleanupEGLContext();
+                        mCleanup = true;
+                        mConfigured = false;
+                        break;
+                    case MSG_DROP_FRAMES:
+                        mDroppingFrames = true;
+                        break;
+                    case MSG_ALLOW_FRAMES:
+                        mDroppingFrames = false;
+                        break;
+                    default:
+                        Log.e(TAG, "Unhandled message " + msg.what + " on GLThread.");
+                        break;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Received exception on GL render thread: ", e);
+                mDeviceState.setError(CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
             }
             return true;
         }
@@ -122,11 +130,13 @@ public class GLThreadManager {
      *
      * @param cameraId the camera id for this thread.
      * @param facing direction the camera is facing.
+     * @param state {@link CameraDeviceState} to use for error handling.
      */
-    public GLThreadManager(int cameraId, int facing) {
+    public GLThreadManager(int cameraId, int facing, CameraDeviceState state) {
         mTextureRenderer = new SurfaceTextureRenderer(facing);
         TAG = String.format("CameraDeviceGLThread-%d", cameraId);
         mGLHandlerThread = new RequestHandlerThread(TAG, mGLHandlerCb);
+        mDeviceState = state;
     }
 
     /**
