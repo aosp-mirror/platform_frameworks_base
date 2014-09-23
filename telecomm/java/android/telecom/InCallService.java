@@ -59,6 +59,10 @@ public abstract class InCallService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            if (mPhone == null && msg.what != MSG_SET_IN_CALL_ADAPTER) {
+                return;
+            }
+
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
                     mPhone = new Phone(new InCallAdapter((IInCallAdapter) msg.obj));
