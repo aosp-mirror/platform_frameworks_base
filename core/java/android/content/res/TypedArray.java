@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -728,15 +729,13 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve the Drawable for the attribute at <var>index</var>.  This
-     * gets the resource ID of the selected attribute, and uses
-     * {@link Resources#getDrawable Resources.getDrawable} of the owning
-     * Resources object to retrieve its Drawable.
+     * Retrieve the Drawable for the attribute at <var>index</var>.
      *
      * @param index Index of attribute to retrieve.
      *
      * @return Drawable for the attribute, or null if not defined.
      */
+    @Nullable
     public Drawable getDrawable(int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
