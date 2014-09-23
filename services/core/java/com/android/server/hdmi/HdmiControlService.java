@@ -724,20 +724,18 @@ public final class HdmiControlService extends SystemService {
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
 
-        ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
-        for (int type : mLocalDevices) {
-            if (type == HdmiDeviceInfo.DEVICE_TV) {
-                // Skip the reallocation of the logical address on TV.
-                continue;
+        if (connected && !isTvDevice()) {
+            ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
+            for (int type : mLocalDevices) {
+                HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
+                if (localDevice == null) {
+                    localDevice = HdmiCecLocalDevice.create(this, type);
+                    localDevice.init();
+                }
+                localDevices.add(localDevice);
             }
-            HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
-            if (localDevice == null) {
-                localDevice = HdmiCecLocalDevice.create(this, type);
-                localDevice.init();
-            }
-            localDevices.add(localDevice);
+            allocateLogicalAddress(localDevices, INITIATED_BY_HOTPLUG);
         }
-        allocateLogicalAddress(localDevices, INITIATED_BY_HOTPLUG);
 
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
             device.onHotplug(portId, connected);
@@ -1691,7 +1689,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     boolean isTvDevice() {
-        return tv() != null;
+        return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_TV);
     }
 
     private HdmiCecLocalDevicePlayback playback() {
