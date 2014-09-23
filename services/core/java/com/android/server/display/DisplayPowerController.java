@@ -43,6 +43,7 @@ import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
 import android.view.Display;
+import android.view.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 
@@ -65,7 +66,7 @@ import java.io.PrintWriter;
  * does not need to worry about holding a suspend blocker unless it happens
  * independently of the display ready signal.
    *
- * For debugging, you can make the electron beam and brightness animations run
+ * For debugging, you can make the color fade and brightness animations run
  * slower by changing the "animator duration scale" option in Development Settings.
  */
 final class DisplayPowerController implements AutomaticBrightnessController.Callbacks {
@@ -76,12 +77,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
 
-    // If true, uses the electron beam on animation.
+    // If true, uses the color fade on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
     // actually turns on and starts showing new content after the call to set the
     // screen state returns.  Playing the animation can also be somewhat slow.
     private static final boolean USE_COLOR_FADE_ON_ANIMATION = false;
-
 
     // The minimum reduction in brightness when dimmed.
     private static final int SCREEN_DIM_MINIMUM_REDUCTION = 10;
@@ -91,6 +91,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
+    private static final int MSG_SCREEN_ON_UNBLOCKED = 3;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -127,6 +128,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The sensor manager.
     private final SensorManager mSensorManager;
 
+    // The window manager policy.
+    private final WindowManagerPolicy mWindowManagerPolicy;
+
     // The display blanker.
     private final DisplayBlanker mBlanker;
 
@@ -152,7 +156,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mUseSoftwareAutoBrightnessConfig;
 
     // True if we should fade the screen while turning it off, false if we should play
-    // a stylish electron beam animation instead.
+    // a stylish color fade animation instead.
     private boolean mColorFadeFadesConfig;
 
     // The pending power request.
@@ -214,8 +218,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // When the screen turns on again, we report user activity to the power manager.
     private boolean mScreenOffBecauseOfProximity;
 
-    // True if the screen on is being blocked.
-    private boolean mScreenOnWasBlocked;
+    // The currently active screen on unblocker.  This field is non-null whenever
+    // we are waiting for a callback to release it and unblock the screen.
+    private ScreenOnUnblocker mPendingScreenOnUnblocker;
+
+    // True if we were in the process of turning off the screen.
+    // This allows us to recover more gracefully from situations where we abort
+    // turning off the screen.
+    private boolean mPendingScreenOff;
 
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
@@ -246,6 +256,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBatteryStats = BatteryStatsService.getService();
         mLights = LocalServices.getService(LightsManager.class);
         mSensorManager = sensorManager;
+        mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
         mContext = context;
 
@@ -633,7 +644,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Report whether the display is ready for use and all changes have been applied.
         if (mustNotify
-                && !mScreenOnWasBlocked
+                && mPendingScreenOnUnblocker == null
                 && !mColorFadeOnAnimator.isStarted()
                 && !mColorFadeOffAnimator.isStarted()
                 && !mScreenBrightnessRampAnimator.isAnimating()
@@ -657,32 +668,53 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void blockScreenOn() {
-        if (!mScreenOnWasBlocked) {
+        if (mPendingScreenOnUnblocker == null) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_TRACE_NAME, 0);
-            mScreenOnWasBlocked = true;
+            mPendingScreenOnUnblocker = new ScreenOnUnblocker();
             mScreenOnBlockStartRealTime = SystemClock.elapsedRealtime();
             Slog.i(TAG, "Blocking screen on until initial contents have been drawn.");
         }
     }
 
     private void unblockScreenOn() {
-        if (mScreenOnWasBlocked) {
-            mScreenOnWasBlocked = false;
+        if (mPendingScreenOnUnblocker != null) {
+            mPendingScreenOnUnblocker = null;
             long delay = SystemClock.elapsedRealtime() - mScreenOnBlockStartRealTime;
             Slog.i(TAG, "Unblocked screen on after " + delay + " ms");
             Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_TRACE_NAME, 0);
         }
     }
 
-    private void setScreenState(int state) {
+    private boolean setScreenState(int state) {
         if (mPowerState.getScreenState() != state) {
+            final boolean wasOn = (mPowerState.getScreenState() != Display.STATE_OFF);
             mPowerState.setScreenState(state);
+
+            // Tell battery stats about the transition.
             try {
                 mBatteryStats.noteScreenState(state);
             } catch (RemoteException ex) {
                 // same process
             }
+
+            // Tell the window manager what's happening.
+            // Temporarily block turning the screen on until the window manager is ready
+            // by leaving a black surface covering the screen.  This surface is essentially
+            // the final state of the color fade animation.
+            boolean isOn = (state != Display.STATE_OFF);
+            if (wasOn && !isOn) {
+                unblockScreenOn();
+                mWindowManagerPolicy.screenTurnedOff();
+            } else if (!wasOn && isOn) {
+                if (mPowerState.getColorFadeLevel() == 0.0f) {
+                    blockScreenOn();
+                } else {
+                    unblockScreenOn();
+                }
+                mWindowManagerPolicy.screenTurningOn(mPendingScreenOnUnblocker);
+            }
         }
+        return mPendingScreenOnUnblocker == null;
     }
 
     private int clampScreenBrightness(int value) {
@@ -707,21 +739,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return;
         }
 
-        // Temporarily block turning the screen on if requested and there is already a
-        // black surface covering the screen.
-        if (mPowerRequest.blockScreenOn
-                && mPowerState.getColorFadeLevel() == 0.0f
-                && target != Display.STATE_OFF) {
-            blockScreenOn();
-            return;
+        // If we were in the process of turning off the screen but didn't quite
+        // finish.  Then finish up now to prevent a jarring transition back
+        // to screen on if we skipped blocking screen on as usual.
+        if (mPendingScreenOff && target != Display.STATE_OFF) {
+            setScreenState(Display.STATE_OFF);
+            mPendingScreenOff = false;
         }
 
         if (target == Display.STATE_ON) {
             // Want screen on.  The contents of the screen may not yet
-            // be visible if the electron beam has not been dismissed because
+            // be visible if the color fade has not been dismissed because
             // its last frame of animation is solid black.
-            unblockScreenOn();
-            setScreenState(Display.STATE_ON);
+            if (!setScreenState(Display.STATE_ON)) {
+                return; // screen on blocked
+            }
             if (USE_COLOR_FADE_ON_ANIMATION && mPowerRequest.isBrightOrDim()) {
                 // Perform screen on animation.
                 if (mPowerState.getColorFadeLevel() == 1.0f) {
@@ -749,9 +781,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return;
             }
 
-            // Set screen state and dismiss the black surface without fanfare.
-            unblockScreenOn();
-            setScreenState(Display.STATE_DOZE);
+            // Set screen state.
+            if (!setScreenState(Display.STATE_DOZE)) {
+                return; // screen on blocked
+            }
+
+            // Dismiss the black surface without fanfare.
             mPowerState.setColorFadeLevel(1.0f);
             mPowerState.dismissColorFade();
         } else if (target == Display.STATE_DOZE_SUSPEND) {
@@ -763,18 +798,26 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return;
             }
 
-            // Set screen state and dismiss the black surface without fanfare.
-            unblockScreenOn();
-            setScreenState(Display.STATE_DOZE_SUSPEND);
+            // If not already suspending, temporarily set the state to doze until the
+            // screen on is unblocked, then suspend.
+            if (mPowerState.getScreenState() != Display.STATE_DOZE_SUSPEND) {
+                if (!setScreenState(Display.STATE_DOZE)) {
+                    return; // screen on blocked
+                }
+                setScreenState(Display.STATE_DOZE_SUSPEND); // already on so can't block
+            }
+
+            // Dismiss the black surface without fanfare.
             mPowerState.setColorFadeLevel(1.0f);
             mPowerState.dismissColorFade();
         } else {
             // Want screen off.
-            unblockScreenOn();
+            mPendingScreenOff = true;
             if (mPowerState.getColorFadeLevel() == 0.0f) {
                 // Turn the screen off.
                 // A black surface is already hiding the contents of the screen.
                 setScreenState(Display.STATE_OFF);
+                mPendingScreenOff = false;
             } else if (performScreenOffTransition
                     && mPowerState.prepareColorFade(mContext,
                             mColorFadeFadesConfig ?
@@ -968,6 +1011,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mAppliedAutoBrightness=" + mAppliedAutoBrightness);
         pw.println("  mAppliedDimming=" + mAppliedDimming);
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
+        pw.println("  mPendingScreenOnUnblocker=" + mPendingScreenOnUnblocker);
+        pw.println("  mPendingScreenOff=" + mPendingScreenOff);
 
         pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
                 mScreenBrightnessRampAnimator.isAnimating());
@@ -1052,6 +1097,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 case MSG_PROXIMITY_SENSOR_DEBOUNCED:
                     debounceProximitySensor();
                     break;
+
+                case MSG_SCREEN_ON_UNBLOCKED:
+                    if (mPendingScreenOnUnblocker == msg.obj) {
+                        unblockScreenOn();
+                        updatePowerState();
+                    }
+                    break;
             }
         }
     }
@@ -1072,4 +1124,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // Not used.
         }
     };
+
+    private final class ScreenOnUnblocker implements WindowManagerPolicy.ScreenOnListener {
+        @Override
+        public void onScreenOn() {
+            Message msg = mHandler.obtainMessage(MSG_SCREEN_ON_UNBLOCKED, this);
+            msg.setAsynchronous(true);
+            mHandler.sendMessage(msg);
+        }
+    }
 }

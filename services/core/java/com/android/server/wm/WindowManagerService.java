@@ -3474,7 +3474,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean okToDisplay() {
-        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isAwake();
+        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOn();
     }
 
     AppWindowToken findAppWindowToken(IBinder token) {
@@ -10397,7 +10397,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (!mDisplayReady || !mPolicy.isAwake()) {
+        if (!mDisplayReady || !mPolicy.isScreenOn()) {
             // No need to freeze the screen before the system is ready or if
             // the screen is off.
             return;
