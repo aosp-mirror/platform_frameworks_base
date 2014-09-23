@@ -408,7 +408,7 @@ ES 3.1. Key new functionality provided in OpenGL ES 3.1 includes:</p>
 <p>The Java interface for OpenGL ES 3.1 on Android is provided with {@code GLES31}. When
 using OpenGL ES 3.1, be sure that you declare it in your manifest file with the
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
-tag and the {@code android:glEsVversion} attribute. For example:</p>
+tag and the {@code android:glEsVersion} attribute. For example:</p>
 
 <pre>
 &lt;manifest&gt;
