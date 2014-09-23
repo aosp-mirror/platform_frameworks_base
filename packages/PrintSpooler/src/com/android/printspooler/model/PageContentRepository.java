@@ -125,7 +125,7 @@ public final class PageContentRepository {
         if (mLastRenderSpec == null) {
             mScheduledPreloadFirstShownPage = firstShownPage;
             mScheduledPreloadLastShownPage = lastShownPage;
-        } else {
+        } else if (mState == STATE_OPENED) {
             mRenderer.startPreload(firstShownPage, lastShownPage, mLastRenderSpec);
         }
     }

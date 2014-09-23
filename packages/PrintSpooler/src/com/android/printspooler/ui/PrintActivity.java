@@ -471,10 +471,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 requestCreatePdfFileOrFinish();
             } break;
 
-            case STATE_PRINT_CANCELED: {
-                doFinish();
-            } break;
-
             default: {
                 updatePrintPreviewController(document.changed);
 
