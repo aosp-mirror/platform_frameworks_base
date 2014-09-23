@@ -331,7 +331,10 @@
   <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_tx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_rx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_network_switch_tx_packet_threshold" />
-  <java-symbol type="integer" name="config_wifi_framework_network_switch_tx_packet_threshold" />
+  <java-symbol type="integer" name="config_wifi_framework_network_switch_rx_packet_threshold" />
+  <java-symbol type="integer" name="config_wifi_framework_max_connection_errors_to_blacklist" />
+  <java-symbol type="integer" name="config_wifi_framework_max_auth_errors_to_blacklist" />
+  <java-symbol type="integer" name="config_wifi_framework_network_black_list_min_time_milli" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
   <java-symbol type="integer" name="config_cursorWindowSize" />

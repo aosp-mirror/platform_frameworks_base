@@ -405,6 +405,15 @@
     <!-- Integer indicating associated full scan max num passive channels -->
     <integer translatable="false" name="config_wifi_framework_associated_partial_scan_max_num_passive_channels">3</integer>
 
+    <!-- Integer indicating number of association errors leading to blacklisting of the network -->
+    <integer translatable="false" name="config_wifi_framework_max_connection_errors_to_blacklist">4</integer>
+
+    <!-- Integer indicating number of authentication errors leading to blacklisting of the network -->
+    <integer translatable="false" name="config_wifi_framework_max_auth_errors_to_blacklist">4</integer>
+
+    <!-- Integer indicating minimum blacklisting delay of a wofo configuration due to connectin or auth errors -->
+    <integer translatable="false" name="config_wifi_framework_network_black_list_min_time_milli">120000</integer>
+
     <!-- Boolean indicating associated scan are allowed -->
     <bool translatable="false" name="config_wifi_framework_enable_associated_autojoin_scan">true</bool>
 
