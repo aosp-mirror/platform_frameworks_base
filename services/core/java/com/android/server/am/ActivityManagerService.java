@@ -18965,6 +18965,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (tr.getRootActivity() != null) {
                     moveTaskToFrontLocked(tr.taskId, 0, null);
+                    return;
                 }
             }
 
