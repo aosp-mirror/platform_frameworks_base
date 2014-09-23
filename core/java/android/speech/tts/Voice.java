@@ -91,9 +91,6 @@ public class Voice implements Parcelable {
         Collections.addAll(this.mFeatures, in.readStringArray());
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mName);
@@ -104,17 +101,11 @@ public class Voice implements Parcelable {
         dest.writeStringList(new ArrayList<String>(mFeatures));
     }
 
-    /**
-     * @hide
-     */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /**
-     * @hide
-     */
     public static final Parcelable.Creator<Voice> CREATOR = new Parcelable.Creator<Voice>() {
         @Override
         public Voice createFromParcel(Parcel in) {

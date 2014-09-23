@@ -1216,17 +1216,12 @@ public class TextToSpeech {
      *
      * @param durationInMs The duration of the silence.
      * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
-     * @param params Parameters for the request. Can be null.
-     *            Engine specific parameters may be passed in but the parameter keys
-     *            must be prefixed by the name of the engine they are intended for. For example
-     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
-     *            engine named "com.svox.pico" if it is being used.
      * @param utteranceId An unique identifier for this request.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
      */
     public int playSilence(final long durationInMs, final int queueMode,
-            final HashMap<String, String> params, final String utteranceId) {
+            final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
@@ -1258,12 +1253,12 @@ public class TextToSpeech {
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
      * @deprecated As of API level 20, replaced by
-     *         {@link #playSilence(long, int, HashMap, String)}.
+     *         {@link #playSilence(long, int, String)}.
      */
     @Deprecated
     public int playSilence(final long durationInMs, final int queueMode,
             final HashMap<String, String> params) {
-        return playSilence(durationInMs, queueMode, params,
+        return playSilence(durationInMs, queueMode,
                            params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
