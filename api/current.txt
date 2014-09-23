@@ -14832,7 +14832,6 @@ package android.media {
   }
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
-    ctor public MediaDrm.MediaDrmStateException(int, java.lang.String);
     method public java.lang.String getDiagnosticInfo();
   }
 
