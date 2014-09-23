@@ -239,5 +239,11 @@
 
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>
+
+    <!-- Zen toast fade in/out duration -->
+    <integer name="zen_toast_animation_duration">500</integer>
+
+    <!-- Zen toast visibility duration -->
+    <integer name="zen_toast_visible_duration">2000</integer>
 </resources>
 
