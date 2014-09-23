@@ -65,7 +65,11 @@ final class RemoteConnectionService {
                         parcel.getCallerDisplayName(),
                         parcel.getCallerDisplayNamePresentation());
                 // Set state after handle so that the client can identify the connection.
-                connection.setState(parcel.getState());
+                if (parcel.getState() == Connection.STATE_DISCONNECTED) {
+                    connection.setDisconnected(parcel.getDisconnectCause());
+                } else {
+                    connection.setState(parcel.getState());
+                }
                 List<RemoteConnection> conferenceable = new ArrayList<>();
                 for (String confId : parcel.getConferenceableConnectionIds()) {
                     if (mConnectionById.containsKey(confId)) {
