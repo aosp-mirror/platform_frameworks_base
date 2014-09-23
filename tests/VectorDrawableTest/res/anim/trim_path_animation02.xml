@@ -19,7 +19,7 @@
 
     <objectAnimator
         android:duration="5000"
-        android:propertyName="fill"
+        android:propertyName="fillColor"
         android:valueFrom="#FF000000"
         android:valueTo="#FFFF0000"/>
 
