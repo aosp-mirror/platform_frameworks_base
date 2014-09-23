@@ -284,10 +284,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mAccessibilityController == null) {
             return;
         }
-        mLockIcon.setClickable(mUnlockMethodCache.isTrustManaged()
-                || mAccessibilityController.isTouchExplorationEnabled());
-        mLockIcon.setLongClickable(mAccessibilityController.isTouchExplorationEnabled()
-                && mUnlockMethodCache.isTrustManaged());
+        boolean clickToUnlock = mAccessibilityController.isTouchExplorationEnabled();
+        boolean clickToForceLock = mUnlockMethodCache.isTrustManaged()
+                && !mAccessibilityController.isAccessibilityEnabled();
+        boolean longClickToForceLock = mUnlockMethodCache.isTrustManaged()
+                && !clickToForceLock;
+        mLockIcon.setClickable(clickToForceLock || clickToUnlock);
+        mLockIcon.setLongClickable(longClickToForceLock);
         mLockIcon.setFocusable(mAccessibilityController.isAccessibilityEnabled());
     }
 
