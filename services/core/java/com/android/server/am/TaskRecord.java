@@ -783,7 +783,7 @@ final class TaskRecord {
     int findEffectiveRootIndex() {
         int effectiveNdx = 0;
         final int topActivityNdx = mActivities.size() - 1;
-        for (int activityNdx = 0; activityNdx < topActivityNdx; ++activityNdx) {
+        for (int activityNdx = 0; activityNdx <= topActivityNdx; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
             if (r.finishing) {
                 continue;
