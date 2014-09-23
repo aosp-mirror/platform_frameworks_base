@@ -193,6 +193,9 @@
 
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
 
+    <!-- Explicit width of the zen toast window -->
+    <dimen name="zen_toast_width">224dp</dimen>
+
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
 

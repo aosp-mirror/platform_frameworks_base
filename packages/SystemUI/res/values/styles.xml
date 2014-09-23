@@ -167,6 +167,10 @@
         <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
+    <style name="TextAppearance.QS.ZenToast">
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="TextAppearance.QS.SegmentedButton">
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
@@ -261,5 +265,10 @@
 
     <style name="UserDetailView">
         <item name="numColumns">3</item>
+    </style>
+
+    <style name="ZenToastAnimations">
+        <item name="android:windowEnterAnimation">@anim/zen_toast_enter</item>
+        <item name="android:windowExitAnimation">@anim/zen_toast_exit</item>
     </style>
 </resources>
