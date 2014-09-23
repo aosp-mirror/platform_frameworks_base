@@ -61,7 +61,7 @@ public class ScanResult implements Parcelable {
     public int frequency;
 
     /**
-     * Time Synchronization Function (tsf) timestamp in microseconds when
+     * timestamp in microseconds (since boot) when
      * this result was last seen.
      */
     public long timestamp;
