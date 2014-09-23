@@ -623,7 +623,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSettingsButton.setTranslationX(values.settingsTranslation);
         mSettingsButton.setRotation(values.settingsRotation);
         applyAlpha(mEmergencyCallsOnly, values.emergencyCallsOnlyAlpha);
-        applyAlpha(mAlarmStatus, values.alarmStatusAlpha);
+        if (!mShowingDetail) {
+            // Otherwise it needs to stay invisible
+            applyAlpha(mAlarmStatus, values.alarmStatusAlpha);
+        }
         applyAlpha(mDateCollapsed, values.dateCollapsedAlpha);
         applyAlpha(mDateExpanded, values.dateExpandedAlpha);
         applyAlpha(mBatteryLevel, values.batteryLevelAlpha);
