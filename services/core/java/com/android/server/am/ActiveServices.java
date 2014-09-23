@@ -895,6 +895,11 @@ public final class ActiveServices {
             while (clist.size() > 0) {
                 ConnectionRecord r = clist.get(0);
                 removeConnectionLocked(r, null, null);
+                if (clist.size() > 0 && clist.get(0) == r) {
+                    // In case it didn't get removed above, do it now.
+                    Slog.wtf(TAG, "Connection " + r + " not removed for binder " + binder);
+                    clist.remove(0);
+                }
 
                 if (r.binding.service.app != null) {
                     // This could have made the service less important.

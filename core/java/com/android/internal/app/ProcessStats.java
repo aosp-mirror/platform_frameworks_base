@@ -3570,6 +3570,10 @@ public final class ProcessStats implements Parcelable {
             return mOwner != null || mRestarting;
         }
 
+        public boolean isRestarting() {
+            return mRestarting;
+        }
+
         void add(ServiceState other) {
             addDurations(other);
             mRunCount += other.mRunCount;
