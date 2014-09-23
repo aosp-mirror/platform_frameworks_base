@@ -33,4 +33,8 @@
         <item>315</item>
         <item>316</item>
     </string-array>
+    <string-array translatable="false" name="config_twoDigitNumberPattern">
+        <item>"0"</item>
+        <item>"00"</item>
+    </string-array>
 </resources>
