@@ -611,6 +611,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private final int[] mScrollOffset = new int[2];
     private final int[] mScrollConsumed = new int[2];
 
+    // Used for offsetting MotionEvents that we feed to the VelocityTracker.
+    // In the future it would be nice to be able to give this to the VelocityTracker
+    // directly, or alternatively put a VT into absolute-positioning mode that only
+    // reads the raw screen-coordinate x/y values.
+    private int mNestedYOffset = 0;
+
     // True when the popup should be hidden because of a call to
     // dispatchDisplayHint()
     private boolean mPopupHidden;
@@ -3332,6 +3338,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             scrollConsumedCorrection = mScrollConsumed[1];
             if (vtev != null) {
                 vtev.offsetLocation(0, mScrollOffset[1]);
+                mNestedYOffset += mScrollOffset[1];
             }
         }
         final int deltaY = rawDeltaY;
@@ -3401,6 +3408,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             lastYCorrection -= mScrollOffset[1];
                             if (vtev != null) {
                                 vtev.offsetLocation(0, mScrollOffset[1]);
+                                mNestedYOffset += mScrollOffset[1];
                             }
                         } else {
                             final boolean atOverscrollEdge = overScrollBy(0, overscroll,
@@ -3584,6 +3592,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final MotionEvent vtev = MotionEvent.obtain(ev);
 
         final int actionMasked = ev.getActionMasked();
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            mNestedYOffset = 0;
+        }
+        vtev.offsetLocation(0, mNestedYOffset);
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN: {
                 onTouchDown(ev);
@@ -4146,7 +4158,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
+        final int actionMasked = ev.getActionMasked();
         View v;
 
         if (mPositionScroller != null) {
@@ -4165,7 +4177,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return true;
         }
 
-        switch (action & MotionEvent.ACTION_MASK) {
+        switch (actionMasked) {
         case MotionEvent.ACTION_DOWN: {
             int touchMode = mTouchMode;
             if (touchMode == TOUCH_MODE_OVERFLING || touchMode == TOUCH_MODE_OVERSCROLL) {
@@ -4192,6 +4204,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mLastY = Integer.MIN_VALUE;
             initOrResetVelocityTracker();
             mVelocityTracker.addMovement(ev);
+            mNestedYOffset = 0;
             startNestedScroll(SCROLL_AXIS_VERTICAL);
             if (touchMode == TOUCH_MODE_FLING) {
                 return true;
