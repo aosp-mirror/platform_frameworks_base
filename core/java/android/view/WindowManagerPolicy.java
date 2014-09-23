@@ -955,14 +955,19 @@ public interface WindowManagerPolicy {
      */
     public void screenTurningOn(ScreenOnListener screenOnListener);
 
+    /**
+     * Called when the device has turned the screen off.
+     */
+    public void screenTurnedOff();
+
     public interface ScreenOnListener {
         void onScreenOn();
     }
 
     /**
-     * Return whether the system is awake.
+     * Return whether the default display is on and not blocked by a black surface.
      */
-    public boolean isAwake();
+    public boolean isScreenOn();
 
     /**
      * Tell the policy that the lid switch has changed state.
