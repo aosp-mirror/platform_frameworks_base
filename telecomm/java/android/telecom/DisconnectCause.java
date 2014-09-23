@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.media.ToneGenerator;
@@ -28,7 +29,9 @@ import java.util.Objects;
  * cause of the disconnect. Optionally, it may include a localized label and/or localized description
  * to display to the user which is provided by the {@link ConnectionService}. It also may contain a
  * reason for the the disconnect, which is intended for logging and not for display to the user.
+ * @hide
  */
+@SystemApi
 public final class DisconnectCause implements Parcelable {
 
     /** Disconnected because of an unknown or unspecified reason. */
