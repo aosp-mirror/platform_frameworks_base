@@ -5132,6 +5132,8 @@ public final class ActivityThread {
         // process.
         if (!ActivityManager.isHighEndGfx()) {
             HardwareRenderer.disable(true);
+        } else {
+            HardwareRenderer.enableForegroundTrimming();
         }
         ActivityThread thread = new ActivityThread();
         thread.attach(true);
