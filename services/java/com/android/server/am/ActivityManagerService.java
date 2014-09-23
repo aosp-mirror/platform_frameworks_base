@@ -12820,7 +12820,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // activity manager to announce its creation.
     public boolean bindBackupAgent(ApplicationInfo app, int backupMode) {
         if (DEBUG_BACKUP) Slog.v(TAG, "bindBackupAgent: app=" + app + " mode=" + backupMode);
-        enforceCallingPermission("android.permission.BACKUP", "bindBackupAgent");
+        enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "bindBackupAgent");
 
         synchronized(this) {
             // !!! TODO: currently no check here that we're already bound
