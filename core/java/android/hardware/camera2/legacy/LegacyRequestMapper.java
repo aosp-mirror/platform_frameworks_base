@@ -648,6 +648,8 @@ public class LegacyRequestMapper {
                 return Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT;
             case CONTROL_AWB_MODE_TWILIGHT:
                 return Camera.Parameters.WHITE_BALANCE_TWILIGHT;
+            case CONTROL_AWB_MODE_SHADE:
+                return Parameters.WHITE_BALANCE_SHADE;
             default:
                 Log.w(TAG, "convertAwbModeToLegacy - unrecognized control.awbMode" + mode);
                 return Camera.Parameters.WHITE_BALANCE_AUTO;
