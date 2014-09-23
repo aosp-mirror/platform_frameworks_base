@@ -25,6 +25,9 @@ import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
+import static android.net.RouteInfo.RTN_THROW;
+import static android.net.RouteInfo.RTN_UNICAST;
+import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 import static com.android.server.NetworkManagementService.NetdResponseCode.ClatdStatusResult;
@@ -955,11 +958,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final Command cmd = new Command("network", "route", action, netId);
 
         // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
-        final LinkAddress la = route.getDestinationLinkAddress();
         cmd.appendArg(route.getInterface());
-        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getPrefixLength());
-        if (route.hasGateway()) {
-            cmd.appendArg(route.getGateway().getHostAddress());
+        cmd.appendArg(route.getDestination().toString());
+
+        switch (route.getType()) {
+            case RouteInfo.RTN_UNICAST:
+                if (route.hasGateway()) {
+                    cmd.appendArg(route.getGateway().getHostAddress());
+                }
+                break;
+            case RouteInfo.RTN_UNREACHABLE:
+                cmd.appendArg("unreachable");
+                break;
+            case RouteInfo.RTN_THROW:
+                cmd.appendArg("throw");
+                break;
         }
 
         try {
@@ -2129,6 +2142,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         modifyAddressFamily("remove", family, netId, iface);
     }
 
+    // TODO: get rid of this and add RTN_UNREACHABLE routes instead.
     private void modifyAddressFamily(String action, int family, int netId, String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
