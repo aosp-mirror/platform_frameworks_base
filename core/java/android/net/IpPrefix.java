@@ -172,7 +172,7 @@ public final class IpPrefix implements Parcelable {
     /**
      * Returns a string representation of this {@code IpPrefix}.
      *
-     * @return a string such as {@code "192.0.2.0/24"} or {@code "2001:db8:1:2::"}.
+     * @return a string such as {@code "192.0.2.0/24"} or {@code "2001:db8:1:2::/64"}.
      */
     public String toString() {
         try {

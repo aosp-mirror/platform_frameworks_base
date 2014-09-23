@@ -381,7 +381,8 @@ public final class LinkProperties implements Parcelable {
         return new RouteInfo(
             route.getDestination(),
             route.getGateway(),
-            mIfaceName);
+            mIfaceName,
+            route.getType());
     }
 
     /**
