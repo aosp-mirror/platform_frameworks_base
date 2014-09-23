@@ -199,8 +199,8 @@ public class DozeService extends DreamService {
                     if (mPulsing && mDreaming) {
                         mPulsing = false;
                         turnDisplayOff();
-                        mWakeLock.release();
                     }
+                    mWakeLock.release(); // needs to be unconditional to balance acquire
                 }
             });
         }
