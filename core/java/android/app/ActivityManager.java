@@ -2226,19 +2226,27 @@ public class ActivityManager {
      * call this method.
      * 
      * @param packageName The name of the package to be stopped.
+     * @param userId The user for which the running package is to be stopped.
      * 
      * @hide This is not available to third party applications due to
      * it allowing them to break other applications by stopping their
      * services, removing their alarms, etc.
      */
-    public void forceStopPackage(String packageName) {
+    public void forceStopPackageAsUser(String packageName, int userId) {
         try {
-            ActivityManagerNative.getDefault().forceStopPackage(packageName,
-                    UserHandle.myUserId());
+            ActivityManagerNative.getDefault().forceStopPackage(packageName, userId);
         } catch (RemoteException e) {
         }
     }
-    
+
+    /**
+     * @see #forceStopPackageAsUser(String, int)
+     * @hide
+     */
+    public void forceStopPackage(String packageName) {
+        forceStopPackageAsUser(packageName, UserHandle.myUserId());
+    }
+
     /**
      * Get the device configuration attributes.
      */

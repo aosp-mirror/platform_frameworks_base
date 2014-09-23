@@ -1993,9 +1993,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void onPackageRemoved(String packageName, int uid) {
             // Remove all tasks with activities in the specified package from the list of recent tasks
+            final int eventUserId = getChangingUserId();
             synchronized (ActivityManagerService.this) {
                 for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
                     TaskRecord tr = mRecentTasks.get(i);
+                    if (tr.userId != eventUserId) continue;
+
                     ComponentName cn = tr.intent.getComponent();
                     if (cn != null && cn.getPackageName().equals(packageName)) {
                         // If the package name matches, remove the task and kill the process
@@ -2013,28 +2016,36 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public void onPackageModified(String packageName) {
+            final int eventUserId = getChangingUserId();
             final PackageManager pm = mContext.getPackageManager();
             final ArrayList<Pair<Intent, Integer>> recentTaskIntents =
                     new ArrayList<Pair<Intent, Integer>>();
+            final HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
             final ArrayList<Integer> tasksToRemove = new ArrayList<Integer>();
             // Copy the list of recent tasks so that we don't hold onto the lock on
             // ActivityManagerService for long periods while checking if components exist.
             synchronized (ActivityManagerService.this) {
                 for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
                     TaskRecord tr = mRecentTasks.get(i);
+                    if (tr.userId != eventUserId) continue;
+
                     recentTaskIntents.add(new Pair<Intent, Integer>(tr.intent, tr.taskId));
                 }
             }
             // Check the recent tasks and filter out all tasks with components that no longer exist.
-            Intent tmpI = new Intent();
             for (int i = recentTaskIntents.size() - 1; i >= 0; i--) {
                 Pair<Intent, Integer> p = recentTaskIntents.get(i);
                 ComponentName cn = p.first.getComponent();
                 if (cn != null && cn.getPackageName().equals(packageName)) {
+                    if (componentsKnownToExist.contains(cn)) {
+                        // If we know that the component still exists in the package, then skip
+                        continue;
+                    }
                     try {
-                        // Add the task to the list to remove if the component no longer exists
-                        tmpI.setComponent(cn);
-                        if (pm.queryIntentActivities(tmpI, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
+                        ActivityInfo info = pm.getActivityInfo(cn, eventUserId);
+                        if (info != null && info.isEnabled()) {
+                            componentsKnownToExist.add(cn);
+                        } else {
                             tasksToRemove.add(p.second);
                         }
                     } catch (Exception e) {}
@@ -2053,11 +2064,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
             // Force stop the specified packages
+            int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
             if (packages != null) {
                 for (String pkg : packages) {
                     synchronized (ActivityManagerService.this) {
-                        if (forceStopPackageLocked(pkg, -1, false, false, false, false, false, 0,
-                                "finished booting")) {
+                        if (forceStopPackageLocked(pkg, -1, false, false, false, false, false,
+                                userId, "finished booting")) {
                             return true;
                         }
                     }
@@ -6266,7 +6278,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Register receivers to handle package update events
-        mPackageMonitor.register(mContext, Looper.getMainLooper(), false);
+        mPackageMonitor.register(mContext, Looper.getMainLooper(), UserHandle.ALL, false);
 
         // Let system services know.
         mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);
