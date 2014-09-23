@@ -146,7 +146,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         final ArrayMap<String, ProcessStats.ServiceState> services = pkg.mServices;
                         for (int isvc=services.size()-1; isvc>=0; isvc--) {
                             final ProcessStats.ServiceState service = services.valueAt(isvc);
-                            if (service.isInUse()) {
+                            if (service.isRestarting()) {
+                                service.setRestarting(true, memFactor, now);
+                            } else if (service.isInUse()) {
                                 if (service.mStartedState != ProcessStats.STATE_NOTHING) {
                                     service.setStarted(true, memFactor, now);
                                 }
@@ -157,7 +159,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                     service.setExecuting(true, memFactor, now);
                                 }
                             }
-
                         }
                     }
                 }
