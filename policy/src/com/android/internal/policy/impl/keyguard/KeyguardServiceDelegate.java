@@ -295,6 +295,7 @@ public class KeyguardServiceDelegate {
                 stretch, stretch, type, flags, PixelFormat.TRANSLUCENT);
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
         lp.setTitle("KeyguardScrim");
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.addView(view, lp);
