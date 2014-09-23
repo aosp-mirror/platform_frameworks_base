@@ -65,6 +65,15 @@ public class SubscriptionManager implements BaseColumns {
     /** Indicates the caller wants the default sub id. */
     public static final long DEFAULT_SUB_ID = Long.MAX_VALUE;
 
+    /** Minimum possible subid that represents a subscription */
+    /** @hide */
+    public static final long MIN_SUB_ID_VALUE = 0;
+
+    /** Maximum possible subid that represents a subscription */
+    /** @hide */
+    public static final long MAX_SUB_ID_VALUE = DEFAULT_SUB_ID - 1;
+
+
     /** @hide */
     public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
 
@@ -912,6 +921,15 @@ public class SubscriptionManager implements BaseColumns {
      */
     public static boolean isValidSubId(long subId) {
         return subId > INVALID_SUB_ID ;
+    }
+
+    /**
+     * @return true if subId is an usable subId value else false. A
+     * usable subId means its neither a INVALID_SUB_ID nor a DEFAUL_SUB_ID.
+     * @hide
+     */
+    public static boolean isUsableSubIdValue(long subId) {
+        return subId >= MIN_SUB_ID_VALUE && subId <= MAX_SUB_ID_VALUE;
     }
 
     /** @hide */
