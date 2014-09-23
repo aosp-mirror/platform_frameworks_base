@@ -195,12 +195,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void cancelJobsForUser(int userHandle) {
+        List<JobStatus> jobsForUser;
         synchronized (mJobs) {
-            List<JobStatus> jobsForUser = mJobs.getJobsByUser(userHandle);
-            for (int i=0; i<jobsForUser.size(); i++) {
-                JobStatus toRemove = jobsForUser.get(i);
-                cancelJobLocked(toRemove);
-            }
+            jobsForUser = mJobs.getJobsByUser(userHandle);
+        }
+        for (int i=0; i<jobsForUser.size(); i++) {
+            JobStatus toRemove = jobsForUser.get(i);
+            cancelJobImpl(toRemove);
         }
     }
 
@@ -208,16 +209,16 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Entry point from client to cancel all jobs originating from their uid.
      * This will remove the job from the master list, and cancel the job if it was staged for
      * execution or being executed.
-     * @param uid To check against for removal of a job.
+     * @param uid Uid to check against for removal of a job.
      */
     public void cancelJobsForUid(int uid) {
-        // Remove from master list.
+        List<JobStatus> jobsForUid;
         synchronized (mJobs) {
-            List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
-            for (int i=0; i<jobsForUid.size(); i++) {
-                JobStatus toRemove = jobsForUid.get(i);
-                cancelJobLocked(toRemove);
-            }
+            jobsForUid = mJobs.getJobsByUid(uid);
+        }
+        for (int i=0; i<jobsForUid.size(); i++) {
+            JobStatus toRemove = jobsForUid.get(i);
+            cancelJobImpl(toRemove);
         }
     }
 
@@ -232,22 +233,23 @@ public class JobSchedulerService extends com.android.server.SystemService
         JobStatus toCancel;
         synchronized (mJobs) {
             toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
-            if (toCancel != null) {
-                cancelJobLocked(toCancel);
-            }
+        }
+        if (toCancel != null) {
+            cancelJobImpl(toCancel);
         }
     }
 
-    private void cancelJobLocked(JobStatus cancelled) {
+    private void cancelJobImpl(JobStatus cancelled) {
         if (DEBUG) {
             Slog.d(TAG, "Cancelling: " + cancelled);
         }
-        // Remove from store.
         stopTrackingJob(cancelled);
-        // Remove from pending queue.
-        mPendingJobs.remove(cancelled);
-        // Cancel if running.
-        stopJobOnServiceContextLocked(cancelled);
+        synchronized (mJobs) {
+            // Remove from pending queue.
+            mPendingJobs.remove(cancelled);
+            // Cancel if running.
+            stopJobOnServiceContextLocked(cancelled);
+        }
     }
 
     /**
@@ -482,21 +484,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     // StateChangedListener implementations.
 
     /**
-     * Off-board work to our handler thread as quickly as possible, b/c this call is probably being
-     * made on the main thread.
-     * For now this takes the job and if it's ready to run it will run it. In future we might not
-     * provide the job, so that the StateChangedListener has to run through its list of jobs to
-     * see which are ready. This will further decouple the controllers from the execution logic.
+     * Posts a message to the {@link com.android.server.job.JobSchedulerService.JobHandler} that
+     * some controller's state has changed, so as to run through the list of jobs and start/stop
+     * any that are eligible.
      */
     @Override
     public void onControllerStateChanged() {
-        synchronized (mJobs) {
-            if (mReadyToRock) {
-                // Post a message to to run through the list of jobs and start/stop any that
-                // are eligible.
-                mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
-            }
-        }
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
     @Override
@@ -512,21 +506,29 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public void handleMessage(Message message) {
+            synchronized (mJobs) {
+                if (!mReadyToRock) {
+                    return;
+                }
+            }
             switch (message.what) {
                 case MSG_JOB_EXPIRED:
                     synchronized (mJobs) {
                         JobStatus runNow = (JobStatus) message.obj;
                         // runNow can be null, which is a controller's way of indicating that its
                         // state is such that all ready jobs should be run immediately.
-                        if (runNow != null && !mPendingJobs.contains(runNow)) {
+                        if (runNow != null && !mPendingJobs.contains(runNow)
+                                && mJobs.containsJob(runNow)) {
                             mPendingJobs.add(runNow);
                         }
+                        queueReadyJobsForExecutionLockedH();
                     }
-                    queueReadyJobsForExecutionH();
                     break;
                 case MSG_CHECK_JOB:
-                    // Check the list of jobs and run some of them if we feel inclined.
-                    maybeQueueReadyJobsForExecutionH();
+                    synchronized (mJobs) {
+                        // Check the list of jobs and run some of them if we feel inclined.
+                        maybeQueueReadyJobsForExecutionLockedH();
+                    }
                     break;
             }
             maybeRunPendingJobsH();
@@ -538,30 +540,28 @@ public class JobSchedulerService extends com.android.server.SystemService
          * Run through list of jobs and execute all possible - at least one is expired so we do
          * as many as we can.
          */
-        private void queueReadyJobsForExecutionH() {
-            synchronized (mJobs) {
-                ArraySet<JobStatus> jobs = mJobs.getJobs();
-                if (DEBUG) {
-                    Slog.d(TAG, "queuing all ready jobs for execution:");
-                }
-                for (int i=0; i<jobs.size(); i++) {
-                    JobStatus job = jobs.valueAt(i);
-                    if (isReadyToBeExecutedLocked(job)) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "    queued " + job.toShortString());
-                        }
-                        mPendingJobs.add(job);
-                    } else if (isReadyToBeCancelledLocked(job)) {
-                        stopJobOnServiceContextLocked(job);
+        private void queueReadyJobsForExecutionLockedH() {
+            ArraySet<JobStatus> jobs = mJobs.getJobs();
+            if (DEBUG) {
+                Slog.d(TAG, "queuing all ready jobs for execution:");
+            }
+            for (int i=0; i<jobs.size(); i++) {
+                JobStatus job = jobs.valueAt(i);
+                if (isReadyToBeExecutedLocked(job)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "    queued " + job.toShortString());
                     }
+                    mPendingJobs.add(job);
+                } else if (isReadyToBeCancelledLocked(job)) {
+                    stopJobOnServiceContextLocked(job);
                 }
-                if (DEBUG) {
-                    final int queuedJobs = mPendingJobs.size();
-                    if (queuedJobs == 0) {
-                        Slog.d(TAG, "No jobs pending.");
-                    } else {
-                        Slog.d(TAG, queuedJobs + " jobs queued.");
-                    }
+            }
+            if (DEBUG) {
+                final int queuedJobs = mPendingJobs.size();
+                if (queuedJobs == 0) {
+                    Slog.d(TAG, "No jobs pending.");
+                } else {
+                    Slog.d(TAG, queuedJobs + " jobs queued.");
                 }
             }
         }
@@ -575,55 +575,53 @@ public class JobSchedulerService extends com.android.server.SystemService
          * If more than 4 jobs total are ready we send them all off.
          * TODO: It would be nice to consolidate these sort of high-level policies somewhere.
          */
-        private void maybeQueueReadyJobsForExecutionH() {
-            synchronized (mJobs) {
-                int chargingCount = 0;
-                int idleCount =  0;
-                int backoffCount = 0;
-                int connectivityCount = 0;
-                List<JobStatus> runnableJobs = new ArrayList<JobStatus>();
-                ArraySet<JobStatus> jobs = mJobs.getJobs();
-                for (int i=0; i<jobs.size(); i++) {
-                    JobStatus job = jobs.valueAt(i);
-                    if (isReadyToBeExecutedLocked(job)) {
-                        if (job.getNumFailures() > 0) {
-                            backoffCount++;
-                        }
-                        if (job.hasIdleConstraint()) {
-                            idleCount++;
-                        }
-                        if (job.hasConnectivityConstraint() || job.hasUnmeteredConstraint()) {
-                            connectivityCount++;
-                        }
-                        if (job.hasChargingConstraint()) {
-                            chargingCount++;
-                        }
-                        runnableJobs.add(job);
-                    } else if (isReadyToBeCancelledLocked(job)) {
-                        stopJobOnServiceContextLocked(job);
+        private void maybeQueueReadyJobsForExecutionLockedH() {
+            int chargingCount = 0;
+            int idleCount =  0;
+            int backoffCount = 0;
+            int connectivityCount = 0;
+            List<JobStatus> runnableJobs = new ArrayList<JobStatus>();
+            ArraySet<JobStatus> jobs = mJobs.getJobs();
+            for (int i=0; i<jobs.size(); i++) {
+                JobStatus job = jobs.valueAt(i);
+                if (isReadyToBeExecutedLocked(job)) {
+                    if (job.getNumFailures() > 0) {
+                        backoffCount++;
                     }
+                    if (job.hasIdleConstraint()) {
+                        idleCount++;
+                    }
+                    if (job.hasConnectivityConstraint() || job.hasUnmeteredConstraint()) {
+                        connectivityCount++;
+                    }
+                    if (job.hasChargingConstraint()) {
+                        chargingCount++;
+                    }
+                    runnableJobs.add(job);
+                } else if (isReadyToBeCancelledLocked(job)) {
+                    stopJobOnServiceContextLocked(job);
                 }
-                if (backoffCount > 0 ||
-                        idleCount >= MIN_IDLE_COUNT ||
-                        connectivityCount >= MIN_CONNECTIVITY_COUNT ||
-                        chargingCount >= MIN_CHARGING_COUNT ||
-                        runnableJobs.size() >= MIN_READY_JOBS_COUNT) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionH: Running jobs.");
-                    }
-                    for (int i=0; i<runnableJobs.size(); i++) {
-                        mPendingJobs.add(runnableJobs.get(i));
-                    }
-                } else {
-                    if (DEBUG) {
-                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionH: Not running anything.");
-                    }
-                }
+            }
+            if (backoffCount > 0 ||
+                    idleCount >= MIN_IDLE_COUNT ||
+                    connectivityCount >= MIN_CONNECTIVITY_COUNT ||
+                    chargingCount >= MIN_CHARGING_COUNT ||
+                    runnableJobs.size() >= MIN_READY_JOBS_COUNT) {
                 if (DEBUG) {
-                    Slog.d(TAG, "idle=" + idleCount + " connectivity=" +
-                    connectivityCount + " charging=" + chargingCount + " tot=" +
-                            runnableJobs.size());
+                    Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
                 }
+                for (int i=0; i<runnableJobs.size(); i++) {
+                    mPendingJobs.add(runnableJobs.get(i));
+                }
+            } else {
+                if (DEBUG) {
+                    Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Not running anything.");
+                }
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "idle=" + idleCount + " connectivity=" +
+                connectivityCount + " charging=" + chargingCount + " tot=" +
+                        runnableJobs.size());
             }
         }
 
