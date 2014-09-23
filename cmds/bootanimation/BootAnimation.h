@@ -82,7 +82,7 @@ private:
     };
 
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
-    status_t initTexture(const Animation::Frame& frame);
+    status_t initTexture(void* buffer, size_t len);
     bool android();
     bool readFile(const char* name, String8& outString);
     bool movie();
