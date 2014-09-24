@@ -3161,7 +3161,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
-                    entryPointArgs);
+                    app.info.dataDir, entryPointArgs);
             checkTime(startTime, "startProcess: returned from zygote!");
 
             if (app.isolated) {
