@@ -222,8 +222,15 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (mListener != null) {
             mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
         }
-        mSharedElementNames.addAll(sharedElements.keySet());
-        mSharedElements.addAll(sharedElements.values());
+        int numSharedElements = sharedElements.size();
+        for (int i = 0; i < numSharedElements; i++) {
+            View sharedElement = sharedElements.valueAt(i);
+            String name = sharedElements.keyAt(i);
+            if (sharedElement != null && sharedElement.isAttachedToWindow() && name != null) {
+                mSharedElements.add(sharedElement);
+                mSharedElementNames.add(name);
+            }
+        }
         if (getViewsTransition() != null && mTransitioningViews != null) {
             ViewGroup decorView = getDecor();
             if (decorView != null) {
