@@ -207,7 +207,8 @@ MyMtpDatabase::MyMtpDatabase(JNIEnv *env, jobject client)
         return; // Already threw.
     }
     mLongBuffer = (jlongArray)env->NewGlobalRef(longArray);
-    jcharArray charArray = env->NewCharArray(256);
+    // Needs to be long enough to hold a file path for getObjectFilePath()
+    jcharArray charArray = env->NewCharArray(PATH_MAX + 1);
     if (!charArray) {
         return; // Already threw.
     }
@@ -761,7 +762,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
     return result;
 }
 
-static void foreachentry(ExifEntry *entry, void *user) {
+static void foreachentry(ExifEntry *entry, void * /*user*/) {
     char buf[1024];
     ALOGI("entry %x, format %d, size %d: %s",
             entry->tag, entry->format, entry->size, exif_entry_get_value(entry, buf, sizeof(buf)));
