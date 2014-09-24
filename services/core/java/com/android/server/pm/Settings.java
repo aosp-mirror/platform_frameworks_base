@@ -2285,7 +2285,7 @@ final class Settings {
                 Intent finalIntent = new Intent(intent);
                 finalIntent.setData(builder.build());
                 applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                        scheme, ssp, null, null, null, userId);
+                        scheme, ssp, null, null, userId);
                 doScheme = false;
             }
             for (int iauth=0; iauth<tmpPa.countDataAuthorities(); iauth++) {
@@ -2302,7 +2302,7 @@ final class Settings {
                     Intent finalIntent = new Intent(intent);
                     finalIntent.setData(builder.build());
                     applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                            scheme, null, auth, path, null, userId);
+                            scheme, null, auth, path, userId);
                     doAuth = doScheme = false;
                 }
                 if (doAuth) {
@@ -2314,7 +2314,7 @@ final class Settings {
                     Intent finalIntent = new Intent(intent);
                     finalIntent.setData(builder.build());
                     applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                            scheme, null, auth, null, null, userId);
+                            scheme, null, auth, null, userId);
                     doScheme = false;
                 }
             }
@@ -2324,7 +2324,7 @@ final class Settings {
                 Intent finalIntent = new Intent(intent);
                 finalIntent.setData(builder.build());
                 applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                        scheme, null, null, null, null, userId);
+                        scheme, null, null, null, userId);
             }
             doNonData = false;
         }
@@ -2340,28 +2340,27 @@ final class Settings {
                         builder.scheme(scheme);
                         finalIntent.setDataAndType(builder.build(), mimeType);
                         applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                                scheme, null, null, null, mimeType, userId);
+                                scheme, null, null, null, userId);
                     }
                 }
             } else {
                 Intent finalIntent = new Intent(intent);
                 finalIntent.setType(mimeType);
                 applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                        null, null, null, null, mimeType, userId);
+                        null, null, null, null, userId);
             }
             doNonData = false;
         }
 
         if (doNonData) {
             applyDefaultPreferredActivityLPw(service, intent, flags, cn,
-                    null, null, null, null, null, userId);
+                    null, null, null, null, userId);
         }
     }
 
     private void applyDefaultPreferredActivityLPw(PackageManagerService service,
             Intent intent, int flags, ComponentName cn, String scheme, PatternMatcher ssp,
-            IntentFilter.AuthorityEntry auth, PatternMatcher path, String mimeType,
-            int userId) {
+            IntentFilter.AuthorityEntry auth, PatternMatcher path, int userId) {
         List<ResolveInfo> ri = service.mActivities.queryIntent(intent,
                 intent.getType(), flags, 0);
         if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Queried " + intent
@@ -2369,19 +2368,24 @@ final class Settings {
         int match = 0;
         if (ri != null && ri.size() > 1) {
             boolean haveAct = false;
-            boolean haveNonSys = false;
+            ComponentName haveNonSys = null;
             ComponentName[] set = new ComponentName[ri.size()];
             for (int i=0; i<ri.size(); i++) {
                 ActivityInfo ai = ri.get(i).activityInfo;
                 set[i] = new ComponentName(ai.packageName, ai.name);
                 if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    // If any of the matches are not system apps, then
-                    // there is a third party app that is now an option...
-                    // so don't set a default since we don't want to hide it.
-                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                            + ai.packageName + "/" + ai.name + ": non-system!");
-                    haveNonSys = true;
-                    break;
+                    if (ri.get(i).match >= match) {
+                        // If any of the matches are not system apps, then
+                        // there is a third party app that is now an option...
+                        // so don't set a default since we don't want to hide it.
+                        // Only do this if the match of this one is at least as good
+                        // as what we have found as the built-in app; if it isn't
+                        // as good, the user won't want it anyway, right?
+                        if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                                + ai.packageName + "/" + ai.name + ": non-system!");
+                        haveNonSys = set[i];
+                        break;
+                    }
                 } else if (cn.getPackageName().equals(ai.packageName)
                         && cn.getClassName().equals(ai.name)) {
                     if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
@@ -2393,7 +2397,7 @@ final class Settings {
                             + ai.packageName + "/" + ai.name + ": skipped");
                 }
             }
-            if (haveAct && !haveNonSys) {
+            if (haveAct && haveNonSys == null) {
                 IntentFilter filter = new IntentFilter();
                 if (intent.getAction() != null) {
                     filter.addAction(intent.getAction());
@@ -2427,9 +2431,25 @@ final class Settings {
                 }
                 PreferredActivity pa = new PreferredActivity(filter, match, set, cn, true);
                 editPreferredActivitiesLPw(userId).addFilter(pa);
-            } else if (!haveNonSys) {
-                Slog.w(TAG, "No component found for default preferred activity " + cn);
+            } else if (haveNonSys == null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("No component ");
+                sb.append(cn.flattenToShortString());
+                sb.append(" found setting preferred ");
+                sb.append(intent);
+                sb.append("; possible matches are ");
+                for (int i=0; i<set.length; i++) {
+                    if (i > 0) sb.append(", ");
+                    sb.append(set[i].flattenToShortString());
+                }
+                Slog.w(TAG, sb.toString());
+            } else {
+                Slog.i(TAG, "Not setting preferred " + intent + "; found third party match "
+                        + haveNonSys.flattenToShortString());
             }
+        } else {
+            Slog.w(TAG, "No potential matches found for " + intent + " while setting preferred "
+                    + cn.flattenToShortString());
         }
     }
 
