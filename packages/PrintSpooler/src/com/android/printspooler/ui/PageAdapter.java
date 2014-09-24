@@ -312,10 +312,6 @@ public final class PageAdapter extends Adapter implements
                         + ", pageIndexInFile: " + pageIndexInFile);
             }
 
-            if (provider != null && provider.getPageIndex() != pageIndexInFile) {
-                mPageContentRepository.releasePageContentProvider(provider);
-            }
-
             provider = mPageContentRepository.acquirePageContentProvider(
                     pageIndexInFile, content);
             mBoundPagesInAdapter.put(position, null);
