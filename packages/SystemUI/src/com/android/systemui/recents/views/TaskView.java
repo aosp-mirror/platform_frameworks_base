@@ -21,11 +21,10 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.*;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -34,6 +33,7 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
@@ -265,8 +265,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (isTaskViewLaunchTargetTask) {
-                // Hide the action button if it exists
-                mActionButtonView.setAlpha(0f);
                 // Set the dim to 0 so we can animate it in
                 initialDim = 0;
             } else if (occludesLaunchTarget) {
@@ -383,14 +381,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
                 // Animate the footer into view
                 animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
+                fadeInActionButton(true);
 
-                // Animate the action button in
-                mActionButtonView.animate().alpha(1f)
-                        .setStartDelay(mConfig.taskBarEnterAnimDelay)
-                        .setDuration(mConfig.taskBarEnterAnimDuration)
-                        .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                        .withLayer()
-                        .start();
+
             } else {
                 // Animate the task up if it was occluding the launch target
                 if (ctx.currentTaskOccludesLaunchTarget) {
@@ -461,6 +454,23 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 enableFocusAnimations();
             }
         }, (startDelay / 2));
+    }
+
+    public void fadeInActionButton(boolean withDelay) {
+        // Hide the action button
+        mActionButtonView.setAlpha(0f);
+
+        // Animate the action button in
+        ViewPropertyAnimator animator = mActionButtonView.animate().alpha(1f)
+                .setDuration(mConfig.taskBarEnterAnimDuration)
+                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .withLayer();
+        if (withDelay) {
+            animator.setStartDelay(mConfig.taskBarEnterAnimDelay);
+        }
+        animator.start();
+
+
     }
 
     /** Animates this task view as it leaves recents by pressing home. */
@@ -783,9 +793,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else {
             animateFooterVisibility(t.lockToThisTask, mConfig.taskViewLockToAppLongAnimDuration);
         }
-        // Hide the action button if lock to app is disabled
-        if (!t.lockToTaskEnabled && mActionButtonView.getVisibility() != View.GONE) {
-            mActionButtonView.setVisibility(View.GONE);
+        updateLockButtonVisibility(t);
+
+    }
+
+    private void updateLockButtonVisibility(Task t) {
+        // Hide the action button if lock to app is disabled for this view
+        int lockButtonVisibility = (!t.lockToTaskEnabled || !t.lockToThisTask) ? GONE : VISIBLE;
+        if (mActionButtonView.getVisibility() != lockButtonVisibility) {
+            mActionButtonView.setVisibility(lockButtonVisibility);
+            requestLayout();
         }
     }
 

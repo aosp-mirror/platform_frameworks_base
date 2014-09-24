@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -810,6 +809,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
             if (frontTv != null) {
                 frontTv.onTaskBound(newFrontMostTask);
+                frontTv.fadeInActionButton(false);
             }
         }
 
