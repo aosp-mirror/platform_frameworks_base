@@ -123,7 +123,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     public void userSwitch(int newUserId) {
-        mHandler.obtainMessage(H.USER_SWITCH, newUserId).sendToTarget();
+        mHandler.obtainMessage(H.USER_SWITCH, newUserId, 0).sendToTarget();
     }
 
     public void fireToggleStateChanged(boolean state) {
