@@ -68,6 +68,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy.WindowManagerFuncs;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -625,6 +626,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * What each item in the global actions dialog must be able to support.
      */
     private interface Action {
+        /**
+         * @return Text that will be announced when dialog is created.  null
+         *     for none.
+         */
+        CharSequence getLabelForAccessibility(Context context);
+
         View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater);
 
         void onPress();
@@ -691,6 +698,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         abstract public void onPress();
+
+        public CharSequence getLabelForAccessibility(Context context) {
+            if (mMessage != null) {
+                return mMessage;
+            } else {
+                return context.getString(mMessageResId);
+            }
+        }
 
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
@@ -779,6 +794,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
          */
         void willCreate() {
 
+        }
+
+        @Override
+        public CharSequence getLabelForAccessibility(Context context) {
+            return context.getString(mMessageResId);
         }
 
         public View create(Context context, View convertView, ViewGroup parent,
@@ -895,6 +915,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         private int indexToRingerMode(int index) {
             // They just happen to coincide
             return index;
+        }
+
+        @Override
+        public CharSequence getLabelForAccessibility(Context context) {
+            return null;
         }
 
         public View create(Context context, View convertView, ViewGroup parent,
@@ -1045,6 +1070,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         private final Context mContext;
         private final int mWindowTouchSlop;
         private final AlertController mAlert;
+        private final MyAdapter mAdapter;
 
         private EnableAccessibilityController mEnableAccessibilityController;
 
@@ -1055,6 +1081,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             super(context, getDialogTheme(context));
             mContext = context;
             mAlert = new AlertController(mContext, this, getWindow());
+            mAdapter = (MyAdapter) params.mAdapter;
             mWindowTouchSlop = ViewConfiguration.get(context).getScaledWindowTouchSlop();
             params.apply(mAlert);
         }
@@ -1146,6 +1173,20 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             mAlert.installContent();
+        }
+
+        @Override
+        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                for (int i = 0; i < mAdapter.getCount(); ++i) {
+                    CharSequence label =
+                            mAdapter.getItem(i).getLabelForAccessibility(getContext());
+                    if (label != null) {
+                        event.getText().add(label);
+                    }
+                }
+            }
+            return super.dispatchPopulateAccessibilityEvent(event);
         }
 
         @Override
