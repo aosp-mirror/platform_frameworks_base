@@ -1373,7 +1373,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final Rect stableInsets = mLastStableInsets;
             final boolean reportDraw = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
             final Configuration newConfig = configChanged ? mConfiguration : null;
-            if (mClient instanceof IWindow.Stub) {
+            if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
+                    && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
                 mService.mH.post(new Runnable() {
                     @Override
