@@ -94,8 +94,8 @@ public class MediaSessionStack {
             mSessions.add(0, record);
             clearCache();
             return true;
-        } else if (newState == PlaybackState.STATE_PAUSED) {
-            // Just clear the volume cache in this case
+        } else if (!MediaSession.isActiveState(newState)) {
+            // Just clear the volume cache when a state goes inactive
             mCachedVolumeDefault = null;
         }
         return false;
