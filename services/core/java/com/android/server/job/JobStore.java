@@ -50,15 +50,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
- * Maintain a list of classes, and accessor methods/logic for these jobs.
- * This class offers the following functionality:
- *     - When a job is added, it will determine if the job requirements have changed (update) and
- *       whether the controllers need to be updated.
- *     - Persists JobInfos, figures out when to to rewrite the JobInfo to disk.
- *     - Handles rescheduling of jobs.
- *       - When a periodic job is executed and must be re-added.
- *       - When a job fails and the client requests that it be retried with backoff.
- *       - This class <strong>is not</strong> thread-safe.
+ * Maintains the master list of jobs that the job scheduler is tracking. These jobs are compared by
+ * reference, so none of the functions in this class should make a copy.
+ * Also handles read/write of persisted jobs.
  *
  * Note on locking:
  *      All callers to this class must <strong>lock on the class object they are calling</strong>.
@@ -152,6 +146,10 @@ public class JobStore {
         return false;
     }
 
+    boolean containsJob(JobStatus jobStatus) {
+        return mJobSet.contains(jobStatus);
+    }
+
     public int size() {
         return mJobSet.size();
     }
@@ -180,6 +178,10 @@ public class JobStore {
         maybeWriteStatusToDiskAsync();
     }
 
+    /**
+     * @param userHandle User for whom we are querying the list of jobs.
+     * @return A list of all the jobs scheduled by the provided user. Never null.
+     */
     public List<JobStatus> getJobsByUser(int userHandle) {
         List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
         Iterator<JobStatus> it = mJobSet.iterator();
@@ -194,7 +196,7 @@ public class JobStore {
 
     /**
      * @param uid Uid of the requesting app.
-     * @return All JobStatus objects for a given uid from the master list.
+     * @return All JobStatus objects for a given uid from the master list. Never null.
      */
     public List<JobStatus> getJobsByUid(int uid) {
         List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
