@@ -11423,6 +11423,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 createDisplayContentLocked(display);
                 displayReady(displayId);
             }
+            requestTraversalLocked();
         }
     }
 
@@ -11445,6 +11446,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         mAnimator.removeDisplayLocked(displayId);
+        requestTraversalLocked();
     }
 
     public void onDisplayChanged(int displayId) {
@@ -11456,6 +11458,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayContent != null) {
             displayContent.updateDisplayInfo();
         }
+        requestTraversalLocked();
     }
 
     @Override
