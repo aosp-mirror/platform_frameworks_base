@@ -109,6 +109,12 @@ public class ScanResult implements Parcelable {
     public int autoJoinStatus;
 
     /**
+     * num IP configuration failures
+     * @hide
+     */
+    public int numIpConfigFailures;
+
+    /**
      * @hide
      * Last time we blacklisted the ScanResult
      */
@@ -266,6 +272,7 @@ public class ScanResult implements Parcelable {
             untrusted = source.untrusted;
             numConnection = source.numConnection;
             numUsage = source.numUsage;
+            numIpConfigFailures = source.numIpConfigFailures;
         }
     }
 
