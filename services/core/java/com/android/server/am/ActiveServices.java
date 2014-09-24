@@ -1909,7 +1909,8 @@ public final class ActiveServices {
         }
     }
 
-    boolean attachApplicationLocked(ProcessRecord proc, String processName) throws Exception {
+    boolean attachApplicationLocked(ProcessRecord proc, String processName)
+            throws RemoteException {
         boolean didSomething = false;
         // Collect any services that are waiting for this process to come up.
         if (mPendingServices.size() > 0) {
@@ -1929,7 +1930,7 @@ public final class ActiveServices {
                     realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;
                 }
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 Slog.w(TAG, "Exception in new application when starting service "
                         + sr.shortName, e);
                 throw e;
