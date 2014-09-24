@@ -56,6 +56,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
@@ -689,19 +690,30 @@ public class SettingsProvider extends ContentProvider {
         // Get methods
         if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
-            if (isManagedProfile(callingUser) && sSystemCloneToManagedKeys.contains(request)) {
-                callingUser = UserHandle.USER_OWNER;
+            // Check if this request should be (re)directed to the primary user's db
+            if (callingUser == UserHandle.USER_OWNER
+                    || shouldShadowParentProfile(callingUser, sSystemCloneToManagedKeys, request)) {
+                dbHelper = getOrEstablishDatabase(UserHandle.USER_OWNER);
+            } else {
+                dbHelper = getOrEstablishDatabase(callingUser);
             }
-            dbHelper = getOrEstablishDatabase(callingUser);
             cache = sSystemCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
         }
         if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
-            if (isManagedProfile(callingUser) && sSecureCloneToManagedKeys.contains(request)) {
-                callingUser = UserHandle.USER_OWNER;
+            // Check if this is a setting to be copied from the primary user
+            if (shouldShadowParentProfile(callingUser, sSecureCloneToManagedKeys, request)) {
+                // If the request if for location providers and there's a restriction, return none
+                if (Secure.LOCATION_PROVIDERS_ALLOWED.equals(request)
+                        && mUserManager.hasUserRestriction(
+                                UserManager.DISALLOW_SHARE_LOCATION, new UserHandle(callingUser))) {
+                    return sSecureCaches.get(callingUser).putIfAbsent(request, "");
+                }
+                dbHelper = getOrEstablishDatabase(UserHandle.USER_OWNER);
+            } else {
+                dbHelper = getOrEstablishDatabase(callingUser);
             }
-            dbHelper = getOrEstablishDatabase(callingUser);
             cache = sSecureCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SECURE, cache, request);
         }
@@ -742,11 +754,10 @@ public class SettingsProvider extends ContentProvider {
                         + callingUser);
             }
             // Extra check for USER_OWNER to optimize for the 99%
-            if (callingUser != UserHandle.USER_OWNER && isManagedProfile(callingUser)) {
-                if (sSystemCloneToManagedKeys.contains(request)) {
-                    // Don't write these settings
-                    return null;
-                }
+            if (callingUser != UserHandle.USER_OWNER && shouldShadowParentProfile(callingUser,
+                    sSystemCloneToManagedKeys, request)) {
+                // Don't write these settings, as they are cloned from the parent profile
+                return null;
             }
             insertForUser(Settings.System.CONTENT_URI, values, callingUser);
             // Clone the settings to the managed profiles so that notifications can be sent out
@@ -772,11 +783,10 @@ public class SettingsProvider extends ContentProvider {
                         + callingUser);
             }
             // Extra check for USER_OWNER to optimize for the 99%
-            if (callingUser != UserHandle.USER_OWNER && isManagedProfile(callingUser)) {
-                if (sSecureCloneToManagedKeys.contains(request)) {
-                    // Don't write these settings
-                    return null;
-                }
+            if (callingUser != UserHandle.USER_OWNER && shouldShadowParentProfile(callingUser,
+                    sSecureCloneToManagedKeys, request)) {
+                // Don't write these settings, as they are cloned from the parent profile
+                return null;
             }
             insertForUser(Settings.Secure.CONTENT_URI, values, callingUser);
             // Clone the settings to the managed profiles so that notifications can be sent out
@@ -814,6 +824,14 @@ public class SettingsProvider extends ContentProvider {
         }
 
         return null;
+    }
+
+    /**
+     * Check if the user is a managed profile and name is one of the settings to be cloned
+     * from the parent profile.
+     */
+    private boolean shouldShadowParentProfile(int userId, HashSet<String> keys, String name) {
+        return isManagedProfile(userId) && keys.contains(name);
     }
 
     // Looks up value 'key' in 'table' and returns either a single-pair Bundle,
