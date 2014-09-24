@@ -48,7 +48,6 @@ public final class BluetoothGattServer implements BluetoothProfile {
     private BluetoothAdapter mAdapter;
     private IBluetoothGatt mService;
     private BluetoothGattServerCallback mCallback;
-    private Boolean mIsCongested = false;
 
     private Object mServerIfLock = new Object();
     private int mServerIf;
@@ -283,24 +282,6 @@ public final class BluetoothGattServer implements BluetoothProfile {
                     mCallback.onNotificationSent(device, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
-                }
-            }
-
-            /**
-             * Callback indicating the remote device connection is congested.
-             * @hide
-             */
-            public void onConnectionCongested(String address, boolean congested) {
-                if (DBG) Log.d(TAG, "onConnectionCongested() - Device=" + address
-                        + " congested=" + congested);
-
-                BluetoothDevice device = mAdapter.getRemoteDevice(address);
-                if (device == null) return;
-
-                try {
-                    mIsCongested = congested;
-                } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
         };
