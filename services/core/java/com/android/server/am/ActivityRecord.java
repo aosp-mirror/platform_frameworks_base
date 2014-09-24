@@ -79,7 +79,7 @@ final class ActivityRecord {
     private static final String ATTR_LAUNCHEDFROMPACKAGE = "launched_from_package";
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
-    private static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
+    static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
