@@ -2389,6 +2389,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (tempFile != null) {
                     tempFile.delete();
                 }
+                mFileProvider.releaseFile();
             }
         }
 
