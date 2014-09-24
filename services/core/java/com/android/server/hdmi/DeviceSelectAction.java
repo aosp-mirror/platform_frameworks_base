@@ -95,7 +95,7 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         sendCommand(mGivePowerStatus, new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == Constants.SEND_RESULT_NAK) {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
                     invokeCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                     finish();
                     return;

@@ -96,11 +96,8 @@ public class TimerRecordingAction extends HdmiCecFeatureAction {
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAITING_FOR_TIMER_STATUS) {
-            return false;
-        }
-
-        if (cmd.getSource() != mRecorderAddress) {
+        if (mState != STATE_WAITING_FOR_TIMER_STATUS
+                || cmd.getSource() != mRecorderAddress) {
             return false;
         }
 

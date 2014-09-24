@@ -125,6 +125,9 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
 
     @Override
     final boolean processCommand(HdmiCecMessage cmd) {
+        if (cmd.getSource() != mAvrLogicalAddress) {
+            return false;
+        }
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
                 if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT
