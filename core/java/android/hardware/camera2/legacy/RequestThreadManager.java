@@ -78,7 +78,7 @@ public class RequestThreadManager {
 
     private static final int MAX_IN_FLIGHT_REQUESTS = 2;
 
-    private static final int PREVIEW_FRAME_TIMEOUT = 300; // ms
+    private static final int PREVIEW_FRAME_TIMEOUT = 1000; // ms
     private static final int JPEG_FRAME_TIMEOUT = 3000; // ms (same as CTS for API2)
     private static final int REQUEST_COMPLETE_TIMEOUT = 3000; // ms (same as JPEG timeout)
 
