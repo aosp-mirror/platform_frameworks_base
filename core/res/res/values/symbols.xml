@@ -322,6 +322,8 @@
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_bad_link_speed_5" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_good_link_speed_24" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_good_link_speed_5" />
+  <java-symbol type="string"  name="config_wifi_random_mac_oui" />
+
   <java-symbol type="bool" name="editable_voicemailnumber" />
 
   <java-symbol type="bool" name="config_wifi_framework_cellular_handover_enable_user_triggered_adjustment" />
