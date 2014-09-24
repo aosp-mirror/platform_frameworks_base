@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.SHUTDOWN;
@@ -2059,20 +2058,26 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setPermission(boolean internal, boolean changeNetState, int[] uids) {
+    public void setPermission(String permission, int[] uids) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "permission", "user", "set");
-        if (internal) cmd.appendArg(CONNECTIVITY_INTERNAL);
-        if (changeNetState) cmd.appendArg(CHANGE_NETWORK_STATE);
-        for (int i=0; i<uids.length; i++) {
-            cmd.appendArg(uids[i]);
-        }
-
-        try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+        Object[] argv = new Object[4 + MAX_UID_RANGES_PER_COMMAND];
+        argv[0] = "permission";
+        argv[1] = "user";
+        argv[2] = "set";
+        argv[3] = permission;
+        int argc = 4;
+        // Avoid overly long commands by limiting number of UIDs per command.
+        for (int i = 0; i < uids.length; ++i) {
+            argv[argc++] = uids[i];
+            if (i == uids.length - 1 || argc == argv.length) {
+                try {
+                    mConnector.execute("network", Arrays.copyOf(argv, argc));
+                } catch (NativeDaemonConnectorException e) {
+                    throw e.rethrowAsParcelableException();
+                }
+                argc = 4;
+            }
         }
     }
 
@@ -2080,15 +2085,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void clearPermission(int[] uids) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "permission", "user", "clear");
-        for (int i=0; i<uids.length; i++) {
-            cmd.appendArg(uids[i]);
-        }
-
-        try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+        Object[] argv = new Object[3 + MAX_UID_RANGES_PER_COMMAND];
+        argv[0] = "permission";
+        argv[1] = "user";
+        argv[2] = "clear";
+        int argc = 3;
+        // Avoid overly long commands by limiting number of UIDs per command.
+        for (int i = 0; i < uids.length; ++i) {
+            argv[argc++] = uids[i];
+            if (i == uids.length - 1 || argc == argv.length) {
+                try {
+                    mConnector.execute("network", Arrays.copyOf(argv, argc));
+                } catch (NativeDaemonConnectorException e) {
+                    throw e.rethrowAsParcelableException();
+                }
+                argc = 3;
+            }
         }
     }
 
