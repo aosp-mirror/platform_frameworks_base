@@ -2629,7 +2629,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui >= 0) {
             if (!app.killed) {
-                Slog.wtf(TAG, "Removing process that hasn't been killed: " + app);
+                Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
                 Process.killProcessQuiet(app.pid);
                 Process.killProcessGroup(app.info.uid, app.pid);
             }
@@ -6126,7 +6126,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // todo: Yikes!  What should we do?  For now we will try to
             // start another process, but that could easily get us in
             // an infinite loop of restarting processes...
-            Slog.w(TAG, "Exception thrown during bind!", e);
+            Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
 
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
@@ -6150,6 +6150,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     didSomething = true;
                 }
             } catch (Exception e) {
+                Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
                 badApp = true;
             }
         }
@@ -6159,6 +6160,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 didSomething |= mServices.attachApplicationLocked(app, processName);
             } catch (Exception e) {
+                Slog.wtf(TAG, "Exception thrown starting services in " + app, e);
                 badApp = true;
             }
         }
@@ -6169,6 +6171,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 didSomething |= sendPendingBroadcastsLocked(app);
             } catch (Exception e) {
                 // If the app died trying to launch the receiver we declare it 'bad'
+                Slog.wtf(TAG, "Exception thrown dispatching broadcasts in " + app, e);
                 badApp = true;
             }
         }
@@ -6182,14 +6185,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         compatibilityInfoForPackageLocked(mBackupTarget.appInfo),
                         mBackupTarget.backupMode);
             } catch (Exception e) {
-                Slog.w(TAG, "Exception scheduling backup agent creation: ");
-                e.printStackTrace();
+                Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
+                badApp = true;
             }
         }
 
         if (badApp) {
-            // todo: Also need to kill application to deal with all
-            // kinds of exceptions.
+            app.kill("error during init", true);
             handleAppDiedLocked(app, false, true);
             return false;
         }
