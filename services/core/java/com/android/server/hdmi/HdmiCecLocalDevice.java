@@ -34,7 +34,6 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -125,7 +124,7 @@ abstract class HdmiCecLocalDevice {
 
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
-    private final LinkedList<HdmiCecFeatureAction> mActions = new LinkedList<>();
+    private final ArrayList<HdmiCecFeatureAction> mActions = new ArrayList<>();
 
     private final Handler mHandler = new Handler () {
         @Override
@@ -290,12 +289,14 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     private boolean dispatchMessageToAction(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        for (HdmiCecFeatureAction action : mActions) {
-            if (action.processCommand(message)) {
-                return true;
-            }
+        boolean processed = false;
+        // Use copied action list in that processCommand may remove itself.
+        for (HdmiCecFeatureAction action : new ArrayList<>(mActions)) {
+            // Iterates all actions to check whether incoming message is consumed.
+            boolean result = action.processCommand(message);
+            processed = processed || result;
         }
-        return false;
+        return processed;
     }
 
     @ServiceThreadOnly

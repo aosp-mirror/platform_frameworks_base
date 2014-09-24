@@ -92,7 +92,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
+        if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS
+                || mTargetAddress != cmd.getSource()) {
             return false;
         }
         if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
