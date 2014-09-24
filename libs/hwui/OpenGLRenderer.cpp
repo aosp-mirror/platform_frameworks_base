@@ -51,6 +51,21 @@
     #define EVENT_LOGD(...)
 #endif
 
+static void atraceFormatBegin(const char* fmt, ...) {
+    const int BUFFER_SIZE = 256;
+    va_list ap;
+    char buf[BUFFER_SIZE];
+
+    va_start(ap, fmt);
+    vsnprintf(buf, BUFFER_SIZE, fmt, ap);
+    va_end(ap);
+
+    ATRACE_BEGIN(buf);
+}
+
+#define ATRACE_FORMAT_BEGIN(fmt, ...) \
+    if (CC_UNLIKELY(ATRACE_ENABLED())) atraceFormatBegin(fmt, ##__VA_ARGS__)
+
 namespace android {
 namespace uirenderer {
 
@@ -537,17 +552,18 @@ void OpenGLRenderer::flushLayers() {
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
+            Layer* layer = mLayerUpdates.itemAt(i);
+
             sprintf(layerName, "Layer #%d", i);
             startMark(layerName);
+            ATRACE_FORMAT_BEGIN("flushLayer %ux%u", layer->getWidth(), layer->getHeight());
 
-            ATRACE_BEGIN("flushLayer");
-            Layer* layer = mLayerUpdates.itemAt(i);
             layer->flush();
+
             ATRACE_END();
+            endMark();
 
             mCaches.resourceCache.decrementRefcount(layer);
-
-            endMark();
         }
 
         mLayerUpdates.clear();
@@ -631,6 +647,7 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
 
     if (restoreLayer) {
         endMark(); // Savelayer
+        ATRACE_END(); // SaveLayer
         startMark("ComposeLayer");
         composeLayer(removed, restored);
         endMark();
@@ -814,6 +831,9 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     mSnapshot->flags |= Snapshot::kFlagIsLayer;
     mSnapshot->layer = layer;
 
+    ATRACE_FORMAT_BEGIN("%ssaveLayer %ux%u",
+            fboLayer ? "" : "unclipped ",
+            layer->getWidth(), layer->getHeight());
     startMark("SaveLayer");
     if (fboLayer) {
         return createFboLayer(layer, bounds, clip);
