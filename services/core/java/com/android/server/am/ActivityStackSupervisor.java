@@ -503,7 +503,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return resumedActivity;
     }
 
-    boolean attachApplicationLocked(ProcessRecord app) throws Exception {
+    boolean attachApplicationLocked(ProcessRecord app) throws RemoteException {
         final String processName = app.processName;
         boolean didSomething = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
@@ -521,7 +521,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             if (realStartActivityLocked(hr, app, true, true)) {
                                 didSomething = true;
                             }
-                        } catch (Exception e) {
+                        } catch (RemoteException e) {
                             Slog.w(TAG, "Exception in new application when starting activity "
                                   + hr.intent.getComponent().flattenToShortString(), e);
                             throw e;
