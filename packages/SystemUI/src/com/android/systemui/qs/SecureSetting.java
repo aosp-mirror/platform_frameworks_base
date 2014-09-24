@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -28,32 +29,33 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
     private final Context mContext;
     private final String mSettingName;
 
+    private boolean mListening;
+    private int mUserId;
+
     protected abstract void handleValueChanged(int value);
 
     public SecureSetting(Context context, Handler handler, String settingName) {
         super(handler);
         mContext = context;
         mSettingName = settingName;
-        rebindForCurrentUser();
-    }
-
-    public void rebindForCurrentUser() {
+        mUserId = ActivityManager.getCurrentUser();
         setListening(true);
     }
 
     public int getValue() {
-        return Secure.getInt(mContext.getContentResolver(), mSettingName, 0);
+        return Secure.getIntForUser(mContext.getContentResolver(), mSettingName, 0, mUserId);
     }
 
     public void setValue(int value) {
-        Secure.putInt(mContext.getContentResolver(), mSettingName, value);
+        Secure.putIntForUser(mContext.getContentResolver(), mSettingName, value, mUserId);
     }
 
     @Override
     public void setListening(boolean listening) {
+        mListening = listening;
         if (listening) {
             mContext.getContentResolver().registerContentObserver(
-                    Secure.getUriFor(mSettingName), false, this);
+                    Secure.getUriFor(mSettingName), false, this, mUserId);
         } else {
             mContext.getContentResolver().unregisterContentObserver(this);
         }
@@ -62,5 +64,13 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
     @Override
     public void onChange(boolean selfChange) {
         handleValueChanged(getValue());
+    }
+
+    public void setUserId(int userId) {
+        mUserId = userId;
+        if (mListening) {
+            setListening(false);
+            setListening(true);
+        }
     }
 }
