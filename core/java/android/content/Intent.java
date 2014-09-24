@@ -7498,23 +7498,32 @@ public class Intent implements Parcelable, Cloneable {
 
         final String action = getAction();
         if (ACTION_CHOOSER.equals(action)) {
+            // Inspect contained intents to see if we need to migrate extras. We
+            // don't promote ClipData to the parent, since ChooserActivity will
+            // already start the picked item as the caller, and we can't combine
+            // the flags in a safe way.
+
+            boolean migrated = false;
             try {
-                // Inspect target intent to see if we need to migrate
-                final Intent target = getParcelableExtra(EXTRA_INTENT);
-                if (target != null && target.migrateExtraStreamToClipData()) {
-                    // Since we migrated in child, we need to promote ClipData
-                    // and flags to ourselves to grant.
-                    setClipData(target.getClipData());
-                    addFlags(target.getFlags() & (FLAG_GRANT_READ_URI_PERMISSION
-                            | FLAG_GRANT_WRITE_URI_PERMISSION
-                            | FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                            | FLAG_GRANT_PREFIX_URI_PERMISSION));
-                    return true;
-                } else {
-                    return false;
+                final Intent intent = getParcelableExtra(EXTRA_INTENT);
+                if (intent != null) {
+                    migrated |= intent.migrateExtraStreamToClipData();
                 }
             } catch (ClassCastException e) {
             }
+            try {
+                final Parcelable[] intents = getParcelableArrayExtra(EXTRA_INITIAL_INTENTS);
+                if (intents != null) {
+                    for (int i = 0; i < intents.length; i++) {
+                        final Intent intent = (Intent) intents[i];
+                        if (intent != null) {
+                            migrated |= intent.migrateExtraStreamToClipData();
+                        }
+                    }
+                }
+            } catch (ClassCastException e) {
+            }
+            return migrated;
 
         } else if (ACTION_SEND.equals(action)) {
             try {
