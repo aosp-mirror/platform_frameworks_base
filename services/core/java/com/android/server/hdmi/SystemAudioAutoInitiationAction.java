@@ -58,17 +58,16 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAITING_FOR_SYSTEM_AUDIO_MODE_STATUS) {
+        if (mState != STATE_WAITING_FOR_SYSTEM_AUDIO_MODE_STATUS
+                || mAvrAddress != cmd.getSource()) {
             return false;
         }
 
-        switch (cmd.getOpcode()) {
-            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
-                handleSystemAudioModeStatusMessage();
-                return true;
-            default:
-                return false;
+        if (cmd.getOpcode() == Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS) {
+            handleSystemAudioModeStatusMessage();
+            return true;
         }
+        return false;
     }
 
     private void handleSystemAudioModeStatusMessage() {

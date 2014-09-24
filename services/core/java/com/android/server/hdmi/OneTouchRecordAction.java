@@ -68,23 +68,21 @@ public class OneTouchRecordAction extends HdmiCecFeatureAction {
                             finish();
                             return;
                         }
-
-                        mState = STATE_WAITING_FOR_RECORD_STATUS;
-                        addTimer(mState, RECORD_STATUS_TIMEOUT_MS);
                     }
                 });
+        mState = STATE_WAITING_FOR_RECORD_STATUS;
+        addTimer(mState, RECORD_STATUS_TIMEOUT_MS);
     }
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAITING_FOR_RECORD_STATUS) {
+        if (mState != STATE_WAITING_FOR_RECORD_STATUS || mRecorderAddress != cmd.getSource()) {
             return false;
         }
 
         switch (cmd.getOpcode()) {
             case Constants.MESSAGE_RECORD_STATUS:
                 return handleRecordStatus(cmd);
-
         }
         return false;
     }
