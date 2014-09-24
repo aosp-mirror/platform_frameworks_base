@@ -412,8 +412,6 @@ public final class PageContentRepository {
     }
 
     private static final class AsyncRenderer implements ServiceConnection {
-        private static final int MALFORMED_PDF_FILE_ERROR = -2;
-
         private final Object mLock = new Object();
 
         private final Context mContext;
@@ -486,7 +484,7 @@ public final class PageContentRepository {
                             return mRenderer.openDocument(source);
                         } catch (RemoteException re) {
                             Log.e(LOG_TAG, "Cannot open PDF document");
-                            return MALFORMED_PDF_FILE_ERROR;
+                            return PdfManipulationService.MALFORMED_PDF_FILE_ERROR;
                         } finally {
                             // Close the fd as we passed it to another process
                             // which took ownership.
@@ -497,7 +495,7 @@ public final class PageContentRepository {
 
                 @Override
                 public void onPostExecute(Integer pageCount) {
-                    if (pageCount == MALFORMED_PDF_FILE_ERROR) {
+                    if (pageCount == PdfManipulationService.MALFORMED_PDF_FILE_ERROR) {
                         mOnMalformedPdfFileListener.onMalformedPdfFile();
                         mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
                     } else {
