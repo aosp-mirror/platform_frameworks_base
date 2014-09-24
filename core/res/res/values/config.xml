@@ -1805,7 +1805,7 @@
         <item>SUPL_PORT=7275</item>
         <item>NTP_SERVER=north-america.pool.ntp.org</item>
         <item>SUPL_VER=0x20000</item>
-        <item>SUPL_MODE=0x01</item>
+        <item>SUPL_MODE=1</item>
     </string-array>
 
     <!-- If there is no preload VM number in the sim card, carriers such as
