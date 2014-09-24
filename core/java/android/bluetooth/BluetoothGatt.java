@@ -51,7 +51,6 @@ public final class BluetoothGatt implements BluetoothProfile {
     private int mConnState;
     private final Object mStateLock = new Object();
     private Boolean mDeviceBusy = false;
-    private Boolean mIsCongested = false;
     private int mTransport;
 
     private static final int CONN_STATE_IDLE = 0;
@@ -603,21 +602,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 try {
                     mCallback.onMtuChanged(BluetoothGatt.this, mtu, status);
-                } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception in callback", ex);
-                }
-            }
-
-            /**
-             * Callback indicating the remote device connection is congested.
-             * @hide
-             */
-            public void onConnectionCongested(String address, boolean congested) {
-                if (DBG) Log.d(TAG, "onConnectionCongested() - Device=" + address
-                        + " congested=" + congested);
-                if (!address.equals(mDevice.getAddress())) return;
-                try {
-                    mIsCongested = congested;
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
