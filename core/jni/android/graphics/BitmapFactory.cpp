@@ -478,7 +478,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
 
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
-    jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    int descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     struct stat fdStat;
     if (fstat(descriptor, &fdStat) == -1) {
@@ -486,16 +486,22 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         return nullObjectReturn("fstat return -1");
     }
 
-    // Restore the descriptor's offset on exiting this function.
-    AutoFDSeek autoRestore(descriptor);
+    // Duplicate the descriptor here to prevent leaking memory. A leak occurs
+    // if we only close the file descriptor and not the file object it is used to
+    // create.  If we don't explicitly clean up the file (which in turn closes the
+    // descriptor) the buffers allocated internally by fseek will be leaked.
+    int dupDescriptor = dup(descriptor);
 
-    FILE* file = fdopen(descriptor, "r");
+    FILE* file = fdopen(dupDescriptor, "r");
     if (file == NULL) {
+        // cleanup the duplicated descriptor since it will not be closed when the
+        // file is cleaned up (fclose).
+        close(dupDescriptor);
         return nullObjectReturn("Could not open file");
     }
 
     SkAutoTUnref<SkFILEStream> fileStream(new SkFILEStream(file,
-                         SkFILEStream::kCallerRetains_Ownership));
+                         SkFILEStream::kCallerPasses_Ownership));
 
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
