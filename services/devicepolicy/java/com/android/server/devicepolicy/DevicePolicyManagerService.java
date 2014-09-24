@@ -2862,7 +2862,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    void wipeDataLocked(int flags) {
+    void wipeDataLocked(int flags, String reason) {
         // If the SD card is encrypted and non-removable, we have to force a wipe.
         boolean forceExtWipe = !Environment.isExternalStorageRemovable() && isExtStorageEncrypted();
         boolean wipeExtRequested = (flags&DevicePolicyManager.WIPE_EXTERNAL_STORAGE) != 0;
@@ -2871,12 +2871,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if ((forceExtWipe || wipeExtRequested) && !Environment.isExternalStorageEmulated()) {
             Intent intent = new Intent(ExternalStorageFormatter.FORMAT_AND_FACTORY_RESET);
             intent.putExtra(ExternalStorageFormatter.EXTRA_ALWAYS_RESET, true);
+            intent.putExtra(Intent.EXTRA_REASON, reason);
             intent.setComponent(ExternalStorageFormatter.COMPONENT_NAME);
             mWakeLock.acquire(10000);
             mContext.startService(intent);
         } else {
             try {
-                RecoverySystem.rebootWipeUserData(mContext);
+                RecoverySystem.rebootWipeUserData(mContext, reason);
             } catch (IOException e) {
                 Slog.w(LOG_TAG, "Failed requesting data wipe", e);
             } catch (SecurityException e) {
@@ -2885,6 +2886,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
     public void wipeData(int flags, final int userHandle) {
         if (!mHasFeature) {
             return;
@@ -2896,20 +2898,34 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null,
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
+
+            final String source;
+            if (admin != null && admin.info != null) {
+                final ComponentName cname = admin.info.getComponent();
+                if (cname != null) {
+                    source = cname.flattenToShortString();
+                } else {
+                    source = admin.info.getPackageName();
+                }
+            } else {
+                source = "?";
+            }
+
             long ident = Binder.clearCallingIdentity();
             try {
-                wipeDeviceOrUserLocked(flags, userHandle);
+                wipeDeviceOrUserLocked(flags, userHandle,
+                        "DevicePolicyManager.wipeData() from " + source);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
     }
 
-    private void wipeDeviceOrUserLocked(int flags, final int userHandle) {
+    private void wipeDeviceOrUserLocked(int flags, final int userHandle, String reason) {
         if (userHandle == UserHandle.USER_OWNER) {
-            wipeDataLocked(flags);
+            wipeDataLocked(flags, reason);
         } else {
             mHandler.post(new Runnable() {
                 public void run() {
@@ -3061,7 +3077,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (wipeData) {
                 // Call without holding lock.
-                wipeDeviceOrUserLocked(0, identifier);
+                wipeDeviceOrUserLocked(0, identifier, "reportFailedPasswordAttempt()");
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
