@@ -642,7 +642,7 @@ public class ImageReader implements AutoCloseable {
         private void createSurfacePlanes() {
             mPlanes = new SurfacePlane[ImageReader.this.mNumPlanes];
             for (int i = 0; i < ImageReader.this.mNumPlanes; i++) {
-                mPlanes[i] = nativeCreatePlane(i);
+                mPlanes[i] = nativeCreatePlane(i, ImageReader.this.mFormat);
             }
         }
         private class SurfacePlane extends android.media.Image.Plane {
@@ -661,7 +661,8 @@ public class ImageReader implements AutoCloseable {
                 if (mBuffer != null) {
                     return mBuffer;
                 } else {
-                    mBuffer = SurfaceImage.this.nativeImageGetBuffer(mIndex);
+                    mBuffer = SurfaceImage.this.nativeImageGetBuffer(mIndex,
+                            ImageReader.this.mFormat);
                     // Set the byteBuffer order according to host endianness (native order),
                     // otherwise, the byteBuffer order defaults to ByteOrder.BIG_ENDIAN.
                     return mBuffer.order(ByteOrder.nativeOrder());
@@ -711,8 +712,8 @@ public class ImageReader implements AutoCloseable {
         private SurfacePlane[] mPlanes;
         private boolean mIsImageValid;
 
-        private synchronized native ByteBuffer nativeImageGetBuffer(int idx);
-        private synchronized native SurfacePlane nativeCreatePlane(int idx);
+        private synchronized native ByteBuffer nativeImageGetBuffer(int idx, int readerFormat);
+        private synchronized native SurfacePlane nativeCreatePlane(int idx, int readerFormat);
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,
