@@ -1884,36 +1884,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     break;
                 }
-                case NetworkAgent.EVENT_BLOCK_ADDRESS_FAMILY: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_BLOCK_ADDRESS_FAMILY from unknown NetworkAgent");
-                        break;
-                    }
-                    try {
-                        mNetd.blockAddressFamily((Integer) msg.obj, nai.network.netId,
-                                nai.linkProperties.getInterfaceName());
-                    } catch (Exception e) {
-                        // Never crash!
-                        loge("Exception in blockAddressFamily: " + e);
-                    }
-                    break;
-                }
-                case NetworkAgent.EVENT_UNBLOCK_ADDRESS_FAMILY: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_UNBLOCK_ADDRESS_FAMILY from unknown NetworkAgent");
-                        break;
-                    }
-                    try {
-                        mNetd.unblockAddressFamily((Integer) msg.obj, nai.network.netId,
-                                nai.linkProperties.getInterfaceName());
-                    } catch (Exception e) {
-                        // Never crash!
-                        loge("Exception in blockAddressFamily: " + e);
-                    }
-                    break;
-                }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
                     NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
                     if (nai == null) {
