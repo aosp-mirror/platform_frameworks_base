@@ -8386,6 +8386,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public Bitmap getTaskDescriptionIcon(String filename) {
+        if (!FileUtils.isValidExtFilename(filename)
+                || !filename.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {
+            throw new IllegalArgumentException("Bad filename: " + filename);
+        }
         return mTaskPersister.getTaskDescriptionIcon(filename);
     }
 
