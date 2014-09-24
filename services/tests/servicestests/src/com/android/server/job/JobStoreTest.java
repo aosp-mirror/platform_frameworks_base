@@ -67,6 +67,7 @@ public class JobStoreTest extends AndroidTestCase {
         assertEquals("Didn't get expected number of persisted tasks.", 1, jobStatusSet.size());
         final JobStatus loadedTaskStatus = jobStatusSet.iterator().next();
         assertTasksEqual(task, loadedTaskStatus.getJob());
+        assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(ts));
         assertEquals("Different uids.", SOME_UID, loadedTaskStatus.getUid());
         compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
                 ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
@@ -103,7 +104,8 @@ public class JobStoreTest extends AndroidTestCase {
         JobStatus loaded2 = it.next();
         assertTasksEqual(task1, loaded1.getJob());
         assertTasksEqual(task2, loaded2.getJob());
-
+        assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus1));
+        assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus2));
         // Check that the loaded task has the correct runtimes.
         compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
                 taskStatus1.getEarliestRunTime(), loaded1.getEarliestRunTime());
