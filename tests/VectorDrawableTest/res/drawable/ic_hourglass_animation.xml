@@ -12,5 +12,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:pathData="L0.1, 0 C0.10066,0 0.198,1 0.2, 1 L 1,1" />
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_hourglass" >
+    <target
+        android:name="hourglass_frame"
+        android:animation="@anim/ic_hourglass_animation_hourglass_frame" />
+    <target
+        android:name="fill_outlines"
+        android:animation="@anim/ic_hourglass_animation_fill_outlines" />
+    <target
+        android:name="mask_1"
+        android:animation="@anim/ic_hourglass_animation_mask_1" />
+</animated-vector>
