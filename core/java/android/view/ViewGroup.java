@@ -836,6 +836,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 break;
             }
 
+            // Ignore invisible views as they are not interactive.
+            if (sibling.getVisibility() != View.VISIBLE) {
+                continue;
+            }
+
             // If sibling is not interactive we do not care.
             if (!sibling.isClickable() && !sibling.isLongClickable()) {
                 continue;
