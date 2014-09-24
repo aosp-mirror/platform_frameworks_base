@@ -253,10 +253,13 @@ package android {
     field public static final int actionModeCloseDrawable = 16843484; // 0x10102dc
     field public static final int actionModeCopyDrawable = 16843538; // 0x1010312
     field public static final int actionModeCutDrawable = 16843537; // 0x1010311
+    field public static final int actionModeFindDrawable = 16843898; // 0x101047a
     field public static final int actionModePasteDrawable = 16843539; // 0x1010313
     field public static final int actionModeSelectAllDrawable = 16843646; // 0x101037e
+    field public static final int actionModeShareDrawable = 16843897; // 0x1010479
     field public static final int actionModeSplitBackground = 16843677; // 0x101039d
     field public static final int actionModeStyle = 16843668; // 0x1010394
+    field public static final int actionModeWebSearchDrawable = 16843899; // 0x101047b
     field public static final int actionOverflowButtonStyle = 16843510; // 0x10102f6
     field public static final int actionProviderClass = 16843657; // 0x1010389
     field public static final int actionViewClass = 16843516; // 0x10102fc

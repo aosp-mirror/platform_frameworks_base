@@ -568,6 +568,9 @@
   <public type="attr" name="listChoiceIndicatorMultiple" id="0x0101021a" />
   <public type="attr" name="versionCode" id="0x0101021b" />
   <public type="attr" name="versionName" id="0x0101021c" />
+  <public type="attr" name="actionModeShareDrawable" id="0x01010479" />
+  <public type="attr" name="actionModeFindDrawable" id="0x0101047a" />
+  <public type="attr" name="actionModeWebSearchDrawable" id="0x0101047b" />
 
   <public type="id" name="background" id="0x01020000" />
   <public type="id" name="checkbox" id="0x01020001" />
