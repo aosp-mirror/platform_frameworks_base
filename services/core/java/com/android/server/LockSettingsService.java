@@ -115,16 +115,20 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Update keystore settings for profiles which use the same password as their parent
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                final int userSysUid = UserHandle.getUid(userHandle, Process.SYSTEM_UID);
+                final KeyStore ks = KeyStore.getInstance();
+
+                // Clear up keystore in case anything was left behind by previous users
+                ks.resetUid(userSysUid);
+
+                // If this user has a parent, sync with its keystore password
                 final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
                 final UserInfo parentInfo = um.getProfileParent(userHandle);
                 if (parentInfo != null) {
-                    final KeyStore ks = KeyStore.getInstance();
-                    final int profileUid = UserHandle.getUid(userHandle, Process.SYSTEM_UID);
-                    final int parentUid = UserHandle.getUid(parentInfo.id, Process.SYSTEM_UID);
-                    ks.syncUid(parentUid, profileUid);
+                    final int parentSysUid = UserHandle.getUid(parentInfo.id, Process.SYSTEM_UID);
+                    ks.syncUid(parentSysUid, userSysUid);
                 }
             }
         }
@@ -530,6 +534,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         } finally {
             db.endTransaction();
         }
+
+        final KeyStore ks = KeyStore.getInstance();
+        final int userUid = UserHandle.getUid(userId, Process.SYSTEM_UID);
+        ks.resetUid(userUid);
     }
 
     private void writeFile(String name, byte[] hash) {
