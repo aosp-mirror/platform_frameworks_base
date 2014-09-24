@@ -19,8 +19,7 @@
         android:viewportHeight="400"
         android:viewportWidth="400" >
 
-    <group android:name="backgroundGroup"
-        android:alpha = "0.5" >
+    <group android:name="backgroundGroup">
         <path
             android:name="background1"
             android:fillColor="#FF000000"
@@ -33,8 +32,7 @@
     <group
         android:name="translateToCenterGroup"
         android:translateX="50.0"
-        android:translateY="90.0"
-        android:alpha = "0.5" >
+        android:translateY="90.0" >
         <path
             android:name="twoLines"
             android:pathData="@string/twoLinePathData"
@@ -45,8 +43,7 @@
             android:name="rotationGroup"
             android:pivotX="0.0"
             android:pivotY="0.0"
-            android:rotation="-45.0"
-            android:alpha = "0.5" >
+            android:rotation="-45.0">
             <path
                 android:name="twoLines1"
                 android:pathData="@string/twoLinePathData"
@@ -56,8 +53,7 @@
             <group
                 android:name="translateGroup"
                 android:translateX="130.0"
-                android:translateY="160.0"
-                android:alpha = "0.5">
+                android:translateY="160.0">
                 <group android:name="scaleGroup" >
                     <path
                         android:name="twoLines3"
@@ -70,8 +66,7 @@
             <group
                 android:name="translateGroupHalf"
                 android:translateX="65.0"
-                android:translateY="80.0"
-                android:alpha = "0.5">
+                android:translateY="80.0">
                 <group android:name="scaleGroup" >
                     <path
                         android:name="twoLines2"
