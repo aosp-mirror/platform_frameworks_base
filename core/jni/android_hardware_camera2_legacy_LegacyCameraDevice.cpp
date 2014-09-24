@@ -200,7 +200,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     switch(pixelFmt) {
         case HAL_PIXEL_FORMAT_YCrCb_420_SP: {
             if (bufSize < width * height * 4) {
-                ALOGE("%s: PixelBuffer size %" PRId32 " to small for given dimensions",
+                ALOGE("%s: PixelBuffer size %" PRId32 " too small for given dimensions",
                         __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
@@ -222,7 +222,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
         }
         case HAL_PIXEL_FORMAT_YV12: {
             if (bufSize < width * height * 4) {
-                ALOGE("%s: PixelBuffer size %" PRId32 " to small for given dimensions",
+                ALOGE("%s: PixelBuffer size %" PRId32 " too small for given dimensions",
                         __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
@@ -259,7 +259,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
             // Software writes with YCbCr_420_888 format are unsupported
             // by the gralloc module for now
             if (bufSize < width * height * 4) {
-                ALOGE("%s: PixelBuffer size %" PRId32 " to small for given dimensions",
+                ALOGE("%s: PixelBuffer size %" PRId32 " too small for given dimensions",
                         __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
@@ -281,6 +281,18 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
                 return BAD_VALUE;
             }
             int8_t* img = NULL;
+            struct camera3_jpeg_blob footer = {
+                jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
+                jpeg_size: (uint32_t)width
+            };
+
+            size_t totalSize = static_cast<size_t>(width) + sizeof(footer);
+            size_t padding = ((totalSize - 1) & ~0x3) + 4; // align to next octonibble
+            totalSize += padding;
+            if (anb->width != totalSize) {
+                ALOGE("%s: gralloc buffer wrong size to hold jpeg, failed to produce buffer.");
+                return BAD_VALUE;
+            }
 
             ALOGV("%s: Lock buffer from %p for write", __FUNCTION__, anw.get());
             err = buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
@@ -289,12 +301,9 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
                         err);
                 return err;
             }
-            struct camera3_jpeg_blob footer = {
-                jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
-                jpeg_size: (uint32_t)width
-            };
             memcpy(img, pixelBuffer, width);
-            memcpy(img + anb->width - sizeof(footer), &footer, sizeof(footer));
+            memset(img + width, 0, padding);
+            memcpy(img + totalSize - sizeof(footer), &footer, sizeof(footer));
             break;
         }
         default: {

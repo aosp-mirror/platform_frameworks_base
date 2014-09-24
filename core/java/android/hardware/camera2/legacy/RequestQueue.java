@@ -39,8 +39,11 @@ public class RequestQueue {
     private long mCurrentFrameNumber = 0;
     private long mCurrentRepeatingFrameNumber = INVALID_FRAME;
     private int mCurrentRequestId = 0;
+    private final List<Long> mJpegSurfaceIds;
 
-    public RequestQueue() {}
+    public RequestQueue(List<Long> jpegSurfaceIds) {
+        mJpegSurfaceIds = jpegSurfaceIds;
+    }
 
     /**
      * Return and remove the next burst on the queue.
@@ -117,7 +120,7 @@ public class RequestQueue {
     public synchronized int submit(List<CaptureRequest> requests, boolean repeating,
             /*out*/LongParcelable frameNumber) {
         int requestId = mCurrentRequestId++;
-        BurstHolder burst = new BurstHolder(requestId, repeating, requests);
+        BurstHolder burst = new BurstHolder(requestId, repeating, requests, mJpegSurfaceIds);
         long ret = INVALID_FRAME;
         if (burst.isRepeating()) {
             Log.i(TAG, "Repeating capture request set.");

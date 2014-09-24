@@ -581,6 +581,7 @@ public class SurfaceTextureRenderer {
             // If pixel conversions aren't handled by egl, use a pbuffer
             try {
                 if (LegacyCameraDevice.needsConversion(s)) {
+                    // Always override to YV12 output for YUV surface formats.
                     LegacyCameraDevice.setSurfaceFormat(s, ImageFormat.YV12);
                     EGLSurfaceHolder holder = new EGLSurfaceHolder();
                     holder.surface = s;
