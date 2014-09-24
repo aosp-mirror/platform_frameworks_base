@@ -71,7 +71,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUserSwitch(int newUserId) {
-        mSetting.rebindForCurrentUser();
+        mSetting.setUserId(newUserId);
+        handleRefreshState(mSetting.getValue());
     }
 
     @Override
