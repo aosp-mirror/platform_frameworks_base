@@ -2583,4 +2583,13 @@
     <public type="raw" name="loaderror" id="0x01100000" />
     <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
     <public type="raw" name="nodomain" id="0x01100001" />
+
+    <!-- ===============================================================
+         Insert space from public API 21 attributes to private attributes
+         =============================================================== -->
+    <eat-comment />
+
+    <!-- @hide -->
+    <public-padding type="attr" name="private_resource_pad" end="0x01010500" />
+
 </resources>
