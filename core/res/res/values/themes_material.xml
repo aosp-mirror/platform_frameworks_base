@@ -771,8 +771,6 @@ please see themes_device_defaults.xml.
         <item name="textCheckMark">@drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_dark</item>
 
-        <item name="windowBackground">@color/background_material_light</item>
-
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
 
@@ -808,8 +806,6 @@ please see themes_device_defaults.xml.
 
         <item name="textCheckMark">@drawable/indicator_check_mark_dark</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_light</item>
-
-        <item name="windowBackground">@color/background_material_dark</item>
 
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
@@ -1227,6 +1223,7 @@ please see themes_device_defaults.xml.
 
     <!-- Default theme for Settings and activities launched from Settings. -->
     <style name="Theme.Material.Settings" parent="Theme.Material.Light.DarkActionBar">
+        <item name="colorBackground">@color/white</item>
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
@@ -1239,6 +1236,7 @@ please see themes_device_defaults.xml.
     </style>
 
     <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.Light.BaseDialog">
+        <item name="colorBackground">@color/white</item>
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
@@ -1247,6 +1245,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog" />
 
     <style name="Theme.Material.Settings.Dialog.BaseAlert" parent="Theme.Material.Light.Dialog.BaseAlert">
+        <item name="colorBackground">@color/white</item>
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
@@ -1255,18 +1254,21 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert" />
 
     <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
+        <item name="colorBackground">@color/white</item>
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.Light.SearchBar">
+        <item name="colorBackground">@color/white</item>
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.Light.CompactMenu">
+        <item name="colorBackground">@color/white</item>
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
