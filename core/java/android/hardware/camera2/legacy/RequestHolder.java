@@ -43,71 +43,6 @@ public class RequestHolder {
     private volatile boolean mFailed = false;
 
     /**
-     * Returns true if the given surface requires jpeg buffers.
-     *
-     * @param s a {@link android.view.Surface} to check.
-     * @return true if the surface requires a jpeg buffer.
-     */
-    public static boolean jpegType(Surface s)
-            throws LegacyExceptionUtils.BufferQueueAbandonedException {
-        return LegacyCameraDevice.detectSurfaceType(s) ==
-                CameraMetadataNative.NATIVE_JPEG_FORMAT;
-    }
-
-    /**
-     * Returns true if the given surface requires non-jpeg buffer types.
-     *
-     * <p>
-     * "Jpeg buffer" refers to the buffers returned in the jpeg
-     * {@link android.hardware.Camera.PictureCallback}.  Non-jpeg buffers are created using a tee
-     * of the preview stream drawn to the surface
-     * set via {@link android.hardware.Camera#setPreviewDisplay(android.view.SurfaceHolder)} or
-     * equivalent methods.
-     * </p>
-     * @param s a {@link android.view.Surface} to check.
-     * @return true if the surface requires a non-jpeg buffer type.
-     */
-    public static boolean previewType(Surface s)
-            throws LegacyExceptionUtils.BufferQueueAbandonedException {
-        return LegacyCameraDevice.detectSurfaceType(s) !=
-                CameraMetadataNative.NATIVE_JPEG_FORMAT;
-    }
-
-    /**
-     * Returns the number of surfaces targeted by the request that require jpeg buffers.
-     */
-    private static int numJpegTargets(CaptureRequest request) {
-        int count = 0;
-        for (Surface s : request.getTargets()) {
-            try {
-                if (jpegType(s)) {
-                    ++count;
-                }
-            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-                Log.w(TAG, "Surface abandoned, skipping...", e);
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Returns the number of surfaces targeted by the request that require non-jpeg buffers.
-     */
-    private static int numPreviewTargets(CaptureRequest request) {
-        int count = 0;
-        for (Surface s : request.getTargets()) {
-            try {
-                if (previewType(s)) {
-                    ++count;
-                }
-            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-                Log.w(TAG, "Surface abandoned, skipping...", e);
-            }
-        }
-        return count;
-    }
-
-    /**
      * A builder class for {@link RequestHolder} objects.
      *
      * <p>
@@ -121,6 +56,7 @@ public class RequestHolder {
         private final boolean mRepeating;
         private final int mNumJpegTargets;
         private final int mNumPreviewTargets;
+        private final Collection<Long> mJpegSurfaceIds;
 
         /**
          * Construct a new {@link Builder} to generate {@link RequestHolder} objects.
@@ -132,14 +68,78 @@ public class RequestHolder {
          * @param repeating {@code true} if the request is repeating.
          */
         public Builder(int requestId, int subsequenceId, CaptureRequest request,
-                       boolean repeating) {
+                       boolean repeating, Collection<Long> jpegSurfaceIds) {
             checkNotNull(request, "request must not be null");
             mRequestId = requestId;
             mSubsequenceId = subsequenceId;
             mRequest = request;
             mRepeating = repeating;
+            mJpegSurfaceIds = jpegSurfaceIds;
             mNumJpegTargets = numJpegTargets(mRequest);
             mNumPreviewTargets = numPreviewTargets(mRequest);
+        }
+
+        /**
+         * Returns true if the given surface requires jpeg buffers.
+         *
+         * @param s a {@link android.view.Surface} to check.
+         * @return true if the surface requires a jpeg buffer.
+         */
+        private boolean jpegType(Surface s)
+                throws LegacyExceptionUtils.BufferQueueAbandonedException {
+            return LegacyCameraDevice.containsSurfaceId(s, mJpegSurfaceIds);
+        }
+
+        /**
+         * Returns true if the given surface requires non-jpeg buffer types.
+         *
+         * <p>
+         * "Jpeg buffer" refers to the buffers returned in the jpeg
+         * {@link android.hardware.Camera.PictureCallback}.  Non-jpeg buffers are created using a tee
+         * of the preview stream drawn to the surface
+         * set via {@link android.hardware.Camera#setPreviewDisplay(android.view.SurfaceHolder)} or
+         * equivalent methods.
+         * </p>
+         * @param s a {@link android.view.Surface} to check.
+         * @return true if the surface requires a non-jpeg buffer type.
+         */
+        private boolean previewType(Surface s)
+                throws LegacyExceptionUtils.BufferQueueAbandonedException {
+            return !jpegType(s);
+        }
+
+        /**
+         * Returns the number of surfaces targeted by the request that require jpeg buffers.
+         */
+        private int numJpegTargets(CaptureRequest request) {
+            int count = 0;
+            for (Surface s : request.getTargets()) {
+                try {
+                    if (jpegType(s)) {
+                        ++count;
+                    }
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.d(TAG, "Surface abandoned, skipping...", e);
+                }
+            }
+            return count;
+        }
+
+        /**
+         * Returns the number of surfaces targeted by the request that require non-jpeg buffers.
+         */
+        private int numPreviewTargets(CaptureRequest request) {
+            int count = 0;
+            for (Surface s : request.getTargets()) {
+                try {
+                    if (previewType(s)) {
+                        ++count;
+                    }
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.d(TAG, "Surface abandoned, skipping...", e);
+                }
+            }
+            return count;
         }
 
         /**
