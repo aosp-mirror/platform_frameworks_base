@@ -194,8 +194,17 @@ public final class AudioAttributes implements Parcelable {
      */
     public final static int FLAG_HW_AV_SYNC = 0x1 << 4;
 
+    /**
+     * @hide
+     * Flag requesting capture from the source used for hardware hotword detection.
+     * To be used with capture preset MediaRecorder.AudioSource.HOTWORD or
+     * MediaRecorder.AudioSource.VOICE_RECOGNITION.
+     */
+    @SystemApi
+    public final static int FLAG_HW_HOTWORD = 0x1 << 5;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
-            FLAG_BEACON | FLAG_HW_AV_SYNC;
+            FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC;
 
     private int mUsage = USAGE_UNKNOWN;

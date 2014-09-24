@@ -45,6 +45,7 @@ struct audio_record_fields_t {
 };
 struct audio_attributes_fields_t {
     jfieldID  fieldRecSource;    // AudioAttributes.mSource
+    jfieldID  fieldFlags;        // AudioAttributes.mFlags
     jfieldID  fieldFormattedTags;// AudioAttributes.mFormattedTags
 };
 static audio_attributes_fields_t javaAudioAttrFields;
@@ -212,9 +213,13 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
     env->ReleaseStringUTFChars(jtags, tags);
     paa->source = (audio_source_t) env->GetIntField(jaa, javaAudioAttrFields.fieldRecSource);
+    paa->flags = (audio_flags_mask_t)env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
+    ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
 
-    ALOGV("AudioRecord_setup for source=%d tags=%s", paa->source, paa->tags);
-
+    audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
+    if (paa->flags & AUDIO_FLAG_HW_HOTWORD) {
+        flags = AUDIO_INPUT_FLAG_HW_HOTWORD;
+    }
     // create the callback information:
     // this data will be passed with every AudioRecord callback
     audiorecord_callback_cookie *lpCallbackData = new audiorecord_callback_cookie;
@@ -232,7 +237,9 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         lpCallbackData,// void* user
         0,             // notificationFrames,
         true,          // threadCanCallJava
-        sessionId);
+        sessionId,
+        AudioRecord::TRANSFER_DEFAULT,
+        flags);
 
     if (status != NO_ERROR) {
         ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
@@ -638,10 +645,12 @@ int register_android_media_AudioRecord(JNIEnv *env)
     }
     jclass audioAttributesClassRef = (jclass)env->NewGlobalRef(audioAttrClass);
     javaAudioAttrFields.fieldRecSource = env->GetFieldID(audioAttributesClassRef, "mSource", "I");
+    javaAudioAttrFields.fieldFlags = env->GetFieldID(audioAttributesClassRef, "mFlags", "I");
     javaAudioAttrFields.fieldFormattedTags =
             env->GetFieldID(audioAttributesClassRef, "mFormattedTags", "Ljava/lang/String;");
     env->DeleteGlobalRef(audioAttributesClassRef);
     if (javaAudioAttrFields.fieldRecSource == NULL
+            || javaAudioAttrFields.fieldFlags == NULL
             || javaAudioAttrFields.fieldFormattedTags == NULL) {
         ALOGE("Can't initialize AudioAttributes fields");
         return -1;
