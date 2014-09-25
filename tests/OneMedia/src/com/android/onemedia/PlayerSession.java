@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
+import android.media.session.MediaSession.QueueItem;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -44,6 +45,8 @@ public class PlayerSession {
     protected MediaSession.Callback mCallback;
     protected Renderer.Listener mRenderListener;
     protected MediaMetadata.Builder mMetadataBuilder;
+    protected ArrayList<MediaSession.QueueItem> mQueue;
+    protected boolean mUseQueue;
 
     protected PlaybackState mPlaybackState;
     protected Listener mListener;
@@ -58,6 +61,7 @@ public class PlayerSession {
         PlaybackState.Builder psBob = new PlaybackState.Builder();
         psBob.setActions(PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_PLAY);
         mPlaybackState = psBob.build();
+        mQueue = new ArrayList<MediaSession.QueueItem>();
 
         mRenderer.registerListener(mRenderListener);
 
@@ -114,6 +118,8 @@ public class PlayerSession {
 
     public void setIcon(Bitmap icon) {
         mMetadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, icon);
+        mQueue.clear();
+        mQueue.add(new QueueItem(mMetadataBuilder.build().getDescription(), 11));
         updateMetadata();
     }
 
@@ -122,6 +128,10 @@ public class PlayerSession {
         // code
         if (mSession != null && mSession.isActive()) {
             mSession.setMetadata(mMetadataBuilder.build());
+            // Just toggle the queue every time we update for testing
+            mSession.setQueue(mUseQueue ? mQueue : null);
+            mSession.setQueueTitle(mUseQueue ? "Queue title" : null);
+            mUseQueue = !mUseQueue;
         }
     }
 
@@ -141,6 +151,8 @@ public class PlayerSession {
                 "OneMedia display title");
         mMetadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
                 "OneMedia display subtitle");
+
+        mQueue.add(new QueueItem(mMetadataBuilder.build().getDescription(), 11));
     }
 
     public interface Listener {
