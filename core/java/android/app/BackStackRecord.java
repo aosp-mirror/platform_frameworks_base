@@ -624,22 +624,18 @@ final class BackStackRecord extends FragmentTransaction implements
                             Fragment old = mManager.mAdded.get(i);
                             if (FragmentManagerImpl.DEBUG) Log.v(TAG,
                                     "OP_REPLACE: adding=" + f + " old=" + old);
-                            if (f == null || old.mContainerId == f.mContainerId) {
-                                if (old == f) {
-                                    op.fragment = f = null;
-                                } else {
-                                    if (op.removed == null) {
-                                        op.removed = new ArrayList<Fragment>();
-                                    }
-                                    op.removed.add(old);
-                                    old.mNextAnim = op.exitAnim;
-                                    if (mAddToBackStack) {
-                                        old.mBackStackNesting += 1;
-                                        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
-                                                + old + " to " + old.mBackStackNesting);
-                                    }
-                                    mManager.removeFragment(old, mTransition, mTransitionStyle);
+                            if (old.mContainerId == f.mContainerId) {
+                                if (op.removed == null) {
+                                    op.removed = new ArrayList<Fragment>();
                                 }
+                                op.removed.add(old);
+                                old.mNextAnim = op.exitAnim;
+                                if (mAddToBackStack) {
+                                old.mBackStackNesting += 1;
+                                if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
+                                    + old + " to " + old.mBackStackNesting);
+                                }
+                                mManager.removeFragment(old, mTransition, mTransitionStyle);
                             }
                         }
                     }
