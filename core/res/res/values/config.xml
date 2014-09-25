@@ -365,6 +365,8 @@
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_5">12</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
+    <string  translatable="false" name="config_wifi_random_mac_oui">DA-A1-19</string>
+
     <bool translatable="false" name="config_wifi_framework_cellular_handover_enable_user_triggered_adjustment">true</bool>
 
     <!-- Integer packet threshold used to allow scan while associated -->
