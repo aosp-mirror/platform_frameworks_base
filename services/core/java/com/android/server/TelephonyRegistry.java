@@ -154,6 +154,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private VoLteServiceState mVoLteServiceState = new VoLteServiceState();
 
+    private long mDefaultSubId = SubscriptionManager.INVALID_SUB_ID;
+
+    private int mDefaultPhoneId = SubscriptionManager.INVALID_PHONE_ID;
+
     private DataConnectionRealTimeInfo mDcRtInfo = new DataConnectionRealTimeInfo();
 
     private int mRingingCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -195,8 +199,27 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     break;
                 }
-                case MSG_UPDATE_DEFAULT_SUB: {// do nothing
-                    if (VDBG) log(TAG + "MSG_UPDATE_DEFAULT_SUB");
+                case MSG_UPDATE_DEFAULT_SUB: {
+                    int newDefaultPhoneId = msg.arg1;
+                    long newDefaultSubId = (Long)(msg.obj);
+                    if (VDBG) {
+                        log("MSG_UPDATE_DEFAULT_SUB:current mDefaultSubId=" + mDefaultSubId
+                            + " current mDefaultPhoneId=" + mDefaultPhoneId + " newDefaultSubId= "
+                            + newDefaultSubId + " newDefaultPhoneId=" + newDefaultPhoneId);
+                    }
+
+                    //Due to possible risk condition,(notify call back using the new
+                    //defaultSubId comes before new defaultSubId update) we need to recall all
+                    //possible missed notify callback
+                    synchronized (mRecords) {
+                      for (Record r : mRecords) {
+                          if(r.subId == SubscriptionManager.DEFAULT_SUB_ID) {
+                              checkPossibleMissNotify(r, newDefaultPhoneId);
+                          }
+                      }
+                    }
+                    mDefaultSubId = newDefaultSubId;
+                    mDefaultPhoneId = newDefaultPhoneId;
                 }
             }
         }
@@ -212,10 +235,21 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (DBG) log("onReceive: userHandle=" + userHandle);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED, userHandle, 0));
             } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED)) {
+                Long newDefaultSubIdObj = new Long(intent.getLongExtra(
+                        PhoneConstants.SUBSCRIPTION_KEY, SubscriptionManager.getDefaultSubId()));
+                int newDefaultPhoneId = intent.getIntExtra(PhoneConstants.SLOT_KEY,
+                    SubscriptionManager.getPhoneId(mDefaultSubId));
                 if (DBG) {
-                    log(TAG + "onReceive: ACTION_DEFAULT_SUBSCRIPTION_CHANGED");
+                    log("onReceive:current mDefaultSubId=" + mDefaultSubId
+                        + " current mDefaultPhoneId=" + mDefaultPhoneId + " newDefaultSubId= "
+                        + newDefaultSubIdObj + " newDefaultPhoneId=" + newDefaultPhoneId);
                 }
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB, 0, 0));
+
+                if(validatePhoneId(newDefaultPhoneId) && (newDefaultSubIdObj.equals(mDefaultSubId)
+                        || (newDefaultPhoneId != mDefaultPhoneId))) {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB,
+                            newDefaultPhoneId, 0, newDefaultSubIdObj));
+                }
             }
         }
     };
@@ -560,8 +594,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " phoneId=" + phoneId + " state=" + state);
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             if (DBG) {
                                 log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
@@ -606,8 +639,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " phoneId=" + phoneId + " ss=" + signalStrength);
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             if (DBG) {
                                 log("notifySignalStrengthForSubscriber: callback.onSsS r=" + r
@@ -620,8 +652,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)){
                         try {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
                             int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
@@ -663,8 +694,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCellInfo.set(phoneId, cellInfo);
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
@@ -719,8 +749,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mMessageWaiting[phoneId] = mwi;
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR) != 0) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             r.callback.onMessageWaitingIndicatorChanged(mwi);
                         } catch (RemoteException ex) {
@@ -751,8 +780,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCallForwarding[phoneId] = cfi;
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR) != 0) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             r.callback.onCallForwardingIndicatorChanged(cfi);
                         } catch (RemoteException ex) {
@@ -849,8 +877,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             log("Notify data connection state changed on sub: " +
                                     subId);
@@ -936,8 +963,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCellLocation[phoneId] = cellLocation;
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION) &&
-                            ((r.subId == subId) ||
-                            (r.subId == SubscriptionManager.DEFAULT_SUB_ID))) {
+                            subIdMatch(r.subId, subId)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellLocation: cellLocation=" + cellLocation
@@ -1369,6 +1395,119 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
             } while (i != next);
             log(prompt + ": ----------------");
+        }
+    }
+
+    boolean subIdMatch(long rSubId, long subId) {
+        if(rSubId == SubscriptionManager.DEFAULT_SUB_ID) {
+            return (subId == mDefaultSubId);
+        } else {
+            return (rSubId == subId);
+        }
+    }
+
+    private void checkPossibleMissNotify(Record r, int phoneId) {
+        int events = r.events;
+
+        if ((events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
+            try {
+                if (VDBG) log("checkPossibleMissNotify: onServiceStateChanged state=" +
+                        mServiceState[phoneId]);
+                r.callback.onServiceStateChanged(
+                        new ServiceState(mServiceState[phoneId]));
+            } catch (RemoteException ex) {
+                remove(r.binder);
+            }
+        }
+
+        if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
+            try {
+                SignalStrength signalStrength = mSignalStrength[phoneId];
+                if (DBG) {
+                    log("checkPossibleMissNotify: onSignalStrengthsChanged SS=" + signalStrength);
+                }
+                r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
+            } catch (RemoteException ex) {
+                mRemoveList.add(r.binder);
+            }
+        }
+
+        if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) {
+            try {
+                int gsmSignalStrength = mSignalStrength[phoneId]
+                        .getGsmSignalStrength();
+                if (DBG) {
+                    log("checkPossibleMissNotify: onSignalStrengthChanged SS=" +
+                            gsmSignalStrength);
+                }
+                r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
+                        : gsmSignalStrength));
+            } catch (RemoteException ex) {
+                remove(r.binder);
+            }
+        }
+
+        if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO)) {
+            try {
+                if (DBG_LOC) {
+                    log("checkPossibleMissNotify: onCellInfoChanged[" + phoneId + "] = "
+                            + mCellInfo.get(phoneId));
+                }
+                r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
+            } catch (RemoteException ex) {
+                remove(r.binder);
+            }
+        }
+
+        if ((events & PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR) != 0) {
+            try {
+                if (VDBG) {
+                    log("checkPossibleMissNotify: onMessageWaitingIndicatorChanged phoneId="
+                            + phoneId + " mwi=" + mMessageWaiting[phoneId]);
+                }
+                r.callback.onMessageWaitingIndicatorChanged(
+                        mMessageWaiting[phoneId]);
+            } catch (RemoteException ex) {
+                remove(r.binder);
+            }
+        }
+
+        if ((events & PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR) != 0) {
+            try {
+                if (VDBG) {
+                    log("checkPossibleMissNotify: onCallForwardingIndicatorChanged phoneId="
+                        + phoneId + " cfi=" + mCallForwarding[phoneId]);
+                }
+                r.callback.onCallForwardingIndicatorChanged(
+                        mCallForwarding[phoneId]);
+            } catch (RemoteException ex) {
+                remove(r.binder);
+            }
+        }
+
+        if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION)) {
+            try {
+                if (DBG_LOC) log("checkPossibleMissNotify: onCellLocationChanged mCellLocation = "
+                        + mCellLocation[phoneId]);
+                r.callback.onCellLocationChanged(new Bundle(mCellLocation[phoneId]));
+            } catch (RemoteException ex) {
+                mRemoveList.add(r.binder);
+            }
+        }
+
+        if ((events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
+            try {
+                if (DBG) {
+                    log("checkPossibleMissNotify: onDataConnectionStateChanged(mDataConnectionState"
+                            + "=" + mDataConnectionState[phoneId]
+                            + ", mDataConnectionNetworkType=" + mDataConnectionNetworkType[phoneId]
+                            + ")");
+                }
+                r.callback.onDataConnectionStateChanged(mDataConnectionState[phoneId],
+                        mDataConnectionNetworkType[phoneId]);
+            } catch (RemoteException ex) {
+                remove(r.binder);
+            }
         }
     }
 }
