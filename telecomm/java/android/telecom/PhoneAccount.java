@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources.NotFoundException;
@@ -35,9 +34,7 @@ import java.util.MissingResourceException;
 /**
  * Describes a distinct account, line of service or call placement method that the system
  * can use to place phone calls.
- * @hide
  */
-@SystemApi
 public class PhoneAccount implements Parcelable {
 
     /**
