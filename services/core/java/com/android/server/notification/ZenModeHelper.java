@@ -376,14 +376,21 @@ public class ZenModeHelper {
         return record.isCategory(Notification.CATEGORY_MESSAGE) || isDefaultMessagingApp(record);
     }
 
+    /**
+     * @param extras extras of the notification with EXTRA_PEOPLE populated
+     * @param contactsTimeoutMs timeout in milliseconds to wait for contacts response
+     * @param timeoutAffinity affinity to return when the timeout specified via
+     *                        <code>contactsTimeoutMs</code> is hit
+     */
     public boolean matchesCallFilter(UserHandle userHandle, Bundle extras,
-            ValidateNotificationPeople validator) {
+            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
         final int zen = mZenMode;
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             if (!mConfig.allowCalls) return false; // no calls get through
             if (validator != null) {
-                final float contactAffinity = validator.getContactAffinity(userHandle, extras);
+                final float contactAffinity = validator.getContactAffinity(userHandle, extras,
+                        contactsTimeoutMs, timeoutAffinity);
                 return audienceMatches(contactAffinity);
             }
         }
