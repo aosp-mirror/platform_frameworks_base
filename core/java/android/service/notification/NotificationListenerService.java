@@ -478,7 +478,7 @@ public abstract class NotificationListenerService extends Service {
     public final int getCurrentInterruptionFilter() {
         if (!isBound()) return 0;
         try {
-            return getNotificationInterface().getHintsFromListener(mWrapper);
+            return getNotificationInterface().getInterruptionFilterFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
             return 0;
