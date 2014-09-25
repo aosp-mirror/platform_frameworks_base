@@ -434,11 +434,12 @@ public final class WindowManagerGlobal {
         boolean hasVisibleWindows = false;
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
-                if (mRoots.get(i).getHostVisibility() == View.VISIBLE
-                        && mRoots.get(i).mAttachInfo.mHardwareRenderer != null) {
+                final ViewRootImpl root = mRoots.get(i);
+                if (root.mView != null && root.getHostVisibility() == View.VISIBLE
+                        && root.mAttachInfo.mHardwareRenderer != null) {
                     hasVisibleWindows = true;
                 } else {
-                    mRoots.get(i).destroyHardwareResources();
+                    root.destroyHardwareResources();
                 }
             }
         }
