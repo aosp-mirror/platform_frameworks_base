@@ -91,9 +91,11 @@ public class RequestThreadManager {
     private SurfaceTexture mPreviewTexture;
     private Camera.Parameters mParams;
 
+    private final List<Long> mJpegSurfaceIds = new ArrayList<>();
+
     private Size mIntermediateBufferSize;
 
-    private final RequestQueue mRequestQueue = new RequestQueue();
+    private final RequestQueue mRequestQueue = new RequestQueue(mJpegSurfaceIds);
     private LegacyRequest mLastRequest = null;
     private SurfaceTexture mDummyTexture;
     private Surface mDummySurface;
@@ -101,6 +103,10 @@ public class RequestThreadManager {
     private final Object mIdleLock = new Object();
     private final FpsCounter mPrevCounter = new FpsCounter("Incoming Preview");
     private final FpsCounter mRequestCounter = new FpsCounter("Incoming Requests");
+
+    // Stuff JPEGs into HAL_PIXEL_FORMAT_RGBA_8888 gralloc buffers to get around SW write
+    // limitations for (b/17379185).
+    private static final boolean USE_BLOB_FORMAT_OVERRIDE = true;
 
     /**
      * Container object for Configure messages.
@@ -197,10 +203,13 @@ public class RequestThreadManager {
             }
             for (Surface s : holder.getHolderTargets()) {
                 try {
-                    if (RequestHolder.jpegType(s)) {
+                    if (LegacyCameraDevice.containsSurfaceId(s, mJpegSurfaceIds)) {
                         Log.i(TAG, "Producing jpeg buffer...");
-                        LegacyCameraDevice.setSurfaceDimens(s, data.length +
-                                LegacyCameraDevice.nativeGetJpegFooterSize(), /*height*/1);
+
+                        int totalSize = data.length + LegacyCameraDevice.nativeGetJpegFooterSize();
+                        totalSize += ((totalSize - 1) & ~0x3) + 4; // align to next octonibble
+
+                        LegacyCameraDevice.setSurfaceDimens(s, totalSize, /*height*/1);
                         LegacyCameraDevice.setNextTimestamp(s, timestamp);
                         LegacyCameraDevice.produceFrame(s, data, data.length, /*height*/1,
                                 CameraMetadataNative.NATIVE_JPEG_FORMAT);
@@ -316,6 +325,7 @@ public class RequestThreadManager {
             mGLThreadManager.ignoreNewFrames();
             mGLThreadManager.waitUntilIdle();
         }
+        resetJpegSurfaceFormats(mCallbackOutputs);
         mPreviewOutputs.clear();
         mCallbackOutputs.clear();
         mPreviewTexture = null;
@@ -329,6 +339,12 @@ public class RequestThreadManager {
                     LegacyCameraDevice.setSurfaceOrientation(s, facing, orientation);
                     switch (format) {
                         case CameraMetadataNative.NATIVE_JPEG_FORMAT:
+                            if (USE_BLOB_FORMAT_OVERRIDE) {
+                                // Override to RGBA_8888 format.
+                                LegacyCameraDevice.setSurfaceFormat(s,
+                                        LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888);
+                            }
+                            mJpegSurfaceIds.add(LegacyCameraDevice.getSurfaceId(s));
                             mCallbackOutputs.add(s);
                             break;
                         default:
@@ -426,8 +442,19 @@ public class RequestThreadManager {
         }
 
         mCamera.setParameters(mParams);
-        // TODO: configure the JPEG surface with some arbitrary size
-        // using LegacyCameraDevice.nativeConfigureSurface
+    }
+
+    private void resetJpegSurfaceFormats(Collection<Surface> surfaces) {
+        if (!USE_BLOB_FORMAT_OVERRIDE || surfaces == null) {
+            return;
+        }
+        for(Surface s : surfaces) {
+            try {
+                LegacyCameraDevice.setSurfaceFormat(s, LegacyMetadataMapper.HAL_PIXEL_FORMAT_BLOB);
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
+            }
+        }
     }
 
     /**
@@ -459,9 +486,8 @@ public class RequestThreadManager {
         List<Size> configuredJpegSizes = new ArrayList<Size>();
         for (Surface callbackSurface : callbackOutputs) {
             try {
-                int format = LegacyCameraDevice.detectSurfaceType(callbackSurface);
 
-                if (format != CameraMetadataNative.NATIVE_JPEG_FORMAT) {
+                if (!LegacyCameraDevice.containsSurfaceId(callbackSurface, mJpegSurfaceIds)) {
                     continue; // Ignore non-JPEG callback formats
                 }
 
@@ -821,6 +847,7 @@ public class RequestThreadManager {
                     if (mCamera != null) {
                         mCamera.release();
                     }
+                    resetJpegSurfaceFormats(mCallbackOutputs);
                     break;
                 default:
                     throw new AssertionError("Unhandled message " + msg.what +
