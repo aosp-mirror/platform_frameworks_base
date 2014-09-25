@@ -759,7 +759,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     int getActiveWindowId() {
-        return mSecurityPolicy.mActiveWindowId;
+        return mSecurityPolicy.getActiveWindowId();
     }
 
     void onTouchInteractionStart() {
@@ -2822,7 +2822,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         private int resolveAccessibilityWindowIdLocked(int accessibilityWindowId) {
             if (accessibilityWindowId == AccessibilityNodeInfo.ACTIVE_WINDOW_ID) {
-                return mSecurityPolicy.mActiveWindowId;
+                return mSecurityPolicy.getActiveWindowId();
             }
             return accessibilityWindowId;
         }
@@ -3283,7 +3283,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public void clearWindowsLocked() {
             List<AccessibilityWindowInfo> windows = Collections.emptyList();
+            final int activeWindowId = mActiveWindowId;
             updateWindowsLocked(windows);
+            mActiveWindowId = activeWindowId;
             mWindows = null;
         }
 
@@ -3494,6 +3496,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                             oldActiveWindow, 0).sendToTarget();
                 }
             }
+        }
+
+        public int getActiveWindowId() {
+            if (mActiveWindowId == INVALID_WINDOW_ID && !mTouchInteractionInProgress) {
+                mActiveWindowId = getFocusedWindowId();
+            }
+            return mActiveWindowId;
         }
 
         private void setActiveWindowLocked(int windowId) {
