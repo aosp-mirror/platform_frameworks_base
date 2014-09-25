@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -718,25 +719,31 @@ public class LockPatternUtils {
     }
 
     /** Update the encryption password if it is enabled **/
-    private void updateEncryptionPassword(int type, String password) {
+    private void updateEncryptionPassword(final int type, final String password) {
         DevicePolicyManager dpm = getDevicePolicyManager();
         if (dpm.getStorageEncryptionStatus(getCurrentOrCallingUserId())
                 != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
             return;
         }
 
-        IBinder service = ServiceManager.getService("mount");
+        final IBinder service = ServiceManager.getService("mount");
         if (service == null) {
             Log.e(TAG, "Could not find the mount service to update the encryption password");
             return;
         }
 
-        IMountService mountService = IMountService.Stub.asInterface(service);
-        try {
-            mountService.changeEncryptionPassword(type, password);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error changing encryption password", e);
-        }
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... dummy) {
+                IMountService mountService = IMountService.Stub.asInterface(service);
+                try {
+                    mountService.changeEncryptionPassword(type, password);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error changing encryption password", e);
+                }
+                return null;
+            }
+        }.execute();
     }
 
     /**
