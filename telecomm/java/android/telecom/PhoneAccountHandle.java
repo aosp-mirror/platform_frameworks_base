@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,9 +24,7 @@ import java.util.Objects;
 
 /**
  * The unique identifier for a {@link PhoneAccount}.
- * @hide
  */
-@SystemApi
 public class PhoneAccountHandle implements Parcelable {
     private ComponentName mComponentName;
     private String mId;

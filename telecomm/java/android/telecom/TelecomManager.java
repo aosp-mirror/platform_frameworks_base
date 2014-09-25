@@ -53,7 +53,6 @@ public class TelecomManager {
     /**
      * The {@link android.content.Intent} action used to configure a
      * {@link android.telecom.ConnectionService}.
-     * @hide
      */
     public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
             "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
@@ -67,7 +66,6 @@ public class TelecomManager {
     /**
      * The {@link android.content.Intent} action used to show the settings page used to configure
      * {@link PhoneAccount} preferences.
-     * @hide
      */
     public static final String ACTION_CHANGE_PHONE_ACCOUNTS =
             "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
@@ -98,7 +96,6 @@ public class TelecomManager {
      * {@link PhoneAccountHandle} to use when making the call.
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
-     * @hide
      */
     public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
             "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
@@ -141,7 +138,6 @@ public class TelecomManager {
     /**
      * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
      * containing the component name of the associated connection service.
-     * @hide
      */
     public static final String EXTRA_CONNECTION_SERVICE =
             "android.telecom.extra.CONNECTION_SERVICE";
@@ -177,7 +173,6 @@ public class TelecomManager {
      * {@link ConnectionService}s which interact with {@link RemoteConnection}s should only populate
      * this if the {@link android.telephony.TelephonyManager#getLine1Number()} value, as that is the
      * user's expected caller ID.
-     * @hide
      */
     public static final String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
 
@@ -424,7 +419,6 @@ public class TelecomManager {
      * {@code PhoneAccount}.
      *
      * @return The phone account handle of the current connection manager.
-     * @hide
      */
     public PhoneAccountHandle getConnectionManager() {
         return getSimCallManager();
@@ -482,7 +476,6 @@ public class TelecomManager {
      *
      * @return {@code true} if the device has more than one account registered and {@code false}
      * otherwise.
-     * @hide
      */
     public boolean hasMultipleCallCapableAccounts() {
         return getCallCapablePhoneAccounts().size() > 1;
@@ -492,7 +485,6 @@ public class TelecomManager {
      *  Returns a list of all {@link PhoneAccount}s registered for the calling package.
      *
      * @return A list of {@code PhoneAccountHandle} objects.
-     * @hide
      */
     public List<PhoneAccountHandle> getPhoneAccountsForPackage() {
         try {
@@ -511,7 +503,6 @@ public class TelecomManager {
      *
      * @param account The {@link PhoneAccountHandle}.
      * @return The {@link PhoneAccount} object.
-     * @hide
      */
     public PhoneAccount getPhoneAccount(PhoneAccountHandle account) {
         try {
@@ -582,7 +573,6 @@ public class TelecomManager {
      * Register a {@link PhoneAccount} for use by the system.
      *
      * @param account The complete {@link PhoneAccount}.
-     * @hide
      */
     public void registerPhoneAccount(PhoneAccount account) {
         try {
@@ -598,7 +588,6 @@ public class TelecomManager {
      * Remove a {@link PhoneAccount} registration from the system.
      *
      * @param accountHandle A {@link PhoneAccountHandle} for the {@link PhoneAccount} to unregister.
-     * @hide
      */
     public void unregisterPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
@@ -612,7 +601,6 @@ public class TelecomManager {
 
     /**
      * Remove all Accounts that belong to the calling package from the system.
-     * @hide
      */
     @SystemApi
     public void clearAccounts() {
@@ -798,7 +786,6 @@ public class TelecomManager {
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
      *            {@link ConnectionService#onCreateIncomingConnection}.
-     * @hide
      */
     public void addNewIncomingCall(PhoneAccountHandle phoneAccount, Bundle extras) {
         try {
