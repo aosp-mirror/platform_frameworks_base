@@ -195,12 +195,12 @@ public class RequestThreadManager {
         public void onPictureTaken(byte[] data, Camera camera) {
             Log.i(TAG, "Received jpeg.");
             Pair<RequestHolder, Long> captureInfo = mCaptureCollector.jpegProduced();
-            RequestHolder holder = captureInfo.first;
-            long timestamp = captureInfo.second;
-            if (holder == null) {
+            if (captureInfo == null || captureInfo.first == null) {
                 Log.e(TAG, "Dropping jpeg frame.");
                 return;
             }
+            RequestHolder holder = captureInfo.first;
+            long timestamp = captureInfo.second;
             for (Surface s : holder.getHolderTargets()) {
                 try {
                     if (LegacyCameraDevice.containsSurfaceId(s, mJpegSurfaceIds)) {
