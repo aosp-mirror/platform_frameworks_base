@@ -154,6 +154,16 @@ public class NotificationManagerService extends SystemService {
     static final boolean ENABLE_BLOCKED_NOTIFICATIONS = true;
     static final boolean ENABLE_BLOCKED_TOASTS = true;
 
+    // When #matchesCallFilter is called from the ringer, wait at most
+    // 3s to resolve the contacts. This timeout is required since
+    // ContactsProvider might take a long time to start up.
+    //
+    // Return STARRED_CONTACT when the timeout is hit in order to avoid
+    // missed calls in ZEN mode "Important".
+    static final int MATCHES_CALL_FILTER_CONTACTS_TIMEOUT_MS = 3000;
+    static final float MATCHES_CALL_FILTER_TIMEOUT_AFFINITY =
+            ValidateNotificationPeople.STARRED_CONTACT;
+
     private IActivityManager mAm;
     AudioManager mAudioManager;
     StatusBarManagerInternal mStatusBar;
@@ -1474,8 +1484,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean matchesCallFilter(Bundle extras) {
             enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
-            return mZenModeHelper.matchesCallFilter(UserHandle.getCallingUserHandle(), extras,
-                    mRankingHelper.findExtractor(ValidateNotificationPeople.class));
+            return mZenModeHelper.matchesCallFilter(
+                    UserHandle.getCallingUserHandle(),
+                    extras,
+                    mRankingHelper.findExtractor(ValidateNotificationPeople.class),
+                    MATCHES_CALL_FILTER_CONTACTS_TIMEOUT_MS,
+                    MATCHES_CALL_FILTER_TIMEOUT_AFFINITY);
         }
     };
 
