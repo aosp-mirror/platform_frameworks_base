@@ -29,7 +29,7 @@
 
 namespace android {
 
-static jlong halOpen(JNIEnv *env, jobject obj) {
+static jlong halOpen(JNIEnv* /* env */, jobject /* obj */) {
     hw_module_t const* module;
     consumerir_device_t *dev;
     int err;
@@ -50,7 +50,7 @@ static jlong halOpen(JNIEnv *env, jobject obj) {
     return reinterpret_cast<jlong>(dev);
 }
 
-static jint halTransmit(JNIEnv *env, jobject obj, jlong halObject,
+static jint halTransmit(JNIEnv *env, jobject /* obj */, jlong halObject,
    jint carrierFrequency, jintArray pattern) {
     int ret;
 
@@ -66,7 +66,7 @@ static jint halTransmit(JNIEnv *env, jobject obj, jlong halObject,
     return reinterpret_cast<jint>(ret);
 }
 
-static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject obj,
+static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject /* obj */,
     jlong halObject) {
     consumerir_device_t *dev = reinterpret_cast<consumerir_device_t*>(halObject);
     consumerir_freq_range_t *ranges;

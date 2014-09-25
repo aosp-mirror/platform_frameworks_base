@@ -150,24 +150,24 @@ static void nativeInit(JNIEnv* env, jobject obj) {
     }
 }
 
-static void nativeSetPowerState(JNIEnv* env,
-        jclass clazz, jboolean screenOn, jboolean screenBright) {
+static void nativeSetPowerState(JNIEnv* /* env */,
+        jclass /* clazz */, jboolean screenOn, jboolean screenBright) {
     AutoMutex _l(gPowerManagerLock);
     gScreenOn = screenOn;
     gScreenBright = screenBright;
 }
 
-static void nativeAcquireSuspendBlocker(JNIEnv *env, jclass clazz, jstring nameStr) {
+static void nativeAcquireSuspendBlocker(JNIEnv *env, jclass /* clazz */, jstring nameStr) {
     ScopedUtfChars name(env, nameStr);
     acquire_wake_lock(PARTIAL_WAKE_LOCK, name.c_str());
 }
 
-static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass clazz, jstring nameStr) {
+static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass /* clazz */, jstring nameStr) {
     ScopedUtfChars name(env, nameStr);
     release_wake_lock(name.c_str());
 }
 
-static void nativeSetInteractive(JNIEnv *env, jclass clazz, jboolean enable) {
+static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (gPowerModule) {
         if (enable) {
             ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(true) while turning screen on");
@@ -179,7 +179,7 @@ static void nativeSetInteractive(JNIEnv *env, jclass clazz, jboolean enable) {
     }
 }
 
-static void nativeSetAutoSuspend(JNIEnv *env, jclass clazz, jboolean enable) {
+static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (enable) {
         ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_enable() while turning screen off");
         autosuspend_enable();
