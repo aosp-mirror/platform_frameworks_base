@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -38,14 +39,16 @@ public class BurstHolder {
      *
      * @param requestId id of the burst request.
      * @param repeating true if this burst is repeating.
-     * @param requests a {@link java.util.List} of {@link CaptureRequest}s in this burst.
+     * @param requests a {@link List} of {@link CaptureRequest}s in this burst.
+     * @param jpegSurfaceIds a {@link Collection} of IDs for the surfaces that have jpeg outputs.
      */
-    public BurstHolder(int requestId, boolean repeating, List<CaptureRequest> requests) {
-        mRequestBuilders = new ArrayList<RequestHolder.Builder>();
+    public BurstHolder(int requestId, boolean repeating, List<CaptureRequest> requests,
+                       Collection<Long> jpegSurfaceIds) {
+        mRequestBuilders = new ArrayList<>();
         int i = 0;
         for (CaptureRequest r : requests) {
             mRequestBuilders.add(new RequestHolder.Builder(requestId, /*subsequenceId*/i,
-                    /*request*/r, repeating));
+                    /*request*/r, repeating, jpegSurfaceIds));
             ++i;
         }
         mRepeating = repeating;
