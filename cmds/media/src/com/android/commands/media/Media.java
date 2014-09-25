@@ -204,7 +204,8 @@ public class Media extends BaseCommand {
 
         @Override
         public void onQueueChanged(ParceledListSlice queue) throws RemoteException {
-            System.out.println("onQueueChanged, size=" + queue.getList().size());
+            System.out.println("onQueueChanged, "
+                    + (queue == null ? "null queue" : " size=" + queue.getList().size()));
         }
 
         @Override
