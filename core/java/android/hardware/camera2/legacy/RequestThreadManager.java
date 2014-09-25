@@ -328,6 +328,7 @@ public class RequestThreadManager {
         resetJpegSurfaceFormats(mCallbackOutputs);
         mPreviewOutputs.clear();
         mCallbackOutputs.clear();
+        mJpegSurfaceIds.clear();
         mPreviewTexture = null;
 
         int facing = mCharacteristics.get(CameraCharacteristics.LENS_FACING);
