@@ -106,7 +106,7 @@ class RippleBackground {
 
     public void setup(int maxRadius, int color, float density) {
         mColorOpaque = color | 0xFF000000;
-        mColorAlpha = Color.alpha(color);
+        mColorAlpha = Color.alpha(color) / 2;
 
         if (maxRadius != RippleDrawable.RADIUS_AUTO) {
             mHasMaxRadius = true;
