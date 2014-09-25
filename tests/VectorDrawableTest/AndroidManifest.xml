@@ -99,6 +99,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="AnimatedVectorDrawableDupPerf"
+            android:label="Animated Vector Performance of clones" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name="VectorDrawableStaticPerf"
             android:label="System icons" >
             <intent-filter>
