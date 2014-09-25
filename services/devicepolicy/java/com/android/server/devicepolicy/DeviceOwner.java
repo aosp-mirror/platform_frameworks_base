@@ -229,11 +229,20 @@ public class DeviceOwner {
                     String profileOwnerComponentStr =
                             parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
                     int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USERID));
-                    OwnerInfo profileOwnerInfo;
+                    OwnerInfo profileOwnerInfo = null;
                     if (profileOwnerComponentStr != null) {
-                        profileOwnerInfo = new OwnerInfo(profileOwnerName,
-                                ComponentName.unflattenFromString(profileOwnerComponentStr));
-                    } else {
+                        ComponentName admin = ComponentName.unflattenFromString(
+                                profileOwnerComponentStr);
+                        if (admin != null) {
+                            profileOwnerInfo = new OwnerInfo(profileOwnerName, admin);
+                        } else {
+                            // This shouldn't happen but switch from package name -> component name
+                            // might have written bad device owner files. b/17652534
+                            Slog.e(TAG, "Error parsing device-owner file. Bad component name " +
+                                    profileOwnerComponentStr);
+                        }
+                    }
+                    if (profileOwnerInfo == null) {
                         profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName);
                     }
                     mProfileOwners.put(userId, profileOwnerInfo);
