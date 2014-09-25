@@ -827,8 +827,13 @@ final public class MediaCodec {
             invalidateByteBuffer(mCachedInputBuffers, index);
             mDequeuedInputBuffers.remove(index);
         }
-        native_queueInputBuffer(
-                index, offset, size, presentationTimeUs, flags);
+        try {
+            native_queueInputBuffer(
+                    index, offset, size, presentationTimeUs, flags);
+        } catch (CryptoException e) {
+            validateInputByteBuffer(mCachedInputBuffers, index);
+            throw e;
+        }
     }
 
     private native final void native_queueInputBuffer(
@@ -947,8 +952,13 @@ final public class MediaCodec {
             invalidateByteBuffer(mCachedInputBuffers, index);
             mDequeuedInputBuffers.remove(index);
         }
-        native_queueSecureInputBuffer(
-                index, offset, info, presentationTimeUs, flags);
+        try {
+            native_queueSecureInputBuffer(
+                    index, offset, info, presentationTimeUs, flags);
+        } catch (CryptoException e) {
+            validateInputByteBuffer(mCachedInputBuffers, index);
+            throw e;
+        }
     }
 
     private native final void native_queueSecureInputBuffer(
