@@ -1120,6 +1120,9 @@ public class ImageView extends View {
 
     /** @hide */
     public void animateTransform(Matrix matrix) {
+        if (mDrawable == null) {
+            return;
+        }
         if (matrix == null) {
             mDrawable.setBounds(0, 0, getWidth(), getHeight());
         } else {
