@@ -836,6 +836,8 @@
 
         <!-- Default style for PreferenceScreen. -->
         <attr name="preferenceScreenStyle" format="reference" />
+        <!-- Default style for the PreferenceActivity. -->
+        <attr name="preferenceActivityStyle" format="reference" />
         <!-- Default style for Headers pane in PreferenceActivity. -->
         <attr name="preferenceFragmentStyle" format="reference" />
         <!-- Default style for PreferenceCategory. -->
@@ -7265,8 +7267,19 @@
 
     <!-- Base attributes available to PreferenceFragment. -->
     <declare-styleable name="PreferenceFragment">
-        <!-- The layout for the PreferenceFragment. This should rarely need to be changed -->
+        <!-- The layout for the PreferenceFragment. This should rarely need to be changed. -->
         <attr name="layout" />
+    </declare-styleable>
+
+    <!-- Base attributes available to PreferenceActivity. -->
+    <declare-styleable name="PreferenceActivity">
+        <!-- The layout for the Preference Activity. This should rarely need to be changed. -->
+        <attr name="layout" />
+        <!-- The layout for the Preference Header. This should rarely need to be changed. -->
+        <attr name="headerLayout" format="reference" />
+        <!-- true if the Icon view will be removed when there is none and thus not showing
+             the fixed margins. -->
+        <attr name="headerRemoveIconIfEmpty" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>tts-engine</code> as the root tag of the XML resource that
@@ -7370,6 +7383,8 @@
     tags. -->
     <declare-styleable name="FragmentBreadCrumbs">
         <attr name="gravity" />
+        <attr name="itemLayout" format="reference" />
+        <attr name="itemColor" format="color|reference" />
     </declare-styleable>
 
     <declare-styleable name="MultiPaneChallengeLayout">
