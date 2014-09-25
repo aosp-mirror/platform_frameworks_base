@@ -522,7 +522,7 @@ public class LegacyCameraDevice implements AutoCloseable {
         return surfaceIds;
     }
 
-    static boolean containsSurfaceId(Surface s, List<Long> ids) {
+    static boolean containsSurfaceId(Surface s, Collection<Long> ids) {
         long id = getSurfaceId(s);
         return ids.contains(id);
     }
