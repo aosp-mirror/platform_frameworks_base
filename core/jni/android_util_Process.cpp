@@ -348,7 +348,6 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
 jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
                                       jint pid, jint adj)
 {
-#ifdef HAVE_OOM_ADJ
     char text[64];
     sprintf(text, "/proc/%d/oom_adj", pid);
     int fd = open(text, O_WRONLY);
@@ -358,8 +357,6 @@ jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
         close(fd);
     }
     return true;
-#endif
-    return false;
 }
 
 jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
