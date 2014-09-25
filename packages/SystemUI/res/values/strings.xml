@@ -900,10 +900,10 @@
     <!-- Body of notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=60] -->
     <string name="hidden_notifications_text">See them before you unlock</string>
 
-    <!-- Cancel action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=10] -->
+    <!-- Cancel action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
     <string name="hidden_notifications_cancel">No thanks</string>
 
-    <!-- continue action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=10] -->
+    <!-- continue action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
     <string name="hidden_notifications_setup">Set up</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
