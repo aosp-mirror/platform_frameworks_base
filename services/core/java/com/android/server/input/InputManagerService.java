@@ -695,6 +695,8 @@ public class InputManagerService extends IInputManager.Stub
             final int numFullKeyboards = mTempFullKeyboards.size();
             boolean missingLayoutForExternalKeyboard = false;
             boolean missingLayoutForExternalKeyboardAdded = false;
+            boolean multipleMissingLayoutsForExternalKeyboardsAdded = false;
+            InputDevice keyboardMissingLayout = null;
             synchronized (mDataStore) {
                 for (int i = 0; i < numFullKeyboards; i++) {
                     final InputDevice inputDevice = mTempFullKeyboards.get(i);
@@ -704,13 +706,25 @@ public class InputManagerService extends IInputManager.Stub
                         missingLayoutForExternalKeyboard = true;
                         if (i < numFullKeyboardsAdded) {
                             missingLayoutForExternalKeyboardAdded = true;
+                            if (keyboardMissingLayout == null) {
+                                keyboardMissingLayout = inputDevice;
+                            } else {
+                                multipleMissingLayoutsForExternalKeyboardsAdded = true;
+                            }
                         }
                     }
                 }
             }
             if (missingLayoutForExternalKeyboard) {
                 if (missingLayoutForExternalKeyboardAdded) {
-                    showMissingKeyboardLayoutNotification();
+                    if (multipleMissingLayoutsForExternalKeyboardsAdded) {
+                        // We have more than one keyboard missing a layout, so drop the
+                        // user at the generic input methods page so they can pick which
+                        // one to set.
+                        showMissingKeyboardLayoutNotification(null);
+                    } else {
+                        showMissingKeyboardLayoutNotification(keyboardMissingLayout);
+                    }
                 }
             } else if (mKeyboardLayoutNotificationShown) {
                 hideMissingKeyboardLayoutNotification();
@@ -761,16 +775,17 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Must be called on handler.
-    private void showMissingKeyboardLayoutNotification() {
+    private void showMissingKeyboardLayoutNotification(InputDevice device) {
         if (!mKeyboardLayoutNotificationShown) {
-            if (mKeyboardLayoutIntent == null) {
-                final Intent intent = new Intent("android.settings.INPUT_METHOD_SETTINGS");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mKeyboardLayoutIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                        intent, 0, null, UserHandle.CURRENT);
+            final Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
+            if (device != null) {
+                intent.putExtra(Settings.EXTRA_INPUT_DEVICE_IDENTIFIER, device.getIdentifier());
             }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            final PendingIntent keyboardLayoutIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                    intent, 0, null, UserHandle.CURRENT);
 
             Resources r = mContext.getResources();
             Notification notification = new Notification.Builder(mContext)
@@ -778,7 +793,7 @@ public class InputManagerService extends IInputManager.Stub
                             R.string.select_keyboard_layout_notification_title))
                     .setContentText(r.getString(
                             R.string.select_keyboard_layout_notification_message))
-                    .setContentIntent(mKeyboardLayoutIntent)
+                    .setContentIntent(keyboardLayoutIntent)
                     .setSmallIcon(R.drawable.ic_settings_language)
                     .setPriority(Notification.PRIORITY_LOW)
                     .setColor(mContext.getResources().getColor(
