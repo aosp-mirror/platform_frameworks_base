@@ -708,6 +708,7 @@ public final class MediaBrowser {
             // We make a new mServiceCallbacks each time we connect so that we can drop
             // responses from previous connections.
             mServiceCallbacks = getNewServiceCallbacks();
+            mState = CONNECT_STATE_CONNECTING;
 
             // Call connect, which is async. When we get a response from that we will
             // say that we're connected.
