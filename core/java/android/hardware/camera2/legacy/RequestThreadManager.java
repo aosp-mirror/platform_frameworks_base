@@ -822,6 +822,9 @@ public class RequestThreadManager {
                         mCamera.release();
                     }
                     break;
+                case RequestHandlerThread.MSG_POKE_IDLE_HANDLER:
+                    // OK: Ignore message.
+                    break;
                 default:
                     throw new AssertionError("Unhandled message " + msg.what +
                             " on RequestThread.");
