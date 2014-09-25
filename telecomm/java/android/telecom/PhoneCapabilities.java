@@ -16,14 +16,10 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
-
 /**
  * Defines capabilities a phone call can support, such as conference calling and video telephony.
  * Also defines properties of a phone call, such as whether it is using VoLTE technology.
- * @hide
  */
-@SystemApi
 public final class PhoneCapabilities {
     /** Call can currently be put on hold or unheld. */
     public static final int HOLD               = 0x00000001;
