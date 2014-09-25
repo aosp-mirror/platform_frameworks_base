@@ -120,10 +120,6 @@ public class BluetoothGattCallbackWrapper extends IBluetoothGattCallback.Stub {
     }
 
     @Override
-    public void onConnectionCongested(String address, boolean congested) throws RemoteException {
-    }
-
-    @Override
     public void onFoundOrLost(boolean onFound, ScanResult scanResult) throws RemoteException {
     }
 
