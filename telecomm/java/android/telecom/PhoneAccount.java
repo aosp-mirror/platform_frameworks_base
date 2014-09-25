@@ -283,9 +283,6 @@ public class PhoneAccount implements Parcelable {
      * The raw callback number used for this {@code PhoneAccount}, as distinct from
      * {@link #getAddress()}. For the majority of {@code PhoneAccount}s this should be registered
      * as {@code null}.  It is used by the system for SIM-based {@code PhoneAccount} registration
-     * where {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(String, String)}
-     * has been used to alter the callback number.
-     * <p>
      *
      * @return The subscription number, suitable for display to the user.
      */
