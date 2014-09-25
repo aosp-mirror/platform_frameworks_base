@@ -592,7 +592,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mDestinationSpinner.post(new Runnable() {
                 @Override
                 public void run() {
-                    shredPagesAndFinish(uri);
+                    transformDocumentAndFinish(uri);
                 }
             });
         } else if (resultCode == RESULT_CANCELED) {
@@ -922,7 +922,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
             startCreateDocumentActivity();
         } else {
-            shredPagesAndFinish(null);
+            transformDocumentAndFinish(null);
         }
     }
 
@@ -1597,8 +1597,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         return true;
     }
 
-    private void shredPagesAndFinish(final Uri writeToUri) {
-        new PageShredder(this, mPrintJob, mFileProvider, new Runnable() {
+    private void transformDocumentAndFinish(final Uri writeToUri) {
+        // If saving to PDF, apply the attibutes as we are acting as a print service.
+        PrintAttributes attributes = mDestinationSpinnerAdapter.getPdfPrinter() == mCurrentPrinter
+                ?  mPrintJob.getAttributes() : null;
+        new DocumentTransformer(this, mPrintJob, mFileProvider, attributes, new Runnable() {
             @Override
             public void run() {
                 if (writeToUri != null) {
@@ -1606,7 +1609,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
                 doFinish();
             }
-        }).shred();
+        }).transform();
     }
 
     private void doFinish() {
@@ -2335,7 +2338,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
     }
 
-    private static final class PageShredder implements ServiceConnection {
+    private static final class DocumentTransformer implements ServiceConnection {
         private static final String TEMP_FILE_PREFIX = "print_job";
         private static final String TEMP_FILE_EXTENSION = ".pdf";
 
@@ -2347,20 +2350,24 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         private final PageRange[] mPagesToShred;
 
+        private final PrintAttributes mAttributesToApply;
+
         private final Runnable mCallback;
 
-        public PageShredder(Context context, PrintJobInfo printJob,
-                MutexFileProvider fileProvider, Runnable callback) {
+        public DocumentTransformer(Context context, PrintJobInfo printJob,
+                MutexFileProvider fileProvider, PrintAttributes attributes,
+                Runnable callback) {
             mContext = context;
             mPrintJob = printJob;
             mFileProvider = fileProvider;
             mCallback = callback;
             mPagesToShred = computePagesToShred(mPrintJob);
+            mAttributesToApply = attributes;
         }
 
-        public void shred() {
+        public void transform() {
             // If we have only the pages we want, done.
-            if (mPagesToShred.length <= 0) {
+            if (mPagesToShred.length <= 0 && mAttributesToApply == null) {
                 mCallback.run();
                 return;
             }
@@ -2382,14 +2389,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     // final and this code is the last one to touch
                     // them as shredding is the very last step, so the
                     // UI is not interactive at this point.
-                    shredPages(editor);
+                    doTransform(editor);
                     updatePrintJob();
                     return null;
                 }
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
-                    mContext.unbindService(PageShredder.this);
+                    mContext.unbindService(DocumentTransformer.this);
                     mCallback.run();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -2400,7 +2407,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             /* do nothing */
         }
 
-        private void shredPages(IPdfEditor editor) {
+        private void doTransform(IPdfEditor editor) {
             File tempFile = null;
             ParcelFileDescriptor src = null;
             ParcelFileDescriptor dst = null;
@@ -2418,6 +2425,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
                 // Drop the pages.
                 editor.removePages(mPagesToShred);
+
+                // Apply print attributes if needed.
+                if (mAttributesToApply != null) {
+                    editor.applyPrintAttributes(mAttributesToApply);
+                }
 
                 // Write the modified PDF to a temp file.
                 tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_EXTENSION,
