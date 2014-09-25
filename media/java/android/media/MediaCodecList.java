@@ -204,7 +204,7 @@ final public class MediaCodecList {
      *         requests, or {@code null} if no such codec has been found.
      */
     public final String findEncoderForFormat(MediaFormat format) {
-        return findCodecForFormat(false /* encoder */, format);
+        return findCodecForFormat(true /* encoder */, format);
     }
 
     private String findCodecForFormat(boolean encoder, MediaFormat format) {
