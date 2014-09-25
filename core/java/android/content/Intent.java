@@ -2723,6 +2723,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final String
             ACTION_OPEN_DOCUMENT_TREE = "android.intent.action.OPEN_DOCUMENT_TREE";
 
+    /** {@hide} */
+    public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -3424,6 +3427,9 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_TIME_PREF_24_HOUR_FORMAT =
             "android.intent.extra.TIME_PREF_24_HOUR_FORMAT";
+
+    /** {@hide} */
+    public static final String EXTRA_REASON = "android.intent.extra.REASON";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

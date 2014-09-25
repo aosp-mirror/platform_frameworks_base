@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -333,9 +334,10 @@ public class RecoverySystem {
         throws IOException {
         String filename = packageFile.getCanonicalPath();
         Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
-        String arg = "--update_package=" + filename +
-            "\n--locale=" + Locale.getDefault().toString();
-        bootCommand(context, arg);
+
+        final String filenameArg = "--update_package=" + filename;
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, filenameArg, localeArg);
     }
 
     /**
@@ -352,7 +354,18 @@ public class RecoverySystem {
      * @throws SecurityException if the current user is not allowed to wipe data.
      */
     public static void rebootWipeUserData(Context context) throws IOException {
-        rebootWipeUserData(context, false);
+        rebootWipeUserData(context, false, context.getPackageName());
+    }
+
+    /** {@hide} */
+    public static void rebootWipeUserData(Context context, String reason) throws IOException {
+        rebootWipeUserData(context, false, reason);
+    }
+
+    /** {@hide} */
+    public static void rebootWipeUserData(Context context, boolean shutdown)
+            throws IOException {
+        rebootWipeUserData(context, shutdown, context.getPackageName());
     }
 
     /**
@@ -373,8 +386,8 @@ public class RecoverySystem {
      *
      * @hide
      */
-    public static void rebootWipeUserData(Context context, boolean shutdown)
-        throws IOException {
+    public static void rebootWipeUserData(Context context, boolean shutdown, String reason)
+            throws IOException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         if (um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
             throw new SecurityException("Wiping data is not allowed for this user.");
@@ -395,13 +408,18 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
-        String shutdownArg = "";
+        String shutdownArg = null;
         if (shutdown) {
-            shutdownArg = "--shutdown_after\n";
+            shutdownArg = "--shutdown_after";
         }
 
-        bootCommand(context, shutdownArg + "--wipe_data\n--locale=" +
-                    Locale.getDefault().toString());
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
     }
 
     /**
@@ -409,23 +427,38 @@ public class RecoverySystem {
      * @throws IOException if something goes wrong.
      */
     public static void rebootWipeCache(Context context) throws IOException {
-        bootCommand(context, "--wipe_cache\n--locale=" + Locale.getDefault().toString());
+        rebootWipeCache(context, context.getPackageName());
+    }
+
+    /** {@hide} */
+    public static void rebootWipeCache(Context context, String reason) throws IOException {
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, "--wipe_cache", reasonArg, localeArg);
     }
 
     /**
      * Reboot into the recovery system with the supplied argument.
-     * @param arg to pass to the recovery utility.
+     * @param args to pass to the recovery utility.
      * @throws IOException if something goes wrong.
      */
-    private static void bootCommand(Context context, String arg) throws IOException {
+    private static void bootCommand(Context context, String... args) throws IOException {
         RECOVERY_DIR.mkdirs();  // In case we need it
         COMMAND_FILE.delete();  // In case it's not writable
         LOG_FILE.delete();
 
         FileWriter command = new FileWriter(COMMAND_FILE);
         try {
-            command.write(arg);
-            command.write("\n");
+            for (String arg : args) {
+                if (!TextUtils.isEmpty(arg)) {
+                    command.write(arg);
+                    command.write("\n");
+                }
+            }
         } finally {
             command.close();
         }
@@ -468,6 +501,16 @@ public class RecoverySystem {
         }
 
         return log;
+    }
+
+    /**
+     * Internally, recovery treats each line of the command file as a separate
+     * argv, so we only need to protect against newlines and nulls.
+     */
+    private static String sanitizeArg(String arg) {
+        arg = arg.replace('\0', '?');
+        arg = arg.replace('\n', '?');
+        return arg;
     }
 
     private void RecoverySystem() { }  // Do not instantiate
