@@ -132,6 +132,7 @@ public class Am extends BaseCommand {
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
+                "       am start-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
@@ -233,8 +234,11 @@ public class Am extends BaseCommand {
                 "am switch-user: switch to put USER_ID in the foreground, starting\n" +
                 "  execution of that user if it is currently stopped.\n" +
                 "\n" +
+                "am start-user: start USER_ID in background if it is currently stopped,\n" +
+                "  use switch-user if you want to start the user in foreground.\n" +
+                "\n" +
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
-                "  code until a later explicit switch to it.\n" +
+                "  code until a later explicit start or switch to it.\n" +
                 "\n" +
                 "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
@@ -340,6 +344,8 @@ public class Am extends BaseCommand {
             runToUri(true);
         } else if (op.equals("switch-user")) {
             runSwitchUser();
+        } else if (op.equals("start-user")) {
+            runStartUserInBackground();
         } else if (op.equals("stop-user")) {
             runStopUser();
         } else if (op.equals("stack")) {
@@ -1131,6 +1137,16 @@ public class Am extends BaseCommand {
     private void runSwitchUser() throws Exception {
         String user = nextArgRequired();
         mAm.switchUser(Integer.parseInt(user));
+    }
+
+    private void runStartUserInBackground() throws Exception {
+        String user = nextArgRequired();
+        boolean success = mAm.startUserInBackground(Integer.parseInt(user));
+        if (success) {
+            System.out.println("Success: user started");
+        } else {
+            System.err.println("Error: could not start user");
+        }
     }
 
     private void runStopUser() throws Exception {
