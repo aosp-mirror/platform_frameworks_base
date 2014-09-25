@@ -830,8 +830,8 @@ final public class MediaCodec {
         try {
             native_queueInputBuffer(
                     index, offset, size, presentationTimeUs, flags);
-        } catch (CryptoException e) {
-            validateInputByteBuffer(mCachedInputBuffers, index);
+        } catch (CryptoException | IllegalStateException e) {
+            revalidateByteBuffer(mCachedInputBuffers, index);
             throw e;
         }
     }
@@ -955,8 +955,8 @@ final public class MediaCodec {
         try {
             native_queueSecureInputBuffer(
                     index, offset, info, presentationTimeUs, flags);
-        } catch (CryptoException e) {
-            validateInputByteBuffer(mCachedInputBuffers, index);
+        } catch (CryptoException | IllegalStateException e) {
+            revalidateByteBuffer(mCachedInputBuffers, index);
             throw e;
         }
     }
@@ -1280,6 +1280,18 @@ final public class MediaCodec {
         }
     }
 
+    private final void revalidateByteBuffer(
+            ByteBuffer[] buffers, int index) {
+        synchronized(mBufferLock) {
+            if (buffers != null && index >= 0 && index < buffers.length) {
+                ByteBuffer buffer = buffers[index];
+                if (buffer != null) {
+                    buffer.setAccessible(true);
+                }
+            }
+        }
+    }
+
     private final void validateOutputByteBuffer(
             ByteBuffer[] buffers, int index, BufferInfo info) {
         if (buffers != null && index >= 0 && index < buffers.length) {
@@ -1317,7 +1329,7 @@ final public class MediaCodec {
     }
 
     private final void freeAllTrackedBuffers() {
-        synchronized (mBufferLock) {
+        synchronized(mBufferLock) {
             freeByteBuffers(mCachedInputBuffers);
             freeByteBuffers(mCachedOutputBuffers);
             mCachedInputBuffers = null;
