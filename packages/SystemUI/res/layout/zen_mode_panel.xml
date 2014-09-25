@@ -44,6 +44,7 @@
         android:id="@+id/zen_subhead"
         android:layout_width="match_parent"
         android:layout_height="62dp"
+        android:gravity="center_vertical"
         android:paddingLeft="8dp"
         android:paddingRight="8dp" >
 
