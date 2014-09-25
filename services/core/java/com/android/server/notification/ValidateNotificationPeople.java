@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -37,6 +38,8 @@ import android.util.Slog;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This {@link NotificationSignalExtractor} attempts to validate
@@ -45,9 +48,10 @@ import java.util.Map;
  * {@hide}
  */
 public class ValidateNotificationPeople implements NotificationSignalExtractor {
-    private static final String TAG = "ValidateNotificationPeople";
+    // Using a shorter log tag since setprop has a limit of 32chars on variable name.
+    private static final String TAG = "ValidateNoPeople";
     private static final boolean INFO = true;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final boolean ENABLE_PEOPLE_VALIDATOR = true;
     private static final String SETTING_ENABLE_PEOPLE_VALIDATOR =
@@ -132,7 +136,14 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         // ignore: config has no relevant information yet.
     }
 
-    public float getContactAffinity(UserHandle userHandle, Bundle extras) {
+    /**
+     * @param extras extras of the notification with EXTRA_PEOPLE populated
+     * @param timeoutMs timeout in milliseconds to wait for contacts response
+     * @param timeoutAffinity affinity to return when the timeout specified via
+     *                        <code>timeoutMs</code> is hit
+     */
+    public float getContactAffinity(UserHandle userHandle, Bundle extras, int timeoutMs,
+            float timeoutAffinity) {
         if (DEBUG) Slog.d(TAG, "checking affinity for " + userHandle);
         if (extras == null) return NONE;
         final String key = Long.toString(System.nanoTime());
@@ -143,8 +154,31 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
         final PeopleRankingReconsideration prr = validatePeople(context, key, extras, affinityOut);
         float affinity = affinityOut[0];
+
         if (prr != null) {
-            prr.work();
+            // Perform the heavy work on a background thread so we can abort when we hit the
+            // timeout.
+            final Semaphore s = new Semaphore(0);
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+                @Override
+                public void run() {
+                    prr.work();
+                    s.release();
+                }
+            });
+
+            try {
+                if (!s.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS)) {
+                    Slog.w(TAG, "Timeout while waiting for affinity: " + key + ". "
+                            + "Returning timeoutAffinity=" + timeoutAffinity);
+                    return timeoutAffinity;
+                }
+            } catch (InterruptedException e) {
+                Slog.w(TAG, "InterruptedException while waiting for affinity: " + key + ". "
+                        + "Returning affinity=" + affinity, e);
+                return affinity;
+            }
+
             affinity = Math.max(prr.getContactAffinity(), affinity);
         }
         return affinity;
@@ -391,6 +425,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         @Override
         public void work() {
             if (INFO) Slog.i(TAG, "Executing: validation for: " + mKey);
+            long timeStartMs = System.currentTimeMillis();
             for (final String handle: mPendingLookups) {
                 LookupResult lookupResult = null;
                 final Uri uri = Uri.parse(handle);
@@ -414,6 +449,10 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                     }
                     mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
                 }
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Validation finished in " + (System.currentTimeMillis() - timeStartMs) +
+                        "ms");
             }
         }
 
