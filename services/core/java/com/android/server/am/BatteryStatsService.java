@@ -123,6 +123,40 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         return mStats;
     }
 
+    // These are for direct use by the activity manager...
+
+    void addIsolatedUid(int isolatedUid, int appUid) {
+        synchronized (mStats) {
+            mStats.addIsolatedUidLocked(isolatedUid, appUid);
+        }
+    }
+
+    void removeIsolatedUid(int isolatedUid, int appUid) {
+        synchronized (mStats) {
+            mStats.removeIsolatedUidLocked(isolatedUid, appUid);
+        }
+    }
+
+    void noteProcessStart(String name, int uid) {
+        synchronized (mStats) {
+            mStats.noteProcessStartLocked(name, uid);
+        }
+    }
+
+    void noteProcessState(String name, int uid, int state) {
+        synchronized (mStats) {
+            mStats.noteProcessStateLocked(name, uid, state);
+        }
+    }
+
+    void noteProcessFinish(String name, int uid) {
+        synchronized (mStats) {
+            mStats.noteProcessFinishLocked(name, uid);
+        }
+    }
+
+    // Public interface...
+
     public byte[] getStatistics() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
@@ -166,45 +200,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void addIsolatedUid(int isolatedUid, int appUid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.addIsolatedUidLocked(isolatedUid, appUid);
-        }
-    }
-
-    public void removeIsolatedUid(int isolatedUid, int appUid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.removeIsolatedUidLocked(isolatedUid, appUid);
-        }
-    }
-
     public void noteEvent(int code, String name, int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteEventLocked(code, name, uid);
-        }
-    }
-
-    public void noteProcessStart(String name, int uid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteProcessStartLocked(name, uid);
-        }
-    }
-
-    public void noteProcessState(String name, int uid, int state) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteProcessStateLocked(name, uid, state);
-        }
-    }
-
-    public void noteProcessFinish(String name, int uid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteProcessFinishLocked(name, uid);
         }
     }
 
