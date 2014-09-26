@@ -275,9 +275,11 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@style/Widget.Material.PopupMenu</item>
         <item name="stackViewStyle">@style/Widget.Material.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.ActivityChooserView</item>
+        <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
+        <item name="preferenceActivityStyle">@style/PreferenceActivity.Material</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Material</item>
         <item name="preferenceCategoryStyle">@style/Preference.Material.Category</item>
         <item name="preferenceStyle">@style/Preference.Material</item>
@@ -622,9 +624,11 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@style/Widget.Material.Light.PopupMenu</item>
         <item name="stackViewStyle">@style/Widget.Material.Light.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.Light.ActivityChooserView</item>
+        <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
+        <item name="preferenceActivityStyle">@style/PreferenceActivity.Material</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Material</item>
         <item name="preferenceCategoryStyle">@style/Preference.Material.Category</item>
         <item name="preferenceStyle">@style/Preference.Material</item>

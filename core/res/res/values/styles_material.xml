@@ -42,6 +42,12 @@ please see styles_device_defaults.xml.
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
     </style>
 
+    <style name="PreferenceActivity.Material">
+        <item name="layout">@layout/preference_list_content_material</item>
+        <item name="headerLayout">@layout/preference_header_item_material</item>
+        <item name="headerRemoveIconIfEmpty">true</item>
+    </style>
+
     <style name="Preference.Material.Information">
         <item name="layout">@layout/preference_information_material</item>
         <item name="enabled">false</item>
@@ -93,6 +99,8 @@ please see styles_device_defaults.xml.
 
     <!-- No margins or background by default. Could be different for x-large screens -->
     <style name="PreferencePanel.Material">
+        <item name="layout_marginStart">0dip</item>
+        <item name="layout_marginEnd">0dip</item>
     </style>
 
     <!-- The attributes are overridden here because the x-large or large resources may have
@@ -106,10 +114,10 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="PreferenceHeaderPanel.Material">
-        <item name="layout_marginStart">@dimen/preference_screen_side_margin</item>
-        <item name="layout_marginEnd">@dimen/preference_screen_side_margin_negative</item>
-        <item name="paddingTop">@dimen/preference_screen_header_vertical_padding</item>
-        <item name="paddingBottom">@dimen/preference_screen_header_vertical_padding</item>
+        <item name="layout_marginStart">@dimen/preference_screen_side_margin_material</item>
+        <item name="layout_marginEnd">@dimen/preference_screen_side_margin_negative_material</item>
+        <item name="paddingTop">@dimen/preference_screen_header_vertical_padding_material</item>
+        <item name="paddingBottom">@dimen/preference_screen_header_vertical_padding_material</item>
     </style>
 
     <style name="PreferenceHeaderList.Material">
@@ -585,6 +593,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.ExpandableListView.White"/>
+
+    <style name="Widget.Material.FragmentBreadCrumbs" parent="Widget.FragmentBreadCrumbs">
+        <item name="itemLayout">@layout/fragment_bread_crumb_item_material</item>
+        <item name="itemColor">@color/primary_text_default_material_light</item>
+    </style>
+
     <style name="Widget.Material.Gallery" parent="Widget.Gallery"/>
     <style name="Widget.Material.GestureOverlayView" parent="Widget.GestureOverlayView"/>
 
@@ -972,6 +986,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.EditText" parent="Widget.Material.EditText"/>
     <style name="Widget.Material.Light.ExpandableListView" parent="Widget.Material.ExpandableListView"/>
     <style name="Widget.Material.Light.ExpandableListView.White" parent="Widget.Material.ExpandableListView.White"/>
+    <style name="Widget.Material.Light.FragmentBreadCrumbs" parent="Widget.Material.FragmentBreadCrumbs" >
+        <item name="itemColor">@color/primary_text_default_material_dark</item>
+    </style>
     <style name="Widget.Material.Light.Gallery" parent="Widget.Material.Gallery"/>
     <style name="Widget.Material.Light.GestureOverlayView" parent="Widget.Material.GestureOverlayView"/>
     <style name="Widget.Material.Light.GridView" parent="Widget.Material.GridView"/>
