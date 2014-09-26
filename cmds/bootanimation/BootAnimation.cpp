@@ -397,6 +397,31 @@ void BootAnimation::checkExit() {
     }
 }
 
+// Parse a color represented as an HTML-style 'RRGGBB' string: each pair of
+// characters in str is a hex number in [0, 255], which are converted to
+// floating point values in the range [0.0, 1.0] and placed in the
+// corresponding elements of color.
+//
+// If the input string isn't valid, parseColor returns false and color is
+// left unchanged.
+static bool parseColor(const char str[7], float color[3]) {
+    float tmpColor[3];
+    for (int i = 0; i < 3; i++) {
+        int val = 0;
+        for (int j = 0; j < 2; j++) {
+            val *= 16;
+            char c = str[2*i + j];
+            if      (c >= '0' && c <= '9') val += c - '0';
+            else if (c >= 'A' && c <= 'F') val += (c - 'A') + 10;
+            else if (c >= 'a' && c <= 'f') val += (c - 'a') + 10;
+            else                           return false;
+        }
+        tmpColor[i] = static_cast<float>(val) / 255.0f;
+    }
+    memcpy(color, tmpColor, sizeof(tmpColor));
+    return true;
+}
+
 bool BootAnimation::movie()
 {
     ZipEntryRO desc = mZip->findEntryByName("desc.txt");
@@ -427,20 +452,28 @@ bool BootAnimation::movie()
         const char* l = line.string();
         int fps, width, height, count, pause;
         char path[ANIM_ENTRY_NAME_MAX];
+        char color[7] = "000000"; // default to black if unspecified
+
         char pathType;
         if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
-            //LOGD("> w=%d, h=%d, fps=%d", width, height, fps);
+            // ALOGD("> w=%d, h=%d, fps=%d", width, height, fps);
             animation.width = width;
             animation.height = height;
             animation.fps = fps;
         }
-        else if (sscanf(l, " %c %d %d %s", &pathType, &count, &pause, path) == 4) {
-            //LOGD("> type=%c, count=%d, pause=%d, path=%s", pathType, count, pause, path);
+        else if (sscanf(l, " %c %d %d %s #%6s", &pathType, &count, &pause, path, color) >= 4) {
+            // ALOGD("> type=%c, count=%d, pause=%d, path=%s, color=%s", pathType, count, pause, path, color);
             Animation::Part part;
             part.playUntilComplete = pathType == 'c';
             part.count = count;
             part.pause = pause;
             part.path = path;
+            if (!parseColor(color, part.backgroundColor)) {
+                ALOGE("> invalid color '#%s'", color);
+                part.backgroundColor[0] = 0.0f;
+                part.backgroundColor[1] = 0.0f;
+                part.backgroundColor[2] = 0.0f;
+            }
             animation.parts.add(part);
         }
 
@@ -525,6 +558,12 @@ bool BootAnimation::movie()
             // Exit any non playuntil complete parts immediately
             if(exitPending() && !part.playUntilComplete)
                 break;
+
+            glClearColor(
+                    part.backgroundColor[0],
+                    part.backgroundColor[1],
+                    part.backgroundColor[2],
+                    1.0f);
 
             for (size_t j=0 ; j<fcount && (!exitPending() || part.playUntilComplete) ; j++) {
                 const Animation::Frame& frame(part.frames[j]);
