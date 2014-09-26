@@ -316,6 +316,7 @@ public:
         { }
 
         Entry(const Entry& entry);
+        Entry& operator=(const Entry& entry);
 
         virtual ~Entry() { }
 
