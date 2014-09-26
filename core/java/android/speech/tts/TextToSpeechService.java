@@ -91,7 +91,7 @@ import java.util.Set;
  * The first three methods are siblings of the {@link #onGetLanguage},
  * {@link #onIsLanguageAvailable} and {@link #onLoadLanguage} methods. The last one,
  * {@link #onGetDefaultVoiceNameFor(String, String, String)} is a link between locale and voice
- * based methods. Since API level 20 {@link TextToSpeech#setLanguage} is implemented by
+ * based methods. Since API level 21 {@link TextToSpeech#setLanguage} is implemented by
  * calling {@link TextToSpeech#setVoice} with the voice returned by
  * {@link #onGetDefaultVoiceNameFor(String, String, String)}.
  *
