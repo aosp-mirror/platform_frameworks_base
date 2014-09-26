@@ -1458,8 +1458,7 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
             mAfforanceHelper.animateHideLeftRightIcon();
-        }
-        if (mQsExpanded) {
+        } else if (mQsExpanded) {
             mTwoFingerQsExpand = true;
         }
     }
