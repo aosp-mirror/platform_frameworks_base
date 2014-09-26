@@ -4690,8 +4690,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final void handleAppDiedLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart) {
         int pid = app.pid;
-        cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1);
-        if (!restarting) {
+        boolean kept = cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1);
+        if (!kept && !restarting) {
             removeLruProcessLocked(app);
             if (pid > 0) {
                 ProcessList.remove(pid);
@@ -4816,6 +4816,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void appDiedLocked(ProcessRecord app, int pid, IApplicationThread thread) {
+        // First check if this ProcessRecord is actually active for the pid.
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord curProc = mPidsSelfLocked.get(pid);
+            if (curProc != app) {
+                Slog.w(TAG, "Spurious death for " + app + ", curProc for " + pid + ": " + curProc);
+                return;
+            }
+        }
 
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         synchronized (stats) {
@@ -4833,7 +4841,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean doOomAdj = doLowMem;
             if (!app.killedByAm) {
                 Slog.i(TAG, "Process " + app.processName + " (pid " + pid
-                        + ") has died.");
+                        + ") has died");
                 mAllowLowerMemLevel = true;
             } else {
                 // Note that we always want to do oom adj to update our state with the
@@ -14310,8 +14318,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Main code for cleaning up a process when it has gone away.  This is
      * called both as a result of the process dying, or directly when stopping
      * a process when running in single process mode.
+     *
+     * @return Returns true if the given process has been restarted, so the
+     * app that was passed in must remain on the process lists.
      */
-    private final void cleanUpApplicationRecordLocked(ProcessRecord app,
+    private final boolean cleanUpApplicationRecordLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart, int index) {
         if (index >= 0) {
             removeLruProcessLocked(app);
@@ -14434,7 +14445,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
         if (restarting) {
-            return;
+            return false;
         }
 
         if (!app.persistent || app.isolated) {
@@ -14470,8 +14481,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (restart && !app.isolated) {
             // We have components that still need to be running in the
             // process, so re-launch it.
+            if (index < 0) {
+                ProcessList.remove(app.pid);
+            }
             mProcessNames.put(app.processName, app.uid, app);
             startProcessLocked(app, "restart", app.processName);
+            return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
             boolean removed;
@@ -14485,6 +14500,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             app.setPid(0);
         }
+        return false;
     }
 
     boolean checkAppInLaunchingProvidersLocked(ProcessRecord app, boolean alwaysBad) {
