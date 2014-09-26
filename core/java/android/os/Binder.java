@@ -17,6 +17,7 @@
 package android.os;
 
 import android.util.Log;
+import android.util.Slog;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -48,7 +49,7 @@ public class Binder implements IBinder {
      * of classes can potentially create leaks.
      */
     private static final boolean FIND_POTENTIAL_LEAKS = false;
-    private static final String TAG = "Binder";
+    static final String TAG = "Binder";
 
     /**
      * Control whether dump() calls are allowed.
@@ -385,7 +386,14 @@ public class Binder implements IBinder {
             super.finalize();
         }
     }
-    
+
+    static void checkParcel(Parcel parcel, String msg) {
+        if (parcel.dataSize() >= 800*1024) {
+            // Trying to send > 800k, this is way too much
+            Slog.wtfStack(TAG, msg + parcel.dataSize());
+        }
+    }
+
     private native final void init();
     private native final void destroy();
 
@@ -424,6 +432,7 @@ public class Binder implements IBinder {
             reply.writeException(re);
             res = true;
         }
+        checkParcel(reply, "Unreasonably large binder reply buffer: ");
         reply.recycle();
         data.recycle();
         return res;
@@ -433,13 +442,18 @@ public class Binder implements IBinder {
 final class BinderProxy implements IBinder {
     public native boolean pingBinder();
     public native boolean isBinderAlive();
-    
+
     public IInterface queryLocalInterface(String descriptor) {
         return null;
     }
-    
+
+    public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+        Binder.checkParcel(data, "Unreasonably large binder buffer: ");
+        return transactNative(code, data, reply, flags);
+    }
+
     public native String getInterfaceDescriptor() throws RemoteException;
-    public native boolean transact(int code, Parcel data, Parcel reply,
+    public native boolean transactNative(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException;
     public native void linkToDeath(DeathRecipient recipient, int flags)
             throws RemoteException;
