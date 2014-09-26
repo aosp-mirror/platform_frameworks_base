@@ -244,6 +244,6 @@
     <integer name="zen_toast_animation_duration">500</integer>
 
     <!-- Zen toast visibility duration -->
-    <integer name="zen_toast_visible_duration">2000</integer>
+    <integer name="zen_toast_visible_duration">500</integer>
 </resources>
 
