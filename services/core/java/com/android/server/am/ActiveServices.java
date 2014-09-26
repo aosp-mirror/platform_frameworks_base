@@ -2134,7 +2134,8 @@ public final class ActiveServices {
                     if (!hasCreate) {
                         continue;
                     }
-                    if (proc != null && !proc.persistent && proc.thread != null
+                    // XXX turned off for now until we have more time to get a better policy.
+                    if (false && proc != null && !proc.persistent && proc.thread != null
                             && proc.pid != 0 && proc.pid != ActivityManagerService.MY_PID
                             && proc.setProcState >= ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                         proc.kill("bound to service " + sr.name.flattenToShortString()
