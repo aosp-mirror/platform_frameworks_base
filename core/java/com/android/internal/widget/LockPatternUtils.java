@@ -604,7 +604,7 @@ public class LockPatternUtils {
         IMountService mountService = IMountService.Stub.asInterface(service);
         try {
             Log.d(TAG, "Setting owner info");
-            mountService.setField("OwnerInfo", ownerInfo);
+            mountService.setField(StorageManager.OWNER_INFO_KEY, ownerInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing user info", e);
         }
@@ -1144,7 +1144,7 @@ public class LockPatternUtils {
 
         IMountService mountService = IMountService.Stub.asInterface(service);
         try {
-            mountService.setField("PatternVisible", enabled ? "1" : "0");
+            mountService.setField(StorageManager.PATTERN_VISIBLE_KEY, enabled ? "1" : "0");
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing pattern visible state", e);
         }
