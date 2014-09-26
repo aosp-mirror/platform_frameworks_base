@@ -350,13 +350,26 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!action.isEmpty()) {
             action.get(0).processKeyEvent(keyCode, isPressed);
         } else {
-            if (isPressed && getActiveSource().isValid()) {
-                int logicalAddress = getActiveSource().logicalAddress;
-                addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
-            } else {
-                Slog.w(TAG, "Discard key event: " + keyCode + " pressed:" + isPressed);
+            if (isPressed) {
+                int logicalAddress = findKeyReceiverAddress();
+                if (logicalAddress != Constants.ADDR_INVALID) {
+                    addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
+                    return;
+                }
             }
+            Slog.w(TAG, "Discard key event: " + keyCode + " pressed:" + isPressed);
         }
+    }
+
+    private int findKeyReceiverAddress() {
+        if (getActiveSource().isValid()) {
+            return getActiveSource().logicalAddress;
+        }
+        HdmiDeviceInfo info = getDeviceInfoByPath(getActivePath());
+        if (info != null) {
+            return info.getLogicalAddress();
+        }
+        return Constants.ADDR_INVALID;
     }
 
     private static void invokeCallback(IHdmiControlCallback callback, int result) {
