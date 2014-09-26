@@ -229,7 +229,7 @@ public class PhoneStateListener {
      * own non-null looper use PhoneStateListener(Looper looper) below.
      */
     public PhoneStateListener() {
-        this(SubscriptionManager.getDefaultSubId(), Looper.myLooper());
+        this(SubscriptionManager.DEFAULT_SUB_ID, Looper.myLooper());
     }
 
     /**
