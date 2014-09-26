@@ -317,6 +317,7 @@ please see themes_device_defaults.xml.
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.PreferenceScreen</item>
+        <item name="preferenceActivityStyle">@style/PreferenceActivity</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment</item>
         <item name="preferenceCategoryStyle">@style/Preference.Category</item>
         <item name="preferenceStyle">@style/Preference</item>
