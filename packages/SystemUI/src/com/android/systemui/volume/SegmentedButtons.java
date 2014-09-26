@@ -80,6 +80,12 @@ public class SegmentedButtons extends LinearLayout {
         addView(b);
         b.setTag(value);
         b.setOnClickListener(mClick);
+        Interaction.register(b, new Interaction.Callback() {
+            @Override
+            public void onInteraction() {
+                fireInteraction();
+            }
+        });
     }
 
     public void updateLocale() {
@@ -96,6 +102,12 @@ public class SegmentedButtons extends LinearLayout {
         }
     }
 
+    private void fireInteraction() {
+        if (mCallback != null) {
+            mCallback.onInteraction();
+        }
+    }
+
     private final View.OnClickListener mClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -103,7 +115,7 @@ public class SegmentedButtons extends LinearLayout {
         }
     };
 
-    public interface Callback {
+    public interface Callback extends Interaction.Callback {
         void onSelected(Object value);
     }
 }

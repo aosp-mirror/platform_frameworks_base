@@ -42,6 +42,7 @@ import android.media.VolumeProvider;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.net.Uri;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -400,11 +401,10 @@ public class VolumePanel extends Handler {
                 | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 | LayoutParams.FLAG_HARDWARE_ACCELERATED);
         mView = window.findViewById(R.id.content);
-        mView.setOnTouchListener(new View.OnTouchListener() {
+        Interaction.register(mView, new Interaction.Callback() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onInteraction() {
                 resetTimeout();
-                return false;
             }
         });
 
@@ -1382,9 +1382,10 @@ public class VolumePanel extends Handler {
     }
 
     private void resetTimeout() {
+        final boolean touchExploration = mAccessibilityManager.isTouchExplorationEnabled();
         if (LOGD) Log.d(mTag, "resetTimeout at " + System.currentTimeMillis()
-                + " delay=" + mTimeoutDelay);
-        if (sSafetyWarning == null || !mAccessibilityManager.isTouchExplorationEnabled()) {
+                + " delay=" + mTimeoutDelay + " touchExploration=" + touchExploration);
+        if (sSafetyWarning == null || !touchExploration) {
             removeMessages(MSG_TIMEOUT);
             sendEmptyMessageDelayed(MSG_TIMEOUT, mTimeoutDelay);
             removeMessages(MSG_USER_ACTIVITY);
@@ -1393,6 +1394,7 @@ public class VolumePanel extends Handler {
     }
 
     private void forceTimeout(long delay) {
+        if (LOGD) Log.d(mTag, "forceTimeout delay=" + delay + " callers=" + Debug.getCallers(3));
         removeMessages(MSG_TIMEOUT);
         sendEmptyMessageDelayed(MSG_TIMEOUT, delay);
     }
