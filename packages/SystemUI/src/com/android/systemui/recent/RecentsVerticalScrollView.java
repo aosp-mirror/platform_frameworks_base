@@ -204,6 +204,11 @@ public class RecentsVerticalScrollView extends ScrollView
         return false;
     }
 
+    @Override
+    public float getFalsingThresholdFactor() {
+        return 1.0f;
+    }
+
     public void dismissChild(View v) {
         mSwipeHelper.dismissChild(v, 0);
     }
