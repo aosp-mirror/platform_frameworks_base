@@ -3310,6 +3310,19 @@ ResourceTable::Entry::Entry(const Entry& entry)
     , mParentId(entry.mParentId)
     , mPos(entry.mPos) {}
 
+ResourceTable::Entry& ResourceTable::Entry::operator=(const Entry& entry) {
+    mName = entry.mName;
+    mParent = entry.mParent;
+    mType = entry.mType;
+    mItem = entry.mItem;
+    mItemFormat = entry.mItemFormat;
+    mBag = entry.mBag;
+    mNameIndex = entry.mNameIndex;
+    mParentId = entry.mParentId;
+    mPos = entry.mPos;
+    return *this;
+}
+
 status_t ResourceTable::Entry::makeItABag(const SourcePos& sourcePos)
 {
     if (mType == TYPE_BAG) {
@@ -4352,7 +4365,11 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                                     String8(entriesToAdd[i].value->getName()).string(),
                                     entriesToAdd[i].key.toString().string());
 
-                    c->addEntry(entriesToAdd[i].key, entriesToAdd[i].value);
+                    sp<Entry> newEntry = t->getEntry(c->getName(),
+                            entriesToAdd[i].value->getPos(),
+                            &entriesToAdd[i].key);
+
+                    *newEntry = *entriesToAdd[i].value;
                 }
             }
         }
