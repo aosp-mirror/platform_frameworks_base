@@ -1493,11 +1493,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(AbsListView.class.getName());
         if (isEnabled()) {
-            if (getFirstVisiblePosition() > 0) {
+            if (canScrollUp()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
                 info.setScrollable(true);
             }
-            if (getLastVisiblePosition() < getCount() - 1) {
+            if (canScrollDown()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
                 info.setScrollable(true);
             }
@@ -2203,36 +2203,44 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     void updateScrollIndicators() {
         if (mScrollUp != null) {
-            boolean canScrollUp;
-            // 0th element is not visible
-            canScrollUp = mFirstPosition > 0;
-
-            // ... Or top of 0th element is not visible
-            if (!canScrollUp) {
-                if (getChildCount() > 0) {
-                    View child = getChildAt(0);
-                    canScrollUp = child.getTop() < mListPadding.top;
-                }
-            }
-
-            mScrollUp.setVisibility(canScrollUp ? View.VISIBLE : View.INVISIBLE);
+            mScrollUp.setVisibility(canScrollUp() ? View.VISIBLE : View.INVISIBLE);
         }
 
         if (mScrollDown != null) {
-            boolean canScrollDown;
-            int count = getChildCount();
-
-            // Last item is not visible
-            canScrollDown = (mFirstPosition + count) < mItemCount;
-
-            // ... Or bottom of the last element is not visible
-            if (!canScrollDown && count > 0) {
-                View child = getChildAt(count - 1);
-                canScrollDown = child.getBottom() > mBottom - mListPadding.bottom;
-            }
-
-            mScrollDown.setVisibility(canScrollDown ? View.VISIBLE : View.INVISIBLE);
+            mScrollDown.setVisibility(canScrollDown() ? View.VISIBLE : View.INVISIBLE);
         }
+    }
+
+    private boolean canScrollUp() {
+        boolean canScrollUp;
+        // 0th element is not visible
+        canScrollUp = mFirstPosition > 0;
+
+        // ... Or top of 0th element is not visible
+        if (!canScrollUp) {
+            if (getChildCount() > 0) {
+                View child = getChildAt(0);
+                canScrollUp = child.getTop() < mListPadding.top;
+            }
+        }
+
+        return canScrollUp;
+    }
+
+    private boolean canScrollDown() {
+        boolean canScrollDown;
+        int count = getChildCount();
+
+        // Last item is not visible
+        canScrollDown = (mFirstPosition + count) < mItemCount;
+
+        // ... Or bottom of the last element is not visible
+        if (!canScrollDown && count > 0) {
+            View child = getChildAt(count - 1);
+            canScrollDown = child.getBottom() > mBottom - mListPadding.bottom;
+        }
+
+        return canScrollDown;
     }
 
     @Override
