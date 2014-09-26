@@ -91,7 +91,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             if (visible) {
                 mTransition.start();
             } else {
-                mTransition.stop();
+                // Ensure we're showing the correct state when visible.
+                jumpToCurrentState();
             }
         }
 
@@ -140,7 +141,11 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     protected boolean onStateChange(int[] stateSet) {
         final int keyframeIndex = mState.indexOfKeyframe(stateSet);
         if (keyframeIndex == getCurrentIndex()) {
-            // No transition needed.
+            // Propagate state change to current keyframe.
+            final Drawable current = getCurrent();
+            if (current != null) {
+                return current.setState(stateSet);
+            }
             return false;
         }
 
