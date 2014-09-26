@@ -102,9 +102,12 @@ public class KeyguardServiceDelegate {
     };
 
     public KeyguardServiceDelegate(Context context, LockPatternUtils lockPatternUtils) {
+        mScrim = createScrim(context);
+    }
+
+    public void bindService(Context context) {
         Intent intent = new Intent();
         intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
-        mScrim = createScrim(context);
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
             if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
@@ -250,7 +253,6 @@ public class KeyguardServiceDelegate {
         if (mKeyguardService != null) {
             mKeyguardService.onSystemReady();
         } else {
-            if (DEBUG) Log.v(TAG, "onSystemReady() called before keyguard service was ready");
             mKeyguardState.systemIsReady = true;
         }
     }
