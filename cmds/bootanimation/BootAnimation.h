@@ -71,6 +71,7 @@ private:
             String8 path;
             SortedVector<Frame> frames;
             bool playUntilComplete;
+            float backgroundColor[3];
         };
         int fps;
         int width;
