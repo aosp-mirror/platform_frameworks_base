@@ -48,14 +48,8 @@ interface IBatteryStats {
     // Returns -1 if nothing could be computed.
     long computeChargeTimeRemaining();
 
-    void addIsolatedUid(int isolatedUid, int appUid);
-    void removeIsolatedUid(int isolatedUid, int appUid);
-
     void noteEvent(int code, String name, int uid);
 
-    void noteProcessStart(String name, int uid);
-    void noteProcessState(String name, int uid, int state);
-    void noteProcessFinish(String name, int uid);
     void noteSyncStart(String name, int uid);
     void noteSyncFinish(String name, int uid);
     void noteJobStart(String name, int uid);
