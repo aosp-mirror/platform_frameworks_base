@@ -73,6 +73,7 @@ public class CameraDeviceState {
         void onError(int errorCode, RequestHolder holder);
         void onConfiguring();
         void onIdle();
+        void onBusy();
         void onCaptureStarted(RequestHolder holder, long timestamp);
         void onCaptureResult(CameraMetadataNative result, RequestHolder holder);
     }
@@ -217,6 +218,20 @@ public class CameraDeviceState {
             }
             Log.i(TAG, "Legacy camera service transitioning to state " + stateName);
         }
+
+        // If we transitioned into a non-IDLE/non-ERROR state then mark the device as busy
+        if(newState != STATE_ERROR && newState != STATE_IDLE) {
+            if (mCurrentState != newState && mCurrentHandler != null &&
+                    mCurrentListener != null) {
+                mCurrentHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCurrentListener.onBusy();
+                    }
+                });
+            }
+        }
+
         switch(newState) {
             case STATE_ERROR:
                 if (mCurrentState != STATE_ERROR && mCurrentHandler != null &&

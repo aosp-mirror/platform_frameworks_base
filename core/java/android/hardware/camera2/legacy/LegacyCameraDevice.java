@@ -21,6 +21,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.params.StreamConfiguration;
@@ -95,7 +96,25 @@ public class LegacyCameraDevice implements AutoCloseable {
             new CameraDeviceState.CameraDeviceStateListener() {
         @Override
         public void onError(final int errorCode, final RequestHolder holder) {
-            mIdle.open();
+            if (DEBUG) {
+                Log.d(TAG, "onError called, errorCode = " + errorCode);
+            }
+            switch (errorCode) {
+                /*
+                 * Only be considered idle if we hit a fatal error
+                 * and no further requests can be processed.
+                 */
+                case CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DISCONNECTED:
+                case CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_SERVICE:
+                case CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE: {
+                    mIdle.open();
+
+                    if (DEBUG) {
+                        Log.d(TAG, "onError - opening idle");
+                    }
+                }
+            }
+
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
             mResultHandler.post(new Runnable() {
                 @Override
@@ -124,6 +143,10 @@ public class LegacyCameraDevice implements AutoCloseable {
 
         @Override
         public void onIdle() {
+            if (DEBUG) {
+                Log.d(TAG, "onIdle called");
+            }
+
             mIdle.open();
 
             mResultHandler.post(new Runnable() {
@@ -140,6 +163,15 @@ public class LegacyCameraDevice implements AutoCloseable {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onBusy() {
+            mIdle.close();
+
+            if (DEBUG) {
+                Log.d(TAG, "onBusy called");
+            }
         }
 
         @Override
