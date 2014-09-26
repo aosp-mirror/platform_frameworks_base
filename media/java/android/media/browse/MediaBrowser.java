@@ -141,26 +141,31 @@ public final class MediaBrowser {
 
         final ServiceConnection thisConnection = mServiceConnection = new MediaServiceConnection();
 
+        boolean bound = false;
         try {
-            mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            if (mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE)) {
+                bound = true;
+            }
         } catch (Exception ex) {
             Log.e(TAG, "Failed binding to service " + mServiceComponent);
+        }
 
+        if (!bound) {
             // Tell them that it didn't work.  We are already on the main thread,
             // but we don't want to do callbacks inside of connect().  So post it,
             // and then check that we are on the same ServiceConnection.  We know
             // we won't also get an onServiceConnected or onServiceDisconnected,
             // so we won't be doing double callbacks.
             mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Ensure that nobody else came in or tried to connect again.
-                        if (thisConnection == mServiceConnection) {
-                            forceCloseConnection();
-                            mCallback.onConnectionFailed();
-                        }
+                @Override
+                public void run() {
+                    // Ensure that nobody else came in or tried to connect again.
+                    if (thisConnection == mServiceConnection) {
+                        forceCloseConnection();
+                        mCallback.onConnectionFailed();
                     }
-                });
+                }
+            });
         }
 
         if (DBG) {
