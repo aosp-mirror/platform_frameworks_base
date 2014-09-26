@@ -2021,6 +2021,7 @@
   <java-symbol type="style" name="TextAppearance.Material.TimePicker.TimeLabel" />
   <java-symbol type="attr" name="seekBarPreferenceStyle" />
   <java-symbol type="style" name="Theme.DeviceDefault.Resolver" />
+  <java-symbol type="attr" name="preferenceActivityStyle" />
   <java-symbol type="attr" name="preferenceFragmentStyle" />
   <java-symbol type="bool" name="skipHoldBeforeMerge" />
   <java-symbol type="bool" name="imsServiceAllowTurnOff" />
