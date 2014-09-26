@@ -151,7 +151,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mAnimatedVectorState = new AnimatedVectorDrawableState(mAnimatedVectorState);
+            mAnimatedVectorState.mVectorDrawable.mutate();
             mMutated = true;
         }
         return this;
