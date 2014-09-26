@@ -3448,7 +3448,10 @@
          and a previously used application is known. -->
     <string name="whichSendApplicationNamed">Share with %1$s</string>
     <!-- Title of intent resolver dialog when selecting a HOME application to run. -->
-    <string name="whichHomeApplication">Select a home app</string>
+    <string name="whichHomeApplication">Select a Home app</string>
+    <!-- Title of intent resolver dialog when selecting a HOME application to run
+         and a previously used application is known. -->
+    <string name="whichHomeApplicationNamed">Use %1$s as Home</string>
     <!-- Option to always use the selected application resolution in the future. See the "Complete action using" dialog title-->
     <string name="alwaysUse">Use by default for this action.</string>
     <!-- Title of the list of alternate options to complete an action shown when the
