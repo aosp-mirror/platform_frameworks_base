@@ -177,16 +177,24 @@ class TaskResourceLoader implements Runnable {
                 if (t != null) {
                     Drawable cachedIcon = mApplicationIconCache.get(t.key);
                     Bitmap cachedThumbnail = mThumbnailCache.get(t.key);
+
                     // Load the application icon if it is stale or we haven't cached one yet
                     if (cachedIcon == null) {
-                        ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
-                                t.key.userId);
-                        if (info != null) {
-                            cachedIcon = ssp.getActivityIcon(info, t.key.userId);
+                        cachedIcon = getTaskDescriptionIcon(t.key, t.icon, t.iconFilename, ssp,
+                                mContext.getResources());
+
+                        if (cachedIcon == null) {
+                            ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
+                                    t.key.userId);
+                            if (info != null) {
+                                cachedIcon = ssp.getActivityIcon(info, t.key.userId);
+                            }
                         }
+
                         if (cachedIcon == null) {
                             cachedIcon = mDefaultApplicationIcon;
                         }
+
                         // At this point, even if we can't load the icon, we will set the default
                         // icon.
                         mApplicationIconCache.put(t.key, cachedIcon);
@@ -229,6 +237,17 @@ class TaskResourceLoader implements Runnable {
                 }
             }
         }
+    }
+
+    Drawable getTaskDescriptionIcon(Task.TaskKey taskKey, Bitmap iconBitmap, String iconFilename,
+            SystemServicesProxy ssp, Resources res) {
+        Bitmap tdIcon = iconBitmap != null
+                ? iconBitmap
+                : ActivityManager.TaskDescription.loadTaskDescriptionIcon(iconFilename);
+        if (tdIcon != null) {
+            return ssp.getBadgedIcon(new BitmapDrawable(res, tdIcon), taskKey.userId);
+        }
+        return null;
     }
 }
 
@@ -321,15 +340,20 @@ public class RecentsTaskLoader {
         if (icon != null) {
             return icon;
         }
-        // Return the task description icon if it exists
-        if (td != null && td.getIcon() != null) {
-            icon = ssp.getBadgedIcon(new BitmapDrawable(res, td.getIcon()), taskKey.userId);
-            mApplicationIconCache.put(taskKey, icon);
-            return icon;
-        }
-        // If we are preloading this task, continue to load the activity icon
+
+        // If we are preloading this task, continue to load the task description icon or the
+        // activity icon
         if (preloadTask) {
-            // All short paths failed, load the icon from the activity info and cache it
+
+            // Return and cache the task description icon if it exists
+            Drawable tdDrawable = mLoader.getTaskDescriptionIcon(taskKey, td.getInMemoryIcon(),
+                    td.getIconFilename(), ssp, res);
+            if (tdDrawable != null) {
+                mApplicationIconCache.put(taskKey, tdDrawable);
+                return tdDrawable;
+            }
+
+            // Load the icon from the activity info and cache it
             if (infoHandle.info == null) {
                 infoHandle.info = ssp.getActivityInfo(taskKey.baseIntent.getComponent(),
                         taskKey.userId);
@@ -453,10 +477,17 @@ public class RecentsTaskLoader {
                 activityInfoCache.put(cnKey, infoHandle);
             }
 
+            Bitmap icon = t.taskDescription != null
+                    ? t.taskDescription.getInMemoryIcon()
+                    : null;
+            String iconFilename = t.taskDescription != null
+                    ? t.taskDescription.getIconFilename()
+                    : null;
+
             // Add the task to the stack
             Task task = new Task(taskKey, (t.id > -1), t.affiliatedTaskId, t.affiliatedTaskColor,
                     activityLabel, activityIcon, activityColor, (i == (taskCount - 1)),
-                    config.lockToAppEnabled);
+                    config.lockToAppEnabled, icon, iconFilename);
 
             if (preloadTask && loadTaskThumbnails) {
                 // Load the thumbnail from the cache if possible

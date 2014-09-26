@@ -124,7 +124,8 @@ public class Task {
     public boolean isActive;
     public boolean lockToThisTask;
     public boolean lockToTaskEnabled;
-
+    public Bitmap icon;
+    public String iconFilename;
     TaskCallbacks mCb;
 
     public Task() {
@@ -133,7 +134,8 @@ public class Task {
 
     public Task(TaskKey key, boolean isActive, int taskAffiliation, int taskAffiliationColor,
                 String activityTitle, Drawable activityIcon, int colorPrimary,
-                boolean lockToThisTask, boolean lockToTaskEnabled) {
+                boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
+                String iconFilename) {
         boolean isInAffiliationGroup = (taskAffiliation != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
         this.key = key;
@@ -147,6 +149,8 @@ public class Task {
         this.isActive = isActive;
         this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
         this.lockToTaskEnabled = lockToTaskEnabled;
+        this.icon = icon;
+        this.iconFilename = iconFilename;
     }
 
     /** Copies the other task. */

@@ -635,19 +635,29 @@ public class ActivityManager {
             if (mIcon != null) {
                 return mIcon;
             }
-            if (mIconFilename != null) {
-                try {
-                    return ActivityManagerNative.getDefault().
-                            getTaskDescriptionIcon(mIconFilename);
-                } catch (RemoteException e) {
-                }
-            }
-            return null;
+            return loadTaskDescriptionIcon(mIconFilename);
         }
 
         /** @hide */
         public String getIconFilename() {
             return mIconFilename;
+        }
+
+        /** @hide */
+        public Bitmap getInMemoryIcon() {
+            return mIcon;
+        }
+
+        /** @hide */
+        public static Bitmap loadTaskDescriptionIcon(String iconFilename) {
+            if (iconFilename != null) {
+                try {
+                    return ActivityManagerNative.getDefault().
+                            getTaskDescriptionIcon(iconFilename);
+                } catch (RemoteException e) {
+                }
+            }
+            return null;
         }
 
         /**
