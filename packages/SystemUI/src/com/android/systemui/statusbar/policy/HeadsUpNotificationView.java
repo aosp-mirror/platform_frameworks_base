@@ -316,6 +316,11 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     @Override
+    public float getFalsingThresholdFactor() {
+        return 1.0f;
+    }
+
+    @Override
     public void onChildDismissed(View v) {
         Log.v(TAG, "User swiped heads up to dismiss");
         mBar.onHeadsUpDismissed();
