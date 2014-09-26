@@ -289,7 +289,7 @@ public class GpsNetInitiatedHandler {
                         + " mPopupImmediately: " + mPopupImmediately
                         + " mInEmergency: " + getInEmergency());
 
-        if (getLocationEnabled() && !getInEmergency()) {
+        if (!getLocationEnabled() && !getInEmergency()) {
             // Location is currently disabled, ignore all NI requests.
             try {
                 mNetInitiatedListener.sendNiResponse(notif.notificationId,
