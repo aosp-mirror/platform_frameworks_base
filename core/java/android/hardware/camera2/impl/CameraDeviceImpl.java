@@ -60,7 +60,7 @@ public class CameraDeviceImpl extends CameraDevice {
     private ICameraDeviceUser mRemoteDevice;
 
     // Lock to synchronize cross-thread access to device public interface
-    private final Object mInterfaceLock = new Object();
+    final Object mInterfaceLock = new Object(); // access from this class and Session only!
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
     private final StateCallback mDeviceCallback;

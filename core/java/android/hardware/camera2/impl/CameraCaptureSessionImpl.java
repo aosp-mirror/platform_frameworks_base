@@ -633,7 +633,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         @Override
         public void onDrained() {
             if (VERBOSE) Log.v(TAG, mIdString + "onIdleDrained");
-            synchronized (CameraCaptureSessionImpl.this) {
+
+            // Take device lock before session lock so that we can call back into device
+            // without causing a deadlock
+            synchronized (mDeviceImpl.mInterfaceLock) {
+                synchronized (CameraCaptureSessionImpl.this) {
                 /*
                  * The device is now IDLE, and has settled. It will not transition to
                  * ACTIVE or BUSY again by itself.
@@ -642,28 +646,31 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                  *
                  * This operation is idempotent; a session will not be closed twice.
                  */
-                if (VERBOSE) Log.v(TAG, mIdString + "Session drain complete, skip unconfigure: " +
-                        mSkipUnconfigure);
+                    if (VERBOSE)
+                        Log.v(TAG, mIdString + "Session drain complete, skip unconfigure: " +
+                                mSkipUnconfigure);
 
-                // Fast path: A new capture session has replaced this one; don't unconfigure.
-                if (mSkipUnconfigure) {
-                    mStateCallback.onClosed(CameraCaptureSessionImpl.this);
-                    return;
+                    // Fast path: A new capture session has replaced this one; don't unconfigure.
+                    if (mSkipUnconfigure) {
+                        mStateCallback.onClosed(CameraCaptureSessionImpl.this);
+                        return;
+                    }
+
+                    // Slow path: #close was called explicitly on this session; unconfigure first
+
+                    try {
+                        mUnconfigureDrainer.taskStarted();
+                        mDeviceImpl
+                                .configureOutputsChecked(null); // begin transition to unconfigured
+                    } catch (CameraAccessException e) {
+                        // OK: do not throw checked exceptions.
+                        Log.e(TAG, mIdString + "Exception while configuring outputs: ", e);
+
+                        // TODO: call onError instead of onClosed if this happens
+                    }
+
+                    mUnconfigureDrainer.beginDrain();
                 }
-
-                // Slow path: #close was called explicitly on this session; unconfigure first
-
-                try {
-                    mUnconfigureDrainer.taskStarted();
-                    mDeviceImpl.configureOutputsChecked(null); // begin transition to unconfigured
-                } catch (CameraAccessException e) {
-                    // OK: do not throw checked exceptions.
-                    Log.e(TAG, mIdString + "Exception while configuring outputs: ", e);
-
-                    // TODO: call onError instead of onClosed if this happens
-                }
-
-                mUnconfigureDrainer.beginDrain();
             }
         }
     }
