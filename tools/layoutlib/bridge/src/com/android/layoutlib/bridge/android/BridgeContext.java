@@ -630,10 +630,15 @@ public final class BridgeContext extends Context {
                                         defStyleRes, value.getSecond()),
                                 null /*data*/);
                     }
+                } else if (value.getFirst() == ResourceType.ATTR) {
+                    // Ignore. There's a bug in the framework where sometimes defStyleAttr ends up
+                    // in defStyleRes. The framework ignores the attribute when it's not a style.
+                    // But to let the developers find bugs in their code, we log an error for other
+                    // cases.
                 } else {
-                    Bridge.getLog().error(null,
+                    Bridge.getLog().warning(null,
                             String.format(
-                                    "Resouce id 0x%x is not of type STYLE (instead %s)",
+                                    "Resource id 0x%x is not of type STYLE (instead %s)",
                                     defStyleRes, value.getFirst().toString()),
                             null /*data*/);
                 }
