@@ -780,9 +780,9 @@ public class LockPatternUtils {
      */
     public void saveLockPassword(String password, int quality, boolean isFallback, int userHandle) {
         try {
-            getLockSettings().setLockPassword(password, userHandle);
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (!TextUtils.isEmpty(password)) {
+                getLockSettings().setLockPassword(password, userHandle);
                 int computedQuality = computePasswordQuality(password);
 
                 if (userHandle == UserHandle.USER_OWNER) {
@@ -860,6 +860,7 @@ public class LockPatternUtils {
                 setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
             } else {
                 // Empty password
+                getLockSettings().setLockPassword(null, userHandle);
                 if (userHandle == UserHandle.USER_OWNER) {
                     // Set the encryption password to default.
                     updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
