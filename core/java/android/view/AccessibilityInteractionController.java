@@ -889,7 +889,13 @@ final class AccessibilityInteractionController {
                     }
                 }
             } else {
-                AccessibilityNodeInfo root = provider.createAccessibilityNodeInfo(virtualViewId);
+                final AccessibilityNodeInfo root;
+                if (virtualViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                    root = provider.createAccessibilityNodeInfo(virtualViewId);
+                } else {
+                    root = provider.createAccessibilityNodeInfo(
+                            AccessibilityNodeProvider.HOST_VIEW_ID);
+                }
                 if (root != null) {
                     outInfos.add(root);
                     if ((fetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
