@@ -28274,11 +28274,13 @@ package android.telecom {
     method public android.telecom.DisconnectCause getDisconnectCause();
     method public final int getState();
     method public void hold();
+    method public void merge();
     method public void playDtmfTone(char);
     method public final void registerCallback(android.telecom.RemoteConference.Callback);
     method public void separate(android.telecom.RemoteConnection);
     method public void setAudioState(android.telecom.AudioState);
     method public void stopDtmfTone();
+    method public void swap();
     method public void unhold();
     method public final void unregisterCallback(android.telecom.RemoteConference.Callback);
   }
