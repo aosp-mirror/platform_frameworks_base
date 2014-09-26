@@ -48,6 +48,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
+import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1192,6 +1194,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
     static final int ENABLE_SCREEN_AFTER_BOOT_MSG = 45;
     static final int START_USER_SWITCH_MSG = 46;
+    static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1876,6 +1879,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case ENABLE_SCREEN_AFTER_BOOT_MSG: {
                 enableScreenAfterBoot();
+                break;
+            }
+            case SEND_LOCALE_TO_MOUNT_DAEMON_MSG: {
+                try {
+                    Locale l = (Locale) msg.obj;
+                    IBinder service = ServiceManager.getService("mount");
+                    IMountService mountService = IMountService.Stub.asInterface(service);
+                    Log.d(TAG, "Storing locale " + l.toLanguageTag() + " for decryption UI");
+                    mountService.setField(StorageManager.SYSTEM_LOCALE_KEY, l.toLanguageTag());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error storing locale for decryption UI", e);
+                }
                 break;
             }
             }
@@ -16258,6 +16273,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             SystemProperties.set("persist.sys.language", l.getLanguage());
             SystemProperties.set("persist.sys.country", l.getCountry());
             SystemProperties.set("persist.sys.localevar", l.getVariant());
+
+            mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG, l));
         }
     }
 
