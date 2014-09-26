@@ -61,7 +61,7 @@ public final class SynthesisRequest {
 
     /**
      * Gets the text which should be synthesized.
-     * @deprecated As of API level 20, replaced by {@link #getCharSequenceText}.
+     * @deprecated As of API level 21, replaced by {@link #getCharSequenceText}.
      */
     @Deprecated
     public String getText() {
