@@ -665,4 +665,12 @@ public class StorageManager {
     public static final int CRYPT_TYPE_PATTERN = 2;
     /** @hide */
     public static final int CRYPT_TYPE_PIN = 3;
+
+    // Constants for the data available via MountService.getField.
+    /** @hide */
+    public static final String SYSTEM_LOCALE_KEY = "SystemLocale";
+    /** @hide */
+    public static final String OWNER_INFO_KEY = "OwnerInfo";
+    /** @hide */
+    public static final String PATTERN_VISIBLE_KEY = "PatternVisible";
 }
