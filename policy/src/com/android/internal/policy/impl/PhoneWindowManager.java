@@ -5269,6 +5269,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void systemBooted() {
         if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.bindService(mContext);
             mKeyguardDelegate.onBootCompleted();
         }
         synchronized (mLock) {
