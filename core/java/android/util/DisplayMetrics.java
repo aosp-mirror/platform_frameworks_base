@@ -81,7 +81,7 @@ public class DisplayMetrics {
 
     /**
      * Intermediate density for screens that sit somewhere between
-     * {@link #DENSITY_XXHIGH} (480 dpi) and {@link #DENSITY_XXXHIGH} (560 dpi).
+     * {@link #DENSITY_XXHIGH} (480 dpi) and {@link #DENSITY_XXXHIGH} (640 dpi).
      * This is not a density that applications should target, instead relying
      * on the system to scale their {@link #DENSITY_XXXHIGH} assets for them.
      */
