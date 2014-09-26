@@ -1769,7 +1769,6 @@ public class TelephonyManager {
      *
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
-     * @hide
      */
     public void setLine1NumberForDisplay(String alphaTag, String number) {
         setLine1NumberForDisplayForSubscriber(getDefaultSubscription(), alphaTag, number);
@@ -2410,6 +2409,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return an IccOpenLogicalChannelResponse object.
@@ -2430,6 +2430,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param channel is the channel id to be closed as retruned by a successful
      *            iccOpenLogicalChannel.
@@ -2451,6 +2452,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
@@ -2482,6 +2484,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
@@ -2509,6 +2512,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param fileID
      * @param command
@@ -2534,6 +2538,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param content String containing SAT/USAT response in hexadecimal
      *                format starting with command tag. See TS 102 223 for
@@ -2998,7 +3003,6 @@ public class TelephonyManager {
      * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @return true on success; false on any failure.
-     * @hide
      */
     public boolean setGlobalPreferredNetworkType() {
         return setPreferredNetworkType(RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
@@ -3006,23 +3010,10 @@ public class TelephonyManager {
 
     /**
      * Values used to return status for hasCarrierPrivileges call.
-     * @hide
      */
     public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1;
-    /**
-     * Values used to return status for hasCarrierPrivileges call.
-     * @hide
-     */
     public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0;
-    /**
-     * Values used to return status for hasCarrierPrivileges call.
-     * @hide
-     */
     public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1;
-    /**
-     * Values used to return status for hasCarrierPrivileges call.
-     * @hide
-     */
     public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2;
 
     /**
@@ -3039,7 +3030,6 @@ public class TelephonyManager {
      *         CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED if the carrier rules are not loaded.
      *         CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES if there was an error loading carrier
      *             rules (or if there are no rules).
-     * @hide
      */
     public int hasCarrierPrivileges() {
         try {
@@ -3066,7 +3056,6 @@ public class TelephonyManager {
      *
      * @param brand The brand name to display/set.
      * @return true if the operation was executed correctly.
-     * @hide
      */
     public boolean setOperatorBrandOverride(String brand) {
         try {
