@@ -575,7 +575,7 @@ public class TextToSpeech {
          * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
          * @see TextToSpeech#getFeatures(java.util.Locale)
          *
-         * @deprecated Starting from API level 20, to select network synthesis, call
+         * @deprecated Starting from API level 21, to select network synthesis, call
          * ({@link TextToSpeech#getVoices()}, find a suitable network voice
          * ({@link Voice#isNetworkConnectionRequired()}) and pass it
          * to {@link TextToSpeech#setVoice(Voice)}).
@@ -593,7 +593,7 @@ public class TextToSpeech {
          * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
          * @see TextToSpeech#getFeatures(java.util.Locale)
 
-         * @deprecated Starting from API level 20, to select embedded synthesis, call
+         * @deprecated Starting from API level 21, to select embedded synthesis, call
          * ({@link TextToSpeech#getVoices()}, find a suitable embedded voice
          * ({@link Voice#isNetworkConnectionRequired()}) and pass it
          * to {@link TextToSpeech#setVoice(Voice)}).
@@ -1015,7 +1015,7 @@ public class TextToSpeech {
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      *
-     * @deprecated As of API level 20, replaced by
+     * @deprecated As of API level 21, replaced by
      *         {@link #addEarcon(String, File)}.
      */
     @Deprecated
@@ -1124,7 +1124,7 @@ public class TextToSpeech {
      *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the speak operation.
-     * @deprecated As of API level 20, replaced by
+     * @deprecated As of API level 21, replaced by
      *         {@link #speak(CharSequence, int, Bundle, String)}.
      */
     @Deprecated
@@ -1194,7 +1194,7 @@ public class TextToSpeech {
      *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
-     * @deprecated As of API level 20, replaced by
+     * @deprecated As of API level 21, replaced by
      *         {@link #playEarcon(String, int, Bundle, String)}.
      */
     @Deprecated
@@ -1218,9 +1218,9 @@ public class TextToSpeech {
      * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
      * @param utteranceId An unique identifier for this request.
      *
-     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilentUtterance operation.
      */
-    public int playSilence(final long durationInMs, final int queueMode,
+    public int playSilentUtterance(final long durationInMs, final int queueMode,
             final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
@@ -1228,7 +1228,7 @@ public class TextToSpeech {
                 return service.playSilence(getCallerIdentity(), durationInMs,
                                            queueMode, utteranceId);
             }
-        }, ERROR, "playSilence");
+        }, ERROR, "playSilentUtterance");
     }
 
     /**
@@ -1252,13 +1252,13 @@ public class TextToSpeech {
      *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
-     * @deprecated As of API level 20, replaced by
-     *         {@link #playSilence(long, int, String)}.
+     * @deprecated As of API level 21, replaced by
+     *         {@link #playSilentUtterance(long, int, String)}.
      */
     @Deprecated
     public int playSilence(final long durationInMs, final int queueMode,
             final HashMap<String, String> params) {
-        return playSilence(durationInMs, queueMode,
+        return playSilentUtterance(durationInMs, queueMode,
                            params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
@@ -1276,7 +1276,7 @@ public class TextToSpeech {
      *
      * @param locale The locale to query features for.
      * @return Set instance. May return {@code null} on error.
-     * @deprecated As of API level 20, please use voices. In order to query features of the voice,
+     * @deprecated As of API level 21, please use voices. In order to query features of the voice,
      * call {@link #getVoices()} to retrieve the list of available voices and
      * {@link Voice#getFeatures()} to retrieve the set of features.
      */
@@ -1421,7 +1421,7 @@ public class TextToSpeech {
      *
      * @return language, country (if any) and variant (if any) used by the client stored in a
      *     Locale instance, or {@code null} on error.
-     * @deprecated As of API Level 20, use <code>getDefaultVoice().getLocale()</code> ({@link
+     * @deprecated As of API level 21, use <code>getDefaultVoice().getLocale()</code> ({@link
      *   #getDefaultVoice()})
      */
     @Deprecated
@@ -1476,7 +1476,7 @@ public class TextToSpeech {
 
                 String variant = loc.getVariant();
 
-                // As of API level 20, setLanguage is implemented using setVoice.
+                // As of API level 21, setLanguage is implemented using setVoice.
                 // (which, in the default implementation, will call loadLanguage on the service
                 // interface).
 
@@ -1535,7 +1535,7 @@ public class TextToSpeech {
      * @return language, country (if any) and variant (if any) used by the client stored in a
      *     Locale instance, or {@code null} on error.
      *
-     * @deprecated As of API level 20, please use <code>getVoice().getLocale()</code>
+     * @deprecated As of API level 21, please use <code>getVoice().getLocale()</code>
      * ({@link #getVoice()}).
      */
     @Deprecated
@@ -1831,7 +1831,7 @@ public class TextToSpeech {
      *            something like "/sdcard/myappsounds/mysound.wav".
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the synthesizeToFile operation.
-     * @deprecated As of API level 20, replaced by
+     * @deprecated As of API level 21, replaced by
      *         {@link #synthesizeToFile(CharSequence, Bundle, File, String)}.
      */
     @Deprecated
