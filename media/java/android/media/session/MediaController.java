@@ -930,7 +930,8 @@ public final class MediaController {
 
         @Override
         public void onQueueChanged(ParceledListSlice parceledQueue) {
-            List<MediaSession.QueueItem> queue = parceledQueue.getList();
+            List<MediaSession.QueueItem> queue = parceledQueue == null ? null : parceledQueue
+                    .getList();
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_QUEUE, queue, null);

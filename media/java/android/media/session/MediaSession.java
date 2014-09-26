@@ -445,7 +445,7 @@ public final class MediaSession {
      */
     public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(new ParceledListSlice<QueueItem>(queue));
+            mBinder.setQueue(queue == null ? null : new ParceledListSlice<QueueItem>(queue));
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
