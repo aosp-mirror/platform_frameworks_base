@@ -168,6 +168,10 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     }
 
     private void sendSetStreamPath() {
+        // Turn the active source invalidated, which remains so till <Active Source> comes from
+        // the selected device.
+        tv().getActiveSource().invalidate();
+        tv().setActivePath(mTarget.getPhysicalAddress());
         sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(
                 getSourceAddress(), mTarget.getPhysicalAddress()));
         invokeCallback(HdmiControlManager.RESULT_SUCCESS);
