@@ -387,10 +387,26 @@ public class Binder implements IBinder {
         }
     }
 
-    static void checkParcel(Parcel parcel, String msg) {
+    static void checkParcel(IBinder obj, int code, Parcel parcel, String msg) {
         if (parcel.dataSize() >= 800*1024) {
             // Trying to send > 800k, this is way too much
-            Slog.wtfStack(TAG, msg + parcel.dataSize());
+            StringBuilder sb = new StringBuilder();
+            sb.append(msg);
+            sb.append(": on ");
+            sb.append(obj);
+            sb.append(" calling ");
+            sb.append(code);
+            sb.append(" size ");
+            sb.append(parcel.dataSize());
+            sb.append(" (data: ");
+            parcel.setDataPosition(0);
+            sb.append(parcel.readInt());
+            sb.append(", ");
+            sb.append(parcel.readInt());
+            sb.append(", ");
+            sb.append(parcel.readInt());
+            sb.append(")");
+            Slog.wtfStack(TAG, sb.toString());
         }
     }
 
@@ -432,7 +448,7 @@ public class Binder implements IBinder {
             reply.writeException(re);
             res = true;
         }
-        checkParcel(reply, "Unreasonably large binder reply buffer: ");
+        checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
         reply.recycle();
         data.recycle();
         return res;
@@ -448,7 +464,7 @@ final class BinderProxy implements IBinder {
     }
 
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-        Binder.checkParcel(data, "Unreasonably large binder buffer: ");
+        Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
         return transactNative(code, data, reply, flags);
     }
 
