@@ -256,6 +256,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void startActivateAnimation(boolean reverse) {
+        if (!isAttachedToWindow()) {
+            return;
+        }
         int widthHalf = mBackgroundNormal.getWidth()/2;
         int heightHalf = mBackgroundNormal.getActualHeight()/2;
         float radius = (float) Math.sqrt(widthHalf*widthHalf + heightHalf*heightHalf);
