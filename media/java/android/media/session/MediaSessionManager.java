@@ -296,6 +296,21 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Check if the global priority session is currently active. This can be
+     * used to decide if media keys should be sent to the session or to the app.
+     *
+     * @hide
+     */
+    public boolean isGlobalPriorityActive() {
+        try {
+            return mService.isGlobalPriorityActive();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to check if the global priority is active.", e);
+        }
+        return false;
+    }
+
+    /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */

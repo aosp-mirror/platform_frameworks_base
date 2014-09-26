@@ -743,6 +743,11 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
+        public boolean isGlobalPriorityActive() {
+            return mPriorityStack.isGlobalPriorityActive();
+        }
+
+        @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
