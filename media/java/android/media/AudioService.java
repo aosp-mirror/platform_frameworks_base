@@ -4174,6 +4174,14 @@ public class AudioService extends IAudioService.Stub {
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 address);
         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+        synchronized (mCurAudioRoutes) {
+            // Remove A2DP routes as well
+            if (mCurAudioRoutes.mBluetoothName != null) {
+                mCurAudioRoutes.mBluetoothName = null;
+                sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
+                        SENDMSG_NOOP, 0, 0, null, 0);
+            }
+        }
     }
 
     // must be called synchronized on mConnectedDevices
