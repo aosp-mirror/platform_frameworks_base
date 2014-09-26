@@ -492,7 +492,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
     @Override
     public Drawable mutate() {
-        if (!mMutated) {
+        if (!mMutated && super.mutate() == this) {
             final AnimatedStateListState newState = new AnimatedStateListState(mState, this, null);
             setConstantState(newState);
             mMutated = true;

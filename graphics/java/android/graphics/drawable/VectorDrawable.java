@@ -507,9 +507,10 @@ public class VectorDrawable extends Drawable {
                 pathRenderer.getAlpha());
         pathRenderer.setAlpha(alphaInFloat);
 
-        pathRenderer.mRootName = a.getString(R.styleable.VectorDrawable_name);
-        if (pathRenderer.mRootName != null) {
-            pathRenderer.mVGTargetsMap.put(pathRenderer.mRootName, pathRenderer);
+        final String name = a.getString(R.styleable.VectorDrawable_name);
+        if (name != null) {
+            pathRenderer.mRootName = name;
+            pathRenderer.mVGTargetsMap.put(name, pathRenderer);
         }
     }
 
@@ -1313,9 +1314,15 @@ public class VectorDrawable extends Drawable {
             // Account for any configuration changes.
             mChangingConfigurations |= a.getChangingConfigurations();
 
-            mPathName = a.getString(R.styleable.VectorDrawableClipPath_name);
-            mNodes = PathParser.createNodesFromPathData(a.getString(
-                    R.styleable.VectorDrawableClipPath_pathData));
+            final String pathName = a.getString(R.styleable.VectorDrawableClipPath_name);
+            if (pathName != null) {
+                mPathName = pathName;
+            }
+
+            final String pathData = a.getString(R.styleable.VectorDrawableClipPath_pathData);
+            if (pathData != null) {
+                mNodes = PathParser.createNodesFromPathData(pathData);
+            }
         }
 
         @Override
@@ -1415,9 +1422,15 @@ public class VectorDrawable extends Drawable {
             // Extract the theme attributes, if any.
             mThemeAttrs = a.extractThemeAttrs();
 
-            mPathName = a.getString(R.styleable.VectorDrawablePath_name);
-            mNodes = PathParser.createNodesFromPathData(a.getString(
-                    R.styleable.VectorDrawablePath_pathData));
+            final String pathName = a.getString(R.styleable.VectorDrawablePath_name);
+            if (pathName != null) {
+                mPathName = pathName;
+            }
+
+            final String pathData = a.getString(R.styleable.VectorDrawablePath_pathData);
+            if (pathData != null) {
+                mNodes = PathParser.createNodesFromPathData(pathData);
+            }
 
             mFillColor = a.getColor(R.styleable.VectorDrawablePath_fillColor,
                     mFillColor);
