@@ -9547,7 +9547,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void removeContentProviderExternal(String name, IBinder token) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call removeContentProviderExternal()");
-        removeContentProviderExternalUnchecked(name, token, UserHandle.getCallingUserId());
+        int userId = UserHandle.getCallingUserId();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            removeContentProviderExternalUnchecked(name, token, userId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void removeContentProviderExternalUnchecked(String name, IBinder token, int userId) {
