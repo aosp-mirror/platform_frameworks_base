@@ -58,6 +58,8 @@ public class FragmentBreadCrumbs extends ViewGroup
     private OnBreadCrumbClickListener mOnBreadCrumbClickListener;
 
     private int mGravity;
+    private int mLayoutResId;
+    private int mTextColor;
 
     private static final int DEFAULT_GRAVITY = Gravity.START | Gravity.CENTER_VERTICAL;
 
@@ -103,6 +105,12 @@ public class FragmentBreadCrumbs extends ViewGroup
 
         mGravity = a.getInt(com.android.internal.R.styleable.FragmentBreadCrumbs_gravity,
                 DEFAULT_GRAVITY);
+        mLayoutResId = a.getResourceId(
+                com.android.internal.R.styleable.FragmentBreadCrumbs_itemLayout,
+                com.android.internal.R.layout.fragment_bread_crumb_item);
+        mTextColor = a.getColor(
+                com.android.internal.R.styleable.FragmentBreadCrumbs_itemColor,
+                0);
 
         a.recycle();
     }
@@ -311,12 +319,11 @@ public class FragmentBreadCrumbs extends ViewGroup
                 }
             }
             if (i >= numViews) {
-                final View item = mInflater.inflate(
-                        com.android.internal.R.layout.fragment_bread_crumb_item,
-                        this, false);
+                final View item = mInflater.inflate(mLayoutResId, this, false);
                 final TextView text = (TextView) item.findViewById(com.android.internal.R.id.title);
                 text.setText(bse.getBreadCrumbTitle());
                 text.setTag(bse);
+                text.setTextColor(mTextColor);
                 if (i == 0) {
                     item.findViewById(com.android.internal.R.id.left_icon).setVisibility(View.GONE);
                 }
