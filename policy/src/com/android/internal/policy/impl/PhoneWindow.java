@@ -274,6 +274,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private long mBackgroundFadeDurationMillis = -1;
     private Boolean mSharedElementsUseOverlay;
 
+    private Rect mTempRect;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -2892,37 +2894,53 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // Show the status guard when the non-overlay contextual action bar is showing
             if (mActionModeView != null) {
                 if (mActionModeView.getLayoutParams() instanceof MarginLayoutParams) {
-                    MarginLayoutParams mlp = (MarginLayoutParams) mActionModeView.getLayoutParams();
+                    // Insets are magic!
+                    final MarginLayoutParams mlp = (MarginLayoutParams)
+                            mActionModeView.getLayoutParams();
                     boolean mlpChanged = false;
                     if (mActionModeView.isShown()) {
-                        final boolean nonOverlay = (getLocalFeatures()
-                                & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0;
-                        if (mlp.topMargin != insets.getSystemWindowInsetTop()) {
+                        if (mTempRect == null) {
+                            mTempRect = new Rect();
+                        }
+                        final Rect rect = mTempRect;
+
+                        // If the parent doesn't consume the insets, manually
+                        // apply the default system window insets.
+                        mContentParent.computeSystemWindowInsets(insets, rect);
+                        final int newMargin = rect.top == 0 ? insets.getSystemWindowInsetTop() : 0;
+                        if (mlp.topMargin != newMargin) {
                             mlpChanged = true;
                             mlp.topMargin = insets.getSystemWindowInsetTop();
 
-                            // Only show status guard for non-overlay modes.
-                            if (nonOverlay) {
-                                if (mStatusGuard == null) {
-                                    mStatusGuard = new View(mContext);
-                                    mStatusGuard.setBackgroundColor(mContext.getResources()
-                                            .getColor(R.color.input_method_navigation_guard));
-                                    addView(mStatusGuard, indexOfChild(mStatusColorView),
-                                            new LayoutParams(LayoutParams.MATCH_PARENT,
-                                                    mlp.topMargin,
-                                                    Gravity.START | Gravity.TOP));
-                                } else {
-                                    LayoutParams lp = (LayoutParams) mStatusGuard.getLayoutParams();
-                                    if (lp.height != mlp.topMargin) {
-                                        lp.height = mlp.topMargin;
-                                        mStatusGuard.setLayoutParams(lp);
-                                    }
+                            if (mStatusGuard == null) {
+                                mStatusGuard = new View(mContext);
+                                mStatusGuard.setBackgroundColor(mContext.getResources()
+                                        .getColor(R.color.input_method_navigation_guard));
+                                addView(mStatusGuard, indexOfChild(mStatusColorView),
+                                        new LayoutParams(LayoutParams.MATCH_PARENT,
+                                                mlp.topMargin, Gravity.START | Gravity.TOP));
+                            } else {
+                                final LayoutParams lp = (LayoutParams)
+                                        mStatusGuard.getLayoutParams();
+                                if (lp.height != mlp.topMargin) {
+                                    lp.height = mlp.topMargin;
+                                    mStatusGuard.setLayoutParams(lp);
                                 }
                             }
                         }
+
+                        // We only need to consume the insets if the action
+                        // mode is overlaid on the app content (e.g. it's
+                        // sitting in a FrameLayout, see
+                        // screen_simple_overlay_action_mode.xml).
+                        final boolean nonOverlay = (getLocalFeatures()
+                                & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0;
                         insets = insets.consumeSystemWindowInsets(
                                 false, nonOverlay /* top */, false, false);
-                        showStatusGuard = nonOverlay;
+
+                        // The action mode's theme may differ from the app, so
+                        // always show the status guard above it.
+                        showStatusGuard = true;
                     } else {
                         // reset top margin
                         if (mlp.topMargin != 0) {
