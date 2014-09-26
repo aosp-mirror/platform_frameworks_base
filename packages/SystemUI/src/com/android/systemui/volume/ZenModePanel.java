@@ -135,20 +135,21 @@ public class ZenModePanel extends LinearLayout {
             @Override
             public void onClick(View v) {
                 setExpanded(true);
-                fireInteraction();
             }
         });
+        Interaction.register(mZenSubheadCollapsed, mInteractionCallback);
 
         mZenSubheadExpanded = (TextView) findViewById(R.id.zen_subhead_expanded);
+        Interaction.register(mZenSubheadExpanded, mInteractionCallback);
 
         mMoreSettings = findViewById(R.id.zen_more_settings);
         mMoreSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fireMoreSettings();
-                fireInteraction();
             }
         });
+        Interaction.register(mMoreSettings, mInteractionCallback);
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
     }
@@ -444,18 +445,22 @@ public class ZenModePanel extends LinearLayout {
                         childTag.rb.setChecked(false);
                     }
                     select(tag.condition);
-                    fireInteraction();
+                    announceConditionSelection(tag);
                 }
             }
         });
-        final TextView title = (TextView) row.findViewById(android.R.id.title);
-        if (condition == null) {
-            title.setText(mContext.getString(com.android.internal.R.string.zen_mode_forever));
-        } else {
-            title.setText(condition.summary);
+
+        if (tag.title == null) {
+            tag.title = (TextView) row.findViewById(android.R.id.title);
         }
-        title.setEnabled(enabled);
-        title.setAlpha(enabled ? 1 : .4f);
+        if (condition == null) {
+            tag.title.setText(mContext.getString(com.android.internal.R.string.zen_mode_forever));
+        } else {
+            tag.title.setText(condition.summary);
+        }
+        tag.title.setEnabled(enabled);
+        tag.title.setAlpha(enabled ? 1 : .4f);
+
         final ImageView button1 = (ImageView) row.findViewById(android.R.id.button1);
         button1.setOnClickListener(new OnClickListener() {
             @Override
@@ -471,11 +476,10 @@ public class ZenModePanel extends LinearLayout {
                 onClickTimeButton(row, tag, true /*up*/);
             }
         });
-        title.setOnClickListener(new OnClickListener() {
+        tag.title.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 tag.rb.setChecked(true);
-                fireInteraction();
             }
         });
 
@@ -497,6 +501,30 @@ public class ZenModePanel extends LinearLayout {
             button1.setVisibility(View.GONE);
             button2.setVisibility(View.GONE);
         }
+        // wire up interaction callbacks for newly-added condition rows
+        if (convertView == null) {
+            Interaction.register(tag.rb, mInteractionCallback);
+            Interaction.register(tag.title, mInteractionCallback);
+            Interaction.register(button1, mInteractionCallback);
+            Interaction.register(button2, mInteractionCallback);
+        }
+    }
+
+    private void announceConditionSelection(ConditionTag tag) {
+        final int zen = getSelectedZen(Global.ZEN_MODE_OFF);
+        String modeText;
+        switch(zen) {
+            case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                modeText = mContext.getString(R.string.zen_important_interruptions);
+                break;
+            case Global.ZEN_MODE_NO_INTERRUPTIONS:
+                modeText = mContext.getString(R.string.zen_no_interruptions);
+                break;
+             default:
+                return;
+        }
+        announceForAccessibility(mContext.getString(R.string.zen_mode_and_condition, modeText,
+                tag.title.getText()));
     }
 
     private void onClickTimeButton(View row, ConditionTag tag, boolean up) {
@@ -530,7 +558,7 @@ public class ZenModePanel extends LinearLayout {
         bind(mTimeCondition, row);
         tag.rb.setChecked(true);
         select(mTimeCondition);
-        fireInteraction();
+        announceConditionSelection(tag);
     }
 
     private void select(Condition condition) {
@@ -611,6 +639,7 @@ public class ZenModePanel extends LinearLayout {
     // used as the view tag on condition rows
     private static class ConditionTag {
         RadioButton rb;
+        TextView title;
         Condition condition;
     }
 
@@ -690,6 +719,18 @@ public class ZenModePanel extends LinearLayout {
                 if (DEBUG) Log.d(mTag, "mZenButtonsCallback selected=" + value);
                 mController.setZen((Integer) value);
             }
+        }
+
+        @Override
+        public void onInteraction() {
+            fireInteraction();
+        }
+    };
+
+    private final Interaction.Callback mInteractionCallback = new Interaction.Callback() {
+        @Override
+        public void onInteraction() {
+            fireInteraction();
         }
     };
 }
