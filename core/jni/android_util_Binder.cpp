@@ -1232,7 +1232,7 @@ static const JNINativeMethod gBinderProxyMethods[] = {
     {"pingBinder",          "()Z", (void*)android_os_BinderProxy_pingBinder},
     {"isBinderAlive",       "()Z", (void*)android_os_BinderProxy_isBinderAlive},
     {"getInterfaceDescriptor", "()Ljava/lang/String;", (void*)android_os_BinderProxy_getInterfaceDescriptor},
-    {"transact",            "(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z", (void*)android_os_BinderProxy_transact},
+    {"transactNative",      "(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z", (void*)android_os_BinderProxy_transact},
     {"linkToDeath",         "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
     {"unlinkToDeath",       "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
     {"destroy",             "()V", (void*)android_os_BinderProxy_destroy},
