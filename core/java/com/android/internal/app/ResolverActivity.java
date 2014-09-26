@@ -128,7 +128,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 com.android.internal.R.string.whichSendApplicationNamed),
         DEFAULT(null,
                 com.android.internal.R.string.whichApplication,
-                com.android.internal.R.string.whichApplicationNamed);
+                com.android.internal.R.string.whichApplicationNamed),
+        HOME(Intent.ACTION_MAIN,
+                com.android.internal.R.string.whichHomeApplication,
+                com.android.internal.R.string.whichHomeApplicationNamed);
 
         public final String action;
         public final int titleRes;
@@ -142,7 +145,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         public static ActionTitle forAction(String action) {
             for (ActionTitle title : values()) {
-                if (action != null && action.equals(title.action)) {
+                if (title != HOME && action != null && action.equals(title.action)) {
                     return title;
                 }
             }
@@ -165,26 +168,19 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Use a specialized prompt when we're handling the 'Home' app startActivity()
-        final int titleResource;
         final Intent intent = makeMyIntent();
         final Set<String> categories = intent.getCategories();
         if (Intent.ACTION_MAIN.equals(intent.getAction())
                 && categories != null
                 && categories.size() == 1
                 && categories.contains(Intent.CATEGORY_HOME)) {
-            titleResource = com.android.internal.R.string.whichHomeApplication;
-
             // Note: this field is not set to true in the compatibility version.
             mResolvingHome = true;
-        } else {
-            titleResource = 0;
         }
 
         setSafeForwardingMode(true);
 
-        onCreate(savedInstanceState, intent,
-                titleResource != 0 ? getResources().getText(titleResource) : null, titleResource,
-                null, null, true);
+        onCreate(savedInstanceState, intent, null, 0, null, null, true);
     }
 
     /**
@@ -336,7 +332,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     }
 
     protected CharSequence getTitleForAction(String action, int defaultTitleRes) {
-        final ActionTitle title = ActionTitle.forAction(action);
+        final ActionTitle title = mResolvingHome ? ActionTitle.HOME : ActionTitle.forAction(action);
         final boolean named = mAdapter.hasFilteredItem();
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);

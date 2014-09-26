@@ -2068,4 +2068,5 @@
   <java-symbol type="bool" name="config_restart_radio_on_pdp_fail_regular_deactivation" />
   <java-symbol type="array" name="networks_not_clear_data" />
   <java-symbol type="bool" name="config_switch_phone_on_voice_reg_state_change" />
+  <java-symbol type="string" name="whichHomeApplicationNamed" />
 </resources>
