@@ -784,6 +784,34 @@ include the action bar on devices running Android 2.1 or higher."
 
       <li class="nav-section">
         <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/ui/index.html"
+             description="How to create custom user interfaces for wearable apps."
+            >Creating Custom UIs</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/layouts.html">Defining Layouts</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/cards.html">Creating Cards</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/lists.html">Creating Lists</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/2d-picker.html">Creating a 2D Picker</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/confirm.html">Showing Confirmations</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/exit.html">Exiting Full-Screen Activities</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/wearables/data-layer/index.html"
              description="How to sync data between handhelds and wearables."
             >Sending and Syncing Data</a>
