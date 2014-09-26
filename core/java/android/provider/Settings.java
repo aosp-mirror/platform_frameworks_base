@@ -978,6 +978,19 @@ public final class Settings {
     public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
 
     /**
+     * Activity Extra: The device identifier to act upon.
+     * <p>
+     * This can be passed as an extra field in an Activity Intent with a single
+     * InputDeviceIdentifier. This field is used by some activities to jump straight into the
+     * settings for the given device.
+     * <p>
+     * Example: The {@link #INPUT_METHOD_SETTINGS} intent opens the keyboard layout dialog for the
+     * given device.
+     * @hide
+     */
+    public static final String EXTRA_INPUT_DEVICE_IDENTIFIER = "input_device_identifier";
+
+    /**
      * @hide
      * Activity Extra: Enable or disable Airplane Mode.
      * <p>
