@@ -1169,7 +1169,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         // No enabled installed services => disable accessibility to avoid
         // sending accessibility events with no recipient across processes.
-        if (isEnabled && userState.mEnabledServices.isEmpty()) {
+        if (isEnabled && userState.mBoundServices.isEmpty()
+                && userState.mBindingServices.isEmpty()) {
             userState.mIsAccessibilityEnabled = false;
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId);
