@@ -27271,8 +27271,8 @@ package android.speech.tts {
     method public boolean isSpeaking();
     method public int playEarcon(java.lang.String, int, android.os.Bundle, java.lang.String);
     method public deprecated int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
-    method public int playSilence(long, int, java.lang.String);
     method public deprecated int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
+    method public int playSilentUtterance(long, int, java.lang.String);
     method public int setAudioAttributes(android.media.AudioAttributes);
     method public deprecated int setEngineByPackageName(java.lang.String);
     method public int setLanguage(java.util.Locale);
