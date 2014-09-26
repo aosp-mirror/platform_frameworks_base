@@ -31,6 +31,7 @@ import android.os.UserHandle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -110,6 +111,17 @@ public class ZenToast {
         message.setText(text);
         final ImageView icon = (ImageView) mZenToast.findViewById(android.R.id.icon);
         icon.setImageResource(iconRes);
+        mZenToast.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                // noop
+            }
+
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                mZenToast.announceForAccessibility(message.getText());
+            }
+        });
         mWindowManager.addView(mZenToast, params);
         final int animDuration = res.getInteger(R.integer.zen_toast_animation_duration);
         final int visibleDuration = res.getInteger(R.integer.zen_toast_visible_duration);
