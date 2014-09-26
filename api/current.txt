@@ -29110,7 +29110,6 @@ package android.telephony {
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
-    method public int hasCarrierPrivileges();
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
     method public byte[] iccExchangeSimIO(int, int, int, int, int, java.lang.String);
@@ -29121,18 +29120,11 @@ package android.telephony {
     method public boolean isSmsCapable();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
-    method public boolean setGlobalPreferredNetworkType();
-    method public void setLine1NumberForDisplay(java.lang.String, java.lang.String);
-    method public boolean setOperatorBrandOverride(java.lang.String);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
-    field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
-    field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
-    field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
-    field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final int DATA_ACTIVITY_DORMANT = 4; // 0x4
     field public static final int DATA_ACTIVITY_IN = 1; // 0x1
     field public static final int DATA_ACTIVITY_INOUT = 3; // 0x3
