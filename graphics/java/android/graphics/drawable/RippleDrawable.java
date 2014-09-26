@@ -114,7 +114,8 @@ public class RippleDrawable extends LayerDrawable {
     /** Current dirty bounds, union of current and previous drawing bounds. */
     private final Rect mDirtyBounds = new Rect();
 
-    private final RippleState mState;
+    /** Mirrors mLayerState with some extra information. */
+    private RippleState mState;
 
     /** The masking layer, e.g. the layer with id R.id.mask. */
     private Drawable mMask;
@@ -885,18 +886,34 @@ public class RippleDrawable extends LayerDrawable {
         return mState;
     }
 
+    @Override
+    public Drawable mutate() {
+        super.mutate();
+
+        // LayerDrawable creates a new state using createConstantState, so
+        // this should always be a safe cast.
+        mState = (RippleState) mLayerState;
+        return this;
+    }
+
+    @Override
+    RippleState createConstantState(LayerState state, Resources res) {
+        return new RippleState(state, this, res);
+    }
+
     static class RippleState extends LayerState {
         int[] mTouchThemeAttrs;
         ColorStateList mColor = ColorStateList.valueOf(Color.MAGENTA);
         int mMaxRadius = RADIUS_AUTO;
 
-        public RippleState(RippleState orig, RippleDrawable owner, Resources res) {
+        public RippleState(LayerState orig, RippleDrawable owner, Resources res) {
             super(orig, owner, res);
 
-            if (orig != null) {
-                mTouchThemeAttrs = orig.mTouchThemeAttrs;
-                mColor = orig.mColor;
-                mMaxRadius = orig.mMaxRadius;
+            if (orig != null && orig instanceof RippleState) {
+                final RippleState origs = (RippleState) orig;
+                mTouchThemeAttrs = origs.mTouchThemeAttrs;
+                mColor = origs.mColor;
+                mMaxRadius = origs.mMaxRadius;
             }
         }
 
