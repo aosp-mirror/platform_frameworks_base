@@ -303,8 +303,12 @@ public class KeyguardAffordanceHelper {
     }
 
     private boolean isBelowFalsingThreshold() {
-        return Math.abs(mTranslation) < Math.abs(mTranslationOnDown)
-                + mMinTranslationAmount;
+        return Math.abs(mTranslation) < Math.abs(mTranslationOnDown) + getMinTranslationAmount();
+    }
+
+    private int getMinTranslationAmount() {
+        float factor = mCallback.getAffordanceFalsingFactor();
+        return (int) (mMinTranslationAmount * factor);
     }
 
     private void fling(float vel, final boolean snapBack) {
@@ -339,14 +343,14 @@ public class KeyguardAffordanceHelper {
         translation = rightSwipePossible() ? translation : Math.max(0, translation);
         translation = leftSwipePossible() ? translation : Math.min(0, translation);
         float absTranslation = Math.abs(translation);
-        if (absTranslation > Math.abs(mTranslationOnDown) + mMinTranslationAmount ||
+        if (absTranslation > Math.abs(mTranslationOnDown) + getMinTranslationAmount() ||
                 mMotionPerformedByUser) {
             mMotionPerformedByUser = true;
         }
         if (translation != mTranslation || isReset) {
             KeyguardAffordanceView targetView = translation > 0 ? mLeftIcon : mRightIcon;
             KeyguardAffordanceView otherView = translation > 0 ? mRightIcon : mLeftIcon;
-            float alpha = absTranslation / mMinTranslationAmount;
+            float alpha = absTranslation / getMinTranslationAmount();
 
             // We interpolate the alpha of the other icons to 0
             float fadeOutAlpha = SWIPE_RESTING_ALPHA_AMOUNT * (1.0f - alpha);
@@ -482,5 +486,10 @@ public class KeyguardAffordanceHelper {
         View getLeftPreview();
 
         View getRightPreview();
+
+        /**
+         * @return The factor the minimum swipe amount should be multiplied with.
+         */
+        float getAffordanceFalsingFactor();
     }
 }
