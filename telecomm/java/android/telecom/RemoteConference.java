@@ -166,6 +166,20 @@ public final class RemoteConference {
         }
     }
 
+    public void merge() {
+        try {
+            mConnectionService.mergeConference(mId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void swap() {
+        try {
+            mConnectionService.swapConference(mId);
+        } catch (RemoteException e) {
+        }
+    }
+
     public void hold() {
         try {
             mConnectionService.hold(mId);
