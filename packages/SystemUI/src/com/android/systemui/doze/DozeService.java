@@ -18,10 +18,12 @@ package com.android.systemui.doze;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
@@ -61,12 +63,14 @@ public class DozeService extends DreamService {
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private AlarmManager mAlarmManager;
+    private UiModeManager mUiModeManager;
     private boolean mDreaming;
     private boolean mPulsing;
     private boolean mBroadcastReceiverRegistered;
     private boolean mDisplayStateSupported;
     private boolean mNotificationLightOn;
     private boolean mPowerSaveActive;
+    private boolean mCarMode;
     private long mNotificationPulseTime;
     private int mScheduleResetsRemaining;
 
@@ -88,6 +92,7 @@ public class DozeService extends DreamService {
         pw.print("  mDisplayStateSupported: "); pw.println(mDisplayStateSupported);
         pw.print("  mNotificationLightOn: "); pw.println(mNotificationLightOn);
         pw.print("  mPowerSaveActive: "); pw.println(mPowerSaveActive);
+        pw.print("  mCarMode: "); pw.println(mCarMode);
         pw.print("  mNotificationPulseTime: "); pw.println(mNotificationPulseTime);
         pw.print("  mScheduleResetsRemaining: "); pw.println(mScheduleResetsRemaining);
         mDozeParameters.dump(pw);
@@ -116,6 +121,7 @@ public class DozeService extends DreamService {
         mWakeLock.setReferenceCounted(true);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mDisplayStateSupported = mDozeParameters.getDisplayStateSupported();
+        mUiModeManager = (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
         turnDisplayOff();
     }
 
@@ -135,10 +141,15 @@ public class DozeService extends DreamService {
         }
 
         mPowerSaveActive = mHost.isPowerSaveActive();
+        mCarMode = mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR;
         if (DEBUG) Log.d(mTag, "onDreamingStarted canDoze=" + canDoze() + " mPowerSaveActive="
-                + mPowerSaveActive);
+                + mPowerSaveActive + " mCarMode=" + mCarMode);
         if (mPowerSaveActive) {
             finishToSavePower();
+            return;
+        }
+        if (mCarMode) {
+            finishForCarMode();
             return;
         }
 
@@ -221,6 +232,11 @@ public class DozeService extends DreamService {
         finish();
     }
 
+    private void finishForCarMode() {
+        Log.w(mTag, "Exiting ambient mode, not allowed in car mode");
+        finish();
+    }
+
     private void listenForPulseSignals(boolean listen) {
         if (DEBUG) Log.d(mTag, "listenForPulseSignals: " + listen);
         mSigMotionSensor.setListening(listen);
@@ -233,6 +249,7 @@ public class DozeService extends DreamService {
         if (listen) {
             final IntentFilter filter = new IntentFilter(PULSE_ACTION);
             filter.addAction(NOTIFICATION_PULSE_ACTION);
+            filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
             mContext.registerReceiver(mBroadcastReceiver, filter);
             mBroadcastReceiverRegistered = true;
         } else {
@@ -340,6 +357,12 @@ public class DozeService extends DreamService {
                 DozeLog.traceNotificationPulse(instance);
                 requestPulse();
                 rescheduleNotificationPulse(mNotificationLightOn);
+            }
+            if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
+                mCarMode = true;
+                if (mCarMode && mDreaming) {
+                    finishForCarMode();
+                }
             }
         }
     };
