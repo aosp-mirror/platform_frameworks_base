@@ -308,6 +308,7 @@ please see themes_device_defaults.xml.
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Holo.PreferenceScreen</item>
+        <item name="preferenceActivityStyle">@style/PreferenceActivity</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Holo</item>
         <item name="preferenceCategoryStyle">@style/Preference.Holo.Category</item>
         <item name="preferenceStyle">@style/Preference.Holo</item>
@@ -643,6 +644,7 @@ please see themes_device_defaults.xml.
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Holo.PreferenceScreen</item>
+        <item name="preferenceActivityStyle">@style/PreferenceActivity</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Holo</item>
         <item name="preferenceCategoryStyle">@style/Preference.Holo.Category</item>
         <item name="preferenceStyle">@style/Preference.Holo</item>

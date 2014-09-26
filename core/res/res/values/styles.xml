@@ -533,6 +533,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.FragmentBreadCrumbs">
         <item name="padding">4dp</item>
         <item name="animateLayoutChanges">true</item>
+        <item name="itemLayout">@layout/fragment_bread_crumb_item</item>
+        <item name="itemColor">@null</item>
     </style>
 
     <style name="Widget.ImageWell">
@@ -952,6 +954,12 @@ please see styles_device_defaults.xml.
         <item name="layout">@layout/preference_list_fragment</item>
         <item name="paddingStart">0dp</item>
         <item name="paddingEnd">0dp</item>
+    </style>
+
+    <style name="PreferenceActivity">
+        <item name="layout">@layout/preference_list_content</item>
+        <item name="headerLayout">@layout/preference_header_item</item>
+        <item name="headerRemoveIconIfEmpty">false</item>
     </style>
 
     <style name="Preference.Information">
