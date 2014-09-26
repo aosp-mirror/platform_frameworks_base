@@ -6096,8 +6096,15 @@ public final class ViewRootImpl implements ViewParent,
                 if (source != null) {
                     AccessibilityNodeProvider provider = source.getAccessibilityNodeProvider();
                     if (provider != null) {
-                        AccessibilityNodeInfo node = provider.createAccessibilityNodeInfo(
-                                AccessibilityNodeInfo.getVirtualDescendantId(sourceNodeId));
+                        final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
+                                sourceNodeId);
+                        final AccessibilityNodeInfo node;
+                        if (virtualNodeId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                            node = provider.createAccessibilityNodeInfo(
+                                    AccessibilityNodeProvider.HOST_VIEW_ID);
+                        } else {
+                            node = provider.createAccessibilityNodeInfo(virtualNodeId);
+                        }
                         setAccessibilityFocus(source, node);
                     }
                 }
@@ -6135,8 +6142,14 @@ public final class ViewRootImpl implements ViewParent,
                         if (provider != null) {
                             final int virtualChildId = AccessibilityNodeInfo.getVirtualDescendantId(
                                     mAccessibilityFocusedVirtualView.getSourceNodeId());
-                            mAccessibilityFocusedVirtualView = provider.createAccessibilityNodeInfo(
-                                    virtualChildId);
+                            if (virtualChildId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                                mAccessibilityFocusedVirtualView = provider
+                                        .createAccessibilityNodeInfo(
+                                                AccessibilityNodeProvider.HOST_VIEW_ID);
+                            } else {
+                                mAccessibilityFocusedVirtualView = provider
+                                        .createAccessibilityNodeInfo(virtualChildId);
+                            }
                         }
                     }
                 }
