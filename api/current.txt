@@ -25824,10 +25824,6 @@ package android.provider {
   public static final class Telephony.Mms.Intents {
     field public static final java.lang.String CONTENT_CHANGED_ACTION = "android.intent.action.CONTENT_CHANGED";
     field public static final java.lang.String DELETED_CONTENTS = "deleted_contents";
-    field public static final java.lang.String EXTRA_MMS_CONTENT_URI = "android.provider.Telephony.extra.MMS_CONTENT_URI";
-    field public static final java.lang.String EXTRA_MMS_LOCATION_URL = "android.provider.Telephony.extra.MMS_LOCATION_URL";
-    field public static final java.lang.String MMS_DOWNLOAD_ACTION = "android.provider.Telephony.MMS_DOWNLOAD";
-    field public static final java.lang.String MMS_SEND_ACTION = "android.provider.Telephony.MMS_SEND";
   }
 
   public static final class Telephony.Mms.Outbox implements android.provider.Telephony.BaseMmsColumns {
@@ -25932,10 +25928,8 @@ package android.provider {
     field public static final java.lang.String SMS_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_CB_RECEIVED";
     field public static final java.lang.String SMS_DELIVER_ACTION = "android.provider.Telephony.SMS_DELIVER";
     field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
-    field public static final java.lang.String SMS_FILTER_ACTION = "android.provider.Telephony.SMS_FILTER";
     field public static final java.lang.String SMS_RECEIVED_ACTION = "android.provider.Telephony.SMS_RECEIVED";
     field public static final java.lang.String SMS_REJECTED_ACTION = "android.provider.Telephony.SMS_REJECTED";
-    field public static final java.lang.String SMS_SEND_ACTION = "android.provider.Telephony.SMS_SEND";
     field public static final java.lang.String SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION = "android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED";
     field public static final java.lang.String WAP_PUSH_DELIVER_ACTION = "android.provider.Telephony.WAP_PUSH_DELIVER";
     field public static final java.lang.String WAP_PUSH_RECEIVED_ACTION = "android.provider.Telephony.WAP_PUSH_RECEIVED";
@@ -28932,14 +28926,10 @@ package android.telephony {
     method public static android.telephony.SmsManager getDefault();
     method public static android.telephony.SmsManager getSmsManagerForSubscriber(long);
     method public long getSubId();
-    method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(android.content.Context, android.net.Uri, java.lang.String, android.os.Bundle, android.app.PendingIntent);
     method public void sendMultipartTextMessage(java.lang.String, java.lang.String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
     method public void sendTextMessage(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
-    method public void updateMmsDownloadStatus(android.content.Context, int, int, android.net.Uri);
-    method public void updateMmsSendStatus(android.content.Context, int, byte[], int, android.net.Uri);
-    method public void updateSmsSendStatus(int, boolean);
     field public static final java.lang.String EXTRA_MMS_DATA = "android.telephony.extra.MMS_DATA";
     field public static final java.lang.String MMS_CONFIG_ALIAS_ENABLED = "aliasEnabled";
     field public static final java.lang.String MMS_CONFIG_ALIAS_MAX_CHARS = "aliasMaxChars";
