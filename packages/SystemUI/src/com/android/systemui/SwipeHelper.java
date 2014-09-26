@@ -412,7 +412,7 @@ public class SwipeHelper implements Gefingerpoken {
                 if (mCurrView != null) {
                     float delta = getPos(ev) - mInitialTouchPos;
                     float absDelta = Math.abs(delta);
-                    if (absDelta >= mFalsingThreshold) {
+                    if (absDelta >= getFalsingThreshold()) {
                         mTouchAboveFalsingThreshold = true;
                     }
                     // don't let items that can't be dismissed be dragged more than
@@ -466,6 +466,11 @@ public class SwipeHelper implements Gefingerpoken {
         return true;
     }
 
+    private int getFalsingThreshold() {
+        float factor = mCallback.getFalsingThresholdFactor();
+        return (int) (mFalsingThreshold * factor);
+    }
+
     public interface Callback {
         View getChildAtPosition(MotionEvent ev);
 
@@ -489,6 +494,11 @@ public class SwipeHelper implements Gefingerpoken {
          * @return if true, prevents the default alpha fading.
          */
         boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress);
+
+        /**
+         * @return The factor the falsing threshold should be multiplied with
+         */
+        float getFalsingThresholdFactor();
     }
 
     /**

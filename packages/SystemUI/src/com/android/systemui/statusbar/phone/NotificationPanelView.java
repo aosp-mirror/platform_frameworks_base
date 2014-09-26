@@ -706,7 +706,7 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 setQsExpansion(h + mInitialHeightOnTouch);
-                if (h >= mQsFalsingThreshold) {
+                if (h >= getFalsingThreshold()) {
                     mQsTouchAboveFalsingThreshold = true;
                 }
                 trackMovement(event);
@@ -730,6 +730,11 @@ public class NotificationPanelView extends PanelView implements
                 }
                 break;
         }
+    }
+
+    private int getFalsingThreshold() {
+        float factor = mStatusBar.isScreenOnComingFromTouch() ? 1.5f : 1.0f;
+        return (int) (mQsFalsingThreshold * factor);
     }
 
     @Override
@@ -1630,6 +1635,11 @@ public class NotificationPanelView extends PanelView implements
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
                 ? mKeyguardBottomArea.getPhonePreview()
                 : mKeyguardBottomArea.getCameraPreview();
+    }
+
+    @Override
+    public float getAffordanceFalsingFactor() {
+        return mStatusBar.isScreenOnComingFromTouch() ? 1.5f : 1.0f;
     }
 
     @Override
