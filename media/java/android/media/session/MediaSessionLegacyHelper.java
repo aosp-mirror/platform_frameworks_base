@@ -49,7 +49,7 @@ import android.view.KeyEvent;
  */
 public class MediaSessionLegacyHelper {
     private static final String TAG = "MediaSessionHelper";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final Object sLock = new Object();
     private static MediaSessionLegacyHelper sInstance;
