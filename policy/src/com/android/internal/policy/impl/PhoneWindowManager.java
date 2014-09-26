@@ -4248,8 +4248,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey();
         if (interactive || (isInjected && !isWakeKey)) {
-            // When the device is interactive or the key is injected pass the key to the
-            // application.
+            // When the device is interactive or the key is injected pass the
+            // key to the application.
             result = ACTION_PASS_TO_USER;
             isWakeKey = false;
         } else if (!interactive && shouldDispatchInputWhenNonInteractive()) {
@@ -4449,16 +4449,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                if (down) {
-                    TelecomManager telecomManager = getTelecommService();
-                    if (telecomManager != null) {
-                        if (telecomManager.isInCall()) {
-                            // Suppress PLAY/PAUSE toggle when phone is ringing or in-call
-                            // to avoid music playback.
-                            break;
-                        }
-                    }
-                }
             case KeyEvent.KEYCODE_HEADSETHOOK:
             case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_MEDIA_STOP:
@@ -4468,6 +4458,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
+                if (MediaSessionLegacyHelper.getHelper(mContext).isGlobalPriorityActive()) {
+                    // If the global session is active pass all media keys to it
+                    // instead of the active window.
+                    result &= ~ACTION_PASS_TO_USER;
+                }
                 if ((result & ACTION_PASS_TO_USER) == 0) {
                     // Only do this if we would otherwise not pass it to the user. In that
                     // case, the PhoneWindow class will do the same thing, except it will
