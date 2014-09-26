@@ -217,6 +217,10 @@ public class MediaSessionStack {
         return null;
     }
 
+    public boolean isGlobalPriorityActive() {
+        return mGlobalPrioritySession == null ? false : mGlobalPrioritySession.isActive();
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0,
                 UserHandle.USER_ALL);
