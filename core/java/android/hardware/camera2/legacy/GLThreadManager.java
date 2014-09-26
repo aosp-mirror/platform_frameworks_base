@@ -113,6 +113,9 @@ public class GLThreadManager {
                     case MSG_ALLOW_FRAMES:
                         mDroppingFrames = false;
                         break;
+                    case RequestHandlerThread.MSG_POKE_IDLE_HANDLER:
+                        // OK: Ignore message.
+                        break;
                     default:
                         Log.e(TAG, "Unhandled message " + msg.what + " on GLThread.");
                         break;

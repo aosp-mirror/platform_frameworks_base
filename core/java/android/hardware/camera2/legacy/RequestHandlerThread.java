@@ -23,6 +23,15 @@ import android.os.Looper;
 import android.os.MessageQueue;
 
 public class RequestHandlerThread extends HandlerThread {
+
+    /**
+     * Ensure that the MessageQueue's idle handler gets run by poking the message queue;
+     * normally if the message queue is already idle, the idle handler won't get invoked.
+     *
+     * <p>Users of this handler thread should ignore this message.</p>
+     */
+    public final static int MSG_POKE_IDLE_HANDLER = -1;
+
     private final ConditionVariable mStarted = new ConditionVariable(false);
     private final ConditionVariable mIdle = new ConditionVariable(true);
     private Handler.Callback mCallback;
@@ -86,12 +95,15 @@ public class RequestHandlerThread extends HandlerThread {
 
     // Blocks until thread is idling
     public void waitUntilIdle() {
-        Looper looper = waitAndGetHandler().getLooper();
+        Handler handler = waitAndGetHandler();
+        Looper looper = handler.getLooper();
         if (looper.isIdling()) {
             return;
         }
         mIdle.close();
         looper.getQueue().addIdleHandler(mIdleHandler);
+        // Ensure that the idle handler gets run even if the looper already went idle
+        handler.sendEmptyMessage(MSG_POKE_IDLE_HANDLER);
         if (looper.isIdling()) {
             return;
         }
