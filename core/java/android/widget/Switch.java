@@ -208,7 +208,13 @@ public class Switch extends CompoundButton {
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Switch, defStyleAttr, defStyleRes);
         mThumbDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_thumb);
+        if (mThumbDrawable != null) {
+            mThumbDrawable.setCallback(this);
+        }
         mTrackDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_track);
+        if (mTrackDrawable != null) {
+            mTrackDrawable.setCallback(this);
+        }
         mTextOn = a.getText(com.android.internal.R.styleable.Switch_textOn);
         mTextOff = a.getText(com.android.internal.R.styleable.Switch_textOff);
         mShowText = a.getBoolean(com.android.internal.R.styleable.Switch_showText, true);
@@ -433,7 +439,13 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_track
      */
     public void setTrackDrawable(Drawable track) {
+        if (mTrackDrawable != null) {
+            mTrackDrawable.setCallback(null);
+        }
         mTrackDrawable = track;
+        if (track != null) {
+            track.setCallback(this);
+        }
         requestLayout();
     }
 
@@ -468,7 +480,13 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_thumb
      */
     public void setThumbDrawable(Drawable thumb) {
+        if (mThumbDrawable != null) {
+            mThumbDrawable.setCallback(null);
+        }
         mThumbDrawable = thumb;
+        if (thumb != null) {
+            thumb.setCallback(this);
+        }
         requestLayout();
     }
 
