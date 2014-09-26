@@ -702,6 +702,20 @@ public final class NfcAdapter {
     }
 
     /**
+     * Disable NFC hardware.
+     * @hide
+    */
+    @SystemApi
+    public boolean disable(boolean persist) {
+        try {
+            return sService.disable(persist);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
      * Pauses polling for a {@code timeoutInMs} millis. If polling must be resumed before timeout,
      * use {@link #resumePolling()}.
      * @hide
