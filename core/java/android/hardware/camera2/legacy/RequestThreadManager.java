@@ -356,7 +356,14 @@ public class RequestThreadManager {
                 }
             }
         }
-        mParams = mCamera.getParameters();
+        try {
+            mParams = mCamera.getParameters();
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Received device exception: ", e);
+            mDeviceState.setError(
+                CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+            return;
+        }
 
         List<int[]> supportedFpsRanges = mParams.getSupportedPreviewFpsRange();
         int[] bestRange = getPhotoPreviewFpsRange(supportedFpsRanges);
@@ -780,7 +787,14 @@ public class RequestThreadManager {
                             if (DEBUG) {
                                 Log.d(TAG, "Params changed -- getting new Parameters from HAL.");
                             }
-                            mParams = mCamera.getParameters();
+                            try {
+                                mParams = mCamera.getParameters();
+                            } catch (RuntimeException e) {
+                                Log.e(TAG, "Received device exception: ", e);
+                                mDeviceState.setError(
+                                    CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                                break;
+                            }
 
                             // Update parameters to the latest that we think the camera is using
                             mLastRequest.setParameters(mParams);

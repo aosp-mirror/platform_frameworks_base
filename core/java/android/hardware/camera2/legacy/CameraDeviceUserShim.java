@@ -336,8 +336,16 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         CameraInfo info = new CameraInfo();
         Camera.getCameraInfo(cameraId, info);
 
+        Camera.Parameters legacyParameters = null;
+        try {
+            legacyParameters = legacyCamera.getParameters();
+        } catch (RuntimeException e) {
+            throw new CameraRuntimeException(CameraAccessException.CAMERA_ERROR,
+                    "Unable to get initial parameters", e);
+        }
+
         CameraCharacteristics characteristics =
-                LegacyMetadataMapper.createCharacteristics(legacyCamera.getParameters(), info);
+                LegacyMetadataMapper.createCharacteristics(legacyParameters, info);
         LegacyCameraDevice device = new LegacyCameraDevice(
                 cameraId, legacyCamera, characteristics, threadCallbacks);
         return new CameraDeviceUserShim(cameraId, device, characteristics, init, threadCallbacks);
