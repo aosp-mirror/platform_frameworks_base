@@ -232,6 +232,10 @@ public class MediaSessionLegacyHelper {
         }
     }
 
+    public boolean isGlobalPriorityActive() {
+        return mSessionManager.isGlobalPriorityActive();
+    }
+
     public void addRccListener(PendingIntent pi, MediaSession.Callback listener) {
         if (pi == null) {
             Log.w(TAG, "Pending intent was null, can't add rcc listener.");

@@ -38,4 +38,7 @@ interface ISessionManager {
 
     // This is for the system volume UI only
     void setRemoteVolumeController(in IRemoteVolumeController rvc);
+
+    // For PhoneWindowManager to precheck media keys
+    boolean isGlobalPriorityActive();
 }
