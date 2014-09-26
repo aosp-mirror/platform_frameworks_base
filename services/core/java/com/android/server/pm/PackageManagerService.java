@@ -10444,9 +10444,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
-            if (dpm != null && (dpm.packageHasActiveAdmins(packageName, userId)
-                    || dpm.isDeviceOwner(packageName))) {
-                return true;
+            if (dpm != null) {
+                if (dpm.isDeviceOwner(packageName)) {
+                    return true;
+                }
+                int[] users;
+                if (userId == UserHandle.USER_ALL) {
+                    users = sUserManager.getUserIds();
+                } else {
+                    users = new int[]{userId};
+                }
+                for (int i = 0; i < users.length; ++i) {
+                    if (dpm.packageHasActiveAdmins(packageName, users[i])) {
+                        return true;
+                    }
+                }
             }
         } catch (RemoteException e) {
         }
@@ -10471,7 +10483,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         final boolean res;
 
-        if (isPackageDeviceAdmin(packageName, userId)) {
+        final UserHandle removeForUser = (flags & PackageManager.DELETE_ALL_USERS) != 0
+                ? UserHandle.ALL : new UserHandle(userId);
+
+        if (isPackageDeviceAdmin(packageName, removeForUser.getIdentifier())) {
             Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
             return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
         }
@@ -10494,9 +10509,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mInstallLock) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
-            res = deletePackageLI(packageName,
-                    (flags & PackageManager.DELETE_ALL_USERS) != 0
-                            ? UserHandle.ALL : new UserHandle(userId),
+            res = deletePackageLI(packageName, removeForUser,
                     true, allUsers, perUserInstalled,
                     flags | REMOVE_CHATTY, info, true);
             systemUpdate = info.isRemovedPackageSystemUpdate;
