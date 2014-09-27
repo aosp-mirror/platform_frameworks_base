@@ -1501,7 +1501,16 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperator() {
-        long subId = getDefaultSubscription();
+        long subId = SubscriptionManager.getDefaultDataSubId();
+        if (!SubscriptionManager.isUsableSubIdValue(subId)) {
+            subId = SubscriptionManager.getDefaultSmsSubId();
+            if (!SubscriptionManager.isUsableSubIdValue(subId)) {
+                subId = SubscriptionManager.getDefaultVoiceSubId();
+                if (!SubscriptionManager.isUsableSubIdValue(subId)) {
+                    subId = SubscriptionManager.getDefaultSubId();
+                }
+            }
+        }
         Rlog.d(TAG, "getSimOperator(): default subId=" + subId);
         return getSimOperator(subId);
     }
