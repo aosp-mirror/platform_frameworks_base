@@ -380,12 +380,17 @@ public class PhoneAccount implements Parcelable {
     }
 
     private Drawable getIcon(Context context, int resId) {
+        if (resId == 0) {
+            return null;
+        }
+
         Context packageContext;
         try {
             packageContext = context.createPackageContext(
                     mAccountHandle.getComponentName().getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.w(this, "Cannot find package %s", mAccountHandle.getComponentName().getPackageName());
+            Log.w(this, "Cannot find package %s",
+                    mAccountHandle.getComponentName().getPackageName());
             return null;
         }
         try {
