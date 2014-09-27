@@ -47,5 +47,6 @@
     <!-- service number convert map in roaming network. -->
     <string-array translatable="false" name="dial_string_replace">
         <item>"*611:+19085594899,"</item>
+        <item>"*86:+1MDN,"</item>
     </string-array>
 </resources>
