@@ -207,11 +207,18 @@ public class RequestThreadManager {
                         Log.i(TAG, "Producing jpeg buffer...");
 
                         int totalSize = data.length + LegacyCameraDevice.nativeGetJpegFooterSize();
-                        totalSize += ((totalSize - 1) & ~0x3) + 4; // align to next octonibble
+                        totalSize = (totalSize + 3) & ~0x3; // round up to nearest octonibble
 
+                        if (USE_BLOB_FORMAT_OVERRIDE) {
+                            // Override to RGBA_8888 format.
+                            LegacyCameraDevice.setSurfaceFormat(s,
+                                    LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888);
+                            // divide by 4 if using RGBA format (width is in pixels, not bytes).
+                            totalSize >>= 2;
+                        }
                         LegacyCameraDevice.setSurfaceDimens(s, totalSize, /*height*/1);
                         LegacyCameraDevice.setNextTimestamp(s, timestamp);
-                        LegacyCameraDevice.produceFrame(s, data, data.length, /*height*/1,
+                        LegacyCameraDevice.produceFrame(s, data, totalSize, /*height*/1,
                                 CameraMetadataNative.NATIVE_JPEG_FORMAT);
                     }
                 } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
