@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import android.annotation.SystemApi;
+import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.IpConfiguration.IpAssignment;
@@ -375,9 +376,31 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Universal name for app creating the configuration
+     *    see {#link {@link PackageManager#getNameForUid(int)}
+     */
+    @SystemApi
+    public String creatorName;
+
+    /**
+     * @hide
+     * Universal name for app updating the configuration
+     *    see {#link {@link PackageManager#getNameForUid(int)}
+     */
+    @SystemApi
+    public String lastUpdateName;
+
+    /**
+     * @hide
      * Uid used by autoJoin
      */
     public String autoJoinBSSID;
+
+    /**
+     * @hide
+     * Status of user approval for connection
+     */
+    public int userApproved = USER_UNSPECIFIED;
 
     /**
      * @hide
@@ -614,6 +637,28 @@ public class WifiConfiguration implements Parcelable {
     /** @hide */
     public static final int AUTO_JOIN_DELETED  = 200;
 
+    // States for the userApproved field
+    /**
+     * @hide
+     * User hasn't specified if connection is okay
+     */
+    public static final int USER_UNSPECIFIED = 0;
+    /**
+     * @hide
+     * User has approved this for connection
+     */
+    public static final int USER_APPROVED = 1;
+    /**
+     * @hide
+     * User has banned this from connection
+     */
+    public static final int USER_BANNED = 2;
+    /**
+     * @hide
+     * Waiting for user input
+     */
+    public static final int USER_PENDING = 3;
+
     /**
      * @hide
      */
@@ -826,6 +871,8 @@ public class WifiConfiguration implements Parcelable {
         ephemeral = false;
         noInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
+        lastUpdateUid = -1;
+        creatorUid = -1;
     }
 
     /**
@@ -1012,7 +1059,6 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append("IP config:\n");
         sbuf.append(mIpConfiguration.toString());
 
-        if (this.creatorUid != 0)  sbuf.append(" uid=" + Integer.toString(creatorUid));
         if (this.autoJoinBSSID != null) sbuf.append(" autoJoinBSSID=" + autoJoinBSSID);
         long now_ms = System.currentTimeMillis();
         if (this.blackListTimestamp != 0) {
@@ -1024,6 +1070,12 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append(" blackListed: ").append(Long.toString(diff/1000)).append( "sec");
             }
         }
+        if (creatorUid != 0)  sbuf.append(" cuid=" + Integer.toString(creatorUid));
+        if (creatorName != null) sbuf.append(" cname=" + creatorName);
+        if (lastUpdateUid != 0) sbuf.append(" luid=" + lastUpdateUid);
+        if (lastUpdateName != null) sbuf.append(" lname=" + lastUpdateName);
+        sbuf.append("userApproved=" + userApprovedAsString(userApproved));
+
         if (this.lastConnected != 0) {
             sbuf.append('\n');
             long diff = now_ms - this.lastConnected;
@@ -1126,6 +1178,20 @@ public class WifiConfiguration implements Parcelable {
             return wifiSsid.toString();
         }
         return SSID;
+    }
+
+    /** @hide **/
+    public static String userApprovedAsString(int userApproved) {
+        switch (userApproved) {
+            case USER_APPROVED:
+                return "USER_APPROVED";
+            case USER_BANNED:
+                return "USER_BANNED";
+            case USER_UNSPECIFIED:
+                return "USER_UNSPECIFIED";
+            default:
+                return "INVALID";
+        }
     }
 
     /**
@@ -1390,6 +1456,8 @@ public class WifiConfiguration implements Parcelable {
             lastConnectUid = source.lastConnectUid;
             lastUpdateUid = source.lastUpdateUid;
             creatorUid = source.creatorUid;
+            creatorName = source.creatorName;
+            lastUpdateName = source.lastUpdateName;
             peerWifiConfiguration = source.peerWifiConfiguration;
             blackListTimestamp = source.blackListTimestamp;
             lastConnected = source.lastConnected;
@@ -1413,6 +1481,7 @@ public class WifiConfiguration implements Parcelable {
                     = source.autoJoinUseAggressiveJoinAttemptThreshold;
             autoJoinBailedDueToLowRssi = source.autoJoinBailedDueToLowRssi;
             dirty = source.dirty;
+            userApproved = source.userApproved;
         }
     }
 
@@ -1460,6 +1529,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
+        dest.writeString(creatorName);
+        dest.writeString(lastUpdateName);
         dest.writeLong(blackListTimestamp);
         dest.writeLong(lastConnectionFailure);
         dest.writeInt(numConnectionFailures);
@@ -1477,6 +1548,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numUserTriggeredJoinAttempts);
         dest.writeInt(autoJoinUseAggressiveJoinAttemptThreshold);
         dest.writeInt(autoJoinBailedDueToLowRssi ? 1 : 0);
+        dest.writeInt(userApproved);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1520,6 +1592,8 @@ public class WifiConfiguration implements Parcelable {
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
+                config.creatorName = in.readString();
+                config.lastUpdateName = in.readString();
                 config.blackListTimestamp = in.readLong();
                 config.lastConnectionFailure = in.readLong();
                 config.numConnectionFailures = in.readInt();
@@ -1537,6 +1611,7 @@ public class WifiConfiguration implements Parcelable {
                 config.numUserTriggeredJoinAttempts = in.readInt();
                 config.autoJoinUseAggressiveJoinAttemptThreshold = in.readInt();
                 config.autoJoinBailedDueToLowRssi = in.readInt() != 0;
+                config.userApproved = in.readInt();
                 return config;
             }
 
