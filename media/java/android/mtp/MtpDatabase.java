@@ -39,6 +39,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -300,8 +301,27 @@ public class MtpDatabase {
         return false;
     }
 
+    // returns true if the path is in the storage root
+    private boolean inStorageRoot(String path) {
+        try {
+            File f = new File(path);
+            String canonical = f.getCanonicalPath();
+            if (canonical.startsWith(mMediaStoragePath)) {
+                return true;
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+        return false;
+    }
+
     private int beginSendObject(String path, int format, int parent,
                          int storageId, long size, long modified) {
+        // if the path is outside of the storage root, do not allow access
+        if (!inStorageRoot(path)) {
+            Log.e(TAG, "attempt to put file outside of storage area: " + path);
+            return -1;
+        }
         // if mSubDirectories is not null, do not allow copying files to any other locations
         if (!inStorageSubDirectory(path)) return -1;
 
