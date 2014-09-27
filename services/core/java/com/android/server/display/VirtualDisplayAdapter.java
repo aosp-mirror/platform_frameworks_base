@@ -257,6 +257,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.refreshRate = 60;
+                mInfo.supportedRefreshRates = new float[] { 60.0f };
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;

@@ -248,6 +248,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.refreshRate = mRefreshRate;
+                mInfo.supportedRefreshRates = new float[] { mRefreshRate };
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
