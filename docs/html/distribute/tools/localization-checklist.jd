@@ -529,21 +529,6 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <strong>Purchase professional translations through Google Play</strong>
 </h4>
 
-<div class="sidebox-wrapper">
-  <div class="sidebox">
-    <h2>
-      App Translations Service
-    </h2>
-
-    <p>
-      To make it easy to export your app's strings and import the finished
-      translations into your project, try the <a href=
-      "{@docRoot}sdk/installing/installing-adt.html#tmgr">ADT Translation
-      Manager Plugin</a>.
-    </p>
-  </div>
-</div>
-
 <p>
   Google Play App Translation Service can help you quickly find and purchase
   translations of your app. In the Developer Console, you can browse a list of
