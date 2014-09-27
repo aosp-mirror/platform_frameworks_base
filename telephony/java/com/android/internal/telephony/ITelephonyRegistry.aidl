@@ -62,4 +62,5 @@ interface ITelephonyRegistry {
     void notifyCellInfoForSubscriber(in long subId, in List<CellInfo> cellInfo);
     void notifyDataConnectionRealTimeInfo(in DataConnectionRealTimeInfo dcRtInfo);
     void notifyVoLteServiceStateChanged(in VoLteServiceState lteState);
+    void notifyOemHookRawEventForSubscriber(in long subId, in byte[] rawData);
 }
