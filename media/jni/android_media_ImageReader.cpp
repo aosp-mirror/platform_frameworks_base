@@ -286,12 +286,16 @@ static int Image_getPixelFormat(JNIEnv* env, int format)
     return format;
 }
 
-static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer)
+static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer, bool usingRGBAOverride)
 {
     ALOG_ASSERT(buffer != NULL, "Input buffer is NULL!!!");
     uint32_t size = 0;
     uint32_t width = buffer->width;
     uint8_t* jpegBuffer = buffer->data;
+
+    if (usingRGBAOverride) {
+        width *= 4;
+    }
 
     // First check for JPEG transport header at the end of the buffer
     uint8_t* header = jpegBuffer + (width - sizeof(struct camera3_jpeg_blob));
@@ -317,11 +321,15 @@ static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer)
     return size;
 }
 
+static bool usingRGBAToJpegOverride(int32_t bufferFormat, int32_t readerCtxFormat) {
+    return readerCtxFormat == HAL_PIXEL_FORMAT_BLOB && bufferFormat == HAL_PIXEL_FORMAT_RGBA_8888;
+}
+
 static int32_t applyFormatOverrides(int32_t bufferFormat, int32_t readerCtxFormat)
 {
     // Using HAL_PIXEL_FORMAT_RGBA_8888 gralloc buffers containing JPEGs to get around SW
     // write limitations for some platforms (b/17379185).
-    if (readerCtxFormat == HAL_PIXEL_FORMAT_BLOB && bufferFormat == HAL_PIXEL_FORMAT_RGBA_8888) {
+    if (usingRGBAToJpegOverride(bufferFormat, readerCtxFormat)) {
         return HAL_PIXEL_FORMAT_BLOB;
     }
     return bufferFormat;
@@ -345,6 +353,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
     dataSize = ySize = cSize = cStride = 0;
     int32_t fmt = buffer->format;
 
+    bool usingRGBAOverride = usingRGBAToJpegOverride(fmt, readerFormat);
     fmt = applyFormatOverrides(fmt, readerFormat);
     switch (fmt) {
         case HAL_PIXEL_FORMAT_YCbCr_420_888:
@@ -416,7 +425,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             ALOG_ASSERT(buffer->height == 1, "JPEG should has height value %d", buffer->height);
 
             pData = buffer->data;
-            dataSize = Image_getJpegSize(buffer);
+            dataSize = Image_getJpegSize(buffer, usingRGBAOverride);
             break;
         case HAL_PIXEL_FORMAT_RAW_SENSOR:
             // Single plane 16bpp bayer data.
@@ -912,7 +921,7 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx, int reade
     if (size > static_cast<uint32_t>(INT32_MAX)) {
         // Byte buffer have 'int capacity', so check the range
         jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Size too large for bytebuffer capacity " PRIu32, size);
+                "Size too large for bytebuffer capacity %" PRIu32, size);
         return NULL;
     }
 
