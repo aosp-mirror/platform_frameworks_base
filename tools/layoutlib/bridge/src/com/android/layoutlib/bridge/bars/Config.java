@@ -73,8 +73,7 @@ public class Config {
 
     public static String getTime(int platformVersion) {
         if (platformVersion == 0) {
-            // TODO: revisit when the version is selected.
-            return "4:57";
+            return "5:00";
         }
         if (platformVersion < GINGERBREAD) {
             return "2:20";
