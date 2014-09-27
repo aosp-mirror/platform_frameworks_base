@@ -143,9 +143,7 @@ public final class MediaBrowser {
 
         boolean bound = false;
         try {
-            if (mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE)) {
-                bound = true;
-            }
+            bound = mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
         } catch (Exception ex) {
             Log.e(TAG, "Failed binding to service " + mServiceComponent);
         }
