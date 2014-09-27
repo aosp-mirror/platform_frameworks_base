@@ -214,6 +214,14 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_VOLTE_STATE                              = 0x00004000;
 
+    /**
+     * Listen for OEM hook raw event
+     *
+     * @see #onOemHookRawEvent
+     * @hide
+     */
+    public static final int LISTEN_OEM_HOOK_RAW_EVENT                       = 0x00008000;
+
      /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -314,6 +322,10 @@ public class PhoneStateListener {
                     case LISTEN_VOLTE_STATE:
                         PhoneStateListener.this.onVoLteServiceStateChanged((VoLteServiceState)msg.obj);
                         break;
+                    case LISTEN_OEM_HOOK_RAW_EVENT:
+                        PhoneStateListener.this.onOemHookRawEvent((byte[])msg.obj);
+                        break;
+
                 }
             }
         };
@@ -482,6 +494,16 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when OEM hook raw event is received. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param rawData is the byte array of the OEM hook raw data.
+     * @hide
+     */
+    public void onOemHookRawEvent(byte[] rawData) {
+        // default implementation empty
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      */
@@ -552,6 +574,10 @@ public class PhoneStateListener {
 
         public void onVoLteServiceStateChanged(VoLteServiceState lteState) {
             Message.obtain(mHandler, LISTEN_VOLTE_STATE, 0, 0, lteState).sendToTarget();
+        }
+
+        public void onOemHookRawEvent(byte[] rawData) {
+            Message.obtain(mHandler, LISTEN_OEM_HOOK_RAW_EVENT, 0, 0, rawData).sendToTarget();
         }
     };
 
