@@ -657,9 +657,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                     }
 
                     // Slow path: #close was called explicitly on this session; unconfigure first
+                    mUnconfigureDrainer.taskStarted();
 
                     try {
-                        mUnconfigureDrainer.taskStarted();
                         mDeviceImpl
                                 .configureOutputsChecked(null); // begin transition to unconfigured
                     } catch (CameraAccessException e) {
@@ -667,6 +667,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                         Log.e(TAG, mIdString + "Exception while configuring outputs: ", e);
 
                         // TODO: call onError instead of onClosed if this happens
+                    } catch (IllegalStateException e) {
+                        // Camera is already closed, so go straight to the close callback
+                        if (VERBOSE) Log.v(TAG, mIdString +
+                                "Camera was already closed or busy, skipping unconfigure");
+                        mUnconfigureDrainer.taskFinished();
                     }
 
                     mUnconfigureDrainer.beginDrain();
