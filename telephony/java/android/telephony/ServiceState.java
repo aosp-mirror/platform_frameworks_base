@@ -861,4 +861,23 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EVDO_B
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EHRPD;
     }
+
+    /**
+     * Returns a merged ServiceState consisting of the base SS with voice settings from the
+     * voice SS. The voice SS is only used if it is IN_SERVICE (otherwise the base SS is returned).
+     * @hide
+     * */
+    public static ServiceState mergeServiceStates(ServiceState baseSs, ServiceState voiceSs) {
+        if (voiceSs.mVoiceRegState != STATE_IN_SERVICE) {
+            return baseSs;
+        }
+
+        ServiceState newSs = new ServiceState(baseSs);
+
+        // voice overrides
+        newSs.mVoiceRegState = voiceSs.mVoiceRegState;
+        newSs.mIsEmergencyOnly = false; // only get here if voice is IN_SERVICE
+
+        return newSs;
+    }
 }
