@@ -87,11 +87,10 @@ page.tags="listing, google play, users, growth"
 <p>
   Choosing the right featured image is important, it needs to convey as much
   about the features of your apps and what makes them special as possible,
-  without being cluttered and confusing. Check out the <a href=
-  "http://android-developers.blogspot.com/">Android Developers blog</a> post
-  for more <a href=
-  "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html">
-  Featured-Image Guidelines</a>.
+  without being cluttered and confusing. To get started with the featured
+  image specs, read the <a
+  href="https://support.google.com/googleplay/android-developer/answer/1078870">featured
+  image guidelines</a> in the Help Center.
 </p>
 
 <div class="headerLine">
