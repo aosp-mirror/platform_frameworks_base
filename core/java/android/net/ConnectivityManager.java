@@ -1970,9 +1970,9 @@ public class ConnectivityManager {
      * {@hide}
      */
     public void setProvisioningNotificationVisible(boolean visible, int networkType,
-            String extraInfo, String url) {
+            String action) {
         try {
-            mService.setProvisioningNotificationVisible(visible, networkType, extraInfo, url);
+            mService.setProvisioningNotificationVisible(visible, networkType, action);
         } catch (RemoteException e) {
         }
     }
