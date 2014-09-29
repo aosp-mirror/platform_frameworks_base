@@ -1209,7 +1209,8 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
     <skip />
-    <string name="whichHomeApplication" msgid="4616420172727326782">"मुख्य अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"गृह अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s लाई गृहको रूपमा प्रयोग गर्नुहोस्"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"यस कार्यको लागि पूर्वनिर्धारितबाट प्रयोग गर्नुहोस्।"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"फरक अनुप्रयोग प्रयोग गर्नुहोस्"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"प्रणाली सेटिङहरूमा पूर्वनिर्धारितलाई हटाउनुहोस् &gt; अनुप्रयोगहरू &gt; डाउनलोड।"</string>
@@ -1600,11 +1601,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"आवरण #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"स्क्रिन कास्ट गर्दै"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"<xliff:g id="NAME">%1$s</xliff:g> सँग जोड्दै"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"स्क्रिन कास्ट गर्दै"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"<xliff:g id="NAME">%1$s</xliff:g> सँग जोडिएको"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"विच्छेदन गर्नुहोस्"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"आपतकालीन कल"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ढाँचा बिर्सनु भयो"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत ढाँचा"</string>

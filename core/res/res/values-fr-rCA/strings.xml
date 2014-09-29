@@ -696,7 +696,7 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet à l\'application d\'accéder aux mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ajouter des mots au dictionnaire personnel"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet à l\'application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lire contenu du stockage USB"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lire le contenu du stockage USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lire le contenu de la carte SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permet à l\'application de lire le contenu de votre périphérique de stockage USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permet à l\'application de lire le contenu de votre carte SD."</string>
@@ -1201,7 +1201,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Modifier avec %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Partager avec"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partager avec %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Sélectionnez une application de l\'écran d\'accueil"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Sélectionner une application pour l\'écran d\'accueil"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utiliser %1$s comme écran d\'accueil"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Utiliser une application différente"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Pour supprimer les valeurs par défaut, accédez à Paramètres système &gt; Applications &gt; Téléchargements."</string>
@@ -1592,11 +1593,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sécurisé"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Connexion à l\'écran en cours"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Connexion au réseau <xliff:g id="NAME">%1$s</xliff:g> en cours…"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Diffusion de l\'écran en cours"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Connecté à <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Déconnecter"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Appel d\'urgence"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"J\'ai oublié le schéma"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Schéma incorrect."</string>

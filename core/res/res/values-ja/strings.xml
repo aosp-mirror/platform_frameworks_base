@@ -1201,7 +1201,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sで編集"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"共有"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sで共有"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"ホームアプリを選択"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"ホームアプリを選択"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ホームとして%1$sを使用"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"常にこの操作で使用する"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"別のアプリの使用"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]でデフォルト設定をクリアします。"</string>
@@ -1592,11 +1593,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"オーバーレイ第<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>、<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"、セキュア"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"画面のキャスト中"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"<xliff:g id="NAME">%1$s</xliff:g>に接続しています"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"画面のキャスト中"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"<xliff:g id="NAME">%1$s</xliff:g>に接続しました"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"切断"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"緊急通報"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"パターンを忘れた場合"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"パターンが正しくありません"</string>

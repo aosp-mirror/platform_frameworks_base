@@ -1554,7 +1554,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s менен түзөтүү"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Төмөнкү менен бөлүшүү"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s менен бөлүшүү"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Үй колдонмосун тандаңыз"</string>
+    <!-- no translation found for whichHomeApplication (4307587691506919691) -->
+    <skip />
+    <!-- no translation found for whichHomeApplicationNamed (4493438593214760979) -->
+    <skip />
     <!-- no translation found for alwaysUse (4583018368000610438) -->
     <skip />
     <string name="use_a_different_app" msgid="8134926230585710243">"Башка колдонмону пайдалануу"</string>
@@ -2073,11 +2076,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Катмар №<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", корголгон"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Экран көчүрүлүүдө"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Буга туташууда: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Сырткы экранга чыгарылууда көчүрүлүүдө"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Буга туташып турат: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Ажыратуу"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Куткаруучуларга чалуу"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Үлгү унутулду"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Үлгү туура эмес"</string>

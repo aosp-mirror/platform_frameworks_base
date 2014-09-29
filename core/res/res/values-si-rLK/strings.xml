@@ -1203,7 +1203,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"සමඟ බෙදාගන්න"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%s සමඟ බෙදාගන්න"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"මුල්පිටු යෙදුමක් තෝරන්න"</string>
+    <!-- no translation found for whichHomeApplication (4307587691506919691) -->
+    <skip />
+    <!-- no translation found for whichHomeApplicationNamed (4493438593214760979) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"මෙම ක්‍රියාව සඳහා සුපුරුද්දෙන් භාවිත කරන්න."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"වෙනත් යෙදුමක් භාවිතා කරන්න"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"පද්ධති සැකසීම් &gt; යෙදුම් &gt; බාගැනීම් තුළ ඇති සුපුරුද්ද හිස් කරන්න."</string>
@@ -1594,11 +1597,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"උඩැතිරිය #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ආරක්‍ෂිත"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"යොමුකරන තිරය"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"<xliff:g id="NAME">%1$s</xliff:g> වෙත සම්බන්ධ වෙමින්"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"යොමුකරන තිරය"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"<xliff:g id="NAME">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"විසන්ධි කරන්න"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"හදිසි ඇමතුම"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"රටාව අමතකයි"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"වැරදි රටාවකි"</string>
