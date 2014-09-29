@@ -52,14 +52,14 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट पद्धति सेट करें"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"भौतिक कीबोर्ड"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB उपकरण तक पहुंचने दें?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB सहायक उपकरण तक पहुंचने दें?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"जब यह USB उपकरण कनेक्ट किया जाए, तब <xliff:g id="ACTIVITY">%1$s</xliff:g> को खोलें?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB डिवाइस तक पहुंचने दें?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB सहायक डिवाइस तक पहुंचने दें?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"जब यह USB डिवाइस कनेक्ट किया जाए, तब <xliff:g id="ACTIVITY">%1$s</xliff:g> को खोलें?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"जब यह USB एसेसरी कनेक्ट की जाए, तब <xliff:g id="ACTIVITY">%1$s</xliff:g> को खोलें?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक उपकरण के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक उपकरण के बारे में यहां अधिक जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक डिवाइस के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक डिवाइस के बारे में यहां अधिक जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB सहायक साधन"</string>
     <string name="label_view" msgid="6304565553218192990">"देखें"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"इस USB उपकरण के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"इस USB डिवाइस के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"इस USB एसेसरी के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबगिंग करने दें?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
@@ -204,7 +204,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G डेटा बंद है"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"सेल्युलर डेटा बंद है"</string>
     <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"डेटा बंद है"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"आपके उपकरण ने डेटा बंद कर दिया है क्योंकि आपके द्वारा सेट की गई सीमा पार हो गई है.\n\nइसे पुनः चालू करने से आपका वाहक शुल्क ले सकता है."</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"आपके डिवाइस ने डेटा बंद कर दिया है क्योंकि आपके द्वारा सेट की गई सीमा पार हो गई है.\n\nइसे पुनः चालू करने से आपका वाहक शुल्क ले सकता है."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"डेटा चालू करें"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"कोई इंटरनेट कनेक्शन नहीं"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाई-फ़ाई  कनेक्‍ट किया गया"</string>
@@ -227,9 +227,9 @@
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"चार्ज हो रही है, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"चार्ज हो गई है"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटूथ"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> उपकरण)"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> डिवाइस)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लूटूथ बंद"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोई भी युग्मित उपकरण उपलब्ध नहीं"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोई भी युग्मित डिवाइस उपलब्ध नहीं"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वत: घुमाएं"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"घुमाना लॉक किया गया"</string>
@@ -238,7 +238,7 @@
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"इनपुट विधि"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"स्थान"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"स्थान बंद"</string>
-    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"मीडिया उपकरण"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"मीडिया डिवाइस"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"केवल आपातकालीन कॉल"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"सेटिंग"</string>
@@ -253,9 +253,9 @@
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"कोई भी सहेजा गया नेटवर्क उपलब्ध नहीं"</string>
     <string name="quick_settings_cast_title" msgid="1893629685050355115">"स्क्रीन कास्ट करें"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"कास्टिंग"</string>
-    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"अनाम उपकरण"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"अनाम डिवाइस"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"कास्ट करने के लिए तैयार"</string>
-    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"कोई उपकरण उपलब्ध नहीं"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"कोई डिवाइस उपलब्ध नहीं"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंग उलटें"</string>
@@ -288,7 +288,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"खोजें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"कोई बाधा नहीं. यहां तक कि अलार्म भी नहीं."</string>
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"ऐसा सेट करें की कोई कि अलार्म भी ना हो."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"कोई अवरोध नहीं"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"केवल प्राथमिक अवरोध"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"आपका अगला अलार्म <xliff:g id="ALARM_TIME">%s</xliff:g> पर है"</string>
@@ -331,29 +331,31 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ करें"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब प्रारंभ करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई नोटिफिकेशन नहीं"</string>
-    <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण को मॉनीटर किया जा सकता है"</string>
+    <string name="device_owned_footer" msgid="3802752663326030053">"डिवाइस को मॉनीटर किया जा सकता है"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"उपकरण को मॉनीटर करना"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"डिवाइस को मॉनीटर करना"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क को मॉनीटर करना"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करें"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्‍कनेक्‍ट करें"</string>
-    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें."</string>
-    <string name="monitoring_description_vpn" msgid="7288268682714305659">"आपने \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप्‍स ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके उपकरण और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
-    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"आप VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") से कनेक्‍ट हैं.\n\nआपका VPN सेवा प्रदाता ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके उपकरण और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने VPN कनेक्‍शन सेट करने के लिए \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" अनुमति भी दी है. यह ऐप्‍स नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक, ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से कनेक्‍ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
-    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी उपकरण और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"यह उपकरण इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी उपकरण और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"यह डिवाइस इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"आपने \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप्‍स ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"आप VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") से कनेक्‍ट हैं.\n\nआपका VPN सेवा प्रदाता ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"यह डिवाइस इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने VPN कनेक्‍शन सेट करने के लिए \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" अनुमति भी दी है. यह ऐप्‍स नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"यह डिवाइस इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक, ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से कनेक्‍ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी डिवाइस और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"यह डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी डिवाइस और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
     <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"उपकरण इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nप्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nव्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित नेटवर्क गतिविधि मॉनीटर कर सकते हैं. अधिक जानकारी हेतु, व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"यह उपकरण इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
-    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक उपकरण लॉक रहेगा"</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nप्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nव्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित नेटवर्क गतिविधि मॉनीटर कर सकते हैं. अधिक जानकारी हेतु, व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"यह डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक डिवाइस लॉक रहेगा"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचनाएं अधिक तेज़ी से प्राप्त करें"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपके द्वारा उन्हें अनलॉक किए जाने से पहले देखें"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नहीं धन्यवाद"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट करें"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा म्यूट किया गया"</string>
+    <!-- no translation found for zen_mode_and_condition (4462471036429759903) -->
+    <skip />
 </resources>

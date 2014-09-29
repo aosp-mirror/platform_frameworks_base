@@ -221,7 +221,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"এখন ভূদৃশ্য সজ্জাতে স্ক্রীন লক হয়েছে।"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"এখন প্রতিকৃতি সজ্জাতে স্ক্রীন লক হয়েছে।"</string>
     <string name="dessert_case" msgid="1295161776223959221">"ডেজার্ট কেস"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"দিবাস্বপ্ন"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"স্ক্রিনসেভার"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ইথারনেট"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"বিমান মোড"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"চার্জ হচ্ছে, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -288,7 +288,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"অনুসন্ধান করুন"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য উপরের দিকে স্লাইড করুন৷"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য বাম দিকে স্লাইড করুন৷"</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"ব্যাঘাত ছাড়াই। এমনকি অ্যালার্মও নেই।"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"কোনো ব্যাঘাত ছাড়াই। এমনকি অ্যালার্মও নয়।"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"কোনো বাধা নয়"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"শুধুমাত্র প্রাধান্য বাধাগুলি"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"আপনার পরবর্তী অ্যালার্মের সময় <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -335,7 +335,7 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"প্রোফাইল পর্যবেক্ষণ করা হতে পারে"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"নেটওয়ার্ক নিরীক্ষণ করা হতে পারে"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ডিভাইস নিরীক্ষণ"</string>
-    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"প্রোফাইল পর্যবেক্ষণ করা"</string>
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"প্রোফাইল দেখরেখ করা"</string>
     <string name="monitoring_title" msgid="169206259253048106">"নেটওয়ার্ক নিরীক্ষণ"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN অক্ষম করুন"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN এর সংযোগ বিচ্ছিন্ন করুন"</string>
@@ -356,4 +356,6 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"না থাক"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"সেট আপ"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
+    <!-- no translation found for zen_mode_and_condition (4462471036429759903) -->
+    <skip />
 </resources>
