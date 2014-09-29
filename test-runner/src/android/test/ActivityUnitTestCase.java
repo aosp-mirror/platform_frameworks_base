@@ -26,6 +26,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.test.mock.MockApplication;
 import android.view.Window;
+import android.util.Log;
+
+
 
 /**
  * This class provides isolated testing of a single activity.  The activity under test will
@@ -73,6 +76,7 @@ import android.view.Window;
 public abstract class ActivityUnitTestCase<T extends Activity> 
         extends ActivityTestCase {
 
+    private static final String TAG = "ActivityUnitTestCase";
     private Class<T> mActivityClass;
 
     private Context mActivityContext;
@@ -132,27 +136,28 @@ public abstract class ActivityUnitTestCase<T extends Activity>
                 if (mApplication == null) {
                     setApplication(new MockApplication());
                 }
-                ComponentName cn = new ComponentName(mActivityClass.getPackage().getName(), 
+                ComponentName cn = new ComponentName(mActivityClass.getPackage().getName(),
                         mActivityClass.getName());
                 intent.setComponent(cn);
                 ActivityInfo info = new ActivityInfo();
                 CharSequence title = mActivityClass.getName();
                 mMockParent = new MockParent();
                 String id = null;
-                        
+
                 newActivity = (T) getInstrumentation().newActivity(mActivityClass, mActivityContext,
                         token, mApplication, intent, info, title, mMockParent, id,
                         lastNonConfigurationInstance);
             } catch (Exception e) {
+                Log.w(TAG, "Catching exception", e);
                 assertNotNull(newActivity);
             }
-            
+
             assertNotNull(newActivity);
             setActivity(newActivity);
             
             mAttached = true;
         }
-        
+
         T result = getActivity();
         if (result != null) {
             getInstrumentation().callActivityOnCreate(getActivity(), savedInstanceState);
