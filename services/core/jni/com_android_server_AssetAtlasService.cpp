@@ -29,8 +29,12 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+// Disable warnings for Skia.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkCanvas.h>
 #include <SkBitmap.h>
+#pragma GCC diagnostic pop
 
 namespace android {
 

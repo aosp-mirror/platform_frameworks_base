@@ -698,14 +698,14 @@ static void Init(JNIEnv* env, jobject obj) {
   // TODO: inject any device context if when needed
 }
 
-static jboolean IsSupported(JNIEnv* env, jclass clazz) {
+static jboolean IsSupported(JNIEnv* /* env */, jclass /* clazz */) {
   if (sFlpInterface == NULL) {
     return JNI_FALSE;
   }
   return JNI_TRUE;
 }
 
-static jint GetBatchSize(JNIEnv* env, jobject object) {
+static jint GetBatchSize(JNIEnv* env, jobject /* object */) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -715,7 +715,7 @@ static jint GetBatchSize(JNIEnv* env, jobject object) {
 
 static void StartBatching(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint id,
     jobject optionsObject) {
   if(sFlpInterface == NULL || optionsObject == NULL) {
@@ -730,7 +730,7 @@ static void StartBatching(
 
 static void UpdateBatchingOptions(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint id,
     jobject optionsObject) {
   if(sFlpInterface == NULL || optionsObject == NULL) {
@@ -743,7 +743,7 @@ static void UpdateBatchingOptions(
   ThrowOnError(env, result, __FUNCTION__);
 }
 
-static void StopBatching(JNIEnv* env, jobject object, jint id) {
+static void StopBatching(JNIEnv* env, jobject /* object */, jint id) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -751,7 +751,7 @@ static void StopBatching(JNIEnv* env, jobject object, jint id) {
   sFlpInterface->stop_batching(id);
 }
 
-static void Cleanup(JNIEnv* env, jobject object) {
+static void Cleanup(JNIEnv* env, jobject /* object */) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -774,7 +774,7 @@ static void Cleanup(JNIEnv* env, jobject object) {
   }
 }
 
-static void GetBatchedLocation(JNIEnv* env, jobject object, jint lastNLocations) {
+static void GetBatchedLocation(JNIEnv* env, jobject /* object */, jint lastNLocations) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -782,7 +782,7 @@ static void GetBatchedLocation(JNIEnv* env, jobject object, jint lastNLocations)
   sFlpInterface->get_batched_location(lastNLocations);
 }
 
-static void InjectLocation(JNIEnv* env, jobject object, jobject locationObject) {
+static void InjectLocation(JNIEnv* env, jobject /* object */, jobject locationObject) {
   if(locationObject == NULL) {
     ALOGE("Invalid location for injection: %p", locationObject);
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
@@ -806,7 +806,7 @@ static jboolean IsDiagnosticSupported() {
   return sFlpDiagnosticInterface != NULL;
 }
 
-static void InjectDiagnosticData(JNIEnv* env, jobject object, jstring stringData) {
+static void InjectDiagnosticData(JNIEnv* env, jobject /* object */, jstring stringData) {
   if(stringData == NULL) {
     ALOGE("Invalid diagnostic data for injection: %p", stringData);
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
@@ -830,7 +830,7 @@ static jboolean IsDeviceContextSupported() {
   return sFlpDeviceContextInterface != NULL;
 }
 
-static void InjectDeviceContext(JNIEnv* env, jobject object, jint enabledMask) {
+static void InjectDeviceContext(JNIEnv* env, jobject /* object */, jint enabledMask) {
   if(sFlpDeviceContextInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -845,7 +845,7 @@ static jboolean IsGeofencingSupported() {
 
 static void AddGeofences(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jobjectArray geofenceRequestsArray) {
   if(geofenceRequestsArray == NULL) {
     ALOGE("Invalid Geofences to add: %p", geofenceRequestsArray);
@@ -885,7 +885,7 @@ static void AddGeofences(
   }
 }
 
-static void PauseGeofence(JNIEnv* env, jobject object, jint geofenceId) {
+static void PauseGeofence(JNIEnv* env, jobject /* object */, jint geofenceId) {
   if(sFlpGeofencingInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -895,7 +895,7 @@ static void PauseGeofence(JNIEnv* env, jobject object, jint geofenceId) {
 
 static void ResumeGeofence(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint geofenceId,
     jint monitorTransitions) {
   if(sFlpGeofencingInterface == NULL) {
@@ -907,7 +907,7 @@ static void ResumeGeofence(
 
 static void ModifyGeofenceOption(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint geofenceId,
     jint lastTransition,
     jint monitorTransitions,
@@ -931,7 +931,7 @@ static void ModifyGeofenceOption(
 
 static void RemoveGeofences(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jintArray geofenceIdsArray) {
   if(sFlpGeofencingInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
