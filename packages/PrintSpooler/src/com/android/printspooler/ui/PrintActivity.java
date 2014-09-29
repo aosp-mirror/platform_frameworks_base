@@ -724,10 +724,35 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
         }
 
+        // Handle selected page changes making sure they are in the doc.
         PrintDocumentInfo info = mPrintedDocument.getDocumentInfo().info;
         final int pageCount = (info != null) ? getAdjustedPageCount(info) : 0;
         PageRange[] pageRanges = printJobInfo.getPages();
-        updateSelectedPages(pageRanges, pageCount);
+        if (pageRanges != null && pageCount > 0) {
+            pageRanges = PageRangeUtils.normalize(pageRanges);
+
+            List<PageRange> validatedList = new ArrayList<>();
+            final int rangeCount = pageRanges.length;
+            for (int i = 0; i < rangeCount; i++) {
+                PageRange pageRange = pageRanges[i];
+                if (pageRange.getEnd() >= pageCount) {
+                    final int rangeStart = pageRange.getStart();
+                    final int rangeEnd = pageCount - 1;
+                    if (rangeStart <= rangeEnd) {
+                        pageRange = new PageRange(rangeStart, rangeEnd);
+                        validatedList.add(pageRange);
+                    }
+                    break;
+                }
+                validatedList.add(pageRange);
+            }
+
+            if (!validatedList.isEmpty()) {
+                PageRange[] validatedArray = new PageRange[validatedList.size()];
+                validatedList.toArray(validatedArray);
+                updateSelectedPages(validatedArray, pageCount);
+            }
+        }
 
         // Update the content if needed.
         if (canUpdateDocument()) {
