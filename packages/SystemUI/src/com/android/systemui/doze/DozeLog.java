@@ -89,29 +89,7 @@ public class DozeLog {
                 sScreenOnNotPulsingStats = new SummaryStats();
                 sEmergencyCallStats = new SummaryStats();
                 log("init");
-                KeyguardUpdateMonitor.getInstance(context)
-                        .registerCallback(new KeyguardUpdateMonitorCallback() {
-                    @Override
-                    public void onEmergencyCallAction() {
-                        traceEmergencyCall();
-                    }
-                    @Override
-                    public void onKeyguardBouncerChanged(boolean bouncer) {
-                        traceKeyguardBouncerChanged(bouncer);
-                    }
-                    @Override
-                    public void onScreenTurnedOn() {
-                        traceScreenOn();
-                    }
-                    @Override
-                    public void onScreenTurnedOff(int why) {
-                        traceScreenOff(why);
-                    }
-                    @Override
-                    public void onKeyguardVisibilityChanged(boolean showing) {
-                        traceKeyguard(showing);
-                    }
-                });
+                KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
             }
         }
         log("dozing " + dozing);
@@ -126,6 +104,7 @@ public class DozeLog {
     public static void traceEmergencyCall() {
         if (!ENABLED) return;
         log("emergencyCall");
+        sEmergencyCallStats.append();
     }
 
     public static void traceKeyguardBouncerChanged(boolean showing) {
@@ -208,4 +187,32 @@ public class DozeLog {
             pw.println();
         }
     }
+
+    private static final KeyguardUpdateMonitorCallback sKeyguardCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onEmergencyCallAction() {
+            traceEmergencyCall();
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean bouncer) {
+            traceKeyguardBouncerChanged(bouncer);
+        }
+
+        @Override
+        public void onScreenTurnedOn() {
+            traceScreenOn();
+        }
+
+        @Override
+        public void onScreenTurnedOff(int why) {
+            traceScreenOff(why);
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            traceKeyguard(showing);
+        }
+    };
 }
