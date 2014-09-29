@@ -193,7 +193,8 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     }
 
     private boolean isInDowntime(int daysOffset, long time, long start, long end) {
-        final int day = ((getDayOfWeek(time) + daysOffset - 1) % Calendar.SATURDAY) + 1;
+        final int n = Calendar.SATURDAY;
+        final int day = ((getDayOfWeek(time) - 1) + (daysOffset % n) + n) % n + 1;
         start = addDays(start, daysOffset);
         end = addDays(end, daysOffset);
         return mDays.contains(day) && time >= start && time < end;
