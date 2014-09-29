@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
@@ -358,7 +359,7 @@ public final class ResourceHelper {
      * @param requireUnit whether the value is expected to contain a unit.
      * @return true if success.
      */
-    public static boolean parseFloatAttribute(String attribute, String value,
+    public static boolean parseFloatAttribute(String attribute, @NonNull String value,
             TypedValue outValue, boolean requireUnit) {
         assert !requireUnit || attribute != null;
 
