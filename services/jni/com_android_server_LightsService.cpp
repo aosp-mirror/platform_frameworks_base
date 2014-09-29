@@ -60,7 +60,7 @@ static light_device_t* get_device(hw_module_t* module, char const* name)
     }
 }
 
-static jlong init_native(JNIEnv *env, jobject clazz)
+static jlong init_native(JNIEnv* /* env */, jobject /* clazz */)
 {
     int err;
     hw_module_t* module;
@@ -93,7 +93,7 @@ static jlong init_native(JNIEnv *env, jobject clazz)
     return (jlong)devices;
 }
 
-static void finalize_native(JNIEnv *env, jobject clazz, jlong ptr)
+static void finalize_native(JNIEnv* /* env */, jobject /* clazz */, jlong ptr)
 {
     Devices* devices = (Devices*)ptr;
     if (devices == NULL) {
@@ -103,7 +103,7 @@ static void finalize_native(JNIEnv *env, jobject clazz, jlong ptr)
     free(devices);
 }
 
-static void setLight_native(JNIEnv *env, jobject clazz, jlong ptr,
+static void setLight_native(JNIEnv* /* env */, jobject /* clazz */, jlong ptr,
         jint light, jint colorARGB, jint flashMode, jint onMS, jint offMS, jint brightnessMode)
 {
     Devices* devices = (Devices*)ptr;

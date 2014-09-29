@@ -142,7 +142,7 @@ static int usb_device_removed(const char *devname, void* client_data) {
     return 0;
 }
 
-static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv *env, jobject thiz)
+static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv* /* env */, jobject thiz)
 {
     struct usb_host_context* context = usb_host_init();
     if (!context) {
@@ -153,7 +153,8 @@ static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv *env, jobject
     usb_host_run(context, usb_device_added, usb_device_removed, NULL, (void *)thiz);
 }
 
-static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject thiz, jstring deviceName)
+static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject /* thiz */,
+                                                        jstring deviceName)
 {
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
     struct usb_device* device = usb_device_open(deviceNameStr);
