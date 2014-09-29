@@ -34,6 +34,7 @@ public class ObservableScrollView extends ScrollView {
     private float mLastX;
     private float mLastY;
     private boolean mBlockFlinging;
+    private boolean mTouchCancelled;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,9 +88,20 @@ public class ObservableScrollView extends ScrollView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean isEndGuesture = (ev.getAction() == MotionEvent.ACTION_UP
-                || ev.getAction() == MotionEvent.ACTION_CANCEL);
-        if (!mTouchEnabled && !isEndGuesture) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (!mTouchEnabled) {
+                mTouchCancelled = true;
+                return false;
+            }
+            mTouchCancelled = false;
+        } else if (mTouchCancelled) {
+            return false;
+        } else if (!mTouchEnabled) {
+            MotionEvent cancel = MotionEvent.obtain(ev);
+            cancel.setAction(MotionEvent.ACTION_CANCEL);
+            super.dispatchTouchEvent(ev);
+            cancel.recycle();
+            mTouchCancelled = true;
             return false;
         }
         return super.dispatchTouchEvent(ev);
