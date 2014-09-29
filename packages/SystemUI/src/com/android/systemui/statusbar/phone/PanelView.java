@@ -136,9 +136,6 @@ public abstract class PanelView extends FrameLayout {
     }
 
     private void runPeekAnimation() {
-        if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-            Log.i(TAG, "Starting peek animation");
-        }
         mPeekHeight = getPeekHeight();
         if (DEBUG) logf("peek to height=%.1f", mPeekHeight);
         if (mHeightAnimator != null) {
@@ -159,15 +156,9 @@ public abstract class PanelView extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 mPeekAnimator = null;
                 if (mCollapseAfterPeek && !mCancelled) {
-                    if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                        Log.i(TAG, "Peek animation finished, posting collapse");
-                    }
                     postOnAnimation(new Runnable() {
                         @Override
                         public void run() {
-                            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                                Log.i(TAG, "Peek animation finished, collapsing");
-                            }
                             collapse(false /* delayed */);
                         }
                     });
@@ -345,9 +336,6 @@ public abstract class PanelView extends FrameLayout {
                     }
                     boolean expand = flingExpands(vel, vectorVel);
                     onTrackingStopped(expand);
-                    if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                        Log.i(TAG, "Flinging: expand=" + expand);
-                    }
                     DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                             mStatusBar.isFalsingThresholdNeeded());
                     fling(vel, expand);
@@ -535,9 +523,6 @@ public abstract class PanelView extends FrameLayout {
             notifyExpandingFinished();
             return;
         }
-        if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-            Log.i(TAG, "Executing fling: expand=" + expand + " vel=" + vel);
-        }
         mOverExpandedBeforeFling = getOverExpansionAmount() > 0f;
         ValueAnimator animator = createHeightAnimator(target);
         if (expand) {
@@ -719,14 +704,8 @@ public abstract class PanelView extends FrameLayout {
             mClosing = true;
             notifyExpandingStarted();
             if (delayed) {
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Posting collapse runnable, will be run in 120ms");
-                }
                 postDelayed(mFlingCollapseRunnable, 120);
             } else {
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Animating collapsing now");
-                }
                 fling(0, false /* expand */);
             }
         }
@@ -735,9 +714,6 @@ public abstract class PanelView extends FrameLayout {
     private final Runnable mFlingCollapseRunnable = new Runnable() {
         @Override
         public void run() {
-            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                Log.i(TAG, "Executing collapse runnable, animating collapsing now");
-            }
             fling(0, false /* expand */);
         }
     };
@@ -766,11 +742,6 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public void instantExpand() {
-        if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-            Log.i(TAG, "Before instant expanding"
-                    + " mTracking=" + mTracking
-                    + " mExpanding=" + mExpanding);
-        }
         mInstantExpanding = true;
         mUpdateFlingOnLayout = false;
         abortAnimations();
@@ -791,11 +762,6 @@ public abstract class PanelView extends FrameLayout {
                     public void onGlobalLayout() {
                         if (mStatusBar.getStatusBarWindow().getHeight()
                                 != mStatusBar.getStatusBarHeight()) {
-                            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                                Log.i(TAG, "Now instant expanding after layout"
-                                        + " mTracking=" + mTracking
-                                        + " mExpanding=" + mExpanding);
-                            }
                             getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             setExpandedFraction(1f);
                             mInstantExpanding = false;
@@ -942,9 +908,6 @@ public abstract class PanelView extends FrameLayout {
     private final Runnable mPostCollapseRunnable = new Runnable() {
         @Override
         public void run() {
-            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                Log.i(TAG, "Collapsing after middle clicked");
-            }
             collapse(false /* delayed */);
         }
     };
@@ -957,9 +920,6 @@ public abstract class PanelView extends FrameLayout {
                 mStatusBar.goToKeyguard();
                 return true;
             case StatusBarState.SHADE:
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Middle clicked in shade state, posting collapsing runnable");
-                }
 
                 // This gets called in the middle of the touch handling, where the state is still
                 // that we are tracking the panel. Collapse the panel after this is done.

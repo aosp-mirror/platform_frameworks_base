@@ -140,9 +140,6 @@ public class PanelBar extends FrameLayout {
         mPanelHolder.setSelectedPanel(mTouchingPanel);
         for (PanelView pv : mPanels) {
             if (pv != panel) {
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Collapsing because opening another panel");
-                }
                 pv.collapse(false /* delayed */);
             }
         }
@@ -194,15 +191,9 @@ public class PanelBar extends FrameLayout {
         boolean waiting = false;
         for (PanelView pv : mPanels) {
             if (animate && !pv.isFullyCollapsed()) {
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Animating collapse, delayed");
-                }
                 pv.collapse(true /* delayed */);
                 waiting = true;
             } else {
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Collapsing without animation");
-                }
                 pv.resetViews();
                 pv.setExpandedFraction(0); // just in case
                 pv.setVisibility(View.GONE);
