@@ -187,10 +187,12 @@ public final class BroadcastQueue {
 
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
         mParallelBroadcasts.add(r);
+        r.enqueueClockTime = System.currentTimeMillis();
     }
 
     public void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
         mOrderedBroadcasts.add(r);
+        r.enqueueClockTime = System.currentTimeMillis();
     }
 
     public final boolean replaceParallelBroadcastLocked(BroadcastRecord r) {

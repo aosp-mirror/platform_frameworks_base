@@ -52,6 +52,7 @@ final class BroadcastRecord extends Binder {
     final int appOp;        // an app op that is associated with this broadcast
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     IIntentReceiver resultTo; // who receives final result if non-null
+    long enqueueClockTime;  // the clock time the broadcast was enqueued
     long dispatchTime;      // when dispatch started on this set of receivers
     long dispatchClockTime; // the clock time the dispatch started
     long receiverTime;      // when current receiver started for timeouts.
@@ -102,7 +103,9 @@ final class BroadcastRecord extends Binder {
             pw.print(prefix); pw.print("requiredPermission="); pw.print(requiredPermission);
                     pw.print("  appOp="); pw.println(appOp);
         }
-        pw.print(prefix); pw.print("dispatchClockTime=");
+        pw.print(prefix); pw.print("enqueueClockTime=");
+                pw.print(new Date(enqueueClockTime));
+                pw.print(" dispatchClockTime=");
                 pw.println(new Date(dispatchClockTime));
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
