@@ -19,6 +19,7 @@ package com.android.systemui.recents.misc;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.KeyEvent;
+import com.android.systemui.recents.Constants;
 
 /**
  * A trigger for catching a debug chord.
@@ -48,6 +49,8 @@ public class DebugTrigger {
      * then we just call the callback.
      */
     public void onKeyEvent(int keyCode) {
+        if (!Constants.DebugFlags.App.EnableDebugMode) return;
+
         if (mLastKeyCode == 0) {
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 mLastKeyCode = keyCode;

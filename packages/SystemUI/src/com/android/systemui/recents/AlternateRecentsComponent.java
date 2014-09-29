@@ -189,7 +189,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     void showRelativeAffiliatedTask(boolean showNextTask) {
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
-                -1, -1, false, null, null);
+                -1, -1, false, true, null, null);
         // Return early if there are no tasks
         if (stack.getTaskCount() == 0) return;
 
@@ -444,7 +444,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // Get the stack of tasks that we are animating into
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
-                runningTaskId, -1, false, null, null);
+                runningTaskId, -1, false, isTopTaskHome, null, null);
         if (stack.getTaskCount() == 0) {
             return null;
         }
@@ -485,7 +485,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // which can differ depending on the number of items in the list.
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> recentTasks =
-                ssp.getRecentTasks(3, UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(3, UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
         boolean useThumbnailTransition = !isTopTaskHome;
         boolean hasRecentTasks = !recentTasks.isEmpty();
 
