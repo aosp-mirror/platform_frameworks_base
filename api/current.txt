@@ -4795,7 +4795,9 @@ package android.app {
     method public int getCustomSizePreset();
     method public android.app.PendingIntent getDisplayIntent();
     method public int getGravity();
+    method public boolean getHintAvoidBackgroundClipping();
     method public boolean getHintHideIcon();
+    method public int getHintScreenTimeout();
     method public boolean getHintShowBackgroundOnly();
     method public java.util.List<android.app.Notification> getPages();
     method public boolean getStartScrollBottom();
@@ -4808,9 +4810,13 @@ package android.app {
     method public android.app.Notification.WearableExtender setCustomSizePreset(int);
     method public android.app.Notification.WearableExtender setDisplayIntent(android.app.PendingIntent);
     method public android.app.Notification.WearableExtender setGravity(int);
+    method public android.app.Notification.WearableExtender setHintAvoidBackgroundClipping(boolean);
     method public android.app.Notification.WearableExtender setHintHideIcon(boolean);
+    method public android.app.Notification.WearableExtender setHintScreenTimeout(int);
     method public android.app.Notification.WearableExtender setHintShowBackgroundOnly(boolean);
     method public android.app.Notification.WearableExtender setStartScrollBottom(boolean);
+    field public static final int SCREEN_TIMEOUT_LONG = -1; // 0xffffffff
+    field public static final int SCREEN_TIMEOUT_SHORT = 0; // 0x0
     field public static final int SIZE_DEFAULT = 0; // 0x0
     field public static final int SIZE_FULL_SCREEN = 5; // 0x5
     field public static final int SIZE_LARGE = 4; // 0x4
