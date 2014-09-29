@@ -2883,12 +2883,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.service.persistentdata.PersistentDataBlockManager} instance retrieving
-     * a file descriptor for a persistent data block.
+     * android.service.persistentdata.PersistentDataBlockManager} instance
+     * for interacting with a storage device that lives across factory resets.
+     *
      * @see #getSystemService
      * @see android.service.persistentdata.PersistentDataBlockManager
      * @hide
      */
+    @SystemApi
     public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
 
     /**
