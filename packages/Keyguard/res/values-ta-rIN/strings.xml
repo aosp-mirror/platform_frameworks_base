@@ -105,7 +105,7 @@
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"தவறான பின்"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"உங்கள் வடிவத்தை வரையவும்"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"வடிவத்தை வரையவும்"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"சிம் பின்னை உள்ளிடவும்"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"பின்னை உள்ளிடுக"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"கடவுச்சொல்லை உள்ளிடவும்"</string>
