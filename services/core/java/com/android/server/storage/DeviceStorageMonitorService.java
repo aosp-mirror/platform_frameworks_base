@@ -18,6 +18,7 @@ package com.android.server.storage;
 
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
+import com.android.server.pm.PackageManagerService;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -50,6 +51,8 @@ import android.util.TimeUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+
+import dalvik.system.VMRuntime;
 
 /**
  * This class implements a service to monitor the amount of disk
@@ -89,6 +92,7 @@ public class DeviceStorageMonitorService extends SystemService {
     private long mLastReportedFreeMemTime;
     boolean mLowMemFlag=false;
     private boolean mMemFullFlag=false;
+    private final boolean mIsBootImageOnDisk;
     private final ContentResolver mResolver;
     private final long mTotalMemory;  // on /data
     private final StatFs mDataFileStats;
@@ -285,6 +289,10 @@ public class DeviceStorageMonitorService extends SystemService {
                     mLowMemFlag = false;
                 }
             }
+            if (!mLowMemFlag && !mIsBootImageOnDisk) {
+                Slog.i(TAG, "No boot image on disk due to lack of space. Sending notification");
+                sendNotification();
+            }
             if (mFreeMem < mMemFullThreshold) {
                 if (!mMemFullFlag) {
                     sendFullNotification();
@@ -314,6 +322,7 @@ public class DeviceStorageMonitorService extends SystemService {
         super(context);
         mLastReportedFreeMemTime = 0;
         mResolver = context.getContentResolver();
+        mIsBootImageOnDisk = isBootImageOnDisk();
         //create StatFs object
         mDataFileStats = new StatFs(DATA_PATH.getAbsolutePath());
         mSystemFileStats = new StatFs(SYSTEM_PATH.getAbsolutePath());
@@ -329,6 +338,15 @@ public class DeviceStorageMonitorService extends SystemService {
         mStorageFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageNotFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
         mStorageNotFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    }
+
+    private static boolean isBootImageOnDisk() {
+        for (String instructionSet : PackageManagerService.getAllDexCodeInstructionSets()) {
+            if (!VMRuntime.isBootClassPathOnDisk(instructionSet)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -364,7 +382,7 @@ public class DeviceStorageMonitorService extends SystemService {
 
         @Override
         public boolean isMemoryLow() {
-            return mLowMemFlag;
+            return mLowMemFlag || !mIsBootImageOnDisk;
         }
 
         @Override
@@ -409,6 +427,7 @@ public class DeviceStorageMonitorService extends SystemService {
 
         pw.print("  mLowMemFlag="); pw.print(mLowMemFlag);
         pw.print(" mMemFullFlag="); pw.println(mMemFullFlag);
+        pw.print(" mIsBootImageOnDisk="); pw.print(mIsBootImageOnDisk);
 
         pw.print("  mClearSucceeded="); pw.print(mClearSucceeded);
         pw.print(" mClearingCache="); pw.println(mClearingCache);
@@ -445,19 +464,25 @@ public class DeviceStorageMonitorService extends SystemService {
                         Context.NOTIFICATION_SERVICE);
         CharSequence title = context.getText(
                 com.android.internal.R.string.low_internal_storage_view_title);
-        CharSequence details = context.getText(
-                com.android.internal.R.string.low_internal_storage_view_text);
+        CharSequence details = context.getText(mIsBootImageOnDisk
+                ? com.android.internal.R.string.low_internal_storage_view_text
+                : com.android.internal.R.string.low_internal_storage_view_text_no_boot);
         PendingIntent intent = PendingIntent.getActivityAsUser(context, 0,  lowMemIntent, 0,
                 null, UserHandle.CURRENT);
-        Notification notification = new Notification();
-        notification.icon = com.android.internal.R.drawable.stat_notify_disk_full;
-        notification.tickerText = title;
+        Notification notification = new Notification.Builder(context)
+                .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
+                .setTicker(title)
+                .setColor(context.getResources().getColor(
+                    com.android.internal.R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(details)
+                .setContentIntent(intent)
+                .setStyle(new Notification.BigTextStyle()
+                      .bigText(details))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
-        notification.color = context.getResources().getColor(
-                com.android.internal.R.color.system_notification_accent_color);
-        notification.setLatestEventInfo(context, title, details, intent);
-        notification.visibility = Notification.VISIBILITY_PUBLIC;
-        notification.category = Notification.CATEGORY_SYSTEM;
         mNotificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);
         context.sendStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
