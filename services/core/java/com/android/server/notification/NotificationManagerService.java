@@ -43,6 +43,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -2013,7 +2014,10 @@ public class NotificationManagerService extends SystemService {
 
                         if ((useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
                                 && !(mAudioManager.getRingerMode()
-                                        == AudioManager.RINGER_MODE_SILENT)) {
+                                        == AudioManager.RINGER_MODE_SILENT)
+                                // HACK for klp-modular devices only: disable vibration on watches.
+                                && ((getContext().getResources().getConfiguration().uiMode &
+                                        Configuration.UI_MODE_TYPE_WATCH) == 0)) {
                             mVibrateNotification = r;
 
                             if (useDefaultVibrate || convertSoundToVibration) {
