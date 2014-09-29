@@ -70,7 +70,7 @@ public class ScrimView extends View
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mDrawAsSrc || !mIsEmpty) {
+        if (mDrawAsSrc || (!mIsEmpty && mViewAlpha > 0f)) {
             PorterDuff.Mode mode = mDrawAsSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
             int color = mScrimColor;
             color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
