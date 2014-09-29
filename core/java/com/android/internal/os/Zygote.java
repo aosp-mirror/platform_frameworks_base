@@ -79,19 +79,20 @@ public final class Zygote {
      * (and replaced by /dev/null) after forking.  An integer value
      * of -1 in any entry in the array means "ignore this one".
      * @param instructionSet null-ok the instruction set to use.
+     * @param appDataDir null-ok the data directory of the app.
      *
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          String instructionSet) {
+          String instructionSet, String appDataDir) {
         long startTime = SystemClock.elapsedRealtime();
         VM_HOOKS.preFork();
         checkTime(startTime, "Zygote.preFork");
         int pid = nativeForkAndSpecialize(
                   uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                  instructionSet);
+                  instructionSet, appDataDir);
         checkTime(startTime, "Zygote.nativeForkAndSpecialize");
         VM_HOOKS.postForkCommon();
         checkTime(startTime, "Zygote.postForkCommon");
@@ -100,7 +101,7 @@ public final class Zygote {
 
     native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int debugFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          String instructionSet);
+          String instructionSet, String appDataDir);
 
     /**
      * Temporary hack: check time since start time and log if over a fixed threshold.

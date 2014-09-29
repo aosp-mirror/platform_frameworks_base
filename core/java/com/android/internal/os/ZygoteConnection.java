@@ -93,7 +93,7 @@ class ZygoteConnection {
                 new InputStreamReader(socket.getInputStream()), 256);
 
         mSocket.setSoTimeout(CONNECTION_TIMEOUT_MILLIS);
-                
+
         try {
             peer = mSocket.getPeerCredentials();
         } catch (IOException ex) {
@@ -245,7 +245,8 @@ class ZygoteConnection {
             checkTime(startTime, "zygoteConnection.runOnce: preForkAndSpecialize");
             pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
                     parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                    parsedArgs.niceName, fdsToClose, parsedArgs.instructionSet);
+                    parsedArgs.niceName, fdsToClose, parsedArgs.instructionSet,
+                    parsedArgs.appDataDir);
             checkTime(startTime, "zygoteConnection.runOnce: postForkAndSpecialize");
         } catch (IOException ex) {
             logAndPrintError(newStderr, "Exception creating pipe", ex);
@@ -404,6 +405,12 @@ class ZygoteConnection {
         String instructionSet;
 
         /**
+         * The app data directory. May be null, e.g., for the system server. Note that this might
+         * not be reliable in the case of process-sharing apps.
+         */
+        String appDataDir;
+
+        /**
          * Constructs instance and parses args
          * @param args zygote command-line args
          * @throws IllegalArgumentException
@@ -560,6 +567,8 @@ class ZygoteConnection {
                     abiListQuery = true;
                 } else if (arg.startsWith("--instruction-set=")) {
                     instructionSet = arg.substring(arg.indexOf('=') + 1);
+                } else if (arg.startsWith("--app-data-dir=")) {
+                    appDataDir = arg.substring(arg.indexOf('=') + 1);
                 } else {
                     break;
                 }
@@ -611,7 +620,7 @@ class ZygoteConnection {
         }
 
         // See bug 1092107: large argc can be used for a DOS attack
-        if (argc > MAX_ZYGOTE_ARGC) {   
+        if (argc > MAX_ZYGOTE_ARGC) {
             throw new IOException("max arg count exceeded");
         }
 
@@ -628,7 +637,7 @@ class ZygoteConnection {
     }
 
     /**
-     * Applies zygote security policy per bugs #875058 and #1082165. 
+     * Applies zygote security policy per bugs #875058 and #1082165.
      * Based on the credentials of the process issuing a zygote command:
      * <ol>
      * <li> uid 0 (root) may specify any uid, gid, and setgroups() list
@@ -659,7 +668,7 @@ class ZygoteConnection {
             /* In normal operation, SYSTEM_UID can only specify a restricted
              * set of UIDs. In factory test mode, SYSTEM_UID may specify any uid.
              */
-            uidRestricted  
+            uidRestricted
                  = !(factoryTest.equals("1") || factoryTest.equals("2"));
 
             if (uidRestricted
