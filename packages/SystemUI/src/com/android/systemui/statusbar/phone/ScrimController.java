@@ -74,8 +74,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private final Interpolator mInterpolator = new DecelerateInterpolator();
     private final Interpolator mLinearOutSlowInInterpolator;
     private BackDropView mBackDropView;
+    private boolean mScrimSrcEnabled;
 
-    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront) {
+    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, boolean scrimSrcEnabled) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         final Context context = scrimBehind.getContext();
@@ -83,6 +84,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 android.R.interpolator.linear_out_slow_in);
         mDozeParameters = new DozeParameters(context);
+        mScrimSrcEnabled = scrimSrcEnabled;
     }
 
     public void setKeyguardShowing(boolean showing) {
@@ -384,7 +386,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private void updateScrimBehindDrawingMode() {
-        boolean asSrc = mBackDropView.getVisibility() != View.VISIBLE;
+        boolean asSrc = mBackDropView.getVisibility() != View.VISIBLE && mScrimSrcEnabled;
         mScrimBehind.setDrawAsSrc(asSrc);
     }
 }
