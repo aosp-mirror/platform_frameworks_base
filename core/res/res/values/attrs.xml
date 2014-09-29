@@ -5365,11 +5365,11 @@
         <attr name="drawable" />
     </declare-styleable>
 
-    <!-- Defines the target path or group used in the AnimatedVectorDrawable. -->
+    <!-- Defines the target used in the AnimatedVectorDrawable. -->
     <declare-styleable name="AnimatedVectorDrawableTarget">
-        <!-- The name of this target path or group -->
+        <!-- The name of the target path, group or vector drawable -->
         <attr name="name" />
-        <!-- The animation for this target path or group -->
+        <!-- The animation for the target path, group or vector drawable -->
         <attr name="animation" />
     </declare-styleable>
 
