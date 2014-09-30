@@ -358,6 +358,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"设置"</string>
     <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
-    <!-- no translation found for zen_mode_and_condition (4462471036429759903) -->
-    <skip />
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>（<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>）"</string>
 </resources>
