@@ -515,6 +515,7 @@ class WindowStateAnimator {
 
     static class SurfaceTrace extends SurfaceControl {
         private final static String SURFACE_TAG = "SurfaceTrace";
+        private final static boolean logSurfaceTrace = DEBUG_SURFACE_TRACE;
         final static ArrayList<SurfaceTrace> sSurfaces = new ArrayList<SurfaceTrace>();
 
         private float mSurfaceTraceAlpha = 0;
@@ -534,7 +535,7 @@ class WindowStateAnimator {
             super(s, name, w, h, format, flags);
             mName = name != null ? name : "Not named";
             mSize.set(w, h);
-            Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
+            if (logSurfaceTrace) Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
             synchronized (sSurfaces) {
                 sSurfaces.add(0, this);
@@ -544,8 +545,8 @@ class WindowStateAnimator {
         @Override
         public void setAlpha(float alpha) {
             if (mSurfaceTraceAlpha != alpha) {
-                Slog.v(SURFACE_TAG, "setAlpha(" + alpha + "): OLD:" + this + ". Called by "
-                        + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setAlpha(" + alpha + "): OLD:" + this +
+                        ". Called by " + Debug.getCallers(3));
                 mSurfaceTraceAlpha = alpha;
             }
             super.setAlpha(alpha);
@@ -554,8 +555,8 @@ class WindowStateAnimator {
         @Override
         public void setLayer(int zorder) {
             if (zorder != mLayer) {
-                Slog.v(SURFACE_TAG, "setLayer(" + zorder + "): OLD:" + this + ". Called by "
-                        + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setLayer(" + zorder + "): OLD:" + this
+                        + ". Called by " + Debug.getCallers(3));
                 mLayer = zorder;
             }
             super.setLayer(zorder);
@@ -576,8 +577,8 @@ class WindowStateAnimator {
         @Override
         public void setPosition(float x, float y) {
             if (x != mPosition.x || y != mPosition.y) {
-                Slog.v(SURFACE_TAG, "setPosition(" + x + "," + y + "): OLD:" + this
-                        + ". Called by " + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setPosition(" + x + "," + y + "): OLD:"
+                        + this + ". Called by " + Debug.getCallers(3));
                 mPosition.set(x, y);
             }
             super.setPosition(x, y);
@@ -586,8 +587,8 @@ class WindowStateAnimator {
         @Override
         public void setSize(int w, int h) {
             if (w != mSize.x || h != mSize.y) {
-                Slog.v(SURFACE_TAG, "setSize(" + w + "," + h + "): OLD:" + this + ". Called by "
-                        + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setSize(" + w + "," + h + "): OLD:"
+                        + this + ". Called by " + Debug.getCallers(3));
                 mSize.set(w, h);
             }
             super.setSize(w, h);
@@ -597,8 +598,9 @@ class WindowStateAnimator {
         public void setWindowCrop(Rect crop) {
             if (crop != null) {
                 if (!crop.equals(mWindowCrop)) {
-                    Slog.v(SURFACE_TAG, "setWindowCrop(" + crop.toShortString() + "): OLD:" + this
-                            + ". Called by " + Debug.getCallers(3));
+                    if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setWindowCrop("
+                            + crop.toShortString() + "): OLD:" + this + ". Called by "
+                            + Debug.getCallers(3));
                     mWindowCrop.set(crop);
                 }
             }
@@ -608,8 +610,8 @@ class WindowStateAnimator {
         @Override
         public void setLayerStack(int layerStack) {
             if (layerStack != mLayerStack) {
-                Slog.v(SURFACE_TAG, "setLayerStack(" + layerStack + "): OLD:" + this
-                        + ". Called by " + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setLayerStack(" + layerStack + "): OLD:"
+                        + this + ". Called by " + Debug.getCallers(3));
                 mLayerStack = layerStack;
             }
             super.setLayerStack(layerStack);
@@ -618,8 +620,8 @@ class WindowStateAnimator {
         @Override
         public void setOpaque(boolean isOpaque) {
             if (isOpaque != mIsOpaque) {
-                Slog.v(SURFACE_TAG, "setOpaque(" + isOpaque + "): OLD:" + this
-                        + ". Called by " + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setOpaque(" + isOpaque + "): OLD:"
+                        + this + ". Called by " + Debug.getCallers(3));
                 mIsOpaque = isOpaque;
             }
             super.setOpaque(isOpaque);
@@ -628,8 +630,9 @@ class WindowStateAnimator {
         @Override
         public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
             if (dsdx != mDsdx || dtdx != mDtdx || dsdy != mDsdy || dtdy != mDtdy) {
-                Slog.v(SURFACE_TAG, "setMatrix(" + dsdx + "," + dtdx + "," + dsdy + "," + dtdy +
-                        "): OLD:" + this + ". Called by " + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "setMatrix(" + dsdx + "," + dtdx + ","
+                        + dsdy + "," + dtdy + "): OLD:" + this + ". Called by "
+                        + Debug.getCallers(3));
                 mDsdx = dsdx;
                 mDtdx = dtdx;
                 mDsdy = dsdy;
@@ -641,7 +644,8 @@ class WindowStateAnimator {
         @Override
         public void hide() {
             if (mShown) {
-                Slog.v(SURFACE_TAG, "hide: OLD:" + this + ". Called by " + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "hide: OLD:" + this + ". Called by "
+                        + Debug.getCallers(3));
                 mShown = false;
             }
             super.hide();
@@ -650,7 +654,8 @@ class WindowStateAnimator {
         @Override
         public void show() {
             if (!mShown) {
-                Slog.v(SURFACE_TAG, "show: OLD:" + this + ". Called by " + Debug.getCallers(3));
+                if (logSurfaceTrace) Slog.v(SURFACE_TAG, "show: OLD:" + this + ". Called by "
+                        + Debug.getCallers(3));
                 mShown = true;
             }
             super.show();
@@ -659,7 +664,8 @@ class WindowStateAnimator {
         @Override
         public void destroy() {
             super.destroy();
-            Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by " + Debug.getCallers(3));
+            if (logSurfaceTrace) Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by "
+                    + Debug.getCallers(3));
             synchronized (sSurfaces) {
                 sSurfaces.remove(this);
             }
@@ -668,7 +674,7 @@ class WindowStateAnimator {
         @Override
         public void release() {
             super.release();
-            Slog.v(SURFACE_TAG, "release: " + this + ". Called by "
+            if (logSurfaceTrace) Slog.v(SURFACE_TAG, "release: " + this + ". Called by "
                     + Debug.getCallers(3));
             synchronized (sSurfaces) {
                 sSurfaces.remove(this);
