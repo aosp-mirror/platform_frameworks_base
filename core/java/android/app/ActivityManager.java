@@ -579,7 +579,7 @@ public class ActivityManager {
         public TaskDescription(TaskDescription td) {
             mLabel = td.mLabel;
             mIcon = td.mIcon;
-            setPrimaryColor(td.mColorPrimary);
+            mColorPrimary = td.mColorPrimary;
             mIconFilename = td.mIconFilename;
         }
 
@@ -600,7 +600,11 @@ public class ActivityManager {
          * @hide
          */
         public void setPrimaryColor(int primaryColor) {
-            mColorPrimary = 0xFF000000 | primaryColor;
+            // Ensure that the given color is valid
+            if ((primaryColor != 0) && (Color.alpha(primaryColor) != 255)) {
+                throw new RuntimeException("A TaskDescription's primary color should be opaque");
+            }
+            mColorPrimary = primaryColor;
         }
 
         /**
