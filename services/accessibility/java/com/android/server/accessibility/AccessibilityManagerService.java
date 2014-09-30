@@ -1982,7 +1982,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             } else {
                 userState.mBindingServices.add(mComponentName);
                 mService = userState.mUiAutomationServiceClient.asBinder();
-                onServiceConnected(mComponentName, mService);
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Simulate asynchronous connection since in onServiceConnected
+                        // we may modify the state data in case of an error but bind is
+                        // called while iterating over the data and bad things can happen.
+                        onServiceConnected(mComponentName, mService);
+                    }
+                });
                 userState.mUiAutomationService = this;
             }
             return false;
