@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
+import android.media.AudioSystem;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
@@ -237,6 +238,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public void adjustVolume(int direction, int flags, String packageName, int uid,
             boolean useSuggested) {
+        int previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
         if (isPlaybackActive(false) || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
@@ -248,8 +250,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
             if (useSuggested) {
-                mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction, flags,
-                        packageName, uid);
+                if (AudioSystem.isStreamActive(stream, 0)) {
+                    mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
+                            flags, packageName, uid);
+                } else {
+                    flags |= previousFlagPlaySound;
+                    mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
+                            AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
+                            uid);
+                }
             } else {
                 mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
                         packageName, uid);
