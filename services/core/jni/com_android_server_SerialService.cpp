@@ -34,7 +34,7 @@ static struct parcel_file_descriptor_offsets_t
     jmethodID mConstructor;
 } gParcelFileDescriptorOffsets;
 
-static jobject android_server_SerialService_open(JNIEnv *env, jobject thiz, jstring path)
+static jobject android_server_SerialService_open(JNIEnv *env, jobject /* thiz */, jstring path)
 {
     const char *pathStr = env->GetStringUTFChars(path, NULL);
 
