@@ -92,7 +92,6 @@ import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
@@ -293,10 +292,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                         // close the shade if it was open
                         if (handled) {
-                            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                                Log.i(TAG, "Collapsing panel from mOnClickHandler after keyguard"
-                                        + "dismiss");
-                            }
                             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                             visibilityChanged(false);
                         }
@@ -343,9 +338,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
                 if (BANNER_ACTION_SETUP.equals(action)) {
-                    if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                        Log.i(TAG, "Animating collapse because of BANNER_ACTION_SETUP");
-                    }
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                     mContext.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_REDACTION)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -771,10 +763,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                         }
                     }
                 });
-                if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                    Log.i(TAG, "Collapsing panel from startNotificationGutsIntent after keyguard"
-                            + "dismiss");
-                }
                 animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                 return true;
             }
