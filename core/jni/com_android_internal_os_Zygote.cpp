@@ -51,6 +51,8 @@
 #include "ScopedPrimitiveArray.h"
 #include "ScopedUtfChars.h"
 
+#include "nativebridge/native_bridge.h"
+
 namespace {
 
 using android::String8;
@@ -249,19 +251,23 @@ static void SetSchedulerPolicy(JNIEnv* env) {
 
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
-static bool MountEmulatedStorage(uid_t uid, jint mount_mode) {
-  if (mount_mode == MOUNT_EXTERNAL_NONE) {
+static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_namespace) {
+  if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
     return true;
   }
-
-  // See storage config details at http://source.android.com/tech/storage/
-  userid_t user_id = multiuser_get_user_id(uid);
 
   // Create a second private mount namespace for our process
   if (unshare(CLONE_NEWNS) == -1) {
       ALOGW("Failed to unshare(): %d", errno);
       return false;
   }
+
+  if (mount_mode == MOUNT_EXTERNAL_NONE) {
+    return true;
+  }
+
+  // See storage config details at http://source.android.com/tech/storage/
+  userid_t user_id = multiuser_get_user_id(uid);
 
   // Create bind mounts to expose external storage
   if (mount_mode == MOUNT_EXTERNAL_MULTIUSER || mount_mode == MOUNT_EXTERNAL_MULTIUSER_ALL) {
@@ -422,7 +428,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
                                      bool is_system_server, jintArray fdsToClose,
-                                     jstring instructionSet) {
+                                     jstring instructionSet, jstring dataDir) {
   uint64_t start = MsTime();
   SetSigChldHandler();
   ckTime(start, "ForkAndSpecializeCommon:SetSigChldHandler");
@@ -446,7 +452,13 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     DropCapabilitiesBoundingSet(env);
 
-    if (!MountEmulatedStorage(uid, mount_external)) {
+    bool need_native_bridge = false;
+    if (instructionSet != NULL) {
+      ScopedUtfChars isa_string(env, instructionSet);
+      need_native_bridge = android::NeedsNativeBridge(isa_string.c_str());
+    }
+
+    if (!MountEmulatedStorage(uid, mount_external, need_native_bridge)) {
       ALOGW("Failed to mount emulated storage: %d", errno);
       if (errno == ENOTCONN || errno == EROFS) {
         // When device is actively encrypting, we get ENOTCONN here
@@ -474,6 +486,17 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     SetGids(env, javaGids);
 
     SetRLimits(env, javaRlimits);
+
+    if (!is_system_server && need_native_bridge) {
+      // Set the environment for the apps running with native bridge.
+      ScopedUtfChars isa_string(env, instructionSet);  // Known non-null because of need_native_...
+      if (dataDir == NULL) {
+        android::PreInitializeNativeBridge(NULL, isa_string.c_str());
+      } else {
+        ScopedUtfChars data_dir(env, dataDir);
+        android::PreInitializeNativeBridge(data_dir.c_str(), isa_string.c_str());
+      }
+    }
 
     int rc = setresgid(gid, gid, gid);
     if (rc == -1) {
@@ -563,7 +586,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint debug_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
-        jintArray fdsToClose, jstring instructionSet) {
+        jintArray fdsToClose, jstring instructionSet, jstring appDataDir) {
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
     jlong capabilities = 0;
     if (uid == AID_BLUETOOTH) {
@@ -572,7 +595,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
-            se_name, false, fdsToClose, instructionSet);
+            se_name, false, fdsToClose, instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
@@ -582,7 +605,8 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
-                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true, NULL, NULL);
+                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true, NULL,
+                                      NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -601,7 +625,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
 
 static JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer }
