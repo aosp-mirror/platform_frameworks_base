@@ -264,8 +264,7 @@ protected:
         ALOGV("onTransact() on %p calling object %p in env %p vm %p\n", this, mObject, env, mVM);
 
         IPCThreadState* thread_state = IPCThreadState::self();
-        const int strict_policy_before = thread_state->getStrictModePolicy();
-        thread_state->setLastTransactionBinderFlags(flags);
+        const int32_t strict_policy_before = thread_state->getStrictModePolicy();
 
         //printf("Transact from %p to Java code sending: ", this);
         //data.print();
@@ -284,15 +283,11 @@ protected:
             env->DeleteLocalRef(excep);
         }
 
-        // Restore the Java binder thread's state if it changed while
-        // processing a call (as it would if the Parcel's header had a
-        // new policy mask and Parcel.enforceInterface() changed
-        // it...)
-        const int strict_policy_after = thread_state->getStrictModePolicy();
-        if (strict_policy_after != strict_policy_before) {
-            // Our thread-local...
-            thread_state->setStrictModePolicy(strict_policy_before);
-            // And the Java-level thread-local...
+        // Check if the strict mode state changed while processing the
+        // call.  The Binder state will be restored by the underlying
+        // Binder system in IPCThreadState, however we need to take care
+        // of the parallel Java state as well.
+        if (thread_state->getStrictModePolicy() != strict_policy_before) {
             set_dalvik_blockguard_policy(env, strict_policy_before);
         }
 
