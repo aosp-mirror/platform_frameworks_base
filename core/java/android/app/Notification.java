@@ -798,8 +798,8 @@ public class Notification implements Parcelable
     public static final String EXTRA_TEMPLATE = "android.template";
 
     /**
-     * {@link #extras} key: An array of people that this notification relates to, specified
-     * by contacts provider contact URI.
+     * {@link #extras} key: A String array containing the people that this notification relates to,
+     * each of which was supplied to {@link Builder#addPerson(String)}.
      */
     public static final String EXTRA_PEOPLE = "android.people";
 
@@ -2393,10 +2393,27 @@ public class Notification implements Parcelable
         /**
          * Add a person that is relevant to this notification.
          *
+         * <P>
+         * Depending on user preferences, this annotation may allow the notification to pass
+         * through interruption filters, and to appear more prominently in the user interface.
+         * </P>
+         *
+         * <P>
+         * The person should be specified by the {@code String} representation of a
+         * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+         * </P>
+         *
+         * <P>The system will also attempt to resolve {@code mailto:} and {@code tel:} schema
+         * URIs.  The path part of these URIs must exist in the contacts database, in the
+         * appropriate column, or the reference will be discarded as invalid. Telephone schema
+         * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
+         * </P>
+         *
+         * @param uri A URI for the person.
          * @see Notification#EXTRA_PEOPLE
          */
-        public Builder addPerson(String handle) {
-            mPeople.add(handle);
+        public Builder addPerson(String uri) {
+            mPeople.add(uri);
             return this;
         }
 
