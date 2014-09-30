@@ -2,7 +2,7 @@ page.title=Android SDK
 page.tags=download
 page.template=sdk
 header.hide=1
-page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
+page.metaDescription=Download the official Android developer tools to develop apps for Android-powered devices.
 
 sdk.version=23.0.2
 
@@ -57,7 +57,7 @@ sdk.win_installer_checksum=7be4b9c230341e1fb57c0f84a8df3994
 
 
 
-<div style="position:relative;height:660px;">
+<div style="position:relative;height:460px;">
 
 
 <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
@@ -67,7 +67,7 @@ sdk.win_installer_checksum=7be4b9c230341e1fb57c0f84a8df3994
 
 
 
-<p class="sdk-terms-intro">Before installing the Android SDK, you must agree to the following terms and conditions.</p>
+<p class="sdk-terms-intro">Before installing the Android Studio or the standlone Android SDK, you must agree to the following terms and conditions.</p>
 
 <div class="sdk-terms" onfocus="this.blur()">
 <h2 class="norule">Terms and Conditions</h2>
@@ -96,7 +96,7 @@ This is the Android Software Development Kit License Agreement
 
 3.2 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
 
-3.3 You may not use the SDK for any purpose not expressly permitted by this License Agreement.  Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
+3.3 You may not use the SDK for any purpose not expressly permitted by this License Agreement. Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
 
 3.4 You agree that you will not take any actions that may cause or result in the fragmentation of Android, including but not limited to distributing, participating in the creation of, or promoting in any way a software development kit derived from the SDK.
 
@@ -240,70 +240,66 @@ This is the Android Software Development Kit License Agreement
 
 <div class="col-6" style="margin-left:0">
 
-<h1 style="margin-top:0">Get the Android SDK</h1>
+<h1 style="margin-top:0">Android Developer Tools</h1>
+
 
 
 <p>The Android SDK provides the API libraries and developer tools necessary to build, test,
-  and debug apps for Android.</p>
+and debug apps for Android.</p>
 
-<p>Download the ADT Bundle to quickly start developing apps. It includes the essential Android
-SDK components and a version of the Eclipse IDE with built-in <b>ADT (Android Developer Tools)</b>
-to streamline your Android app development.</p>
+<p>Android Studio is the new official Android IDE, and with a single download includes everything
+you need to begin developing Android apps:</p>
 
-
-<!-- this appears when viewing the online docs -->
-<div class="online" style="margin-bottom:85px">
-
-<a class="big button subtitle" id="download-bundle-button"
-href="" style="width:295px;display:block;margin:25px 0" ></a>
-
-<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
-
-
-  <p>With a single download, the Eclipse ADT bundle
-includes everything you need to begin developing apps:</p>
 <ul>
-<li>Eclipse + ADT plugin</li>
+<li>IntelliJ IDE + Android Studio plugin</li>
 <li>Android SDK Tools</li>
 <li>Android Platform-tools</li>
 <li>A version of the Android platform</li>
 <li>A version of the Android system image for the emulator</li>
 </ul>
+<a class="big button subtitle" id="download-bundle-button"
+href="" style="width:235px;display:block;margin:25px 0" ></a>
+
+
+<!-- this appears when viewing the online docs -->
+<div class="online" style="margin-bottom:85px">
+
+<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
 
 </div>
 <!-- end online -->
 
 
-
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
-To get the ADT Bundle or stand-alone SDK Tools, please visit the web site at <a
-href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
+To get Android Studio or stand-alone SDK Tools, please visit the web site at <a
+href="http://developer.android.com/download/index.html">developer.android.com/download/</a>
 </p>
 
 </div><!-- end col-6 (left column) -->
 
 
+<div class="col-7" style="background: #ddd;
+    padding: 20px 20px; width:350px; margin:0px 0 0 0px;">
+
+  <h3 style="margin-top:0"><strong>Android Studio 1.0 has arrived!</strong>
+  </h3>
+
+<p>Android Studio is the new official Android IDE. Click the button on this page to download
+Android Studio. If you are still using Eclipse ADT,
+<a href="{@docRoot}tools/eclipse/migrate-adt.html">consider migrating to Android Studio</a>.</p> </div>
+
+
 
 <div class="col-7" style="margin-right:0;">
-  <img src="{@docRoot}images/tools-home.png" alt="" height="347" width="400" />
+  <img src="{@docRoot}images/tools/laptop-studio.png" alt="" height="327" width="370" />
 
 
 </div><!-- end col-7 -->
 
-
-
-
-<div class="col-7" style="background: #ddd;
-    padding: 30px 20px; width:350px; margin:20px 0 0 20px;">
-
-  <h3 style="margin-top:0">
-  <a href="/sdk/installing/studio.html">Get Android Studio Beta</a>
-  </h3>
-
   <p>
   Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
-  over ADT. It's currently in beta but will be the official Android IDE once it's ready.</p>
+  over ADT. It is the official Android IDE.</p>
   <p>
   If you're a new Android developer, you should consider starting with Android Studio, because the
   ADT plugin for Eclipse is no longer in active development.</p>
@@ -312,16 +308,12 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
   </div>
 
 
-
-
 <!-- alternative SDK options -->
 <div class="col-13" style="margin:-70px 0 0;">
 
 
-<p style="width:340px">If you prefer to use an existing version of Eclipse or another IDE,
-you can instead download the stand-alone Android SDK Tools:</p>
-
-
+<p style="width:340px">If you prefer to use another IDE or run the tools from the
+command line or build scripts, you can instead download the stand-alone Android SDK Tools:</p>
 
 
 <h4 id="ExistingIDE"><a href='' class="expandable"
@@ -330,11 +322,13 @@ you can instead download the stand-alone Android SDK Tools:</p>
 
 <div class="col-13 myide" style="margin:0 0 15px;display:none;">
 
-<p>If you already have an IDE you want to use for Android app development,
-setting up a new SDK requires that you download the SDK Tools, then
+<p>If you want to use an IDE other than IntelliJ or run Android SDK tools from
+the command line or build scripts,
+setting up a new SDK requires that you download the Android SDK Tools, then
 select additional Android SDK packages to install (such as the Android platform
-and system image). If you'll be using an existing version of Eclipse, then you can add
-the ADT plugin to it.</p>
+and system image).
+</p>
+
   <p>
 <a class="button subtitle" id="download-tools-button" href="" style="display:none" ></a>
   </p>
