@@ -252,7 +252,7 @@ final class HdmiCecKeycode {
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_DOWN),
             new KeycodeEntry(KeyEvent.KEYCODE_HOME, CEC_KEYCODE_ROOT_MENU),
             new KeycodeEntry(KeyEvent.KEYCODE_SETTINGS, CEC_KEYCODE_SETUP_MENU),
-            new KeycodeEntry(KeyEvent.KEYCODE_TV_CONTENTS_MENU, CEC_KEYCODE_CONTENTS_MENU),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_CONTENTS_MENU, CEC_KEYCODE_CONTENTS_MENU, false),
             // No Android keycode defined for CEC_KEYCODE_FAVORITE_MENU
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_FAVORITE_MENU),
             // Note that both BACK and ESCAPE are mapped to EXIT of CEC keycode.
@@ -287,8 +287,8 @@ final class HdmiCecKeycode {
             // RESERVED
             // No Android keycode defined for CEC_KEYCODE_NEXT_FAVORITE
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_NEXT_FAVORITE),
-            new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_UP, CEC_KEYCODE_CHANNEL_UP, false),
-            new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_DOWN, CEC_KEYCODE_CHANNEL_DOWN, false),
+            new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_UP, CEC_KEYCODE_CHANNEL_UP),
+            new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_DOWN, CEC_KEYCODE_CHANNEL_DOWN),
             new KeycodeEntry(KeyEvent.KEYCODE_LAST_CHANNEL, CEC_KEYCODE_PREVIOUS_CHANNEL),
             // No Android keycode defined for CEC_KEYCODE_SOUND_SELECT
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SOUND_SELECT),
@@ -355,31 +355,31 @@ final class HdmiCecKeycode {
             // The following deterministic key definitions do not need key mapping
             // since they are supposed to be generated programmatically only.
             // No Android keycode defined for CEC_KEYCODE_PLAY_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PLAY_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PLAY_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_PAUSE_PLAY_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_PLAY_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_PLAY_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_RECORD_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RECORD_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RECORD_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_PAUSE_RECORD_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_STOP_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_MUTE_FUNCTION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MUTE_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_RESTORE_VOLUME_FUNCTION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESTORE_VOLUME_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_TUNE_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TUNE_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TUNE_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_SELECT_MEDIA_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_MEDIA_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_MEDIA_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_POWER_TOGGLE_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_TOGGLE_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_TOGGLE_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_POWER_OFF_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_OFF_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_OFF_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_POWER_ON_FUNCTION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_ON_FUNCTION, false),
             // RESERVED
