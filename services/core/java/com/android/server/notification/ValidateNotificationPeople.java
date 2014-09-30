@@ -231,7 +231,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 if (lookupResult == null || lookupResult.isExpired()) {
                     pendingLookups.add(handle);
                 } else {
-                    if (DEBUG) Slog.d(TAG, "using cached lookupResult: " + lookupResult.mId);
+                    if (DEBUG) Slog.d(TAG, "using cached lookupResult");
                 }
                 if (lookupResult != null) {
                     affinity = Math.max(affinity, lookupResult.getAffinity());
@@ -336,11 +336,14 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         Cursor c = null;
         try {
             c = context.getContentResolver().query(lookupUri, LOOKUP_PROJECTION, null, null, null);
-            if (c != null && c.getCount() > 0) {
-                c.moveToFirst();
-                lookupResult.readContact(c);
+            if (c == null) {
+                Slog.w(TAG, "Null cursor from contacts query.");
+                return lookupResult;
             }
-        } catch(Throwable t) {
+            while (c.moveToNext()) {
+                lookupResult.mergeContact(c);
+            }
+        } catch (Throwable t) {
             Slog.w(TAG, "Problem getting content resolver or performing contacts query.", t);
         } finally {
             if (c != null) {
@@ -352,61 +355,54 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
     private static class LookupResult {
         private static final long CONTACT_REFRESH_MILLIS = 60 * 60 * 1000;  // 1hr
-        public static final int INVALID_ID = -1;
 
         private final long mExpireMillis;
-        private int mId;
-        private boolean mStarred;
+        private float mAffinity = NONE;
 
         public LookupResult() {
-            mId = INVALID_ID;
-            mStarred = false;
             mExpireMillis = System.currentTimeMillis() + CONTACT_REFRESH_MILLIS;
         }
 
-        public void readContact(Cursor cursor) {
+        public void mergeContact(Cursor cursor) {
+            mAffinity = Math.max(mAffinity, VALID_CONTACT);
+
+            // Contact ID
+            int id;
             final int idIdx = cursor.getColumnIndex(Contacts._ID);
             if (idIdx >= 0) {
-                mId = cursor.getInt(idIdx);
-                if (DEBUG) Slog.d(TAG, "contact _ID is: " + mId);
+                id = cursor.getInt(idIdx);
+                if (DEBUG) Slog.d(TAG, "contact _ID is: " + id);
             } else {
-                if (DEBUG) Slog.d(TAG, "invalid cursor: no _ID");
+                id = -1;
+                Slog.i(TAG, "invalid cursor: no _ID");
             }
+
+            // Starred
             final int starIdx = cursor.getColumnIndex(Contacts.STARRED);
             if (starIdx >= 0) {
-                mStarred = cursor.getInt(starIdx) != 0;
-                if (DEBUG) Slog.d(TAG, "contact STARRED is: " + mStarred);
+                boolean isStarred = cursor.getInt(starIdx) != 0;
+                if (isStarred) {
+                    mAffinity = Math.max(mAffinity, STARRED_CONTACT);
+                }
+                if (DEBUG) Slog.d(TAG, "contact STARRED is: " + isStarred);
             } else {
                 if (DEBUG) Slog.d(TAG, "invalid cursor: no STARRED");
             }
         }
 
-        public boolean isExpired() {
+        private boolean isExpired() {
             return mExpireMillis < System.currentTimeMillis();
         }
 
-        public boolean isInvalid() {
-            return mId == INVALID_ID || isExpired();
+        private boolean isInvalid() {
+            return mAffinity == NONE || isExpired();
         }
 
         public float getAffinity() {
             if (isInvalid()) {
                 return NONE;
-            } else if (mStarred) {
-                return STARRED_CONTACT;
-            } else {
-                return VALID_CONTACT;
             }
-        }
-
-        public LookupResult setStarred(boolean starred) {
-            mStarred = starred;
-            return this;
-        }
-
-        public LookupResult setId(int id) {
-            mId = id;
-            return this;
+            return mAffinity;
         }
     }
 
