@@ -646,19 +646,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mLastSignalLevel = iconLevel = mSignalStrength.getLevel();
                 }
 
-                if (isCdma()) {
-                    if (isCdmaEri()) {
-                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
-                    } else {
-                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
-                    }
+                if (isRoaming()) {
+                    iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
                 } else {
-                    // Though mPhone is a Manager, this call is not an IPC
-                    if (mPhone.isNetworkRoaming()) {
-                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
-                    } else {
-                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
-                    }
+                    iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
                 mQSPhoneSignalIconId =
@@ -811,14 +802,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
 
-        if (isCdma()) {
-            if (isCdmaEri()) {
-                mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
-                mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
-            }
-        } else if (mPhone.isNetworkRoaming()) {
-                mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
-                mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
+        if (isRoaming()) {
+            mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
+            mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
         }
     }
 
@@ -834,6 +820,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
         return false;
+    }
+
+    private boolean isRoaming() {
+        if (isCdma()) {
+            return isCdmaEri();
+        } else {
+            return mServiceState != null && mServiceState.getRoaming();
+        }
     }
 
     private final void updateDataIcon() {
@@ -1233,12 +1227,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
             mDataTypeIconId = 0;
             mQSDataTypeIconId = 0;
-            if (isCdma()) {
-                if (isCdmaEri()) {
-                    mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
-                    mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
-                }
-            } else if (mPhone.isNetworkRoaming()) {
+            if (isRoaming()) {
                 mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
             }
