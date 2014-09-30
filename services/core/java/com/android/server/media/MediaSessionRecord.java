@@ -615,7 +615,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     private PlaybackState getStateWithUpdatedPosition() {
-        PlaybackState state = mPlaybackState;
+        PlaybackState state;
+        synchronized (mLock) {
+            state = mPlaybackState;
+        }
         long duration = -1;
         if (mMetadata != null && mMetadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
             duration = mMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
@@ -674,7 +677,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void sendEvent(String event, Bundle data) {
-            mHandler.post(MessageHandler.MSG_SEND_EVENT, event, data);
+            mHandler.post(MessageHandler.MSG_SEND_EVENT, event,
+                    data == null ? null : new Bundle(data));
         }
 
         @Override
@@ -712,7 +716,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setMetadata(MediaMetadata metadata) {
-            mMetadata = metadata;
+            // Make a copy of the metadata as the underlying bundle may be
+            // modified on this thread.
+            synchronized (mLock) {
+                mMetadata = metadata == null ? null : new MediaMetadata.Builder(metadata).build();
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
         }
 
@@ -723,14 +731,18 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (MediaSession.isActiveState(oldState) && newState == PlaybackState.STATE_PAUSED) {
                 mLastActiveTime = SystemClock.elapsedRealtime();
             }
-            mPlaybackState = state;
+            synchronized (mLock) {
+                mPlaybackState = state;
+            }
             mService.onSessionPlaystateChange(MediaSessionRecord.this, oldState, newState);
             mHandler.post(MessageHandler.MSG_UPDATE_PLAYBACK_STATE);
         }
 
         @Override
         public void setQueue(ParceledListSlice queue) {
-            mQueue = queue;
+            synchronized (mLock) {
+                mQueue = queue;
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
         }
 
@@ -742,7 +754,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setExtras(Bundle extras) {
-            mExtras = extras;
+            synchronized (mLock) {
+                mExtras = extras == null ? null : new Bundle(extras);
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_EXTRAS);
         }
 
@@ -1118,7 +1132,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public MediaMetadata getMetadata() {
-            return mMetadata;
+            synchronized (mLock) {
+                return mMetadata;
+            }
         }
 
         @Override
@@ -1128,7 +1144,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public ParceledListSlice getQueue() {
-            return mQueue;
+            synchronized (mLock) {
+                return mQueue;
+            }
         }
 
         @Override
@@ -1138,7 +1156,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public Bundle getExtras() {
-            return mExtras;
+            synchronized (mLock) {
+                return mExtras;
+            }
         }
 
         @Override
