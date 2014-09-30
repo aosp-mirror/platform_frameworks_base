@@ -360,6 +360,14 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void onConferenceableConnectionsChanged(
+                Conference conference, List<Connection> conferenceableConnections) {
+            mAdapter.setConferenceableConnections(
+                    mIdByConference.get(conference),
+                    createConnectionIdList(conferenceableConnections));
+        }
+
+        @Override
         public void onDestroyed(Conference conference) {
             removeConference(conference);
         }
@@ -638,19 +646,25 @@ public abstract class ConnectionService extends Service {
     private void conference(String callId1, String callId2) {
         Log.d(this, "conference %s, %s", callId1, callId2);
 
-        Connection connection1 = findConnectionForAction(callId1, "conference");
-        if (connection1 == getNullConnection()) {
-            Log.w(this, "Connection1 missing in conference request %s.", callId1);
-            return;
-        }
-
         Connection connection2 = findConnectionForAction(callId2, "conference");
         if (connection2 == getNullConnection()) {
             Log.w(this, "Connection2 missing in conference request %s.", callId2);
             return;
         }
 
-        onConference(connection1, connection2);
+        Connection connection1 = findConnectionForAction(callId1, "conference");
+        if (connection1 == getNullConnection()) {
+            Conference conference1 = findConferenceForAction(callId1, "addConnection");
+            if (conference1 == getNullConference()) {
+                Log.w(this,
+                        "Connection1 or Conference1 missing in conference request %s.",
+                        callId1);
+            } else {
+                conference1.onMerge(connection2);
+            }
+        } else {
+            onConference(connection1, connection2);
+        }
     }
 
     private void splitFromConference(String callId) {
