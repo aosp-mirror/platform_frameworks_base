@@ -279,8 +279,7 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ایپلیکیشن کی معلومات"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"لاک ٹو ایپ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"تلاش کریں"</string>
-    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
-    <skip />
+    <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> کو شروع نہیں کیا جا سکا۔"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"چارج ہوگئی"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"چارج ہو رہی ہے"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> مکمل ہونے تک"</string>
@@ -357,4 +356,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نہیں شکریہ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ترتیب دیں"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کے ذریعے خاموش کردہ"</string>
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>۔ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>
