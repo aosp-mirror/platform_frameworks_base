@@ -914,7 +914,9 @@ public abstract class PanelView extends FrameLayout {
     private boolean onMiddleClicked() {
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
-                startUnlockHintAnimation();
+                if (!isDozing()) {
+                    startUnlockHintAnimation();
+                }
                 return true;
             case StatusBarState.SHADE_LOCKED:
                 mStatusBar.goToKeyguard();
@@ -931,6 +933,8 @@ public abstract class PanelView extends FrameLayout {
     }
 
     protected abstract void onEdgeClicked(boolean right);
+
+    protected abstract boolean isDozing();
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"
