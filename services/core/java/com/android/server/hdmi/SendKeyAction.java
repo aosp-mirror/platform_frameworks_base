@@ -109,12 +109,12 @@ final class SendKeyAction extends HdmiCecFeatureAction {
     }
 
     private void sendKeyDown(int keycode) {
-        int cecKeycode = HdmiCecKeycode.androidKeyToCecKey(keycode);
-        if (cecKeycode == HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
+        byte[] cecKeycodeAndParams = HdmiCecKeycode.androidKeyToCecKey(keycode);
+        if (cecKeycodeAndParams == null) {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
-                mTargetAddress, new byte[] { (byte) (cecKeycode & 0xFF) }));
+                mTargetAddress, cecKeycodeAndParams));
     }
 
     private void sendKeyUp() {
