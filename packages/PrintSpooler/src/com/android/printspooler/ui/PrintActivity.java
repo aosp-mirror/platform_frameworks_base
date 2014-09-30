@@ -566,6 +566,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void startCreateDocumentActivity() {
+        if (!isResumed()) {
+            return;
+        }
         PrintDocumentInfo info = mPrintedDocument.getDocumentInfo().info;
         if (info == null) {
             return;
@@ -1372,7 +1375,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPrintButton.setImageResource(R.drawable.ic_menu_savetopdf);
             mPrintButton.setContentDescription(getString(R.string.savetopdf_button));
         }
-        if ((mRangeOptionsSpinner.getSelectedItemPosition() == 1
+        if (!mPrintedDocument.getDocumentInfo().laidout
+                ||(mRangeOptionsSpinner.getSelectedItemPosition() == 1
                 && (TextUtils.isEmpty(mPageRangeEditText.getText()) || hasErrors()))
                 || (mRangeOptionsSpinner.getSelectedItemPosition() == 0
                 && (mPrintedDocument.getDocumentInfo() == null || hasErrors()))) {
