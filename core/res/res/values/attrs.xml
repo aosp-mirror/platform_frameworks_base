@@ -110,6 +110,11 @@
         <!-- Dim inverse text color. This does not differentiate the disabled state. -->
         <attr name="textColorSecondaryInverseNoDisable" format="reference|color" />
 
+        <!-- Bright text color for use over activated backgrounds. -->
+        <attr name="textColorPrimaryActivated" format="reference|color" />
+        <!-- Dim text color for use over activated backgrounds. -->
+        <attr name="textColorSecondaryActivated" format="reference|color" />
+
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
 
