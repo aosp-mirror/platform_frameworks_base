@@ -6732,7 +6732,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
         m.arg1 = onBattery ? 1 : 0;
         mHandler.sendMessage(m);
-        mOnBattery = mOnBatteryInternal = onBattery;
 
         final long uptime = mSecUptime * 1000;
         final long realtime = mSecRealtime * 1000;
@@ -6745,10 +6744,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             boolean reset = false;
             if (!mNoAutoReset && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
-                    || getLowDischargeAmountSinceCharge() >= 60)
-                    || (getHighDischargeAmountSinceCharge() >= 60
-                            && mHistoryBuffer.dataSize() >= MAX_HISTORY_BUFFER)) {
+                    || (mDischargeCurrentLevel < 20 && level >= 80)
+                    || (getHighDischargeAmountSinceCharge() >= 200
+                            && mHistoryBuffer.dataSize() >= MAX_HISTORY_BUFFER))) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
+                        + " dischargeLevel=" + mDischargeCurrentLevel
                         + " lowAmount=" + getLowDischargeAmountSinceCharge()
                         + " highAmount=" + getHighDischargeAmountSinceCharge());
                 // Before we write, collect a snapshot of the final aggregated
@@ -6785,6 +6785,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 reset = true;
                 mNumDischargeStepDurations = 0;
             }
+            mOnBattery = mOnBatteryInternal = onBattery;
             mLastDischargeStepLevel = level;
             mMinDischargeStepLevel = level;
             mLastDischargeStepTime = -1;
@@ -6812,6 +6813,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOff = 0;
             updateTimeBasesLocked(true, !screenOn, uptime, realtime);
         } else {
+            mOnBattery = mOnBatteryInternal = onBattery;
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
             mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
