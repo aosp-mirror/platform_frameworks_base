@@ -63,6 +63,7 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.Xml;
 
+import android.view.AccessibilityManagerInternal;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IMediaContainerService;
@@ -556,6 +557,8 @@ class MountService extends IMountService.Stub
     };
 
     private final Handler mHandler;
+
+    private final AccessibilityManagerInternal mAccessibilityManagerInternal;
 
     void waitForAsecScan() {
         waitForLatch(mAsecsScanned);
@@ -1454,6 +1457,9 @@ class MountService extends IMountService.Stub
         hthread.start();
         mHandler = new MountServiceHandler(hthread.getLooper());
 
+        mAccessibilityManagerInternal = LocalServices.getService(
+                AccessibilityManagerInternal.class);
+
         // Watch for user changes
         final IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_ADDED);
@@ -2254,8 +2260,15 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
+            // The accessibility layer may veto having a non-default encryption
+            // password because if there are enabled accessibility services the
+            // user cannot authenticate as the latter need access to the data.
+            if (!TextUtils.isEmpty(password)
+                    && !mAccessibilityManagerInternal.isNonDefaultEncryptionPasswordAllowed()) {
+                return getEncryptionState();
+            }
             event = mConnector.execute("cryptfs", "changepw", CRYPTO_TYPES[type],
-                                       new SensitiveArg(toHex(password)));
+                        new SensitiveArg(toHex(password)));
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
@@ -2302,7 +2315,7 @@ class MountService extends IMountService.Stub
      * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
      */
     @Override
-    public int getPasswordType() throws RemoteException {
+    public int getPasswordType() {
 
         waitForReady();
 
