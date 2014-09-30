@@ -1205,7 +1205,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактировать с помощью приложения \"%1$s\""</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью приложения:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Предоставлять доступ с помощью приложения \"%1$s\""</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Выберите приложение"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Выберите главное приложение"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Назначьте приложение \"%1$s\" главным"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Другое приложение"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Удаляет настройки по умолчанию в меню \"Настройки &gt; Приложения &gt; Загруженные\"."</string>
@@ -1278,6 +1279,9 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не удалось подключиться к сети Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" – плохое интернет-соединение."</string>
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Разрешить подключение?"</string>
+    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s запрашивает доступ на подключение к %2$s."</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Приложение"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Начать соединение через Wi-Fi Direct. Модуль Wi-Fi будет отключен."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Не удалось запустить Wi-Fi Direct."</string>
@@ -1596,11 +1600,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Наложение № <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> х <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> тчк/дюйм"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безопасный"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Подключение к удаленному дисплею"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Подключение к <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Удаленный дисплей подключен"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Подключено к <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Отключить"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Экстренный вызов"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забыли графический ключ?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильный графический ключ"</string>
