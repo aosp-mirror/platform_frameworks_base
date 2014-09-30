@@ -226,12 +226,12 @@ static bool modifyAddress(JNIEnv *env, jobject thiz, jstring jName, jstring jAdd
         jniThrowNullPointerException(env, "address");
     } else {
         if (add) {
-            if (error = ifc_add_address(name, address, jPrefixLength)) {
+            if ((error = ifc_add_address(name, address, jPrefixLength)) != 0) {
                 ALOGE("Cannot add address %s/%d on interface %s (%s)", address, jPrefixLength, name,
                       strerror(-error));
             }
         } else {
-            if (error = ifc_del_address(name, address, jPrefixLength)) {
+            if ((error = ifc_del_address(name, address, jPrefixLength)) != 0) {
                 ALOGE("Cannot del address %s/%d on interface %s (%s)", address, jPrefixLength, name,
                       strerror(-error));
             }
@@ -258,7 +258,7 @@ static void throwException(JNIEnv *env, int error, const char *message)
     }
 }
 
-static jint create(JNIEnv *env, jobject thiz, jint mtu)
+static jint create(JNIEnv *env, jobject /* thiz */, jint mtu)
 {
     int tun = create_interface(mtu);
     if (tun < 0) {
@@ -268,7 +268,7 @@ static jint create(JNIEnv *env, jobject thiz, jint mtu)
     return tun;
 }
 
-static jstring getName(JNIEnv *env, jobject thiz, jint tun)
+static jstring getName(JNIEnv *env, jobject /* thiz */, jint tun)
 {
     char name[IFNAMSIZ];
     if (get_interface_name(name, tun) < 0) {
@@ -278,7 +278,7 @@ static jstring getName(JNIEnv *env, jobject thiz, jint tun)
     return env->NewStringUTF(name);
 }
 
-static jint setAddresses(JNIEnv *env, jobject thiz, jstring jName,
+static jint setAddresses(JNIEnv *env, jobject /* thiz */, jstring jName,
         jstring jAddresses)
 {
     const char *name = NULL;
@@ -311,7 +311,7 @@ error:
     return count;
 }
 
-static void reset(JNIEnv *env, jobject thiz, jstring jName)
+static void reset(JNIEnv *env, jobject /* thiz */, jstring jName)
 {
     const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
     if (!name) {
@@ -324,7 +324,7 @@ static void reset(JNIEnv *env, jobject thiz, jstring jName)
     env->ReleaseStringUTFChars(jName, name);
 }
 
-static jint check(JNIEnv *env, jobject thiz, jstring jName)
+static jint check(JNIEnv *env, jobject /* thiz */, jstring jName)
 {
     const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
     if (!name) {

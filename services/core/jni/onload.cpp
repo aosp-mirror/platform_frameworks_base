@@ -46,7 +46,7 @@ int register_android_server_Watchdog(JNIEnv* env);
 
 using namespace android;
 
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
+extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
     JNIEnv* env = NULL;
     jint result = -1;
