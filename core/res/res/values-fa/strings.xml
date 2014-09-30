@@ -1203,7 +1203,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ویرایش با %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"اشتراک‌گذاری با"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏اشتراک‌گذاری با %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"انتخاب یک برنامه صفحه اصلی"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"انتخاب یک برنامه صفحه اصلی"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"‏استفاده از %1$s به عنوان برنامه صفحه اصلی"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"استفاده به صورت پیش‌فرض برای این عملکرد."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"استتفاده از یک برنامه دیگر"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد دانلود شده پاک کنید."</string>
@@ -1594,11 +1595,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"همپوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"، امن"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"درحال فرستادن صفحه نمایش"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"درحال اتصال به <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"درحال فرستادن صفحه نمایش"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"به <xliff:g id="NAME">%1$s</xliff:g> متصل شد"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"قطع اتصال"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"تماس اضطراری"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"الگو را فراموش کرده‌اید"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"الگوی اشتباه"</string>

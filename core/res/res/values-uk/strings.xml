@@ -825,7 +825,7 @@
     <string name="phoneTypeCar" msgid="8738360689616716982">"Авто"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Гол. тел. комп."</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Осн."</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Основний"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Інший факс"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Радіо"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
@@ -1203,7 +1203,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редагувати за допомогою %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Надіслати через"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Надіслати через %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Виберіть програму"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Вибрати головний додаток"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Зробити додаток %1$s головним"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Використ. за умовч. для цієї дії."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Використовувати інший додаток"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Очистити налаштування за умовчанням у меню Налаштування системи &gt; Програми &gt; Завантажені."</string>
@@ -1594,11 +1595,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Накладання №<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>х<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безпечний"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Транслювання екрана"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"<xliff:g id="NAME">%1$s</xliff:g> – під’єднання"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Транслювання екрана"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"<xliff:g id="NAME">%1$s</xliff:g> – під’єднано"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Від’єднати"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Екстрений виклик"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Не пам’ятаю ключ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
