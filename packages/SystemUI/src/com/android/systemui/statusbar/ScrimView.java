@@ -33,7 +33,7 @@ import android.view.animation.Interpolator;
 public class ScrimView extends View
 {
     private int mScrimColor;
-    private boolean mIsEmpty;
+    private boolean mIsEmpty = true;
     private boolean mDrawAsSrc;
     private float mViewAlpha = 1.0f;
     private ValueAnimator mAlphaAnimator;
