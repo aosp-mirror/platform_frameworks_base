@@ -193,12 +193,13 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     if (err != NO_ERROR) return err;
 
     sp<GraphicBuffer> buf(new GraphicBuffer(anb, /*keepOwnership*/false));
-    uint32_t gBufWidth = buf->getWidth();
-    uint32_t gBufHeight = buf->getHeight();
-    if (gBufWidth != width || gBufHeight != height) {
+    uint32_t grallocBufWidth = buf->getWidth();
+    uint32_t grallocBufHeight = buf->getHeight();
+    uint32_t grallocBufStride = buf->getStride();
+    if (grallocBufWidth != width || grallocBufHeight != height) {
         ALOGE("%s: Received gralloc buffer with bad dimensions %" PRIu32 "x%" PRIu32
-                ", expecting dimensions %zu x %zu",  __FUNCTION__, gBufWidth, gBufHeight,
-                width, height);
+                ", expecting dimensions %zu x %zu",  __FUNCTION__, grallocBufWidth,
+                grallocBufHeight, width, height);
         return BAD_VALUE;
     }
 
@@ -210,11 +211,12 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
         return err;
     }
 
-    uint64_t tmpSize = width * height;
+    uint64_t tmpSize = (pixelFmt == HAL_PIXEL_FORMAT_BLOB) ? grallocBufWidth :
+            4 * grallocBufHeight * grallocBufWidth;
     if (bufFmt != pixelFmt) {
         if (bufFmt == HAL_PIXEL_FORMAT_RGBA_8888 && pixelFmt == HAL_PIXEL_FORMAT_BLOB) {
             ALOGV("%s: Using BLOB to RGBA format override.", __FUNCTION__);
-            tmpSize *= 4;
+            tmpSize = 4 * (grallocBufWidth + grallocBufStride * (grallocBufHeight - 1));
         } else {
             ALOGW("%s: Format mismatch in produceFrame: expecting format %#" PRIx32
                     ", but received buffer with format %#" PRIx32, __FUNCTION__, pixelFmt, bufFmt);
@@ -311,16 +313,11 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
             int8_t* img = NULL;
             struct camera3_jpeg_blob footer = {
                 jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
-                jpeg_size: (uint32_t)width
+                jpeg_size: (uint32_t)bufferLength
             };
 
             size_t totalJpegSize = bufferLength + sizeof(footer);
             totalJpegSize = (totalJpegSize + 3) & ~0x3; // round up to nearest octonibble
-
-            if (height != 1) {
-                ALOGE("%s: Invalid height set for JPEG buffer output, %zu", __FUNCTION__, height);
-                return BAD_VALUE;
-            }
 
             if (totalJpegSize > totalSizeBytes) {
                 ALOGE("%s: Pixel buffer needs size %zu, cannot fit in gralloc buffer of size %zu",
