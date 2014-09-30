@@ -1138,7 +1138,7 @@ final class AccessibilityInteractionController {
             if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
                     || parentAccessibilityViewId == providerHost.getAccessibilityViewId()) {
                 final AccessibilityNodeInfo parent;
-                if (parentAccessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
                     parent = provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
                 } else {
                     parent = provider.createAccessibilityNodeInfo(
