@@ -1021,6 +1021,10 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
+    <!-- When set installer will extract native libraries. If set to false
+         libraries in the apk must be stored and page-aligned.  -->
+    <attr name="extractNativeLibs" format="boolean"/>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1151,8 +1155,8 @@
              @hide -->
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
+        <attr name="extractNativeLibs" />
     </declare-styleable>
-    
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
          features in your package (or other packages).  See the
