@@ -537,7 +537,6 @@ bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
  */
 int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 {
-    int result = -1;
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
@@ -581,6 +580,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char localeOption[sizeof("-Duser.locale=") + PROPERTY_VALUE_MAX];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
+    char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -699,7 +699,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     if (!hasFile("/system/etc/preloaded-classes")) {
         ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
               strerror(errno));
-        goto bail;
+        return -1;
     }
     addOption("-Ximage-compiler-option");
     addOption("--image-classes=/system/etc/preloaded-classes");
@@ -811,6 +811,19 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         addOption(nativeBridgeLibrary);
     }
 
+#if defined(__LP64__)
+    const char* cpu_abilist_property_name = "ro.product.cpu.abilist64";
+#else
+    const char* cpu_abilist_property_name = "ro.product.cpu.abilist32";
+#endif  // defined(__LP64__)
+    property_get(cpu_abilist_property_name, propBuf, "");
+    if (propBuf[0] == '\0') {
+        ALOGE("%s is not expected to be empty", cpu_abilist_property_name);
+        return -1;
+    }
+    snprintf(cpuAbiListBuf, sizeof(cpuAbiListBuf), "--cpu-abilist=%s", propBuf);
+    addOption(cpuAbiListBuf);
+
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
     initArgs.nOptions = mOptions.size();
@@ -825,13 +838,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      */
     if (JNI_CreateJavaVM(pJavaVM, pEnv, &initArgs) < 0) {
         ALOGE("JNI_CreateJavaVM failed\n");
-        goto bail;
+        return -1;
     }
 
-    result = 0;
-
-bail:
-    return result;
+    return 0;
 }
 
 char* AndroidRuntime::toSlashClassName(const char* className)
