@@ -1785,6 +1785,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return false;
     }
 
+    private boolean isRequest(NetworkRequest request) {
+        return mNetworkRequests.get(request).isRequest;
+    }
+
     // must be stateless - things change under us.
     private class NetworkStateTrackerHandler extends Handler {
         public NetworkStateTrackerHandler(Looper looper) {
@@ -1901,8 +1905,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         if (valid) {
                             if (DBG) log("Validated " + nai.name());
                             final boolean previouslyValidated = nai.validated;
+                            final int previousScore = nai.getCurrentScore();
                             nai.validated = true;
                             rematchNetworkAndRequests(nai, !previouslyValidated);
+                            // If score has changed, rebroadcast to NetworkFactories. b/17726566
+                            if (nai.getCurrentScore() != previousScore) {
+                                sendUpdatedScoreToFactories(nai);
+                            }
                         }
                         updateInetCondition(nai, valid);
                         // Let the NetworkAgent know the state of its network
@@ -2196,7 +2205,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         boolean keep = nai.isVPN();
                         for (int i = 0; i < nai.networkRequests.size() && !keep; i++) {
                             NetworkRequest r = nai.networkRequests.valueAt(i);
-                            if (mNetworkRequests.get(r).isRequest) keep = true;
+                            if (isRequest(r)) keep = true;
                         }
                         if (!keep) {
                             if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
@@ -2480,6 +2489,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (nai == null) return;
         if (DBG) log("reportBadNetwork(" + nai.name() + ") by " + uid);
         synchronized (nai) {
+            // Validating an uncreated network could result in a call to rematchNetworkAndRequests()
+            // which isn't meant to work on uncreated networks.
+            if (!nai.created) return;
+
             if (isNetworkBlocked(nai, uid)) return;
 
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_FORCE_REEVALUATION, uid);
@@ -3685,6 +3698,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    private void sendUpdatedScoreToFactories(NetworkAgentInfo nai) {
+        for (int i = 0; i < nai.networkRequests.size(); i++) {
+            NetworkRequest nr = nai.networkRequests.valueAt(i);
+            // Don't send listening requests to factories. b/17393458
+            if (!isRequest(nr)) continue;
+            sendUpdatedScoreToFactories(nr, nai.getCurrentScore());
+        }
+    }
+
     private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, int score) {
         if (VDBG) log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
         for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
@@ -3739,22 +3761,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    private void teardownUnneededNetwork(NetworkAgentInfo nai) {
+        for (int i = 0; i < nai.networkRequests.size(); i++) {
+            NetworkRequest nr = nai.networkRequests.valueAt(i);
+            // Ignore listening requests.
+            if (!isRequest(nr)) continue;
+            loge("Dead network still had at least " + nr);
+            break;
+        }
+        nai.asyncChannel.disconnect();
+    }
+
     private void handleLingerComplete(NetworkAgentInfo oldNetwork) {
         if (oldNetwork == null) {
             loge("Unknown NetworkAgentInfo in handleLingerComplete");
             return;
         }
-        if (DBG) {
-            log("handleLingerComplete for " + oldNetwork.name());
-            for (int i = 0; i < oldNetwork.networkRequests.size(); i++) {
-                NetworkRequest nr = oldNetwork.networkRequests.valueAt(i);
-                // Ignore listening requests.
-                if (mNetworkRequests.get(nr).isRequest == false) continue;
-                loge("Dead network still had at least " + nr);
-                break;
-            }
-        }
-        oldNetwork.asyncChannel.disconnect();
+        if (DBG) log("handleLingerComplete for " + oldNetwork.name());
+        teardownUnneededNetwork(oldNetwork);
     }
 
     private void makeDefault(NetworkAgentInfo newNetwork) {
@@ -3891,7 +3915,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             for (int i = 0; i < nai.networkRequests.size() && teardown; i++) {
                 NetworkRequest nr = nai.networkRequests.valueAt(i);
                 try {
-                if (mNetworkRequests.get(nr).isRequest) {
+                if (isRequest(nr)) {
                     teardown = false;
                 }
                 } catch (Exception e) {
@@ -3954,14 +3978,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // the lingering process so communication on that network is given time to wrap up.
             // TODO: Could teardown unvalidated networks when their NetworkCapabilities
             // satisfy no NetworkRequests.
-            if (DBG && newNetwork.networkRequests.size() != 0) {
-                loge("tearing down network with live requests:");
-                for (int i=0; i < newNetwork.networkRequests.size(); i++) {
-                    loge("  " + newNetwork.networkRequests.valueAt(i));
-                }
-            }
             if (DBG) log("Validated network turns out to be unwanted.  Tear it down.");
-            newNetwork.asyncChannel.disconnect();
+            teardownUnneededNetwork(newNetwork);
         }
     }
 
@@ -4090,12 +4108,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (nai.created) rematchAllNetworksAndRequests(nai, oldScore);
 
-        for (int i = 0; i < nai.networkRequests.size(); i++) {
-            NetworkRequest nr = nai.networkRequests.valueAt(i);
-            // Don't send listening requests to factories. b/17393458
-            if (mNetworkRequests.get(nr).isRequest == false) continue;
-            sendUpdatedScoreToFactories(nr, score);
-        }
+        sendUpdatedScoreToFactories(nai);
     }
 
     // notify only this one new request of the current state
