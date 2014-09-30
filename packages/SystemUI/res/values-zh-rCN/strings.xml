@@ -281,8 +281,7 @@
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"应用信息"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"固定屏幕"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
-    <!-- no translation found for recents_launch_error_message (2969287838120550506) -->
-    <skip />
+    <string name="recents_launch_error_message" msgid="2969287838120550506">"无法启动<xliff:g id="APP">%s</xliff:g>。"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"充电完成"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"正在充电"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"还需<xliff:g id="CHARGING_TIME">%s</xliff:g>充满"</string>
@@ -359,4 +358,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"设置"</string>
     <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>（<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>）"</string>
 </resources>
