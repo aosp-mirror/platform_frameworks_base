@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <TextView android:id="@+id/message"
-                          style="?attr/textAppearanceMedium"
+                          style="@style/TextAppearance.Material.Subhead"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:paddingStart="@dimen/alert_dialog_padding_material"
