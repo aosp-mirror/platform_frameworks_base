@@ -2929,6 +2929,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             }
                         }
 
+                        // The action mode's theme may differ from the app, so
+                        // always show the status guard above it if we have one.
+                        showStatusGuard = mStatusGuard != null;
+
                         // We only need to consume the insets if the action
                         // mode is overlaid on the app content (e.g. it's
                         // sitting in a FrameLayout, see
@@ -2936,11 +2940,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         final boolean nonOverlay = (getLocalFeatures()
                                 & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0;
                         insets = insets.consumeSystemWindowInsets(
-                                false, nonOverlay /* top */, false, false);
-
-                        // The action mode's theme may differ from the app, so
-                        // always show the status guard above it.
-                        showStatusGuard = true;
+                                false, nonOverlay && showStatusGuard /* top */, false, false);
                     } else {
                         // reset top margin
                         if (mlp.topMargin != 0) {
