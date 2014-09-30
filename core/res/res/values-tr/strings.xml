@@ -1183,6 +1183,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Depolama alanı bitiyor"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bazı sistem işlevleri çalışmayabilir"</string>
+    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
+    <skip />
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> çalışıyor"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Daha fazla bilgi edinmek için veya uygulamayı durdurmak için dokunun."</string>
     <string name="ok" msgid="5970060430562524910">"Tamam"</string>
@@ -1201,10 +1203,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ile düzenle"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Şununla paylaş:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ile paylaş"</string>
-    <!-- no translation found for whichHomeApplication (4307587691506919691) -->
-    <skip />
-    <!-- no translation found for whichHomeApplicationNamed (4493438593214760979) -->
-    <skip />
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Ana Ekran uygulaması seçin"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Ana Ekran olarak %1$s uygulamasını kullanın"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Varsayılan olarak bu işlem için kullan."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Farklı bir uygulama kullan"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Sistem ayarları &gt; Uygulamalar &gt; İndirilen bölümünden varsayılanı temizleyin."</string>

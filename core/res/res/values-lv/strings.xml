@@ -760,13 +760,13 @@
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Dzēš tālruņa datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Iestatīt ierīces globālo starpniekserveri"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Iestatiet izmantojamo ierīces globālo starpniekserveri, kad ir iespējota politika. Spēkā esošo globālo starpniekserveri iestata tikai pirmās ierīces administrators."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ekr. bloķ. paroles term. iest."</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Ekrāna bloķ., paroles termiņa iestat."</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kontrolē, cik bieži ir jāmaina ekrāna bloķēšanas parole."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Skatīt atmiņas šifrējumu"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pieprasa, lai saglabātie lietotnes dati tiktu šifrēti."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Atspējot kameras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Neļauj izmantot nevienu ierīces kameru."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Bloķēšanas f-jas atspējošana"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Bloķēšanas funkcijas atspējošana"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Atspējot noteiktas funkcijas taustiņslēgā."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Mājas"</item>
@@ -1183,6 +1183,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksta darbības"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Paliek maz brīvas vietas"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Dažas sistēmas funkcijas var nedarboties."</string>
+    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
+    <skip />
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> darbojas"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Pieskarieties, lai iegūtu plašāku informāciju vai apturētu lietotnes darbību."</string>
     <string name="ok" msgid="5970060430562524910">"Labi"</string>

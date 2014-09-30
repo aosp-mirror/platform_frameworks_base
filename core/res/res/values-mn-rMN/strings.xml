@@ -1183,6 +1183,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Текст үйлдэл"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сангийн хэмжээ дутагдаж байна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Зарим систем функц ажиллахгүй байна"</string>
+    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
+    <skip />
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ажиллаж байна"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Илүү мэдээлэл авах бол хүрэх эсвэл апп-г зогсооно уу ."</string>
     <string name="ok" msgid="5970060430562524910">"Тийм"</string>

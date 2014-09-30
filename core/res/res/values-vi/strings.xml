@@ -1183,6 +1183,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tác vụ văn bản"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Sắp hết dung lượng lưu trữ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Một số chức năng hệ thống có thể không hoạt động"</string>
+    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
+    <skip />
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang chạy"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Chạm để xem thêm thông tin hoặc dừng ứng dụng."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1201,10 +1203,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Chỉnh sửa bằng %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Chia sẻ với"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Chia sẻ với %1$s"</string>
-    <!-- no translation found for whichHomeApplication (4307587691506919691) -->
-    <skip />
-    <!-- no translation found for whichHomeApplicationNamed (4493438593214760979) -->
-    <skip />
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Chọn ứng dụng Home"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Sử dụng %1$s làm Home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Sử dụng theo mặc định đối với tác vụ này."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Sử dụng một ứng dụng khác"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Xóa mặc định trong Cài đặt hệ thống &gt; Ứng dụng &gt; Đã tải xuống."</string>
