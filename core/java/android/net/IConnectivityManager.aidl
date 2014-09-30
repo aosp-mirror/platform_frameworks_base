@@ -139,8 +139,7 @@ interface IConnectivityManager
 
     LinkQualityInfo[] getAllLinkQualityInfo();
 
-    void setProvisioningNotificationVisible(boolean visible, int networkType, in String extraInfo,
-            in String url);
+    void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 
     void setAirplaneMode(boolean enable);
 
