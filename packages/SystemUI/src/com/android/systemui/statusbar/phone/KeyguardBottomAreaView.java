@@ -132,9 +132,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public boolean performAccessibilityAction(View host, int action, Bundle args) {
             if (action == ACTION_CLICK) {
                 if (host == mLockIcon) {
-                    if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
-                        Log.i(TAG, "Collapsing panel from lock icon accessibility click");
-                    }
                     mPhoneStatusBar.animateCollapsePanels(
                             CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                     return true;
