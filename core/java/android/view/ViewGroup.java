@@ -3298,7 +3298,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Uses a stable, insertion sort which is commonly O(n) for ViewGroups with very few elevated
      * children.
      */
-    private ArrayList<View> buildOrderedChildList() {
+    ArrayList<View> buildOrderedChildList() {
         final int count = mChildrenCount;
         if (count <= 1 || !hasChildWithZ()) return null;
 
