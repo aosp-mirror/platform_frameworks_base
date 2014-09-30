@@ -67,6 +67,7 @@ import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.AccessibilityManagerInternal;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.InputDevice;
@@ -91,6 +92,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -202,6 +204,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final UserManager mUserManager;
 
+    private final LockPatternUtils mLockPatternUtils;
+
     private int mCurrentUserId = UserHandle.USER_OWNER;
 
     //TODO: Remove this hack
@@ -225,9 +229,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
         mMainHandler = new MainHandler(mContext.getMainLooper());
+        mLockPatternUtils = new LockPatternUtils(context);
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 context.getContentResolver());
+        LocalServices.addService(AccessibilityManagerInternal.class, new LocalService());
     }
 
     private UserState getUserStateLocked(int userId) {
@@ -1294,6 +1300,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayColorAdjustmentSettingsLocked(userState);
+        updateEncryptionState(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
     }
@@ -1568,6 +1575,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void updateDisplayColorAdjustmentSettingsLocked(UserState userState) {
         DisplayAdjustmentUtils.applyAdjustments(mContext, userState.mUserId);
+    }
+
+    private void updateEncryptionState(UserState userState) {
+        if (userState.mUserId != UserHandle.USER_OWNER) {
+            return;
+        }
+        if (hasRunningServicesLocked(userState) && LockPatternUtils.isDeviceEncrypted()) {
+            // If there are running accessibility services we do not have encryption as
+            // the user needs the accessibility layer to be running to authenticate.
+            mLockPatternUtils.clearEncryptionPassword();
+        }
+    }
+
+    private boolean hasRunningServicesLocked(UserState userState) {
+        return !userState.mBoundServices.isEmpty() || !userState.mBindingServices.isEmpty();
     }
 
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
@@ -3880,6 +3902,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         onUserStateChangedLocked(userState);
                     }
                 }
+            }
+        }
+    }
+
+    private final class LocalService extends AccessibilityManagerInternal {
+        @Override
+        public boolean isNonDefaultEncryptionPasswordAllowed() {
+            synchronized (mLock) {
+                UserState userState = getCurrentUserStateLocked();
+                return !hasRunningServicesLocked(userState);
             }
         }
     }

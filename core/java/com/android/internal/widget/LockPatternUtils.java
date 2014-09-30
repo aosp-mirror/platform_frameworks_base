@@ -878,6 +878,30 @@ public class LockPatternUtils {
     }
 
     /**
+     * Gets whether the device is encrypted.
+     *
+     * @return Whether the device is encrypted.
+     */
+    public static boolean isDeviceEncrypted() {
+        IMountService mountService = IMountService.Stub.asInterface(
+                ServiceManager.getService("mount"));
+        try {
+            return mountService.getEncryptionState() != IMountService.ENCRYPTION_STATE_NONE
+                    && mountService.getPasswordType() != StorageManager.CRYPT_TYPE_DEFAULT;
+        } catch (RemoteException re) {
+            Log.e(TAG, "Error getting encryption state", re);
+        }
+        return true;
+    }
+
+    /**
+     * Clears the encryption password.
+     */
+    public void clearEncryptionPassword() {
+        updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+    }
+
+    /**
      * Retrieves the quality mode we're in.
      * {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      *
