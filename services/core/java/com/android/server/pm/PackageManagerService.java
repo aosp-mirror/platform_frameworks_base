@@ -80,6 +80,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
@@ -4389,62 +4390,120 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (pkgs != null) {
+            // Sort apps by importance for dexopt ordering. Important apps are given more priority
+            // in case the device runs out of space.
+            ArrayList<PackageParser.Package> sortedPkgs = new ArrayList<PackageParser.Package>();
+            // Give priority to system apps that listen for pre boot complete.
+            Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
+            HashSet<String> pkgNames = getPackageNamesForIntent(intent);
+            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
+                PackageParser.Package pkg = it.next();
+                if (pkgNames.contains(pkg.packageName)) {
+                    sortedPkgs.add(pkg);
+                    it.remove();
+                }
+            }
+            // Give priority to system apps.
+            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
+                PackageParser.Package pkg = it.next();
+                if (isSystemApp(pkg)) {
+                    sortedPkgs.add(pkg);
+                    it.remove();
+                }
+            }
+            // Give priority to apps that listen for boot complete.
+            intent = new Intent(Intent.ACTION_BOOT_COMPLETED);
+            pkgNames = getPackageNamesForIntent(intent);
+            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
+                PackageParser.Package pkg = it.next();
+                if (pkgNames.contains(pkg.packageName)) {
+                    sortedPkgs.add(pkg);
+                    it.remove();
+                }
+            }
             // Filter out packages that aren't recently used.
-            //
-            // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
-            // should do a full dexopt.
-            if (mLazyDexOpt || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
-                // TODO: add a property to control this?
-                long dexOptLRUThresholdInMinutes;
-                if (mLazyDexOpt) {
-                    dexOptLRUThresholdInMinutes = 30; // only last 30 minutes of apps for eng builds.
-                } else {
-                    dexOptLRUThresholdInMinutes = 7 * 24 * 60; // apps used in the 7 days for users.
-                }
-                long dexOptLRUThresholdInMills = dexOptLRUThresholdInMinutes * 60 * 1000;
-
-                int total = pkgs.size();
-                int skipped = 0;
-                long now = System.currentTimeMillis();
-                for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
-                    PackageParser.Package pkg = i.next();
-                    long then = pkg.mLastPackageUsageTimeInMills;
-                    if (then + dexOptLRUThresholdInMills < now) {
-                        if (DEBUG_DEXOPT) {
-                            Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
-                                  ((then == 0) ? "never" : new Date(then)));
-                        }
-                        i.remove();
-                        skipped++;
-                    }
-                }
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Skipped optimizing " + skipped + " of " + total);
-                }
+            filterRecentlyUsedApps(pkgs);
+            // Add all remaining apps.
+            for (PackageParser.Package pkg : pkgs) {
+                sortedPkgs.add(pkg);
             }
 
             int i = 0;
-            for (PackageParser.Package pkg : pkgs) {
-                i++;
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Optimizing app " + i + " of " + pkgs.size()
-                          + ": " + pkg.packageName);
-                }
-                if (!isFirstBoot()) {
-                    try {
-                        ActivityManagerNative.getDefault().showBootMessage(
-                                mContext.getResources().getString(
-                                        R.string.android_upgrading_apk,
-                                        i, pkgs.size()), true);
-                    } catch (RemoteException e) {
+            int total = sortedPkgs.size();
+            for (PackageParser.Package pkg : sortedPkgs) {
+                performBootDexOpt(pkg, ++i, total);
+            }
+        }
+    }
+
+    private void filterRecentlyUsedApps(HashSet<PackageParser.Package> pkgs) {
+        // Filter out packages that aren't recently used.
+        //
+        // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
+        // should do a full dexopt.
+        if (mLazyDexOpt || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
+            // TODO: add a property to control this?
+            long dexOptLRUThresholdInMinutes;
+            if (mLazyDexOpt) {
+                dexOptLRUThresholdInMinutes = 30; // only last 30 minutes of apps for eng builds.
+            } else {
+                dexOptLRUThresholdInMinutes = 7 * 24 * 60; // apps used in the 7 days for users.
+            }
+            long dexOptLRUThresholdInMills = dexOptLRUThresholdInMinutes * 60 * 1000;
+
+            int total = pkgs.size();
+            int skipped = 0;
+            long now = System.currentTimeMillis();
+            for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
+                PackageParser.Package pkg = i.next();
+                long then = pkg.mLastPackageUsageTimeInMills;
+                if (then + dexOptLRUThresholdInMills < now) {
+                    if (DEBUG_DEXOPT) {
+                        Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
+                              ((then == 0) ? "never" : new Date(then)));
                     }
-                }
-                PackageParser.Package p = pkg;
-                synchronized (mInstallLock) {
-                    performDexOptLI(p, null /* instruction sets */, false /* force dex */, false /* defer */,
-                            true /* include dependencies */);
+                    i.remove();
+                    skipped++;
                 }
             }
+            if (DEBUG_DEXOPT) {
+                Log.i(TAG, "Skipped optimizing " + skipped + " of " + total);
+            }
+        }
+    }
+
+    private HashSet<String> getPackageNamesForIntent(Intent intent) {
+        List<ResolveInfo> ris = null;
+        try {
+            ris = AppGlobals.getPackageManager().queryIntentReceivers(
+                    intent, null, 0, UserHandle.USER_OWNER);
+        } catch (RemoteException e) {
+        }
+        HashSet<String> pkgNames = new HashSet<String>();
+        if (ris != null) {
+            for (ResolveInfo ri : ris) {
+                pkgNames.add(ri.activityInfo.packageName);
+            }
+        }
+        return pkgNames;
+    }
+
+    private void performBootDexOpt(PackageParser.Package pkg, int curr, int total) {
+        if (DEBUG_DEXOPT) {
+            Log.i(TAG, "Optimizing app " + curr + " of " + total + ": " + pkg.packageName);
+        }
+        if (!isFirstBoot()) {
+            try {
+                ActivityManagerNative.getDefault().showBootMessage(
+                        mContext.getResources().getString(R.string.android_upgrading_apk,
+                                curr, total), true);
+            } catch (RemoteException e) {
+            }
+        }
+        PackageParser.Package p = pkg;
+        synchronized (mInstallLock) {
+            performDexOptLI(p, null /* instruction sets */, false /* force dex */,
+                            false /* defer */, true /* include dependencies */);
         }
     }
 
