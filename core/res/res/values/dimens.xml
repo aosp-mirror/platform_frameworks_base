@@ -380,7 +380,7 @@
     <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
     <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
     <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
-    <dimen name="datepicker_view_animator_height">250dp</dimen>
+    <dimen name="datepicker_view_animator_height">244dp</dimen>
 
     <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
     <dimen name="datepicker_year_label_height">64dp</dimen>
