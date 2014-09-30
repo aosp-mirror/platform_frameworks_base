@@ -128,7 +128,7 @@ static void SetSigChldHandler() {
 
   int err = sigaction(SIGCHLD, &sa, NULL);
   if (err < 0) {
-    ALOGW("Error setting SIGCHLD handler: %d", errno);
+    ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
   }
 }
 
@@ -140,7 +140,7 @@ static void UnsetSigChldHandler() {
 
   int err = sigaction(SIGCHLD, &sa, NULL);
   if (err < 0) {
-    ALOGW("Error unsetting SIGCHLD handler: %d", errno);
+    ALOGW("Error unsetting SIGCHLD handler: %s", strerror(errno));
   }
 }
 
@@ -255,7 +255,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_na
 
   // Create a second private mount namespace for our process
   if (unshare(CLONE_NEWNS) == -1) {
-      ALOGW("Failed to unshare(): %d", errno);
+      ALOGW("Failed to unshare(): %s", strerror(errno));
       return false;
   }
 
@@ -292,14 +292,15 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_na
     if (mount_mode == MOUNT_EXTERNAL_MULTIUSER_ALL) {
       // Mount entire external storage tree for all users
       if (TEMP_FAILURE_RETRY(mount(source, target, NULL, MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to %s :%d", source, target, errno);
+        ALOGW("Failed to mount %s to %s: %s", source, target, strerror(errno));
         return false;
       }
     } else {
       // Only mount user-specific external storage
-      if (TEMP_FAILURE_RETRY(
-              mount(source_user.string(), target_user.string(), NULL, MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to %s: %d", source_user.string(), target_user.string(), errno);
+      if (TEMP_FAILURE_RETRY(mount(source_user.string(), target_user.string(), NULL,
+                                   MS_BIND, NULL)) == -1) {
+        ALOGW("Failed to mount %s to %s: %s", source_user.string(), target_user.string(),
+              strerror(errno));
         return false;
       }
     }
@@ -311,7 +312,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_na
     // Finally, mount user-specific path into place for legacy users
     if (TEMP_FAILURE_RETRY(
             mount(target_user.string(), legacy, NULL, MS_BIND | MS_REC, NULL)) == -1) {
-      ALOGW("Failed to mount %s to %s: %d", target_user.string(), legacy, errno);
+      ALOGW("Failed to mount %s to %s: %s", target_user.string(), legacy, strerror(errno));
       return false;
     }
   } else {
@@ -362,13 +363,13 @@ static void DetachDescriptors(JNIEnv* env, jintArray fdsToClose) {
   for (i = 0; i < count; i++) {
     devnull = open("/dev/null", O_RDWR);
     if (devnull < 0) {
-      ALOGE("Failed to open /dev/null");
+      ALOGE("Failed to open /dev/null: %s", strerror(errno));
       RuntimeAbort(env);
       continue;
     }
-    ALOGV("Switching descriptor %d to /dev/null: %d", ar[i], errno);
+    ALOGV("Switching descriptor %d to /dev/null: %s", ar[i], strerror(errno));
     if (dup2(devnull, ar[i]) < 0) {
-      ALOGE("Failed dup2() on descriptor %d", ar[i]);
+      ALOGE("Failed dup2() on descriptor %d: %s", ar[i], strerror(errno));
       RuntimeAbort(env);
     }
     close(devnull);
@@ -398,7 +399,7 @@ void SetThreadName(const char* thread_name) {
   strlcpy(buf, s, sizeof(buf)-1);
   errno = pthread_setname_np(pthread_self(), buf);
   if (errno != 0) {
-    ALOGW("Unable to set the name of current thread to '%s'", buf);
+    ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
   }
 }
 
@@ -435,7 +436,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     }
 
     if (!MountEmulatedStorage(uid, mount_external, need_native_bridge)) {
-      ALOGW("Failed to mount emulated storage: %d", errno);
+      ALOGW("Failed to mount emulated storage: %s", strerror(errno));
       if (errno == ENOTCONN || errno == EROFS) {
         // When device is actively encrypting, we get ENOTCONN here
         // since FUSE was mounted before the framework restarted.
@@ -465,13 +466,13 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     int rc = setresgid(gid, gid, gid);
     if (rc == -1) {
-      ALOGE("setresgid(%d) failed", gid);
+      ALOGE("setresgid(%d) failed: %s", gid, strerror(errno));
       RuntimeAbort(env);
     }
 
     rc = setresuid(uid, uid, uid);
     if (rc == -1) {
-      ALOGE("setresuid(%d) failed", uid);
+      ALOGE("setresuid(%d) failed: %s", uid, strerror(errno));
       RuntimeAbort(env);
     }
 
@@ -480,7 +481,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         int old_personality = personality(0xffffffff);
         int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
         if (new_personality == -1) {
-            ALOGW("personality(%d) failed", new_personality);
+            ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
         }
     }
 
