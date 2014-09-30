@@ -1468,6 +1468,7 @@ public final class ActiveServices {
                 app.services.remove(r);
                 r.app = null;
                 scheduleServiceRestartLocked(r, false);
+                return;
             }
         }
 
