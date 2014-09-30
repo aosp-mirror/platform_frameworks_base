@@ -81,6 +81,13 @@
     <!-- Show camera affordance on Keyguard -->
     <bool name="config_keyguardShowCameraAffordance">true</bool>
 
+    <!-- Whether we should use SRC drawing mode when drawing the scrim behind. If this flag is set,
+         we change the canvas opacity so libhwui doesn't call glClear on our surface, and then we
+         draw the scrim with SRC to overwrite the whole buffer, which saves us a layer of overdraw.
+         However, SRC performs poorly on some devices, where it is more efficient to
+         glClear + SRC_OVER, in which case this flag should be disabled. -->
+    <bool name="config_status_bar_scrim_behind_use_src">true</bool>
+
     <!-- The length of the vibration when the notification pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
 

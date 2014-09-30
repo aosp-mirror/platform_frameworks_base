@@ -430,6 +430,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mVisible;
     private boolean mWaitingForKeyguardExit;
     private boolean mDozing;
+    private boolean mScrimSrcModeEnabled;
 
     private Interpolator mLinearOutSlowIn;
     private Interpolator mLinearInterpolator = new LinearInterpolator();
@@ -569,6 +570,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
         updateDisplaySize();
+        mScrimSrcModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_status_bar_scrim_behind_use_src);
         super.start(); // calls createAndAddWindows()
 
         mMediaSessionManager
@@ -737,7 +740,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         ScrimView scrimBehind = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
-        mScrimController = new ScrimController(scrimBehind, scrimInFront);
+        mScrimController = new ScrimController(scrimBehind, scrimInFront, mScrimSrcModeEnabled);
         mScrimController.setBackDropView(mBackdrop);
         mStatusBarView.setScrimController(mScrimController);
 
@@ -1870,7 +1873,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (mBackdropBack.getDrawable() != null) {
                     Drawable drawable = mBackdropBack.getDrawable();
                     mBackdropFront.setImageDrawable(drawable);
-                    mBackdropFront.getDrawable().mutate().setXfermode(mSrcOverXferMode);
+                    if (mScrimSrcModeEnabled) {
+                        mBackdropFront.getDrawable().mutate().setXfermode(mSrcOverXferMode);
+                    }
                     mBackdropFront.setAlpha(1f);
                     mBackdropFront.setVisibility(View.VISIBLE);
                 } else {
@@ -1885,7 +1890,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 } else {
                     mBackdropBack.setImageBitmap(artworkBitmap);
                 }
-                mBackdropBack.getDrawable().mutate().setXfermode(mSrcXferMode);
+                if (mScrimSrcModeEnabled) {
+                    mBackdropBack.getDrawable().mutate().setXfermode(mSrcXferMode);
+                }
 
                 if (mBackdropFront.getVisibility() == View.VISIBLE) {
                     if (DEBUG_MEDIA) {
@@ -2132,6 +2139,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override  // NotificationData.Environment
     public String getCurrentMediaNotificationKey() {
         return mMediaNotificationKey;
+    }
+
+    public boolean isScrimSrcModeEnabled() {
+        return mScrimSrcModeEnabled;
     }
 
     /**
