@@ -9093,6 +9093,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // gotten drawn.
                 wtoken.allDrawn = true;
                 wtoken.deferClearAllDrawn = false;
+                // Ensure that apps that are mid-starting are also scheduled to have their
+                // starting windows removed after the animation is complete
+                if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
+                    scheduleRemoveStartingWindow(wtoken);
+                }
 
                 if (animLp != null) {
                     int layer = -1;
