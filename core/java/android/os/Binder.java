@@ -430,16 +430,18 @@ public class Binder implements IBinder {
         } catch (RemoteException e) {
             if ((flags & FLAG_ONEWAY) != 0) {
                 Log.w(TAG, "Binder call failed.", e);
+            } else {
+                reply.setDataPosition(0);
+                reply.writeException(e);
             }
-            reply.setDataPosition(0);
-            reply.writeException(e);
             res = true;
         } catch (RuntimeException e) {
             if ((flags & FLAG_ONEWAY) != 0) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+            } else {
+                reply.setDataPosition(0);
+                reply.writeException(e);
             }
-            reply.setDataPosition(0);
-            reply.writeException(e);
             res = true;
         } catch (OutOfMemoryError e) {
             // Unconditionally log this, since this is generally unrecoverable.
@@ -452,6 +454,14 @@ public class Binder implements IBinder {
         checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
         reply.recycle();
         data.recycle();
+
+        // Just in case -- we are done with the IPC, so there should be no more strict
+        // mode violations that have gathered for this thread.  Either they have been
+        // parceled and are now in transport off to the caller, or we are returning back
+        // to the main transaction loop to wait for another incoming transaction.  Either
+        // way, strict mode begone!
+        StrictMode.clearGatheredViolations();
+
         return res;
     }
 }
