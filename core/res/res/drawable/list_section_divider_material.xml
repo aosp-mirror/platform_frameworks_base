@@ -16,4 +16,5 @@
 
 <nine-patch xmlns:android="http://schemas.android.com/apk/res/android"
     android:src="@drawable/list_section_divider_mtrl_alpha"
-    android:tint="?attr/colorControlNormal" />
+    android:tint="?attr/colorForeground"
+    android:alpha="0.12" />
