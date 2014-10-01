@@ -20,6 +20,7 @@ import com.android.internal.telecom.IConnectionService;
 
 import android.os.RemoteException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,9 @@ public final class RemoteConference {
         public void onConnectionAdded(RemoteConference conference, RemoteConnection connection) {}
         public void onConnectionRemoved(RemoteConference conference, RemoteConnection connection) {}
         public void onCapabilitiesChanged(RemoteConference conference, int capabilities) {}
+        public void onConferenceableConnectionsChanged(
+                RemoteConference conference,
+                List<RemoteConnection> conferenceableConnections) {}
         public void onDestroyed(RemoteConference conference) {}
     }
 
@@ -47,6 +51,9 @@ public final class RemoteConference {
     private final List<RemoteConnection> mChildConnections = new CopyOnWriteArrayList<>();
     private final List<RemoteConnection> mUnmodifiableChildConnections =
             Collections.unmodifiableList(mChildConnections);
+    private final List<RemoteConnection> mConferenceableConnections = new ArrayList<>();
+    private final List<RemoteConnection> mUnmodifiableConferenceableConnections =
+            Collections.unmodifiableList(mConferenceableConnections);
 
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
@@ -121,6 +128,15 @@ public final class RemoteConference {
             for (Callback c : mCallbacks) {
                 c.onCapabilitiesChanged(this, mCallCapabilities);
             }
+        }
+    }
+
+    /** @hide */
+    void setConferenceableConnections(List<RemoteConnection> conferenceableConnections) {
+        mConferenceableConnections.clear();
+        mConferenceableConnections.addAll(conferenceableConnections);
+        for (Callback c : mCallbacks) {
+            c.onConferenceableConnectionsChanged(this, mUnmodifiableConferenceableConnections);
         }
     }
 
@@ -214,6 +230,10 @@ public final class RemoteConference {
             mConnectionService.onAudioStateChanged(mId, state);
         } catch (RemoteException e) {
         }
+    }
+
+    public List<RemoteConnection> getConferenceableConnections() {
+        return mUnmodifiableConferenceableConnections;
     }
 
     public final void registerCallback(Callback callback) {
