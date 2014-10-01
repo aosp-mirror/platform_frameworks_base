@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.graphics.*;
 import android.graphics.PorterDuff.Mode;
 import android.content.res.ColorStateList;
@@ -208,6 +209,12 @@ public class ColorDrawable extends Drawable {
                 return PixelFormat.TRANSPARENT;
         }
         return PixelFormat.TRANSLUCENT;
+    }
+
+    @Override
+    public void getOutline(@NonNull Outline outline) {
+        outline.setRect(getBounds());
+        outline.setAlpha(getAlpha() / 255.0f);
     }
 
     @Override
