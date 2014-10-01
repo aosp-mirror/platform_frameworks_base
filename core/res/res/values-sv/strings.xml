@@ -1203,7 +1203,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redigera med %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Dela med"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Dela med %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Välj en app på startskärmen"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Välj en startsidesapp"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Använd %1$s som startsida"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Använd som standard för denna åtgärd."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Använd en annan app"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Rensa standardinställningar i Systeminställningar &gt; Appar &gt; Hämtat."</string>
@@ -1594,11 +1595,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Överlagring #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", säker"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Överför skärmen"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Ansluter till <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Överför skärmen"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Ansluten till <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Koppla från"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Nödsamtal"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Har du glömt ditt grafiska lösenord?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Fel grafiskt lösenord"</string>

@@ -764,8 +764,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el primer administrador de dispositivos define el servidor proxy global efectivo."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Definir caducidad bloqueo pantalla"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Controlar la frecuencia con la que se debe cambiar el bloqueo de la pantalla"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptación de almacenamiento"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se encripten los datos de la aplicación almacenados."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Cifrado del almacenamiento"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se cifren los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Inhabilitar funciones en bloqueo"</string>
@@ -1203,7 +1203,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Compartir con"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Seleccionar una aplicación en la pantalla de inicio"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Selecciona una aplicación de inicio"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como aplicación de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Uitliza otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
@@ -1594,11 +1595,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposición #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", seguro"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Enviando pantalla"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Conectando a <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Enviando pantalla"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Conectado a <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconectar"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Has olvidado el patrón?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"El patrón es incorrecto"</string>
