@@ -70,7 +70,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው::"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"የአንተን ቅጽበታዊ ገጽ እይታ ለማየት ንካ"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት ይንኩ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"በተገደበ የማከማቻ ቦታ ምክንያት ወይም በመተግበሪያው ወይም በድርጅትዎ ስለማይፈቀድ የማያ ገጽ ቅጽበታዊ እይታዎችን ማንሳት አይቻልም።"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
@@ -233,7 +233,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ብሩህነት"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"በራስ ሰር አሽከርክር"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"አዙሪት ተቆልፏል"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ምስል ገላጭ"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"በቁመት"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"በወርድ"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"የግቤት ስልት"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"አካባቢ"</string>
@@ -356,4 +356,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"አይ፣ አመሰግናለሁ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"አዋቅር"</string>
     <string name="muted_by" msgid="6147073845094180001">"ድምጽ በ<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ተዘግቷል"</string>
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>። <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>
