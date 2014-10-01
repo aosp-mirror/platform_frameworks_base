@@ -421,6 +421,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean resumeHomeStackTask(int homeStackTaskType, ActivityRecord prev) {
+        if (!mService.mBooting && !mService.mBooted) {
+            // Not ready yet!
+            return false;
+        }
+
         if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
             mWindowManager.showRecentApps();
             return false;
@@ -2295,9 +2300,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             activityRemoved |= r.task.stack.destroyActivityLocked(r, true, "finish-idle");
         }
 
-        if (booting) {
-            mService.finishBooting();
-        } else {
+        if (!booting) {
             // Complete user switch
             if (startingUsers != null) {
                 for (int i = 0; i < startingUsers.size(); i++) {
@@ -2318,8 +2321,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         //dump();
         //mWindowManager.dump();
 
-        if (enableScreen) {
-            mService.postEnableScreenAfterBootLocked();
+        if (booting || enableScreen) {
+            mService.postFinishBooting(booting, enableScreen);
         }
 
         if (activityRemoved) {
@@ -2584,7 +2587,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         r.mLaunchTaskBehind);
             }
         }
-        resumeHomeStackTask(HOME_ACTIVITY_TYPE, null);
     }
 
     void moveTaskToStack(int taskId, int stackId, boolean toTop) {
