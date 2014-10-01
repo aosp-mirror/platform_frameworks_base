@@ -27,6 +27,7 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
+import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
@@ -1192,7 +1193,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SYSTEM_USER_START_MSG = 42;
     static final int SYSTEM_USER_CURRENT_MSG = 43;
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
-    static final int ENABLE_SCREEN_AFTER_BOOT_MSG = 45;
+    static final int FINISH_BOOTING_MSG = 45;
     static final int START_USER_SWITCH_MSG = 46;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
 
@@ -1877,8 +1878,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
-            case ENABLE_SCREEN_AFTER_BOOT_MSG: {
-                enableScreenAfterBoot();
+            case FINISH_BOOTING_MSG: {
+                if (msg.arg1 != 0) {
+                    finishBooting();
+                }
+                if (msg.arg2 != 0) {
+                    enableScreenAfterBoot();
+                }
                 break;
             }
             case SEND_LOCALE_TO_MOUNT_DAEMON_MSG: {
@@ -6258,8 +6264,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         Binder.restoreCallingIdentity(origId);
     }
 
-    void postEnableScreenAfterBootLocked() {
-        mHandler.sendEmptyMessage(ENABLE_SCREEN_AFTER_BOOT_MSG);
+    void postFinishBooting(boolean finishBooting, boolean enableScreen) {
+        mHandler.sendMessage(mHandler.obtainMessage(FINISH_BOOTING_MSG,
+                finishBooting? 1 : 0, enableScreen ? 1 : 0));
     }
 
     void enableScreenAfterBoot() {
@@ -11275,6 +11282,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start up initial activity.
             mBooting = true;
+            startHomeActivityLocked(mCurrentUserId);
 
             try {
                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
@@ -12508,7 +12516,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean printedAnything = false;
 
-        if (mRecentTasks.size() > 0) {
+        if (mRecentTasks != null && mRecentTasks.size() > 0) {
             boolean printedHeader = false;
 
             final int N = mRecentTasks.size();
@@ -12907,10 +12915,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (dumpAll) {
                 pw.println("  Total persistent processes: " + numPers);
                 pw.println("  mProcessesReady=" + mProcessesReady
-                        + " mSystemReady=" + mSystemReady);
-                pw.println("  mBooting=" + mBooting
+                        + " mSystemReady=" + mSystemReady
                         + " mBooted=" + mBooted
                         + " mFactoryTest=" + mFactoryTest);
+                pw.println("  mBooting=" + mBooting
+                        + " mCallFinishBooting=" + mCallFinishBooting
+                        + " mBootAnimationComplete=" + mBootAnimationComplete);
                 pw.print("  mLastPowerCheckRealtime=");
                         TimeUtils.formatDuration(mLastPowerCheckRealtime, pw);
                         pw.println("");
