@@ -2243,9 +2243,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.idle = true;
 
             //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-            if (!mService.mBooted && isFrontStack(r.task.stack)) {
-                mService.mBooted = true;
-                enableScreen = true;
+            if (isFrontStack(r.task.stack) || fromTimeout) {
+                booting = mService.mBooting;
+                mService.mBooting = false;
+                if (!mService.mBooted) {
+                    mService.mBooted = true;
+                    enableScreen = true;
+                }
             }
         }
 
@@ -2272,9 +2276,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             finishes = new ArrayList<ActivityRecord>(mFinishingActivities);
             mFinishingActivities.clear();
         }
-
-        booting = mService.mBooting;
-        mService.mBooting = false;
 
         if (mStartingUsers.size() > 0) {
             startingUsers = new ArrayList<UserStartedState>(mStartingUsers);
