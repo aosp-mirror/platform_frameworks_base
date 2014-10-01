@@ -691,12 +691,11 @@ public class SettingsProvider extends ContentProvider {
         if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
             // Check if this request should be (re)directed to the primary user's db
-            if (callingUser == UserHandle.USER_OWNER
-                    || shouldShadowParentProfile(callingUser, sSystemCloneToManagedKeys, request)) {
-                dbHelper = getOrEstablishDatabase(UserHandle.USER_OWNER);
-            } else {
-                dbHelper = getOrEstablishDatabase(callingUser);
+            if (callingUser != UserHandle.USER_OWNER
+                    && shouldShadowParentProfile(callingUser, sSystemCloneToManagedKeys, request)) {
+                callingUser = UserHandle.USER_OWNER;
             }
+            dbHelper = getOrEstablishDatabase(callingUser);
             cache = sSystemCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
         }
@@ -710,10 +709,9 @@ public class SettingsProvider extends ContentProvider {
                                 UserManager.DISALLOW_SHARE_LOCATION, new UserHandle(callingUser))) {
                     return sSecureCaches.get(callingUser).putIfAbsent(request, "");
                 }
-                dbHelper = getOrEstablishDatabase(UserHandle.USER_OWNER);
-            } else {
-                dbHelper = getOrEstablishDatabase(callingUser);
+                callingUser = UserHandle.USER_OWNER;
             }
+            dbHelper = getOrEstablishDatabase(callingUser);
             cache = sSecureCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SECURE, cache, request);
         }
