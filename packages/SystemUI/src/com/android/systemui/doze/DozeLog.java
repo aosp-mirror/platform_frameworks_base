@@ -95,10 +95,11 @@ public class DozeLog {
         log("dozing " + dozing);
     }
 
-    public static void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded) {
+    public static void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,
+            boolean screenOnFromTouch) {
         if (!ENABLED) return;
         log("fling expand=" + expand + " aboveThreshold=" + aboveThreshold + " thresholdNeeded="
-                + thresholdNeeded);
+                + thresholdNeeded + " screenOnFromTouch=" + screenOnFromTouch);
     }
 
     public static void traceEmergencyCall() {
