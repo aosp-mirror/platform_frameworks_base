@@ -93,6 +93,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverse">@color/primary_text_holo_light</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_holo_light</item>
         <item name="textColorTertiaryInverse">@color/tertiary_text_holo_light</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_holo_dark</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_holo_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_holo_dark</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_holo_light</item>
         <item name="textColorPrimaryNoDisable">@color/primary_text_nodisable_holo_dark</item>
@@ -429,6 +431,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverse">@color/primary_text_holo_dark</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_holo_dark</item>
         <item name="textColorTertiaryInverse">@color/tertiary_text_holo_dark</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_holo_light</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_holo_light</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_holo_light</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_holo_dark</item>
         <item name="textColorPrimaryNoDisable">@color/primary_text_nodisable_holo_light</item>
