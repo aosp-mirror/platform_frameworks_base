@@ -418,22 +418,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else if (mConfig.launchedFromHome) {
             // Animate the tasks up
             int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
-            float fraction = (float) frontIndex / (ctx.currentStackViewCount - 1);
-            fraction = (float) Math.pow(fraction, 0.85f);
-            int delay = (int) (mConfig.taskViewEnterFromHomeDelay +
-                                fraction * mConfig.taskViewEnterFromHomeStaggerDelay);
-            long delayIncrease = (long) (fraction * mConfig.taskViewEnterFromHomeStaggerDuration);
+            int delay = mConfig.taskViewEnterFromHomeDelay +
+                    frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay;
+
+            setScaleX(transform.scale);
+            setScaleY(transform.scale);
             if (!mConfig.fakeShadows) {
                 animate().translationZ(transform.translationZ);
             }
             animate()
-                    .scaleX(transform.scale)
-                    .scaleY(transform.scale)
                     .translationY(transform.translationY)
                     .setStartDelay(delay)
                     .setUpdateListener(ctx.updateListener)
                     .setInterpolator(mConfig.quintOutInterpolator)
-                    .setDuration(mConfig.taskViewEnterFromHomeDuration + delayIncrease)
+                    .setDuration(mConfig.taskViewEnterFromHomeDuration +
+                            frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
