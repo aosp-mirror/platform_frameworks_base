@@ -324,19 +324,27 @@ public class GhostView extends View {
         final ArrayList<View> preorderedList = parent.buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && parent.isChildrenDrawingOrderEnabled();
+
+        // This default value shouldn't be used because both view and comparedWith
+        // should be in the list. If there is an error, then just return an arbitrary
+        // view is on top.
+        boolean isOnTop = true;
         for (int i = 0; i < childrenCount; i++) {
             int childIndex = customOrder ? parent.getChildDrawingOrder(childrenCount, i) : i;
             final View child = (preorderedList == null)
                     ? parent.getChildAt(childIndex) : preorderedList.get(childIndex);
             if (child == view) {
-                return false;
+                isOnTop = false;
+                break;
             } else if (child == comparedWith) {
-                return true;
+                isOnTop = true;
+                break;
             }
         }
 
-        // Shouldn't get here. Neither of the children is in the parent.
-        // Just return an arbitrary one.
-        return true;
+        if (preorderedList != null) {
+            preorderedList.clear();
+        }
+        return isOnTop;
     }
 }
