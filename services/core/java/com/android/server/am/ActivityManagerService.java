@@ -9349,6 +9349,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 checkTime(startTime, "getContentProviderImpl: after getProviderByClass");
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
+                    final long ident = Binder.clearCallingIdentity();
                     try {
                         checkTime(startTime, "getContentProviderImpl: before getApplicationInfo");
                         ApplicationInfo ai =
@@ -9366,6 +9367,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         cpr = new ContentProviderRecord(this, cpi, ai, comp, singleton);
                     } catch (RemoteException ex) {
                         // pm is in same process, this will never happen.
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
                     }
                 }
 
