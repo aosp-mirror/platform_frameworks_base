@@ -1693,7 +1693,7 @@ public final class StrictMode {
                 int start = p.dataPosition();
                 violations.get(i).writeToParcel(p, 0 /* unused flags? */);
                 int size = p.dataPosition()-start;
-                if (size > 100*1024) {
+                if (size > 10*1024) {
                     Slog.d(TAG, "Wrote violation #" + i + " of " + violations.size() + ": "
                             + (p.dataPosition()-start) + " bytes");
                 }
@@ -1725,6 +1725,11 @@ public final class StrictMode {
         for (int i = 0; i < numViolations; ++i) {
             if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
             ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
+            if (info.crashInfo.stackTrace.length() > 5000) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.w(TAG, "Stack is getting large: " + info.crashInfo.stackTrace, here);
+            }
             info.crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
             BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
             if (policy instanceof AndroidBlockGuardPolicy) {
@@ -2194,7 +2199,7 @@ public final class StrictMode {
             dest.writeString(broadcastIntentAction);
             dest.writeStringArray(tags);
             int total = dest.dataPosition()-start;
-            if (total > 100*1024) {
+            if (total > 10*1024) {
                 Slog.d(TAG, "VIO: policy=" + policy + " dur=" + durationMillis
                         + " numLoop=" + violationNumThisLoop
                         + " anim=" + numAnimationsRunning
