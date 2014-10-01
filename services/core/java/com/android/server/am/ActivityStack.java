@@ -1105,6 +1105,11 @@ final class ActivityStack {
             invalidateLastScreenshot();
         }
         next.returningOptions = null;
+
+        if (mActivityContainer.mActivityDisplay.mVisibleBehindActivity == next) {
+            // When resuming an activity, require it to call requestVisibleBehind() again.
+            mActivityContainer.mActivityDisplay.setVisibleBehindActivity(null);
+        }
     }
 
     private void setVisibile(ActivityRecord r, boolean visible) {
@@ -3296,6 +3301,11 @@ final class ActivityStack {
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
             final ActivityRecord r = getVisibleBehindActivity();
+            if (r == topRunningActivityLocked(null)) {
+                // Don't release the top activity if it has requested to run behind the next
+                // activity.
+                return;
+            }
             if (DEBUG_STATES) Slog.d(TAG, "releaseBackgroundResources activtyDisplay=" +
                     mActivityContainer.mActivityDisplay + " visibleBehind=" + r + " app=" + r.app +
                     " thread=" + r.app.thread);
