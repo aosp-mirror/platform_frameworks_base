@@ -50,20 +50,32 @@ final class RampAnimator<T> {
     /**
      * Starts animating towards the specified value.
      *
-     * If this is the first time the property is being set, the value jumps
-     * directly to the target.
+     * If this is the first time the property is being set or if the rate is 0,
+     * the value jumps directly to the target.
      *
      * @param target The target value.
-     * @param rate The convergence rate, in units per second.
+     * @param rate The convergence rate in units per second, or 0 to set the value immediately.
      * @return True if the target differs from the previous target.
      */
     public boolean animateTo(int target, int rate) {
         // Immediately jump to the target the first time.
-        if (mFirstTime) {
-            mFirstTime = false;
-            mProperty.setValue(mObject, target);
-            mCurrentValue = target;
-            return true;
+        if (mFirstTime || rate <= 0) {
+            if (mFirstTime || target != mCurrentValue) {
+                mFirstTime = false;
+                mRate = 0;
+                mTargetValue = target;
+                mCurrentValue = target;
+                mProperty.setValue(mObject, target);
+                if (mAnimating) {
+                    mAnimating = false;
+                    cancelAnimationCallback();
+                }
+                if (mListener != null) {
+                    mListener.onAnimationEnd();
+                }
+                return true;
+            }
+            return false;
         }
 
         // Adjust the rate based on the closest target.
@@ -88,7 +100,7 @@ final class RampAnimator<T> {
             mAnimating = true;
             mAnimatedValue = mCurrentValue;
             mLastFrameTimeNanos = System.nanoTime();
-            postCallback();
+            postAnimationCallback();
         }
 
         return changed;
@@ -108,11 +120,15 @@ final class RampAnimator<T> {
         mListener = listener;
     }
 
-    private void postCallback() {
-        mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mCallback, null);
+    private void postAnimationCallback() {
+        mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimationCallback, null);
     }
 
-    private final Runnable mCallback = new Runnable() {
+    private void cancelAnimationCallback() {
+        mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION, mAnimationCallback, null);
+    }
+
+    private final Runnable mAnimationCallback = new Runnable() {
         @Override // Choreographer callback
         public void run() {
             final long frameTimeNanos = mChoreographer.getFrameTimeNanos();
@@ -144,7 +160,7 @@ final class RampAnimator<T> {
             }
 
             if (mTargetValue != mCurrentValue) {
-                postCallback();
+                postAnimationCallback();
             } else {
                 mAnimating = false;
                 if (mListener != null) {
