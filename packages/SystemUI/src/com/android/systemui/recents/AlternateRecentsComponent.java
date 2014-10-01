@@ -112,15 +112,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         mTaskStackBounds = new Rect();
     }
 
-    public void onStart() {}
-
-    public void onBootCompleted() {
+    public void onStart() {
         // Initialize some static datastructures
         TaskStackViewLayoutAlgorithm.initializeCurve();
         // Load the header bar layout
         reloadHeaderBarLayout();
-        mBootCompleted = true;
-
         // Try and pre-emptively bind the search widget on startup to ensure that we
         // have the right thumbnail bounds to animate to.
         if (Constants.DebugFlags.App.EnableSearchLayout) {
@@ -136,6 +132,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 }
             }
         }
+    }
+
+    public void onBootCompleted() {
+        mBootCompleted = true;
     }
 
     /** Shows the recents */
