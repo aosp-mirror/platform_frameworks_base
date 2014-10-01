@@ -141,33 +141,15 @@ void ZipEntry::initNew(const char* fileName, const char* comment)
  *
  * Initializes the CDE and the LFH.
  */
-status_t ZipEntry::initFromExternal(const ZipFile* pZipFile,
+status_t ZipEntry::initFromExternal(const ZipFile* /* pZipFile */,
     const ZipEntry* pEntry)
 {
-    /*
-     * Copy everything in the CDE over, then fix up the hairy bits.
-     */
-    memcpy(&mCDE, &pEntry->mCDE, sizeof(mCDE));
-
-    if (mCDE.mFileNameLength > 0) {
-        mCDE.mFileName = new unsigned char[mCDE.mFileNameLength+1];
-        if (mCDE.mFileName == NULL)
-            return NO_MEMORY;
-        strcpy((char*) mCDE.mFileName, (char*)pEntry->mCDE.mFileName);
-    }
-    if (mCDE.mFileCommentLength > 0) {
-        mCDE.mFileComment = new unsigned char[mCDE.mFileCommentLength+1];
-        if (mCDE.mFileComment == NULL)
-            return NO_MEMORY;
-        strcpy((char*) mCDE.mFileComment, (char*)pEntry->mCDE.mFileComment);
-    }
-    if (mCDE.mExtraFieldLength > 0) {
-        /* we null-terminate this, though it may not be a string */
-        mCDE.mExtraField = new unsigned char[mCDE.mExtraFieldLength+1];
-        if (mCDE.mExtraField == NULL)
-            return NO_MEMORY;
-        memcpy(mCDE.mExtraField, pEntry->mCDE.mExtraField,
-            mCDE.mExtraFieldLength+1);
+    mCDE = pEntry->mCDE;
+    // Check whether we got all the memory needed.
+    if ((mCDE.mFileNameLength > 0 && mCDE.mFileName == NULL) ||
+            (mCDE.mFileCommentLength > 0 && mCDE.mFileComment == NULL) ||
+            (mCDE.mExtraFieldLength > 0 && mCDE.mExtraField == NULL)) {
+        return NO_MEMORY;
     }
 
     /* construct the LFH from the CDE */
@@ -694,3 +676,60 @@ void ZipEntry::CentralDirEntry::dump(void) const
         ALOGD("  comment: '%s'\n", mFileComment);
 }
 
+/*
+ * Copy-assignment operator for CentralDirEntry.
+ */
+ZipEntry::CentralDirEntry& ZipEntry::CentralDirEntry::operator=(const ZipEntry::CentralDirEntry& src) {
+    if (this == &src) {
+        return *this;
+    }
+
+    // Free up old data.
+    delete[] mFileName;
+    delete[] mExtraField;
+    delete[] mFileComment;
+
+    // Copy scalars.
+    mVersionMadeBy = src.mVersionMadeBy;
+    mVersionToExtract = src.mVersionToExtract;
+    mGPBitFlag = src.mGPBitFlag;
+    mCompressionMethod = src.mCompressionMethod;
+    mLastModFileTime = src.mLastModFileTime;
+    mLastModFileDate = src.mLastModFileDate;
+    mCRC32 = src.mCRC32;
+    mCompressedSize = src.mCompressedSize;
+    mUncompressedSize = src.mUncompressedSize;
+    mFileNameLength = src.mFileNameLength;
+    mExtraFieldLength = src.mExtraFieldLength;
+    mFileCommentLength = src.mFileCommentLength;
+    mDiskNumberStart = src.mDiskNumberStart;
+    mInternalAttrs = src.mInternalAttrs;
+    mExternalAttrs = src.mExternalAttrs;
+    mLocalHeaderRelOffset = src.mLocalHeaderRelOffset;
+
+    // Copy strings, if necessary.
+    if (mFileNameLength > 0) {
+        mFileName = new unsigned char[mFileNameLength + 1];
+        if (mFileName != NULL)
+            strcpy((char*)mFileName, (char*)src.mFileName);
+    } else {
+        mFileName = NULL;
+    }
+    if (mFileCommentLength > 0) {
+        mFileComment = new unsigned char[mFileCommentLength + 1];
+        if (mFileComment != NULL)
+            strcpy((char*)mFileComment, (char*)src.mFileComment);
+    } else {
+        mFileComment = NULL;
+    }
+    if (mExtraFieldLength > 0) {
+        /* we null-terminate this, though it may not be a string */
+        mExtraField = new unsigned char[mExtraFieldLength + 1];
+        if (mExtraField != NULL)
+            memcpy(mExtraField, src.mExtraField, mExtraFieldLength + 1);
+    } else {
+        mExtraField = NULL;
+    }
+
+    return *this;
+}

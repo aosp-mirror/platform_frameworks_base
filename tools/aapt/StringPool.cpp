@@ -3,7 +3,6 @@
 //
 // Build resource files from raw assets.
 //
-
 #include "StringPool.h"
 
 #include <utils/ByteOrder.h>
@@ -13,15 +12,19 @@
 
 #include "ResourceTable.h"
 
+// SSIZE: mingw does not have signed size_t == ssize_t.
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
 #  define ZD_TYPE ssize_t
+#  define SSIZE(x) x
 #else
 #  define ZD "%ld"
 #  define ZD_TYPE long
+#  define SSIZE(x) (signed size_t)x
 #endif
 
-#define NOISY(x) //x
+// Set to true for noisy debug output.
+static const bool kIsDebug = false;
 
 void strcpy16_htod(char16_t* dst, const char16_t* src)
 {
@@ -134,8 +137,10 @@ ssize_t StringPool::add(const String16& value,
 
     if (configTypeName != NULL) {
         entry& ent = mEntries.editItemAt(eidx);
-        NOISY(printf("*** adding config type name %s, was %s\n",
-                configTypeName->string(), ent.configTypeName.string()));
+        if (kIsDebug) {
+            printf("*** adding config type name %s, was %s\n",
+                    configTypeName->string(), ent.configTypeName.string());
+        }
         if (ent.configTypeName.size() <= 0) {
             ent.configTypeName = *configTypeName;
         } else if (ent.configTypeName != *configTypeName) {
@@ -151,14 +156,18 @@ ssize_t StringPool::add(const String16& value,
             int cmp = ent.configs.itemAt(addPos).compareLogical(*config);
             if (cmp >= 0) {
                 if (cmp > 0) {
-                    NOISY(printf("*** inserting config: %s\n", config->toString().string()));
+                    if (kIsDebug) {
+                        printf("*** inserting config: %s\n", config->toString().string());
+                    }
                     ent.configs.insertAt(*config, addPos);
                 }
                 break;
             }
         }
         if (addPos >= ent.configs.size()) {
-            NOISY(printf("*** adding config: %s\n", config->toString().string()));
+            if (kIsDebug) {
+                printf("*** adding config: %s\n", config->toString().string());
+            }
             ent.configs.add(*config);
         }
     }
@@ -175,9 +184,11 @@ ssize_t StringPool::add(const String16& value,
         ent.indices.add(pos);
     }
 
-    NOISY(printf("Adding string %s to pool: pos=%d eidx=%d vidx=%d\n",
-            String8(value).string(), pos, eidx, vidx));
-    
+    if (kIsDebug) {
+        printf("Adding string %s to pool: pos=%zd eidx=%zd vidx=%zd\n",
+                String8(value).string(), SSIZE(pos), SSIZE(eidx), SSIZE(vidx));
+    }
+
     return pos;
 }
 
@@ -244,10 +255,14 @@ void StringPool::sortByConfig()
     }
 
     // Sort the array.
-    NOISY(printf("SORTING STRINGS BY CONFIGURATION...\n"));
+    if (kIsDebug) {
+        printf("SORTING STRINGS BY CONFIGURATION...\n");
+    }
     ConfigSorter sorter(*this);
     std::sort(newPosToOriginalPos.begin(), newPosToOriginalPos.end(), sorter);
-    NOISY(printf("DONE SORTING STRINGS BY CONFIGURATION.\n"));
+    if (kIsDebug) {
+        printf("DONE SORTING STRINGS BY CONFIGURATION.\n");
+    }
 
     // Create the reverse mapping from the original position in the array
     // to the new position where it appears in the sorted array.  This is
@@ -544,9 +559,13 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
     for (i=0; i<ENTRIES; i++) {
         entry& ent = mEntries.editItemAt(mEntryArray[i]);
         *index++ = htodl(ent.offset);
-        NOISY(printf("Writing entry #%d: \"%s\" ent=%d off=%d\n", i,
-                String8(ent.value).string(),
-                mEntryArray[i], ent.offset));
+        if (kIsDebug) {
+            printf("Writing entry #%zu: \"%s\" ent=%zu off=%zu\n",
+                    i,
+                    String8(ent.value).string(),
+                    mEntryArray[i],
+                    ent.offset);
+        }
     }
 
     // Write style index array.
@@ -562,8 +581,10 @@ ssize_t StringPool::offsetForString(const String16& val) const
 {
     const Vector<size_t>* indices = offsetsForString(val);
     ssize_t res = indices != NULL && indices->size() > 0 ? indices->itemAt(0) : -1;
-    NOISY(printf("Offset for string %s: %d (%s)\n", String8(val).string(), res,
-            res >= 0 ? String8(mEntries[mEntryArray[res]].value).string() : String8()));
+    if (kIsDebug) {
+        printf("Offset for string %s: %zd (%s)\n", String8(val).string(), SSIZE(res),
+                res >= 0 ? String8(mEntries[mEntryArray[res]].value).string() : String8());
+    }
     return res;
 }
 
