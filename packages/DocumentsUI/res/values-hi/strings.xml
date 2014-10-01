@@ -49,7 +49,7 @@
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> खाली"</string>
     <string name="root_type_service" msgid="2178854894416775409">"मेमोरी सेवाएं"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"शॉर्टकट"</string>
-    <string name="root_type_device" msgid="7121342474653483538">"उपकरण"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"डिवाइस"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"अधिक ऐप्स"</string>
     <string name="empty" msgid="7858882803708117596">"कोई आइटम नहीं"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"फ़ाइल नहीं खोली जा सकती"</string>
