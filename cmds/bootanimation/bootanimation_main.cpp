@@ -36,7 +36,7 @@ using namespace android;
 
 // ---------------------------------------------------------------------------
 
-int main(int argc, char** argv)
+int main()
 {
 #if defined(HAVE_PTHREADS)
     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_DISPLAY);

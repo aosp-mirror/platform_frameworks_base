@@ -207,7 +207,6 @@ bool AudioPlayer::threadLoop()
     struct pcm *pcm = NULL;
     bool moreChunks = true;
     const struct chunk_fmt* chunkFmt = NULL;
-    void* buffer = NULL;
     int bufferSize;
     const uint8_t* wavData;
     size_t wavLength;

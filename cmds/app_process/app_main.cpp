@@ -24,7 +24,7 @@
 
 namespace android {
 
-void app_usage()
+static void app_usage()
 {
     fprintf(stderr,
         "Usage: app_process [java-options] cmd-dir start-class-name [options]\n");
