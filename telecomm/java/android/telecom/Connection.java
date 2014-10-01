@@ -867,7 +867,7 @@ public abstract class Connection {
     }
 
     /**
-     * Obtains the connections with which this connection can be conferenced.
+     * Returns the connections with which this connection can be conferenced.
      */
     public final List<Connection> getConferenceableConnections() {
         return mUnmodifiableConferenceableConnections;
@@ -1097,7 +1097,7 @@ public abstract class Connection {
 
     private final void  fireOnConferenceableConnectionsChanged() {
         for (Listener l : mListeners) {
-            l.onConferenceableConnectionsChanged(this, mConferenceableConnections);
+            l.onConferenceableConnectionsChanged(this, getConferenceableConnections());
         }
     }
 
