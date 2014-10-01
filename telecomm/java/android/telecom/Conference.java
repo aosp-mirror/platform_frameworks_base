@@ -18,6 +18,7 @@ package android.telecom;
 
 import android.annotation.SystemApi;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,8 @@ public abstract class Conference {
         public void onDisconnected(Conference conference, DisconnectCause disconnectCause) {}
         public void onConnectionAdded(Conference conference, Connection connection) {}
         public void onConnectionRemoved(Conference conference, Connection connection) {}
+        public void onConferenceableConnectionsChanged(
+                Conference conference, List<Connection> conferenceableConnections) {}
         public void onDestroyed(Conference conference) {}
         public void onCapabilitiesChanged(Conference conference, int capabilities) {}
     }
@@ -45,6 +48,9 @@ public abstract class Conference {
     private final List<Connection> mChildConnections = new CopyOnWriteArrayList<>();
     private final List<Connection> mUnmodifiableChildConnections =
             Collections.unmodifiableList(mChildConnections);
+    private final List<Connection> mConferenceableConnections = new ArrayList<>();
+    private final List<Connection> mUnmodifiableConferenceableConnections =
+            Collections.unmodifiableList(mConferenceableConnections);
 
     private PhoneAccountHandle mPhoneAccount;
     private AudioState mAudioState;
@@ -52,6 +58,15 @@ public abstract class Conference {
     private DisconnectCause mDisconnectCause;
     private int mCapabilities;
     private String mDisconnectMessage;
+
+    private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
+        @Override
+        public void onDestroyed(Connection c) {
+            if (mConferenceableConnections.remove(c)) {
+                fireOnConferenceableConnectionsChanged();
+            }
+        }
+    };
 
     /**
      * Constructs a new Conference with a mandatory {@link PhoneAccountHandle}
@@ -118,6 +133,13 @@ public abstract class Conference {
      * @param connection The connection to separate.
      */
     public void onSeparate(Connection connection) {}
+
+    /**
+     * Invoked when the specified {@link Connection} should merged with the conference call.
+     *
+     * @param connection The {@code Connection} to merge.
+     */
+    public void onMerge(Connection connection) {}
 
     /**
      * Invoked when the conference should be put on hold.
@@ -238,6 +260,37 @@ public abstract class Conference {
     }
 
     /**
+     * Sets the connections with which this connection can be conferenced.
+     *
+     * @param conferenceableConnections The set of connections this connection can conference with.
+     */
+    public final void setConferenceableConnections(List<Connection> conferenceableConnections) {
+        clearConferenceableList();
+        for (Connection c : conferenceableConnections) {
+            // If statement checks for duplicates in input. It makes it N^2 but we're dealing with a
+            // small amount of items here.
+            if (!mConferenceableConnections.contains(c)) {
+                c.addConnectionListener(mConnectionDeathListener);
+                mConferenceableConnections.add(c);
+            }
+        }
+        fireOnConferenceableConnectionsChanged();
+    }
+
+    private final void fireOnConferenceableConnectionsChanged() {
+        for (Listener l : mListeners) {
+            l.onConferenceableConnectionsChanged(this, getConferenceableConnections());
+        }
+    }
+
+    /**
+     * Returns the connections with which this connection can be conferenced.
+     */
+    public final List<Connection> getConferenceableConnections() {
+        return mUnmodifiableConferenceableConnections;
+    }
+
+    /**
      * Tears down the conference object and any of its current connections.
      */
     public final void destroy() {
@@ -312,5 +365,12 @@ public abstract class Conference {
                 l.onStateChanged(this, oldState, newState);
             }
         }
+    }
+
+    private final void clearConferenceableList() {
+        for (Connection c : mConferenceableConnections) {
+            c.removeConnectionListener(mConnectionDeathListener);
+        }
+        mConferenceableConnections.clear();
     }
 }
