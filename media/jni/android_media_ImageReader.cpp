@@ -294,7 +294,7 @@ static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer, bool usingR
     uint8_t* jpegBuffer = buffer->data;
 
     if (usingRGBAOverride) {
-        width *= 4;
+        width = (buffer->width + buffer->stride * (buffer->height - 1)) * 4;
     }
 
     // First check for JPEG transport header at the end of the buffer
