@@ -81,10 +81,14 @@ Java sample using the Smack library</a>.</p>
 
 <p>The CCS XMPP endpoint runs at {@code gcm.googleapis.com:5235}. When testing
 functionality (with non-production users), you should instead connect to
-{@code gcm-staging.googleapis.com:5236} (note the different port). Testing on
-staging (a smaller environment where the latest CCS builds run) is beneficial
-both for isolating real users from test code, as well as for early detection of
-unexpected behavior changes.</p>
+{@code gcm-preprod.googleapis.com:5236} (note the different port). Regular
+testing on preprod (a smaller environment where the latest CCS builds run) is
+beneficial both for isolating real users from test code, as well as for early
+detection of unexpected behavior changes. Note that a connection receives upstream
+messages destined for its GCM sender ID, regardless of which environment (gcm or
+gcm-preprod) it is connected to. Therefore, test code connecting to
+{@code gcm-preprod.googleapis.com:5236} should use a different GCM sender ID to
+avoid upstream messages from production traffic being sent over test connections.</p>
 
 <p>The connection has two important requirements:</p>
 
