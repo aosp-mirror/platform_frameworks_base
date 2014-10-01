@@ -155,14 +155,6 @@ import java.util.Objects;
  *         <th>Description</th>
  *     </tr>
  *     <tr>
- *         <td>AM_TV_RS</td>
- *         <td>Range specific TV content rating system strings for Armenia</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_AS</td>
- *         <td>Age specific TV content rating system strings for Armenia</td>
- *     </tr>
- *     <tr>
  *         <td>AR_TV</td>
  *         <td>TV content rating system for Argentina</td>
  *     </tr>
@@ -171,181 +163,36 @@ import java.util.Objects;
  *         <td>TV content rating system for Australia</td>
  *     </tr>
  *     <tr>
- *         <td>BG_TV</td>
- *         <td>TV content rating system for Bulgaria</td>
- *     </tr>
- *     <tr>
  *         <td>BR_TV</td>
  *         <td>TV content rating system for Brazil</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA</td>
- *         <td>TV content rating system for Canada (Canadian)</td>
+ *         <td>DVB</td>
+ *         <td>DVB content rating system</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_QC</td>
- *         <td>TV content rating system for Canada (Quebec)</td>
+ *         <td>ES_DVB</td>
+ *         <td>DVB content rating system for Spain</td>
  *     </tr>
  *     <tr>
- *         <td>CH_TV</td>
- *         <td>TV content rating system for Switzerland</td>
+ *         <td>FR_DVB</td>
+ *         <td>DVB content rating system for France</td>
  *     </tr>
  *     <tr>
- *         <td>CL_TV</td>
- *         <td>TV content rating system for Chile</td>
- *     </tr>
- *     <tr>
- *         <td>DE_TV</td>
- *         <td>TV content rating system for Germany</td>
- *     </tr>
- *     <tr>
- *         <td>DK_TV</td>
- *         <td>TV content rating system for Denmark</td>
- *     </tr>
- *     <tr>
- *         <td>ES_TV</td>
- *         <td>TV content rating system for Spain</td>
- *     </tr>
- *     <tr>
- *         <td>FI_TV</td>
- *         <td>TV content rating system for Finland</td>
- *     </tr>
- *     <tr>
- *         <td>FR_TV</td>
- *         <td>TV content rating system for France</td>
- *     </tr>
- *     <tr>
- *         <td>GR_TV</td>
- *         <td>TV content rating system for Greece</td>
- *     </tr>
- *     <tr>
- *         <td>HK_TV</td>
- *         <td>TV content rating system for Hong Kong</td>
- *     </tr>
- *     <tr>
- *         <td>HU_TV</td>
- *         <td>TV content rating system for Hungary</td>
- *     </tr>
- *     <tr>
- *         <td>ID_TV</td>
- *         <td>TV content rating system for Indonesia</td>
- *     </tr>
- *     <tr>
- *         <td>IE_TV</td>
- *         <td>TV content rating system for Ireland</td>
- *     </tr>
- *     <tr>
- *         <td>IL_TV</td>
- *         <td>TV content rating system for Israel</td>
- *     </tr>
- *     <tr>
- *         <td>IN_TV</td>
- *         <td>TV content rating system for India</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV</td>
- *         <td>TV content rating system for Iceland</td>
- *     </tr>
- *     <tr>
- *         <td>JP_TV</td>
- *         <td>TV content rating system for Japan</td>
+ *         <td>ISDB</td>
+ *         <td>ISDB content rating system</td>
  *     </tr>
  *     <tr>
  *         <td>KR_TV</td>
  *         <td>TV content rating system for South Korea</td>
  *     </tr>
  *     <tr>
- *         <td>MV_TV</td>
- *         <td>TV content rating system for Maldives</td>
- *     </tr>
- *     <tr>
- *         <td>MX_TV</td>
- *         <td>TV content rating system for Mexico</td>
- *     </tr>
- *     <tr>
- *         <td>MY_TV</td>
- *         <td>TV content rating system for Malaysia</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV</td>
- *         <td>TV content rating system for Netherlands</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_FTV</td>
- *         <td>TV content rating system for free-to-air channels in New Zealand</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV</td>
- *         <td>TV content rating system for Pay TV channels in New Zealand</td>
- *     </tr>
- *     <tr>
- *         <td>PE_TV</td>
- *         <td>TV content rating system for some Peruvian channels in Peru</td>
- *     </tr>
- *     <tr>
- *         <td>PE_ATV</td>
- *         <td>TV content rating system for America Television in Peru that uses its own rating
- *         system</td>
- *     </tr>
- *     <tr>
- *         <td>PH_TV</td>
- *         <td>TV content rating system for Philippines</td>
- *     </tr>
- *     <tr>
- *         <td>PL_TV</td>
- *         <td>TV content rating system for Poland</td>
- *     </tr>
- *     <tr>
- *         <td>PT_TV</td>
- *         <td>TV content rating system for Portugal</td>
- *     </tr>
- *     <tr>
- *         <td>RO_TV</td>
- *         <td>TV content rating system for Romania</td>
- *     </tr>
- *     <tr>
- *         <td>RU_TV</td>
- *         <td>TV content rating system for Russia</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV</td>
- *         <td>TV content rating system for Serbia</td>
- *     </tr>
- *     <tr>
  *         <td>SG_TV</td>
  *         <td>TV content rating system for Singapore</td>
  *     </tr>
  *     <tr>
- *         <td>SI_TV</td>
- *         <td>TV content rating system for Slovenia</td>
- *     </tr>
- *     <tr>
- *         <td>TH_TV</td>
- *         <td>TV content rating system for Thailand</td>
- *     </tr>
- *     <tr>
- *         <td>TR_TV</td>
- *         <td>TV content rating system for Turkey</td>
- *     </tr>
- *     <tr>
- *         <td>TW_TV</td>
- *         <td>TV content rating system for Taiwan</td>
- *     </tr>
- *     <tr>
- *         <td>UA_TV</td>
- *         <td>TV content rating system for Ukraine</td>
- *     </tr>
- *     <tr>
  *         <td>US_TV</td>
  *         <td>TV content rating system for the United States</td>
- *     </tr>
- *     <tr>
- *         <td>VE_TV</td>
- *         <td>TV content rating system for Venezuela</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV</td>
- *         <td>TV content rating system for South Africa</td>
  *     </tr>
  * </table>
  *
@@ -357,137 +204,61 @@ import java.util.Objects;
  *         <th>Description</th>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="6">AM_TV_RS</td>
- *         <td>AM_TV_RS_Y</td>
- *         <td>Suitable for ages 2-11</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_RS_Y7</td>
- *         <td>Suitable for ages 7-16</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_RS_GA</td>
- *         <td>Suitable for general audiences</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_RS_TW</td>
- *         <td>Suitable for teens ages 9 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_RS_T</td>
- *         <td>Suitable for teens ages 12 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_RS_A</td>
- *         <td>Suitable only for adults ages 18 and up</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="6">AM_TV_AS</td>
- *         <td>AM_TV_AS_EC</td>
- *         <td>Suitable for ages 2 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_AS_E</td>
- *         <td>Suitable for ages 5 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_AS_E9</td>
- *         <td>Suitable for ages 9 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_AS_T</td>
- *         <td>Suitable for ages 12 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_AS_M</td>
- *         <td>Suitable for ages 16 and up</td>
- *     </tr>
- *     <tr>
- *         <td>AM_TV_AS_AO</td>
- *         <td>Suitable for ages 17 and up</td>
- *     </tr>
- *     <tr>
  *         <td valign="top" rowspan="4">AR_TV</td>
- *         <td>AR_TV_ALL</td>
+ *         <td>AR_TV_ATP</td>
  *         <td>Suitable for all audiences. Programs may contain mild violence, language and mature
  *         situations</td>
  *     </tr>
  *     <tr>
- *         <td>AR_TV_13</td>
+ *         <td>AR_TV_SAM_13</td>
  *         <td>Suitable for ages 13 and up. Programs may contain mild to moderate language and mild
  *         violence and sexual references</td>
  *     </tr>
  *     <tr>
- *         <td>AR_TV_16</td>
+ *         <td>AR_TV_SAM_16</td>
  *         <td>Suitable for ages 16 and up. Programs may contain more intensive violence and coarse
  *         language, partial nudity and moderate sexual references</td>
  *     </tr>
  *     <tr>
- *         <td>AR_TV_18</td>
+ *         <td>AR_TV_SAM_18</td>
  *         <td>Suitable for mature audiences only. Programs contain strong violence, coarse language
  *         and explicit sexual references</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="7">AU_TV</td>
- *         <td>AU_TV_CTC</td>
- *         <td>This has advertising approval, but is not yet classified</td>
+ *         <td valign="top" rowspan="8">AU_TV</td>
+ *         <td>AU_TV_P</td>
+ *         <td>Recommended for younger children aged between 2 and 11 years</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_C</td>
+ *         <td>Recommended for older children aged between 5 and 14 years</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV_G</td>
- *         <td>The content is very mild in impact, and suitable for everyone</td>
+ *         <td>Recommended for all ages</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV_PG</td>
- *         <td>The content is mild in impact, but it may contain content that children find
- *         confusing or upsetting and may require the guidance or parents and guardians</td>
+ *         <td>Parental guidance is recommended for young viewers under 15</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV_M</td>
- *         <td>The content is moderate in impact, and it is recommended for teenagers aged 15 years
- *         and over</td>
+ *         <td>Recommended for mature audiences aged 15 years and over</td>
  *     </tr>
  *     <tr>
- *         <td>AU_TV_MA15</td>
- *         <td>The content is strong in impact, and it is legally restricted to persons 15 years and
- *         over</td>
+ *         <td>AU_TV_MA</td>
+ *         <td>Not suitable for children and teens under 15, due to sexual descriptions, course
+ *         language, adult themes or drug use</td>
  *     </tr>
  *     <tr>
- *         <td>AU_TV_R18</td>
- *         <td>The content is high in impact, and it is restricted to adults</td>
+ *         <td>AU_TV_AV</td>
+ *         <td>Not suitable for children and teens under 15. This category is used specifically for
+ *         violent programs</td>
  *     </tr>
  *     <tr>
- *         <td>AU_TV_X18</td>
- *         <td>The content is restricted to adults. This classification is a special and legally
- *         restricted category which contains only sexually explicit content</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="5">BG_TV</td>
- *         <td>BG_TV_A</td>
- *         <td>Recommended to children. When the film confirms the ideals of humanism or popularizes
- *         the national and world cultures or contributes to upbringing children</td>
- *     </tr>
- *     <tr>
- *         <td>BG_TV_B</td>
- *         <td>No restrictive recommendations from the Committee. When the film is in no way
- *         contrary to the universal rules of morality in this country, has no restrictive
- *         recommendations from the Committee and does not fall in rating A</td>
- *     </tr>
- *     <tr>
- *         <td>BG_TV_C</td>
- *         <td>No persons under the age of 12 are admitted unless accompanied by an adult. When the
- *         film contains certain erotic scenes or scenes with drinking, taking drugs or stimulants
- *         or a few scenes of violence</td>
- *     </tr>
- *     <tr>
- *         <td>BG_TV_D</td>
- *         <td>No persons under the age of 16 are admitted. When the film contains quite a number of
- *         erotic scenes or scenes with drinking, taking drugs or stimulants or a considerable
- *         number of scenes showing violence</td>
- *     </tr>
- *     <tr>
- *         <td>BG_TV_X</td>
- *         <td>No persons under the age of 18 are admitted. When the film is naturalistically erotic
- *         or shows violence in an ostentatious manner</td>
+ *         <td>AU_TV_R</td>
+ *         <td>Not for children under 18. Content may include graphic violence, sexual situations,
+ *         coarse language and explicit drug use</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">BR_TV</td>
@@ -515,422 +286,272 @@ import java.util.Objects;
  *         <td>Content suitable for viewers over the age of 18</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="7">CA_TV_CA</td>
- *         <td>CA_TV_CA_EXEMPT</td>
- *         <td>Exempt from ratings and won't display an on-screen rating</td>
+ *         <td valign="top" rowspan="15">DVB</td>
+ *         <td>DVB_4</td>
+ *         <td>Recommended for ages 4 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA_C</td>
- *         <td>Suitable for children ages 2-7. May contain mild violence</td>
+ *         <td>DVB_5</td>
+ *         <td>Recommended for ages 5 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA_C8</td>
- *         <td>Suitable for children ages 8 and older. May contain mild violence, fantasy horror,
- *         and socially offensive language</td>
+ *         <td>DVB_6</td>
+ *         <td>Recommended for ages 6 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA_G</td>
- *         <td>Suitable for the entire family and may contain mild violence, profanity, and censored
- *         language</td>
+ *         <td>DVB_7</td>
+ *         <td>Recommended for ages 7 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA_PG</td>
- *         <td>May contain moderate violence, profanity, nudity, and sexual references</td>
+ *         <td>DVB_8</td>
+ *         <td>Recommended for ages 8 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA_14</td>
- *         <td>Intended for viewers ages 14 and older. May contain strong violence and profanity,
- *         and depictions of sexual activity</td>
+ *         <td>DVB_9</td>
+ *         <td>Recommended for ages 9 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_CA_18</td>
- *         <td>Intended for viewers ages 18 and older. May contain explicit violence and sexual
- *         activity</td>
+ *         <td>DVB_10</td>
+ *         <td>Recommended for ages 10 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="6">CA_TV_QC</td>
- *         <td>CA_TV_QC_E</td>
- *         <td>Exempt from ratings and won't display an on-screen rating</td>
+ *         <td>DVB_11</td>
+ *         <td>Recommended for ages 11 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_QC_G</td>
- *         <td>Appropriate for all ages and must contain little or no violence and little to no
- *         sexual content</td>
+ *         <td>DVB_12</td>
+ *         <td>Recommended for ages 12 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_QC_8</td>
- *         <td>Appropriate for children 8 and may contain with little violence, language, and little
- *         to no sexual situations</td>
+ *         <td>DVB_13</td>
+ *         <td>Recommended for ages 13 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_QC_13</td>
- *         <td>Suitable for children 13 and may contain with moderate violence, language, and some
- *         sexual situations</td>
+ *         <td>DVB_14</td>
+ *         <td>Recommended for ages 14 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_QC_16</td>
- *         <td>Recommended for children over the age of 16 and may contain with strong violence,
- *         strong language, and strong sexual content</td>
+ *         <td>DVB_15</td>
+ *         <td>Recommended for ages 15 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_QC_18</td>
- *         <td>Only to be viewed by adults and may contain extreme violence and graphic sexual
- *         content. It is mostly used for 18+ movies and pornography</td>
+ *         <td>DVB_16</td>
+ *         <td>Recommended for ages 16 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="2">CH_TV</td>
- *         <td>CH_TV_ALL</td>
- *         <td>This program is suitable for all ages</td>
+ *         <td>DVB_17</td>
+ *         <td>Recommended for ages 17 and over</td>
  *     </tr>
  *     <tr>
- *         <td>CH_TV_RED</td>
- *         <td>This program contains scenes that may hurt sensitive people, therefore the red symbol
- *         will be displayed</td>
+ *         <td>DVB_18</td>
+ *         <td>Recommended for ages 18 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="7">CL_TV</td>
- *         <td>CL_TV_I</td>
- *         <td>Programs suitable for all children</td>
- *     </tr>
- *     <tr>
- *         <td>CL_TV_I7</td>
- *         <td>Programs recommended for children ages 7 or older</td>
- *     </tr>
- *     <tr>
- *         <td>CL_TV_I10</td>
- *         <td>Programs recommended for children ages 10 or older</td>
- *     </tr>
- *     <tr>
- *         <td>CL_TV_I12</td>
- *         <td>Programs recommended for children and teens ages 12 or older</td>
- *     </tr>
- *     <tr>
- *         <td>CL_TV_F</td>
- *         <td>Programs suitable for a general audience, with content appropriate for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>CL_TV_R</td>
- *         <td>Programs may content not suitable for children not accompanied by an adult</td>
- *     </tr>
- *     <tr>
- *         <td>CL_TV_A</td>
- *         <td>Programs suitable for adult audiences only (ages 18 or older), may contain coarse
- *         language, and sexual or explicit situations</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">DE_TV</td>
- *         <td>DE_TV_ALL</td>
- *         <td>The program is suitable for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>DE_TV_12</td>
- *         <td>The program is not suitable for viewers under the age of 12</td>
- *     </tr>
- *     <tr>
- *         <td>DE_TV_16</td>
- *         <td>The program is not suitable for viewers under the age of 16</td>
- *     </tr>
- *     <tr>
- *         <td>DE_TV_18</td>
- *         <td>The program is not suitable for viewers under the age of 18</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">DK_TV</td>
- *         <td>DK_TV_G</td>
- *         <td>programs suitable for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>DK_TV_Y</td>
- *         <td>programs suitable children accompanied by an adult</td>
- *     </tr>
- *     <tr>
- *         <td>DK_TV_R</td>
- *         <td>programs containing material with more intensive content</td>
- *     </tr>
- *     <tr>
- *         <td>DK_TV_B</td>
- *         <td>programs containing explicit content and strictly for adults only</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="7">ES_TV</td>
- *         <td>ES_TV_TP</td>
+ *         <td valign="top" rowspan="18">ES_DVB</td>
+ *         <td>ES_DVB_ALL</td>
  *         <td>Recommended for all ages</td>
  *     </tr>
  *     <tr>
- *         <td>ES_TV_I</td>
- *         <td>Specially recommended for preschoolers and kids</td>
+ *         <td>ES_DVB_C</td>
+ *         <td>Recommended for children</td>
  *     </tr>
  *     <tr>
- *         <td>ES_TV_7</td>
- *         <td>Recommended for people older than 7 years old</td>
+ *         <td>ES_DVB_X</td>
+ *         <td>Recommended for adults</td>
  *     </tr>
  *     <tr>
- *         <td>ES_TV_7I</td>
- *         <td>Recommended for kids older than 7 years old</td>
+ *         <td>ES_DVB_4</td>
+ *         <td>Recommended for ages 4 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ES_TV_12</td>
- *         <td>Recommended for people older than 12 years old</td>
+ *         <td>ES_DVB_5</td>
+ *         <td>Recommended for ages 5 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ES_TV_16</td>
- *         <td>Recommended for people older than 16 years old</td>
+ *         <td>ES_DVB_6</td>
+ *         <td>Recommended for ages 6 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ES_TV_18</td>
- *         <td>Recommended for people older than 18 years old</td>
+ *         <td>ES_DVB_7</td>
+ *         <td>Recommended for ages 7 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="5">FI_TV</td>
- *         <td>FI_TV_S</td>
- *         <td>Allowed at all times</td>
+ *         <td>ES_DVB_8</td>
+ *         <td>Recommended for ages 8 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FI_TV_K7</td>
- *         <td>Not recommended for children under 7</td>
+ *         <td>ES_DVB_9</td>
+ *         <td>Recommended for ages 9 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FI_TV_K12</td>
- *         <td>Not recommended for children under 12</td>
+ *         <td>ES_DVB_10</td>
+ *         <td>Recommended for ages 10 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FI_TV_K16</td>
- *         <td>Not recommended for children under 16</td>
+ *         <td>ES_DVB_11</td>
+ *         <td>Recommended for ages 11 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FI_TV_K18</td>
- *         <td>Not recommended for children under 18</td>
+ *         <td>ES_DVB_12</td>
+ *         <td>Recommended for ages 12 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="5">FR_TV</td>
- *         <td>FR_TV_ALL</td>
- *         <td>Appropriate for all ages</td>
+ *         <td>ES_DVB_13</td>
+ *         <td>Recommended for ages 13 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FR_TV_10</td>
- *         <td>Not recommended for children under 10</td>
+ *         <td>ES_DVB_14</td>
+ *         <td>Recommended for ages 14 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FR_TV_12</td>
- *         <td>Not recommended for children under 12</td>
+ *         <td>ES_DVB_15</td>
+ *         <td>Recommended for ages 15 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FR_TV_16</td>
- *         <td>Not recommended for children under 16</td>
+ *         <td>ES_DVB_16</td>
+ *         <td>Recommended for ages 16 and over</td>
  *     </tr>
  *     <tr>
- *         <td>FR_TV_18</td>
- *         <td>Not recommended for persons under 18</td>
+ *         <td>ES_DVB_17</td>
+ *         <td>Recommended for ages 17 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="5">GR_TV</td>
- *         <td>GR_TV_ALL</td>
- *         <td>Suitable for all ages</td>
+ *         <td>ES_DVB_18</td>
+ *         <td>Recommended for ages 18 and over</td>
  *     </tr>
  *     <tr>
- *         <td>GR_TV_10</td>
- *         <td>Parental consent suggested</td>
+ *         <td valign="top" rowspan="16">FR_DVB</td>
+ *         <td>FR_DVB_U</td>
+ *         <td>Recommended for all ages</td>
  *     </tr>
  *     <tr>
- *         <td>GR_TV_12</td>
- *         <td>Required parental consent</td>
+ *         <td>FR_DVB_4</td>
+ *         <td>Recommended for ages 4 and over</td>
  *     </tr>
  *     <tr>
- *         <td>GR_TV_15</td>
- *         <td>Suitable for minors over the age of 15</td>
+ *         <td>FR_DVB_5</td>
+ *         <td>Recommended for ages 5 and over</td>
  *     </tr>
  *     <tr>
- *         <td>GR_TV_18</td>
- *         <td>Suitable only for adults profanity before midnight is punishable by fine, except when
- *         used in the context of the program</td>
+ *         <td>FR_DVB_6</td>
+ *         <td>Recommended for ages 6 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="3">HK_TV</td>
- *         <td>HK_TV_G</td>
- *         <td>For general audiences</td>
+ *         <td>FR_DVB_7</td>
+ *         <td>Recommended for ages 7 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HK_TV_PG</td>
- *         <td>Programs are unsuitable for children, parental guidance is recommended</td>
+ *         <td>FR_DVB_8</td>
+ *         <td>Recommended for ages 8 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HK_TV_M</td>
- *         <td>Programs are recommended only for adult viewers above the age of 18</td>
+ *         <td>FR_DVB_9</td>
+ *         <td>Recommended for ages 9 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="6">HU_TV</td>
- *         <td>HU_TV_U</td>
- *         <td>Programs can be viewed by any age</td>
+ *         <td>FR_DVB_10</td>
+ *         <td>Recommended for ages 10 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HU_TV_CF</td>
- *         <td>Programs recommended for children. It is an optional rating, there is no obligation
- *         for broadcasters to indicate it</td>
+ *         <td>FR_DVB_11</td>
+ *         <td>Recommended for ages 11 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HU_TV_6</td>
- *         <td>Programs not recommended for children below the age of 6, may not contain any
- *         violence or sexual content</td>
+ *         <td>FR_DVB_12</td>
+ *         <td>Recommended for ages 12 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HU_TV_12</td>
- *         <td>Programs not recommended for children below the age of 12, may contain light sexual
- *         content or explicit language</td>
+ *         <td>FR_DVB_13</td>
+ *         <td>Recommended for ages 13 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HU_TV_16</td>
- *         <td>Programs not recommended for teens and children below the age of 16, may contain more
- *         intensive violence and sexual content</td>
+ *         <td>FR_DVB_14</td>
+ *         <td>Recommended for ages 14 and over</td>
  *     </tr>
  *     <tr>
- *         <td>HU_TV_18</td>
- *         <td>The program is recommended only for adult viewers (for ages 18 and up), may contain
- *         explicit violence and explicit sexual content</td>
+ *         <td>FR_DVB_15</td>
+ *         <td>Recommended for ages 15 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="8">ID_TV</td>
- *         <td>ID_TV_P</td>
- *         <td>Suitable for children from ages 2 through 11</td>
+ *         <td>FR_DVB_16</td>
+ *         <td>Recommended for ages 16 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_A</td>
- *         <td>Suitable for teens and children from ages 7 through 16</td>
+ *         <td>FR_DVB_17</td>
+ *         <td>Recommended for ages 17 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_A_BO</td>
- *         <td>Suitable for children ages 5 through 10, with parental guidance or permission</td>
+ *         <td>FR_DVB_18</td>
+ *         <td>Recommended for ages 18 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_SU</td>
- *         <td>Suitable for general audiences</td>
+ *         <td valign="top" rowspan="17">ISDB</td>
+ *         <td>ISDB_4</td>
+ *         <td>Recommended for ages 4 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_BO</td>
- *         <td>Parental guidance suggested for ages 5 and under</td>
+ *         <td>ISDB_5</td>
+ *         <td>Recommended for ages 5 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_R</td>
- *         <td>Suitable for teens from ages 13 through 17</td>
+ *         <td>ISDB_6</td>
+ *         <td>Recommended for ages 6 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_R_BO</td>
- *         <td>Suitable for teens with parental guidance or permission</td>
+ *         <td>ISDB_7</td>
+ *         <td>Recommended for ages 7 and over</td>
  *     </tr>
  *     <tr>
- *         <td>ID_TV_D</td>
- *         <td>Suitable for viewers over 18 and older only</td>
+ *         <td>ISDB_8</td>
+ *         <td>Recommended for ages 8 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="5">IE_TV</td>
- *         <td>IE_TV_GA</td>
- *         <td>Suitable for all ages</td>
+ *         <td>ISDB_9</td>
+ *         <td>Recommended for ages 9 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IE_TV_CH</td>
- *         <td>Suitable for children ages 5 to 10, may contain comedic violence or action fantasy
- *         violence</td>
+ *         <td>ISDB_10</td>
+ *         <td>Recommended for ages 10 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IE_TV_YA</td>
- *         <td>Suitable for adolescent audiences, may contain thematic elements that would appeal to
- *         teenagers</td>
+ *         <td>ISDB_11</td>
+ *         <td>Recommended for ages 11 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IE_TV_PS</td>
- *         <td>Suitable for more mature viewers, more mature themes may be present</td>
+ *         <td>ISDB_12</td>
+ *         <td>Recommended for ages 12 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IE_TV_MA</td>
- *         <td>Most restrictive classification, allowing for heavy subject matter and coarse
- *         language</td>
+ *         <td>ISDB_13</td>
+ *         <td>Recommended for ages 13 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="5">IL_TV</td>
- *         <td>IL_TV_G</td>
- *         <td>General audience; anyone, regardless of age, can view the program, usually news and
- *         children's programming</td>
+ *         <td>ISDB_14</td>
+ *         <td>Recommended for ages 14 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IL_TV_12</td>
- *         <td>Suitable for teens and children ages 12 and over, no child under 12 are permitted to
- *         view the program</td>
+ *         <td>ISDB_15</td>
+ *         <td>Recommended for ages 15 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IL_TV_15</td>
- *         <td>Suitable for teens ages 15 and over, no child under 15 may view the programme</td>
+ *         <td>ISDB_16</td>
+ *         <td>Recommended for ages 16 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IL_TV_18</td>
- *         <td>Suitable for adults only, no minors may view the programme</td>
+ *         <td>ISDB_17</td>
+ *         <td>Recommended for ages 17 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IL_TV_E</td>
- *         <td>Exempt from classification</td>
+ *         <td>ISDB_18</td>
+ *         <td>Recommended for ages 18 and over</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="4">IN_TV</td>
- *         <td>IN_TV_U</td>
- *         <td>Unrestricted public exhibition</td>
+ *         <td>ISDB_19</td>
+ *         <td>Recommended for ages 19 and over</td>
  *     </tr>
  *     <tr>
- *         <td>IN_TV_U_A</td>
- *         <td>Unrestricted public exhibition, but with a caution regarding parental guidance to
- *         those under 12 years of age</td>
- *     </tr>
- *     <tr>
- *         <td>IN_TV_A</td>
- *         <td>Public exhibition restricted to adults 18 years of age and older only</td>
- *     </tr>
- *     <tr>
- *         <td>IN_TV_S</td>
- *         <td>Public exhibition restricted to members of any profession or any class of persons
- *         </td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="7">IS_TV</td>
- *         <td>IS_TV_L</td>
- *         <td>Programs suitable for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV_7</td>
- *         <td>Programs suitable for ages 7 and older</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV_10</td>
- *         <td>Programs suitable for ages 10 and older</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV_12</td>
- *         <td>Programs suitable for ages 12 and older</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV_14</td>
- *         <td>Programs suitable for ages 14 and older</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV_16</td>
- *         <td>Programs suitable for ages 16 and older</td>
- *     </tr>
- *     <tr>
- *         <td>IS_TV_18</td>
- *         <td>Programs suitable for ages 18 and older</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">JP_TV</td>
- *         <td>JP_TV_G</td>
- *         <td>General, suitable for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>JP_TV_PG12</td>
- *         <td>Parental guidance requested for young people under 12 years</td>
- *     </tr>
- *     <tr>
- *         <td>JP_TV_R15</td>
- *         <td>For persons aged 15 and above only</td>
- *     </tr>
- *     <tr>
- *         <td>JP_TV_R18</td>
- *         <td>For persons aged 18 and above only</td>
+ *         <td>ISDB_20</td>
+ *         <td>Recommended for ages 20 and over</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="5">KR_TV</td>
@@ -957,314 +578,6 @@ import java.util.Objects;
  *         <td>For adults only</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="9">MV_TV</td>
- *         <td>MV_TV_Y</td>
- *         <td>Young children</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_G</td>
- *         <td>General viewing for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_PG</td>
- *         <td>Parental guidance is required unaccompanied children</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_PG_12</td>
- *         <td>Parental guidance is required for children under the age of 12</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_12</td>
- *         <td>Teens and children aged 12 and older may watch, otherwise restricted</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_15</td>
- *         <td>Restricted to viewers aged 15 and above</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_18</td>
- *         <td>Restricted to viewers aged 18 and above</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_21</td>
- *         <td>Restricted to viewers aged 21 and above</td>
- *     </tr>
- *     <tr>
- *         <td>MV_TV_X</td>
- *         <td>Most restrictive classification, only adults ages 25 and above may view</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="6">MX_TV</td>
- *         <td>MX_TV_A</td>
- *         <td>Appropriate for all ages, parental guidance is recommended for children under 7 years
- *         </td>
- *     </tr>
- *     <tr>
- *         <td>MX_TV_B</td>
- *         <td>Designed for ages 12 and older, may contain some sexual situations, mild violence,
- *         and mild language</td>
- *     </tr>
- *     <tr>
- *         <td>MX_TV_B_15</td>
- *         <td>Designed for ages 15 and up, slightly more intensive than the 'A' and 'B' ratings
- *         </td>
- *     </tr>
- *     <tr>
- *         <td>MX_TV_C</td>
- *         <td>Designed to be viewed by adults aged 18 or older only, generally more intensive
- *         content</td>
- *     </tr>
- *     <tr>
- *         <td>MX_TV_D</td>
- *         <td>Designed to be viewed only by mature adults (at least 21 years of age and over),
- *         contains extreme content matter</td>
- *     </tr>
- *     <tr>
- *         <td>MX_TV_RC</td>
- *         <td>Banned from public television in Mexico</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="3">MY_TV</td>
- *         <td>MY_TV_U</td>
- *         <td>General viewing for all ages, can be broadcast anytime</td>
- *     </tr>
- *     <tr>
- *         <td>MY_TV_P13</td>
- *         <td>For viewers ages 13 and above, children under 13 needs parental guidance, can be
- *         broadcast anytime, but some elements may only be broadcast at night</td>
- *     </tr>
- *     <tr>
- *         <td>MY_TV_18</td>
- *         <td>For viewers ages 18 and above only</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="5">NL_TV</td>
- *         <td>NL_TV_AL</td>
- *         <td>All Ages</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_6</td>
- *         <td>Parental advisory for children under 6</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_9</td>
- *         <td>Parental advisory for children under 9</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_12</td>
- *         <td>Parental advisory for children under 12</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_16</td>
- *         <td>Parental advisory for children under 16</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="3">NZ_FTV</td>
- *         <td>NZ_FTV_G</td>
- *         <td>These exclude material likely to harm children under 14 and can screen at any time.
- *         Programmes may not necessarily be designed for younger viewers, but must not contain
- *         material likely to cause them undue distress or discomfort</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_FTV_PGR</td>
- *         <td>Programmes more suited to more mature viewers. These are not necessarily unsuitable
- *         for children, but viewer discretion is advised, and parents and guardians are encouraged
- *         to supervise younger viewers</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_FTV_AO</td>
- *         <td>Contain material of an adult nature handled in such a way that it is unsuitable for
- *         children</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="5">NZ_PTV</td>
- *         <td>NZ_PTV_G</td>
- *         <td>suitable for general audiences</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_PG</td>
- *         <td>Parental guidance recommended for under 10</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_M</td>
- *         <td>Suitable for mature audiences 13 and up</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_16</td>
- *         <td>Suitable for viewers 16 and up</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_18</td>
- *         <td>Suitable for viewers 18 and up</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="3">PE_TV</td>
- *         <td>PE_TV_A</td>
- *         <td>Suitable for all audiences</td>
- *     </tr>
- *     <tr>
- *         <td>PE_TV_14</td>
- *         <td>Suitable for people aged 14 and above only</td>
- *     </tr>
- *     <tr>
- *         <td>PE_TV_18</td>
- *         <td>Suitable for people aged 18 and above only</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">PE_ATV</td>
- *         <td>PE_ATV_GP</td>
- *         <td>General audience</td>
- *     </tr>
- *     <tr>
- *         <td>PE_ATV_PG</td>
- *         <td>Parental guidance required for under 6</td>
- *     </tr>
- *     <tr>
- *         <td>PE_ATV_14</td>
- *         <td>Suitable for people aged 14 and above only</td>
- *     </tr>
- *     <tr>
- *         <td>PE_ATV_18</td>
- *         <td>Suitable for people aged 18 and above only</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="3">PH_TV</td>
- *         <td>PH_TV_G</td>
- *         <td>Suitable for all public viewers</td>
- *     </tr>
- *     <tr>
- *         <td>PH_TV_PG</td>
- *         <td>Programmes rated PG may contain scenes or other content that are unsuitable for
- *         children without the guidance of a parent</td>
- *     </tr>
- *     <tr>
- *         <td>PH_TV_SPG</td>
- *         <td>Contains mature themes or moderate to intense violence, which may be deemed unfit for
- *         children to watch without strict parental supervision</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="5">PL_TV</td>
- *         <td>PL_TV_G</td>
- *         <td>Positive or neutral view of the world, little to no violence, non-sexual love, and no
- *         sexual content</td>
- *     </tr>
- *     <tr>
- *         <td>PL_TV_7</td>
- *         <td>Age 7 and above. May additionally contain some mild language, bloodless violence, and
- *         a more negative view of the world</td>
- *     </tr>
- *     <tr>
- *         <td>PL_TV_12</td>
- *         <td>Age 12 and above. May contain some foul language, some violence, and some sexual
- *         content</td>
- *     </tr>
- *     <tr>
- *         <td>PL_TV_16</td>
- *         <td>Age 16 and above. Deviant social behaviour, world filled with violence and sexuality,
- *         simplified picture of adulthood, display of physical force, especially in controversial
- *         social context, immoral behaviour without ethic dilemma, putting the blame on the victim,
- *         excessive concentration on material possessions</td>
- *     </tr>
- *     <tr>
- *         <td>PL_TV_18</td>
- *         <td>Age 18 and above. One-sided display of the joys of adult life without showing
- *         responsibilities, social justification of violent behaviour, excessive vulgarity, use of
- *         racial slurs and social stereotypes, explicit sexual content, praise of aggression or
- *         vulgarity</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">PT_TV</td>
- *         <td>PT_TV_T</td>
- *         <td>Suitable for all</td>
- *     </tr>
- *     <tr>
- *         <td>PT_TV_10</td>
- *         <td>May not be suitable for children under 10, parental guidance advised</td>
- *     </tr>
- *     <tr>
- *         <td>PT_TV_12</td>
- *         <td>May not be suitable for children under 12, parental guidance advised</td>
- *     </tr>
- *     <tr>
- *         <td>PT_TV_16</td>
- *         <td>Not suitable for children under 16</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="6">RO_TV</td>
- *         <td>RO_TV_Y</td>
- *         <td>Young Ages</td>
- *     </tr>
- *     <tr>
- *         <td>RO_TV_G</td>
- *         <td>General Exhibition</td>
- *     </tr>
- *     <tr>
- *         <td>RO_TV_AP</td>
- *         <td>Parental guidance is recommended for children below the age of 12</td>
- *     </tr>
- *     <tr>
- *         <td>RO_TV_12</td>
- *         <td>Forbidden for children under 12 years of age</td>
- *     </tr>
- *     <tr>
- *         <td>RO_TV_15</td>
- *         <td>Forbidden for children under 15 years of age</td>
- *     </tr>
- *     <tr>
- *         <td>RO_TV_18</td>
- *         <td>Forbidden for children under 18 years of age</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="5">RU_TV</td>
- *         <td>RU_TV_0</td>
- *         <td>Can be watched by Any Age</td>
- *     </tr>
- *     <tr>
- *         <td>RU_TV_6</td>
- *         <td>Only kids the age of 6 or older can watch</td>
- *     </tr>
- *     <tr>
- *         <td>RU_TV_12</td>
- *         <td>Only kids the age of 12 or older can watch</td>
- *     </tr>
- *     <tr>
- *         <td>RU_TV_16</td>
- *         <td>Only teens the age of 16 or older can watch</td>
- *     </tr>
- *     <tr>
- *         <td>RU_TV_18</td>
- *         <td>Restricted to children ONLY people 18 or older</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="7">RS_TV</td>
- *         <td>RS_TV_G</td>
- *         <td>Program suitable for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV_12</td>
- *         <td>Program not suitable for children under the age of 12</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV_14</td>
- *         <td>Program not suitable for children/teens under the age of 14</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV_15</td>
- *         <td>Program not suitable for children/teens under the age of 15</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV_16</td>
- *         <td>Program not suitable for children/teens under the age of 16</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV_17</td>
- *         <td>Program not suitable for children/teens under the age of 17</td>
- *     </tr>
- *     <tr>
- *         <td>RS_TV_18</td>
- *         <td>Program not suitable for minors under the age of 18</td>
- *     </tr>
- *     <tr>
  *         <td valign="top" rowspan="6">SG_TV</td>
  *         <td>SG_TV_G</td>
  *         <td>Suitable for all ages</td>
@@ -1289,101 +602,6 @@ import java.util.Objects;
  *     <tr>
  *         <td>SG_TV_R21</td>
  *         <td>Suitable for adults aged 21 and above</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">SI_TV</td>
- *         <td>SI_TV_VS</td>
- *         <td>Parental guidance suggested (for children under 6)</td>
- *     </tr>
- *     <tr>
- *         <td>SI_TV_12</td>
- *         <td>Content suitable for teens over 12 years</td>
- *     </tr>
- *     <tr>
- *         <td>SI_TV_15</td>
- *         <td>Content suitable for teens over 15 years</td>
- *     </tr>
- *     <tr>
- *         <td>SI_TV_AD</td>
- *         <td>Content exclusively for adults</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="6">TH_TV</td>
- *         <td>TH_TV_P</td>
- *         <td>Content suitable for primary school aged children</td>
- *     </tr>
- *     <tr>
- *         <td>TH_TV_C</td>
- *         <td>Content suitable for children between 6-12 years old</td>
- *     </tr>
- *     <tr>
- *         <td>TH_TV_G</td>
- *         <td>Content suitable for general audiences</td>
- *     </tr>
- *     <tr>
- *         <td>TH_TV_PG13</td>
- *         <td>Content suitable for people aged 13 and above, but can be watched by those who are
- *         under the recommended age if parental guidance is provided</td>
- *     </tr>
- *     <tr>
- *         <td>TH_TV_PG18</td>
- *         <td>Content suitable for people aged above 18 years old; those who are younger that 18
- *         must be provided with parental guidance</td>
- *     </tr>
- *     <tr>
- *         <td>TH_TV_A</td>
- *         <td>Content unsuitable for children and youngsters</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">TR_TV</td>
- *         <td>TR_TV_G</td>
- *         <td>General audience. Suitable for all ages</td>
- *     </tr>
- *     <tr>
- *         <td>TR_TV_7</td>
- *         <td>Suitable for ages 7 and over</td>
- *     </tr>
- *     <tr>
- *         <td>TR_TV_13</td>
- *         <td>Suitable for ages 13 and over</td>
- *     </tr>
- *     <tr>
- *         <td>TR_TV_18</td>
- *         <td>Suitable for ages 13 and over</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">TW_TV</td>
- *         <td>TW_TV_G</td>
- *         <td>For all ages</td>
- *     </tr>
- *     <tr>
- *         <td>TW_TV_P</td>
- *         <td>Not suitable for children under 6 years old. People aged 6 but under 12 require
- *         guidance from accompanying adults to watch</td>
- *     </tr>
- *     <tr>
- *         <td>TW_TV_PG</td>
- *         <td>Not suitable for people under 12 years of age. Parental guidance is required for
- *         people aged 12 but under 18</td>
- *     </tr>
- *     <tr>
- *         <td>TW_TV_R</td>
- *         <td>For adults only and people under 18 years of age must not watch</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="3">UA_TV</td>
- *         <td>UA_TV_G</td>
- *         <td>This program does not have age restrictions</td>
- *     </tr>
- *     <tr>
- *         <td>UA_TV_Y</td>
- *         <td>Children must view this program with parents. In it program there are fragments,
- *         which unsuitable for children</td>
- *     </tr>
- *     <tr>
- *         <td>UA_TV_R</td>
- *         <td>This program is only for adult viewers. In it there are scenes with nudity, drug use,
- *         or violence</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">US_TV</td>
@@ -1413,63 +631,6 @@ import java.util.Objects;
  *         <td>This program is specifically designed to be viewed by adults and therefore may be
  *         unsuitable for children under 17</td>
  *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="3">VE_TV</td>
- *         <td>VE_TV_TU</td>
- *         <td>For all ages</td>
- *     </tr>
- *     <tr>
- *         <td>VE_TV_SU</td>
- *         <td>Parental guidance for young viewers</td>
- *     </tr>
- *     <tr>
- *         <td>VE_TV_A</td>
- *         <td>Mature viewers</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="6">ZA_TV</td>
- *         <td>ZA_TV_F</td>
- *         <td>This is a program/film that does not contain any obscenity, and is suitable for
- *         family viewing. A logo must be displayed in the corner of the screen for 30 seconds after
- *         each commercial break</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_PG</td>
- *         <td>Children under 6 may watch this program/film, but must be accompanied by an adult.
- *         This program contains an adult related theme, which might include very mild language,
- *         violence and sexual innuendo. A logo must be displayed in the corner of the screen for
- *         one minute after each commercial break</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_13</td>
- *         <td>Children under 13 are prohibited from watching this program/film. This program
- *         contains mild language, violence and sexual innuendo. A logo must be displayed in the
- *         corner of the screen for two minutes after each commercial break</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_16</td>
- *         <td>Children under 16 are prohibited from watching this program/film. It contains
- *         moderate violence, language, and some sexual situations. In the case of television, this
- *         program may only be broadcast after 9pm-4:30am. A logo must be displayed in the corner of
- *         the screen for five minutes after each commercial break. A full-screen warning must be
- *         issued before the start of the program. If the program is longer than an hour, a warning
- *         must be displayed every half an hour</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_18</td>
- *         <td>Children under 18 are prohibited from watching this program/film. It contains extreme
- *         violence, language and/or graphic sexual content. In the case of television, this program
- *         may only be broadcast from 10pm-4:30am. A logo must be displayed in the corner of the
- *         screen for the duration of the program. A full-screen warning must be issued before the
- *         start of the program and after each commercial break</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_R18</td>
- *         <td>This is reserved for films of an extreme sexual nature (pornography). R18 films may
- *         only be distributed in the form of video and DVD in a controlled environment (e.g. Adult
- *         Shops). No public viewing of this film may take place. R18 films may not be broadcast on
- *         television and in cinemas</td>
- *     </tr>
  * </table>
  *
  * <h4>System defined strings for sub-ratings</h4>
@@ -1480,100 +641,42 @@ import java.util.Objects;
  *         <th>Description</th>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="6">NL_TV</td>
- *         <td>NL_TV_V</td>
- *         <td>Violence<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
+ *         <td valign="top" rowspan="3">BR_TV</td>
+ *         <td>BR_TV_D</td>
+ *         <td>Drugs<br/>Applicable to BR_TV_L, BR_TV_10, BR_TV_12, BR_TV_14, BR_TV_16, and BR_TV_18
+ *         </td>
  *     </tr>
  *     <tr>
- *         <td>NL_TV_F</td>
- *         <td>Scary or Disturbing ContentViolence<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9,
- *         NL_TV_12, NL_TV_16</td>
+ *         <td>BR_TV_S</td>
+ *         <td>Sex<br/>Applicable to BR_TV_L, BR_TV_10, BR_TV_12, BR_TV_14, BR_TV_16, and BR_TV_18
+ *         </td>
  *     </tr>
  *     <tr>
- *         <td>NL_TV_S</td>
- *         <td>Sexual Content<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_D</td>
- *         <td>Discrimination<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_DA</td>
- *         <td>Drug and/or Alcohol abuse<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12,
- *         NL_TV_16</td>
- *     </tr>
- *     <tr>
- *         <td>NL_TV_L</td>
- *         <td>Bad Language<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="4">NZ_PTV</td>
- *         <td>NZ_PTV_C</td>
- *         <td>Content may offend<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_V</td>
- *         <td>Violence<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_L</td>
- *         <td>Language<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
- *     </tr>
- *     <tr>
- *         <td>NZ_PTV_S</td>
- *         <td>Sexual content<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
+ *         <td>BR_TV_V</td>
+ *         <td>Violence<br/>Applicable to BR_TV_L, BR_TV_10, BR_TV_12, BR_TV_14, BR_TV_16, and
+ *         BR_TV_18</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="5">US_TV</td>
  *         <td>US_TV_D</td>
- *         <td>Suggestive dialogue (Usually means talks about sex)<br/>Applicable to US_TV_PG,
- *         US_TV_14, US_TV</td>
+ *         <td>Suggestive dialogue (Usually means talks about sex)<br/>Applicable to US_TV_PG, and
+ *         US_TV_14</td>
  *     </tr>
  *     <tr>
  *         <td>US_TV_L</td>
- *         <td>Coarse language<br/>Applicable to US_TV_PG, US_TV_14</td>
+ *         <td>Coarse language<br/>Applicable to US_TV_PG, US_TV_14, and US_TV_MA</td>
  *     </tr>
  *     <tr>
  *         <td>US_TV_S</td>
- *         <td>Sexual content<br/>Applicable to US_TV_PG, US_TV_14, US_TV_MA</td>
+ *         <td>Sexual content<br/>Applicable to US_TV_PG, US_TV_14, and US_TV_MA</td>
  *     </tr>
  *     <tr>
  *         <td>US_TV_V</td>
- *         <td>Violence<br/>Applicable to US_TV_PG, US_TV_14, US_TV_MA</td>
+ *         <td>Violence<br/>Applicable to US_TV_PG, US_TV_14, and US_TV_MA</td>
  *     </tr>
  *     <tr>
  *         <td>US_TV_FV</td>
  *         <td>Fantasy violence (Children's programming only)<br/>Applicable to US_TV_Y7</td>
- *     </tr>
- *     <tr>
- *         <td valign="top" rowspan="6">ZA_TV</td>
- *         <td>ZA_TV_D</td>
- *         <td>Drug<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
- *         </td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_V</td>
- *         <td>Violence<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
- *         </td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_N</td>
- *         <td>Nudity<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
- *         </td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_P</td>
- *         <td>Prejudice<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18,
- *         ZA_TV_R18</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_S</td>
- *         <td>Sex<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</td>
- *     </tr>
- *     <tr>
- *         <td>ZA_TV_L</td>
- *         <td>Language<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
- *         </td>
  *     </tr>
  * </table>
  */
