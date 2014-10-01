@@ -14,7 +14,24 @@
 #include <utils/ByteOrder.h>
 #include <stdarg.h>
 
-#define NOISY(x) //x
+// SSIZE: mingw does not have signed size_t == ssize_t.
+// STATUST: mingw does seem to redefine UNKNOWN_ERROR from our enum value, so a cast is necessary.
+#if HAVE_PRINTF_ZD
+#  define SSIZE(x) x
+#  define STATUST(x) x
+#else
+#  define SSIZE(x) (signed size_t)x
+#  define STATUST(x) (status_t)x
+#endif
+
+// Set to true for noisy debug output.
+static const bool kIsDebug = false;
+
+#if PRINT_STRING_METRICS
+static const bool kPrintStringMetrics = true;
+#else
+static const bool kPrintStringMetrics = false;
+#endif
 
 status_t compileXmlFile(const sp<AaptAssets>& assets,
                         const sp<AaptFile>& target,
@@ -76,9 +93,11 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
     if (hasErrors) {
         return UNKNOWN_ERROR;
     }
-    
-    NOISY(printf("Input XML Resource:\n"));
-    NOISY(root->print());
+
+    if (kIsDebug) {
+        printf("Input XML Resource:\n");
+        root->print();
+    }
     err = root->flatten(target,
             (options&XML_COMPILE_STRIP_COMMENTS) != 0,
             (options&XML_COMPILE_STRIP_RAW_VALUES) != 0);
@@ -86,18 +105,17 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
         return err;
     }
 
-    NOISY(printf("Output XML Resource:\n"));
-    NOISY(ResXMLTree tree;
+    if (kIsDebug) {
+        printf("Output XML Resource:\n");
+        ResXMLTree tree;
         tree.setTo(target->getData(), target->getSize());
-        printXMLBlock(&tree));
+        printXMLBlock(&tree);
+    }
 
     target->setCompressionMethod(ZipEntry::kCompressDeflated);
     
     return err;
 }
-
-#undef NOISY
-#define NOISY(x) //x
 
 struct flag_entry
 {
@@ -576,7 +594,7 @@ status_t parseAndAddBag(Bundle* bundle,
                         const String16& itemIdent,
                         int32_t curFormat,
                         bool isFormatted,
-                        const String16& product,
+                        const String16& /* product */,
                         PseudolocalizationMethod pseudolocalize,
                         const bool overwrite,
                         ResourceTable* outTable)
@@ -592,16 +610,18 @@ status_t parseAndAddBag(Bundle* bundle,
     if (err != NO_ERROR) {
         return err;
     }
-    
-    NOISY(printf("Adding resource bag entry l=%c%c c=%c%c orien=%d d=%d "
-                 " pid=%s, bag=%s, id=%s: %s\n",
-                 config.language[0], config.language[1],
-                 config.country[0], config.country[1],
-                 config.orientation, config.density,
-                 String8(parentIdent).string(),
-                 String8(ident).string(),
-                 String8(itemIdent).string(),
-                 String8(str).string()));
+
+    if (kIsDebug) {
+        printf("Adding resource bag entry l=%c%c c=%c%c orien=%d d=%d "
+                " pid=%s, bag=%s, id=%s: %s\n",
+                config.language[0], config.language[1],
+                config.country[0], config.country[1],
+                config.orientation, config.density,
+                String8(parentIdent).string(),
+                String8(ident).string(),
+                String8(itemIdent).string(),
+                String8(str).string());
+    }
 
     err = outTable->addBag(SourcePos(in->getPrintableSource(), block->getLineNumber()),
                            myPackage, curType, ident, parentIdent, itemIdent, str,
@@ -737,11 +757,13 @@ status_t parseAndAddEntry(Bundle* bundle,
         }
     }
 
-    NOISY(printf("Adding resource entry l=%c%c c=%c%c orien=%d d=%d id=%s: %s\n",
-                 config.language[0], config.language[1],
-                 config.country[0], config.country[1],
-                 config.orientation, config.density,
-                 String8(ident).string(), String8(str).string()));
+    if (kIsDebug) {
+        printf("Adding resource entry l=%c%c c=%c%c orien=%d d=%d id=%s: %s\n",
+                config.language[0], config.language[1],
+                config.country[0], config.country[1],
+                config.orientation, config.density,
+                String8(ident).string(), String8(str).string());
+    }
 
     err = outTable->addEntry(SourcePos(in->getPrintableSource(), block->getLineNumber()),
                              myPackage, curType, ident, str, &spans, &config,
@@ -1710,7 +1732,7 @@ status_t compileResourceFile(Bundle* bundle,
         }
     }
 
-    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+    return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
 }
 
 ResourceTable::ResourceTable(Bundle* bundle, const String16& assetsPackage)
@@ -1764,8 +1786,9 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
                 }
             }
             if (id != 0) {
-                NOISY(printf("Including package %s with ID=%d\n",
-                             String8(name).string(), id));
+                if (kIsDebug) {
+                    printf("Including package %s with ID=%d\n", String8(name).string(), id);
+                }
                 sp<Package> p = new Package(name, id);
                 mPackages.add(name, p);
                 mOrderedPackages.add(p);
@@ -1856,7 +1879,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                                  const String16& bagParent,
                                  const ResTable_config* params,
                                  bool overlay,
-                                 bool replace, bool isId)
+                                 bool replace, bool /* isId */)
 {
     status_t result = NO_ERROR;
 
@@ -2163,22 +2186,25 @@ uint32_t ResourceTable::getResId(const String16& ref,
         ref.string(), ref.size(), &package, &type, &name,
         defType, defPackage ? defPackage:&mAssetsPackage,
         outErrorMsg, &refOnlyPublic)) {
-        NOISY(printf("Expanding resource: ref=%s\n",
-                     String8(ref).string()));
-        NOISY(printf("Expanding resource: defType=%s\n",
-                     defType ? String8(*defType).string() : "NULL"));
-        NOISY(printf("Expanding resource: defPackage=%s\n",
-                     defPackage ? String8(*defPackage).string() : "NULL"));
-        NOISY(printf("Expanding resource: ref=%s\n", String8(ref).string()));
-        NOISY(printf("Expanded resource: p=%s, t=%s, n=%s, res=0\n",
-                     String8(package).string(), String8(type).string(),
-                     String8(name).string()));
+        if (kIsDebug) {
+            printf("Expanding resource: ref=%s\n", String8(ref).string());
+            printf("Expanding resource: defType=%s\n",
+                    defType ? String8(*defType).string() : "NULL");
+            printf("Expanding resource: defPackage=%s\n",
+                    defPackage ? String8(*defPackage).string() : "NULL");
+            printf("Expanding resource: ref=%s\n", String8(ref).string());
+            printf("Expanded resource: p=%s, t=%s, n=%s, res=0\n",
+                    String8(package).string(), String8(type).string(),
+                    String8(name).string());
+        }
         return 0;
     }
     uint32_t res = getResId(package, type, name, onlyPublic && refOnlyPublic);
-    NOISY(printf("Expanded resource: p=%s, t=%s, n=%s, res=%d\n",
-                 String8(package).string(), String8(type).string(),
-                 String8(name).string(), res));
+    if (kIsDebug) {
+        printf("Expanded resource: p=%s, t=%s, n=%s, res=%d\n",
+                String8(package).string(), String8(type).string(),
+                String8(name).string(), res);
+    }
     if (res == 0) {
         if (outErrorMsg)
             *outErrorMsg = "No resource found that matches the given name";
@@ -2245,9 +2271,11 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
             } else {
                 configStr = "(null)";
             }
-            NOISY(printf("Adding to pool string style #%d config %s: %s\n",
-                    style != NULL ? style->size() : 0,
-                    configStr.string(), String8(finalStr).string()));
+            if (kIsDebug) {
+                printf("Adding to pool string style #%zu config %s: %s\n",
+                        style != NULL ? style->size() : 0U,
+                        configStr.string(), String8(finalStr).string());
+            }
             if (style != NULL && style->size() > 0) {
                 outValue->data = pool->add(finalStr, *style, configTypeName, config);
             } else {
@@ -2851,9 +2879,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
         const size_t typeStringsStart = data->getSize();
         sp<AaptFile> strFile = p->getTypeStringsData();
         ssize_t amt = data->writeData(strFile->getData(), strFile->getSize());
-        #if PRINT_STRING_METRICS
-        fprintf(stderr, "**** type strings: %d\n", amt);
-        #endif
+        if (kPrintStringMetrics) {
+            fprintf(stderr, "**** type strings: %zd\n", SSIZE(amt));
+        }
         strAmt += amt;
         if (amt < 0) {
             return amt;
@@ -2861,9 +2889,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
         const size_t keyStringsStart = data->getSize();
         strFile = p->getKeyStringsData();
         amt = data->writeData(strFile->getData(), strFile->getSize());
-        #if PRINT_STRING_METRICS
-        fprintf(stderr, "**** key strings: %d\n", amt);
-        #endif
+        if (kPrintStringMetrics) {
+            fprintf(stderr, "**** key strings: %zd\n", SSIZE(amt));
+        }
         strAmt += amt;
         if (amt < 0) {
             return amt;
@@ -2942,29 +2970,31 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
             for (size_t ci=0; ci<NC; ci++) {
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
-                NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
-                     "sw%ddp w%ddp h%ddp dir:%d\n",
-                      ti+1,
-                      config.mcc, config.mnc,
-                      config.language[0] ? config.language[0] : '-',
-                      config.language[1] ? config.language[1] : '-',
-                      config.country[0] ? config.country[0] : '-',
-                      config.country[1] ? config.country[1] : '-',
-                      config.orientation,
-                      config.uiMode,
-                      config.touchscreen,
-                      config.density,
-                      config.keyboard,
-                      config.inputFlags,
-                      config.navigation,
-                      config.screenWidth,
-                      config.screenHeight,
-                      config.smallestScreenWidthDp,
-                      config.screenWidthDp,
-                      config.screenHeightDp,
-                      config.layoutDirection));
-                      
+                if (kIsDebug) {
+                    printf("Writing config %zu config: imsi:%d/%d lang:%c%c cnt:%c%c "
+                        "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                        "sw%ddp w%ddp h%ddp layout:%d\n",
+                        ti + 1,
+                        config.mcc, config.mnc,
+                        config.language[0] ? config.language[0] : '-',
+                        config.language[1] ? config.language[1] : '-',
+                        config.country[0] ? config.country[0] : '-',
+                        config.country[1] ? config.country[1] : '-',
+                        config.orientation,
+                        config.uiMode,
+                        config.touchscreen,
+                        config.density,
+                        config.keyboard,
+                        config.inputFlags,
+                        config.navigation,
+                        config.screenWidth,
+                        config.screenHeight,
+                        config.smallestScreenWidthDp,
+                        config.screenWidthDp,
+                        config.screenHeightDp,
+                        config.screenLayout);
+                }
+
                 if (filterable && !filter.match(config)) {
                     continue;
                 }
@@ -2985,28 +3015,30 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entryCount = htodl(N);
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
-                NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
-                     "sw%ddp w%ddp h%ddp dir:%d\n",
-                      ti+1,
-                      tHeader->config.mcc, tHeader->config.mnc,
-                      tHeader->config.language[0] ? tHeader->config.language[0] : '-',
-                      tHeader->config.language[1] ? tHeader->config.language[1] : '-',
-                      tHeader->config.country[0] ? tHeader->config.country[0] : '-',
-                      tHeader->config.country[1] ? tHeader->config.country[1] : '-',
-                      tHeader->config.orientation,
-                      tHeader->config.uiMode,
-                      tHeader->config.touchscreen,
-                      tHeader->config.density,
-                      tHeader->config.keyboard,
-                      tHeader->config.inputFlags,
-                      tHeader->config.navigation,
-                      tHeader->config.screenWidth,
-                      tHeader->config.screenHeight,
-                      tHeader->config.smallestScreenWidthDp,
-                      tHeader->config.screenWidthDp,
-                      tHeader->config.screenHeightDp,
-                      tHeader->config.layoutDirection));
+                if (kIsDebug) {
+                    printf("Writing type %zu config: imsi:%d/%d lang:%c%c cnt:%c%c "
+                        "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                        "sw%ddp w%ddp h%ddp layout:%d\n",
+                        ti + 1,
+                        tHeader->config.mcc, tHeader->config.mnc,
+                        tHeader->config.language[0] ? tHeader->config.language[0] : '-',
+                        tHeader->config.language[1] ? tHeader->config.language[1] : '-',
+                        tHeader->config.country[0] ? tHeader->config.country[0] : '-',
+                        tHeader->config.country[1] ? tHeader->config.country[1] : '-',
+                        tHeader->config.orientation,
+                        tHeader->config.uiMode,
+                        tHeader->config.touchscreen,
+                        tHeader->config.density,
+                        tHeader->config.keyboard,
+                        tHeader->config.inputFlags,
+                        tHeader->config.navigation,
+                        tHeader->config.screenWidth,
+                        tHeader->config.screenHeight,
+                        tHeader->config.smallestScreenWidthDp,
+                        tHeader->config.screenWidthDp,
+                        tHeader->config.screenHeightDp,
+                        tHeader->config.screenLayout);
+                }
                 tHeader->config.swapHtoD();
 
                 // Build the entries inside of this type.
@@ -3083,10 +3115,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
 
     ssize_t amt = (dest->getSize()-strStart);
     strAmt += amt;
-    #if PRINT_STRING_METRICS
-    fprintf(stderr, "**** value strings: %d\n", amt);
-    fprintf(stderr, "**** total strings: %d\n", strAmt);
-    #endif
+    if (kPrintStringMetrics) {
+        fprintf(stderr, "**** value strings: %zd\n", SSIZE(amt));
+        fprintf(stderr, "**** total strings: %zd\n", SSIZE(strAmt));
+    }
     
     for (pi=0; pi<flatPackages.size(); pi++) {
         err = dest->writeData(flatPackages[pi]->getData(),
@@ -3101,13 +3133,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
         (((uint8_t*)dest->getData()) + dataStart);
     header->header.size = htodl(dest->getSize() - dataStart);
 
-    NOISY(aout << "Resource table:"
-          << HexDump(dest->getData(), dest->getSize()) << endl);
-
-    #if PRINT_STRING_METRICS
-    fprintf(stderr, "**** total resource table size: %d / %d%% strings\n",
-        dest->getSize(), (strAmt*100)/dest->getSize());
-    #endif
+    if (kPrintStringMetrics) {
+        fprintf(stderr, "**** total resource table size: %zu / %zu%% strings\n",
+                dest->getSize(), (size_t)(strAmt*100)/dest->getSize());
+    }
     
     return NO_ERROR;
 }
@@ -3339,7 +3368,7 @@ status_t ResourceTable::Entry::generateAttributes(ResourceTable* table,
 }
 
 status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
-                                                 const String16& package)
+                                                 const String16& /* package */)
 {
     bool hasErrors = false;
     
@@ -3372,7 +3401,7 @@ status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
             }
         }
     }
-    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+    return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
 }
 
 status_t ResourceTable::Entry::prepareFlatten(StringPool* strings, ResourceTable* table,
@@ -3431,22 +3460,20 @@ status_t ResourceTable::Entry::remapStringValue(StringPool* strings)
     return NO_ERROR;
 }
 
-ssize_t ResourceTable::Entry::flatten(Bundle* bundle, const sp<AaptFile>& data, bool isPublic)
+ssize_t ResourceTable::Entry::flatten(Bundle* /* bundle */, const sp<AaptFile>& data, bool isPublic)
 {
     size_t amt = 0;
     ResTable_entry header;
     memset(&header, 0, sizeof(header));
     header.size = htods(sizeof(header));
-    const type ty = this != NULL ? mType : TYPE_ITEM;
-    if (this != NULL) {
-        if (ty == TYPE_BAG) {
-            header.flags |= htods(header.FLAG_COMPLEX);
-        }
-        if (isPublic) {
-            header.flags |= htods(header.FLAG_PUBLIC);
-        }
-        header.key.index = htodl(mNameIndex);
+    const type ty = mType;
+    if (ty == TYPE_BAG) {
+        header.flags |= htods(header.FLAG_COMPLEX);
     }
+    if (isPublic) {
+        header.flags |= htods(header.FLAG_PUBLIC);
+    }
+    header.key.index = htodl(mNameIndex);
     if (ty != TYPE_BAG) {
         status_t err = data->writeData(&header, sizeof(header));
         if (err != NO_ERROR) {
@@ -3621,10 +3648,11 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
     
     sp<Entry> e = c->getEntries().valueFor(cdesc);
     if (e == NULL) {
-        if (config != NULL) {
-            NOISY(printf("New entry at %s:%d: imsi:%d/%d lang:%c%c cnt:%c%c "
+        if (kIsDebug) {
+            if (config != NULL) {
+                printf("New entry at %s:%d: imsi:%d/%d lang:%c%c cnt:%c%c "
                     "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
-                    "sw%ddp w%ddp h%ddp dir:%d\n",
+                    "sw%ddp w%ddp h%ddp layout:%d\n",
                       sourcePos.file.string(), sourcePos.line,
                       config->mcc, config->mnc,
                       config->language[0] ? config->language[0] : '-',
@@ -3642,10 +3670,11 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                       config->smallestScreenWidthDp,
                       config->screenWidthDp,
                       config->screenHeightDp,
-                      config->layoutDirection));
-        } else {
-            NOISY(printf("New entry at %s:%d: NULL config\n",
-                      sourcePos.file.string(), sourcePos.line));
+                      config->screenLayout);
+            } else {
+                printf("New entry at %s:%d: NULL config\n",
+                        sourcePos.file.string(), sourcePos.line);
+            }
         }
         e = new Entry(entry, sourcePos);
         c->addEntry(cdesc, e);
@@ -3751,7 +3780,7 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
         j++;
     }
 
-    return hasError ? UNKNOWN_ERROR : NO_ERROR;
+    return hasError ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
 }
 
 ResourceTable::Package::Package(const String16& name, ssize_t includedId)
@@ -3806,9 +3835,6 @@ status_t ResourceTable::Package::setStrings(const sp<AaptFile>& data,
     if (data->getData() == NULL) {
         return UNKNOWN_ERROR;
     }
-
-    NOISY(aout << "Setting restable string pool: "
-          << HexDump(data->getData(), data->getSize()) << endl);
 
     status_t err = strings->setTo(data->getData(), data->getSize());
     if (err == NO_ERROR) {
@@ -4017,7 +4043,7 @@ bool ResourceTable::getItemValue(
         }
         item->evaluating = true;
         res = stringToValue(outValue, NULL, item->value, false, false, item->bagKeyId);
-        NOISY(
+        if (kIsDebug) {
             if (res) {
                 printf("getItemValue of #%08x[#%08x] (%s): type=#%08x, data=#%08x\n",
                        resID, attrID, String8(getEntry(resID)->getName()).string(),
@@ -4026,7 +4052,7 @@ bool ResourceTable::getItemValue(
                 printf("getItemValue of #%08x[#%08x]: failed\n",
                        resID, attrID);
             }
-        );
+        }
         item->evaluating = false;
     }
     return res;

@@ -298,6 +298,8 @@ private:
         status_t read(FILE* fp);
         status_t write(FILE* fp);
 
+        CentralDirEntry& operator=(const CentralDirEntry& src);
+
         // unsigned long mSignature;
         unsigned short  mVersionMadeBy;
         unsigned short  mVersionToExtract;
