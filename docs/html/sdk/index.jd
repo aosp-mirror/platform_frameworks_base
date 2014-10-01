@@ -246,11 +246,9 @@ This is the Android Software Development Kit License Agreement
 <p>The Android SDK provides you the API libraries and developer tools necessary to build, test,
   and debug apps for Android.</p>
 
-<p>If you're a new Android developer, we recommend you download the ADT Bundle
-to quickly start developing apps. It includes the essential
-Android SDK components and a version of the Eclipse IDE with built-in
-<b>ADT (Android Developer Tools)</b> to
-streamline your Android app development.</p>
+<p>Download the ADT Bundle to quickly start developing apps. It includes the essential Android
+SDK components and a version of the Eclipse IDE with built-in <b>ADT (Android Developer Tools)</b>
+to streamline your Android app development.</p>
 
 
 <!-- this appears when viewing the online docs -->
