@@ -55,9 +55,11 @@ please see themes_device_defaults.xml.
 
         <item name="textColorPrimary">@color/primary_text_material_dark</item>
         <item name="textColorPrimaryInverse">@color/primary_text_material_light</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_activated_material_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorSecondary">@color/secondary_text_material_dark</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_light</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_activated_material_dark</item>
         <item name="textColorTertiary">@color/secondary_text_material_dark</item>
         <item name="textColorTertiaryInverse">@color/secondary_text_material_light</item>
         <item name="textColorHint">@color/hint_foreground_material_dark</item>
@@ -402,8 +404,10 @@ please see themes_device_defaults.xml.
 
         <item name="textColorPrimary">@color/primary_text_material_light</item>
         <item name="textColorPrimaryInverse">@color/primary_text_material_dark</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_activated_material_light</item>
         <item name="textColorSecondary">@color/secondary_text_material_light</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_dark</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_activated_material_light</item>
         <item name="textColorTertiary">@color/secondary_text_material_light</item>
         <item name="textColorTertiaryInverse">@color/secondary_text_material_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_light</item>
@@ -757,8 +761,10 @@ please see themes_device_defaults.xml.
 
         <item name="textColorPrimary">@color/primary_text_material_light</item>
         <item name="textColorPrimaryInverse">@color/primary_text_material_dark</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_activated_material_light</item>
         <item name="textColorSecondary">@color/secondary_text_material_light</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_dark</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_activated_material_light</item>
         <item name="textColorTertiary">@color/secondary_text_material_light</item>
         <item name="textColorTertiaryInverse">@color/secondary_text_material_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_light</item>
@@ -794,9 +800,11 @@ please see themes_device_defaults.xml.
 
         <item name="textColorPrimary">@color/primary_text_material_dark</item>
         <item name="textColorPrimaryInverse">@color/primary_text_material_light</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_activated_material_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorSecondary">@color/secondary_text_material_dark</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_light</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_activated_material_dark</item>
         <item name="textColorTertiary">@color/secondary_text_material_dark</item>
         <item name="textColorTertiaryInverse">@color/secondary_text_material_light</item>
         <item name="textColorHint">@color/hint_foreground_material_dark</item>
