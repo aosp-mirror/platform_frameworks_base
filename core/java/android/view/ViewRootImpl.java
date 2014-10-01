@@ -1646,6 +1646,9 @@ public final class ViewRootImpl implements ViewParent,
                         mLastScrolledFocus.clear();
                     }
                     mScrollY = mCurScrollY = 0;
+                    if (mView instanceof RootViewSurfaceTaker) {
+                        ((RootViewSurfaceTaker) mView).onRootViewScrollYChanged(mCurScrollY);
+                    }
                     if (mScroller != null) {
                         mScroller.abortAnimation();
                     }
@@ -2415,6 +2418,9 @@ public final class ViewRootImpl implements ViewParent,
         if (mCurScrollY != curScrollY) {
             mCurScrollY = curScrollY;
             fullRedrawNeeded = true;
+            if (mView instanceof RootViewSurfaceTaker) {
+                ((RootViewSurfaceTaker) mView).onRootViewScrollYChanged(mCurScrollY);
+            }
         }
 
         final float appScale = mAttachInfo.mApplicationScale;

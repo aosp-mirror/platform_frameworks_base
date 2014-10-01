@@ -2174,6 +2174,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private int mLastBottomInset = 0;
         private int mLastRightInset = 0;
 
+        private int mRootScrollY = 0;
 
         public DecorView(Context context, int featureId) {
             super(context);
@@ -2875,6 +2876,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     view.setId(id);
                     addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, height,
                             Gravity.START | verticalGravity));
+                    updateColorViewTranslations();
                 }
             } else {
                 int vis = show ? VISIBLE : INVISIBLE;
@@ -2889,6 +2891,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
             return view;
+        }
+
+        private void updateColorViewTranslations() {
+            // Put the color views back in place when they get moved off the screen
+            // due to the the ViewRootImpl panning.
+            int rootScrollY = mRootScrollY;
+            if (mStatusColorView != null) {
+                mStatusColorView.setTranslationY(rootScrollY > 0 ? rootScrollY : 0);
+            }
+            if (mNavigationColorView != null) {
+                mNavigationColorView.setTranslationY(rootScrollY < 0 ? rootScrollY : 0);
+            }
         }
 
         private WindowInsets updateStatusGuard(WindowInsets insets) {
@@ -3147,6 +3161,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public void setSurfaceKeepScreenOn(boolean keepOn) {
             if (keepOn) PhoneWindow.this.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             else PhoneWindow.this.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
+        @Override
+        public void onRootViewScrollYChanged(int rootScrollY) {
+            mRootScrollY = rootScrollY;
+            updateColorViewTranslations();
         }
 
         /**
