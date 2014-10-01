@@ -260,7 +260,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"தானியங்கு"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"வண்ணங்களை மாற்று"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"வண்ணத்தைச் சரிப்படுத்தும் முறை"</string>
-    <string name="quick_settings_more_settings" msgid="326112621462813682">"மேலும் அமைப்பு"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"அமைப்பில் மாற்று"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"முடிந்தது"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"இணைக்கப்பட்டது"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"இணைக்கிறது..."</string>
@@ -356,4 +356,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"வேண்டாம்"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"அமை"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ஒலியடக்கினார்"</string>
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>
