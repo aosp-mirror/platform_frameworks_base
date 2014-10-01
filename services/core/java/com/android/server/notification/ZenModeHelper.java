@@ -150,48 +150,50 @@ public class ZenModeHelper {
     }
 
     public boolean shouldIntercept(NotificationRecord record) {
-        if (mZenMode != Global.ZEN_MODE_OFF) {
-            if (isSystem(record)) {
-                return false;
-            }
-            if (isAlarm(record)) {
-                if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                    ZenLog.traceIntercepted(record, "alarm");
-                    return true;
+        if (isSystem(record)) {
+            return false;
+        }
+        switch (mZenMode) {
+            case Global.ZEN_MODE_NO_INTERRUPTIONS:
+                // #notevenalarms
+                ZenLog.traceIntercepted(record, "none");
+                return true;
+            case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                if (isAlarm(record)) {
+                    // Alarms are always priority
+                    return false;
                 }
-                return false;
-            }
-            // allow user-prioritized packages through in priority mode
-            if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+                // allow user-prioritized packages through in priority mode
                 if (record.getPackagePriority() == Notification.PRIORITY_MAX) {
                     ZenLog.traceNotIntercepted(record, "priorityApp");
                     return false;
                 }
-            }
-            if (isCall(record)) {
-                if (!mConfig.allowCalls) {
-                    ZenLog.traceIntercepted(record, "!allowCalls");
-                    return true;
+                if (isCall(record)) {
+                    if (!mConfig.allowCalls) {
+                        ZenLog.traceIntercepted(record, "!allowCalls");
+                        return true;
+                    }
+                    return shouldInterceptAudience(record);
                 }
-                return shouldInterceptAudience(record);
-            }
-            if (isMessage(record)) {
-                if (!mConfig.allowMessages) {
-                    ZenLog.traceIntercepted(record, "!allowMessages");
-                    return true;
+                if (isMessage(record)) {
+                    if (!mConfig.allowMessages) {
+                        ZenLog.traceIntercepted(record, "!allowMessages");
+                        return true;
+                    }
+                    return shouldInterceptAudience(record);
                 }
-                return shouldInterceptAudience(record);
-            }
-            if (isEvent(record)) {
-                if (!mConfig.allowEvents) {
-                    ZenLog.traceIntercepted(record, "!allowEvents");
-                    return true;
+                if (isEvent(record)) {
+                    if (!mConfig.allowEvents) {
+                        ZenLog.traceIntercepted(record, "!allowEvents");
+                        return true;
+                    }
+                    return false;
                 }
-            }
-            ZenLog.traceIntercepted(record, "!allowed");
-            return true;
+                ZenLog.traceIntercepted(record, "!priority");
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     private boolean shouldInterceptAudience(NotificationRecord record) {
