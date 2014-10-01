@@ -516,11 +516,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 return;
             }
 
-            if (list.isEmpty() || isDefaultNetwork(nai)) {
+            list.add(nai);
+
+            // Send a broadcast if this is the first network of its type or if it's the default.
+            if (list.size() == 1 || isDefaultNetwork(nai)) {
                 maybeLogBroadcast(nai, true, type);
                 sendLegacyNetworkBroadcast(nai, true, type);
             }
-            list.add(nai);
         }
 
         /** Removes the given network from the specified legacy type list. */
