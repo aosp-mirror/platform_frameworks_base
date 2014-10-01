@@ -1183,6 +1183,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
+    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
+    <skip />
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಚಾಲನೆಯಲ್ಲಿದೆ"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ನಿಲ್ಲಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="ok" msgid="5970060430562524910">"ಸರಿ"</string>
