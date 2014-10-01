@@ -8652,7 +8652,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         } catch (RuntimeException e) {
-            Log.wtf(TAG, "Unhandled exception while force removing for memory", e);
+            Slog.wtf(TAG, "Unhandled exception while force removing for memory", e);
         }
 
         try {
@@ -8677,7 +8677,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } catch (RuntimeException e) {
             mInLayout = false;
-            Log.wtf(TAG, "Unhandled exception while laying out windows", e);
+            Slog.wtf(TAG, "Unhandled exception while laying out windows", e);
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -9762,7 +9762,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
 
         } catch (RuntimeException e) {
-            Log.wtf(TAG, "Unhandled exception in Window Manager", e);
+            Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             SurfaceControl.closeTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,

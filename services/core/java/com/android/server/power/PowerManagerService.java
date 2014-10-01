@@ -2126,7 +2126,7 @@ public final class PowerManagerService extends SystemService
             t.start();
             t.join();
         } catch (InterruptedException e) {
-            Log.wtf(TAG, e);
+            Slog.wtf(TAG, e);
         }
     }
 
