@@ -74,6 +74,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverse">@color/primary_text_light</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_light</item>
         <item name="textColorTertiaryInverse">@color/tertiary_text_light</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_dark</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_dark_disable_only</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_light_disable_only</item>
         <item name="textColorPrimaryNoDisable">@color/primary_text_dark_nodisable</item>
@@ -478,6 +480,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverse">@color/primary_text_dark</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_dark</item>
         <item name="textColorTertiaryInverse">@color/tertiary_text_dark</item>
+        <item name="textColorPrimaryActivated">@color/primary_text_light</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_light</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_light_disable_only</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_dark_disable_only</item>
         <item name="textColorPrimaryNoDisable">@color/primary_text_light_nodisable</item>
