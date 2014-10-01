@@ -9102,7 +9102,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Ensure that apps that are mid-starting are also scheduled to have their
                 // starting windows removed after the animation is complete
                 if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
-                    scheduleRemoveStartingWindow(wtoken);
+                    scheduleRemoveStartingWindowLocked(wtoken);
                 }
 
                 if (animLp != null) {
