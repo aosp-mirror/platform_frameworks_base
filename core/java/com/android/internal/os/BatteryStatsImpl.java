@@ -6748,6 +6748,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                     || getLowDischargeAmountSinceCharge() >= 60)
                     || (getHighDischargeAmountSinceCharge() >= 60
                             && mHistoryBuffer.dataSize() >= MAX_HISTORY_BUFFER)) {
+                Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
+                        + " lowAmount=" + getLowDischargeAmountSinceCharge()
+                        + " highAmount=" + getHighDischargeAmountSinceCharge());
                 // Before we write, collect a snapshot of the final aggregated
                 // stats to be reported in the next checkin.  Only do this if we have
                 // a sufficient amount of data to make it interesting.
