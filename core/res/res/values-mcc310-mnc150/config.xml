@@ -24,8 +24,10 @@
         <item>310140</item>
         <item>310400</item>
         <item>310470</item>
+        <item>311170</item>
     </string-array>
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>310</item>
         <item>311</item>
         <item>312</item>
         <item>313</item>
