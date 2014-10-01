@@ -4729,6 +4729,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         return dexCodeInstructionSets.toArray(new String[dexCodeInstructionSets.size()]);
     }
 
+    /**
+     * Returns deduplicated list of supported instructions for dex code.
+     */
+    public static String[] getAllDexCodeInstructionSets() {
+        String[] supportedInstructionSets = new String[Build.SUPPORTED_ABIS.length];
+        for (int i = 0; i < supportedInstructionSets.length; i++) {
+            String abi = Build.SUPPORTED_ABIS[i];
+            supportedInstructionSets[i] = VMRuntime.getInstructionSet(abi);
+        }
+        return getDexCodeInstructionSets(supportedInstructionSets);
+    }
+
     @Override
     public void forceDexOpt(String packageName) {
         enforceSystemOrRoot("forceDexOpt");
