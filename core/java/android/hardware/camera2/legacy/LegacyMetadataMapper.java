@@ -1350,6 +1350,14 @@ public class LegacyMetadataMapper {
         m.set(CaptureRequest.LENS_FOCAL_LENGTH,
                 c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0]);
 
+        /*
+         * jpeg.*
+         */
+
+        // jpeg.thumbnailSize - set smallest non-zero size if possible
+        Size[] sizes = c.get(CameraCharacteristics.JPEG_AVAILABLE_THUMBNAIL_SIZES);
+        m.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, (sizes.length > 1) ? sizes[1] : sizes[0]);
+
         // TODO: map other request template values
         return m;
     }
