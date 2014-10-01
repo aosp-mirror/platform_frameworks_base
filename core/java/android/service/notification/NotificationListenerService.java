@@ -760,6 +760,9 @@ public abstract class NotificationListenerService extends Service {
         /**
          * Returns whether the notification matches the user's interruption
          * filter.
+         *
+         * @return {@code true} if the notification is allowed by the filter, or
+         * {@code false} if it is blocked.
          */
         public boolean matchesInterruptionFilter() {
             return mMatchesInterruptionFilter;
