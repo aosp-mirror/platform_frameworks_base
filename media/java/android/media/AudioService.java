@@ -1165,6 +1165,12 @@ public class AudioService extends IAudioService.Stub {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
+        // Don't show the volume panel for watches yet.
+        if ((mContext.getResources().getConfiguration().uiMode & Configuration.UI_MODE_TYPE_WATCH)
+                == Configuration.UI_MODE_TYPE_WATCH) {
+            flags &= ~AudioManager.FLAG_SHOW_UI;
+        }
+
         mVolumePanel.postVolumeChanged(streamType, flags);
 
         if ((flags & AudioManager.FLAG_FIXED_VOLUME) == 0) {
