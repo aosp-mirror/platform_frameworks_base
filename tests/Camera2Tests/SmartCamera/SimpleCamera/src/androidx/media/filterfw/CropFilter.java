@@ -20,7 +20,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.util.FloatMath;
 
 import androidx.media.filterfw.Filter;
 import androidx.media.filterfw.FrameImage2D;
@@ -90,8 +89,8 @@ public class CropFilter extends Filter {
         // Pull input frame
         FrameImage2D inputImage = getConnectedInputPort("image").pullFrame().asFrameImage2D();
         int[] inDims = inputImage.getDimensions();
-        int[] croppedDims = { (int)FloatMath.ceil(mCropRect.xEdge().length() * inDims[0]),
-                              (int)FloatMath.ceil(mCropRect.yEdge().length() * inDims[1]) };
+        int[] croppedDims = { (int)Math.ceil(mCropRect.xEdge().length() * inDims[0]),
+                              (int)Math.ceil(mCropRect.yEdge().length() * inDims[1]) };
         int[] outDims = { getOutputWidth(croppedDims[0], croppedDims[1]),
                 getOutputHeight(croppedDims[0], croppedDims[1]) };
         FrameImage2D outputImage = outPort.fetchAvailableFrame(outDims).asFrameImage2D();
