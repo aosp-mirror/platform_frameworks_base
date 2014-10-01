@@ -254,7 +254,7 @@ public class LauncherAppsService extends SystemService {
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 ActivityInfo info = pm.getActivityInfo(component, 0, user.getIdentifier());
-                return info != null && info.isEnabled();
+                return info != null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
