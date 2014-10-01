@@ -337,7 +337,8 @@ public abstract class PanelView extends FrameLayout {
                     boolean expand = flingExpands(vel, vectorVel);
                     onTrackingStopped(expand);
                     DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
-                            mStatusBar.isFalsingThresholdNeeded());
+                            mStatusBar.isFalsingThresholdNeeded(),
+                            mStatusBar.isScreenOnComingFromTouch());
                     fling(vel, expand);
                     mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
                     if (mUpdateFlingOnLayout) {
