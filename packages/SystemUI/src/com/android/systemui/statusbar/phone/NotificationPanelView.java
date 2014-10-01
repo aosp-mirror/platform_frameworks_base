@@ -1551,7 +1551,8 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onEdgeClicked(boolean right) {
         if ((right && getRightIcon().getVisibility() != View.VISIBLE)
-                || (!right && getLeftIcon().getVisibility() != View.VISIBLE)) {
+                || (!right && getLeftIcon().getVisibility() != View.VISIBLE)
+                || isDozing()) {
             return;
         }
         mHintAnimationRunning = true;
@@ -1747,6 +1748,7 @@ public class NotificationPanelView extends PanelView implements
         updateKeyguardStatusBarVisibility();
     }
 
+    @Override
     public boolean isDozing() {
         return mDozing;
     }
