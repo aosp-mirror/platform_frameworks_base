@@ -80,6 +80,7 @@ final class DisplayPowerState {
         mBacklight = backlight;
         mColorFade = electronBeam;
         mPhotonicModulator = new PhotonicModulator();
+        mPhotonicModulator.start();
 
         // At boot time, we know that the screen is on and the electron beam
         // animation is not playing.  We don't know the screen's brightness though,
@@ -336,7 +337,7 @@ final class DisplayPowerState {
     /**
      * Updates the state of the screen and backlight asynchronously on a separate thread.
      */
-    private final class PhotonicModulator {
+    private final class PhotonicModulator extends Thread {
         private static final int INITIAL_SCREEN_STATE = Display.STATE_OFF; // unknown, assume off
         private static final int INITIAL_BACKLIGHT = -1; // unknown
 
@@ -361,7 +362,7 @@ final class DisplayPowerState {
 
                     if (!mChangeInProgress) {
                         mChangeInProgress = true;
-                        AsyncTask.THREAD_POOL_EXECUTOR.execute(mTask);
+                        mLock.notifyAll();
                     }
                 }
                 return !mChangeInProgress;
@@ -369,75 +370,78 @@ final class DisplayPowerState {
         }
 
         public void dump(PrintWriter pw) {
-            pw.println();
-            pw.println("Photonic Modulator State:");
-            pw.println("  mPendingState=" + Display.stateToString(mPendingState));
-            pw.println("  mPendingBacklight=" + mPendingBacklight);
-            pw.println("  mActualState=" + Display.stateToString(mActualState));
-            pw.println("  mActualBacklight=" + mActualBacklight);
-            pw.println("  mChangeInProgress=" + mChangeInProgress);
+            synchronized (mLock) {
+                pw.println();
+                pw.println("Photonic Modulator State:");
+                pw.println("  mPendingState=" + Display.stateToString(mPendingState));
+                pw.println("  mPendingBacklight=" + mPendingBacklight);
+                pw.println("  mActualState=" + Display.stateToString(mActualState));
+                pw.println("  mActualBacklight=" + mActualBacklight);
+                pw.println("  mChangeInProgress=" + mChangeInProgress);
+            }
         }
 
-        private final Runnable mTask = new Runnable() {
-            @Override
-            public void run() {
-                // Apply pending changes until done.
-                for (;;) {
-                    final int state;
-                    final boolean stateChanged;
-                    final int backlight;
-                    final boolean backlightChanged;
-                    synchronized (mLock) {
-                        state = mPendingState;
-                        stateChanged = (state != mActualState);
-                        backlight = mPendingBacklight;
-                        backlightChanged = (backlight != mActualBacklight);
-                        if (!stateChanged && !backlightChanged) {
-                            mChangeInProgress = false;
-                            break;
-                        }
-                        mActualState = state;
-                        mActualBacklight = backlight;
+        @Override
+        public void run() {
+            for (;;) {
+                // Get pending change.
+                final int state;
+                final boolean stateChanged;
+                final int backlight;
+                final boolean backlightChanged;
+                synchronized (mLock) {
+                    state = mPendingState;
+                    stateChanged = (state != mActualState);
+                    backlight = mPendingBacklight;
+                    backlightChanged = (backlight != mActualBacklight);
+                    if (!stateChanged && !backlightChanged) {
+                        // All changed applied, notify outer class and wait for more.
+                        mChangeInProgress = false;
+                        postScreenUpdateThreadSafe();
+                        try {
+                            mLock.wait();
+                        } catch (InterruptedException ex) { }
+                        continue;
                     }
-
-                    if (DEBUG) {
-                        Slog.d(TAG, "Updating screen state: state="
-                                + Display.stateToString(state) + ", backlight=" + backlight);
-                    }
-                    boolean suspending = Display.isSuspendedState(state);
-                    if (stateChanged && !suspending) {
-                        requestDisplayState(state);
-                    }
-                    if (backlightChanged) {
-                        setBrightness(backlight);
-                    }
-                    if (stateChanged && suspending) {
-                        requestDisplayState(state);
-                    }
+                    mActualState = state;
+                    mActualBacklight = backlight;
                 }
 
-                // Let the outer class know that all changes have been applied.
-                postScreenUpdateThreadSafe();
-            }
-
-            private void requestDisplayState(int state) {
-                Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
-                        + Display.stateToString(state) + ")");
-                try {
-                    mBlanker.requestDisplayState(state);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                // Apply pending change.
+                if (DEBUG) {
+                    Slog.d(TAG, "Updating screen state: state="
+                            + Display.stateToString(state) + ", backlight=" + backlight);
+                }
+                boolean suspending = Display.isSuspendedState(state);
+                if (stateChanged && !suspending) {
+                    requestDisplayState(state);
+                }
+                if (backlightChanged) {
+                    setBrightness(backlight);
+                }
+                if (stateChanged && suspending) {
+                    requestDisplayState(state);
                 }
             }
+        }
 
-            private void setBrightness(int backlight) {
-                Trace.traceBegin(Trace.TRACE_TAG_POWER, "setBrightness(" + backlight + ")");
-                try {
-                    mBacklight.setBrightness(backlight);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
-                }
+        private void requestDisplayState(int state) {
+            Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
+                    + Display.stateToString(state) + ")");
+            try {
+                mBlanker.requestDisplayState(state);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             }
-        };
+        }
+
+        private void setBrightness(int backlight) {
+            Trace.traceBegin(Trace.TRACE_TAG_POWER, "setBrightness(" + backlight + ")");
+            try {
+                mBacklight.setBrightness(backlight);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+            }
+        }
     }
 }
