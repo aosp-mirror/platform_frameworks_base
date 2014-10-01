@@ -2282,7 +2282,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                     + " VALUES(?,?);");
-            loadSetting(stmt, Settings.System.VIBRATE_WHEN_RINGING, vibrateWhenRinging ? 1 : 0);
+            if (mContext.getResources().getBoolean(R.bool.def_vibrate_when_ringing_enabled)) {
+                loadSetting(stmt, Settings.System.VIBRATE_WHEN_RINGING, 1);
+            } else {
+                loadSetting(stmt, Settings.System.VIBRATE_WHEN_RINGING, vibrateWhenRinging ? 1 : 0);
+            }
         } finally {
             if (stmt != null) stmt.close();
         }
