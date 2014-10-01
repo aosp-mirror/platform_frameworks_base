@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.media.session.MediaSessionLegacyHelper;
 import android.os.IBinder;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -133,11 +134,14 @@ public class StatusBarWindowView extends FrameLayout {
                 if (!down) {
                     return mService.onSpacePressed();
                 }
+                break;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
-                if (down) {
-                    mService.wakeUpIfDozing(event.getEventTime(), false);
+                if (mService.isDozing()) {
+                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, true);
+                    return true;
                 }
+                break;
         }
         if (mService.interceptMediaKey(event)) {
             return true;
