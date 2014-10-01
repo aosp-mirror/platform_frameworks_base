@@ -57,6 +57,8 @@ import java.util.Stack;
  * <dl>
  * <dd>Used to defined a vector drawable
  * <dl>
+ * <dt><code>android:name</code></dt>
+ * <dd>Defines the name of this vector drawable.</dd>
  * <dt><code>android:width</code></dt>
  * <dd>Used to defined the intrinsic width of the drawable.
  * This support all the dimension units, normally specified with dp.</dd>
@@ -76,6 +78,8 @@ import java.util.Stack;
  * <dt><code>android:autoMirrored</code></dt>
  * <dd>Indicates if the drawable needs to be mirrored when its layout direction is
  * RTL (right-to-left).</dd>
+ * <dt><code>android:alpha</code></dt>
+ * <dd>The opacity of this drawable.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -85,6 +89,8 @@ import java.util.Stack;
  * The transformations are defined in the same coordinates as the viewport.
  * And the transformations are applied in the order of scale, rotate then translate.
  * <dl>
+ * <dt><code>android:name</code></dt>
+ * <dd>Defines the name of the group.</dd>
  * <dt><code>android:rotation</code></dt>
  * <dd>The degrees of rotation of the group.</dd>
  * <dt><code>android:pivotX</code></dt>
