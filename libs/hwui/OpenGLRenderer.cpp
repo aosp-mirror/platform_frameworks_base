@@ -1714,13 +1714,6 @@ void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
     }
 }
 
-static bool isBlendedColorFilter(const SkColorFilter* filter) {
-    if (filter == NULL) {
-        return false;
-    }
-    return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
-}
-
 void OpenGLRenderer::setupDrawBlending(const Layer* layer, bool swapSrcDst) {
     SkXfermode::Mode mode = layer->getMode();
     // When the blending mode is kClear_Mode, we need to use a modulate color
