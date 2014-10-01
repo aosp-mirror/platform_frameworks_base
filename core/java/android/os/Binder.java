@@ -49,6 +49,7 @@ public class Binder implements IBinder {
      * of classes can potentially create leaks.
      */
     private static final boolean FIND_POTENTIAL_LEAKS = false;
+    private static final boolean CHECK_PARCEL_SIZE = false;
     static final String TAG = "Binder";
 
     /**
@@ -388,7 +389,7 @@ public class Binder implements IBinder {
     }
 
     static void checkParcel(IBinder obj, int code, Parcel parcel, String msg) {
-        if (parcel.dataSize() >= 800*1024) {
+        if (CHECK_PARCEL_SIZE && parcel.dataSize() >= 800*1024) {
             // Trying to send > 800k, this is way too much
             StringBuilder sb = new StringBuilder();
             sb.append(msg);
