@@ -138,7 +138,8 @@ public class SystemServicesProxy {
     }
 
     /** Returns a list of the recents tasks */
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId) {
+    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
+            boolean isTopTaskHome) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
@@ -195,10 +196,11 @@ public class SystemServicesProxy {
             // tasks
 
             // Check the first non-recents task, include this task even if it is marked as excluded
-            // from recents.  In other words, only remove excluded tasks if it is not the first task
+            // from recents if we are currently in the app.  In other words, only remove excluded
+            // tasks if it is not the first active task.
             boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-            if (isExcluded && !isFirstValidTask) {
+            if (isExcluded && (isTopTaskHome || !isFirstValidTask)) {
                 iter.remove();
                 continue;
             }

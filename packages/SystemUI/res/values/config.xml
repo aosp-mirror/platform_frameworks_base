@@ -161,12 +161,9 @@
      duration of the transition in to recents from home. -->
     <integer name="recents_animate_task_enter_from_home_delay">150</integer>
     <!-- The min animation duration for animating the task in when transitioning from home. -->
-    <integer name="recents_animate_task_enter_from_home_duration">200</integer>
-    <!-- The total animation stagger delay when entering from home. -->
-    <integer name="recents_animate_task_enter_from_home_stagger_delay">110</integer>
-    <!-- The total animation duration added to the last card when entering from home.
-    This value is partialy also added to the previous tasks -->
-    <integer name="recents_animate_task_enter_from_home_stagger_duration">72</integer>
+    <integer name="recents_animate_task_enter_from_home_duration">250</integer>
+    <!-- The animation stagger to apply to each task animation when transitioning from home. -->
+    <integer name="recents_animate_task_enter_from_home_stagger_delay">12</integer>
     <!-- The short duration when animating in/out the lock to app button. -->
     <integer name="recents_animate_lock_to_app_button_short_duration">150</integer>
     <!-- The long duration when animating in/out the lock to app button. -->
