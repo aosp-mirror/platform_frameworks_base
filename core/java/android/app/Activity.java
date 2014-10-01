@@ -5466,27 +5466,33 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Activities that want to remain visible behind a translucent activity above them must call
-     * this method anytime before a return from {@link #onPause()}. If this call is successful
-     * then the activity will remain visible when {@link #onPause()} is called, and can continue to
-     * play media in the background, but it must stop playing and release resources prior to or
-     * within the call to {@link #onVisibleBehindCanceled()}. If this call returns false, the 
-     * activity will not be visible in the background, and must release any media resources 
-     * immediately.
+     * this method anytime between the start of {@link #onResume()} and the return from
+     * {@link #onPause()}. If this call is successful then the activity will remain visible after
+     * {@link #onPause()} is called, and is allowed to continue playing media in the background.
+     *
+     * <p>The actions of this call are reset each time that this activity is brought to the
+     * front. That is, every time {@link #onResume()} is called the activity will be assumed
+     * to not have requested visible behind. Therefore, if you want this activity to continue to
+     * be visible in the background you must call this method again.
      *
      * <p>Only fullscreen opaque activities may make this call. I.e. this call is a nop
      * for dialog and translucent activities.
      *
-     * <p>False will be returned any time this method is call between the return of onPause and
+     * <p>Under all circumstances, the activity must stop playing and release resources prior to or
+     * within a call to {@link #onVisibleBehindCanceled()} or if this call returns false.
+     *
+     * <p>False will be returned any time this method is called between the return of onPause and
      *      the next call to onResume.
      *
      * @param visible true to notify the system that the activity wishes to be visible behind other
      *                translucent activities, false to indicate otherwise. Resources must be
      *                released when passing false to this method.
-     * @return the resulting visibiity state. If true the activity may remain visible beyond
-     *      {@link #onPause()}. If false then the activity may not count on being visible behind
-     *      other translucent activities, and must stop any media playback and release resources.
-     *      Returning false may occur in lieu of a call to onVisibleBehindCanceled() so the return
-     *      value must be checked.
+     * @return the resulting visibiity state. If true the activity will remain visible beyond
+     *      {@link #onPause()} if the next activity is translucent or not fullscreen. If false
+     *      then the activity may not count on being visible behind other translucent activities,
+     *      and must stop any media playback and release resources.
+     *      Returning false may occur in lieu of a call to {@link #onVisibleBehindCanceled()} so
+     *      the return value must be checked.
      *
      * @see #onVisibleBehindCanceled()
      * @see #onBackgroundVisibleBehindChanged(boolean)
