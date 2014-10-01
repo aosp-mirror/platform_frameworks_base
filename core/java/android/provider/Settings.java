@@ -3102,7 +3102,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
             MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_NETWORK_MODE);
-            MOVED_TO_GLOBAL.add(Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY);
         }
 
         /** @hide */
@@ -4585,13 +4584,6 @@ public final class Settings {
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
 
         /**
-         * (Experimental). If nonzero, WebView uses data reduction proxy to save network
-         * bandwidth. Otherwise, WebView does not use data reduction proxy.
-         * @hide
-         */
-        public static final String WEBVIEW_DATA_REDUCTION_PROXY = "webview_data_reduction_proxy";
-
-        /**
          * The {@link ComponentName} string of the service to be used as the voice recognition
          * service.
          *
@@ -5685,13 +5677,6 @@ public final class Settings {
         * to Gmail on the device must change to Google Mail.
         */
        public static final String USE_GOOGLE_MAIL = "use_google_mail";
-
-        /**
-         * Webview Data reduction proxy key.
-         * @hide
-         */
-        public static final String WEBVIEW_DATA_REDUCTION_PROXY_KEY =
-                "webview_data_reduction_proxy_key";
 
        /**
         * Whether Wifi display is enabled/disabled
