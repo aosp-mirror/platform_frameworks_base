@@ -256,7 +256,7 @@
     <string name="quick_settings_cast_title" msgid="1893629685050355115">"投放螢幕"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"投放"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"未命名的裝置"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"投放準備完成"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"可以開始投放了"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"沒有可用裝置"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
@@ -358,4 +358,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了，謝謝"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
     <string name="muted_by" msgid="6147073845094180001">"由 <xliff:g id="THIRD_PARTY">%1$s</xliff:g> 設為靜音"</string>
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>
