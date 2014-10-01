@@ -18,15 +18,11 @@ package com.google.android.test.shared_library;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.TextView;
 
 public class ActivityMain extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        TextView content = new TextView(this);
-        content.setText("Dummy main entry for this apk; not really needed...");
-        setContentView(content);
+        setContentView(R.layout.main);
     }
 }
