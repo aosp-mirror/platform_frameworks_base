@@ -138,7 +138,14 @@ public:
     const Vector<size_t>* offsetsForString(const String16& val) const;
 
 private:
-    static int config_sort(void* state, const void* lhs, const void* rhs);
+    class ConfigSorter
+    {
+    public:
+        explicit ConfigSorter(const StringPool&);
+        bool operator()(size_t l, size_t r);
+    private:
+        const StringPool& pool;
+    };
 
     const bool                              mUTF8;
 

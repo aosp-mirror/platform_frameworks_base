@@ -5,11 +5,13 @@
 //
 
 #include "StringPool.h"
-#include "ResourceTable.h"
 
 #include <utils/ByteOrder.h>
 #include <utils/SortedVector.h>
-#include "qsort_r_compat.h"
+
+#include <algorithm>
+
+#include "ResourceTable.h"
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
@@ -222,12 +224,15 @@ status_t StringPool::addStyleSpan(size_t idx, const entry_style_span& span)
     return NO_ERROR;
 }
 
-int StringPool::config_sort(void* state, const void* lhs, const void* rhs)
+StringPool::ConfigSorter::ConfigSorter(const StringPool& pool) : pool(pool)
 {
-    StringPool* pool = (StringPool*)state;
-    const entry& lhe = pool->mEntries[pool->mEntryArray[*static_cast<const size_t*>(lhs)]];
-    const entry& rhe = pool->mEntries[pool->mEntryArray[*static_cast<const size_t*>(rhs)]];
-    return lhe.compare(rhe);
+}
+
+bool StringPool::ConfigSorter::operator()(size_t l, size_t r)
+{
+    const StringPool::entry& lhe = pool.mEntries[pool.mEntryArray[l]];
+    const StringPool::entry& rhe = pool.mEntries[pool.mEntryArray[r]];
+    return lhe.compare(rhe) < 0;
 }
 
 void StringPool::sortByConfig()
@@ -248,10 +253,8 @@ void StringPool::sortByConfig()
 
     // Sort the array.
     NOISY(printf("SORTING STRINGS BY CONFIGURATION...\n"));
-    // Vector::sort uses insertion sort, which is very slow for this data set.
-    // Use quicksort instead because we don't need a stable sort here.
-    qsort_r_compat(newPosToOriginalPos.editArray(), N, sizeof(size_t), this, config_sort);
-    //newPosToOriginalPos.sort(config_sort, this);
+    ConfigSorter sorter(*this);
+    std::sort(newPosToOriginalPos.begin(), newPosToOriginalPos.end(), sorter);
     NOISY(printf("DONE SORTING STRINGS BY CONFIGURATION.\n"));
 
     // Create the reverse mapping from the original position in the array
