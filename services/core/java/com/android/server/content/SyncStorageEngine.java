@@ -834,17 +834,16 @@ public class SyncStorageEngine extends Handler {
         return changed;
     }
 
-    public void clearAllBackoffs(SyncQueue syncQueue) {
+    public void clearAllBackoffsLocked(SyncQueue syncQueue) {
         boolean changed = false;
         synchronized (mAuthorities) {
-            synchronized (syncQueue) {
                 // Clear backoff for all sync adapters.
                 for (AccountInfo accountInfo : mAccounts.values()) {
                     for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
                         if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
                                 || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
                             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                                Log.v(TAG, "clearAllBackoffs:"
+                                Log.v(TAG, "clearAllBackoffsLocked:"
                                         + " authority:" + authorityInfo.target
                                         + " account:" + accountInfo.accountAndUser.account.name
                                         + " user:" + accountInfo.accountAndUser.userId
@@ -868,7 +867,6 @@ public class SyncStorageEngine extends Handler {
                             authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
                         }
                     }
-                }
                 syncQueue.clearBackoffs();
             }
         }
