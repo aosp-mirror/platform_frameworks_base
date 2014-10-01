@@ -454,8 +454,8 @@ with the default local certificate, so that you can install it on the emulator a
 for debugging purposes.</p>
 
 <p>After you build the project, the output APK for the app module is located in
-<code>app/build/apk/</code>, and the output AAR for the lib module is located in
-<code>lib/build/libs/</code>.</p>
+<code>app/build/outputs/apk/</code>, and the output AAR for the lib module is located in
+<code>lib/build/outputs/libs/</code>.</p>
 
 <p>To see a list of all available build tasks for your project, type this command:</p>
 
