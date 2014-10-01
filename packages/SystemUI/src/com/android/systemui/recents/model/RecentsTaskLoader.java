@@ -322,11 +322,12 @@ public class RecentsTaskLoader {
     }
 
     /** Gets the list of recent tasks, ordered from back to front. */
-    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp) {
+    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp,
+            boolean isTopTaskHome) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         List<ActivityManager.RecentTaskInfo> tasks =
-                ssp.getRecentTasks(config.maxNumTasksToLoad,
-                        UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(config.maxNumTasksToLoad, UserHandle.CURRENT.getIdentifier(),
+                        isTopTaskHome);
         Collections.reverse(tasks);
         return tasks;
     }
@@ -408,11 +409,11 @@ public class RecentsTaskLoader {
     }
 
     /** Reload the set of recent tasks */
-    public SpaceNode reload(Context context, int preloadCount) {
+    public SpaceNode reload(Context context, int preloadCount, boolean isTopTaskHome) {
         ArrayList<Task.TaskKey> taskKeys = new ArrayList<Task.TaskKey>();
         ArrayList<Task> tasksToLoad = new ArrayList<Task>();
         TaskStack stack = getTaskStack(mSystemServicesProxy, context.getResources(),
-                -1, preloadCount, true, taskKeys, tasksToLoad);
+                -1, preloadCount, true, isTopTaskHome, taskKeys, tasksToLoad);
         SpaceNode root = new SpaceNode();
         root.setStack(stack);
 
@@ -429,10 +430,10 @@ public class RecentsTaskLoader {
     /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
     public TaskStack getTaskStack(SystemServicesProxy ssp, Resources res,
             int preloadTaskId, int preloadTaskCount,
-            boolean loadTaskThumbnails, List<Task.TaskKey> taskKeysOut,
-            List<Task> tasksToLoadOut) {
+            boolean loadTaskThumbnails, boolean isTopTaskHome,
+            List<Task.TaskKey> taskKeysOut, List<Task> tasksToLoadOut) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, isTopTaskHome);
         HashMap<Task.ComponentNameKey, ActivityInfoHandle> activityInfoCache =
                 new HashMap<Task.ComponentNameKey, ActivityInfoHandle>();
         ArrayList<Task> tasksToAdd = new ArrayList<Task>();

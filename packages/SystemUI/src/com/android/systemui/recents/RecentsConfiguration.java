@@ -220,8 +220,6 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
         taskViewEnterFromHomeStaggerDelay =
                 res.getInteger(R.integer.recents_animate_task_enter_from_home_stagger_delay);
-        taskViewEnterFromHomeStaggerDuration =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_stagger_duration);
         taskViewExitToHomeDuration =
                 res.getInteger(R.integer.recents_animate_task_exit_to_home_duration);
         taskViewRemoveAnimDuration =
