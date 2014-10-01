@@ -1185,7 +1185,11 @@ uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
 {
     int32_t id = getAttributeNameID(idx);
     if (id >= 0 && (size_t)id < mTree.mNumResIds) {
-        return dtohl(mTree.mResIds[id]);
+        uint32_t resId = dtohl(mTree.mResIds[id]);
+        if (mTree.mDynamicRefTable == NULL ||
+                mTree.mDynamicRefTable->lookupResourceId(&resId) == NO_ERROR) {
+            return resId;
+        }
     }
     return 0;
 }
