@@ -48,7 +48,8 @@
                 android:drawSelectorOnTop="false"
                 android:cacheColorHint="@color/transparent"
                 android:listPreferredItemHeight="48dp"
-                android:scrollbarAlwaysDrawVerticalTrack="true" />
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:divider="@null" />
 
             <FrameLayout android:id="@+id/list_footer"
                     android:layout_width="match_parent"
