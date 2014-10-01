@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
+import android.util.Slog;
 import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
@@ -40,6 +41,7 @@ import dalvik.system.VMDebug;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1688,7 +1690,13 @@ public final class StrictMode {
         } else {
             p.writeInt(violations.size());
             for (int i = 0; i < violations.size(); ++i) {
+                int start = p.dataPosition();
                 violations.get(i).writeToParcel(p, 0 /* unused flags? */);
+                int size = p.dataPosition()-start;
+                if (size > 100*1024) {
+                    Slog.d(TAG, "Wrote violation #" + i + " of " + violations.size() + ": "
+                            + (p.dataPosition()-start) + " bytes");
+                }
             }
             if (LOG_V) Log.d(TAG, "wrote violations to response parcel; num=" + violations.size());
             violations.clear(); // somewhat redundant, as we're about to null the threadlocal
@@ -2176,6 +2184,7 @@ public final class StrictMode {
          */
         public void writeToParcel(Parcel dest, int flags) {
             crashInfo.writeToParcel(dest, flags);
+            int start = dest.dataPosition();
             dest.writeInt(policy);
             dest.writeInt(durationMillis);
             dest.writeInt(violationNumThisLoop);
@@ -2184,6 +2193,17 @@ public final class StrictMode {
             dest.writeLong(numInstances);
             dest.writeString(broadcastIntentAction);
             dest.writeStringArray(tags);
+            int total = dest.dataPosition()-start;
+            if (total > 100*1024) {
+                Slog.d(TAG, "VIO: policy=" + policy + " dur=" + durationMillis
+                        + " numLoop=" + violationNumThisLoop
+                        + " anim=" + numAnimationsRunning
+                        + " uptime=" + violationUptimeMillis
+                        + " numInst=" + numInstances);
+                Slog.d(TAG, "VIO: action=" + broadcastIntentAction);
+                Slog.d(TAG, "VIO: tags=" + Arrays.toString(tags));
+                Slog.d(TAG, "VIO: TOTAL BYTES WRITTEN: " + (dest.dataPosition()-start));
+            }
         }
 
 
