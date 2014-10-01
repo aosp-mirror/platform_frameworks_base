@@ -6601,6 +6601,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #fitSystemWindows(Rect)
      * @see #setSystemUiVisibility(int)
      */
+    @ViewDebug.ExportedProperty
     public boolean getFitsSystemWindows() {
         return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
     }
