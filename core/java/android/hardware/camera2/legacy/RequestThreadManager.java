@@ -16,11 +16,13 @@
 
 package android.hardware.camera2.legacy;
 
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraDeviceImpl;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.utils.SizeAreaComparator;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -36,6 +38,7 @@ import android.view.Surface;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -208,18 +211,23 @@ public class RequestThreadManager {
 
                         int totalSize = data.length + LegacyCameraDevice.nativeGetJpegFooterSize();
                         totalSize = (totalSize + 3) & ~0x3; // round up to nearest octonibble
+                        LegacyCameraDevice.setNextTimestamp(s, timestamp);
 
                         if (USE_BLOB_FORMAT_OVERRIDE) {
                             // Override to RGBA_8888 format.
                             LegacyCameraDevice.setSurfaceFormat(s,
                                     LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888);
-                            // divide by 4 if using RGBA format (width is in pixels, not bytes).
-                            totalSize >>= 2;
+
+                            int dimen = (int) Math.ceil(Math.sqrt(totalSize));
+                            dimen = (dimen + 0xf) & ~0xf; // round up to nearest multiple of 16
+                            LegacyCameraDevice.setSurfaceDimens(s, dimen, dimen);
+                            LegacyCameraDevice.produceFrame(s, data, dimen, dimen,
+                                    CameraMetadataNative.NATIVE_JPEG_FORMAT);
+                        } else {
+                            LegacyCameraDevice.setSurfaceDimens(s, totalSize, /*height*/1);
+                            LegacyCameraDevice.produceFrame(s, data, totalSize, /*height*/1,
+                                    CameraMetadataNative.NATIVE_JPEG_FORMAT);
                         }
-                        LegacyCameraDevice.setSurfaceDimens(s, totalSize, /*height*/1);
-                        LegacyCameraDevice.setNextTimestamp(s, timestamp);
-                        LegacyCameraDevice.produceFrame(s, data, totalSize, /*height*/1,
-                                CameraMetadataNative.NATIVE_JPEG_FORMAT);
                     }
                 } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                     Log.w(TAG, "Surface abandoned, dropping frame. ", e);
