@@ -2712,9 +2712,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (atoken != null) {
             if (atoken.startingWindow == win) {
-                if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Nulling startingWindow " + win);
-                atoken.startingWindow = null;
-            } else if (atoken.allAppWindows.size() == 0 && atoken.startingData != null) {
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Notify removed startingWindow " + win);
+                scheduleRemoveStartingWindowLocked(atoken);
+            } else
+            if (atoken.allAppWindows.size() == 0 && atoken.startingData != null) {
                 // If this is the last window and we had requested a starting
                 // transition window, well there is no point now.
                 if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Nulling last startingWindow");
@@ -2722,7 +2723,7 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (atoken.allAppWindows.size() == 1 && atoken.startingView != null) {
                 // If this is the last window except for a starting transition
                 // window, we need to get rid of the starting transition.
-                scheduleRemoveStartingWindow(atoken);
+                scheduleRemoveStartingWindowLocked(atoken);
             }
         }
 
@@ -4329,7 +4330,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             AppWindowToken wtoken = mTokenMap.get(token).appWindowToken;
             if (wtoken.startingWindow != null) {
-                scheduleRemoveStartingWindow(wtoken);
+                scheduleRemoveStartingWindowLocked(wtoken);
             }
         }
     }
@@ -4791,14 +4792,19 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!delayed && wtoken != null) {
                 wtoken.updateReportedVisibilityLocked();
             }
+
+            // Will only remove if startingToken non null.
+            scheduleRemoveStartingWindowLocked(startingToken);
         }
         Binder.restoreCallingIdentity(origId);
 
-        // Will only remove if startingToken non null.
-        scheduleRemoveStartingWindow(startingToken);
     }
 
-    void scheduleRemoveStartingWindow(AppWindowToken wtoken) {
+    void scheduleRemoveStartingWindowLocked(AppWindowToken wtoken) {
+        if (mH.hasMessages(H.REMOVE_STARTING, wtoken)) {
+            // Already scheduled.
+            return;
+        }
         if (wtoken != null && wtoken.startingWindow != null) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG, Debug.getCallers(1) +
                     ": Schedule remove starting " + wtoken + (wtoken != null ?
@@ -10236,7 +10242,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.mSurfaceShown = false;
                     winAnimator.mSurfaceControl = null;
                     winAnimator.mWin.mHasSurface = false;
-                    scheduleRemoveStartingWindow(winAnimator.mWin.mAppToken);
+                    scheduleRemoveStartingWindowLocked(winAnimator.mWin.mAppToken);
                 }
 
                 try {
