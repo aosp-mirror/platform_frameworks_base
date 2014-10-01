@@ -16,8 +16,26 @@
 #define O_BINARY 0
 #endif
 
-#define NOISY(x) //x
-#define NOISY_PARSE(x) //x
+// SSIZE: mingw does not have signed size_t == ssize_t.
+// STATUST: mingw does seem to redefine UNKNOWN_ERROR from our enum value, so a cast is necessary.
+#if HAVE_PRINTF_ZD
+#  define SSIZE(x) x
+#  define STATUST(x) x
+#else
+#  define SSIZE(x) (signed size_t)x
+#  define STATUST(x) (status_t)x
+#endif
+
+// Set to true for noisy debug output.
+static const bool kIsDebug = false;
+// Set to true for noisy debug output of parsing.
+static const bool kIsDebugParse = false;
+
+#if PRINT_STRING_METRICS
+static const bool kPrintStringMetrics = true;
+#else
+static const bool kPrintStringMetrics = false;
+#endif
 
 const char* const RESOURCES_ROOT_NAMESPACE = "http://schemas.android.com/apk/res/";
 const char* const RESOURCES_ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android";
@@ -56,7 +74,10 @@ String16 getNamespaceResourcePackage(String16 appPackage, String16 namespaceUri,
     size_t prefixSize;
     bool isPublic = true;
     if(namespaceUri.startsWith(RESOURCES_PREFIX_AUTO_PACKAGE)) {
-        NOISY(printf("Using default application package: %s -> %s\n", String8(namespaceUri).string(), String8(appPackage).string()));
+        if (kIsDebug) {
+            printf("Using default application package: %s -> %s\n", String8(namespaceUri).string(),
+                   String8(appPackage).string());
+        }
         isPublic = true;
         return appPackage;
     } else if (namespaceUri.startsWith(RESOURCES_PREFIX)) {
@@ -180,7 +201,7 @@ status_t hasSubstitutionErrors(const char* fileName,
     return NO_ERROR;
 }
 
-status_t parseStyledString(Bundle* bundle,
+status_t parseStyledString(Bundle* /* bundle */,
                            const char* fileName,
                            ResXMLTree* inXml,
                            const String16& endTag,
@@ -557,8 +578,10 @@ status_t parseXMLResource(const sp<AaptFile>& file, ResXMLTree* outTree,
     }
     root->removeWhitespace(stripAll, cDataTags);
 
-    NOISY(printf("Input XML from %s:\n", (const char*)file->getPrintableSource()));
-    NOISY(root->print());
+    if (kIsDebug) {
+        printf("Input XML from %s:\n", (const char*)file->getPrintableSource());
+        root->print();
+    }
     sp<AaptFile> rsc = new AaptFile(String8(), AaptGroupEntry(), String8());
     status_t err = root->flatten(rsc, !keepComments, false);
     if (err != NO_ERROR) {
@@ -569,8 +592,10 @@ status_t parseXMLResource(const sp<AaptFile>& file, ResXMLTree* outTree,
         return err;
     }
 
-    NOISY(printf("Output XML:\n"));
-    NOISY(printXMLBlock(outTree));
+    if (kIsDebug) {
+        printf("Output XML:\n");
+        printXMLBlock(outTree);
+    }
 
     return NO_ERROR;
 }
@@ -818,11 +843,13 @@ void XMLNode::setAttributeResID(size_t attrIdx, uint32_t resId)
     } else {
         mAttributeOrder.removeItem(e.index);
     }
-    NOISY(printf("Elem %s %s=\"%s\": set res id = 0x%08x\n",
-            String8(getElementName()).string(),
-            String8(mAttributes.itemAt(attrIdx).name).string(),
-            String8(mAttributes.itemAt(attrIdx).string).string(),
-            resId));
+    if (kIsDebug) {
+        printf("Elem %s %s=\"%s\": set res id = 0x%08x\n",
+                String8(getElementName()).string(),
+                String8(mAttributes.itemAt(attrIdx).name).string(),
+                String8(mAttributes.itemAt(attrIdx).string).string(),
+                resId);
+    }
     mAttributes.editItemAt(attrIdx).nameResId = resId;
     mAttributeOrder.add(resId, attrIdx);
 }
@@ -933,9 +960,11 @@ status_t XMLNode::parseValues(const sp<AaptAssets>& assets,
                                   e.nameResId, NULL, &defPackage, table, &ac)) {
                 hasErrors = true;
             }
-            NOISY(printf("Attr %s: type=0x%x, str=%s\n",
-                   String8(e.name).string(), e.value.dataType,
-                   String8(e.string).string()));
+            if (kIsDebug) {
+                printf("Attr %s: type=0x%x, str=%s\n",
+                        String8(e.name).string(), e.value.dataType,
+                        String8(e.string).string());
+            }
         }
     }
     const size_t N = mChildren.size();
@@ -945,7 +974,7 @@ status_t XMLNode::parseValues(const sp<AaptAssets>& assets,
             hasErrors = true;
         }
     }
-    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+    return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
 }
 
 status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
@@ -962,13 +991,15 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
             if (e.ns.size() <= 0) continue;
             bool nsIsPublic;
             String16 pkg(getNamespaceResourcePackage(String16(assets->getPackage()), e.ns, &nsIsPublic));
-            NOISY(printf("Elem %s %s=\"%s\": namespace(%s) %s ===> %s\n",
-                    String8(getElementName()).string(),
-                    String8(e.name).string(),
-                    String8(e.string).string(),
-                    String8(e.ns).string(),
-                    (nsIsPublic) ? "public" : "private",
-                    String8(pkg).string()));
+            if (kIsDebug) {
+                printf("Elem %s %s=\"%s\": namespace(%s) %s ===> %s\n",
+                        String8(getElementName()).string(),
+                        String8(e.name).string(),
+                        String8(e.string).string(),
+                        String8(e.ns).string(),
+                        (nsIsPublic) ? "public" : "private",
+                        String8(pkg).string());
+            }
             if (pkg.size() <= 0) continue;
             uint32_t res = table != NULL
                 ? table->getResId(e.name, &attr, &pkg, &errorMsg, nsIsPublic)
@@ -977,8 +1008,10 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
                                       attr.string(), attr.size(),
                                       pkg.string(), pkg.size());
             if (res != 0) {
-                NOISY(printf("XML attribute name %s: resid=0x%08x\n",
-                             String8(e.name).string(), res));
+                if (kIsDebug) {
+                    printf("XML attribute name %s: resid=0x%08x\n",
+                            String8(e.name).string(), res);
+                }
                 setAttributeResID(i, res);
             } else {
                 SourcePos(mFilename, getStartLineNumber()).error(
@@ -996,7 +1029,7 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
         }
     }
 
-    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+    return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
 }
 
 status_t XMLNode::flatten(const sp<AaptFile>& dest,
@@ -1014,18 +1047,7 @@ status_t XMLNode::flatten(const sp<AaptFile>& dest,
     // Next collect all remainibng strings.
     collect_strings(&strings, &resids, stripComments, stripRawValues);
 
-#if 0  // No longer compiles
-    NOISY(printf("Found strings:\n");
-        const size_t N = strings.size();
-        for (size_t i=0; i<N; i++) {
-            printf("%s\n", String8(strings.entryAt(i).string).string());
-        }
-    );
-#endif    
-
     sp<AaptFile> stringPool = strings.createStringBlock();
-    NOISY(aout << "String pool:"
-          << HexDump(stringPool->getData(), stringPool->getSize()) << endl);
 
     ResXMLTree_header header;
     memset(&header, 0, sizeof(header));
@@ -1056,17 +1078,13 @@ status_t XMLNode::flatten(const sp<AaptFile>& dest,
 
     void* data = dest->editData();
     ResXMLTree_header* hd = (ResXMLTree_header*)(((uint8_t*)data)+basePos);
-    size_t size = dest->getSize()-basePos;
     hd->header.size = htodl(dest->getSize()-basePos);
 
-    NOISY(aout << "XML resource:"
-          << HexDump(dest->getData(), dest->getSize()) << endl);
-
-    #if PRINT_STRING_METRICS
-    fprintf(stderr, "**** total xml size: %d / %d%% strings (in %s)\n",
-        dest->getSize(), (stringPool->getSize()*100)/dest->getSize(),
-        dest->getPath().string());
-    #endif
+    if (kPrintStringMetrics) {
+        fprintf(stderr, "**** total xml size: %zu / %zu%% strings (in %s)\n",
+                dest->getSize(), (stringPool->getSize()*100)/dest->getSize(),
+                dest->getPath().string());
+    }
         
     return NO_ERROR;
 }
@@ -1139,7 +1157,9 @@ static void splitName(const char* name, String16* outNs, String16* outName)
 void XMLCALL
 XMLNode::startNamespace(void *userData, const char *prefix, const char *uri)
 {
-    NOISY_PARSE(printf("Start Namespace: %s %s\n", prefix, uri));
+    if (kIsDebugParse) {
+        printf("Start Namespace: %s %s\n", prefix, uri);
+    }
     ParseState* st = (ParseState*)userData;
     sp<XMLNode> node = XMLNode::newNamespace(st->filename, 
             String16(prefix != NULL ? prefix : ""), String16(uri));
@@ -1155,7 +1175,9 @@ XMLNode::startNamespace(void *userData, const char *prefix, const char *uri)
 void XMLCALL
 XMLNode::startElement(void *userData, const char *name, const char **atts)
 {
-    NOISY_PARSE(printf("Start Element: %s\n", name));
+    if (kIsDebugParse) {
+        printf("Start Element: %s\n", name);
+    }
     ParseState* st = (ParseState*)userData;
     String16 ns16, name16;
     splitName(name, &ns16, &name16);
@@ -1181,7 +1203,9 @@ XMLNode::startElement(void *userData, const char *name, const char **atts)
 void XMLCALL
 XMLNode::characterData(void *userData, const XML_Char *s, int len)
 {
-    NOISY_PARSE(printf("CDATA: \"%s\"\n", String8(s, len).string()));
+    if (kIsDebugParse) {
+        printf("CDATA: \"%s\"\n", String8(s, len).string());
+    }
     ParseState* st = (ParseState*)userData;
     sp<XMLNode> node = NULL;
     if (st->stack.size() == 0) {
@@ -1208,7 +1232,9 @@ XMLNode::characterData(void *userData, const XML_Char *s, int len)
 void XMLCALL
 XMLNode::endElement(void *userData, const char *name)
 {
-    NOISY_PARSE(printf("End Element: %s\n", name));
+    if (kIsDebugParse) {
+        printf("End Element: %s\n", name);
+    }
     ParseState* st = (ParseState*)userData;
     sp<XMLNode> node = st->stack.itemAt(st->stack.size()-1);
     node->setEndLineNumber(XML_GetCurrentLineNumber(st->parser));
@@ -1228,7 +1254,9 @@ void XMLCALL
 XMLNode::endNamespace(void *userData, const char *prefix)
 {
     const char* nonNullPrefix = prefix != NULL ? prefix : "";
-    NOISY_PARSE(printf("End Namespace: %s\n", prefix));
+    if (kIsDebugParse) {
+        printf("End Namespace: %s\n", prefix);
+    }
     ParseState* st = (ParseState*)userData;
     sp<XMLNode> node = st->stack.itemAt(st->stack.size()-1);
     node->setEndLineNumber(XML_GetCurrentLineNumber(st->parser));
@@ -1240,7 +1268,9 @@ XMLNode::endNamespace(void *userData, const char *prefix)
 void XMLCALL
 XMLNode::commentData(void *userData, const char *comment)
 {
-    NOISY_PARSE(printf("Comment: %s\n", comment));
+    if (kIsDebugParse) {
+        printf("Comment: %s\n", comment);
+    }
     ParseState* st = (ParseState*)userData;
     if (st->pendingComment.size() > 0) {
         st->pendingComment.append(String16("\n"));
@@ -1337,8 +1367,10 @@ status_t XMLNode::collect_attr_strings(StringPool* outPool,
             }
             if (idx < 0) {
                 idx = outPool->add(attr.name);
-                NOISY(printf("Adding attr %s (resid 0x%08x) to pool: idx=%d\n",
-                        String8(attr.name).string(), id, idx));
+                if (kIsDebug) {
+                    printf("Adding attr %s (resid 0x%08x) to pool: idx=%zd\n",
+                            String8(attr.name).string(), id, SSIZE(idx));
+                }
                 if (id != 0) {
                     while ((ssize_t)outResIds->size() <= idx) {
                         outResIds->add(0);
@@ -1347,8 +1379,9 @@ status_t XMLNode::collect_attr_strings(StringPool* outPool,
                 }
             }
             attr.namePoolIdx = idx;
-            NOISY(printf("String %s offset=0x%08x\n",
-                         String8(attr.name).string(), idx));
+            if (kIsDebug) {
+                printf("String %s offset=0x%08zd\n", String8(attr.name).string(), SSIZE(idx));
+            }
         }
     }
 
