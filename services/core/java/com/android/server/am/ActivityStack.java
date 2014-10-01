@@ -1482,6 +1482,11 @@ final class ActivityStack {
     final boolean resumeTopActivityInnerLocked(ActivityRecord prev, Bundle options) {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
 
+        if (!mService.mBooting && !mService.mBooted) {
+            // Not ready yet!
+            return false;
+        }
+
         ActivityRecord parent = mActivityContainer.mParentActivity;
         if ((parent != null && parent.state != ActivityState.RESUMED) ||
                 !mActivityContainer.isAttachedLocked()) {
@@ -3606,6 +3611,10 @@ final class ActivityStack {
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
         if (task == tr && tr.isOverHomeStack() || numTasks <= 1 && isOnHomeDisplay()) {
+            if (!mService.mBooting && !mService.mBooted) {
+                // Not ready yet!
+                return false;
+            }
             final int taskToReturnTo = tr.getTaskToReturnTo();
             tr.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
             return mStackSupervisor.resumeHomeStackTask(taskToReturnTo, null);
