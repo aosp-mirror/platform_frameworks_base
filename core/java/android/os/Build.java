@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.telephony.TelephonyProperties;
+import dalvik.system.VMRuntime;
 
 /**
  * Information about the current build, extracted from system properties.
@@ -51,7 +52,7 @@ public class Build {
      * @deprecated Use {@link #SUPPORTED_ABIS} instead.
      */
     @Deprecated
-    public static final String CPU_ABI = getString("ro.product.cpu.abi");
+    public static final String CPU_ABI;
 
     /**
      * The name of the second instruction set (CPU type + ABI convention) of native code.
@@ -59,7 +60,7 @@ public class Build {
      * @deprecated Use {@link #SUPPORTED_ABIS} instead.
      */
     @Deprecated
-    public static final String CPU_ABI2 = getString("ro.product.cpu.abi2");
+    public static final String CPU_ABI2;
 
     /** The manufacturer of the product/hardware. */
     public static final String MANUFACTURER = getString("ro.product.manufacturer");
@@ -116,6 +117,27 @@ public class Build {
     public static final String[] SUPPORTED_64_BIT_ABIS =
             getStringList("ro.product.cpu.abilist64", ",");
 
+
+    static {
+        /*
+         * Adjusts CPU_ABI and CPU_ABI2 depending on whether or not a given process is 64 bit.
+         * 32 bit processes will always see 32 bit ABIs in these fields for backward
+         * compatibility.
+         */
+        final String[] abiList;
+        if (VMRuntime.getRuntime().is64Bit()) {
+            abiList = SUPPORTED_64_BIT_ABIS;
+        } else {
+            abiList = SUPPORTED_32_BIT_ABIS;
+        }
+
+        CPU_ABI = abiList[0];
+        if (abiList.length > 1) {
+            CPU_ABI2 = abiList[1];
+        } else {
+            CPU_ABI2 = "";
+        }
+    }
 
     /** Various version strings. */
     public static class VERSION {
