@@ -28,4 +28,5 @@
     </string-array>
 
     <string name="racoon">Racoon</string>
+    <string name="sample_layout">This is an example of a layout this library provides.</string>
 </resources>
