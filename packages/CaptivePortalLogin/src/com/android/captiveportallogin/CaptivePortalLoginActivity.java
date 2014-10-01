@@ -20,7 +20,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -55,6 +58,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private URL mURL;
     private int mNetId;
+    private NetworkCallback mNetworkCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +77,27 @@ public class CaptivePortalLoginActivity extends Activity {
         getActionBar().setDisplayShowHomeEnabled(false);
 
         mNetId = Integer.parseInt(getIntent().getStringExtra(Intent.EXTRA_TEXT));
-        ConnectivityManager.setProcessDefaultNetwork(new Network(mNetId));
+        final Network network = new Network(mNetId);
+        ConnectivityManager.setProcessDefaultNetwork(network);
+
+        // Exit app if Network disappears.
+        final NetworkCapabilities networkCapabilities =
+                ConnectivityManager.from(this).getNetworkCapabilities(network);
+        if (networkCapabilities == null) {
+            finish();
+            return;
+        }
+        mNetworkCallback = new NetworkCallback() {
+            @Override
+            public void onLost(Network lostNetwork) {
+                if (network.equals(lostNetwork)) done(false);
+            }
+        };
+        final NetworkRequest.Builder builder = new NetworkRequest.Builder();
+        for (int transportType : networkCapabilities.getTransportTypes()) {
+            builder.addTransportType(transportType);
+        }
+        ConnectivityManager.from(this).registerNetworkCallback(builder.build(), mNetworkCallback);
 
         WebView myWebView = (WebView) findViewById(R.id.webview);
         WebSettings webSettings = myWebView.getSettings();
@@ -84,6 +108,7 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void done(boolean use_network) {
+        ConnectivityManager.from(this).unregisterNetworkCallback(mNetworkCallback);
         Intent intent = new Intent(ACTION_CAPTIVE_PORTAL_LOGGED_IN);
         intent.putExtra(Intent.EXTRA_TEXT, String.valueOf(mNetId));
         intent.putExtra(LOGGED_IN_RESULT, use_network ? "1" : "0");
