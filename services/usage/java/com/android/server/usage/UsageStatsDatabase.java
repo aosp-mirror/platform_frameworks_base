@@ -382,6 +382,10 @@ class UsageStatsDatabase {
         File[] files = dir.listFiles();
         if (files != null) {
             for (File f : files) {
+                String path = f.getPath();
+                if (path.endsWith(".bak")) {
+                    f = new File(path.substring(0, path.length() - 4));
+                }
                 long beginTime = Long.parseLong(f.getName());
                 if (beginTime < expiryTime) {
                     new AtomicFile(f).delete();
