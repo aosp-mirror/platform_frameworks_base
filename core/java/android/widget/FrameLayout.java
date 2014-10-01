@@ -29,6 +29,7 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
@@ -198,6 +199,15 @@ public class FrameLayout extends ViewGroup {
             }
 
             requestLayout();
+        }
+    }
+
+    @Override
+    @RemotableViewMethod
+    public void setVisibility(@Visibility int visibility) {
+        super.setVisibility(visibility);
+        if (mForeground != null) {
+            mForeground.setVisible(visibility == VISIBLE, false);
         }
     }
 
