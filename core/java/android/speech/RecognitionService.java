@@ -91,9 +91,20 @@ public abstract class RecognitionService extends Service {
         }
     };
 
-    private void dispatchStartListening(Intent intent, IRecognitionListener listener) {
+    private void dispatchStartListening(Intent intent, final IRecognitionListener listener) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
+            try {
+                listener.asBinder().linkToDeath(new IBinder.DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_CANCEL, listener));
+                    }
+                }, 0);
+            } catch (RemoteException re) {
+                Log.e(TAG, "dead listener on startListening");
+                return;
+            }
             mCurrentCallback = new Callback(listener);
             RecognitionService.this.onStartListening(intent, mCurrentCallback);
         } else {
