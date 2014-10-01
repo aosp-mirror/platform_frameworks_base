@@ -2135,6 +2135,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return onKeyguard && (isMethodInsecure || mDozing || mScreenOnComingFromTouch);
     }
 
+    public boolean isDozing() {
+        return mDozing;
+    }
+
     @Override  // NotificationData.Environment
     public String getCurrentMediaNotificationKey() {
         return mMediaNotificationKey;
