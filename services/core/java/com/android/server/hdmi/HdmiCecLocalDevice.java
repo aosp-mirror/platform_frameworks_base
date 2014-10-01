@@ -246,6 +246,8 @@ abstract class HdmiCecLocalDevice {
                 return handleRequestActiveSource(message);
             case Constants.MESSAGE_GET_MENU_LANGUAGE:
                 return handleGetMenuLanguage(message);
+            case Constants.MESSAGE_SET_MENU_LANGUAGE:
+                return handleSetMenuLanguage(message);
             case Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS:
                 return handleGivePhysicalAddress();
             case Constants.MESSAGE_GIVE_OSD_NAME:
@@ -372,6 +374,14 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
+        // 'return false' will cause to reply with <Feature Abort>.
+        return false;
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleSetMenuLanguage(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        Slog.w(TAG, "Only Playback device can handle <Set Menu Language>:" + message.toString());
         // 'return false' will cause to reply with <Feature Abort>.
         return false;
     }
