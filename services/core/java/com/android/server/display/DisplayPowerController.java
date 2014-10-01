@@ -227,6 +227,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // turning off the screen.
     private boolean mPendingScreenOff;
 
+    // True if we have unfinished business and are holding a suspend blocker.
+    private boolean mUnfinishedBusiness;
+
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
 
@@ -633,22 +636,42 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedLowPower = true;
         }
 
-        // Animate the screen brightness when the screen is on.
-        if (state != Display.STATE_OFF) {
-            animateScreenBrightness(brightness, slowChange
-                    ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
-        }
-
         // Animate the screen state change unless already animating.
         animateScreenStateChange(state, performScreenOffTransition);
 
-        // Report whether the display is ready for use and all changes have been applied.
-        if (mustNotify
-                && mPendingScreenOnUnblocker == null
+        // Animate the screen brightness when the screen is on or dozing.
+        // Skip the animation when the screen is off or suspended.
+        final int actualState = mPowerState.getScreenState();
+        if (actualState == Display.STATE_ON || actualState == Display.STATE_DOZE) {
+            animateScreenBrightness(brightness,
+                    slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+        } else {
+            animateScreenBrightness(brightness, 0);
+        }
+
+        // Determine whether the display is ready for use in the newly requested state.
+        // Note that we do not wait for the brightness ramp animation to complete before
+        // reporting the display is ready because we only need to ensure the screen is in the
+        // right power state even as it continues to converge on the desired brightness.
+        final boolean ready = mPendingScreenOnUnblocker == null
                 && !mColorFadeOnAnimator.isStarted()
                 && !mColorFadeOffAnimator.isStarted()
-                && !mScreenBrightnessRampAnimator.isAnimating()
-                && mPowerState.waitUntilClean(mCleanListener)) {
+                && mPowerState.waitUntilClean(mCleanListener);
+        final boolean finished = ready
+                && !mScreenBrightnessRampAnimator.isAnimating();
+
+        // Grab a wake lock if we have unfinished business.
+        if (!finished && !mUnfinishedBusiness) {
+            if (DEBUG) {
+                Slog.d(TAG, "Unfinished business...");
+            }
+            mCallbacks.acquireSuspendBlocker();
+            mUnfinishedBusiness = true;
+        }
+
+        // Notify the power manager when ready.
+        if (ready && mustNotify) {
+            // Send state change.
             synchronized (mLock) {
                 if (!mPendingRequestChangedLocked) {
                     mDisplayReadyLocked = true;
@@ -659,6 +682,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
             sendOnStateChangedWithWakelock();
+        }
+
+        // Release the wake lock when we have no unfinished business.
+        if (finished && mUnfinishedBusiness) {
+            if (DEBUG) {
+                Slog.d(TAG, "Finished business...");
+            }
+            mUnfinishedBusiness = false;
+            mCallbacks.releaseSuspendBlocker();
         }
     }
 
@@ -723,6 +755,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void animateScreenBrightness(int target, int rate) {
+        if (DEBUG) {
+            Slog.d(TAG, "Animating brightness: target=" + target +", rate=" + rate);
+        }
         if (mScreenBrightnessRampAnimator.animateTo(target, rate)) {
             try {
                 mBatteryStats.noteScreenBrightness(target);
