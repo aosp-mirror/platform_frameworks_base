@@ -895,7 +895,7 @@ public abstract class Drawable {
      */
     public void getOutline(@NonNull Outline outline) {
         outline.setRect(getBounds());
-        outline.setAlpha(getAlpha() / 255.0f);
+        outline.setAlpha(0);
     }
 
     /**
