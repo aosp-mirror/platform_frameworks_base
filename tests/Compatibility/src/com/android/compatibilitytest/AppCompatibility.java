@@ -155,16 +155,12 @@ public class AppCompatibility extends InstrumentationTestCase {
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Intent intent;
         if (isleanback) {
-            Log.d(TAG, "Leanback and relax!");
+            Log.d(TAG, "Leanback and relax! " + packageName);
             intent = mPackageManager.getLeanbackLaunchIntentForPackage(packageName);
         } else {
             intent = mPackageManager.getLaunchIntentForPackage(packageName);
         }
-        // Skip if the apk does not have a launch intent.
-        if (intent == null) {
-            Log.d(TAG, "Skipping " + packageName + "; missing launch intent");
-            return null;
-        }
+        assertNotNull("Skipping " + packageName + "; missing launch intent", intent);
 
         String processName = getProcessName(packageName);
 
