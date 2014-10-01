@@ -16,6 +16,7 @@
 
 #ifdef HAVE_MS_C_RUNTIME
 #include <io.h>
+#include <direct.h>
 #include <sys/stat.h>
 #endif
 
