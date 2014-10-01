@@ -627,7 +627,7 @@
     <string name="permlab_setTime" msgid="2021614829591775646">"angive tid"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Tillader, at appen kan ændre klokkeslættet på din tablet."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Tillader, at en app kan ændre telefonens klokkeslæt."</string>
-    <string name="permlab_setTimeZone" msgid="2945079801013077340">"angiv tidszone"</string>
+    <string name="permlab_setTimeZone" msgid="2945079801013077340">"angive tidszone"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Tillader, at appen kan ændre tidszonen på din tablet."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillader, at appen kan ændre tidszonen på din telefon."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungerer som kontoadministrationstjeneste"</string>
@@ -755,11 +755,11 @@
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Overvåg antallet af forkerte adgangskoder ved oplåsning af skærmen, og lås telefonen eller slet alle data på telefonen, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Skifte adgangskode til oplåsning af skærm"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Skifter adgangskode til oplåsning af skærmen."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skærmen"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Slet din tablets data uden varsel ved at gendanne fabriksindstillingerne."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Slet telefonens data uden varsel ved at gendanne fabriksindstillingerne."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Sletter telefonens data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Angiv enhedens globale proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angiv enhedens globale proxy, der skal bruges, mens politikken er aktiveret. Kun den første enhedsadministrator angiver den effektive globale proxy."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Angiv udløb for skærmlåskoden"</string>
@@ -1185,6 +1185,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der er snart ikke mere lagerplads"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Nogle systemfunktioner virker måske ikke"</string>
+    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
+    <skip />
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Tryk for at få flere oplysninger eller for at stoppe appen."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1203,7 +1205,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediger med %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Del med"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Del med %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Vælg en startapp"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Vælg en startapp"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Brug %1$s som startapp"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Brug en anden app"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ryd standard i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
@@ -1594,11 +1597,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlejring nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sikker"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Skærm sendes"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Der oprettes forbindelse til <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Skærm sendes"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Forbundet til <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Afbryd forbindelsen"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Nødopkald"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Glemt mønster"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Forkert mønster"</string>
