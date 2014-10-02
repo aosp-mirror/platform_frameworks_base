@@ -38,6 +38,7 @@ public class TaskStackViewScroller {
 
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
+    float mFinalAnimatedScroll;
 
     public TaskStackViewScroller(Context context, RecentsConfiguration config, TaskStackViewLayoutAlgorithm layoutAlgorithm) {
         mConfig = config;
@@ -128,10 +129,15 @@ public class TaskStackViewScroller {
 
     /** Animates the stack scroll */
     void animateScroll(float curScroll, float newScroll, final Runnable postRunnable) {
-        // Abort any current animations
+        // Finish any current scrolling animations
+        if (mScrollAnimator != null && mScrollAnimator.isRunning()) {
+            setStackScroll(mFinalAnimatedScroll);
+            mScroller.startScroll(0, progressToScrollRange(mFinalAnimatedScroll), 0, 0, 0);
+        }
         stopScroller();
         stopBoundScrollAnimation();
 
+        mFinalAnimatedScroll = newScroll;
         mScrollAnimator = ObjectAnimator.ofFloat(this, "stackScroll", curScroll, newScroll);
         mScrollAnimator.setDuration(mConfig.taskStackScrollDuration);
         mScrollAnimator.setInterpolator(mConfig.linearOutSlowInInterpolator);
