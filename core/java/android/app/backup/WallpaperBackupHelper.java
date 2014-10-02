@@ -80,17 +80,17 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
         mFiles = files;
         mKeys = keys;
 
-        WallpaperManager wpm;
-        wpm = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
-        mDesiredMinWidth = (double) wpm.getDesiredMinimumWidth();
+        final WindowManager wm =
+                (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        final WallpaperManager wpm =
+                (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
+        final Display d = wm.getDefaultDisplay();
+        final Point size = new Point();
+        d.getSize(size);
+        mDesiredMinWidth = size.x;
         mDesiredMinHeight = (double) wpm.getDesiredMinimumHeight();
 
-        if (mDesiredMinWidth <= 0 || mDesiredMinHeight <= 0) {
-            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            Display d = wm.getDefaultDisplay();
-            Point size = new Point();
-            d.getSize(size);
-            mDesiredMinWidth = size.x;
+        if (mDesiredMinHeight <= 0) {
             mDesiredMinHeight = size.y;
         }
 
@@ -130,15 +130,12 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                     if (DEBUG) Slog.d(TAG, "Restoring wallpaper image w=" + options.outWidth
                             + " h=" + options.outHeight);
 
-                    // How much does the image differ from our preference?  The threshold
-                    // here is set to accept any image larger than our target, because
-                    // scaling down is acceptable; but to reject images that are deemed
-                    // "too small" to scale up attractively.  The value 1.33 is just barely
-                    // too low to pass Nexus 1 or Droid wallpapers for use on a Xoom, but
-                    // will pass anything relatively larger.
-                    double widthRatio = mDesiredMinWidth / options.outWidth;
-                    double heightRatio = mDesiredMinHeight / options.outHeight;
-                    if (widthRatio > 0 && widthRatio < 1.33
+                    // We accept any wallpaper that is at least as wide as our preference
+                    // (i.e. wide enough to fill the screen), and is within a comfortable
+                    // factor of the target height, to avoid significant clipping/scaling/
+                    // letterboxing.
+                    final double heightRatio = mDesiredMinHeight / options.outHeight;
+                    if (options.outWidth >= mDesiredMinWidth
                             && heightRatio > 0 && heightRatio < 1.33) {
                         // sufficiently close to our resolution; go ahead and use it
                         Slog.d(TAG, "Applying restored wallpaper image.");
@@ -147,8 +144,11 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                         // since it does not exist anywhere other than the private wallpaper
                         // file.
                     } else {
-                        Slog.i(TAG, "Dimensions too far off; using default wallpaper. wr=" + widthRatio
-                                + " hr=" + heightRatio);
+                        Slog.i(TAG, "Restored image dimensions (w="
+                                + options.outWidth + ", h=" + options.outHeight
+                                + ") too far off target (tw="
+                                + mDesiredMinWidth + ", th=" + mDesiredMinHeight
+                                + "); falling back to default wallpaper.");
                         f.delete();
                     }
                 }
