@@ -112,7 +112,7 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
       your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
     </p>
     </li>
-    
+
   </ol>
 
 
@@ -416,6 +416,9 @@ function getUrlParam(param) {
   }
 }
 
-
-
+/* direct link to ubuntu troubleshooting */
+if ( document.location.href.indexOf('#ubuntu-trouble') > -1 ) {
+  $(".linux.docs").show();
+  toggleExpandable(this,'#ubuntu-trouble');
+}
 </script>
