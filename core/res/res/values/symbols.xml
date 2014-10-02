@@ -2074,4 +2074,7 @@
   <java-symbol type="array" name="networks_not_clear_data" />
   <java-symbol type="bool" name="config_switch_phone_on_voice_reg_state_change" />
   <java-symbol type="string" name="whichHomeApplicationNamed" />
+
+  <!-- From MSIM Account -->
+  <java-symbol type="layout" name="simple_account_item" />
 </resources>
