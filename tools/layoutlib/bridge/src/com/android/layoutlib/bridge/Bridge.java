@@ -298,7 +298,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             if (log != null) {
                 log.error(LayoutLog.TAG_BROKEN,
                         "Failed to load com.android.internal.R from the layout library jar",
-                        throwable);
+                        throwable, null);
             }
             return false;
         }
@@ -426,8 +426,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             locale = "";
         }
         ULocale uLocale = new ULocale(locale);
-        return uLocale.getCharacterOrientation().equals(ICU_LOCALE_DIRECTION_RTL) ?
-                true : false;
+        return uLocale.getCharacterOrientation().equals(ICU_LOCALE_DIRECTION_RTL);
     }
 
     /**
