@@ -91,7 +91,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
-import android.util.FloatMath;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Pair;
@@ -5724,7 +5723,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
         // TODO: Test for RTL vs. LTR and use frame.right-width instead of -frame.left
-        matrix.postTranslate(-FloatMath.ceil(frame.left), -FloatMath.ceil(frame.top));
+        matrix.postTranslate((float) -Math.ceil(frame.left), (float) -Math.ceil(frame.top));
         Canvas canvas = new Canvas(bm);
         canvas.drawColor(0xFF000000);
         canvas.drawBitmap(rawss, matrix, null);

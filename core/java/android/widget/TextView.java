@@ -92,7 +92,6 @@ import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
-import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
@@ -4556,7 +4555,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                      * make sure the entire cursor gets invalidated instead of
                      * sometimes missing half a pixel.
                      */
-                    float thick = FloatMath.ceil(mTextPaint.getStrokeWidth());
+                    float thick = (float) Math.ceil(mTextPaint.getStrokeWidth());
                     if (thick < 1.0f) {
                         thick = 1.0f;
                     }
@@ -4566,10 +4565,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // mHighlightPath is guaranteed to be non null at that point.
                     mHighlightPath.computeBounds(TEMP_RECTF, false);
 
-                    invalidate((int) FloatMath.floor(horizontalPadding + TEMP_RECTF.left - thick),
-                            (int) FloatMath.floor(verticalPadding + TEMP_RECTF.top - thick),
-                            (int) FloatMath.ceil(horizontalPadding + TEMP_RECTF.right + thick),
-                            (int) FloatMath.ceil(verticalPadding + TEMP_RECTF.bottom + thick));
+                    invalidate((int) Math.floor(horizontalPadding + TEMP_RECTF.left - thick),
+                            (int) Math.floor(verticalPadding + TEMP_RECTF.top - thick),
+                            (int) Math.ceil(horizontalPadding + TEMP_RECTF.right + thick),
+                            (int) Math.ceil(verticalPadding + TEMP_RECTF.bottom + thick));
                 }
             } else {
                 for (int i = 0; i < mEditor.mCursorCount; i++) {
@@ -6236,7 +6235,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             max = Math.max(max, layout.getLineWidth(i));
         }
 
-        return (int) FloatMath.ceil(max);
+        return (int) Math.ceil(max);
     }
 
     /**
@@ -6313,7 +6312,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    des = (int) FloatMath.ceil(Layout.getDesiredWidth(mTransformed, mTextPaint));
+                    des = (int) Math.ceil(Layout.getDesiredWidth(mTransformed, mTextPaint));
                 }
                 width = des;
             } else {
@@ -6343,7 +6342,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
-                        hintDes = (int) FloatMath.ceil(Layout.getDesiredWidth(mHint, mTextPaint));
+                        hintDes = (int) Math.ceil(Layout.getDesiredWidth(mHint, mTextPaint));
                     }
                     hintWidth = hintDes;
                 } else {
@@ -6649,8 +6648,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              * keep leading edge in view.
              */
 
-            int left = (int) FloatMath.floor(layout.getLineLeft(line));
-            int right = (int) FloatMath.ceil(layout.getLineRight(line));
+            int left = (int) Math.floor(layout.getLineLeft(line));
+            int right = (int) Math.ceil(layout.getLineRight(line));
 
             if (right - left < hspace) {
                 scrollx = (right + left) / 2 - hspace / 2;
@@ -6662,10 +6661,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         } else if (a == Layout.Alignment.ALIGN_RIGHT) {
-            int right = (int) FloatMath.ceil(layout.getLineRight(line));
+            int right = (int) Math.ceil(layout.getLineRight(line));
             scrollx = right - hspace;
         } else { // a == Layout.Alignment.ALIGN_LEFT (will also be the default)
-            scrollx = (int) FloatMath.floor(layout.getLineLeft(line));
+            scrollx = (int) Math.floor(layout.getLineLeft(line));
         }
 
         if (ht < vspace) {
@@ -6740,8 +6739,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int top = layout.getLineTop(line);
         final int bottom = layout.getLineTop(line + 1);
 
-        int left = (int) FloatMath.floor(layout.getLineLeft(line));
-        int right = (int) FloatMath.ceil(layout.getLineRight(line));
+        int left = (int) Math.floor(layout.getLineLeft(line));
+        int right = (int) Math.ceil(layout.getLineRight(line));
         int ht = layout.getHeight();
 
         int hspace = mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight();

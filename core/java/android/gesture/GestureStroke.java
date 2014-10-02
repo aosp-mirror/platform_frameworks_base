@@ -69,8 +69,7 @@ public class GestureStroke {
                 bx.bottom = p.y;
                 len = 0;
             } else {
-                len += Math.sqrt(Math.pow(p.x - tmpPoints[(i - 1) * 2], 2)
-                        + Math.pow(p.y - tmpPoints[(i -1 ) * 2 + 1], 2));
+                len += Math.hypot(p.x - tmpPoints[(i - 1) * 2], p.y - tmpPoints[(i -1 ) * 2 + 1]);
                 bx.union(p.x, p.y);
             }
             index++;
