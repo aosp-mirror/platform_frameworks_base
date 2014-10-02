@@ -257,7 +257,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
 
-        final TypedArray a = r.obtainAttributes(attrs, R.styleable.AnimatedRotateDrawable);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.AnimatedRotateDrawable);
 
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedRotateDrawable_visible);
 
