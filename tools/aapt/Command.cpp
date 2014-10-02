@@ -211,11 +211,16 @@ int doList(Bundle* bundle)
             goto bail;
         }
 
-        const ResTable& res = assets.getResources(false);
-#ifndef HAVE_ANDROID_OS
-        printf("\nResource table:\n");
-        res.print(false);
+#ifdef HAVE_ANDROID_OS
+        static const bool kHaveAndroidOs = true;
+#else
+        static const bool kHaveAndroidOs = false;
 #endif
+        const ResTable& res = assets.getResources(false);
+        if (!kHaveAndroidOs) {
+            printf("\nResource table:\n");
+            res.print(false);
+        }
 
         Asset* manifestAsset = assets.openNonAsset("AndroidManifest.xml",
                                                    Asset::ACCESS_BUFFER);
