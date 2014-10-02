@@ -625,6 +625,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.refreshRate = mRefreshRate;
+                mInfo.supportedRefreshRates = new float[] { mRefreshRate };
                 mInfo.presentationDeadlineNanos = 1000000000L / (int) mRefreshRate; // 1 frame
                 mInfo.flags = mFlags;
                 mInfo.type = Display.TYPE_WIFI;
