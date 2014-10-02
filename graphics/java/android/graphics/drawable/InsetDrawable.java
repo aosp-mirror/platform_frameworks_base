@@ -84,7 +84,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        final TypedArray a = r.obtainAttributes(attrs, R.styleable.InsetDrawable);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.InsetDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.InsetDrawable_visible);
 
         mInsetState.mDrawable = null;
