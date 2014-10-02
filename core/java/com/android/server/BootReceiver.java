@@ -155,8 +155,10 @@ public class BootReceiver extends BroadcastReceiver {
         // Scan existing tombstones (in case any new ones appeared)
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
         for (int i = 0; tombstoneFiles != null && i < tombstoneFiles.length; i++) {
-            addFileToDropBox(db, prefs, headers, tombstoneFiles[i].getPath(),
-                    LOG_SIZE, "SYSTEM_TOMBSTONE");
+            if (tombstoneFiles[i].isFile()) {
+                addFileToDropBox(db, prefs, headers, tombstoneFiles[i].getPath(),
+                        LOG_SIZE, "SYSTEM_TOMBSTONE");
+            }
         }
 
         // Start watching for new tombstone files; will record them as they occur.
@@ -165,8 +167,10 @@ public class BootReceiver extends BroadcastReceiver {
             @Override
             public void onEvent(int event, String path) {
                 try {
-                    String filename = new File(TOMBSTONE_DIR, path).getPath();
-                    addFileToDropBox(db, prefs, headers, filename, LOG_SIZE, "SYSTEM_TOMBSTONE");
+                    File file = new File(TOMBSTONE_DIR, path);
+                    if (file.isFile()) {
+                        addFileToDropBox(db, prefs, headers, file.getPath(), LOG_SIZE, "SYSTEM_TOMBSTONE");
+                    }
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't log tombstone", e);
                 }
