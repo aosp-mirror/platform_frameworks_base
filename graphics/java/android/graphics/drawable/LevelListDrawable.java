@@ -105,7 +105,7 @@ public class LevelListDrawable extends DrawableContainer {
                 continue;
             }
 
-            TypedArray a = r.obtainAttributes(attrs,
+            TypedArray a = obtainAttributes(r, theme, attrs,
                     com.android.internal.R.styleable.LevelListDrawableItem);
 
             low = a.getInt(
