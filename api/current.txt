@@ -28311,12 +28311,14 @@ package android.telecom {
     method public final void destroy();
     method public final android.telecom.AudioState getAudioState();
     method public final int getCapabilities();
+    method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
     method public final java.util.List<android.telecom.Connection> getConnections();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public final int getState();
     method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onDisconnect();
     method public void onHold();
+    method public void onMerge(android.telecom.Connection);
     method public void onMerge();
     method public void onPlayDtmfTone(char);
     method public void onSeparate(android.telecom.Connection);
@@ -28326,6 +28328,7 @@ package android.telecom {
     method public final void removeConnection(android.telecom.Connection);
     method public final void setActive();
     method public final void setCapabilities(int);
+    method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setOnHold();
   }
@@ -28510,6 +28513,7 @@ package android.telecom {
   public final class RemoteConference {
     method public void disconnect();
     method public final int getCallCapabilities();
+    method public java.util.List<android.telecom.RemoteConnection> getConferenceableConnections();
     method public final java.util.List<android.telecom.RemoteConnection> getConnections();
     method public android.telecom.DisconnectCause getDisconnectCause();
     method public final int getState();
@@ -28528,6 +28532,7 @@ package android.telecom {
   public static abstract class RemoteConference.Callback {
     ctor public RemoteConference.Callback();
     method public void onCapabilitiesChanged(android.telecom.RemoteConference, int);
+    method public void onConferenceableConnectionsChanged(android.telecom.RemoteConference, java.util.List<android.telecom.RemoteConnection>);
     method public void onConnectionAdded(android.telecom.RemoteConference, android.telecom.RemoteConnection);
     method public void onConnectionRemoved(android.telecom.RemoteConference, android.telecom.RemoteConnection);
     method public void onDestroyed(android.telecom.RemoteConference);
