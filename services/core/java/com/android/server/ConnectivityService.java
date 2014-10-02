@@ -403,7 +403,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private ArrayList mInetLog;
 
     // track the current default http proxy - tell the world if we get a new one (real change)
-    private ProxyInfo mDefaultProxy = null;
+    private volatile ProxyInfo mDefaultProxy = null;
     private Object mProxyLock = new Object();
     private boolean mDefaultProxyDisabled = false;
 
@@ -2537,12 +2537,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-        }
 
-        if (mGlobalProxy == null) {
-            proxyProperties = mDefaultProxy;
+            if (mGlobalProxy == null) {
+                proxyProperties = mDefaultProxy;
+            }
+            sendProxyBroadcast(proxyProperties);
         }
-        sendProxyBroadcast(proxyProperties);
     }
 
     private void loadGlobalProxy() {
