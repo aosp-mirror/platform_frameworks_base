@@ -50,10 +50,13 @@ void RenderNode::outputLogBuffer(int fd) {
     fprintf(file, "\nRecent DisplayList operations\n");
     logBuffer.outputCommands(file);
 
-    String8 cachesLog;
-    Caches::getInstance().dumpMemoryUsage(cachesLog);
-    fprintf(file, "\nCaches:\n%s", cachesLog.string());
-    fprintf(file, "\n");
+    if (Caches::hasInstance()) {
+        String8 cachesLog;
+        Caches::getInstance().dumpMemoryUsage(cachesLog);
+        fprintf(file, "\nCaches:\n%s\n", cachesLog.string());
+    } else {
+        fprintf(file, "\nNo caches instance.\n");
+    }
 
     fflush(file);
 }
