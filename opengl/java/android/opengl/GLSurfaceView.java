@@ -595,9 +595,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         mDetached = false;
     }
 
-    /** @hide */
     @Override
-    protected void onDetachedFromWindowInternal() {
+    protected void onDetachedFromWindow() {
         if (LOG_ATTACH_DETACH) {
             Log.d(TAG, "onDetachedFromWindow");
         }
@@ -605,7 +604,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mGLThread.requestExitAndWait();
         }
         mDetached = true;
-        super.onDetachedFromWindowInternal();
+        super.onDetachedFromWindow();
     }
 
     // ----------------------------------------------------------------------
