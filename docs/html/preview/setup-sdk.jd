@@ -202,9 +202,15 @@ to flash the following devices:
   <li>Nexus 7 Wi-Fi (version 2, released in 2013)</li>
 </ul>
 
-<p>In addition, you also get the emulator system images, which includes
+<p>In addition, you also get the emulator system images, which include
 experimental 64-bit system images along with standard 32-bit system images.
 </p>
+
+<p class="note"><strong>Note:</strong> The 64-bit system images require the
+Intel x86 Emulator Accelerator (HAXM) Rev.5 which can be downloaded from the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a><em>Extras</em> 
+folder.</p>
+
 
 <h3 id="installImage">Install the L Preview System Image</h3>
 
@@ -216,6 +222,7 @@ can result in damage to your computer systems, devices, and data. The preview
 Android system image is not subject to the same testing as the factory OS and
 can cause your phone and installed services and applications to stop working.
 </p>
+
 
 
 <ol>
