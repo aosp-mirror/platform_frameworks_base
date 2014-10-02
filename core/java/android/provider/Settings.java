@@ -2001,7 +2001,10 @@ public final class Settings {
         public static final String DIM_SCREEN = "dim_screen";
 
         /**
-         * The timeout before the screen turns off.
+         * The amount of time in milliseconds before the device goes to sleep or begins
+         * to dream after a period of inactivity.  This value is also known as the
+         * user activity timeout period since the screen isn't necessarily turned off
+         * when it expires.
          */
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
@@ -4817,6 +4820,20 @@ public final class Settings {
                 "usb_audio_automatic_routing_disabled";
 
         /**
+         * The timeout in milliseconds before the device fully goes to sleep after
+         * a period of inactivity.  This value sets an upper bound on how long the device
+         * will stay awake or dreaming without user activity.  It should generally
+         * be longer than {@link #SCREEN_OFF_TIMEOUT} as otherwise the device
+         * will sleep before it ever has a chance to dream.
+         * <p>
+         * Use -1 to disable this timeout.
+         * </p>
+         *
+         * @hide
+         */
+        public static final String SLEEP_TIMEOUT = "sleep_timeout";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -4865,7 +4882,8 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE
+            UI_NIGHT_MODE,
+            SLEEP_TIMEOUT
         };
 
         /**
