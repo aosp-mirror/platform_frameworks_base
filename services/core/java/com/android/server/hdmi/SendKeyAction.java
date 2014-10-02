@@ -15,7 +15,7 @@
  */
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.Constants.IRT_MS;
+import static com.android.server.hdmi.HdmiConfig.IRT_MS;
 
 import android.util.Slog;
 import android.view.KeyEvent;
@@ -35,6 +35,11 @@ import android.view.KeyEvent;
 final class SendKeyAction extends HdmiCecFeatureAction {
     private static final String TAG = "SendKeyAction";
 
+    // Amount of time this action waits for a new release key input event. When timed out,
+    // the action sends out UCR and finishes its lifecycle. Used to deal with missing key release
+    // event, which can lead the device on the receiving end to generating unintended key repeats.
+    private static final int AWAIT_RELEASE_KEY_MS = 1000;
+
     // State in which the action is at work. The state is set in {@link #start()} and
     // persists throughout the process till it is set back to {@code STATE_NONE} at the end.
     private static final int STATE_PROCESSING_KEYCODE = 1;
@@ -44,6 +49,10 @@ final class SendKeyAction extends HdmiCecFeatureAction {
 
     // The key code of the last key press event the action is passed via processKeyEvent.
     private int mLastKeycode;
+
+    // The time stamp when the last CEC key command was sent. Used to determine the press-and-hold
+    // operation.
+    private long mLastSendKeyTime;
 
     /**
      * Constructor.
@@ -61,6 +70,7 @@ final class SendKeyAction extends HdmiCecFeatureAction {
     @Override
     public boolean start() {
         sendKeyDown(mLastKeycode);
+        mLastSendKeyTime = getCurrentTime();
         // finish action for non-repeatable key.
         if (!HdmiCecKeycode.isRepeatableKey(mLastKeycode)) {
             sendKeyUp();
@@ -68,8 +78,12 @@ final class SendKeyAction extends HdmiCecFeatureAction {
             return true;
         }
         mState = STATE_PROCESSING_KEYCODE;
-        addTimer(mState, IRT_MS);
+        addTimer(mState, AWAIT_RELEASE_KEY_MS);
         return true;
+    }
+
+    private long getCurrentTime() {
+        return System.currentTimeMillis();
     }
 
     /**
@@ -83,24 +97,32 @@ final class SendKeyAction extends HdmiCecFeatureAction {
             Slog.w(TAG, "Not in a valid state");
             return;
         }
-        // A new key press event that comes in with a key code different from the last
-        // one sets becomes a new key code to be used for press-and-hold operation.
-        // Removes any pending timer and starts a new timer for itself.
-        // Key release event indicates that the action shall be finished. Send UCR
-        // command and terminate the action. Other release events are ignored.
         if (isPressed) {
+            // A new key press event that comes in with a key code different from the last
+            // one becomes a new key code to be used for press-and-hold operation.
             if (keycode != mLastKeycode) {
                 sendKeyDown(keycode);
+                mLastSendKeyTime = getCurrentTime();
                 if (!HdmiCecKeycode.isRepeatableKey(keycode)) {
                     sendKeyUp();
                     finish();
                     return;
                 }
-                mActionTimer.clearTimerMessage();
-                addTimer(mState, IRT_MS);
-                mLastKeycode = keycode;
+            } else {
+                // Press-and-hold key transmission takes place if Android key inputs are
+                // repeatedly coming in and more than IRT_MS has passed since the last
+                // press-and-hold key transmission.
+                if (getCurrentTime() - mLastSendKeyTime >= IRT_MS) {
+                    sendKeyDown(keycode);
+                    mLastSendKeyTime = getCurrentTime();
+                }
             }
+            mActionTimer.clearTimerMessage();
+            addTimer(mState, AWAIT_RELEASE_KEY_MS);
+            mLastKeycode = keycode;
         } else {
+            // Key release event indicates that the action shall be finished. Send UCR
+            // command and terminate the action. Other release events are ignored.
             if (keycode == mLastKeycode) {
                 sendKeyUp();
                 finish();
@@ -130,15 +152,12 @@ final class SendKeyAction extends HdmiCecFeatureAction {
 
     @Override
     public void handleTimerEvent(int state) {
-        // Timer event occurs every IRT_MS milliseconds to perform key-repeat (or press-and-hold)
-        // operation. If the last received key code is as same as the one with which the action
-        // is started, plus there was no key release event in last IRT_MS timeframe, send a UCP
-        // command and start another timer to schedule the next press-and-hold command.
+        // Timeout on waiting for the release key event. Send UCR and quit the action.
         if (mState != STATE_PROCESSING_KEYCODE) {
             Slog.w(TAG, "Not in a valid state");
             return;
         }
-        sendKeyDown(mLastKeycode);
-        addTimer(mState, IRT_MS);
+        sendKeyUp();
+        finish();
     }
 }
