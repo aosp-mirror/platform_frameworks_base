@@ -807,6 +807,8 @@ public abstract class CameraMetadata<TKey> {
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are used by the camera
      * device, along with android.flash.* fields, if there's
      * a flash unit for this camera device.</p>
+     * <p>LEGACY devices do not support the OFF mode and will
+     * override attempts to use this value to ON.</p>
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
@@ -1577,6 +1579,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Turn on custom high dynamic range (HDR) mode.</p>
+     * <p>This is intended for LEGACY mode devices only;
+     * HAL3+ camera devices should not implement this mode.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      * @hide
      */
@@ -2064,6 +2068,8 @@ public abstract class CameraMetadata<TKey> {
      * and may restart scanning at any time.</p>
      * <p>Only used by CONTINUOUS_* AF modes. This is a transient state, the camera
      * device may skip reporting this state in capture result.</p>
+     * <p>LEGACY camera devices do not support this state. When a passive
+     * scan has finished, it will always go to PASSIVE_FOCUSED.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_UNFOCUSED = 6;

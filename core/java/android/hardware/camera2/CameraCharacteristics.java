@@ -318,6 +318,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * OFF mode.</p>
      * <p>For FULL capability device ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL), OFF must be
      * included.</p>
+     * <p>LEGACY devices will always only support FAST mode.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
@@ -333,6 +335,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * supported by a given camera device. This field lists the
      * valid anti-banding modes that the application may request
      * for this camera device; they must include AUTO.</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
@@ -345,12 +348,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * given camera device, especially if no flash unit is
      * available. This entry lists the valid modes for
      * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} for this camera device.</p>
-     * <p>All camera devices support ON, and all camera devices with
-     * flash units support ON_AUTO_FLASH and
-     * ON_ALWAYS_FLASH.</p>
+     * <p>All camera devices support ON, and all camera devices with flash
+     * units support ON_AUTO_FLASH and ON_ALWAYS_FLASH.</p>
      * <p>FULL mode camera devices always support OFF mode,
      * which enables application control of camera exposure time,
      * sensitivity, and frame duration.</p>
+     * <p>LEGACY mode camera devices never support OFF mode.
+     * LIMITED mode devices support OFF if they support the MANUAL_SENSOR
+     * capability.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      */
@@ -361,6 +367,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of frame rate ranges supported by the
      * auto-exposure (AE) algorithm/hardware</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<android.util.Range<Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
@@ -370,6 +377,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Maximum and minimum exposure compensation
      * setting, in counts of
      * {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
      */
@@ -380,6 +388,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Smallest step by which exposure compensation
      * can be changed</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<Rational> CONTROL_AE_COMPENSATION_STEP =
@@ -394,8 +403,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>All LIMITED and FULL mode camera devices will support OFF mode, and all
      * camera devices with adjustable focuser units
      * (<code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>) will support AUTO mode.</p>
+     * <p>LEGACY devices will support OFF mode only if they support
+     * focusing to infinity (by also setting {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} to
+     * <code>0.0f</code>).</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
     @PublicKey
@@ -414,6 +428,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * simply be set to OFF.</p>
      * <p>A color effect will only be applied if
      * {@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      * @see CaptureRequest#CONTROL_MODE
@@ -430,6 +445,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * camera device may be included here. Implementations are not expected
      * to be consistent across all devices. If no scene modes are supported
      * by the camera device, this will be set to <code>[DISABLED]</code>.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
@@ -440,6 +456,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of video stabilization modes that can
      * be supported</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
@@ -455,6 +472,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>FULL mode camera devices will always support OFF mode,
      * which enables application control of white balance, by using
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}({@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} must be set to TRANSFORM_MATRIX).</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
@@ -471,6 +489,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * this corresponds to the the maximum number of elements in
      * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}, {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions},
      * and {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_REGIONS
      * @see CaptureRequest#CONTROL_AF_REGIONS
@@ -485,6 +504,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * auto-exposure (AE);
      * this corresponds to the the maximum number of elements in
      * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_REGIONS
      */
@@ -498,6 +518,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * auto-white balance (AWB);
      * this corresponds to the the maximum number of elements in
      * {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      */
@@ -511,6 +532,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * auto-focus (AF);
      * this corresponds to the the maximum number of elements in
      * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AF_REGIONS
      */
@@ -541,9 +563,14 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the fps ranges
      * reported in this metadata must not be used to setup capture requests, or it will cause
      * request error.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
      * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
     public static final Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS =
@@ -553,8 +580,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The set of edge enhancement modes supported by this camera device.</p>
      * <p>This tag lists the valid modes for {@link CaptureRequest#EDGE_MODE android.edge.mode}.</p>
      * <p>Full-capability camera devices must always support OFF and FAST.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#EDGE_MODE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
     public static final Key<int[]> EDGE_AVAILABLE_EDGE_MODES =
@@ -564,7 +596,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Whether this camera device has a
      * flash.</p>
      * <p>If no flash, none of the flash controls do
-     * anything. All other metadata should return 0.</p>
+     * anything. All other metadata should return 0.
+     * This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<Boolean> FLASH_INFO_AVAILABLE =
@@ -575,6 +608,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * camera device.</p>
      * <p>This tag lists valid modes for {@link CaptureRequest#HOT_PIXEL_MODE android.hotPixel.mode}.</p>
      * <p>FULL mode camera devices will always support FAST.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
@@ -595,7 +629,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>Each output JPEG size in android.scaler.availableStreamConfigurations will have at least
      * one corresponding size that has the same aspect ratio in availableThumbnailSizes,
      * and vice versa.</li>
-     * <li>All non (0, 0) sizes will have non-zero widths and heights.</li>
+     * <li>All non (0, 0) sizes will have non-zero widths and heights.
+     * This key is available on all devices.</li>
      * </ul>
      */
     @PublicKey
@@ -609,6 +644,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * listed value will be the fixed aperture.</p>
      * <p>If the camera device supports variable apertures, the aperture value
      * in this list will be sorted in ascending order.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
     public static final Key<float[]> LENS_INFO_AVAILABLE_APERTURES =
@@ -621,7 +662,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * availableFilterDensities must contain only 0. Otherwise, this
      * list contains only the exact filter density values available on
      * this camera device.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#LENS_FILTER_DENSITY
      */
     @PublicKey
@@ -635,6 +681,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * a single value corresponding to the static focal length of the
      * device. Otherwise, this will report every focal length supported
      * by the device.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#LENS_FOCAL_LENGTH
      */
@@ -648,7 +695,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}.</p>
      * <p>If OIS is not implemented for a given camera device, this will
      * contain only OFF.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
     @PublicKey
@@ -660,7 +712,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If the lens is not fixed focus, the camera device will report this
      * field when {@link CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION android.lens.info.focusDistanceCalibration} is APPROXIMATE or CALIBRATED.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
     @PublicKey
@@ -673,6 +729,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If the lens is fixed-focus, this should be
      * 0.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
     public static final Key<Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE =
@@ -682,6 +743,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Dimensions of lens shading map.</p>
      * <p>The map should be on the order of 30-40 rows and columns, and
      * must be smaller than 64x64.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
     public static final Key<android.util.Size> LENS_INFO_SHADING_MAP_SIZE =
@@ -693,7 +760,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * focus related metadata entries, i.e. {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
      * {@link CaptureResult#LENS_FOCUS_RANGE android.lens.focusRange}, {@link CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE android.lens.info.hyperfocalDistance}, and
      * {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CaptureResult#LENS_FOCUS_RANGE
      * @see CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE
@@ -709,6 +781,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Direction the camera faces relative to
      * device screen.</p>
+     * <p>This key is available on all devices.</p>
      * @see #LENS_FACING_FRONT
      * @see #LENS_FACING_BACK
      */
@@ -720,7 +793,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The set of noise reduction modes supported by this camera device.</p>
      * <p>This tag lists the valid modes for {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}.</p>
      * <p>Full-capability camera devices must always support OFF and FAST.</p>
+     * <p>Legacy-capability camera devices will only support FAST mode.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     @PublicKey
@@ -765,6 +844,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
      * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
+     * <p>This key is available on all devices.</p>
      * @hide
      */
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
@@ -786,7 +866,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>ImageFormat#RAW10</li>
      * <li>Opaque <code>RAW</code></li>
      * </ul>
+     * <p>LEGACY mode devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> LEGACY)
+     * never support raw streams.</p>
+     * <p>This key is available on all devices.</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
     @PublicKey
@@ -814,6 +898,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
      * a processed format -- it will return 0 for a non-stalling stream.</p>
+     * <p>LEGACY devices will support up to 3 processing/non-stalling streams.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
@@ -836,6 +922,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * Typically only the <code>JPEG</code> format (ImageFormat#JPEG)</p>
      * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
      * a processed format -- it will return a non-0 value for a stalling stream.</p>
+     * <p>LEGACY devices will support up to 1 processing/stalling stream.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
@@ -856,6 +944,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
      * stream image format will be RAW_OPAQUE, the associated output stream image format
      * should be JPEG.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
     public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
@@ -876,6 +970,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>A pipeline depth of X stages is equivalent to a pipeline latency of
      * X frame intervals.</p>
      * <p>This value will be 8 or less.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureResult#REQUEST_PIPELINE_DEPTH
      */
@@ -924,6 +1019,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>Other capabilities may be available on either FULL or LIMITED
      * devices, but the application should query this field to be sure.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
@@ -945,6 +1041,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * at a more granular level than capabilities. This is especially
      * important for optional keys that are not listed under any capability
      * in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @hide
@@ -969,6 +1066,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * at a more granular level than capabilities. This is especially
      * important for optional keys that are not listed under any capability
      * in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
@@ -984,6 +1082,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.request.availableResultKeys (except that it applies for
      * CameraCharacteristics instead of CaptureResult). See above for more
      * details.</p>
+     * <p>This key is available on all devices.</p>
      * @hide
      */
     public static final Key<int[]> REQUEST_AVAILABLE_CHARACTERISTICS_KEYS =
@@ -994,6 +1093,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * camera device for output streams.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
      * <p>When set to YUV_420_888, application can access the YUV420 data directly.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
      * @hide
      */
@@ -1010,6 +1110,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>When multiple streams are configured, the minimum
      * frame duration will be &gt;= max(individual stream min
      * durations)</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
      * @hide
      */
@@ -1021,6 +1122,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The JPEG resolutions that are supported by this camera device.</p>
      * <p>The resolutions are listed as <code>(width, height)</code> pairs. All camera devices will support
      * sensor maximum resolution (defined by {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @deprecated
@@ -1040,6 +1142,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Crop regions that have a width or height that is smaller
      * than this ratio allows will be rounded up to the minimum
      * allowed size by the camera device.</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM =
@@ -1054,6 +1157,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * set to FAST.</p>
      * <p>When multiple streams are configured, the minimum frame duration will
      * be &gt;= max(individual stream min durations).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
      * @hide
      */
@@ -1075,6 +1179,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * can provide.</p>
      * <p>Please reference the documentation for the image data destination to
      * check if it limits the maximum size for image data.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
      * @hide
      */
@@ -1133,6 +1238,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
      * <p>TODO: typedef to ReprocessFormatMap</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
     public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
@@ -1220,6 +1331,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </table>
      * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} for additional
      * mandatory stream configurations on a per-capability basis.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -1244,6 +1356,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * calculating the max frame rate.</p>
      * <p>(Keep in sync with
      * StreamConfigurationMap#getOutputMinFrameDuration)</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @hide
@@ -1309,6 +1422,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * calculating the max frame rate (absent stalls).</p>
      * <p>(Keep up to date with
      * StreamConfigurationMap#getOutputStallDuration(int, Size) )</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#SENSOR_FRAME_DURATION
@@ -1396,6 +1510,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </table>
      * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} for additional
      * mandatory stream configurations on a per-capability basis.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -1417,7 +1532,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * is inside of the active array. The camera device will apply the same crop region and
      * return the final used crop region in capture result metadata {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</p>
      * <p>FULL capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL) will support
-     * FREEFORM cropping.</p>
+     * FREEFORM cropping. LEGACY capability devices will only support CENTER_ONLY cropping.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SCALER_CROP_REGION
@@ -1433,7 +1549,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Area of raw data which corresponds to only
      * active pixels.</p>
      * <p>It is smaller or equal to
-     * sensor full pixel array, which could include the black calibration pixels.</p>
+     * sensor full pixel array, which could include the black calibration pixels.
+     * This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE =
@@ -1445,7 +1562,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} control.</p>
      * <p>The values are the standard ISO sensitivity values,
      * as defined in ISO 12232:2006.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
@@ -1456,6 +1578,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The arrangement of color filters on sensor;
      * represents the colors in the top-left 2x2 section of
      * the sensor, in reading order.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG
@@ -1472,6 +1600,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The min value will be &lt;= 100e3 (100 us). For FULL
      * capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} == FULL),
      * max will be &gt;= 100e6 (100ms)</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
@@ -1493,6 +1625,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * for the minimum frame duration values.</p>
      * <p>For FULL capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} == FULL),
      * max will be &gt;= 100e6 (100ms).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_FRAME_DURATION
@@ -1506,6 +1642,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * array.</p>
      * <p>This is the physical size of the sensor pixel
      * array defined by {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      */
@@ -1523,6 +1660,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * raw size listed in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.
      * If a size corresponding to pixelArraySize is listed, the resulting
      * raw sensor image will include black pixels.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
@@ -1543,6 +1681,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * (8-14 bits is expected), or by the point where the sensor response
      * becomes too non-linear to be useful.  The default value for this is
      * maximum representable value for a 16-bit raw sample (2^16 - 1).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
      */
@@ -1556,6 +1695,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * may not based on a time source that can be compared to other system time sources.</p>
      * <p>This characteristic defines the source for the timestamps, and therefore whether they
      * can be compared against other system time sources/timestamps.</p>
+     * <p>This key is available on all devices.</p>
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME
      */
@@ -1577,6 +1717,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Some devices may choose to provide a second set of calibration
      * information for improved quality, including
      * {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2} and its corresponding matrices.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1
      * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM1
@@ -1617,6 +1758,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If this tag is present, then {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM2 android.sensor.colorTransform2},
      * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2 android.sensor.calibrationTransform2}, and
      * {@link CameraCharacteristics#SENSOR_FORWARD_MATRIX2 android.sensor.forwardMatrix2} will also be present.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2
      * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM2
@@ -1804,6 +1946,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * screen in its native orientation. Also defines the
      * direction of rolling shutter readout, which is from top
      * to bottom in the sensor's coordinate system</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<Integer> SENSOR_ORIENTATION =
@@ -1830,6 +1973,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>FULL means the device additionally supports the
      * android.statistics.faceIds and
      * android.statistics.faceLandmarks outputs.</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<int[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
@@ -1838,6 +1982,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The maximum number of simultaneously detectable
      * faces.</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     public static final Key<Integer> STATISTICS_INFO_MAX_FACE_COUNT =
@@ -1849,6 +1994,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If no hotpixel map is available for this camera device, this will contain
      * only OFF.  If the hotpixel map is available, this will include both
      * the ON and OFF options.</p>
+     * <p>Required on devices with the RAW capability.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE
      */
@@ -1866,7 +2013,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The output curves in the result metadata may have a different number
      * of points than the input curves, and will represent the actual
      * hardware curves used as closely as possible when linearly interpolated.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#TONEMAP_CURVE
      */
     @PublicKey
@@ -1878,7 +2030,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This tag lists the valid modes for {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}.</p>
      * <p>Full-capability camera devices must always support CONTRAST_CURVE and
      * FAST.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#TONEMAP_MODE
      */
     @PublicKey
@@ -1887,6 +2044,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>A list of camera LEDs that are available on this system.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @see #LED_AVAILABLE_LEDS_TRANSMIT
      * @hide
      */
@@ -1895,7 +2053,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Generally classifies the overall set of the camera device functionality.</p>
-     * <p>Camera devices will come in two flavors: LIMITED and FULL.</p>
+     * <p>Camera devices will come in three flavors: LEGACY, LIMITED and FULL.</p>
      * <p>A FULL device has the most support possible and will support below capabilities:</p>
      * <ul>
      * <li>30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.</li>
@@ -1912,6 +2070,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
      * <p>A LEGACY device does not support per-frame control, manual sensor control, manual
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
+     * <p>Each higher level supports everything the lower level supports
+     * in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC
@@ -1959,6 +2120,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Since <code>result4</code> has a <code>frameNumber == 4</code> and
      * <code>android.sync.frameNumber == 2</code>, the distance is clearly
      * <code>4 - 2 = 2</code>.</p>
+     * <p>This key is available on all devices.</p>
      * @see #SYNC_MAX_LATENCY_PER_FRAME_CONTROL
      * @see #SYNC_MAX_LATENCY_UNKNOWN
      */
@@ -1969,5 +2131,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
 
 }
