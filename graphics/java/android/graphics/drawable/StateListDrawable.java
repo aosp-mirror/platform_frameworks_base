@@ -118,7 +118,7 @@ public class StateListDrawable extends DrawableContainer {
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
 
-        final TypedArray a = r.obtainAttributes(attrs, R.styleable.StateListDrawable);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.StateListDrawable);
 
         super.inflateWithAttributes(r, parser, a,
                 R.styleable.StateListDrawable_visible);
