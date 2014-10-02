@@ -1,0 +1,230 @@
+page.title=Creating a Catalog Browser
+page.tags="browsefragment","presenter","backgroundmanager"
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#layout">Create a Media Browse Layout</a></li>
+    <li><a href="#lists">Display Media Lists</a></li>
+    <li><a href="#background">Update the Background</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>
+  Media apps that run on TV need to allow users to browse its content offerings, make a
+  selection, and start playing content. The content browsing experience for apps of this type
+  should be simple and intuitive, as well as visually pleasing and engaging.
+</p>
+
+<p>
+  This lesson discusses how to use the classes provided by the <a href=
+  "{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support library</a> to
+  implement a user interface for browsing music or videos from your app's media catalog.
+</p>
+
+
+<h2 id="layout">Create a Media Browse Layout</h2>
+
+<p>
+  The {@link android.support.v17.leanback.app.BrowseFragment} class in the leanback library
+  allows you to create a primary layout for browsing categories and rows of media items with a
+  minimum of code. The following example shows how to create a layout that contains a {@link
+  android.support.v17.leanback.app.BrowseFragment}:
+</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width=&quot;match_parent&quot;
+  android:layout_height=&quot;match_parent&quot;
+  android:orientation=&quot;vertical&quot;
+  &gt;
+
+  &lt;fragment
+      <strong>android:name="android.support.v17.leanback.app.BrowseFragment"</strong>
+      android:id=&quot;@+id/browse_fragment&quot;
+      android:layout_width=&quot;match_parent&quot;
+      android:layout_height=&quot;match_parent&quot;
+      /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>
+  In order to work with this layout in an activity, retrieve the {@link
+  android.support.v17.leanback.app.BrowseFragment} element from the layout. Use the methods in this
+  class to set display parameters such as the icon, title, and whether category headers are enabled.
+  The following code sample demonstrates how to set the layout parameters for a {@link
+  android.support.v17.leanback.app.BrowseFragment} in a layout:
+</p>
+
+<pre>
+public class BrowseMediaActivity extends Activity {
+
+    public static final String TAG ="BrowseActivity";
+
+    protected BrowseFragment mBrowseFragment;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.browse_fragment);
+
+        final FragmentManager fragmentManager = getFragmentManager();
+        <strong>mBrowseFragment = (BrowseFragment) fragmentManager.findFragmentById(
+                R.id.browse_fragment);</strong>
+
+        // Set display parameters for the BrowseFragment
+        mBrowseFragment.setHeadersState(BrowseFragment.HEADERS_ENABLED);
+        mBrowseFragment.setTitle(getString(R.string.app_name));
+        mBrowseFragment.setBadgeDrawable(getResources().getDrawable(
+                R.drawable.ic_launcher));
+        mBrowseFragment.setBrowseParams(params);
+
+    }
+}
+</pre>
+
+
+<h2 id="lists">Displaying Media Lists</h2>
+
+<p>
+  The {@link android.support.v17.leanback.app.BrowseFragment} allows you to define and display
+  browsable media content categories and media items from a media catalog using adapters and
+  presenters. Adapters enable you to connect to local or online data sources that contain your
+  media catalog information. Presenters hold data about media items and provide layout information
+  for displaying an item on screen.
+</p>
+
+<p>
+  The following example code shows an implementation of a {@link
+  android.support.v17.leanback.widget.Presenter} for displaying string data:
+</p>
+
+<pre>
+public class StringPresenter extends Presenter {
+    private static final String TAG = "StringPresenter";
+
+    public ViewHolder onCreateViewHolder(ViewGroup parent) {
+        TextView textView = new TextView(parent.getContext());
+        textView.setFocusable(true);
+        textView.setFocusableInTouchMode(true);
+        textView.setBackground(
+                parent.getContext().getResources().getDrawable(R.drawable.text_bg));
+        return new ViewHolder(textView);
+    }
+
+    public void onBindViewHolder(ViewHolder viewHolder, Object item) {
+        ((TextView) viewHolder.view).setText(item.toString());
+    }
+
+    public void onUnbindViewHolder(ViewHolder viewHolder) {
+        // no op
+    }
+}
+</pre>
+
+<p>
+  Once you have constructed a presenter class for your media items, you can build and attach an
+  adapter to the {@link android.support.v17.leanback.app.BrowseFragment} to display those items on
+  screen for browsing by the user. The following example code demonstrates how to construct an
+  adapter to display categories and items in those categories using the {@code StringPresenter}
+  class shown in the previous code example:
+</p>
+
+<pre>
+private ArrayObjectAdapter mRowsAdapter;
+private static final int NUM_ROWS = 4;
+
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+
+    buildRowsAdapter();
+}
+
+private void buildRowsAdapter() {
+    mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+
+    for (int i = 0; i &lt; NUM_ROWS; ++i) {
+        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(
+                new StringPresenter());
+        listRowAdapter.add("Media Item 1");
+        listRowAdapter.add("Media Item 2");
+        listRowAdapter.add("Media Item 3");
+        HeaderItem header = new HeaderItem(i, "Category " + i, null);
+        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+    }
+
+    mBrowseFragment.setAdapter(mRowsAdapter);
+}
+</pre>
+
+<p>
+  This example shows a static implementation of the adapters. A typical media browsing application
+  uses data from an online database or web service. For an example of a browsing application that
+  uses data retrieved from the web, see the
+  <a href="http://github.com/googlesamples/androidtv-leanback">Android TV</a> sample app.
+</p>
+
+<h2 id="background">Update the Background</h2>
+
+<p>
+  In order to add visual interest to a media-browsing app on TV, you can update the background
+  image as users browse through content. This technique can make interaction with your app feel
+  more cinematic and enjoyable for users.
+</p>
+
+<p>
+  The Leanback support library provides a {@link android.support.v17.leanback.app.BackgroundManager}
+  class for changing the background of your TV app activity. The following example shows how to
+  create a simple method for updating the background within your TV app activity:
+</p>
+
+<pre>
+protected void updateBackground(Drawable drawable) {
+    BackgroundManager.getInstance(this).setDrawable(drawable);
+}
+</pre>
+
+<p>
+  Many of the existing media-browse apps automatically update the background as the user navigates
+  through media listings. In order to do this, you can set up a selection listener to automatically
+  update the background based on the user's current selection. The following example shows you how
+  to set up an {@link android.support.v17.leanback.widget.OnItemViewSelectedListener} class to
+  catch selection events and update the background:
+</p>
+
+<pre>
+protected void clearBackground() {
+    BackgroundManager.getInstance(this).setDrawable(mDefaultBackground);
+}
+
+protected OnItemViewSelectedListener getDefaultItemViewSelectedListener() {
+    return new OnItemViewSelectedListener() {
+        &#64;Override
+        public void onItemSelected(Object item, Row row) {
+            if (item instanceof Movie ) {
+                URI uri = ((Movie)item).getBackdropURI();
+                updateBackground(uri);
+            } else {
+                clearBackground();
+            }
+        }
+    };
+}
+</pre>
+
+<p class="note">
+  <strong>Note:</strong> The implementation above is a simple example shown for purposes of
+  illustration. When creating this function in your own app, you should consider running the
+  background update action in a separate thread for better performance. In addition, if you are
+  planning on updating the background in response to users scrolling through items, consider adding
+  a time to delay a background image update until the user settles on an item. This technique avoids
+  excessive background image updates.
+</p>
