@@ -901,7 +901,7 @@ public final class BroadcastQueue {
                     Slog.w(TAG, "Exception when sending broadcast to "
                           + r.curComponent, e);
                 } catch (RuntimeException e) {
-                    Log.wtf(TAG, "Failed sending broadcast to "
+                    Slog.wtf(TAG, "Failed sending broadcast to "
                             + r.curComponent + " with " + r.intent, e);
                     // If some unexpected exception happened, just skip
                     // this broadcast.  At this point we are not in the call
