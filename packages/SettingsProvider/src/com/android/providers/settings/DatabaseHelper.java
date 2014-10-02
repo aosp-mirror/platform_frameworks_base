@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 112;
+    private static final int DATABASE_VERSION = 113;
 
     private Context mContext;
     private int mUserHandle;
@@ -1811,6 +1811,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 112;
         }
 
+        if (upgradeVersion < 113) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadIntegerSetting(stmt, Settings.Secure.SLEEP_TIMEOUT,
+                        R.integer.def_sleep_timeout);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 113;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2382,6 +2398,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt, Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
                     R.bool.def_lock_screen_allow_private_notifications);
 
+            loadIntegerSetting(stmt, Settings.Secure.SLEEP_TIMEOUT,
+                    R.integer.def_sleep_timeout);
         } finally {
             if (stmt != null) stmt.close();
         }
