@@ -12,6 +12,9 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include "Images.h"
+#ifdef HAVE_MS_C_RUNTIME
+#include <direct.h>
+#endif
 
 using namespace android;
 
