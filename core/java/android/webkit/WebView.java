@@ -251,15 +251,6 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener, ViewDebug.HierarchyHandler {
 
-    /**
-     * Broadcast Action: Indicates the data reduction proxy setting changed.
-     * Sent by the settings app when user changes the data reduction proxy value. This intent will
-     * always stay as a hidden API.
-     * @hide
-     */
-    public static final String DATA_REDUCTION_PROXY_SETTING_CHANGED =
-            "android.webkit.DATA_REDUCTION_PROXY_SETTING_CHANGED";
-
     private static final String LOGTAG = "WebView";
 
     // Throwing an exception for incorrect thread usage if the
