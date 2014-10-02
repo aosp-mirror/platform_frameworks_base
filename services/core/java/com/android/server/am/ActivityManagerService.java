@@ -2031,7 +2031,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void onPackageModified(String packageName) {
             final int eventUserId = getChangingUserId();
-            final PackageManager pm = mContext.getPackageManager();
+            final IPackageManager pm = AppGlobals.getPackageManager();
             final ArrayList<Pair<Intent, Integer>> recentTaskIntents =
                     new ArrayList<Pair<Intent, Integer>>();
             final HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
@@ -2056,13 +2056,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                         continue;
                     }
                     try {
-                        ActivityInfo info = pm.getActivityInfo(cn, eventUserId);
-                        if (info != null && info.isEnabled()) {
+                        ActivityInfo info = pm.getActivityInfo(cn, 0, eventUserId);
+                        if (info != null) {
                             componentsKnownToExist.add(cn);
                         } else {
                             tasksToRemove.add(p.second);
                         }
-                    } catch (Exception e) {}
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to query activity info for component: " + cn, e);
+                    }
                 }
             }
             // Prune all the tasks with removed components from the list of recent tasks
