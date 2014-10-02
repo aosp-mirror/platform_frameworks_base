@@ -93,7 +93,8 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
 
         int type;
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ScaleDrawable);
+        TypedArray a = obtainAttributes(
+                r, theme, attrs, com.android.internal.R.styleable.ScaleDrawable);
 
         float sw = getPercent(a, com.android.internal.R.styleable.ScaleDrawable_scaleWidth);
         float sh = getPercent(a, com.android.internal.R.styleable.ScaleDrawable_scaleHeight);
