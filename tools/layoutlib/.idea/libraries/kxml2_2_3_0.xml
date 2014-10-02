@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="kxml2-2.3.0">
     <CLASSES>
-      <root url="jar://$ANDROID_BUILD_TOP$/prebuilts/misc/common/kxml2/kxml2-2.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/kxml2/kxml2-2.3.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$ANDROID_BUILD_TOP$/libcore/xml/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../../../libcore/xml/src/main/java" />
     </SOURCES>
   </library>
 </component>

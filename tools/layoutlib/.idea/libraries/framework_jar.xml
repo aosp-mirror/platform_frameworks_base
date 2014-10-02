@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="framework.jar">
     <CLASSES>
-      <root url="jar://$ANDROID_BUILD_TOP$/out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$ANDROID_BUILD_TOP$/frameworks/base/core/java" />
-      <root url="file://$ANDROID_BUILD_TOP$/frameworks/base/graphics/java" />
-      <root url="file://$ANDROID_BUILD_TOP$/libcore/luni/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../core/java" />
+      <root url="file://$PROJECT_DIR$/../../graphics/java" />
+      <root url="file://$PROJECT_DIR$/../../../../libcore/luni/src/main/java" />
     </SOURCES>
   </library>
 </component>

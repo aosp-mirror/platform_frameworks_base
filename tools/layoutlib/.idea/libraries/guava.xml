@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="guava">
     <CLASSES>
-      <root url="jar://$ANDROID_BUILD_TOP$/out/host/common/obj/JAVA_LIBRARIES/guavalib_intermediates/javalib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../out/host/common/obj/JAVA_LIBRARIES/guavalib_intermediates/javalib.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$ANDROID_BUILD_TOP$/external/guava/guava/src" />
+      <root url="file://$PROJECT_DIR$/../../../../external/guava/guava/src" />
     </SOURCES>
   </library>
 </component>
