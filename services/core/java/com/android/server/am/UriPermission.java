@@ -257,7 +257,7 @@ final class UriPermission {
      */
     void removeReadOwner(UriPermissionOwner owner) {
         if (!mReadOwners.remove(owner)) {
-            Log.wtf(TAG, "Unknown read owner " + owner + " in " + this);
+            Slog.wtf(TAG, "Unknown read owner " + owner + " in " + this);
         }
         if (mReadOwners.size() == 0) {
             mReadOwners = null;
@@ -282,7 +282,7 @@ final class UriPermission {
      */
     void removeWriteOwner(UriPermissionOwner owner) {
         if (!mWriteOwners.remove(owner)) {
-            Log.wtf(TAG, "Unknown write owner " + owner + " in " + this);
+            Slog.wtf(TAG, "Unknown write owner " + owner + " in " + this);
         }
         if (mWriteOwners.size() == 0) {
             mWriteOwners = null;
