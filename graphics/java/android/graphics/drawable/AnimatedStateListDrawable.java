@@ -357,7 +357,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        final TypedArray a = r.obtainAttributes(attrs, R.styleable.AnimatedStateListDrawable);
+        final TypedArray a = obtainAttributes(
+                r, theme, attrs, R.styleable.AnimatedStateListDrawable);
 
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedStateListDrawable_visible);
 

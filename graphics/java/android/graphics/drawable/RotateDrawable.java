@@ -399,7 +399,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        final TypedArray a = r.obtainAttributes(attrs,
+        final TypedArray a = obtainAttributes(r, theme, attrs,
                 com.android.internal.R.styleable.RotateDrawable);
 
         super.inflateWithAttributes(r, parser, a,
