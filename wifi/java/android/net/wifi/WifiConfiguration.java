@@ -1222,18 +1222,15 @@ public class WifiConfiguration implements Parcelable {
         if (allowCached && mCachedConfigKey != null) {
             key = mCachedConfigKey;
         } else {
-            key = this.SSID;
-            if (key == null)
-                key = "";
-            if (this.wepKeys[0] != null) {
-                key = key + "-WEP";
-            }
-            if (this.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-                key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_PSK];
-            }
-            if (this.allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
-                    this.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
-                key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+            if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+                key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
+            } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
+                    allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+                key = SSID + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+            } else if (wepKeys[0] != null) {
+                key = SSID + "WEP";
+            } else {
+                key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
             }
             mCachedConfigKey = key;
         }
