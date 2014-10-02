@@ -281,7 +281,7 @@ public class GeomagneticField {
      * @return  Horizontal component of the field strength in nonoteslas.
      */
     public float getHorizontalStrength() {
-        return (float) Math.sqrt(mX * mX + mY * mY);
+        return (float) Math.hypot(mX, mY);
     }
 
     /**

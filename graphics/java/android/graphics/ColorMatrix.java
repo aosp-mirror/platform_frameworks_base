@@ -16,8 +16,6 @@
 
 package android.graphics;
 
-import android.util.FloatMath;
-
 /**
  *  4x5 matrix for transforming the color+alpha components of a Bitmap.
  *  The matrix is stored in a single array, and its treated as follows:
@@ -118,9 +116,9 @@ public class ColorMatrix {
      */
     public void setRotate(int axis, float degrees) {
         reset();
-        float radians = degrees * (float)Math.PI / 180;
-        float cosine = FloatMath.cos(radians);
-        float sine = FloatMath.sin(radians);
+        double radians = degrees * Math.PI / 180d;
+        float cosine = (float) Math.cos(radians);
+        float sine = (float) Math.sin(radians);
         switch (axis) {
         // Rotation around the red color
         case 0:

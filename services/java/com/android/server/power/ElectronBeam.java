@@ -31,7 +31,6 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES10;
 import android.opengl.GLES11Ext;
 import android.os.Looper;
-import android.util.FloatMath;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -636,7 +635,7 @@ final class ElectronBeam {
     }
 
     private static float sigmoid(float x, float s) {
-        return 1.0f / (1.0f + FloatMath.exp(-x * s));
+        return 1.0f / (1.0f + (float) Math.exp(-x * s));
     }
 
     private static FloatBuffer createNativeFloatBuffer(int size) {

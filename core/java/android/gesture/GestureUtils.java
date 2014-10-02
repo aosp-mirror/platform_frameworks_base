@@ -293,7 +293,7 @@ public final class GestureUtils {
             }
             float deltaX = currentPointX - lstPointX;
             float deltaY = currentPointY - lstPointY;
-            float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            float distance = (float) Math.hypot(deltaX, deltaY);
             if (distanceSoFar + distance >= increment) {
                 float ratio = (increment - distanceSoFar) / distance;
                 float nx = lstPointX + ratio * deltaX;
@@ -379,7 +379,7 @@ public final class GestureUtils {
         for (int i = 0; i < count; i += 2) {
             float dx = points[i + 2] - points[i];
             float dy = points[i + 3] - points[i + 1];
-            sum += Math.sqrt(dx * dx + dy * dy);
+            sum += Math.hypot(dx, dy);
         }
         return sum;
     }
@@ -388,13 +388,13 @@ public final class GestureUtils {
         float totalLen = computeTotalLength(points);
         float dx = points[2] - points[0];
         float dy = points[3] - points[1];
-        return (float) Math.sqrt(dx * dx + dy * dy) / totalLen;
+        return (float) Math.hypot(dx, dy) / totalLen;
     }
 
     static float computeStraightness(float[] points, float totalLen) {
         float dx = points[2] - points[0];
         float dy = points[3] - points[1];
-        return (float) Math.sqrt(dx * dx + dy * dy) / totalLen;
+        return (float) Math.hypot(dx, dy) / totalLen;
     }
 
     /**
