@@ -137,6 +137,7 @@ import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.PacManager;
+import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
@@ -224,6 +225,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     AlarmManager mAlarmManager;
 
     private Tethering mTethering;
+
+    private final PermissionMonitor mPermissionMonitor;
 
     private KeyStore mKeyStore;
 
@@ -701,6 +704,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 && SystemProperties.get("ro.build.type").equals("eng");
 
         mTethering = new Tethering(mContext, mNetd, statsService, mHandler.getLooper());
+
+        mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
 
         //set up the listener for user state for creating user VPNs
         IntentFilter intentFilter = new IntentFilter();
@@ -1484,6 +1489,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
+
+        mPermissionMonitor.startMonitoring();
     }
 
     private BroadcastReceiver mUserPresentReceiver = new BroadcastReceiver() {
