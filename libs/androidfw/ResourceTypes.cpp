@@ -1185,7 +1185,11 @@ uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
 {
     int32_t id = getAttributeNameID(idx);
     if (id >= 0 && (size_t)id < mTree.mNumResIds) {
-        return dtohl(mTree.mResIds[id]);
+        uint32_t resId = dtohl(mTree.mResIds[id]);
+        if (mTree.mDynamicRefTable != NULL) {
+            mTree.mDynamicRefTable->lookupResourceId(&resId);
+        }
+        return resId;
     }
     return 0;
 }
@@ -5973,11 +5977,11 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     // Do a proper lookup.
     uint8_t translatedId = mLookupTable[packageId];
     if (translatedId == 0) {
-        ALOGE("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
+        ALOGV("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
                 (uint8_t)mAssignedPackageId, (uint8_t)packageId);
         for (size_t i = 0; i < 256; i++) {
             if (mLookupTable[i] != 0) {
-                ALOGE("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
+                ALOGV("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
             }
         }
         return UNKNOWN_ERROR;
