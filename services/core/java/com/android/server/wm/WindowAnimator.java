@@ -632,7 +632,7 @@ public class WindowAnimator {
                 mService.mWatermark.drawIfNeeded();
             }
         } catch (RuntimeException e) {
-            Log.wtf(TAG, "Unhandled exception in Window Manager", e);
+            Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             SurfaceControl.closeTransaction();
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(

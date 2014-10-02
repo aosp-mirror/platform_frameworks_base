@@ -1178,12 +1178,14 @@ final class Settings {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR,
                     "Error reading stopped packages: " + e);
-            Log.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages", e);
+            Slog.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages",
+                    e);
 
         } catch (java.io.IOException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-            Log.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages", e);
+            Slog.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages",
+                    e);
         }
     }
 
@@ -1272,7 +1274,8 @@ final class Settings {
             // might have been corrupted.
             if (!backupFile.exists()) {
                 if (!userPackagesStateFile.renameTo(backupFile)) {
-                    Log.wtf(PackageManagerService.TAG, "Unable to backup user packages state file, "
+                    Slog.wtf(PackageManagerService.TAG,
+                            "Unable to backup user packages state file, "
                             + "current changes will be lost at reboot");
                     return;
                 }
@@ -1379,7 +1382,7 @@ final class Settings {
             // Done, all is good!
             return;
         } catch(java.io.IOException e) {
-            Log.wtf(PackageManagerService.TAG,
+            Slog.wtf(PackageManagerService.TAG,
                     "Unable to write package manager user packages state, "
                     + " current changes will be lost at reboot", e);
         }
@@ -1485,12 +1488,14 @@ final class Settings {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR,
                     "Error reading stopped packages: " + e);
-            Log.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages", e);
+            Slog.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages",
+                    e);
 
         } catch (java.io.IOException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-            Log.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages", e);
+            Slog.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages",
+                    e);
 
         }
     }
@@ -1507,7 +1512,8 @@ final class Settings {
             // might have been corrupted.
             if (!mBackupSettingsFilename.exists()) {
                 if (!mSettingsFilename.renameTo(mBackupSettingsFilename)) {
-                    Log.wtf(PackageManagerService.TAG, "Unable to backup package manager settings, "
+                    Slog.wtf(PackageManagerService.TAG,
+                            "Unable to backup package manager settings, "
                             + " current changes will be lost at reboot");
                     return;
                 }
@@ -1698,7 +1704,7 @@ final class Settings {
                 str.close();
                 journal.commit();
             } catch (Exception e) {
-                Log.wtf(TAG, "Failed to write packages.list", e);
+                Slog.wtf(TAG, "Failed to write packages.list", e);
                 IoUtils.closeQuietly(str);
                 journal.rollback();
             }
@@ -1707,16 +1713,16 @@ final class Settings {
             return;
 
         } catch(XmlPullParserException e) {
-            Log.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
+            Slog.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
                     + "current changes will be lost at reboot", e);
         } catch(java.io.IOException e) {
-            Log.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
+            Slog.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
                     + "current changes will be lost at reboot", e);
         }
         // Clean up partially written files
         if (mSettingsFilename.exists()) {
             if (!mSettingsFilename.delete()) {
-                Log.wtf(PackageManagerService.TAG, "Failed to clean up mangled file: "
+                Slog.wtf(PackageManagerService.TAG, "Failed to clean up mangled file: "
                         + mSettingsFilename);
             }
         }
@@ -1984,7 +1990,7 @@ final class Settings {
                 mReadMessages.append("No start tag found in settings file\n");
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "No start tag found in package manager settings");
-                Log.wtf(PackageManagerService.TAG,
+                Slog.wtf(PackageManagerService.TAG,
                         "No start tag found in package manager settings");
                 return false;
             }
@@ -2097,12 +2103,12 @@ final class Settings {
         } catch (XmlPullParserException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-            Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+            Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
 
         } catch (java.io.IOException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-            Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+            Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
         }
 
         final int N = mPendingPackages.size();

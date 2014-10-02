@@ -1725,10 +1725,25 @@ public final class StrictMode {
         for (int i = 0; i < numViolations; ++i) {
             if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
             ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
-            if (info.crashInfo.stackTrace.length() > 5000) {
-                RuntimeException here = new RuntimeException("here");
-                here.fillInStackTrace();
-                Slog.w(TAG, "Stack is getting large: " + info.crashInfo.stackTrace, here);
+            if (info.crashInfo.stackTrace.length() > 10000) {
+                // 10000 characters is way too large for this to be any sane kind of
+                // strict mode collection of stacks.  We've had a problem where we leave
+                // strict mode violations associated with the thread, and it keeps tacking
+                // more and more stacks on to the violations.  Looks like we're in this casse,
+                // so we'll report it and bail on all of the current strict mode violations
+                // we currently are maintaining for this thread.
+                // First, drain the remaining violations from the parcel.
+                while (i < numViolations) {
+                    info = new ViolationInfo(p, !currentlyGathering);
+                    i++;
+                }
+                // Next clear out all gathered violations.
+                clearGatheredViolations();
+                // Now report the problem.
+                Slog.wtfStack(TAG, "Stack is too large: numViolations=" + numViolations
+                        + " policy=#" + Integer.toHexString(policyMask)
+                        + " front=" + info.crashInfo.stackTrace.substring(256));
+                return;
             }
             info.crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
             BlockGuard.Policy policy = BlockGuard.getThreadPolicy();

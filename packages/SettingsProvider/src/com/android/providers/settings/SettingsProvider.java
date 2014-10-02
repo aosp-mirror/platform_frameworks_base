@@ -351,8 +351,11 @@ public class SettingsProvider extends ContentProvider {
         }
 
         public void onEvent(int event, String path) {
-            int modsInFlight = sKnownMutationsInFlight.get(mUserHandle).get();
-            if (modsInFlight > 0) {
+            final AtomicInteger mutationCount;
+            synchronized (SettingsProvider.this) {
+                mutationCount = sKnownMutationsInFlight.get(mUserHandle);
+            }
+            if (mutationCount != null && mutationCount.get() > 0) {
                 // our own modification.
                 return;
             }
@@ -952,8 +955,13 @@ public class SettingsProvider extends ContentProvider {
         checkWritePermissions(args);
         SettingsCache cache = cacheForTable(callingUser, args.table);
 
-        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
-        mutationCount.incrementAndGet();
+        final AtomicInteger mutationCount;
+        synchronized (this) {
+            mutationCount = sKnownMutationsInFlight.get(callingUser);
+        }
+        if (mutationCount != null) {
+            mutationCount.incrementAndGet();
+        }
         DatabaseHelper dbH = getOrEstablishDatabase(
                 TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : callingUser);
         SQLiteDatabase db = dbH.getWritableDatabase();
@@ -969,7 +977,9 @@ public class SettingsProvider extends ContentProvider {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
-            mutationCount.decrementAndGet();
+            if (mutationCount != null) {
+                mutationCount.decrementAndGet();
+            }
         }
 
         sendNotify(uri, callingUser);
@@ -1105,12 +1115,19 @@ public class SettingsProvider extends ContentProvider {
             return Uri.withAppendedPath(url, name);
         }
 
-        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(desiredUserHandle);
-        mutationCount.incrementAndGet();
+        final AtomicInteger mutationCount;
+        synchronized (this) {
+            mutationCount = sKnownMutationsInFlight.get(callingUser);
+        }
+        if (mutationCount != null) {
+            mutationCount.incrementAndGet();
+        }
         DatabaseHelper dbH = getOrEstablishDatabase(desiredUserHandle);
         SQLiteDatabase db = dbH.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
-        mutationCount.decrementAndGet();
+        if (mutationCount != null) {
+            mutationCount.decrementAndGet();
+        }
         if (rowId <= 0) return null;
 
         SettingsCache.populate(cache, initialValues);  // before we notify
@@ -1137,12 +1154,19 @@ public class SettingsProvider extends ContentProvider {
         }
         checkWritePermissions(args);
 
-        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
-        mutationCount.incrementAndGet();
+        final AtomicInteger mutationCount;
+        synchronized (this) {
+            mutationCount = sKnownMutationsInFlight.get(callingUser);
+        }
+        if (mutationCount != null) {
+            mutationCount.incrementAndGet();
+        }
         DatabaseHelper dbH = getOrEstablishDatabase(callingUser);
         SQLiteDatabase db = dbH.getWritableDatabase();
         int count = db.delete(args.table, args.where, args.args);
-        mutationCount.decrementAndGet();
+        if (mutationCount != null) {
+            mutationCount.decrementAndGet();
+        }
         if (count > 0) {
             invalidateCache(callingUser, args.table);  // before we notify
             sendNotify(url, callingUser);
@@ -1170,12 +1194,19 @@ public class SettingsProvider extends ContentProvider {
         checkWritePermissions(args);
         checkUserRestrictions(initialValues.getAsString(Settings.Secure.NAME), callingUser);
 
-        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
-        mutationCount.incrementAndGet();
+        final AtomicInteger mutationCount;
+        synchronized (this) {
+            mutationCount = sKnownMutationsInFlight.get(callingUser);
+        }
+        if (mutationCount != null) {
+            mutationCount.incrementAndGet();
+        }
         DatabaseHelper dbH = getOrEstablishDatabase(callingUser);
         SQLiteDatabase db = dbH.getWritableDatabase();
         int count = db.update(args.table, initialValues, args.where, args.args);
-        mutationCount.decrementAndGet();
+        if (mutationCount != null) {
+            mutationCount.decrementAndGet();
+        }
         if (count > 0) {
             invalidateCache(callingUser, args.table);  // before we notify
             sendNotify(url, callingUser);

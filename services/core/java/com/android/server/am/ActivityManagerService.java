@@ -27,7 +27,6 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
@@ -4958,7 +4957,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 } catch (InterruptedException e) {
-                    Log.wtf(TAG, e);
+                    Slog.wtf(TAG, e);
                 }
             }
 
@@ -4998,7 +4997,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 observer.wait(200);  // Wait for write-close, give up after 200msec
                             }
                         } catch (InterruptedException e) {
-                            Log.wtf(TAG, e);
+                            Slog.wtf(TAG, e);
                         }
 
                     }
@@ -7918,9 +7917,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         } catch (FileNotFoundException e) {
             // Missing grants is okay
         } catch (IOException e) {
-            Log.wtf(TAG, "Failed reading Uri grants", e);
+            Slog.wtf(TAG, "Failed reading Uri grants", e);
         } catch (XmlPullParserException e) {
-            Log.wtf(TAG, "Failed reading Uri grants", e);
+            Slog.wtf(TAG, "Failed reading Uri grants", e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
@@ -11713,17 +11712,10 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param crashInfo describing the context of the error
      * @return true if the process should exit immediately (WTF is fatal)
      */
-    public boolean handleApplicationWtf(IBinder app, final String tag, boolean system,
+    public boolean handleApplicationWtf(final IBinder app, final String tag, boolean system,
             final ApplicationErrorReport.CrashInfo crashInfo) {
-        final ProcessRecord r = findAppProcess(app, "WTF");
-        final String processName = app == null ? "system_server"
-                : (r == null ? "unknown" : r.processName);
-
-        EventLog.writeEvent(EventLogTags.AM_WTF,
-                UserHandle.getUserId(Binder.getCallingUid()), Binder.getCallingPid(),
-                processName,
-                r == null ? -1 : r.info.flags,
-                tag, crashInfo.exceptionMessage);
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
 
         if (system) {
             // If this is coming from the system, we could very well have low-level
@@ -11731,14 +11723,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             // never want this to become fatal, so there is that too.
             mHandler.post(new Runnable() {
                 @Override public void run() {
-                    addErrorToDropBox("wtf", r, processName, null, null, tag, null, null,
-                            crashInfo);
+                    handleApplicationWtfInner(callingUid, callingPid, app, tag, crashInfo);
                 }
             });
             return false;
         }
 
-        addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
+        final ProcessRecord r = handleApplicationWtfInner(callingUid, callingPid, app, tag,
+                crashInfo);
 
         if (r != null && r.pid != Process.myPid() &&
                 Settings.Global.getInt(mContext.getContentResolver(),
@@ -11748,6 +11740,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             return false;
         }
+    }
+
+    ProcessRecord handleApplicationWtfInner(int callingUid, int callingPid, IBinder app, String tag,
+            final ApplicationErrorReport.CrashInfo crashInfo) {
+        final ProcessRecord r = findAppProcess(app, "WTF");
+        final String processName = app == null ? "system_server"
+                : (r == null ? "unknown" : r.processName);
+
+        EventLog.writeEvent(EventLogTags.AM_WTF, UserHandle.getUserId(callingUid), callingPid,
+                processName, r == null ? -1 : r.info.flags, tag, crashInfo.exceptionMessage);
+
+        addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
+
+        return r;
     }
 
     /**
