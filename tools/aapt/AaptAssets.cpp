@@ -15,7 +15,6 @@
 #include <dirent.h>
 #include <errno.h>
 
-static const char* kDefaultLocale = "default";
 static const char* kAssetDir = "assets";
 static const char* kResourceDir = "res";
 static const char* kValuesDir = "values";
@@ -1240,7 +1239,7 @@ bail:
 }
 
 ssize_t
-AaptAssets::slurpResourceZip(Bundle* bundle, const char* filename)
+AaptAssets::slurpResourceZip(Bundle* /* bundle */, const char* filename)
 {
     int count = 0;
     SortedVector<AaptGroupEntry> entries;
