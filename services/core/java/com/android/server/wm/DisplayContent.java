@@ -162,7 +162,7 @@ class DisplayContent {
     }
 
     TaskStack getHomeStack() {
-        if (mHomeStack == null) {
+        if (mHomeStack == null && mDisplayId == Display.DEFAULT_DISPLAY) {
             Slog.e(TAG, "getHomeStack: Returning null from this=" + this);
         }
         return mHomeStack;
