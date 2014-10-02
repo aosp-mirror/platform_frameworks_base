@@ -37,6 +37,8 @@ public class Constants {
             public static final boolean EnableTaskBarTouchEvents = true;
             // Enables app-info pane on long-pressing the icon
             public static final boolean EnableDevAppInfoOnLongPress = true;
+            // Enables debug mode
+            public static final boolean EnableDebugMode = false;
             // Enables the search bar layout
             public static final boolean EnableSearchLayout = true;
             // Enables the thumbnail alpha on the front-most task
