@@ -1104,6 +1104,14 @@
         android:label="@string/permlab_hardware_test"
         android:description="@string/permdesc_hardware_test" />
 
+    <!-- @SystemApi Allows access to FM
+         @hide This is not a third-party API (intended for system apps).-->
+    <permission android:name="android.permission.ACCESS_FM_RADIO"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="signature|system"
+        android:label="@string/permlab_fm"
+        android:description="@string/permdesc_fm" />
+
     <!-- Allows access to configure network interfaces, configure/use IPSec, etc.
          @hide -->
     <permission android:name="android.permission.NET_ADMIN"
