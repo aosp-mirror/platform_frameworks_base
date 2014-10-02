@@ -212,10 +212,13 @@ protected:
 
         // check state/paint for transparency
         if (mPaint) {
+            if (mPaint->getAlpha() != 0xFF) {
+                return false;
+            }
             if (mPaint->getShader() && !mPaint->getShader()->isOpaque()) {
                 return false;
             }
-            if (mPaint->getAlpha() != 0xFF) {
+            if (Renderer::isBlendedColorFilter(mPaint->getColorFilter())) {
                 return false;
             }
         }
