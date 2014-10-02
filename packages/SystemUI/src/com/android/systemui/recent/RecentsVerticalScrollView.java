@@ -23,7 +23,6 @@ import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -378,7 +377,7 @@ public class RecentsVerticalScrollView extends ScrollView
         View child = mAdapter.createView(mLinearLayout);
         child.measure(childWidthMeasureSpec, childheightMeasureSpec);
         mNumItemsInOneScreenful =
-                (int) FloatMath.ceil(dm.heightPixels / (float) child.getMeasuredHeight());
+                (int) Math.ceil(dm.heightPixels / (double) child.getMeasuredHeight());
         addToRecycledViews(child);
 
         for (int i = 0; i < mNumItemsInOneScreenful - 1; i++) {

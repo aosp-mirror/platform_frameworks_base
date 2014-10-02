@@ -37,7 +37,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import com.android.mediaframeworktest.CameraStressTestRunner;
