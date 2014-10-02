@@ -574,6 +574,7 @@ public class TelecomManager {
      *
      * @param account The complete {@link PhoneAccount}.
      */
+    @SystemApi
     public void registerPhoneAccount(PhoneAccount account) {
         try {
             if (isServiceConnected()) {
@@ -589,6 +590,7 @@ public class TelecomManager {
      *
      * @param accountHandle A {@link PhoneAccountHandle} for the {@link PhoneAccount} to unregister.
      */
+    @SystemApi
     public void unregisterPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -787,6 +789,7 @@ public class TelecomManager {
      * @param extras A bundle that will be passed through to
      *            {@link ConnectionService#onCreateIncomingConnection}.
      */
+    @SystemApi
     public void addNewIncomingCall(PhoneAccountHandle phoneAccount, Bundle extras) {
         try {
             if (isServiceConnected()) {
