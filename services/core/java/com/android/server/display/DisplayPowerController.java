@@ -563,6 +563,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             state = Display.STATE_OFF;
         }
 
+        // Animate the screen state change unless already animating.
+        // The transition may be deferred, so after this point we will use the
+        // actual state instead of the desired one.
+        animateScreenStateChange(state, performScreenOffTransition);
+        state = mPowerState.getScreenState();
+
         // Use zero brightness when screen is off.
         if (state == Display.STATE_OFF) {
             brightness = PowerManager.BRIGHTNESS_OFF;
@@ -636,13 +642,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedLowPower = true;
         }
 
-        // Animate the screen state change unless already animating.
-        animateScreenStateChange(state, performScreenOffTransition);
-
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended.
-        final int actualState = mPowerState.getScreenState();
-        if (actualState == Display.STATE_ON || actualState == Display.STATE_DOZE) {
+        if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
             animateScreenBrightness(brightness,
                     slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
         } else {
