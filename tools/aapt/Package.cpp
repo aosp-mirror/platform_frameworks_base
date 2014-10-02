@@ -402,7 +402,6 @@ bool endsWith(const char* haystack, const char* needle)
 
 ssize_t processJarFile(ZipFile* jar, ZipFile* out)
 {
-    status_t err;
     size_t N = jar->getNumEntries();
     size_t count = 0;
     for (size_t i=0; i<N; i++) {
