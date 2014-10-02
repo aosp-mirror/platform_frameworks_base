@@ -781,9 +781,6 @@ please see themes_device_defaults.xml.
         <item name="textCheckMark">@drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_dark</item>
 
-        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
-        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
-
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlHighlight">@color/ripple_material_light</item>
         <item name="colorButtonNormal">@color/btn_default_material_light</item>
@@ -818,9 +815,6 @@ please see themes_device_defaults.xml.
 
         <item name="textCheckMark">@drawable/indicator_check_mark_dark</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_light</item>
-
-        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
-        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlHighlight">@color/ripple_material_dark</item>
