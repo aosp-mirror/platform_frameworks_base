@@ -151,7 +151,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     }
 
     /**
-     * Returns true if this URI is relative, i.e. if it doesn't contain an
+     * Returns true if this URI is relative, i.e.&nbsp;if it doesn't contain an
      * explicit scheme.
      *
      * @return true if this URI is relative, false if it's absolute
@@ -159,7 +159,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public abstract boolean isRelative();
 
     /**
-     * Returns true if this URI is absolute, i.e. if it contains an
+     * Returns true if this URI is absolute, i.e.&nbsp;if it contains an
      * explicit scheme.
      *
      * @return true if this URI is absolute, false if it's relative
@@ -176,8 +176,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public abstract String getScheme();
 
     /**
-     * Gets the scheme-specific part of this URI, i.e. everything between the
-     * scheme separator ':' and the fragment separator '#'. If this is a
+     * Gets the scheme-specific part of this URI, i.e.&nbsp;everything between
+     * the scheme separator ':' and the fragment separator '#'. If this is a
      * relative URI, this method returns the entire URI. Decodes escaped octets.
      *
      * <p>Example: "//www.google.com/search?q=android"
@@ -187,8 +187,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public abstract String getSchemeSpecificPart();
 
     /**
-     * Gets the scheme-specific part of this URI, i.e. everything between the
-     * scheme separator ':' and the fragment separator '#'. If this is a
+     * Gets the scheme-specific part of this URI, i.e.&nbsp;everything between
+     * the scheme separator ':' and the fragment separator '#'. If this is a
      * relative URI, this method returns the entire URI. Leaves escaped octets
      * intact.
      *
