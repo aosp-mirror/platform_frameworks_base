@@ -182,14 +182,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks(Intent launchIntent) {
-        // Load all the tasks
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
-        ArrayList<TaskStack> stacks = root.getStacks();
-        if (!stacks.isEmpty()) {
-            mRecentsView.setTaskStacks(root.getStacks());
-        }
-
         // Update the configuration based on the launch intent
         boolean fromSearchHome = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_SEARCH_HOME, false);
@@ -203,6 +195,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_FROM_TASK_ID, -1);
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
+
+        // Load all the tasks
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SpaceNode root = loader.reload(this,
+                Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount,
+                mConfig.launchedFromHome);
+        ArrayList<TaskStack> stacks = root.getStacks();
+        if (!stacks.isEmpty()) {
+            mRecentsView.setTaskStacks(root.getStacks());
+        }
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
 
         // Create the home intent runnable
