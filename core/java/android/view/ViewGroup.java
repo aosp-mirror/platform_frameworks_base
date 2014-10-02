@@ -864,6 +864,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (siblingBounds.intersect(bounds)) {
                 // If an interactive sibling completely covers the child, done.
                 if (siblingBounds.equals(bounds)) {
+                    if (orderedList != null) orderedList.clear();
                     return false;
                 }
                 // Keep track of the intersection rectangle.
@@ -871,6 +872,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 intersections.add(intersection);
             }
         }
+        if (orderedList != null) orderedList.clear();
 
         if (mParent instanceof ViewGroup) {
             ViewGroup parentGroup = (ViewGroup) mParent;
@@ -3293,7 +3295,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Populates (and returns) mPreSortedChildren with a pre-ordered list of the View's children,
-     * sorted first by Z, then by child drawing order (if applicable).
+     * sorted first by Z, then by child drawing order (if applicable). This list must be cleared
+     * after use to avoid leaking child Views.
      *
      * Uses a stable, insertion sort which is commonly O(n) for ViewGroups with very few elevated
      * children.
