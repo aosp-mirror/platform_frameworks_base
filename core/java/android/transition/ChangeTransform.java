@@ -228,7 +228,8 @@ public class ChangeTransform extends Transition {
         }
 
         // Next handle the normal matrix transform:
-        ObjectAnimator transformAnimator = createTransformAnimator(startValues, endValues);
+        ObjectAnimator transformAnimator = createTransformAnimator(startValues, endValues,
+                handleParentChange);
 
         if (handleParentChange && transformAnimator != null && mUseOverlay) {
             createGhostView(sceneRoot, startValues, endValues);
@@ -238,7 +239,7 @@ public class ChangeTransform extends Transition {
     }
 
     private ObjectAnimator createTransformAnimator(TransitionValues startValues,
-            TransitionValues endValues) {
+            TransitionValues endValues, final boolean handleParentChange) {
         Matrix startMatrix = (Matrix) startValues.values.get(PROPNAME_MATRIX);
         Matrix endMatrix = (Matrix) endValues.values.get(PROPNAME_MATRIX);
 
@@ -277,7 +278,12 @@ public class ChangeTransform extends Transition {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!mIsCanceled) {
-                    setCurrentMatrix(finalEndMatrix);
+                    if (handleParentChange && mUseOverlay) {
+                        setCurrentMatrix(finalEndMatrix);
+                    } else {
+                        view.setTagInternal(R.id.transitionTransform, null);
+                        view.setTagInternal(R.id.parentMatrix, null);
+                    }
                 }
                 ANIMATION_MATRIX_PROPERTY.set(view, null);
                 transforms.restore(view);
