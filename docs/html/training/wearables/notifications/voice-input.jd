@@ -86,7 +86,7 @@ style="float:right;margin:0 0 20px 40px" />
  {@link android.support.v4.app.RemoteInput}:</p>
 
 <pre>
-public static final EXTRA_VOICE_REPLY = "extra_voice_reply";
+public static final String EXTRA_VOICE_REPLY = "extra_voice_reply";
 ...
 String replyLabel = getResources().getString(R.string.reply_label);
 String[] replyChoices = getResources().getStringArray(R.array.reply_choices);
@@ -116,7 +116,7 @@ PendingIntent replyPendingIntent =
 // Create the reply action and add the remote input
 NotificationCompat.Action action =
         new NotificationCompat.Action.Builder(R.drawable.ic_reply_icon,
-                getString(R.string.label, replyPendingIntent))
+                getString(R.string.label), replyPendingIntent)
                 .addRemoteInput(remoteInput)
                 .build();
 

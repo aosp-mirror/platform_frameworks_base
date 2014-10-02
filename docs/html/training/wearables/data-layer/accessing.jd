@@ -12,9 +12,9 @@ page.title=Accessing the Wearable Data Layer
 
 <h2>Dependencies and Prerequisites</h2>
 <ol>
-  <li><a href="{@docRoot}training/wearables/apps/environment.html">Creating
-  Wearable Apps > Setting up Your Environment</a></li>
-  <li><a href="{@docRoot}training/wearables/apps/creating.html">Creating
+  <li><a href="{@docRoot}training/wearables/apps/creating.html#SetupEmulator">Creating
+  Wearable Apps > Set Up an Android Wear Emulator or Device</a></li>
+  <li><a href="{@docRoot}training/wearables/apps/creating.html#CreateProject">Creating
     Wearable Apps > Creating a Project</a></li>
 </ol>
 </div>

@@ -19,7 +19,7 @@ page.title=Debugging over Bluetooth
   </div>
 </div>
 
-<p>You can debug your wearable over Bluetooth by routing it's debug output to the
+<p>You can debug your wearable over Bluetooth by routing its debug output to the
 handheld device that's connected to your development machine.</p>
 
 <h2 id="SetupDevices">Setup Devices for Debugging</h2>
