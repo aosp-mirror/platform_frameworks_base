@@ -278,8 +278,13 @@ final class RemoteConnectionService {
                 }
             }
 
-            findConnectionForAction(callId, "setConferenceableConnections")
-                    .setConferenceableConnections(conferenceable);
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "setConferenceableConnections")
+                        .setConferenceableConnections(conferenceable);
+            } else {
+                findConferenceForAction(callId, "setConferenceableConnections")
+                        .setConferenceableConnections(conferenceable);
+            }
         }
     };
 
@@ -356,6 +361,10 @@ final class RemoteConnectionService {
             return RemoteConnection.failure(
                     new DisconnectCause(DisconnectCause.ERROR, e.toString()));
         }
+    }
+
+    private boolean hasConnection(String callId) {
+        return mConferenceById.containsKey(callId);
     }
 
     private RemoteConnection findConnectionForAction(
