@@ -395,7 +395,7 @@ interface INetworkManagementService
     void setDefaultNetId(int netId);
     void clearDefaultNetId();
 
-    void setPermission(boolean internal, boolean changeNetState, in int[] uids);
+    void setPermission(String permission, in int[] uids);
     void clearPermission(in int[] uids);
 
     /**
