@@ -448,7 +448,7 @@ public final class DisplayManagerService extends SystemService {
                     mWifiDisplayAdapter.requestStopScanLocked();
                 }
             } else if (mWifiDisplayScanRequestCount < 0) {
-                Log.wtf(TAG, "mWifiDisplayScanRequestCount became negative: "
+                Slog.wtf(TAG, "mWifiDisplayScanRequestCount became negative: "
                         + mWifiDisplayScanRequestCount);
                 mWifiDisplayScanRequestCount = 0;
             }
