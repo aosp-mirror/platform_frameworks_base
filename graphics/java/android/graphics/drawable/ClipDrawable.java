@@ -81,7 +81,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
         int type;
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ClipDrawable);
+        TypedArray a = obtainAttributes(
+                r, theme, attrs, com.android.internal.R.styleable.ClipDrawable);
 
         int orientation = a.getInt(
                 com.android.internal.R.styleable.ClipDrawable_clipOrientation,
