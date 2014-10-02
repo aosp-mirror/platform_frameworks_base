@@ -150,7 +150,7 @@ public class UriMatcher
      * numbers.
      * <p>
      * Starting from API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
-     * this method will accept leading slash in the path.
+     * this method will accept a leading slash in the path.
      *
      * @param authority the authority to match
      * @param path the path to match. * may be used as a wild card for
