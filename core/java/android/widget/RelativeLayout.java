@@ -1403,7 +1403,7 @@ public class RelativeLayout extends ViewGroup {
          *        {@link android.widget.RelativeLayout RelativeLayout}, such as
          *         ALIGN_WITH_PARENT_LEFT.
          * @param anchor The id of another view to use as an anchor,
-         *        or a boolean value(represented as {@link RelativeLayout#TRUE})
+         *        or a boolean value (represented as {@link RelativeLayout#TRUE}
          *        for true or 0 for false).  For verbs that don't refer to another sibling
          *        (for example, ALIGN_WITH_PARENT_BOTTOM) just use -1.
          * @see #addRule(int)
