@@ -2117,7 +2117,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return null;
                 }
@@ -2148,7 +2148,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return null;
                 }
@@ -2181,7 +2181,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2233,7 +2233,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2285,7 +2285,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2337,7 +2337,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2390,7 +2390,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2441,7 +2441,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2480,7 +2480,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -2527,7 +2527,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // performs the current profile parent resolution.
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.getCallingUserId());
+                                UserHandle.USER_CURRENT);
                 if (resolvedUserId != mCurrentUserId) {
                     return false;
                 }
@@ -3620,6 +3620,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int callingUserId = UserHandle.getUserId(callingUid);
             if (callingUserId == userId) {
                 return resolveProfileParentLocked(userId);
+            }
+            final int callingUserParentId = resolveProfileParentLocked(callingUserId);
+            if (callingUserParentId == mCurrentUserId &&
+                    (userId == UserHandle.USER_CURRENT
+                            || userId == UserHandle.USER_CURRENT_OR_SELF)) {
+                return mCurrentUserId;
             }
             if (!hasPermission(Manifest.permission.INTERACT_ACROSS_USERS)
                     && !hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)) {
