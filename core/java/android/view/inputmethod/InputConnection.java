@@ -75,7 +75,7 @@ import android.view.KeyEvent;
  * behavior you should adopt for a particular call, please mimic the
  * default TextView implementation in the latest Android version, and
  * if you decide to drift from it, please consider carefully that
- * inconsistencies in text edition behavior is almost universally felt
+ * inconsistencies in text editor behavior is almost universally felt
  * as a bad thing by users.</p>
  *
  * <h3>Cursors, selections and compositions</h3>

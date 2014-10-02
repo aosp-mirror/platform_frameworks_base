@@ -67,7 +67,7 @@ android:drawable="@color/green"}).</p>
 
 <h2 id="Bitmap">Bitmap</h2>
 
-<p>A bitmap image. Android supports bitmap files in a three formats:
+<p>A bitmap image. Android supports bitmap files in three formats:
 {@code .png} (preferred), {@code .jpg} (acceptable), {@code .gif} (discouraged).</p>
 
 <p>You can reference a bitmap file directly, using the filename as the resource ID, or create an

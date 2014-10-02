@@ -78,7 +78,7 @@ import java.util.ArrayList;
  * can use the convenience method {@link Item#coerceToText Item.coerceToText}.
  * In this case there is generally no need to worry about the MIME types
  * reported by {@link ClipDescription#getMimeType(int) getDescription().getMimeType(int)},
- * since any clip item an always be converted to a string.
+ * since any clip item can always be converted to a string.
  *
  * <p>More complicated exchanges will be done through URIs, in particular
  * "content:" URIs.  A content URI allows the recipient of a ClippedData item
