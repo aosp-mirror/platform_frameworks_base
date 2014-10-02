@@ -661,9 +661,8 @@ public final class Matrix_Delegate {
         float[] src = new float[] { radius, 0.f, 0.f, radius };
         d.mapVectors(src, 0, src, 0, 2);
 
-        float l1 = getPointLength(src, 0);
-        float l2 = getPointLength(src, 2);
-
+        float l1 = (float) Math.hypot(src[0], src[1]);
+        float l2 = (float) Math.hypot(src[2], src[3]);
         return (float) Math.sqrt(l1 * l2);
     }
 
@@ -916,10 +915,6 @@ public final class Matrix_Delegate {
              // map the content as points.
              copy.mapPoints(dst, dstIndex, src, srcIndex, ptCount);
          }
-     }
-
-     private static float getPointLength(float[] src, int index) {
-         return (float) Math.sqrt(src[index] * src[index] + src[index + 1] * src[index + 1]);
      }
 
     /**

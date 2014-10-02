@@ -184,7 +184,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
 
                         float _x = pt2[0];
                         float _y = pt2[1];
-                        float distance = (float) Math.sqrt(_x * _x + _y * _y);
+                        float distance = (float) Math.hypot(_x, _y);
 
                         data[index++] = getGradientColor(distance / mRadius);
                     }

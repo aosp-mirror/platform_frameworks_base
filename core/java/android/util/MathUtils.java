@@ -94,7 +94,7 @@ public final class MathUtils {
     public static float dist(float x1, float y1, float x2, float y2) {
         final float x = (x2 - x1);
         final float y = (y2 - y1);
-        return (float) Math.sqrt(x * x + y * y);
+        return (float) Math.hypot(x, y);
     }
 
     public static float dist(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -105,7 +105,7 @@ public final class MathUtils {
     }
 
     public static float mag(float a, float b) {
-        return (float) Math.sqrt(a * a + b * b);
+        return (float) Math.hypot(a, b);
     }
 
     public static float mag(float a, float b, float c) {
