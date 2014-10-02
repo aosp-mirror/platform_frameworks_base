@@ -989,7 +989,7 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
         for (size_t i=0; i<N; i++) {
             const attribute_entry& e = mAttributes.itemAt(i);
             if (e.ns.size() <= 0) continue;
-            bool nsIsPublic;
+            bool nsIsPublic = true;
             String16 pkg(getNamespaceResourcePackage(String16(assets->getPackage()), e.ns, &nsIsPublic));
             if (kIsDebug) {
                 printf("Elem %s %s=\"%s\": namespace(%s) %s ===> %s\n",
