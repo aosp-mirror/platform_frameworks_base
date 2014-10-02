@@ -430,10 +430,14 @@ public class UserManager {
         }
     }
 
-   /**
+    /**
      * Used to determine whether the user making this call is subject to
      * teleportations.
-     * @return whether the user making this call is a goat
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#L}, this method can
+     * now automatically identify goats using advanced goat recognition technology.</p>
+     *
+     * @return Returns true if the user making this call is a goat.
      */
     public boolean isUserAGoat() {
         return mContext.getPackageManager()
