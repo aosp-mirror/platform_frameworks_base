@@ -1,5 +1,4 @@
-<!--
- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,12 +13,17 @@
      limitations under the License.
 -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/vector_drawable_progress_bar" >
-
+    android:drawable="@drawable/ic_signal_airplane_v2" >
     <target
-        android:name="pie1"
-        android:animation="@anim/trim_path_animation_progress_bar" />
+        android:name="ic_signal_airplane"
+        android:animation="@anim/ic_signal_airplane_v2_animation_ic_signal_airplane" />
     <target
-        android:name="root_bar"
-        android:animation="@anim/alpha_animation_progress_bar" />
+        android:name="mask_2"
+        android:animation="@anim/ic_signal_airplane_v2_animation_mask_2" />
+    <target
+        android:name="cross_1"
+        android:animation="@anim/ic_signal_airplane_v2_animation_cross_1" />
+    <target
+        android:name="path_1_1"
+        android:animation="@anim/ic_signal_airplane_v2_animation_path_1_1" />
 </animated-vector>

@@ -12,5 +12,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:pathData="L0.1, 0 C0.10066,0 0.198,1 0.2, 1 L 1,1" />
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_rotate_2_portrait_v2" >
+    <target
+        android:name="arrows_1"
+        android:animation="@anim/ic_rotate_2_portrait_v2_animation_arrows_1" />
+    <target
+        android:name="device_1"
+        android:animation="@anim/ic_rotate_2_portrait_v2_animation_device_1" />
+    <target
+        android:name="device_2"
+        android:animation="@anim/ic_rotate_2_portrait_v2_animation_device_2" />
+</animated-vector>

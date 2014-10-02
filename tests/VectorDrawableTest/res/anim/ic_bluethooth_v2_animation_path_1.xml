@@ -1,0 +1,33 @@
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="200"
+            android:propertyName="pathData"
+            android:valueFrom="M 10.6188659668 6.56344604492 c 0.0 0.0 21.7386016846 23.1297454834 21.7386016846 23.1297454834 "
+            android:valueTo="M 10.6188659668 6.56344604492 c 0.0 0.0 21.7386016846 23.1297454834 21.7386016846 23.1297454834 "
+            android:valueType="pathType"
+            android:interpolator="@interpolator/ic_bluethooth_v2_path_1_pathdata_interpolator" />
+        <objectAnimator
+            android:duration="350"
+            android:propertyName="pathData"
+            android:valueFrom="M 10.6188659668 6.56344604492 c 0.0 0.0 21.7386016846 23.1297454834 21.7386016846 23.1297454834 "
+            android:valueTo="M 8.62858581543 4.33430480957 c 0.0 0.0 28.1998138428 30.2359008789 28.1998138428 30.2359008789 "
+            android:valueType="pathType"
+            android:interpolator="@interpolator/ic_bluethooth_v2_path_1_pathdata_interpolator" />
+    </set>
+</set>

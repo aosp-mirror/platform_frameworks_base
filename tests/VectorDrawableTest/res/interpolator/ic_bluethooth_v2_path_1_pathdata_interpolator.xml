@@ -13,4 +13,4 @@
      limitations under the License.
 -->
 <pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:pathData="L0.1, 0 C0.10066,0 0.198,1 0.2, 1 L 1,1" />
+    android:pathData="M 0 0 c 0.16666666667 0.0 0.2 1.0 1.0 1.0" />
