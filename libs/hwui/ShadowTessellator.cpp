@@ -37,7 +37,7 @@ void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
-    float heightFactor = 1.0f / 86;
+    float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
 
     Caches& caches = Caches::getInstance();
