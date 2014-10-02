@@ -12,5 +12,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:pathData="L0.1, 0 C0.10066,0 0.198,1 0.2, 1 L 1,1" />
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <objectAnimator
+        android:duration="400"
+        android:startOffset="200"
+        android:propertyName="rotation"
+        android:valueFrom="0"
+        android:valueTo="-135"
+        android:interpolator="@interpolator/ic_rotate_2_portrait_v2_device_1_rotation_interpolator" />
+</set>
