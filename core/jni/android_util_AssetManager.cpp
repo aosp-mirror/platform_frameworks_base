@@ -1324,21 +1324,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         config.density = 0;
 
         // Skip through XML attributes until the end or the next possible match.
-        // We make two assumptions about the order of attributes:
-        // 1) Among attributes with the same package ID, the attributes are
-        //    sorted by increasing resource ID.
-        // 2) Groups of attributes with the same package ID are in the same
-        //    order.
-        // 3) The same sorting is applied to the input attributes as is
-        //    to the attributes in the XML.
-        //
-        // ex: 02010000, 02010001, 010100f4, 010100f5
-        //
-        // The total order of attributes (including package ID) can not be linear
-        // as shared libraries get assigned dynamic package IDs at runtime, which
-        // may break the sort order established at build time.
-        while (ix < NX && (Res_GETPACKAGE(curIdent) != Res_GETPACKAGE(curXmlAttr) ||
-                    curIdent > curXmlAttr)) {
+        while (ix < NX && curIdent > curXmlAttr) {
             ix++;
             curXmlAttr = xmlParser->getAttributeNameResID(ix);
         }
@@ -1353,9 +1339,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         }
 
         // Skip through the style values until the end or the next possible match.
-        while (styleEnt < endStyleEnt &&
-                (Res_GETPACKAGE(curIdent) != Res_GETPACKAGE(styleEnt->map.name.ident) ||
-                 curIdent > styleEnt->map.name.ident)) {
+        while (styleEnt < endStyleEnt && curIdent > styleEnt->map.name.ident) {
             styleEnt++;
         }
         // Retrieve the current style attribute if it matches, and step to next.
@@ -1371,9 +1355,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         }
 
         // Skip through the default style values until the end or the next possible match.
-        while (defStyleEnt < endDefStyleEnt &&
-                (Res_GETPACKAGE(curIdent) != Res_GETPACKAGE(defStyleEnt->map.name.ident) ||
-                 curIdent > defStyleEnt->map.name.ident)) {
+        while (defStyleEnt < endDefStyleEnt && curIdent > defStyleEnt->map.name.ident) {
             defStyleEnt++;
         }
         // Retrieve the current default style attribute if it matches, and step to next.
@@ -1535,8 +1517,7 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
         config.density = 0;
 
         // Skip through XML attributes until the end or the next possible match.
-        while (ix < NX && (Res_GETPACKAGE(curIdent) != Res_GETPACKAGE(curXmlAttr) ||
-                    curIdent > curXmlAttr)) {
+        while (ix < NX && curIdent > curXmlAttr) {
             ix++;
             curXmlAttr = xmlParser->getAttributeNameResID(ix);
         }
