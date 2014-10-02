@@ -5960,11 +5960,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (bp != null && !Objects.equals(bp.sourcePackage, p.info.packageName)) {
                         final boolean currentOwnerIsSystem = (bp.perm != null
                                 && isSystemApp(bp.perm.owner));
-                        if (isSystemApp(p.owner) && !currentOwnerIsSystem) {
-                            String msg = "New decl " + p.owner + " of permission  "
-                                    + p.info.name + " is system; overriding " + bp.sourcePackage;
-                            reportSettingsProblem(Log.WARN, msg);
-                            bp = null;
+                        if (isSystemApp(p.owner)) {
+                            if (bp.type == BasePermission.TYPE_BUILTIN && bp.perm == null) {
+                                // It's a built-in permission and no owner, take ownership now
+                                bp.packageSetting = pkgSetting;
+                                bp.perm = p;
+                                bp.uid = pkg.applicationInfo.uid;
+                                bp.sourcePackage = p.info.packageName;
+                            } else if (!currentOwnerIsSystem) {
+                                String msg = "New decl " + p.owner + " of permission  "
+                                        + p.info.name + " is system; overriding " + bp.sourcePackage;
+                                reportSettingsProblem(Log.WARN, msg);
+                                bp = null;
+                            }
                         }
                     }
 
