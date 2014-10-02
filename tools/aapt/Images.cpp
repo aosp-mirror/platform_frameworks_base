@@ -1095,6 +1095,41 @@ static void write_png(const char* imageName,
     }
 }
 
+static bool read_png_protected(png_structp read_ptr, String8& printableName, png_infop read_info,
+                               const sp<AaptFile>& file, FILE* fp, image_info* imageInfo) {
+    if (setjmp(png_jmpbuf(read_ptr))) {
+        return false;
+    }
+
+    png_init_io(read_ptr, fp);
+
+    read_png(printableName.string(), read_ptr, read_info, imageInfo);
+
+    const size_t nameLen = file->getPath().length();
+    if (nameLen > 6) {
+        const char* name = file->getPath().string();
+        if (name[nameLen-5] == '9' && name[nameLen-6] == '.') {
+            if (do_9patch(printableName.string(), imageInfo) != NO_ERROR) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+static bool write_png_protected(png_structp write_ptr, String8& printableName, png_infop write_info,
+                                image_info* imageInfo, const Bundle* bundle) {
+    if (setjmp(png_jmpbuf(write_ptr))) {
+        return false;
+    }
+
+    write_png(printableName.string(), write_ptr, write_info, *imageInfo,
+              bundle->getGrayscaleTolerance());
+
+    return true;
+}
+
 status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets */,
                          const sp<AaptFile>& file, String8* /* outNewLeafName */)
 {
@@ -1126,8 +1161,6 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
 
     status_t error = UNKNOWN_ERROR;
 
-    const size_t nameLen = file->getPath().length();
-
     fp = fopen(file->getSourceFile().string(), "rb");
     if (fp == NULL) {
         fprintf(stderr, "%s: ERROR: Unable to open PNG file\n", printableName.string());
@@ -1145,21 +1178,8 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
         goto bail;
     }
 
-    if (setjmp(png_jmpbuf(read_ptr))) {
+    if (!read_png_protected(read_ptr, printableName, read_info, file, fp, &imageInfo)) {
         goto bail;
-    }
-
-    png_init_io(read_ptr, fp);
-
-    read_png(printableName.string(), read_ptr, read_info, &imageInfo);
-
-    if (nameLen > 6) {
-        const char* name = file->getPath().string();
-        if (name[nameLen-5] == '9' && name[nameLen-6] == '.') {
-            if (do_9patch(printableName.string(), &imageInfo) != NO_ERROR) {
-                goto bail;
-            }
-        }
     }
 
     write_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, (png_error_ptr)NULL,
@@ -1178,13 +1198,9 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
     png_set_write_fn(write_ptr, (void*)file.get(),
                      png_write_aapt_file, png_flush_aapt_file);
 
-    if (setjmp(png_jmpbuf(write_ptr)))
-    {
+    if (!write_png_protected(write_ptr, printableName, write_info, &imageInfo, bundle)) {
         goto bail;
     }
-
-    write_png(printableName.string(), write_ptr, write_info, imageInfo,
-              bundle->getGrayscaleTolerance());
 
     error = NO_ERROR;
 
