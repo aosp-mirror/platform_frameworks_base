@@ -564,7 +564,7 @@ public class TouchUtils {
         final int fromX = xy[0];
         final int fromY = xy[1];
         
-        int distance = (int) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        int distance = (int) Math.hypot(deltaX, deltaY);
 
         drag(test, fromX, fromX + deltaX, fromY, fromY + deltaY, distance);
 
@@ -617,7 +617,7 @@ public class TouchUtils {
         int deltaX = fromX - toX;
         int deltaY = fromY - toY;
         
-        int distance = (int)Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        int distance = (int)Math.hypot(deltaX, deltaY);
         drag(test, fromX, toX, fromY, toY, distance);
         
         return distance;

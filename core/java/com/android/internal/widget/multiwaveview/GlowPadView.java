@@ -863,7 +863,7 @@ public class GlowPadView extends View {
             // tx and ty are relative to wave center
             float tx = eventX - mWaveCenterX;
             float ty = eventY - mWaveCenterY;
-            float touchRadius = (float) Math.sqrt(dist2(tx, ty));
+            float touchRadius = (float) Math.hypot(tx, ty);
             final float scale = touchRadius > mOuterRadius ? mOuterRadius / touchRadius : 1.0f;
             float limitX = tx * scale;
             float limitY = ty * scale;
