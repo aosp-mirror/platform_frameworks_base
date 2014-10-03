@@ -48,6 +48,8 @@ public class DozeLog {
     private static SummaryStats sScreenOnPulsingStats;
     private static SummaryStats sScreenOnNotPulsingStats;
     private static SummaryStats sEmergencyCallStats;
+    private static SummaryStats sProxNearStats;
+    private static SummaryStats sProxFarStats;
 
     public static void tracePickupPulse(boolean withinVibrationThreshold) {
         if (!ENABLED) return;
@@ -88,6 +90,8 @@ public class DozeLog {
                 sScreenOnPulsingStats = new SummaryStats();
                 sScreenOnNotPulsingStats = new SummaryStats();
                 sEmergencyCallStats = new SummaryStats();
+                sProxNearStats = new SummaryStats();
+                sProxFarStats = new SummaryStats();
                 log("init");
                 KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
             }
@@ -133,6 +137,12 @@ public class DozeLog {
         }
     }
 
+    public static void traceProximityResult(boolean near, long millis) {
+        if (!ENABLED) return;
+        log("proximityResult near=" + near + " millis=" + millis);
+        (near ? sProxNearStats : sProxFarStats).append();
+    }
+
     public static void dump(PrintWriter pw) {
         synchronized (DozeLog.class) {
             if (sMessages == null) return;
@@ -154,6 +164,8 @@ public class DozeLog {
             sScreenOnPulsingStats.dump(pw, "Screen on (pulsing)");
             sScreenOnNotPulsingStats.dump(pw, "Screen on (not pulsing)");
             sEmergencyCallStats.dump(pw, "Emergency call");
+            sProxNearStats.dump(pw, "Proximity (near)");
+            sProxFarStats.dump(pw, "Proximity (far)");
         }
     }
 
