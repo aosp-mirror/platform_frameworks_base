@@ -764,6 +764,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 .getAccessibilityFocusClickPointInScreenNotLocked(outPoint);
     }
 
+    /**
+     * Gets the bounds of the active window.
+     *
+     * @param outBounds The output to which to write the bounds.
+     */
+    boolean getActiveWindowBounds(Rect outBounds) {
+        // TODO: This should be refactored to work with accessibility
+        // focus in multiple windows.
+        IBinder token;
+        synchronized (mLock) {
+            final int windowId = mSecurityPolicy.mActiveWindowId;
+            token = mGlobalWindowTokens.get(windowId);
+            if (token == null) {
+                token = getCurrentUserStateLocked().mWindowTokens.get(windowId);
+            }
+        }
+        mWindowManagerService.getWindowFrame(token, outBounds);
+        if (!outBounds.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
     int getActiveWindowId() {
         return mSecurityPolicy.getActiveWindowId();
     }
@@ -3205,6 +3228,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     point.offset((int) -spec.offsetX, (int) -spec.offsetY);
                     point.x = (int) (point.x * (1 / spec.scale));
                     point.y = (int) (point.y * (1 / spec.scale));
+                }
+
+                // Make sure the point is within the window.
+                Rect windowBounds = mTempRect;
+                getActiveWindowBounds(windowBounds);
+                if (!windowBounds.contains(point.x, point.y)) {
+                    return false;
                 }
 
                 // Make sure the point is within the screen.
