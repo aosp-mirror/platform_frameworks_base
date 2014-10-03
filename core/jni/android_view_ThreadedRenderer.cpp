@@ -320,13 +320,6 @@ static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject cla
     RenderProxy::invokeFunctor(functor, waitForCompletion);
 }
 
-static jlong android_view_ThreadedRenderer_createDisplayListLayer(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jint width, jint height) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    DeferredLayerUpdater* layer = proxy->createDisplayListLayer(width, height);
-    return reinterpret_cast<jlong>(layer);
-}
-
 static jlong android_view_ThreadedRenderer_createTextureLayer(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -443,7 +436,6 @@ static JNINativeMethod gMethods[] = {
     { "nDestroy", "(J)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
-    { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nBuildLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_buildLayer },
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },

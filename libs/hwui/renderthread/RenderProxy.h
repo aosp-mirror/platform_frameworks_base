@@ -80,7 +80,6 @@ public:
     ANDROID_API void runWithGlContext(RenderTask* task);
 
     static void enqueueDestroyLayer(Layer* layer);
-    ANDROID_API DeferredLayerUpdater* createDisplayListLayer(int width, int height);
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API void buildLayer(RenderNode* node);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
