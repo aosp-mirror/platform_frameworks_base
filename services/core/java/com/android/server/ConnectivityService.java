@@ -90,6 +90,7 @@ import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -171,6 +172,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -3561,6 +3563,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         updateDnses(newLp, oldLp, netId, flushDns);
         updateClat(newLp, oldLp, networkAgent);
         if (isDefaultNetwork(networkAgent)) handleApplyDefaultProxy(newLp.getHttpProxy());
+        // TODO - move this check to cover the whole function
+        if (!Objects.equals(newLp, oldLp)) {
+            notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
+        }
     }
 
     private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo na) {
@@ -3698,10 +3704,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void updateCapabilities(NetworkAgentInfo networkAgent,
             NetworkCapabilities networkCapabilities) {
-        // TODO - what else here?  Verify still satisfies everybody?
-        // Check if satisfies somebody new?  call callbacks?
-        synchronized (networkAgent) {
-            networkAgent.networkCapabilities = networkCapabilities;
+        //  TODO - turn this on in MR1 when we have more dogfooding time.
+        // rematchAllNetworksAndRequests();
+        if (!Objects.equals(networkAgent.networkCapabilities, networkCapabilities)) {
+            synchronized (networkAgent) {
+                networkAgent.networkCapabilities = networkCapabilities;
+            }
+            notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
     }
 
@@ -3725,37 +3734,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void callCallbackForRequest(NetworkRequestInfo nri,
             NetworkAgentInfo networkAgent, int notificationType) {
         if (nri.messenger == null) return;  // Default request has no msgr
-        Object o;
-        int a1 = 0;
-        int a2 = 0;
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(NetworkRequest.class.getSimpleName(),
+                new NetworkRequest(nri.request));
+        Message msg = Message.obtain();
+        if (notificationType != ConnectivityManager.CALLBACK_UNAVAIL &&
+                notificationType != ConnectivityManager.CALLBACK_RELEASED) {
+            bundle.putParcelable(Network.class.getSimpleName(), networkAgent.network);
+        }
         switch (notificationType) {
-            case ConnectivityManager.CALLBACK_LOSING:
-                a1 = 30 * 1000; // TODO - read this from NetworkMonitor
-                // fall through
-            case ConnectivityManager.CALLBACK_PRECHECK:
-            case ConnectivityManager.CALLBACK_AVAILABLE:
-            case ConnectivityManager.CALLBACK_LOST:
-            case ConnectivityManager.CALLBACK_CAP_CHANGED:
+            case ConnectivityManager.CALLBACK_LOSING: {
+                msg.arg1 = 30 * 1000; // TODO - read this from NetworkMonitor
+                break;
+            }
+            case ConnectivityManager.CALLBACK_CAP_CHANGED: {
+                bundle.putParcelable(NetworkCapabilities.class.getSimpleName(),
+                        new NetworkCapabilities(networkAgent.networkCapabilities));
+                break;
+            }
             case ConnectivityManager.CALLBACK_IP_CHANGED: {
-                o = new NetworkRequest(nri.request);
-                a2 = networkAgent.network.netId;
+                bundle.putParcelable(LinkProperties.class.getSimpleName(),
+                        new LinkProperties(networkAgent.linkProperties));
                 break;
-            }
-            case ConnectivityManager.CALLBACK_UNAVAIL:
-            case ConnectivityManager.CALLBACK_RELEASED: {
-                o = new NetworkRequest(nri.request);
-                break;
-            }
-            default: {
-                loge("Unknown notificationType " + notificationType);
-                return;
             }
         }
-        Message msg = Message.obtain();
-        msg.arg1 = a1;
-        msg.arg2 = a2;
-        msg.obj = o;
         msg.what = notificationType;
+        msg.setData(bundle);
         try {
             if (VDBG) {
                 log("sending notification " + notifyTypeToName(notificationType) +
