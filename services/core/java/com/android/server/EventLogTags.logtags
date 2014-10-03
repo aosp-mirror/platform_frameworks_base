@@ -134,6 +134,8 @@ option java_package com.android.server
 # + check activity_launch_time for Home app
 # Value of "unknown sources" setting at app install time
 3110 unknown_sources_enabled (value|1)
+# Package Manager critical info
+3120 pm_critical_info (msg|3)
 
 
 # ---------------------------
