@@ -58,6 +58,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -140,6 +141,25 @@ class AlarmManagerService extends SystemService {
     // May only use on mHandler's thread, locking not required.
     private final SparseArray<AlarmManager.AlarmClockInfo> mHandlerSparseAlarmClockArray =
             new SparseArray<>();
+
+    // Alarm delivery ordering bookkeeping
+    static final int PRIO_TICK = 0;
+    static final int PRIO_WAKEUP = 1;
+    static final int PRIO_NORMAL = 2;
+
+    class PriorityClass {
+        int seq;
+        int priority;
+
+        PriorityClass() {
+            seq = mCurrentSeq - 1;
+            priority = PRIO_NORMAL;
+        }
+    }
+
+    final HashMap<String, PriorityClass> mPriorities =
+            new HashMap<String, PriorityClass>();
+    int mCurrentSeq = 0;
 
     class WakeupEvent {
         public long when;
@@ -356,21 +376,61 @@ class AlarmManagerService extends SystemService {
     final Comparator<Alarm> mAlarmDispatchComparator = new Comparator<Alarm>() {
         @Override
         public int compare(Alarm lhs, Alarm rhs) {
-            if ((!lhs.operation.getCreatorPackage().equals(rhs.operation.getCreatorPackage()))
-                    && lhs.wakeup != rhs.wakeup) {
-                // We want to put wakeup alarms before non-wakeup alarms, since they are
-                // the things that drive most activity in the alarm manager.  However,
-                // alarms from the same package should always be ordered strictly by time.
-                return lhs.wakeup ? -1 : 1;
+            // priority class trumps everything.  TICK < WAKEUP < NORMAL
+            if (lhs.priorityClass.priority < rhs.priorityClass.priority) {
+                return -1;
+            } else if (lhs.priorityClass.priority > rhs.priorityClass.priority) {
+                return 1;
             }
+
+            // within each class, sort by nominal delivery time
             if (lhs.whenElapsed < rhs.whenElapsed) {
                 return -1;
             } else if (lhs.whenElapsed > rhs.whenElapsed) {
                 return 1;
             }
+
+            // same priority class + same target delivery time
             return 0;
         }
     };
+
+    void calculateDeliveryPriorities(ArrayList<Alarm> alarms) {
+        final int N = alarms.size();
+        for (int i = 0; i < N; i++) {
+            Alarm a = alarms.get(i);
+
+            final int alarmPrio;
+            if (Intent.ACTION_TIME_TICK.equals(a.operation.getIntent().getAction())) {
+                alarmPrio = PRIO_TICK;
+            } else if (a.wakeup) {
+                alarmPrio = PRIO_WAKEUP;
+            } else {
+                alarmPrio = PRIO_NORMAL;
+            }
+
+            PriorityClass packagePrio = a.priorityClass;
+            if (packagePrio == null) packagePrio = mPriorities.get(a.operation.getCreatorPackage());
+            if (packagePrio == null) {
+                packagePrio = a.priorityClass = new PriorityClass(); // lowest prio & stale sequence
+                mPriorities.put(a.operation.getCreatorPackage(), packagePrio);
+            }
+            a.priorityClass = packagePrio;
+
+            if (packagePrio.seq != mCurrentSeq) {
+                // first alarm we've seen in the current delivery generation from this package
+                packagePrio.priority = alarmPrio;
+                packagePrio.seq = mCurrentSeq;
+            } else {
+                // Multiple alarms from this package being delivered in this generation;
+                // bump the package's delivery class if it's warranted.
+                // TICK < WAKEUP < NORMAL
+                if (alarmPrio < packagePrio.priority) {
+                    packagePrio.priority = alarmPrio;
+                }
+            }
+        }
+    }
 
     // minimum recurrence period or alarm futurity for us to be able to fuzz it
     static final long MIN_FUZZABLE_INTERVAL = 10000;
@@ -1381,6 +1441,10 @@ class AlarmManagerService extends SystemService {
             }
         }
 
+        // This is a new alarm delivery set; bump the sequence number to indicate that
+        // all apps' alarm delivery classes should be recalculated.
+        mCurrentSeq++;
+        calculateDeliveryPriorities(triggerList);
         Collections.sort(triggerList, mAlarmDispatchComparator);
 
         if (localLOGV) {
@@ -1423,6 +1487,7 @@ class AlarmManagerService extends SystemService {
         public long repeatInterval;
         public final AlarmManager.AlarmClockInfo alarmClock;
         public final int userId;
+        public PriorityClass priorityClass;
 
         public Alarm(int _type, long _when, long _whenElapsed, long _windowLength, long _maxWhen,
                 long _interval, PendingIntent _op, WorkSource _ws,
@@ -1676,6 +1741,7 @@ class AlarmManagerService extends SystemService {
                         rescheduleKernelAlarmsLocked();
                         updateNextAlarmClockLocked();
                         if (mPendingNonWakeupAlarms.size() > 0) {
+                            calculateDeliveryPriorities(mPendingNonWakeupAlarms);
                             triggerList.addAll(mPendingNonWakeupAlarms);
                             Collections.sort(triggerList, mAlarmDispatchComparator);
                             final long thisDelayTime = nowELAPSED - mStartCurrentDelayTime;
@@ -1889,6 +1955,7 @@ class AlarmManagerService extends SystemService {
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkg : pkgList) {
                         removeLocked(pkg);
+                        mPriorities.remove(pkg);
                         for (int i=mBroadcastStats.size()-1; i>=0; i--) {
                             ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(i);
                             if (uidStats.remove(pkg) != null) {
