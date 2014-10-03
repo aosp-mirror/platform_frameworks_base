@@ -787,6 +787,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return false;
     }
 
+    boolean accessibilityFocusOnlyInActiveWindow() {
+        synchronized (mLock) {
+            return mWindowsForAccessibilityCallback == null;
+        }
+    }
+
     int getActiveWindowId() {
         return mSecurityPolicy.getActiveWindowId();
     }
@@ -3596,6 +3602,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private void notifyWindowsChanged() {
+            if (mWindowsForAccessibilityCallback == null) {
+                return;
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 // Let the client know the windows changed.
@@ -3680,6 +3689,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private boolean isRetrievalAllowingWindow(int windowId) {
+            // The system gets to interact with any window it wants.
+            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+                return true;
+            }
             if (windowId == mActiveWindowId) {
                 return true;
             }
