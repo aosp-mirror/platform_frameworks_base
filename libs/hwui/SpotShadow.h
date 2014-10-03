@@ -35,8 +35,6 @@ private:
 
     static float projectCasterToOutline(Vector2& outline,
             const Vector3& lightCenter, const Vector3& polyVertex);
-    static int calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
-            const Vector3* poly, int polyLength, Vector2* occludedUmbra);
 
     static int setupAngleList(VertexAngleData* angleDataList,
             int polyLength, const Vector2* polygon, const Vector2& centroid,
@@ -81,8 +79,7 @@ private:
 
     static void xsort(Vector2* points, int pointsLength);
     static int hull(Vector2* points, int pointsLength, Vector2* retPoly);
-    static bool ccw(double ax, double ay, double bx, double by, double cx, double cy);
-    static int intersection(const Vector2* poly1, int poly1length, Vector2* poly2, int poly2length);
+    static bool ccw(float ax, float ay, float bx, float by, float cx, float cy);
     static void sort(Vector2* poly, int polyLength, const Vector2& center);
 
     static void swap(Vector2* points, int i, int j);
@@ -92,8 +89,6 @@ private:
     static bool testPointInsidePolygon(const Vector2 testPoint, const Vector2* poly, int len);
     static void makeClockwise(Vector2* polygon, int len);
     static void reverse(Vector2* polygon, int len);
-    static inline bool lineIntersection(double x1, double y1, double x2, double y2,
-            double x3, double y3, double x4, double y4, Vector2& ret);
 
     static void generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
             Vector2* penumbra, int penumbraLength, Vector2* umbra, int umbraLength,
