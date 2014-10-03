@@ -260,10 +260,10 @@ the SDK tools from the command line.</p>
 
 
 <h5 id="Troubleshooting" style="margin-bottom:15px"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'#ubuntu-trouble');return false;"
+  onclick="toggleExpandable(this,'#UbuntuTrouble');return false;"
   >Troubleshooting Ubuntu</a></h5>
 
-<div id="ubuntu-trouble" style="display:none">
+<div id="UbuntuTrouble" style="display:none">
 <ul>
   <li>If you need help installing and configuring Java on your
     development machine, you might find these resources helpful:
@@ -417,8 +417,8 @@ function getUrlParam(param) {
 }
 
 /* direct link to ubuntu troubleshooting */
-if ( document.location.href.indexOf('#ubuntu-trouble') > -1 ) {
+if ( document.location.href.indexOf('#UbuntuTrouble') > -1 ) {
   $(".linux.docs").show();
-  toggleExpandable(this,'#ubuntu-trouble');
+  toggleExpandable(this,'#UbuntuTrouble');
 }
 </script>
