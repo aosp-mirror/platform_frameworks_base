@@ -159,7 +159,7 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
         // As unfortunate as it is, it's possible to use enums with all attribute formats,
-        // not just integers/enums. So, we need to search the enums always. In case,
+        // not just integers/enums. So, we need to search the enums always. In case
         // enums are used, the returned value is an integer.
         Integer v = resolveEnumAttribute(index);
         return v == null ? mResourceData[index].getValue() : String.valueOf((int) v);
@@ -197,7 +197,7 @@ public final class BridgeTypedArray extends TypedArray {
             }
         } catch (NumberFormatException e) {
             Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
-                    String.format("\"%s\" in attribute \"%2$s\" is not a valid integer",
+                    String.format("\"%1$s\" in attribute \"%2$s\" is not a valid integer",
                             s, mNames[index]),
                     null);
             return defValue;
@@ -221,7 +221,7 @@ public final class BridgeTypedArray extends TypedArray {
             }
         } catch (NumberFormatException e) {
             Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
-                    String.format("\"%s\" in attribute \"%2$s\" cannot be converted to float.",
+                    String.format("\"%1$s\" in attribute \"%2$s\" cannot be converted to float.",
                             s, mNames[index]),
                     null);
         }
