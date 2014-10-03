@@ -983,10 +983,12 @@ public class NotificationPanelView extends PanelView implements
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
         } else if (statusBarState == StatusBarState.KEYGUARD) {
             mKeyguardStatusView.animate().cancel();
+            mKeyguardStatusViewAnimating = false;
             mKeyguardStatusView.setVisibility(View.VISIBLE);
             mKeyguardStatusView.setAlpha(1f);
         } else {
             mKeyguardStatusView.animate().cancel();
+            mKeyguardStatusViewAnimating = false;
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardStatusView.setAlpha(1f);
         }
