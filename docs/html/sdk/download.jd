@@ -14,9 +14,9 @@ hide_license_footer=true
     if (location.indexOf('?v=') != -1) {
       var filename = location.substring(location.indexOf('=')+1,location.length);
       if (document.getElementById('checkbox').checked) {
-        document.location = "http://dl.google.com/android/" + filename;
+        document.location = "https://dl.google.com/android/" + filename;
       }
-      document.getElementById('click-download').setAttribute("href", "http://dl.google.com/android/"
+      document.getElementById('click-download').setAttribute("href", "https://dl.google.com/android/"
 + filename);
       $("#terms-form").hide(500);
       $("#next-steps").show(500);
