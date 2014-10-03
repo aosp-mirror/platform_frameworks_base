@@ -4357,13 +4357,15 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                         continue;
                     }
 
-                    entriesToAdd[i].value->getPos()
-                            .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                                    SDK_L,
-                                    String8(p->getName()).string(),
-                                    String8(t->getName()).string(),
-                                    String8(entriesToAdd[i].value->getName()).string(),
-                                    entriesToAdd[i].key.toString().string());
+                    if (bundle->getVerbose()) {
+                        entriesToAdd[i].value->getPos()
+                                .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
+                                        SDK_L,
+                                        String8(p->getName()).string(),
+                                        String8(t->getName()).string(),
+                                        String8(entriesToAdd[i].value->getName()).string(),
+                                        entriesToAdd[i].key.toString().string());
+                    }
 
                     sp<Entry> newEntry = t->getEntry(c->getName(),
                             entriesToAdd[i].value->getPos(),
@@ -4437,13 +4439,15 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         resPath.convertToResPath();
 
         // Add a resource table entry.
-        SourcePos(target->getSourceFile(), -1).printf(
-                "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                SDK_L,
-                mAssets->getPackage().string(),
-                newFile->getResourceType().string(),
-                String8(resourceName).string(),
-                newConfig.toString().string());
+        if (bundle->getVerbose()) {
+            SourcePos(target->getSourceFile(), -1).printf(
+                    "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
+                    SDK_L,
+                    mAssets->getPackage().string(),
+                    newFile->getResourceType().string(),
+                    String8(resourceName).string(),
+                    newConfig.toString().string());
+        }
 
         addEntry(SourcePos(),
                 String16(mAssets->getPackage()),
@@ -4466,12 +4470,14 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         sp<XMLNode> node = attrsToRemove[i].key;
         size_t attrIndex = attrsToRemove[i].value;
         const XMLNode::attribute_entry& ae = node->getAttributes()[attrIndex];
-        SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
-                "removing attribute %s%s%s from <%s>",
-                String8(ae.ns).string(),
-                (ae.ns.size() == 0 ? "" : ":"),
-                String8(ae.name).string(),
-                String8(node->getElementName()).string());
+        if (bundle->getVerbose()) {
+            SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
+                    "removing attribute %s%s%s from <%s>",
+                    String8(ae.ns).string(),
+                    (ae.ns.size() == 0 ? "" : ":"),
+                    String8(ae.name).string(),
+                    String8(node->getElementName()).string());
+        }
         node->removeAttribute(attrIndex);
     }
 
