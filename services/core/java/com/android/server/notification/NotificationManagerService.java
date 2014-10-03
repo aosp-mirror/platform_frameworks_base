@@ -75,6 +75,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -187,6 +188,7 @@ public class NotificationManagerService extends SystemService {
     boolean mSystemReady;
 
     private boolean mDisableNotificationEffects;
+    private int mCallState;
     NotificationRecord mSoundNotification;
     NotificationRecord mVibrateNotification;
 
@@ -490,7 +492,7 @@ public class NotificationManagerService extends SystemService {
             synchronized (mNotificationList) {
                 mDisableNotificationEffects =
                         (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
-                if (disableNotificationEffects()) {
+                if (disableNotificationEffects(null) != null) {
                     // cancel whatever's going on
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -875,6 +877,7 @@ public class NotificationManagerService extends SystemService {
         mZenModeHelper.updateZenMode();
 
         mUserProfiles.updateCache(getContext());
+        listenForCallState();
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -1510,8 +1513,17 @@ public class NotificationManagerService extends SystemService {
         return keys.toArray(new String[keys.size()]);
     }
 
-    private boolean disableNotificationEffects() {
-        return mDisableNotificationEffects || (mListenerHints & HINT_HOST_DISABLE_EFFECTS) != 0;
+    private String disableNotificationEffects(NotificationRecord record) {
+        if (mDisableNotificationEffects) {
+            return "booleanState";
+        }
+        if ((mListenerHints & HINT_HOST_DISABLE_EFFECTS) != 0) {
+            return "listenerHints";
+        }
+        if (mCallState != TelephonyManager.CALL_STATE_IDLE && !mZenModeHelper.isCall(record)) {
+            return "callState";
+        }
+        return null;
     }
 
     void dumpImpl(PrintWriter pw, DumpFilter filter) {
@@ -1563,6 +1575,7 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mSoundNotification=" + mSoundNotification);
                     pw.println("  mVibrateNotification=" + mVibrateNotification);
                     pw.println("  mDisableNotificationEffects=" + mDisableNotificationEffects);
+                    pw.println("  mCallState=" + callStateToString(mCallState));
                     pw.println("  mSystemReady=" + mSystemReady);
                 }
                 pw.println("  mArchive=" + mArchive.toString());
@@ -1839,7 +1852,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         // If we're not supposed to beep, vibrate, etc. then don't.
-        if (!disableNotificationEffects()
+        final String disableEffects = disableNotificationEffects(record);
+        if (disableEffects != null) {
+            ZenLog.traceDisableEffects(record, disableEffects);
+        }
+        if (disableEffects == null
                 && (!(record.isUpdate
                     && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                 && (record.getUserId() == UserHandle.USER_ALL ||
@@ -2655,6 +2672,26 @@ public class NotificationManagerService extends SystemService {
         } catch (RemoteException re) {
             throw new SecurityException("Unknown package " + pkg + "\n" + re);
         }
+    }
+
+    private static String callStateToString(int state) {
+        switch (state) {
+            case TelephonyManager.CALL_STATE_IDLE: return "CALL_STATE_IDLE";
+            case TelephonyManager.CALL_STATE_RINGING: return "CALL_STATE_RINGING";
+            case TelephonyManager.CALL_STATE_OFFHOOK: return "CALL_STATE_OFFHOOK";
+            default: return "CALL_STATE_UNKNOWN_" + state;
+        }
+    }
+
+    private void listenForCallState() {
+        TelephonyManager.from(getContext()).listen(new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                if (mCallState == state) return;
+                if (DBG) Slog.d(TAG, "Call state changed: " + callStateToString(state));
+                mCallState = state;
+            }
+        }, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     /**
