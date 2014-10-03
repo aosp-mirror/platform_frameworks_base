@@ -4231,6 +4231,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkInfo result = new NetworkInfo(
                     networkType, 0, ConnectivityManager.getNetworkTypeName(networkType), "");
             result.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
+            result.setIsAvailable(true);
             return result;
         }
     }
