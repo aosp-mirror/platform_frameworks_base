@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.PrintWriter;
+import java.text.NumberFormat;
 
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -171,13 +172,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private void showWarningNotification() {
         final int textRes = mSaver ? R.string.battery_low_percent_format_saver_started
                 : R.string.battery_low_percent_format;
+        final String percentage = NumberFormat.getPercentInstance().format((double) mBatteryLevel / 100.0);
         final Notification.Builder nb = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_power_low)
                 // Bump the notification when the bucket dropped.
                 .setWhen(mBucketDroppedNegativeTimeMs)
                 .setShowWhen(false)
                 .setContentTitle(mContext.getString(R.string.battery_low_title))
-                .setContentText(mContext.getString(textRes, mBatteryLevel))
+                .setContentText(mContext.getString(textRes, percentage))
                 .setOnlyAlertOnce(true)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
