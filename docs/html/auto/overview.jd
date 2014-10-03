@@ -207,7 +207,7 @@ playback state through callbacks.</li>
 
 <p>The Android Auto app uses a car-specific UI model to display content and user interaction
 opportunities. Android Auto provides you with a standard UI designed to minimize driver
-distraction. You do not have to test a custom UI for for driver distraction, which is a
+distraction. You do not have to test a custom UI for driver distraction, which is a
 lengthy and expensive process involving multiple legislations across the globe and different
 standards for each vehicle OEM.</p>
 
@@ -217,7 +217,7 @@ media apps. You can customize the UI colors, action icons, background images, an
 <h3 id="launchapp">Launcher</h3>
 
 <p>The launcher shows all the compatible media apps installed on the user’s
-Android device and lets users select one of them from an scrollable list:</p>
+Android device and lets users select one of them from a scrollable list:</p>
 
 <div class="auto-img-container-single">
   <div class="auto-img-container">
