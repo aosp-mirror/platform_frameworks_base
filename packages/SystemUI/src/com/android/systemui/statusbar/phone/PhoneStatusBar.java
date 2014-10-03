@@ -2372,7 +2372,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void animateCollapseQuickSettings() {
-        mStatusBarView.collapseAllPanels(true);
+        if (mState == StatusBarState.SHADE) {
+            mStatusBarView.collapseAllPanels(true);
+        }
     }
 
     void makeExpandedInvisible() {
@@ -2474,7 +2476,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && mStatusBarWindowState != state) {
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
-            if (!showing) {
+            if (!showing && mState == StatusBarState.SHADE) {
                 mStatusBarView.collapseAllPanels(false);
             }
         }
