@@ -1379,7 +1379,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
-            int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING;
+            final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING;
 
             final HashSet<String> alreadyDexOpted = new HashSet<String>();
 
@@ -1523,13 +1523,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     scanFlags | SCAN_NO_DEX, 0);
 
             // Collected privileged system packages.
-            File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
+            final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             scanDirLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED, scanFlags, 0);
 
             // Collect ordinary system packages.
-            File systemAppDir = new File(Environment.getRootDirectory(), "app");
+            final File systemAppDir = new File(Environment.getRootDirectory(), "app");
             scanDirLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
@@ -1544,7 +1544,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             // Collect all OEM packages.
-            File oemAppDir = new File(Environment.getOemDirectory(), "app");
+            final File oemAppDir = new File(Environment.getOemDirectory(), "app");
             scanDirLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
@@ -1579,8 +1579,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                          * application can be scanned.
                          */
                         if (mSettings.isDisabledSystemPackageLPr(ps.name)) {
-                            Slog.i(TAG, "Expecting better updatd system app for " + ps.name
-                                    + "; removing system app");
+                            logCriticalInfo(Log.WARN, "Expecting better updated system app for "
+                                    + ps.name + "; removing system app.  Last known codePath="
+                                    + ps.codePathString + ", installStatus=" + ps.installStatus
+                                    + ", versionCode=" + ps.versionCode + "; scanned versionCode="
+                                    + scannedPkg.mVersionCode);
                             removePackageLI(ps, true);
                         }
 
@@ -1589,9 +1592,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
                         psit.remove();
-                        String msg = "System package " + ps.name
-                                + " no longer exists; wiping its data";
-                        reportSettingsProblem(Log.WARN, msg);
+                        logCriticalInfo(Log.WARN, "System package " + ps.name
+                                + " no longer exists; wiping its data");
                         removeDataDirsLI(ps.name);
                     } else {
                         final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
@@ -1648,7 +1650,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         PackageSetting deletedPs = mSettings.mPackages.get(deletedAppName);
                         deletedPs.pkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
                     }
-                    reportSettingsProblem(Log.WARN, msg);
+                    logCriticalInfo(Log.WARN, msg);
                 }
             }
 
@@ -1792,7 +1794,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     void cleanupInstallFailedPackage(PackageSetting ps) {
-        Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
+        logCriticalInfo(Log.WARN, "Cleaning up incompletely installed app: " + ps.name);
+
         removeDataDirsLI(ps.name);
         if (ps.codePath != null) {
             if (ps.codePath.isDirectory()) {
@@ -4029,7 +4032,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Delete invalid userdata apps
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
                         e.error == PackageManager.INSTALL_FAILED_INVALID_APK) {
-                    Slog.w(TAG, "Deleting invalid package at " + file);
+                    logCriticalInfo(Log.WARN, "Deleting invalid package at " + file);
                     if (file.isDirectory()) {
                         FileUtils.deleteContents(file);
                     }
@@ -4045,8 +4048,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         File fname = new File(systemDir, "uiderrors.txt");
         return fname;
     }
-    
+
     static void reportSettingsProblem(int priority, String msg) {
+        logCriticalInfo(priority, msg);
+    }
+
+    static void logCriticalInfo(int priority, String msg) {
+        Slog.println(priority, TAG, msg);
+        EventLogTags.writePmCriticalInfo(msg);
         try {
             File fname = getSettingsProblemFile();
             FileOutputStream out = new FileOutputStream(fname, true);
@@ -4061,7 +4070,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     -1, -1);
         } catch (java.io.IOException e) {
         }
-        Slog.println(priority, TAG, msg);
     }
 
     private void collectCertificatesLI(PackageParser pp, PackageSetting ps,
@@ -4155,7 +4163,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkg.mVersionCode < ps.versionCode) {
                     // The system package has been updated and the code path does not match
                     // Ignore entry. Skip it.
-                    Log.i(TAG, "Package " + ps.name + " at " + scanFile
+                    logCriticalInfo(Log.INFO, "Package " + ps.name + " at " + scanFile
                             + " ignored: updated version " + ps.versionCode
                             + " better than this " + pkg.mVersionCode);
                     if (!updatedPkg.codePath.equals(scanFile)) {
@@ -4185,7 +4193,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // Just remove the loaded entries from package lists.
                         mPackages.remove(ps.name);
                     }
-                    Slog.w(TAG, "Package " + ps.name + " at " + scanFile
+
+                    logCriticalInfo(Log.WARN, "Package " + ps.name + " at " + scanFile
                             + "reverting from " + ps.codePathString
                             + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
@@ -4232,7 +4241,8 @@ public class PackageManagerService extends IPackageManager.Stub {
              */
             if (compareSignatures(ps.signatures.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
-                if (DEBUG_INSTALL) Slog.d(TAG, "Signature mismatch!");
+                logCriticalInfo(Log.WARN, "Package " + ps.name + " appeared on system, but"
+                        + " signatures don't match existing userdata copy; removing");
                 deletePackageLI(pkg.packageName, null, true, null, null, 0, null, false);
                 ps = null;
             } else {
@@ -4243,6 +4253,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                  */
                 if (pkg.mVersionCode < ps.versionCode) {
                     shouldHideSystemApp = true;
+                    logCriticalInfo(Log.INFO, "Package " + ps.name + " appeared at " + scanFile
+                            + " but new version " + pkg.mVersionCode + " better than installed "
+                            + ps.versionCode + "; hiding system");
                 } else {
                     /*
                      * The newly found system app is a newer version that the
@@ -4250,9 +4263,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                      * already-installed application and replace it with our own
                      * while keeping the application data.
                      */
-                    Slog.w(TAG, "Package " + ps.name + " at " + scanFile + "reverting from "
-                            + ps.codePathString + ": new version " + pkg.mVersionCode
-                            + " better than installed " + ps.versionCode);
+                    logCriticalInfo(Log.WARN, "Package " + ps.name + " at " + scanFile
+                            + " reverting from " + ps.codePathString + ": new version "
+                            + pkg.mVersionCode + " better than installed " + ps.versionCode);
                     InstallArgs args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
                             ps.codePathString, ps.resourcePathString, ps.legacyNativeLibraryPathString,
                             getAppDexInstructionSets(ps));
