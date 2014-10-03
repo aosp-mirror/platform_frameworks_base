@@ -350,9 +350,9 @@ public class ZenModeHelper {
         return record.isCategory(Notification.CATEGORY_EVENT);
     }
 
-    private boolean isCall(NotificationRecord record) {
-        return isDefaultPhoneApp(record.sbn.getPackageName())
-                || record.isCategory(Notification.CATEGORY_CALL);
+    public boolean isCall(NotificationRecord record) {
+        return record != null && (isDefaultPhoneApp(record.sbn.getPackageName())
+                || record.isCategory(Notification.CATEGORY_CALL));
     }
 
     private boolean isDefaultPhoneApp(String pkg) {
