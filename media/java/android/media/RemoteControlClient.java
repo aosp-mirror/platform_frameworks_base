@@ -572,7 +572,8 @@ import java.lang.IllegalArgumentException;
 
                 // USE_SESSIONS
                 if (mSession != null && mMetadataBuilder != null) {
-                    mSession.setMetadata(mMetadataBuilder.build());
+                    mMediaMetadata = mMetadataBuilder.build();
+                    mSession.setMetadata(mMediaMetadata);
                 }
                 mApplied = true;
             }
