@@ -55,6 +55,7 @@ public class ZenLog {
     private static final int TYPE_CONFIG = 10;
     private static final int TYPE_FOLLOW_RINGER_MODE = 11;
     private static final int TYPE_NOT_INTERCEPTED = 12;
+    private static final int TYPE_DISABLE_EFFECTS = 13;
 
     private static int sNext;
     private static int sSize;
@@ -106,6 +107,10 @@ public class ZenLog {
                 + zenModeToString(oldZen) + " -> " + zenModeToString(newZen));
     }
 
+    public static void traceDisableEffects(NotificationRecord record, String reason) {
+        append(TYPE_DISABLE_EFFECTS, record.getKey() + "," + reason);
+    }
+
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
         return provider == null ? "no provider" : e != null ? e.getMessage() : "ok";
     }
@@ -124,6 +129,7 @@ public class ZenLog {
             case TYPE_CONFIG: return "config";
             case TYPE_FOLLOW_RINGER_MODE: return "follow_ringer_mode";
             case TYPE_NOT_INTERCEPTED: return "not_intercepted";
+            case TYPE_DISABLE_EFFECTS: return "disable_effects";
             default: return "unknown";
         }
     }
