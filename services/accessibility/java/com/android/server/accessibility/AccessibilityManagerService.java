@@ -1604,10 +1604,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         if (userState.mUserId != UserHandle.USER_OWNER) {
             return;
         }
-        if (hasRunningServicesLocked(userState) && LockPatternUtils.isDeviceEncrypted()) {
-            // If there are running accessibility services we do not have encryption as
-            // the user needs the accessibility layer to be running to authenticate.
-            mLockPatternUtils.clearEncryptionPassword();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (hasRunningServicesLocked(userState) && LockPatternUtils.isDeviceEncrypted()) {
+                // If there are running accessibility services we do not have encryption as
+                // the user needs the accessibility layer to be running to authenticate.
+                mLockPatternUtils.clearEncryptionPassword();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
