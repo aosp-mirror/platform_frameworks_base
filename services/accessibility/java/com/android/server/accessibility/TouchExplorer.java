@@ -205,6 +205,9 @@ class TouchExplorer implements EventStreamTransformation {
     // The long pressing pointer Y if coordinate remapping is needed.
     private int mLongPressingPointerDeltaY;
 
+    // The id of the last touch explored window.
+    private int mLastTouchedWindowId;
+
     // Whether touch exploration is in progress.
     private boolean mTouchExplorationInProgress;
 
@@ -365,6 +368,11 @@ class TouchExplorer implements EventStreamTransformation {
                     mInjectedPointerTracker.mLastInjectedHoverEventForClick.recycle();
                     mInjectedPointerTracker.mLastInjectedHoverEventForClick = null;
                 }
+                mLastTouchedWindowId = -1;
+            } break;
+            case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+            case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                mLastTouchedWindowId = event.getWindowId();
             } break;
         }
         if (mNext != null) {
@@ -1143,12 +1151,42 @@ class TouchExplorer implements EventStreamTransformation {
                 mSendTouchInteractionEndDelayed.forceSendAndRemove();
             }
 
+            int clickLocationX;
+            int clickLocationY;
+
             final int pointerId = secondTapUp.getPointerId(secondTapUp.getActionIndex());
             final int pointerIndex = secondTapUp.findPointerIndex(pointerId);
 
-            Point clickLocation = mTempPoint;
-            if (!computeClickLocation(clickLocation)) {
-                return;
+            MotionEvent lastExploreEvent =
+                mInjectedPointerTracker.getLastInjectedHoverEventForClick();
+            if (lastExploreEvent == null) {
+                // No last touch explored event but there is accessibility focus in
+                // the active window. We click in the focus bounds.
+                Point point = mTempPoint;
+                if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                    clickLocationX = point.x;
+                    clickLocationY = point.y;
+                } else {
+                    // Out of luck - do nothing.
+                    return;
+                }
+            } else {
+                // If the click is within the active window but not within the
+                // accessibility focus bounds we click in the focus bounds.
+                final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
+                clickLocationX = (int) lastExploreEvent.getX(lastExplorePointerIndex);
+                clickLocationY = (int) lastExploreEvent.getY(lastExplorePointerIndex);
+                Rect activeWindowBounds = mTempRect;
+                if (mLastTouchedWindowId == mAms.getActiveWindowId()) {
+                    mAms.getActiveWindowBounds(activeWindowBounds);
+                    if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
+                        Point point = mTempPoint;
+                        if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                            clickLocationX = point.x;
+                            clickLocationY = point.y;
+                        }
+                    }
+                }
             }
 
             // Do the click.
@@ -1157,8 +1195,8 @@ class TouchExplorer implements EventStreamTransformation {
             secondTapUp.getPointerProperties(pointerIndex, properties[0]);
             PointerCoords[] coords = new PointerCoords[1];
             coords[0] = new PointerCoords();
-            coords[0].x = clickLocation.x;
-            coords[0].y = clickLocation.y;
+            coords[0].x = clickLocationX;
+            coords[0].y = clickLocationY;
             MotionEvent event = MotionEvent.obtain(secondTapUp.getDownTime(),
                     secondTapUp.getEventTime(), MotionEvent.ACTION_DOWN, 1, properties,
                     coords, 0, 0, 1.0f, 1.0f, secondTapUp.getDeviceId(), 0,
@@ -1284,18 +1322,47 @@ class TouchExplorer implements EventStreamTransformation {
                 return;
             }
 
+            int clickLocationX;
+            int clickLocationY;
+
             final int pointerId = mEvent.getPointerId(mEvent.getActionIndex());
             final int pointerIndex = mEvent.findPointerIndex(pointerId);
 
-
-            Point clickLocation = mTempPoint;
-            if (!computeClickLocation(clickLocation)) {
-                return;
+            MotionEvent lastExploreEvent =
+                mInjectedPointerTracker.getLastInjectedHoverEventForClick();
+            if (lastExploreEvent == null) {
+                // No last touch explored event but there is accessibility focus in
+                // the active window. We click in the focus bounds.
+                Point point = mTempPoint;
+                if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                    clickLocationX = point.x;
+                    clickLocationY = point.y;
+                } else {
+                    // Out of luck - do nothing.
+                    return;
+                }
+            } else {
+                // If the click is within the active window but not within the
+                // accessibility focus bounds we click in the focus bounds.
+                final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
+                clickLocationX = (int) lastExploreEvent.getX(lastExplorePointerIndex);
+                clickLocationY = (int) lastExploreEvent.getY(lastExplorePointerIndex);
+                Rect activeWindowBounds = mTempRect;
+                if (mLastTouchedWindowId == mAms.getActiveWindowId()) {
+                    mAms.getActiveWindowBounds(activeWindowBounds);
+                    if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
+                        Point point = mTempPoint;
+                        if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                            clickLocationX = point.x;
+                            clickLocationY = point.y;
+                        }
+                    }
+                }
             }
 
             mLongPressingPointerId = pointerId;
-            mLongPressingPointerDeltaX = (int) mEvent.getX(pointerIndex) - clickLocation.x;
-            mLongPressingPointerDeltaY = (int) mEvent.getY(pointerIndex) - clickLocation.y;
+            mLongPressingPointerDeltaX = (int) mEvent.getX(pointerIndex) - clickLocationX;
+            mLongPressingPointerDeltaY = (int) mEvent.getY(pointerIndex) - clickLocationY;
 
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(mPolicyFlags);
 
@@ -1309,27 +1376,6 @@ class TouchExplorer implements EventStreamTransformation {
             mEvent = null;
             mPolicyFlags = 0;
         }
-    }
-
-    private boolean computeClickLocation(Point outPoint) {
-        // Try to click on the accessiblity focused view and if that
-        // fails try the last touch explored location, if such.
-        Point point = mTempPoint;
-        if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
-            outPoint.x = point.x;
-            outPoint.y = point.y;
-            return true;
-        } else {
-            MotionEvent lastExploreEvent =
-                    mInjectedPointerTracker.getLastInjectedHoverEventForClick();
-            if (lastExploreEvent != null) {
-                final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
-                outPoint.x = (int) lastExploreEvent.getX(lastExplorePointerIndex);
-                outPoint.y = (int) lastExploreEvent.getY(lastExplorePointerIndex);
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
