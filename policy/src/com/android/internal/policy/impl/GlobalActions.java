@@ -23,6 +23,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -370,6 +371,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                // don't actually trigger the bugreport if we are running stability
+                                // tests via monkey
+                                if (ActivityManager.isUserAMonkey()) {
+                                    return;
+                                }
                                 // Add a little delay before executing, to give the
                                 // dialog a chance to go away before it takes a
                                 // screenshot.
