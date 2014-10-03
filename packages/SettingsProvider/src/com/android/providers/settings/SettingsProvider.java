@@ -506,7 +506,14 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void fullyPopulateCaches(final int userHandle) {
-        DatabaseHelper dbHelper = mOpenHelpers.get(userHandle);
+        DatabaseHelper dbHelper;
+        synchronized (this) {
+            dbHelper = mOpenHelpers.get(userHandle);
+        }
+        if (dbHelper == null) {
+            // User is gone.
+            return;
+        }
         // Only populate the globals cache once, for the owning user
         if (userHandle == UserHandle.USER_OWNER) {
             fullyPopulateCache(dbHelper, TABLE_GLOBAL, sGlobalCache);
@@ -611,10 +618,15 @@ public class SettingsProvider extends ContentProvider {
 
         long oldId = Binder.clearCallingIdentity();
         try {
-            DatabaseHelper dbHelper = mOpenHelpers.get(callingUser);
+            DatabaseHelper dbHelper;
+            synchronized (this) {
+                dbHelper = mOpenHelpers.get(callingUser);
+            }
             if (null == dbHelper) {
                 establishDbTracking(callingUser);
-                dbHelper = mOpenHelpers.get(callingUser);
+                synchronized (this) {
+                    dbHelper = mOpenHelpers.get(callingUser);
+                }
             }
             return dbHelper;
         } finally {
