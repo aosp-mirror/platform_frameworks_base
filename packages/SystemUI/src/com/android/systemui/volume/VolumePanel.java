@@ -127,6 +127,9 @@ public class VolumePanel extends Handler {
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build();
 
+    private static final int IC_AUDIO_VOL = com.android.systemui.R.drawable.ic_audio_vol;
+    private static final int IC_AUDIO_VOL_MUTE = com.android.systemui.R.drawable.ic_audio_vol_mute;
+
     private final String mTag;
     protected final Context mContext;
     private final AudioManager mAudioManager;
@@ -182,13 +185,13 @@ public class VolumePanel extends Handler {
                 false),
         AlarmStream(AudioManager.STREAM_ALARM,
                 R.string.volume_alarm,
-                R.drawable.ic_audio_alarm,
-                R.drawable.ic_audio_alarm_mute,
+                com.android.systemui.R.drawable.ic_audio_alarm,
+                com.android.systemui.R.drawable.ic_audio_alarm_mute,
                 false),
         MediaStream(AudioManager.STREAM_MUSIC,
                 R.string.volume_icon_description_media,
-                R.drawable.ic_audio_vol,
-                R.drawable.ic_audio_vol_mute,
+                IC_AUDIO_VOL,
+                IC_AUDIO_VOL_MUTE,
                 true),
         NotificationStream(AudioManager.STREAM_NOTIFICATION,
                 R.string.volume_icon_description_notification,
@@ -198,8 +201,8 @@ public class VolumePanel extends Handler {
         // for now, use media resources for master volume
         MasterStream(STREAM_MASTER,
                 R.string.volume_icon_description_media, //FIXME should have its own description
-                R.drawable.ic_audio_vol,
-                R.drawable.ic_audio_vol_mute,
+                IC_AUDIO_VOL,
+                IC_AUDIO_VOL_MUTE,
                 false),
         RemoteStream(STREAM_REMOTE_MUSIC,
                 R.string.volume_icon_description_media, //FIXME should have its own description
@@ -994,7 +997,7 @@ public class VolumePanel extends Handler {
                         AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)) != 0) {
                     setMusicIcon(R.drawable.ic_audio_bt, R.drawable.ic_audio_bt_mute);
                 } else {
-                    setMusicIcon(R.drawable.ic_audio_vol, R.drawable.ic_audio_vol_mute);
+                    setMusicIcon(IC_AUDIO_VOL, IC_AUDIO_VOL_MUTE);
                 }
                 break;
             }
