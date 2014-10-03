@@ -25,11 +25,10 @@
 #include "Layer.h"
 #include "Rect.h"
 #include "RenderNode.h"
+#include "renderthread/RenderThread.h"
 
 namespace android {
 namespace uirenderer {
-
-typedef void (*LayerDestroyer)(Layer* layer);
 
 // Container to hold the properties a layer should be set to at the start
 // of a render pass
@@ -37,7 +36,7 @@ class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API DeferredLayerUpdater(Layer* layer, LayerDestroyer = 0);
+    ANDROID_API DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer);
     ANDROID_API ~DeferredLayerUpdater();
 
     ANDROID_API bool setSize(uint32_t width, uint32_t height) {
@@ -99,8 +98,7 @@ private:
 
     Layer* mLayer;
     Caches& mCaches;
-
-    LayerDestroyer mDestroyer;
+    renderthread::RenderThread& mRenderThread;
 
     void doUpdateTexImage();
 };
