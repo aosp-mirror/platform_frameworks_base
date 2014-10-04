@@ -751,8 +751,8 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"‏طول و نویسه‎های مجاز در گذرواژه‌های بازکردن قفل صفحه را کنترل کنید."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"‏تعداد گذرواژه‎های اشتباه تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و یا اگر دفعات زیادی گذرواژه اشتباه تایپ شود رایانهٔ لوحی را قفل می‎کند و همه داده‎های رایانهٔ لوحی را پاک می‎کند."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"‏تعداد گذرواژه‎های نادرست تایپ شده را کنترل می‎کند. هنگام بازکردن قفل صفحه اگر دفعات زیادی گذرواژه نادرست تایپ کرده‎اید، تلفن را قفل کنید یا همه داده‎های تلفن را پاک کنید."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‎کند. اگر دفعات زیادی گذرواژه نادرست وارد شود، تلفن را قفل می‌کند یا همه داده‎های تلفن را پاک می‌کند."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"تغییر رمز ورود قفل گشایی صفحه"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"گذرواژه بازگشایی قفل صفحه را تغییر دهید."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"قفل کردن صفحه"</string>
@@ -1185,8 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"فضای ذخیره‌سازی رو به اتمام است"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> در حال اجرا است"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"برای کسب اطلاعات بیشتر یا توقف برنامه لمس کنید."</string>
     <string name="ok" msgid="5970060430562524910">"تأیید"</string>

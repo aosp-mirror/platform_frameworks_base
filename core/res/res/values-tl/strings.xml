@@ -1185,8 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Tumatakbo ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Pindutin para sa higit pang impormasyon o upang ihinto ang app."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
