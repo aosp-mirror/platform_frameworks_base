@@ -1185,6 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstacties"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Opslagruimte is bijna vol"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bepaalde systeemfuncties werken mogelijk niet"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Onvoldoende opslagruimte voor het systeem. Zorg ervoor dat u 250 MB vrije ruimte heeft en start opnieuw."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> wordt uitgevoerd"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Raak aan voor meer informatie of om de app te stoppen."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
