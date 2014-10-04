@@ -1133,7 +1133,7 @@ public class WifiConfiguration implements Parcelable {
                     sbuf.append(",ipfail=");
                     sbuf.append(result.numIpConfigFailures);
                 }
-                sbuf.append(result.autoJoinStatus).append("} ");
+                sbuf.append(",").append(result.autoJoinStatus).append("} ");
             }
             sbuf.append('\n');
         }
