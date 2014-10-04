@@ -33,8 +33,8 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Гарсан"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Мэдэгдэл"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батерей дуусаж байна"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> үлдсэн"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> үлдсэн. Батерей хэмнэгч асаалттай."</string>
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Батерей хэмнэгч ассан."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB цэнэглэлт дэмжигдэхгүй байна.\nЗөвхөн нийлүүлэгдсэн цэнэглэгчийг ашиглана уу."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB-р цэнэглэх дэмжигддэггүй."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Зөвхөн зориулалтын ирсэн цэнэглэгч ашиглана уу."</string>
@@ -224,8 +224,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Этернет"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Нислэгийн горим"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Цэнэглэж байна, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Цэнэглэгдсэн"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Блютүүт"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Блютүүт (<xliff:g id="NUMBER">%d</xliff:g> төхөөрөмж)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Блютүүт унтраалттай"</string>
@@ -324,7 +322,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Батерей хэмнэгч асаалттай"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Ажиллагаа болон далд датаг бууруулна"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Батерей хэмнэгчийг унтраах"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Контентыг нуусан"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> таны дэлгэц дээр гаргасан бүх зүйлийн зургийг авч эхэлнэ."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Дахиж үл харуулах"</string>
@@ -356,6 +353,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Үгүй"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Тохируулах"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-с хаасан"</string>
-    <!-- no translation found for zen_mode_and_condition (4462471036429759903) -->
-    <skip />
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>

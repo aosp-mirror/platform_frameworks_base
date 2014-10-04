@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Pile faible"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> restant(s)"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Il reste : <xliff:g id="NUMBER">%d%%</xliff:g>. La fonction Économie d\'énergie est activée."</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"Chargement USB non compatible.\nVous devez utiliser le chargeur fourni."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Le chargement par USB n\'est pas pris en charge."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utilisez uniquement le chargeur fourni."</string>
@@ -226,8 +228,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"Écran de veille"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Mode Avion"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"En charge (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Chargée"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"BLUETOOTH DÉSACTIVÉ"</string>
@@ -326,7 +326,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"La fonction Économie d\'énergie est activée"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Réduire les performances et de fond"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Désactiver l\'économiseur d\'énergie"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g> %%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenus masqués"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> commencer à enregistrer tout ce qui s\'affiche sur votre écran."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne plus afficher"</string>

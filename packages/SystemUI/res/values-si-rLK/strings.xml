@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"දැනට පවතින"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"දැනුම්දීම්"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"බැටරිය අඩුය"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> ක් ඉතිරියි"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> ක් ඉතිරියි. බැටරිය සුරකින්නා සක්‍රීයයි."</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"USB ආරෝපණය සහය නොදක්වයි.\nසපයන ලද ආරෝපකය පමණක් භාවිතා කරන්න."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ආරෝපණය කිරීම සහාය නොදක්වයි."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"සපයන ලද අරෝපකය පමණක් භාවිතා කරන්න."</string>
@@ -224,8 +226,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"දවල් හීනය"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ඊතර නෙට්"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"අහස්යානා ආකාරය"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"ආරෝපණය වෙමින්, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"අරෝපිතයි"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"බ්ලූටූත්"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"බ්ලූටූත් (උපාංග <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"බ්ලූටූත් අක්‍රියයි"</string>
@@ -324,7 +324,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"බැටරිය සුරකින්නා සක්‍රීයයි"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ක්‍රියාකාරිත්වය සහ පසුබිම් දත්ත අඩු කරන්න"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"බැටරි සුරැකීම අක්‍රිය කරන්න"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"සැඟවුණු සම්බන්ධතා"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"ඔබගේ තීරයේ දර්ශනය වන සෑම දෙයම <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ලබාගැනීම ආරම්භ කරන ලදි."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"නැවත නොපෙන්වන්න"</string>
@@ -356,6 +355,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"එපා ස්තූතියි"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"සකසන්න"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> විසින් නිශ්ශබ්ද කරන ලදි"</string>
-    <!-- no translation found for zen_mode_and_condition (4462471036429759903) -->
-    <skip />
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>
