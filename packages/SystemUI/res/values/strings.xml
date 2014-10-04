@@ -62,12 +62,12 @@
     <string name="battery_low_title">Battery is low</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
-        appened to the subtitle of the low battery alert.  "number" is the percentage of battery
+        appened to the subtitle of the low battery alert.  "percentage" is the percentage of battery
         remaining [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g> remaining</string>
+    <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
 
     <!-- Same as battery_low_percent_format, with a notice about battery saver if on. [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_saver_started"><xliff:g id="number">%d%%</xliff:g> remaining. Battery saver is on.</string>
+    <string name="battery_low_percent_format_saver_started"><xliff:g id="percentage">%s</xliff:g> remaining. Battery saver is on.</string>
 
     <!-- A message that appears when a USB charger is plugged in and the device does not
     support charging on it.  That is, a charger that fits into the USB port and goes into
@@ -114,11 +114,6 @@
 
     <!-- Label in system panel saying the device will show notifications [CHAR LIMIT=30] -->
     <string name="status_bar_settings_notifications">Notifications</string>
-
-    <!-- Text to display next to the graphical battery meter.  [CHAR LIMIT=3] -->
-    <string name="status_bar_settings_battery_meter_format" translatable="false">
-        <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
-    </string>
 
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false">|</string>
@@ -559,10 +554,6 @@
 
     <!-- QuickSettings: Airplane mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_airplane_mode_label">Airplane mode</string>
-    <!-- QuickSettings: Battery Charging [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_battery_charging_label">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <!-- QuickSettings: Battery Charged [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_battery_charged_label">Charged</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
@@ -812,9 +803,6 @@
 
     <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
     <string name="battery_saver_notification_action_text">Turn off battery saver</string>
-
-    <!-- Battery level for expanded quick settings [CHAR LIMIT=2] -->
-    <string name="battery_level_template"><xliff:g id="level" example="45">%d</xliff:g>%%</string>
 
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
