@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acções de texto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Está quase sem espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Algumas funções do sistema poderão não funcionar"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Não existe armazenamento suficiente para o sistema. Certifique-se de que tem 250 MB de espaço livre e reinicie."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> em execução"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Toque para obter mais informações ou para parar a aplicação."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>

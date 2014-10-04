@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Տեքստի գործողությունները"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Պահոցային տարածքը սպառվում է"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Համակարգի որոշ գործառույթներ հնարավոր է չաշխատեն"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Համակարգի համար բավարար հիշողություն չկա: Համոզվեք, որ ունեք 250ՄԲ ազատ տարածություն և վերագործարկեք:"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ն աշխատեցվում է"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Հպեք` լրացուցիչ տեղեկությունները կամ ծրագիրը դադարեցնելու համար:"</string>
     <string name="ok" msgid="5970060430562524910">"Լավ"</string>
@@ -1279,12 +1280,9 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Չհաջողվեց միանալ Wi-Fi-ին"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ունի թույլ ինտերնետ կապ:"</string>
-    <!-- no translation found for wifi_connect_alert_title (8455846016001810172) -->
-    <skip />
-    <!-- no translation found for wifi_connect_alert_message (8930084523889618078) -->
-    <skip />
-    <!-- no translation found for wifi_connect_default_application (7143109390475484319) -->
-    <skip />
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Թույլատրե՞լ կապը:"</string>
+    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s օգտվողը ցանկանում է կապվել %2$s-ին"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Հավելված"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ուղիղ"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Մեկնարկել Wi-Fi ուղին: Այն կանջատի Wi-Fi հաճախորդ/թեժ կետ գործողությունը:"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Չհաջողվեց մեկնարկել Wi-Fi ուղին:"</string>

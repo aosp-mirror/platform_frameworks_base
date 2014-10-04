@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoiminnot"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Tallennustila loppumassa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tallennustila ei riitä. Varmista, että vapaata tilaa on 250 Mt, ja käynnistä uudelleen."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> on käynnissä"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Hanki lisätietoja tai sulje sovellus koskettamalla."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1279,12 +1280,9 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-yhteyden muodostaminen epäonnistui"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" : huono internetyhteys."</string>
-    <!-- no translation found for wifi_connect_alert_title (8455846016001810172) -->
-    <skip />
-    <!-- no translation found for wifi_connect_alert_message (8930084523889618078) -->
-    <skip />
-    <!-- no translation found for wifi_connect_default_application (7143109390475484319) -->
-    <skip />
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Sallitaanko yhteys?"</string>
+    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s haluaa yhdistää kohteeseen %2$s"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Sovellus"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Suora wifi-yhteys"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora wifi-yhteys. Wi-Fi-asiakas/-hotspot poistetaan käytöstä."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Suoran wifi-yhteyden käynnistäminen epäonnistui."</string>

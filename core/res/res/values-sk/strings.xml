@@ -870,14 +870,14 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dieťa"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Domáci partner"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Druh(-žka)"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otec"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Priateľ"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Manažér"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Matka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Rodič"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner(ka)"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Referencie od"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Odporúča"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Príbuzný(-á)"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Manžel(ka)"</string>
@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operácie s textom"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je spustená"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Dotykom si zobrazíte viac informácií alebo zastavíte aplikáciu."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1252,7 +1253,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Je nastavený tichý tón zvonenia"</string>
     <string name="volume_call" msgid="3941680041282788711">"Hlasitosť hovoru"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Hlasitosť prichádzajúcich hovorov pri pripojení Bluetooth"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Hlasitosť budíka"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Hlasitosť budíkov"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Hlasitosť upozornení"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Hlasitosť"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Hlasitosť zariadenia Bluetooth"</string>
@@ -1778,14 +1779,14 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred uvoľnením požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrácie a prenos údajov na pozadí, aby tak predĺžil výdrž batérie. E-mail, správy a ďalšie aplikácie, ktorú používajú synchronizáciu, sa nemusia aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Na predĺženie výdrže batérie šetrič batérie znižuje výkonnosť zariadenia a obmedzuje vibrácie a prenos údajov na pozadí. E-mail, správy a ďalšie aplikácie, ktoré používajú synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Na jednu minútu"</item>
     <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
   </plurals>
   <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Na jednu hodinu"</item>
+    <item quantity="one" msgid="3480040795582254384">"Na 1 h"</item>
     <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
   </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Natrvalo"</string>

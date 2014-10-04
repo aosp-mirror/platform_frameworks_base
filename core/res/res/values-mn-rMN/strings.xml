@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Текст үйлдэл"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сангийн хэмжээ дутагдаж байна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Зарим систем функц ажиллахгүй байна"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Системд хангалттай сан байхгүй байна. 250MБ чөлөөтэй зай байгаа эсэхийг шалгаад дахин эхлүүлнэ үү."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ажиллаж байна"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Илүү мэдээлэл авах бол хүрэх эсвэл апп-г зогсооно уу ."</string>
     <string name="ok" msgid="5970060430562524910">"Тийм"</string>
@@ -1279,12 +1280,9 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-д холбогдож чадсангүй"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Интернет холболт муу байна."</string>
-    <!-- no translation found for wifi_connect_alert_title (8455846016001810172) -->
-    <skip />
-    <!-- no translation found for wifi_connect_alert_message (8930084523889618078) -->
-    <skip />
-    <!-- no translation found for wifi_connect_default_application (7143109390475484319) -->
-    <skip />
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Холболтыг зөвшөөрөх үү?"</string>
+    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s %2$s-тай холбогдохыг хүсэж байна"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Аппликешн"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Шууд"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Шуудыг эхлүүлнэ үү. Энэ нь Wi-Fi клиент/холболтын цэг унтраана."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Шуудыг эхлүүлж чадсангүй."</string>

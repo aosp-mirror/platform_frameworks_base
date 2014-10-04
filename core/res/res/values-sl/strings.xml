@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Besedilna dejanja"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Prostor za shranjevanje bo pošel"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Nekatere sistemske funkcije morda ne delujejo"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"V shrambi ni dovolj prostora za sistem. Sprostite 250 MB prostora in znova zaženite napravo."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> se izvaja"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Dotaknite se, če želite izvedeti več ali ustaviti aplikacijo."</string>
     <string name="ok" msgid="5970060430562524910">"V redu"</string>
