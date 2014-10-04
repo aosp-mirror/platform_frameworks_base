@@ -3511,7 +3511,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     PackageInfo pkg = allPackages.get(i);
                     // Exclude system apps if we've been asked to do so
                     if (mIncludeSystem == true
-                            || ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
+                            || ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)) {
                         packagesToBackup.put(pkg.packageName, pkg);
                     }
                 }
@@ -4344,6 +4344,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     } else if (info.path.equals(BACKUP_METADATA_FILENAME)) {
                         // Metadata blobs!
                         readMetadata(info, instream);
+                        skipTarPadding(info.size, instream);
                     } else {
                         // Non-manifest, so it's actual file data.  Is this a package
                         // we're ignoring?
@@ -5160,8 +5161,10 @@ public class BackupManagerService extends IBackupManager.Stub {
                         info.packageName = info.path.substring(0, slash);
                         info.path = info.path.substring(slash+1);
 
-                        // if it's a manifest we're done, otherwise parse out the domains
-                        if (!info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                        // if it's a manifest or metadata payload we're done, otherwise parse
+                        // out the domain into which the file will be restored
+                        if (!info.path.equals(BACKUP_MANIFEST_FILENAME)
+                                && !info.path.equals(BACKUP_METADATA_FILENAME)) {
                             slash = info.path.indexOf('/');
                             if (slash < 0) {
                                 throw new IOException("Illegal semantic path in non-manifest "
@@ -5706,6 +5709,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     } else if (info.path.equals(BACKUP_METADATA_FILENAME)) {
                         // Metadata blobs!
                         readMetadata(info, instream);
+                        skipTarPadding(info.size, instream);
                     } else {
                         // Non-manifest, so it's actual file data.  Is this a package
                         // we're ignoring?
@@ -6482,8 +6486,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         info.packageName = info.path.substring(0, slash);
                         info.path = info.path.substring(slash+1);
 
-                        // if it's a manifest we're done, otherwise parse out the domains
-                        if (!info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                        // if it's a manifest or metadata payload we're done, otherwise parse
+                        // out the domain into which the file will be restored
+                        if (!info.path.equals(BACKUP_MANIFEST_FILENAME)
+                                && !info.path.equals(BACKUP_METADATA_FILENAME)) {
                             slash = info.path.indexOf('/');
                             if (slash < 0) throw new IOException("Illegal semantic path in non-manifest " + info.path);
                             info.domain = info.path.substring(0, slash);
@@ -8160,7 +8166,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             if (DEBUG) Slog.v(TAG, "Requesting full backup: apks=" + includeApks
                     + " obb=" + includeObbs + " shared=" + includeShared + " all=" + doAllApps
-                    + " pkgs=" + pkgList);
+                    + " system=" + includeSystem + " pkgs=" + pkgList);
             Slog.i(TAG, "Beginning full backup...");
 
             FullBackupParams params = new FullBackupParams(fd, includeApks, includeObbs,
