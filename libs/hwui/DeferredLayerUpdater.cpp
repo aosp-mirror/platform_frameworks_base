@@ -18,38 +18,52 @@
 #include "OpenGLRenderer.h"
 
 #include "LayerRenderer.h"
+#include "renderthread/EglManager.h"
+#include "renderthread/RenderTask.h"
 
 namespace android {
 namespace uirenderer {
 
-static void defaultLayerDestroyer(Layer* layer) {
-    Caches::getInstance().resourceCache.decrementRefcount(layer);
-}
+class DeleteLayerTask : public renderthread::RenderTask {
+public:
+    DeleteLayerTask(renderthread::EglManager& eglManager, Layer* layer)
+        : mEglManager(eglManager)
+        , mLayer(layer)
+    {}
 
-DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, LayerDestroyer destroyer)
+    virtual void run() {
+        mEglManager.requireGlContext();
+        LayerRenderer::destroyLayer(mLayer);
+        mLayer = 0;
+        delete this;
+    }
+
+private:
+    renderthread::EglManager& mEglManager;
+    Layer* mLayer;
+};
+
+DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer)
         : mSurfaceTexture(0)
         , mTransform(0)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer)
         , mCaches(Caches::getInstance())
-        , mDestroyer(destroyer) {
+        , mRenderThread(thread) {
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
     mColorFilter = SkSafeRef(mLayer->getColorFilter());
     mAlpha = mLayer->getAlpha();
     mMode = mLayer->getMode();
-
-    if (!mDestroyer) {
-        mDestroyer = defaultLayerDestroyer;
-    }
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
     setTransform(0);
-    mDestroyer(mLayer);
+    mRenderThread.queue(new DeleteLayerTask(mRenderThread.eglManager(), mLayer));
+    mLayer = 0;
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
@@ -121,7 +135,12 @@ void DeferredLayerUpdater::doUpdateTexImage() {
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
     if (mSurfaceTexture.get()) {
-        mSurfaceTexture->detachFromContext();
+        mRenderThread.eglManager().requireGlContext();
+        status_t err = mSurfaceTexture->detachFromContext();
+        if (err != 0) {
+            // TODO: Elevate to fatal exception
+            ALOGE("Failed to detach SurfaceTexture from context %d", err);
+        }
         mSurfaceTexture = 0;
         mLayer->clearTexture();
     }

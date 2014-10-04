@@ -83,7 +83,6 @@ public:
 
     void runWithGlContext(RenderTask* task);
 
-    Layer* createRenderLayer(int width, int height);
     Layer* createTextureLayer();
 
     ANDROID_API static void setTextureAtlas(RenderThread& thread,

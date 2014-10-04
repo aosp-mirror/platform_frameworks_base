@@ -344,11 +344,6 @@ void CanvasContext::runWithGlContext(RenderTask* task) {
     task->run();
 }
 
-Layer* CanvasContext::createRenderLayer(int width, int height) {
-    requireSurface();
-    return LayerRenderer::createRenderLayer(mRenderThread.renderState(), width, height);
-}
-
 Layer* CanvasContext::createTextureLayer() {
     requireSurface();
     return LayerRenderer::createTextureLayer(mRenderThread.renderState());
