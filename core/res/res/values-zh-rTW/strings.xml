@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字動作"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確定您已釋出 250MB 的可用空間，然後重新啟動。"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前正在執行"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"輕觸即可瞭解詳情或停止應用程式。"</string>
     <string name="ok" msgid="5970060430562524910">"確定"</string>

@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"पाठ कार्यहरू"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"भण्डारण ठाउँ सकिँदै छ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"सायद केही प्रणाली कार्यक्रमहरूले काम गर्दैनन्"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चलिरहेको छ"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"थप सूचनाको लागि छुनुहोस् वा अनुप्रयोग बन्द गर्नुहोस्।"</string>
     <string name="ok" msgid="5970060430562524910">"ठिक छ"</string>
@@ -1220,7 +1219,7 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB उपकरणको लागि एउटा अनुप्रयोग छान्नुहोस्"</string>
     <string name="noApplications" msgid="2991814273936504689">"कुनै पनि अनुप्रयोगहरूले यो कार्य गर्न सक्दैनन्।"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"दुर्भाग्यवश, <xliff:g id="APPLICATION">%1$s</xliff:g>ले रोकेको छ।"</string>
+    <string name="aerr_application" msgid="932628488013092776">"दुर्भाग्यवश, <xliff:g id="APPLICATION">%1$s</xliff:g> रोकिएको छ।"</string>
     <string name="aerr_process" msgid="4507058997035697579">"दुर्भाग्यवश, प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> बन्द भयो।"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>ले कार्य गरिरहेको छैन।\n\nके तपाईँ यसलाई बन्द गर्न चाहनु हुन्छ?"</string>

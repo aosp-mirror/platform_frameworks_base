@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Радње у вези са текстом"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Простор за складиштење је на измаку"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Неке системске функције можда не функционишу"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Нема довољно складишног простора за систем. Уверите се да имате 250 MB слободног простора и поново покрените."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је покренута"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Додирните за више информација или заустављање апликације."</string>
     <string name="ok" msgid="5970060430562524910">"Потврди"</string>

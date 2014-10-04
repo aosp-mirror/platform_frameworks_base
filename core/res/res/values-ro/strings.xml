@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acţiuni pentru text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spaţiul de stocare aproape ocupat"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Este posibil ca unele funcţii de sistem să nu funcţioneze"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Spațiu de stocare insuficient pentru sistem. Asigurați-vă că aveți 250 MB de spațiu liber și reporniți."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> rulează acum"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Atingeți pentru mai multe informații sau pentru a opri aplicația."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1204,7 +1203,7 @@
     <string name="whichSendApplication" msgid="6902512414057341668">"Distribuiți cu"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Distribuiți cu %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Selectați o aplicație de pe ecranul de pornire"</string>
-    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilizați %1$s ca Pagină de pornire"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilizați %1$s ca ecran de pornire"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Se utilizează în mod prestabilit pentru această acţiune."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Utilizați altă aplicație"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ștergeţi setările prestabilite din Setări de sistem &gt; Aplicaţii &gt; Descărcate."</string>

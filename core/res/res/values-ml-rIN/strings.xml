@@ -749,7 +749,7 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"സ്‌ക്രീൻ-അൺലോക്ക് പാസ്‌വേഡുകളിൽ അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"സ്‌ക്രീൻ അൺലോക്ക് പാസ്‌വേഡ് മാറ്റുക"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"സ്‌ക്രീൻ അൺലോക്ക് പാസ്‌വേഡ് മാറ്റുക."</string>
@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> പ്രവർത്തിക്കുന്നു"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"കൂടുതൽ വിവരങ്ങൾക്ക് സ്‌പർശിക്കുക അല്ലെങ്കിൽ അപ്ലിക്കേഷൻ നിർത്തുക."</string>
     <string name="ok" msgid="5970060430562524910">"ശരി"</string>

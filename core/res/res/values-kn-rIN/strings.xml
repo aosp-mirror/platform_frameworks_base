@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ಸಿಸ್ಟಂನಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆಯಿಲ್ಲ. ನೀವು 250MB ನಷ್ಟು ಖಾಲಿ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುವಿರಾ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಹಾಗೂ ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಚಾಲನೆಯಲ್ಲಿದೆ"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ನಿಲ್ಲಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="ok" msgid="5970060430562524910">"ಸರಿ"</string>
@@ -1491,8 +1490,8 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ಅಳಿಸುವಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"ಈಗ ಏನೂ ಮಾಡಬೇಡಿ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ಖಾತೆಯೊಂದನ್ನು ಆರಿಸು"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"ಒಂದು ಖಾತೆ ಸೇರಿಸಿ"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"ಖಾತೆಯನ್ನು ಸೇರಿಸು"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"ಒಂದು ಖಾತೆ ಸೇರಿಸು"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"ಖಾತೆ ಸೇರಿಸು"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"ಹೆಚ್ಚಿಸಿ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"ಕಡಿಮೆ ಮಾಡಿ"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದಿಡಿ."</string>
