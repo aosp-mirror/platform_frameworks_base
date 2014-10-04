@@ -493,7 +493,6 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
 
-    private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
     private static native long nCreateTextureLayer(long nativeProxy);
     private static native void nBuildLayer(long nativeProxy, long node);
     private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
