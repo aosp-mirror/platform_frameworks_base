@@ -260,6 +260,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private void setScrimColor(ScrimView scrim, float alpha) {
+        Object runningAnim = scrim.getTag(TAG_KEY_ANIM);
+        if (runningAnim instanceof ValueAnimator) {
+            ((ValueAnimator) runningAnim).cancel();
+            scrim.setTag(TAG_KEY_ANIM, null);
+        }
         int color = Color.argb((int) (alpha * 255), 0, 0, 0);
         if (mAnimateChange) {
             startScrimAnimation(scrim, color);
@@ -273,10 +278,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         int target = Color.alpha(targetColor);
         if (current == targetColor) {
             return;
-        }
-        Object runningAnim = scrim.getTag(TAG_KEY_ANIM);
-        if (runningAnim instanceof ValueAnimator) {
-            ((ValueAnimator) runningAnim).cancel();
         }
         ValueAnimator anim = ValueAnimator.ofInt(current, target);
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
