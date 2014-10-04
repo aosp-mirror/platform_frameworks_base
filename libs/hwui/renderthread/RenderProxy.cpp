@@ -257,31 +257,16 @@ void RenderProxy::enqueueDestroyLayer(Layer* layer) {
     RenderThread::getInstance().queue(task);
 }
 
-CREATE_BRIDGE3(createDisplayListLayer, CanvasContext* context, int width, int height) {
-    Layer* layer = args->context->createRenderLayer(args->width, args->height);
-    if (!layer) return 0;
-    return new DeferredLayerUpdater(layer, RenderProxy::enqueueDestroyLayer);
-}
-
-DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height) {
-    SETUP_TASK(createDisplayListLayer);
-    args->width = width;
-    args->height = height;
-    args->context = mContext;
-    void* retval = postAndWait(task);
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
-    return layer;
-}
-
-CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
+CREATE_BRIDGE2(createTextureLayer, RenderThread* thread, CanvasContext* context) {
     Layer* layer = args->context->createTextureLayer();
     if (!layer) return 0;
-    return new DeferredLayerUpdater(layer, RenderProxy::enqueueDestroyLayer);
+    return new DeferredLayerUpdater(*args->thread, layer);
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     SETUP_TASK(createTextureLayer);
     args->context = mContext;
+    args->thread = &mRenderThread;
     void* retval = postAndWait(task);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
     return layer;
