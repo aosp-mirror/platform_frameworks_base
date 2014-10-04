@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"正在进行的"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"电池电量偏低"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"还剩<xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"电量还剩<xliff:g id="NUMBER">%d%%</xliff:g>。节电助手已开启。"</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"不支持USB充电功能。\n只能使用随附的充电器充电。"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支持USB充电。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"仅限使用设备随附的充电器。"</string>
@@ -226,8 +228,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"互动屏保"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"有线网络"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"飞行模式"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"正在充电：<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"充电完成"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"蓝牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"蓝牙：关闭"</string>
@@ -326,7 +326,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已开启"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低性能并限制后台流量"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"关闭节电助手"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将开始截取您的屏幕上显示的所有内容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不再显示"</string>
