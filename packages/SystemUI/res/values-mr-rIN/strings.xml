@@ -290,7 +290,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी डावीकडे स्लाइड करा."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"कोणतेही व्यत्यय नाहीत. अगदी अलार्मचे देखील नाहीत."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"कोणतेही व्यत्यय नाही"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"प्राधान्य व्‍यत्यय केवळ"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"केवळ प्राधान्य दिलेले व्‍यत्यय"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"आपला पुढील अलार्म <xliff:g id="ALARM_TIME">%s</xliff:g> वाजता आहे"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"आपला पुढील अलार्म <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g> आहे"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"आपण आपला अलार्म <xliff:g id="ALARM_TIME">%s</xliff:g> वाजता ऐकणार नाही"</string>
