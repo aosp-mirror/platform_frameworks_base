@@ -152,6 +152,8 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Typeface#getSystemFontConfigLocation",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
+        "android.preference.Preference#dispatchSetInitialValue",
+        "android.preference.Preference#getView",
         "android.text.format.DateFormat#is24HourFormat",
         "android.util.Xml#newPullParser",
         "android.view.Choreographer#getRefreshRate",
@@ -273,6 +275,7 @@ public final class CreateInfo implements ICreateInfo {
 
     private final static String[] EXCLUDED_CLASSES =
         new String[] {
+            "android.preference.PreferenceActivity",
             "org.kxml2.io.KXmlParser"
         };
 

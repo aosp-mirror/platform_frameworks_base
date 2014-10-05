@@ -49,6 +49,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.SessionParamsFlags;
 import com.android.layoutlib.bridge.bars.Config;
 import com.android.layoutlib.bridge.bars.NavigationBar;
 import com.android.layoutlib.bridge.bars.StatusBar;
@@ -73,6 +74,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.preference.Preference_Delegate;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.AttachInfo_Accessor;
@@ -87,7 +89,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.view.WindowManagerGlobal_Delegate;
-import android.view.ViewParent;
 import android.widget.AbsListView;
 import android.widget.AbsSpinner;
 import android.widget.ActionMenuView;
@@ -397,7 +398,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // it can instantiate the custom Fragment.
             Fragment_Delegate.setProjectCallback(params.getProjectCallback());
 
-            View view = mInflater.inflate(mBlockParser, mContentRoot);
+            String rootTag = params.getFlag(SessionParamsFlags.FLAG_KEY_ROOT_TAG);
+            boolean isPreference = "PreferenceScreen".equals(rootTag);
+            View view;
+            if (isPreference) {
+                view = Preference_Delegate.inflatePreference(getContext(), mBlockParser,
+                  mContentRoot);
+            } else {
+                view = mInflater.inflate(mBlockParser, mContentRoot);
+            }
 
             // done with the parser, pop it.
             context.popParser();
@@ -408,7 +417,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             AttachInfo_Accessor.setAttachInfo(mViewRoot);
 
             // post-inflate process. For now this supports TabHost/TabWidget
-            postInflateProcess(view, params.getProjectCallback());
+            postInflateProcess(view, params.getProjectCallback(), isPreference ? view : null);
 
             // get the background drawable
             if (mWindowBackground != null) {
@@ -589,6 +598,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
                     false);
+
+            // clear the preferences cookie map.
+            Preference_Delegate.clearCookiesMap();
 
             // success!
             return SUCCESS.createResult();
@@ -1210,12 +1222,16 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * based on the content of the {@link FrameLayout}.
      * @param view the root view to process.
      * @param projectCallback callback to the project.
+     * @param skip the view and it's children are not processed.
      */
     @SuppressWarnings("deprecation")  // For the use of Pair
-    private void postInflateProcess(View view, IProjectCallback projectCallback)
+    private void postInflateProcess(View view, IProjectCallback projectCallback, View skip)
             throws PostInflateException {
+        if (view == skip) {
+            return;
+        }
         if (view instanceof TabHost) {
-            setupTabHost((TabHost)view, projectCallback);
+            setupTabHost((TabHost) view, projectCallback);
         } else if (view instanceof QuickContactBadge) {
             QuickContactBadge badge = (QuickContactBadge) view;
             badge.setImageToDefault();
@@ -1248,7 +1264,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                             boolean skipCallbackParser = false;
 
                             int count = binding.getHeaderCount();
-                            for (int i = 0 ; i < count ; i++) {
+                            for (int i = 0; i < count; i++) {
                                 Pair<View, Boolean> pair = context.inflateView(
                                         binding.getHeaderAt(i),
                                         list, false /*attachToRoot*/, skipCallbackParser);
@@ -1260,7 +1276,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                             }
 
                             count = binding.getFooterCount();
-                            for (int i = 0 ; i < count ; i++) {
+                            for (int i = 0; i < count; i++) {
                                 Pair<View, Boolean> pair = context.inflateView(
                                         binding.getFooterAt(i),
                                         list, false /*attachToRoot*/, skipCallbackParser);
@@ -1289,11 +1305,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 }
             }
         } else if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup)view;
+            ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
-            for (int c = 0 ; c < count ; c++) {
+            for (int c = 0; c < count; c++) {
                 View child = group.getChildAt(c);
-                postInflateProcess(child, projectCallback);
+                postInflateProcess(child, projectCallback, skip);
             }
         }
     }
@@ -1361,6 +1377,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             for (int i = 0 ; i < count ; i++) {
                 View child = content.getChildAt(i);
                 String tabSpec = String.format("tab_spec%d", i+1);
+                @SuppressWarnings("ConstantConditions")  // child cannot be null.
                 int id = child.getId();
                 @SuppressWarnings("deprecation")
                 Pair<ResourceType, String> resource = projectCallback.resolveResourceId(id);
