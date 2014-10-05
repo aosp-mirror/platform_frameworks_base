@@ -763,7 +763,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅब्लेटचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय फोनचा डेटा मिटवा."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"डिव्हाइस समग्र प्रॉक्सी सेट करा"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"धोरण सक्षम असताना वापरण्यासाठी समग्र प्रॉक्सी डिव्हाइस सेट करा. फक्त प्रथम डिव्हाइस प्रशासक परिणामकारक समग्र प्रॉक्सी सेट करते."</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"धोरण सक्षम असताना वापरण्यासाठी डिव्हाइस समग्र प्रॉक्सी सेट करा. फक्त प्रथम डिव्हाइस प्रशासक परिणामकारक समग्र प्रॉक्सी सेट करते."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"लॉक-स्क्रीन संकेतशब्द कालबाह्यता सेट करा"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"लॉक-स्क्रीन संकेतशब्द किती वारंवार बदलणे आवश्यक आहे ते नियंत्रित करा."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"संचयन कूटबद्धीकरण सेट करा"</string>
@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"मजकूर क्रिया"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"संचयन स्थान संपत आहे"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"काही सिस्टम कार्ये कार्य करू शकत नाहीत"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चालत आहे"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"अधिक माहितीसाठी किंवा अ‍ॅप थांबविण्‍यासाठी स्‍पर्श करा."</string>
     <string name="ok" msgid="5970060430562524910">"ठीक"</string>

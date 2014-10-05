@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> இயக்குகிறது"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"மேலும் தகவலுக்கு அல்லது பயன்பாட்டை நிறுத்துவதற்கு, தொடவும்."</string>
     <string name="ok" msgid="5970060430562524910">"சரி"</string>

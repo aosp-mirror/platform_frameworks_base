@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"テキスト操作"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"一部のシステム機能が動作しない可能性があります"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g>を実行しています"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"タップすると詳細が表示されるか、アプリが停止します。"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>

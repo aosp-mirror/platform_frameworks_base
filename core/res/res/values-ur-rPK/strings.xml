@@ -1187,6 +1187,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"متن کی کارروائیاں"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"اسٹوریج کی جگہ ختم ہو رہی ہے"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ممکن ہے سسٹم کے کچھ فنکشنز کام نہ کریں"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏سسٹم کیلئے کافی اسٹوریج نہیں ہے۔ اس بات کو یقینی بنائیں کہ آپ کے پاس 250MB خالی جگہ ہے اور دوبارہ شروع کریں۔"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> چل رہا ہے"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"مزید معلومات کیلئے یا ایپ کو روکنے کیلئے ٹچ کریں۔"</string>
     <string name="ok" msgid="5970060430562524910">"ٹھیک ہے"</string>
