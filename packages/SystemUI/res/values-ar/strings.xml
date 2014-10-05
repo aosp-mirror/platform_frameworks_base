@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"الإشعارات"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"البطارية منخفضة"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"المتبقي: <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"يتبقى <xliff:g id="NUMBER">%s</xliff:g>. وضع توفير الطاقة قيد التشغيل."</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"‏شحن USB غير معتمد.\nاستخدم الشاحن الموفر فقط."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"‏لا يمكن إجراء الشحن عبر USB."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"لا تستخدم سوى الشاحن المزوّد."</string>
