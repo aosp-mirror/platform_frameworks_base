@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ബാറ്ററി നില കുറവാണ്"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> ശേഷിക്കുന്നു"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> ശേഷിക്കുന്നു. ബാറ്ററി സേവർ ഓണാണ്."</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണയ്ക്കുന്നില്ല.\nഅതിന്റെ അനുബന്ധ ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണച്ചില്ല."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"വിതരണം ചെയ്‌ത ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
@@ -224,8 +226,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"ഡേഡ്രീം"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ഇതർനെറ്റ്"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"വിമാന മോഡ്"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"ചാർജ്ജുചെയ്യുന്നു, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"ചാർജ്ജുചെയ്‌തു"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> ഉപകരണങ്ങൾ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth ഓഫുചെയ്യുക"</string>
@@ -324,7 +324,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ബാറ്ററി സേവർ ഓണാണ്"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ബാറ്ററി സേവർ ഓഫാക്കുക"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"കോൺടാക്‌റ്റുകൾ മറച്ചു"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"നിങ്ങളുടെ സ്ക്രീനിൽ പ്രദർശിപ്പിച്ചിരിക്കുന്ന എല്ലാ കാര്യങ്ങളും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ക്യാപ്‌ചർ ചെയ്യുന്നത് ആരംഭിക്കും."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"വീണ്ടും കാണിക്കരുത്"</string>

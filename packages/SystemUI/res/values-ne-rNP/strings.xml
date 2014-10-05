@@ -33,8 +33,8 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"चलिरहेको"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाहरू"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ब्याट्रि कम छ"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> बाँकी"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> बाँकी। ब्याट्रि सेभर चालु छ।"</string>
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाँकी"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाँकी। ब्याट्री बचत खुलै छ।"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB चार्ज गर्न समर्थित छैन।\n आपूर्ति गरिएको चार्जर मात्र प्रयोग गर्नुहोस्।"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB चार्ज समर्थित छैन।"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"आपूर्ति गरिएको चार्जर मात्र प्रयोग गर्नुहोस्।"</string>
@@ -224,8 +224,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"दिवासपना"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"हवाइजहाज मोड"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"चार्ज हुँदै, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"चार्ज भयो"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लुटुथ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लुटुथ (<xliff:g id="NUMBER">%d</xliff:g> उपकरणहरू)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लुटुथ बन्द"</string>
@@ -324,7 +322,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ब्याट्रि सेभर चालु छ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"प्रदर्शन र पृष्ठभूमि डेटा घटाउँनुहोस्"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ब्याट्री बचत बन्द गर्नुहोस्"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"लुकेका सामाग्रीहरू"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले आफ्नो स्क्रीनमा प्रदर्शित हुने सबै खिच्न शुरू गर्नेछ।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फेरि नदेखाउनुहोस्"</string>
@@ -356,6 +353,5 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"धन्यवाद पर्दैन"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेटअप गर्नुहोस्"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा मौन गरिएको"</string>
-    <!-- no translation found for zen_mode_and_condition (4462471036429759903) -->
-    <skip />
+    <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>

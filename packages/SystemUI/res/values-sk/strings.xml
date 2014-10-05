@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Prebiehajúce"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Upozornenia"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batéria je takmer vybitá"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"Zostáva: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Zostáva: <xliff:g id="NUMBER">%d%%</xliff:g>. Šetrič batérie je zapnutý."</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"Nabíjanie pomocou rozhrania USB nie je podporované.\nPoužívajte iba nabíjačku, ktorá bola dodaná spolu so zariadením."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Nabíjanie prostredníctvom USB nie je podporované."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Používajte iba originálnu nabíjačku."</string>
@@ -226,8 +228,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"Šetrič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Režim v lietadle"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Nabíjanie, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Nabité"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Rozhranie Bluetooth (počet zariadení: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Rozhranie Bluetooth je vypnuté"</string>
@@ -290,9 +290,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhľadávanie"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prejdite prstom nahor: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prejdite prstom doľava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Žiadne prerušenia. Dokonca ani budíky"</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"Žiadne prerušenia"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"Iba prioritné prerušenia"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Žiadne vyrušenia, ani budíky"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Žiadne vyrušenia"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Iba prioritné vyrušenia"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Ďalší budík: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Ďalší budík: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Váš budík o <xliff:g id="ALARM_TIME">%s</xliff:g> sa nespustí"</string>
@@ -326,7 +326,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Šetrič batérie je zapnutý"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Obmedzí výkonnosť a prenos údajov na pozadí"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Vypnúť šetrič batérie"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g> %%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Skrytý obsah"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikácia <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> začne zaznamenávať všetok obsah zobrazený na vašej obrazovke."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nabudúce nezobrazovať"</string>

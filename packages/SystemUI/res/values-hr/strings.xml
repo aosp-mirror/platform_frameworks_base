@@ -33,8 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"U tijeku"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obavijesti"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Niska razina baterije"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> preostalo"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Preostalo je <xliff:g id="NUMBER">%d%%</xliff:g>. Štednja baterije je uključena."</string>
+    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"USB punjenje nije podržano.\nUpotrijebite samo priloženi punjač."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Punjenje putem USB-a nije podržano."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Upotrebljavajte samo priloženi punjač."</string>
@@ -224,8 +226,6 @@
     <string name="start_dreams" msgid="7219575858348719790">"Sanjarenje"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Način rada u zrakoplovu"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Puni se, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Napunjena"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (broj uređaja: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth isključen"</string>
@@ -324,7 +324,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Štednja baterije je uključena"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Smanjuje količinu rada i pozadinske podatke"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Isključi uštedu baterije"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Sadržaj je skriven"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> počet će snimati sve što se prikazuje na zaslonu."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne prikazuj ponovo"</string>
