@@ -1185,8 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Kevés a szabad terület"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Előfordulhat, hogy néhány rendszerfunkció nem működik."</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nincs elegendő tárhely a rendszerhez. Győződjön meg arról, hogy rendelkezik 250 MB szabad területtel, majd kezdje elölről."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg fut"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"További információért, illetve az alkalmazás leállításához érintse meg."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
