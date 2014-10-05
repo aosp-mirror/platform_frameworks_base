@@ -1185,6 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ruang storan semakin berkurangan"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Beberapa fungsi sistem mungkin tidak berfungsi"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tidak cukup storan untuk sistem. Pastikan anda mempunyai 250MB ruang kosong dan mulakan semula."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Sentuh untuk maklumat lanjut atau untuk menghentikan apl."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
