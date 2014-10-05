@@ -1185,8 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje s tekstom"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Neke sistemske funkcije možda neće raditi"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno pohrane za sustav. Oslobodite 250 MB prostora i pokrenite uređaj ponovo."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> pokrenuta je"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Dodirnite za više informacija ili da biste zaustavili aplikaciju."</string>
     <string name="ok" msgid="5970060430562524910">"U redu"</string>

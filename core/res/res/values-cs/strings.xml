@@ -1185,8 +1185,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operace s textem"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"V úložišti je málo místa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Některé systémové funkce nemusí fungovat"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Pro systém není dostatek místa v úložišti. Uvolněte alespoň 250 MB místa a restartujte zařízení."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> je spuštěna"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Klepnutím zobrazíte další informace nebo ukončíte aplikaci."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
