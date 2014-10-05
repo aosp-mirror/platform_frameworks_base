@@ -760,14 +760,14 @@
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ezabatu telefonoaren datuak abisatu gabe, jatorrizko datuak berrezarrita."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ezarri gailuaren proxy orokorra"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ezarri gailuaren proxy orokorra gidalerroak gaituta dauden bitartean erabiltzeko. Gailuaren lehen administratzaileak soilik ezartzen du proxy orokor eraginkorra."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ezarri blokeo-pasahitzaren iraungitzea"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Ezarri blokeatzeko pasahitzaren iraungitzea"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kontrolatu pantaila blokeatuko pasahitza aldatu beharreko maiztasuna."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ezarri memoria-enkriptatzea"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Eskatu gordetako aplikazio-datuak enkriptatzea."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desgaitu kamerak"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Eragotzi gailuaren kamerak erabiltzea."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Teklen blokeoko eginbideak desgaitzea"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Eragotzi teklen blokeoko eginbide batzuk erabiltzea"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Eragotzi teklen blokeoko eginbide batzuk erabiltzea."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Etxekoa"</item>
     <item msgid="869923650527136615">"Mugikorra"</item>
@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Testu-ekintzak"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> abian da"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Informazio gehiago lortzeko edo aplikazioa gelditzeko, ukitu."</string>
     <string name="ok" msgid="5970060430562524910">"Ados"</string>
@@ -1203,8 +1202,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editatu %1$s aplikazioarekin"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Partekatu honekin:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partekatu %1$s aplikazioarekin"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Hautatu Hasierako pantaila"</string>
-    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Erabili %1$s hasierako pantaila gisa"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Hautatu hasierako aplikazioa"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Erabili %1$s hasierako aplikazio gisa"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Erabili modu lehenetsian ekintza honetarako."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Erabili beste aplikazio bat"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Garbitu aplikazio lehenetsia Sistemaren ezarpenak &gt; Aplikazioak &gt; Deskargatutakoak atalean."</string>

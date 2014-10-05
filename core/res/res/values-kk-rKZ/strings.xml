@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Мәтін әрекеттері"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Жүйе үшін жад жеткіліксіз. 250 МБ бос орын бар екенін тексеріп, қайта іске қосыңыз."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> қосылған"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Басқа ақпаратты қарау үшін немесе қолданбаны тоқтату үшін түртіңіз."</string>
     <string name="ok" msgid="5970060430562524910">"Жарайды"</string>

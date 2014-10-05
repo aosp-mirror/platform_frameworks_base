@@ -1055,7 +1055,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"Søgeforespørgsel"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Ryd forespørgslen"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Indsend forespørgslen"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"Stemmesøgning"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Talesøgning"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Vil du aktivere Udforsk ved berøring?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er tændt, kan du høre eller se beskrivelser af, hvad der er under din finger eller udføre bevægelser for at interagere med tabletten."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er aktiveret, kan du høre eller se beskrivelser af, hvad der er under din finger, eller udføre bevægelser for at interagere med telefonen."</string>
@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der er snart ikke mere lagerplads"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Nogle systemfunktioner virker måske ikke"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Der er ikke nok ledig lagerplads til systemet. Sørg for, at du har 250 MB ledig plads, og genstart."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Tryk for at få flere oplysninger eller for at stoppe appen."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>

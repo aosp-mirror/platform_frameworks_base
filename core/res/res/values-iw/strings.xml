@@ -179,7 +179,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"דיווח על באג"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת דוא\"ל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. התאזר בסבלנות."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. התאזר בסבלנות."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"מצב שקט"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"הקול כבוי"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"קול מופעל"</string>
@@ -196,7 +196,7 @@
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"שירותים שעולים כסף"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ביצוע פעולות שעשויות לעלות לך כסף."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ההודעות שלך"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"‏קריאה וכתיבה בהודעות ה-SMS, הדוא\"ל והודעות אחרות שלך."</string>
+    <string name="permgroupdesc_messages" msgid="7821999071003699236">"‏קריאה וכתיבה בהודעות ה-SMS, האימייל והודעות אחרות שלך."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"המידע האישי שלך"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"גישה ישירה למידע עליך, המאוחסן בכרטיס איש הקשר שלך."</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"מידע על הקשרים החברתיים שלך"</string>
@@ -478,11 +478,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"מאפשר לאפליקציה לשלוח שידורים דביקים, אשר נותרים לאחר סיום השידור. אפליקציות זדוניות עלולות להאט את פעילות הטאבלט או להפוך אותה לבלתי יציבה על ידי אילוץ המכשיר להשתמש ביותר מדי זיכרון."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"מאפשר לאפליקציה לשלוח שידורים דביקים, אשר נותרים לאחר סיום השידור. אפליקציות זדוניות עלולות להאט את פעילות הטלפון או להפוך אותה לבלתי יציבה על ידי אילוץ המכשיר להשתמש ביותר מדי זיכרון."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"קריאת אנשי הקשר שלך"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"מאפשר לאפליקציה לקרוא נתונים לגבי אנשי הקשר שלך המאוחסנים בטאבלט, כולל את התדירות שבה התקשרת, שלחת דוא\"ל או יצרת קשר בדרכים אחרות עם אנשים ספציפיים. אישור זה מתיר לאפליקציות לשמור את נתוני אנשי הקשר שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני אנשי קשר ללא ידיעתך."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"מאפשר לאפליקציה לקרוא נתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל את התדירות שבה התקשרת, שלחת דוא\"ל או יצרת קשר בדרכים אחרות עם אנשים ספציפיים. אישור זה מתיר לאפליקציות לשמור את נתוני אנשי הקשר שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני אנשי קשר ללא ידיעתך."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"מאפשר לאפליקציה לקרוא נתונים לגבי אנשי הקשר שלך המאוחסנים בטאבלט, כולל את התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשים ספציפיים. אישור זה מתיר לאפליקציות לשמור את נתוני אנשי הקשר שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני אנשי קשר ללא ידיעתך."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"מאפשר לאפליקציה לקרוא נתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל את התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשים ספציפיים. אישור זה מתיר לאפליקציות לשמור את נתוני אנשי הקשר שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני אנשי קשר ללא ידיעתך."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"שינוי אנשי הקשר שלך"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטאבלט, כולל התדירות שבה התקשרת, שלחת דוא\"ל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל התדירות שבה התקשרת, שלחת דוא\"ל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטאבלט, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"קריאת יומן שיחות"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"מאפשר לאפליקציה לקרוא את יומן השיחות של הטאבלט, כולל נתונים לגבי שיחות נכנסות ויוצאות. אישור זה מתיר לאפליקציות לשמור את נתוני יומן השיחות שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני יומן שיחות ללא ידיעתך."</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"מאפשר לאפליקציה לקרוא את יומן השיחות של הטלפון, כולל נתונים לגבי שיחות נכנסות ויוצאות. אישור זה מתיר לאפליקציות לשמור את נתוני יומן השיחות שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני יומן שיחות ללא ידיעתך."</string>
@@ -502,7 +502,7 @@
     <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי יומן וגם מידע סודי"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"מאפשר לאפליקציה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני היומן שלך, ללא התחשבות בסודיות או ברגישות."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"מאפשר לאפליקציה לקרוא את כל אירועי היומן המאוחסנים בטלפון, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני היומן שלך, ללא התחשבות בסודיות או ברגישות."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי יומן ושליחת דוא\"ל לאורחים ללא ידיעת הבעלים"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי יומן ושליחת אימייל לאורחים ללא ידיעת הבעלים"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטאבלט, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי יומן או לשנות אירועים ללא ידיעת הבעלים."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטלפון, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי יומן או לשנות אירועים ללא ידיעת הבעלים."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"צור מקורות מיקום מדומים לצורך בדיקה"</string>
@@ -941,7 +941,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"ביטול נעילת חשבון"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"בוצעו ניסיונות רבים מדי לשרטוט קו ביטול נעילה."</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"‏כדי לבטל את הנעילה, היכנס באמצעות חשבון Google שלך."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"שם משתמש (דוא\"ל)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"שם משתמש (אימייל)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"סיסמה"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"כניסה"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"שם משתמש או סיסמה לא חוקיים."</string>
@@ -1183,8 +1183,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"פעולות טקסט"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"שטח האחסון אוזל"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ייתכן שפונקציות מערכת מסוימות לא יפעלו"</string>
-    <!-- no translation found for low_internal_storage_view_text_no_boot (6935190099204693424) -->
-    <skip />
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏אין מספיק שטח אחסון עבור המערכת. ודא שיש לך שטח פנוי בגודל 250MB התחל שוב."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> פועל"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"גע לקבלת מידע נוסף או כדי לעצור את האפליקציה."</string>
     <string name="ok" msgid="5970060430562524910">"אישור"</string>
@@ -1616,7 +1615,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"‏קודי ה-PIN אינם תואמים"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ניסיונות רבים מדי לשרטוט קו ביטול נעילה."</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"‏כדי לבטל את הנעילה, היכנס באמצעות חשבון Google שלך."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"שם משתמש (דוא\"ל)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"שם משתמש (אימייל)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"סיסמה"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"היכנס"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
@@ -1629,8 +1628,8 @@
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטאבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\n\nהאזנה בעוצמת קול גבוהה למשכי זמן ממושכים עלולה לפגוע בשמיעה."</string>
@@ -1773,7 +1772,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"בקש קוד אימות לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"בקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"כדי לעזור בהארכת חיי הסוללה, תכונת \'חיסכון בסוללה\' מצמצמת את פעילות המכשיר ומגבילה את השימוש ברטט וברוב נתוני הרקע. ייתכן שדוא\"ל, שליחת הודעות ואפליקציות אחרות המסתמכות על סנכרון לא יתעדכנו, אלא אם תפתח אותן.\n\nתכונת \'חיסכון בסוללה\' מופסקת אוטומטית כשהמכשיר מחובר לחשמל."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"כדי לעזור בהארכת חיי הסוללה, תכונת \'חיסכון בסוללה\' מצמצמת את פעילות המכשיר ומגבילה את השימוש ברטט וברוב נתוני הרקע. ייתכן שאימייל, שליחת הודעות ואפליקציות אחרות המסתמכות על סנכרון לא יתעדכנו, אלא אם תפתח אותן.\n\nתכונת \'חיסכון בסוללה\' מופסקת אוטומטית כשהמכשיר מחובר לחשמל."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"עד לסיום ההשבתה בשעה <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"למשך דקה אחת"</item>
