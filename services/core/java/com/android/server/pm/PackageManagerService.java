@@ -175,11 +175,13 @@ import android.view.Display;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1553,6 +1555,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<String>();
+            final ArrayMap<String, File> expectingBetter = new ArrayMap<>();
             if (!mOnlyCore) {
                 Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
                 while (psit.hasNext()) {
@@ -1585,6 +1588,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     + ", versionCode=" + ps.versionCode + "; scanned versionCode="
                                     + scannedPkg.mVersionCode);
                             removePackageLI(ps, true);
+                            expectingBetter.put(ps.name, ps.codePath);
                         }
 
                         continue;
@@ -1651,6 +1655,49 @@ public class PackageManagerService extends IPackageManager.Stub {
                         deletedPs.pkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
                     }
                     logCriticalInfo(Log.WARN, msg);
+                }
+
+                /**
+                 * Make sure all system apps that we expected to appear on
+                 * the userdata partition actually showed up. If they never
+                 * appeared, crawl back and revive the system version.
+                 */
+                for (int i = 0; i < expectingBetter.size(); i++) {
+                    final String packageName = expectingBetter.keyAt(i);
+                    if (!mPackages.containsKey(packageName)) {
+                        final File scanFile = expectingBetter.valueAt(i);
+
+                        logCriticalInfo(Log.WARN, "Expected better " + packageName
+                                + " but never showed up; reverting to system");
+
+                        final int reparseFlags;
+                        if (FileUtils.contains(privilegedAppDir, scanFile)) {
+                            reparseFlags = PackageParser.PARSE_IS_SYSTEM
+                                    | PackageParser.PARSE_IS_SYSTEM_DIR
+                                    | PackageParser.PARSE_IS_PRIVILEGED;
+                        } else if (FileUtils.contains(systemAppDir, scanFile)) {
+                            reparseFlags = PackageParser.PARSE_IS_SYSTEM
+                                    | PackageParser.PARSE_IS_SYSTEM_DIR;
+                        } else if (FileUtils.contains(vendorAppDir, scanFile)) {
+                            reparseFlags = PackageParser.PARSE_IS_SYSTEM
+                                    | PackageParser.PARSE_IS_SYSTEM_DIR;
+                        } else if (FileUtils.contains(oemAppDir, scanFile)) {
+                            reparseFlags = PackageParser.PARSE_IS_SYSTEM
+                                    | PackageParser.PARSE_IS_SYSTEM_DIR;
+                        } else {
+                            Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
+                            continue;
+                        }
+
+                        mSettings.enableSystemPackageLPw(packageName);
+
+                        try {
+                            scanPackageLI(scanFile, reparseFlags, scanFlags, 0, null);
+                        } catch (PackageManagerException e) {
+                            Slog.e(TAG, "Failed to parse original system package: "
+                                    + e.getMessage());
+                        }
+                    }
                 }
             }
 
@@ -4195,7 +4242,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
 
                     logCriticalInfo(Log.WARN, "Package " + ps.name + " at " + scanFile
-                            + "reverting from " + ps.codePathString
+                            + " reverting from " + ps.codePathString
                             + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
 
@@ -12084,6 +12131,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 break;
             }
             opti++;
+
             if ("-a".equals(opt)) {
                 // Right now we only know how to print all.
             } else if ("-h".equals(opt)) {
@@ -12428,6 +12476,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                         } catch (IOException e) {
                         }
                     }
+                }
+            }
+
+            if (checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES)) {
+                BufferedReader in = null;
+                String line = null;
+                try {
+                    in = new BufferedReader(new FileReader(getSettingsProblemFile()));
+                    while ((line = in.readLine()) != null) {
+                        pw.print("msg,");
+                        pw.println(line);
+                    }
+                } catch (IOException ignored) {
+                } finally {
+                    IoUtils.closeQuietly(in);
                 }
             }
         }
