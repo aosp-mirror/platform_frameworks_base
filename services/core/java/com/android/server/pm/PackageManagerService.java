@@ -10049,6 +10049,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
+        boolean disabledSystem = false;
         boolean updatedSettings = false;
         parseFlags |= PackageParser.PARSE_IS_SYSTEM;
         if ((deletedPackage.applicationInfo.flags&ApplicationInfo.FLAG_PRIVILEGED) != 0) {
@@ -10082,7 +10083,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         removePackageLI(oldPkgSetting, true);
         // writer
         synchronized (mPackages) {
-            if (!mSettings.disableSystemPackageLPw(packageName) && deletedPackage != null) {
+            disabledSystem = mSettings.disableSystemPackageLPw(packageName);
+            if (!disabledSystem && deletedPackage != null) {
                 // We didn't need to disable the .apk as a current system package,
                 // which means we are replacing another update that is already
                 // installed.  We need to make sure to delete the older one's .apk.
@@ -10141,9 +10143,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
             }
             // Restore the old system information in Settings
-            synchronized(mPackages) {
-                if (updatedSettings) {
+            synchronized (mPackages) {
+                if (disabledSystem) {
                     mSettings.enableSystemPackageLPw(packageName);
+                }
+                if (updatedSettings) {
                     mSettings.setInstallerPackageName(packageName,
                             oldPkgSetting.installerPackageName);
                 }
