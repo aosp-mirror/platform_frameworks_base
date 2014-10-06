@@ -793,4 +793,11 @@ public class MockPackageManager extends PackageManager {
     public Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    public Drawable loadUnbadgedItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
+        throw new UnsupportedOperationException();
+    }
 }
