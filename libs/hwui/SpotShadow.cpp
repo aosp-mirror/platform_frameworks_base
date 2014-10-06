@@ -60,7 +60,7 @@
 namespace android {
 namespace uirenderer {
 
-static const double EPSILON = 1e-7;
+static const float EPSILON = 1e-7;
 
 /**
  * For each polygon's vertex, the light center will project it to the receiver
@@ -118,17 +118,17 @@ static float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
     // intersection point should stay on both the ray and the edge of (p1, p2).
     // solve([p1x+t*(p2x-p1x)=dx*t2+px,p1y+t*(p2y-p1y)=dy*t2+py],[t,t2]);
 
-    double divisor = (dx * (p1.y - p2.y) + dy * p2.x - dy * p1.x);
+    float divisor = (dx * (p1.y - p2.y) + dy * p2.x - dy * p1.x);
     if (divisor == 0) return -1.0f; // error, invalid divisor
 
 #if DEBUG_SHADOW
-    double interpVal = (dx * (p1.y - rayOrigin.y) + dy * rayOrigin.x - dy * p1.x) / divisor;
+    float interpVal = (dx * (p1.y - rayOrigin.y) + dy * rayOrigin.x - dy * p1.x) / divisor;
     if (interpVal < 0 || interpVal > 1) {
         ALOGW("rayIntersectPoints is hitting outside the segment %f", interpVal);
     }
 #endif
 
-    double distance = (p1.x * (rayOrigin.y - p2.y) + p2.x * (p1.y - rayOrigin.y) +
+    float distance = (p1.x * (rayOrigin.y - p2.y) + p2.x * (p1.y - rayOrigin.y) +
             rayOrigin.x * (p2.y - p1.y)) / divisor;
 
     return distance; // may be negative in error cases
@@ -217,143 +217,9 @@ int SpotShadow::hull(Vector2* points, int pointsLength, Vector2* retPoly) {
  *
  * @return true if a right hand turn
  */
-bool SpotShadow::ccw(double ax, double ay, double bx, double by,
-        double cx, double cy) {
+bool SpotShadow::ccw(float ax, float ay, float bx, float by,
+        float cx, float cy) {
     return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax) > EPSILON;
-}
-
-/**
- * Calculates the intersection of poly1 with poly2 and put in poly2.
- * Note that both poly1 and poly2 must be in CW order already!
- *
- * @param poly1 The 1st polygon, as a Vector2 array.
- * @param poly1Length The number of vertices of 1st polygon.
- * @param poly2 The 2nd and output polygon, as a Vector2 array.
- * @param poly2Length The number of vertices of 2nd polygon.
- * @return number of vertices in output polygon as poly2.
- */
-int SpotShadow::intersection(const Vector2* poly1, int poly1Length,
-        Vector2* poly2, int poly2Length) {
-#if DEBUG_SHADOW
-    if (!ShadowTessellator::isClockwise(poly1, poly1Length)) {
-        ALOGW("Poly1 is not clockwise! Intersection is wrong!");
-    }
-    if (!ShadowTessellator::isClockwise(poly2, poly2Length)) {
-        ALOGW("Poly2 is not clockwise! Intersection is wrong!");
-    }
-#endif
-    Vector2 poly[poly1Length * poly2Length + 2];
-    int count = 0;
-    int pcount = 0;
-
-    // If one vertex from one polygon sits inside another polygon, add it and
-    // count them.
-    for (int i = 0; i < poly1Length; i++) {
-        if (testPointInsidePolygon(poly1[i], poly2, poly2Length)) {
-            poly[count] = poly1[i];
-            count++;
-            pcount++;
-
-        }
-    }
-
-    int insidePoly2 = pcount;
-    for (int i = 0; i < poly2Length; i++) {
-        if (testPointInsidePolygon(poly2[i], poly1, poly1Length)) {
-            poly[count] = poly2[i];
-            count++;
-        }
-    }
-
-    int insidePoly1 = count - insidePoly2;
-    // If all vertices from poly1 are inside poly2, then just return poly1.
-    if (insidePoly2 == poly1Length) {
-        memcpy(poly2, poly1, poly1Length * sizeof(Vector2));
-        return poly1Length;
-    }
-
-    // If all vertices from poly2 are inside poly1, then just return poly2.
-    if (insidePoly1 == poly2Length) {
-        return poly2Length;
-    }
-
-    // Since neither polygon fully contain the other one, we need to add all the
-    // intersection points.
-    Vector2 intersection = {0, 0};
-    for (int i = 0; i < poly2Length; i++) {
-        for (int j = 0; j < poly1Length; j++) {
-            int poly2LineStart = i;
-            int poly2LineEnd = ((i + 1) % poly2Length);
-            int poly1LineStart = j;
-            int poly1LineEnd = ((j + 1) % poly1Length);
-            bool found = lineIntersection(
-                    poly2[poly2LineStart].x, poly2[poly2LineStart].y,
-                    poly2[poly2LineEnd].x, poly2[poly2LineEnd].y,
-                    poly1[poly1LineStart].x, poly1[poly1LineStart].y,
-                    poly1[poly1LineEnd].x, poly1[poly1LineEnd].y,
-                    intersection);
-            if (found) {
-                poly[count].x = intersection.x;
-                poly[count].y = intersection.y;
-                count++;
-            } else {
-                Vector2 delta = poly2[i] - poly1[j];
-                if (delta.lengthSquared() < EPSILON) {
-                    poly[count] = poly2[i];
-                    count++;
-                }
-            }
-        }
-    }
-
-    if (count == 0) {
-        return 0;
-    }
-
-    // Sort the result polygon around the center.
-    Vector2 center = {0.0f, 0.0f};
-    for (int i = 0; i < count; i++) {
-        center += poly[i];
-    }
-    center /= count;
-    sort(poly, count, center);
-
-#if DEBUG_SHADOW
-    // Since poly2 is overwritten as the result, we need to save a copy to do
-    // our verification.
-    Vector2 oldPoly2[poly2Length];
-    int oldPoly2Length = poly2Length;
-    memcpy(oldPoly2, poly2, sizeof(Vector2) * poly2Length);
-#endif
-
-    // Filter the result out from poly and put it into poly2.
-    poly2[0] = poly[0];
-    int lastOutputIndex = 0;
-    for (int i = 1; i < count; i++) {
-        Vector2 delta = poly[i] - poly2[lastOutputIndex];
-        if (delta.lengthSquared() >= EPSILON) {
-            poly2[++lastOutputIndex] = poly[i];
-        } else {
-            // If the vertices are too close, pick the inner one, because the
-            // inner one is more likely to be an intersection point.
-            Vector2 delta1 = poly[i] - center;
-            Vector2 delta2 = poly2[lastOutputIndex] - center;
-            if (delta1.lengthSquared() < delta2.lengthSquared()) {
-                poly2[lastOutputIndex] = poly[i];
-            }
-        }
-    }
-    int resultLength = lastOutputIndex + 1;
-
-#if DEBUG_SHADOW
-    testConvex(poly2, resultLength, "intersection");
-    testConvex(poly1, poly1Length, "input poly1");
-    testConvex(oldPoly2, oldPoly2Length, "input poly2");
-
-    testIntersection(poly1, poly1Length, oldPoly2, oldPoly2Length, poly2, resultLength);
-#endif
-
-    return resultLength;
 }
 
 /**
@@ -441,13 +307,13 @@ void SpotShadow::quicksortX(Vector2* points, int low, int high) {
 bool SpotShadow::testPointInsidePolygon(const Vector2 testPoint,
         const Vector2* poly, int len) {
     bool c = false;
-    double testx = testPoint.x;
-    double testy = testPoint.y;
+    float testx = testPoint.x;
+    float testy = testPoint.y;
     for (int i = 0, j = len - 1; i < len; j = i++) {
-        double startX = poly[j].x;
-        double startY = poly[j].y;
-        double endX = poly[i].x;
-        double endY = poly[i].y;
+        float startX = poly[j].x;
+        float startY = poly[j].y;
+        float endX = poly[i].x;
+        float endY = poly[i].y;
 
         if (((endY > testy) != (startY > testy))
             && (testx < (startX - endX) * (testy - endY)
@@ -490,46 +356,6 @@ void SpotShadow::reverse(Vector2* polygon, int len) {
 }
 
 /**
- * Intersects two lines in parametric form. This function is called in a tight
- * loop, and we need double precision to get things right.
- *
- * @param x1 the x coordinate point 1 of line 1
- * @param y1 the y coordinate point 1 of line 1
- * @param x2 the x coordinate point 2 of line 1
- * @param y2 the y coordinate point 2 of line 1
- * @param x3 the x coordinate point 1 of line 2
- * @param y3 the y coordinate point 1 of line 2
- * @param x4 the x coordinate point 2 of line 2
- * @param y4 the y coordinate point 2 of line 2
- * @param ret the x,y location of the intersection
- * @return true if it found an intersection
- */
-inline bool SpotShadow::lineIntersection(double x1, double y1, double x2, double y2,
-        double x3, double y3, double x4, double y4, Vector2& ret) {
-    double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-    if (d == 0.0) return false;
-
-    double dx = (x1 * y2 - y1 * x2);
-    double dy = (x3 * y4 - y3 * x4);
-    double x = (dx * (x3 - x4) - (x1 - x2) * dy) / d;
-    double y = (dx * (y3 - y4) - (y1 - y2) * dy) / d;
-
-    // The intersection should be in the middle of the point 1 and point 2,
-    // likewise point 3 and point 4.
-    if (((x - x1) * (x - x2) > EPSILON)
-        || ((x - x3) * (x - x4) > EPSILON)
-        || ((y - y1) * (y - y2) > EPSILON)
-        || ((y - y3) * (y - y4) > EPSILON)) {
-        // Not interesected
-        return false;
-    }
-    ret.x = x;
-    ret.y = y;
-    return true;
-
-}
-
-/**
  * Compute a horizontal circular polygon about point (x , y , height) of radius
  * (size)
  *
@@ -542,7 +368,7 @@ void SpotShadow::computeLightPolygon(int points, const Vector3& lightCenter,
         float size, Vector3* ret) {
     // TODO: Caching all the sin / cos values and store them in a look up table.
     for (int i = 0; i < points; i++) {
-        double angle = 2 * i * M_PI / points;
+        float angle = 2 * i * M_PI / points;
         ret[i].x = cosf(angle) * size + lightCenter.x;
         ret[i].y = sinf(angle) * size + lightCenter.y;
         ret[i].z = lightCenter.z;
@@ -851,21 +677,6 @@ bool convertPolyToRayDist(const Vector2* poly, int polyLength, const Vector2& po
     }
 
     return true;
-}
-
-int SpotShadow::calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
-        const Vector3* poly, int polyLength, Vector2* occludedUmbra) {
-    // Occluded umbra area is computed as the intersection of the projected 2D
-    // poly and umbra.
-    for (int i = 0; i < polyLength; i++) {
-        occludedUmbra[i].x = poly[i].x;
-        occludedUmbra[i].y = poly[i].y;
-    }
-
-    // Both umbra and incoming polygon are guaranteed to be CW, so we can call
-    // intersection() directly.
-    return intersection(umbra, umbraLength,
-            occludedUmbra, polyLength);
 }
 
 /**
@@ -1585,8 +1396,8 @@ bool SpotShadow::testConvex(const Vector2* polygon, int polygonLength,
         Vector2 middle = polygon[(i + 1) % polygonLength];
         Vector2 end = polygon[(i + 2) % polygonLength];
 
-        double delta = (double(middle.x) - start.x) * (double(end.y) - start.y) -
-                (double(middle.y) - start.y) * (double(end.x) - start.x);
+        float delta = (float(middle.x) - start.x) * (float(end.y) - start.y) -
+                (float(middle.y) - start.y) * (float(end.x) - start.x);
         bool isCCWOrCoLinear = (delta >= EPSILON);
 
         if (isCCWOrCoLinear) {
@@ -1621,8 +1432,8 @@ void SpotShadow::testIntersection(const Vector2* poly1, int poly1Length,
     bool dumpPoly = false;
     for (int k = 0; k < TEST_POINT_NUMBER; k++) {
         // Generate a random point between minX, minY and maxX, maxY.
-        double randomX = rand() / double(RAND_MAX);
-        double randomY = rand() / double(RAND_MAX);
+        float randomX = rand() / float(RAND_MAX);
+        float randomY = rand() / float(RAND_MAX);
 
         Vector2 testPoint;
         testPoint.x = lowerBound.x + randomX * (upperBound.x - lowerBound.x);
