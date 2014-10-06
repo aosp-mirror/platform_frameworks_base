@@ -265,7 +265,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Kusambaza mtandao"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Mtandao-hewa"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Arifa"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Kurunzi"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Tochi"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Data ya simu ya mkononi"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Matumizi ya data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data iliyosalia"</string>
