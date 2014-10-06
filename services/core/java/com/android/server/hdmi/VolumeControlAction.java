@@ -16,10 +16,10 @@
 
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.Constants.IRT_MS;
 import static com.android.server.hdmi.Constants.MESSAGE_FEATURE_ABORT;
 import static com.android.server.hdmi.Constants.MESSAGE_REPORT_AUDIO_STATUS;
 import static com.android.server.hdmi.Constants.MESSAGE_USER_CONTROL_PRESSED;
+import static com.android.server.hdmi.HdmiConfig.IRT_MS;
 
 import android.media.AudioManager;
 
