@@ -3911,6 +3911,11 @@ public abstract class PackageManager {
      */
     public abstract Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
 
+    /**
+     * @hide
+     */
+    public abstract Drawable loadUnbadgedItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
+
     /** {@hide} */
     public abstract boolean isPackageAvailable(String packageName);
 

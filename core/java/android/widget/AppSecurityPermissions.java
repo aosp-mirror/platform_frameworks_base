@@ -99,12 +99,12 @@ public class AppSecurityPermissions {
 
         public Drawable loadGroupIcon(PackageManager pm) {
             if (icon != 0) {
-                return loadIcon(pm);
+                return loadUnbadgedIcon(pm);
             } else {
                 ApplicationInfo appInfo;
                 try {
                     appInfo = pm.getApplicationInfo(packageName, 0);
-                    return appInfo.loadIcon(pm);
+                    return appInfo.loadUnbadgedIcon(pm);
                 } catch (NameNotFoundException e) {
                 }
             }
