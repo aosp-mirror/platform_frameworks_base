@@ -1503,6 +1503,7 @@ public class XmlUtils {
         }
     }
 
+    @Deprecated
     public static void writeBitmapAttribute(XmlSerializer out, String name, Bitmap value)
             throws IOException {
         if (value != null) {
