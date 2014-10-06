@@ -60,7 +60,7 @@
     <uses-permission android:name="android.permission.FORCE_BACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.GLOBAL_SEARCH" />
     <uses-permission android:name="android.permission.HARDWARE_TEST" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />

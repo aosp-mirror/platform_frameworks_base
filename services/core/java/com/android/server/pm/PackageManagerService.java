@@ -2930,6 +2930,28 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public boolean isUidPrivileged(int uid) {
+        uid = UserHandle.getAppId(uid);
+        // reader
+        synchronized (mPackages) {
+            Object obj = mSettings.getUserIdLPr(uid);
+            if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+                final Iterator<PackageSetting> it = sus.packages.iterator();
+                while (it.hasNext()) {
+                    if (it.next().isPrivileged()) {
+                        return true;
+                    }
+                }
+            } else if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+                return ps.isPrivileged();
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String[] getAppOpPermissionPackages(String permissionName) {
         synchronized (mPackages) {
             ArraySet<String> pkgs = mAppOpPermissionPackages.get(permissionName);
