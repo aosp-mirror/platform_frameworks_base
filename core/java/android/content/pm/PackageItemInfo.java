@@ -138,7 +138,7 @@ public class PackageItemInfo {
         }
         return packageName;
     }
-    
+
     /**
      * Retrieve the current graphical icon associated with this item.  This
      * will call back on the given PackageManager to load the icon from
@@ -153,6 +153,23 @@ public class PackageItemInfo {
      */
     public Drawable loadIcon(PackageManager pm) {
         return pm.loadItemIcon(this, getApplicationInfo());
+    }
+
+    /**
+     * Retrieve the current graphical icon associated with this item without
+     * the addition of a work badge if applicable.
+     * This will call back on the given PackageManager to load the icon from
+     * the application.
+     *
+     * @param pm A PackageManager from which the icon can be loaded; usually
+     * the PackageManager from which you originally retrieved this item.
+     *
+     * @return Returns a Drawable containing the item's icon.  If the
+     * item does not have an icon, the item's default icon is returned
+     * such as the default activity icon.
+     */
+    public Drawable loadUnbadgedIcon(PackageManager pm) {
+        return pm.loadUnbadgedItemIcon(this, getApplicationInfo());
     }
 
     /**
