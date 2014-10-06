@@ -183,6 +183,8 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     private void maySetActiveSource(int physicalAddress) {
         if (physicalAddress == mService.getPhysicalAddress()) {
             mIsActiveSource = true;
+        } else {
+            mIsActiveSource = false;
         }
     }
 
