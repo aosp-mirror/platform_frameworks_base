@@ -22,7 +22,6 @@ import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.readUriAttribute;
-import static com.android.internal.util.XmlUtils.writeBitmapAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
@@ -47,6 +46,8 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -69,7 +70,6 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.ExceptionUtils;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -125,6 +125,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_INSTALL_LOCATION = "installLocation";
     private static final String ATTR_SIZE_BYTES = "sizeBytes";
     private static final String ATTR_APP_PACKAGE_NAME = "appPackageName";
+    @Deprecated
     private static final String ATTR_APP_ICON = "appIcon";
     private static final String ATTR_APP_LABEL = "appLabel";
     private static final String ATTR_ORIGINATING_URI = "originatingUri";
@@ -149,9 +150,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private final Callbacks mCallbacks;
 
     /**
-     * File storing persisted {@link #mSessions}.
+     * File storing persisted {@link #mSessions} metadata.
      */
     private final AtomicFile mSessionsFile;
+
+    /**
+     * Directory storing persisted {@link #mSessions} metadata which is too
+     * heavy to store directly in {@link #mSessionsFile}.
+     */
+    private final File mSessionsDir;
 
     private final InternalCallback mInternalCallback = new InternalCallback();
 
@@ -195,25 +202,37 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         mSessionsFile = new AtomicFile(
                 new File(Environment.getSystemSecureDirectory(), "install_sessions.xml"));
+        mSessionsDir = new File(Environment.getSystemSecureDirectory(), "install_sessions");
+        mSessionsDir.mkdirs();
 
         synchronized (mSessions) {
             readSessionsLocked();
 
-            final ArraySet<File> unclaimed = Sets.newArraySet(mStagingDir.listFiles(sStageFilter));
+            final ArraySet<File> unclaimedStages = Sets.newArraySet(
+                    mStagingDir.listFiles(sStageFilter));
+            final ArraySet<File> unclaimedIcons = Sets.newArraySet(
+                    mSessionsDir.listFiles());
 
-            // Ignore stages claimed by active sessions
+            // Ignore stages and icons claimed by active sessions
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                unclaimed.remove(session.stageDir);
+                unclaimedStages.remove(session.stageDir);
+                unclaimedIcons.remove(buildAppIconFile(session.sessionId));
             }
 
             // Clean up orphaned staging directories
-            for (File stage : unclaimed) {
+            for (File stage : unclaimedStages) {
                 Slog.w(TAG, "Deleting orphan stage " + stage);
                 if (stage.isDirectory()) {
                     FileUtils.deleteContents(stage);
                 }
                 stage.delete();
+            }
+
+            // Clean up orphaned icons
+            for (File icon : unclaimedIcons) {
+                Slog.w(TAG, "Deleting orphan icon " + icon);
+                icon.delete();
             }
         }
     }
@@ -359,6 +378,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
 
+        final File appIconFile = buildAppIconFile(sessionId);
+        if (appIconFile.exists()) {
+            params.appIcon = BitmapFactory.decodeFile(appIconFile.getAbsolutePath());
+            params.appIconLastModified = appIconFile.lastModified();
+        }
+
         return new PackageInstallerSession(mInternalCallback, mContext, mPm,
                 mInstallThread.getLooper(), sessionId, userId, installerPackageName, installerUid,
                 params, createdMillis, stageDir, stageCid, prepared, sealed);
@@ -418,13 +443,36 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         writeIntAttribute(out, ATTR_INSTALL_LOCATION, params.installLocation);
         writeLongAttribute(out, ATTR_SIZE_BYTES, params.sizeBytes);
         writeStringAttribute(out, ATTR_APP_PACKAGE_NAME, params.appPackageName);
-        writeBitmapAttribute(out, ATTR_APP_ICON, params.appIcon);
         writeStringAttribute(out, ATTR_APP_LABEL, params.appLabel);
         writeUriAttribute(out, ATTR_ORIGINATING_URI, params.originatingUri);
         writeUriAttribute(out, ATTR_REFERRER_URI, params.referrerUri);
         writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
 
+        // Persist app icon if changed since last written
+        final File appIconFile = buildAppIconFile(session.sessionId);
+        if (params.appIcon == null && appIconFile.exists()) {
+            appIconFile.delete();
+        } else if (params.appIcon != null
+                && appIconFile.lastModified() != params.appIconLastModified) {
+            if (LOGD) Slog.w(TAG, "Writing changed icon " + appIconFile);
+            FileOutputStream os = null;
+            try {
+                os = new FileOutputStream(appIconFile);
+                params.appIcon.compress(CompressFormat.PNG, 90, os);
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to write icon " + appIconFile + ": " + e.getMessage());
+            } finally {
+                IoUtils.closeQuietly(os);
+            }
+
+            params.appIconLastModified = appIconFile.lastModified();
+        }
+
         out.endTag(null, TAG_SESSION);
+    }
+
+    private File buildAppIconFile(int sessionId) {
+        return new File(mSessionsDir, "app_icon." + sessionId + ".png");
     }
 
     private void writeSessionsAsync() {
@@ -548,7 +596,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             if (session == null || !isCallingUidOwner(session)) {
                 throw new SecurityException("Caller has no access to session " + sessionId);
             }
+
+            // Defensively resize giant app icons
+            if (appIcon != null) {
+                final ActivityManager am = (ActivityManager) mContext.getSystemService(
+                        Context.ACTIVITY_SERVICE);
+                final int iconSize = am.getLauncherLargeIconSize();
+                if ((appIcon.getWidth() > iconSize * 2)
+                        || (appIcon.getHeight() > iconSize * 2)) {
+                    appIcon = Bitmap.createScaledBitmap(appIcon, iconSize, iconSize, true);
+                }
+            }
+
             session.params.appIcon = appIcon;
+            session.params.appIconLastModified = -1;
+
             mInternalCallback.onSessionBadgingChanged(session);
         }
     }
@@ -973,6 +1035,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                     synchronized (mSessions) {
                         mSessions.remove(session.sessionId);
                         mHistoricalSessions.put(session.sessionId, session);
+
+                        final File appIconFile = buildAppIconFile(session.sessionId);
+                        if (appIconFile.exists()) {
+                            appIconFile.delete();
+                        }
+
                         writeSessionsLocked();
                     }
                 }
