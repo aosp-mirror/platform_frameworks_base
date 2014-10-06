@@ -418,11 +418,11 @@ public abstract class CameraMetadata<TKey> {
      * <ul>
      * <li>RAW_SENSOR is supported as an output format.</li>
      * <li>The maximum available resolution for RAW_SENSOR streams
-     * will match either the value in
-     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize} or
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</li>
+     *   will match either the value in
+     *   {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize} or
+     *   {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</li>
      * <li>All DNG-related optional metadata entries are provided
-     * by the camera device.</li>
+     *   by the camera device.</li>
      * </ul>
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
@@ -437,13 +437,13 @@ public abstract class CameraMetadata<TKey> {
      * <li>At least one input stream can be used.</li>
      * <li>RAW_OPAQUE is supported as an output/input format</li>
      * <li>Using RAW_OPAQUE does not cause a frame rate drop
-     * relative to the sensor's maximum capture rate (at that
-     * resolution).</li>
+     *   relative to the sensor's maximum capture rate (at that
+     *   resolution).</li>
      * <li>RAW_OPAQUE will be reprocessable into both YUV_420_888
-     * and JPEG formats.</li>
+     *   and JPEG formats.</li>
      * <li>The maximum available resolution for RAW_OPAQUE streams
-     * (both input/output) will match the maximum available
-     * resolution of JPEG streams.</li>
+     *   (both input/output) will match the maximum available
+     *   resolution of JPEG streams.</li>
      * </ul>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @hide
@@ -1215,8 +1215,7 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.<br />
-     * </p>
+     * frame rate of video recording.  </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
@@ -1866,8 +1865,6 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Return face rectangle and confidence values only.</p>
-     * <p>In this mode, only android.statistics.faceRectangles and
-     * android.statistics.faceScores outputs are valid.</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1;
@@ -1875,11 +1872,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Return all face
      * metadata.</p>
-     * <p>In this mode,
-     * android.statistics.faceRectangles,
-     * android.statistics.faceScores,
-     * android.statistics.faceIds, and
-     * android.statistics.faceLandmarks outputs are valid.</p>
+     * <p>In this mode, face rectangles, scores, landmarks, and face IDs are all valid.</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2;
