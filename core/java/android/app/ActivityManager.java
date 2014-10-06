@@ -931,7 +931,7 @@ public class ActivityManager {
      * purposes of control flow will be incorrect.</p>
      *
      * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this method is
-     * no longer available to third party applications: as the introduction of
+     * no longer available to third party applications: the introduction of
      * document-centric recents means
      * it can leak personal information to the caller.  For backwards compatibility,
      * it will still return a small subset of its data: at least the caller's
@@ -947,9 +947,6 @@ public class ActivityManager {
      * 
      * @return Returns a list of RecentTaskInfo records describing each of
      * the recent tasks.
-     * 
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
      */
     @Deprecated
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
@@ -976,9 +973,6 @@ public class ActivityManager {
      * @return Returns a list of RecentTaskInfo records describing each of
      * the recent tasks.
      *
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} or the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permissions.
      * @hide
      */
     public List<RecentTaskInfo> getRecentTasksForUser(int maxNum, int flags, int userId)
@@ -1236,9 +1230,6 @@ public class ActivityManager {
      *
      * @return Returns a list of RunningTaskInfo records describing each of
      * the running tasks.
-     *
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
      */
     @Deprecated
     public List<RunningTaskInfo> getRunningTasks(int maxNum)

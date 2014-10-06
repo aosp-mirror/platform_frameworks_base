@@ -8175,13 +8175,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (localLOGV) Slog.v(
                 TAG, "getTasks: max=" + maxNum + ", flags=" + flags);
 
-            final boolean allowed = checkCallingPermission(
-                    android.Manifest.permission.GET_TASKS)
-                    == PackageManager.PERMISSION_GRANTED;
-            if (!allowed) {
-                Slog.w(TAG, "getTasks: caller " + callingUid
-                        + " does not hold GET_TASKS; limiting output");
-            }
+            final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
+                    callingUid);
 
             // TODO: Improve with MRU list from all ActivityStacks.
             mStackSupervisor.getTasksLocked(maxNum, list, callingUid, allowed);
@@ -8218,6 +8213,33 @@ public final class ActivityManagerService extends ActivityManagerNative
         return rti;
     }
 
+    private boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
+        boolean allowed = checkPermission(android.Manifest.permission.REAL_GET_TASKS,
+                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
+        if (!allowed) {
+            if (checkPermission(android.Manifest.permission.GET_TASKS,
+                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED) {
+                // Temporary compatibility: some existing apps on the system image may
+                // still be requesting the old permission and not switched to the new
+                // one; if so, we'll still allow them full access.  This means we need
+                // to see if they are holding the old permission and are a system app.
+                try {
+                    if (AppGlobals.getPackageManager().isUidPrivileged(callingUid)) {
+                        allowed = true;
+                        Slog.w(TAG, caller + ": caller " + callingUid
+                                + " is using old GET_TASKS but privileged; allowing");
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        if (!allowed) {
+            Slog.w(TAG, caller + ": caller " + callingUid
+                    + " does not hold GET_TASKS; limiting output");
+        }
+        return allowed;
+    }
+
     @Override
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
@@ -8227,12 +8249,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean includeProfiles = (flags & ActivityManager.RECENT_INCLUDE_PROFILES) != 0;
         final boolean withExcluded = (flags&ActivityManager.RECENT_WITH_EXCLUDED) != 0;
         synchronized (this) {
-            final boolean allowed = checkCallingPermission(android.Manifest.permission.GET_TASKS)
-                    == PackageManager.PERMISSION_GRANTED;
-            if (!allowed) {
-                Slog.w(TAG, "getRecentTasks: caller " + callingUid
-                        + " does not hold GET_TASKS; limiting output");
-            }
+            final boolean allowed = isGetTasksAllowed("getRecentTasks", Binder.getCallingPid(),
+                    callingUid);
             final boolean detailed = checkCallingPermission(
                     android.Manifest.permission.GET_DETAILED_TASKS)
                     == PackageManager.PERMISSION_GRANTED;
