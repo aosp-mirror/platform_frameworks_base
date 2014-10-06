@@ -31,10 +31,8 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Arifa"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Betri imeisha"</string>
-    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> iliyosalia"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> iliyosalia. Kiokoa betri kimewashwa."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chaji ya USB haihamiliwi.\n Tumia chaka iliyopeanwa."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Kuchaji kwa kutumia USB hakutumiki."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Tumia chaja iliyonunuliwa pamoja na kifaa pekee."</string>
@@ -265,7 +263,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Kusambaza mtandao"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Mtandao-hewa"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Arifa"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Kurunzi"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Tochi"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Data ya simu ya mkononi"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Matumizi ya data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data iliyosalia"</string>

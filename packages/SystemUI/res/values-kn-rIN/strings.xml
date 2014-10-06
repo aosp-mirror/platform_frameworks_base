@@ -33,10 +33,8 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ಬ್ಯಾಟರಿ ಕಡಿಮೆ ಇದೆ"</string>
-    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ. ಬ್ಯಾಟರಿ ಉಳಿತಾಯ ಆನ್‌ ಆಗಿದೆ."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ಚಾರ್ಜಿಂಗ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ.\nಒದಗಿಸಿರುವ ಚಾರ್ಜರ್ ಮಾತ್ರ ಬಳಸಿ."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ಚಾರ್ಜಿಂಗ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"ಒದಗಿಸಿರುವ ಚಾರ್ಜರ್ ಮಾತ್ರ ಬಳಸಿ."</string>
