@@ -33,10 +33,8 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Abian"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Jakinarazpenak"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateria agortzen ari da"</string>
-    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da. Bateria-aurrezteko aukera aktibatuta dago."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ez da USB bidez kargatzea onartzen.\nErabili hornitu zaizun kargagailua soilik."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ez da USB bidez kargatzea onartzen."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Erabili jatorrizko kargagailua soilik."</string>
