@@ -67,7 +67,7 @@ package android {
     field public static final java.lang.String FORCE_BACK = "android.permission.FORCE_BACK";
     field public static final java.lang.String GET_ACCOUNTS = "android.permission.GET_ACCOUNTS";
     field public static final java.lang.String GET_PACKAGE_SIZE = "android.permission.GET_PACKAGE_SIZE";
-    field public static final java.lang.String GET_TASKS = "android.permission.GET_TASKS";
+    field public static final deprecated java.lang.String GET_TASKS = "android.permission.GET_TASKS";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field public static final java.lang.String GLOBAL_SEARCH = "android.permission.GLOBAL_SEARCH";
     field public static final java.lang.String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
