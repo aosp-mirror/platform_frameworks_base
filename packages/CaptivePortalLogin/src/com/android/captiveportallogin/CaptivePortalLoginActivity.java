@@ -17,16 +17,24 @@
 package com.android.captiveportallogin;
 
 import android.app.Activity;
+import android.app.LoadedApk;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.Proxy;
+import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.util.ArrayMap;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,8 +50,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.lang.InterruptedException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class CaptivePortalLoginActivity extends Activity {
+    private static final String TAG = "CaptivePortalLogin";
     private static final String DEFAULT_SERVER = "clients3.google.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
 
@@ -72,13 +83,33 @@ public class CaptivePortalLoginActivity extends Activity {
             done(true);
         }
 
-        setContentView(R.layout.activity_captive_portal_login);
-
-        getActionBar().setDisplayShowHomeEnabled(false);
-
         mNetId = Integer.parseInt(getIntent().getStringExtra(Intent.EXTRA_TEXT));
         final Network network = new Network(mNetId);
         ConnectivityManager.setProcessDefaultNetwork(network);
+
+        // Set HTTP proxy system properties to those of the selected Network.
+        final LinkProperties lp = ConnectivityManager.from(this).getLinkProperties(network);
+        if (lp != null) {
+            final ProxyInfo proxyInfo = lp.getHttpProxy();
+            String host = "";
+            String port = "";
+            String exclList = "";
+            Uri pacFileUrl = Uri.EMPTY;
+            if (proxyInfo != null) {
+                host = proxyInfo.getHost();
+                port = Integer.toString(proxyInfo.getPort());
+                exclList = proxyInfo.getExclusionListAsString();
+                pacFileUrl = proxyInfo.getPacFileUrl();
+            }
+            Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
+            Log.v(TAG, "Set proxy system properties to " + proxyInfo);
+        }
+
+        // Proxy system properties must be initialized before setContentView is called because
+        // setContentView initializes the WebView logic which in turn reads the system properties.
+        setContentView(R.layout.activity_captive_portal_login);
+
+        getActionBar().setDisplayShowHomeEnabled(false);
 
         // Exit app if Network disappears.
         final NetworkCapabilities networkCapabilities =
@@ -99,12 +130,39 @@ public class CaptivePortalLoginActivity extends Activity {
         }
         ConnectivityManager.from(this).registerNetworkCallback(builder.build(), mNetworkCallback);
 
-        WebView myWebView = (WebView) findViewById(R.id.webview);
+        final WebView myWebView = (WebView) findViewById(R.id.webview);
+        myWebView.clearCache(true);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         myWebView.setWebViewClient(new MyWebViewClient());
         myWebView.setWebChromeClient(new MyWebChromeClient());
-        myWebView.loadUrl(mURL.toString());
+        // Start initial page load so WebView finishes loading proxy settings.
+        // Actual load of mUrl is initiated by MyWebViewClient.
+        myWebView.loadData("", "text/html", null);
+    }
+
+    // Find WebView's proxy BroadcastReceiver and prompt it to read proxy system properties.
+    private void setWebViewProxy() {
+        LoadedApk loadedApk = getApplication().mLoadedApk;
+        try {
+            Field receiversField = LoadedApk.class.getDeclaredField("mReceivers");
+            receiversField.setAccessible(true);
+            ArrayMap receivers = (ArrayMap) receiversField.get(loadedApk);
+            for (Object receiverMap : receivers.values()) {
+                for (Object rec : ((ArrayMap) receiverMap).keySet()) {
+                    Class clazz = rec.getClass();
+                    if (clazz.getName().contains("ProxyChangeListener")) {
+                        Method onReceiveMethod = clazz.getDeclaredMethod("onReceive", Context.class,
+                                Intent.class);
+                        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
+                        onReceiveMethod.invoke(rec, getApplicationContext(), intent);
+                        Log.v(TAG, "Prompting WebView proxy reload.");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while setting WebView proxy: " + e);
+        }
     }
 
     private void done(boolean use_network) {
@@ -176,13 +234,25 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private class MyWebViewClient extends WebViewClient {
+        private boolean firstPageLoad = true;
+
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            if (firstPageLoad) return;
             testForCaptivePortal();
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
+            if (firstPageLoad) {
+                firstPageLoad = false;
+                // Now that WebView has loaded at least one page we know it has read in the proxy
+                // settings.  Now prompt the WebView read the Network-specific proxy settings.
+                setWebViewProxy();
+                // Load the real page.
+                view.loadUrl(mURL.toString());
+                return;
+            }
             testForCaptivePortal();
         }
     }
