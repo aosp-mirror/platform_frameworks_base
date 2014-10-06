@@ -1414,9 +1414,24 @@
         android:description="@string/permgroupdesc_appInfo"
         android:priority="220" />
 
-    <!-- @SystemApi Allows an application to get information about the currently
-         or recently running tasks. -->
+    <!-- @deprecated No longer enforced. -->
     <permission android:name="android.permission.GET_TASKS"
+        android:permissionGroup="android.permission-group.APP_INFO"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_getTasks"
+        android:description="@string/permdesc_getTasks" />
+
+    <!-- New version of GET_TASKS that apps can request, since GET_TASKS doesn't really
+         give access to task information.  We need this new one because there are
+         many existing apps that use add libraries and such that have validation
+         code to ensure the app has requested the GET_TASKS permission by seeing
+         if it has been granted the permission...  if it hasn't, it kills the app
+         with a message about being upset.  So we need to have it continue to look
+         like the app is getting that permission, even though it will never be
+         checked, and new privileged apps can now request this one for real access.
+         @hide
+         @SystemApi -->
+    <permission android:name="android.permission.REAL_GET_TASKS"
         android:permissionGroup="android.permission-group.APP_INFO"
         android:protectionLevel="signature|system"
         android:label="@string/permlab_getTasks"
