@@ -96,11 +96,6 @@
       <a href="<?cs var:toroot ?>preview/support.html">Support</a>
       </div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty">
-      <a href="<?cs var:toroot ?>preview/license.html">License Agreement</a>
-      </div>
-  </li>
   <li class="nav-section" style="margin: 20px 0 0 -10px;">
     <div class="nav-section-header empty">
       <a href="<?cs var:toroot ?>index.html" class="back-link">Developer Home</a>
