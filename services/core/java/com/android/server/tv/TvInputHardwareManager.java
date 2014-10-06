@@ -743,7 +743,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             && sinkConfig.channelMask() != mDesiredChannelMask)
                     || (mDesiredFormat != AudioFormat.ENCODING_DEFAULT
                             && sinkConfig.format() != mDesiredFormat)) {
-                sinkConfig = mAudioSource.buildConfig(mDesiredSamplingRate, mDesiredChannelMask,
+                sinkConfig = mAudioSink.buildConfig(mDesiredSamplingRate, mDesiredChannelMask,
                         mDesiredFormat, null);
                 shouldRecreateAudioPatch = true;
             }
