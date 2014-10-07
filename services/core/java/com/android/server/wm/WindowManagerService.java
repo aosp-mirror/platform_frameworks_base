@@ -9598,7 +9598,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 for (i=N-1; i>=0; i--) {
                     WindowState w = windows.get(i);
                     final TaskStack stack = w.getStack();
-                    if (stack == null) {
+                    if (stack == null && w.getAttrs().type != TYPE_PRIVATE_PRESENTATION) {
                         continue;
                     }
 
@@ -9610,7 +9610,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleNotObscuredLocked(w, currentTime, innerDw, innerDh);
                     }
 
-                    if (!stack.testDimmingTag()) {
+                    if (stack != null && !stack.testDimmingTag()) {
                         handleFlagDimBehind(w);
                     }
 
