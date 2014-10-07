@@ -29,10 +29,9 @@ import java.util.Locale;
  */
 public class Paint {
 
-    /**
-     * @hide
-     */
-    public long mNativePaint;
+    private long mNativePaint;
+    private long mNativeShader = 0;
+
     /**
      * @hide
      */
@@ -445,7 +444,7 @@ public class Paint {
      *              new paint.
      */
     public Paint(Paint paint) {
-        mNativePaint = native_initWithPaint(paint.mNativePaint);
+        mNativePaint = native_initWithPaint(paint.getNativeInstance());
         setClassVariablesFrom(paint);
     }
 
@@ -464,6 +463,7 @@ public class Paint {
         mPathEffect = null;
         mRasterizer = null;
         mShader = null;
+        mNativeShader = 0;
         mTypeface = null;
         mNativeTypeface = 0;
         mXfermode = null;
@@ -500,11 +500,8 @@ public class Paint {
         mMaskFilter = paint.mMaskFilter;
         mPathEffect = paint.mPathEffect;
         mRasterizer = paint.mRasterizer;
-        if (paint.mShader != null) {
-            mShader = paint.mShader.copy();
-        } else {
-            mShader = null;
-        }
+        mShader = paint.mShader;
+        mNativeShader = paint.mNativeShader;
         mTypeface = paint.mTypeface;
         mNativeTypeface = paint.mNativeTypeface;
         mXfermode = paint.mXfermode;
@@ -528,6 +525,19 @@ public class Paint {
             mCompatScaling = factor;
             mInvCompatScaling = 1.0f/factor;
         }
+    }
+
+    /**
+     * Return the pointer to the native object while ensuring that any
+     * mutable objects that are attached to the paint are also up-to-date.
+     *
+     * @hide
+     */
+    public long getNativeInstance() {
+        if (mShader != null && mShader.getNativeInstance() != mNativeShader) {
+            native_setShader(mNativePaint, mShader.getNativeInstance());
+        }
+        return mNativePaint;
     }
 
     /**
@@ -920,10 +930,12 @@ public class Paint {
      * @return       shader
      */
     public Shader setShader(Shader shader) {
-        long shaderNative = 0;
-        if (shader != null)
-            shaderNative = shader.getNativeInstance();
-        native_setShader(mNativePaint, shaderNative);
+        if (shader != null) {
+            mNativeShader = shader.getNativeInstance();
+        } else {
+            mNativeShader = 0;
+        }
+        native_setShader(mNativePaint, mNativeShader);
         mShader = shader;
         return shader;
     }

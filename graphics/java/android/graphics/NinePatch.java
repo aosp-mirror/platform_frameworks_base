@@ -200,12 +200,12 @@ public class NinePatch {
 
     void drawSoftware(Canvas canvas, RectF location, Paint paint) {
         nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.ni(), mNativeChunk,
-                paint != null ? paint.mNativePaint : 0, canvas.mDensity, mBitmap.mDensity);
+                paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
     void drawSoftware(Canvas canvas, Rect location, Paint paint) {
         nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.ni(), mNativeChunk,
-                paint != null ? paint.mNativePaint : 0, canvas.mDensity, mBitmap.mDensity);
+                paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
     /**

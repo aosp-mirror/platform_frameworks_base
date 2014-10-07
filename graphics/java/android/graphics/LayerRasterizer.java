@@ -28,11 +28,11 @@ public class LayerRasterizer extends Rasterizer {
         object itself, so it may be reused without danger of side-effects.
     */
     public void addLayer(Paint paint, float dx, float dy) {
-        nativeAddLayer(native_instance, paint.mNativePaint, dx, dy);
+        nativeAddLayer(native_instance, paint.getNativeInstance(), dx, dy);
     }
 
     public void addLayer(Paint paint) {
-        nativeAddLayer(native_instance, paint.mNativePaint, 0, 0);
+        nativeAddLayer(native_instance, paint.getNativeInstance(), 0, 0);
     }
 
     private static native long nativeConstructor();

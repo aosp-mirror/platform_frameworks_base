@@ -82,7 +82,8 @@ public class Shader {
      */
     public void setLocalMatrix(Matrix localM) {
         mLocalMatrix = localM;
-        nativeSetLocalMatrix(native_instance, localM == null ? 0 : localM.native_instance);
+        native_instance = nativeSetLocalMatrix(native_instance,
+                localM == null ? 0 : localM.native_instance);
     }
 
     protected void finalize() throws Throwable {
@@ -120,5 +121,5 @@ public class Shader {
     }
 
     private static native void nativeDestructor(long native_shader);
-    private static native void nativeSetLocalMatrix(long native_shader, long matrix_instance);
+    private static native long nativeSetLocalMatrix(long native_shader, long matrix_instance);
 }

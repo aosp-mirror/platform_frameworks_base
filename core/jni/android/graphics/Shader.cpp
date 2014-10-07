@@ -56,17 +56,31 @@ static void Shader_destructor(JNIEnv* env, jobject o, jlong shaderHandle, jlong 
     SkSafeUnref(shader);
 }
 
-static void Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, jlong matrixHandle)
+static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, jlong matrixHandle)
 {
-    SkShader* shader       = reinterpret_cast<SkShader*>(shaderHandle);
+    // ensure we have a valid matrix to use
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
-    if (shader) {
-        if (matrix) {
-            shader->setLocalMatrix(*matrix);
-        } else {
-            shader->resetLocalMatrix();
-        }
+    if (NULL == matrix) {
+        matrix = &SkMatrix::I();
     }
+
+    // The current shader will no longer need a direct reference owned by Shader.java
+    // as all the data needed is contained within the newly created LocalMatrixShader.
+    SkASSERT(shaderHandle);
+    SkAutoTUnref<SkShader> currentShader(reinterpret_cast<SkShader*>(shaderHandle));
+
+    SkMatrix currentMatrix;
+    SkAutoTUnref<SkShader> baseShader(currentShader->refAsALocalMatrixShader(&currentMatrix));
+    if (baseShader.get()) {
+        // if the matrices are same then there is no need to allocate a new
+        // shader that is identical to the existing one.
+        if (currentMatrix == *matrix) {
+            return reinterpret_cast<jlong>(currentShader.detach());
+        }
+        return reinterpret_cast<jlong>(SkShader::CreateLocalMatrixShader(baseShader, *matrix));
+    }
+
+    return reinterpret_cast<jlong>(SkShader::CreateLocalMatrixShader(currentShader, *matrix));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -237,7 +251,7 @@ static JNINativeMethod gColorMethods[] = {
 
 static JNINativeMethod gShaderMethods[] = {
     { "nativeDestructor",        "(J)V",    (void*)Shader_destructor        },
-    { "nativeSetLocalMatrix",    "(JJ)V",   (void*)Shader_setLocalMatrix    }
+    { "nativeSetLocalMatrix",    "(JJ)J",   (void*)Shader_setLocalMatrix    }
 };
 
 static JNINativeMethod gBitmapShaderMethods[] = {
