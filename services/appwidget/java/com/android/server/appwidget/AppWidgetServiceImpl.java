@@ -2207,9 +2207,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private List<ResolveInfo> queryIntentReceivers(Intent intent, int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
+            int flags = PackageManager.GET_META_DATA;
+
+            // Widgets referencing shared libraries need to have their
+            // dependencies loaded.
+            flags |= PackageManager.GET_SHARED_LIBRARY_FILES;
+
             return mPackageManager.queryIntentReceivers(intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    PackageManager.GET_META_DATA, userId);
+                    flags, userId);
         } catch (RemoteException re) {
             return Collections.emptyList();
         } finally {
