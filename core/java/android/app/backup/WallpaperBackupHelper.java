@@ -39,6 +39,11 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     private static final String TAG = "WallpaperBackupHelper";
     private static final boolean DEBUG = false;
 
+    // If 'true', then apply an acceptable-size heuristic at restore time, dropping back
+    // to the factory default wallpaper if the restored one differs "too much" from the
+    // device's preferred wallpaper image dimensions.
+    private static final boolean REJECT_OUTSIZED_RESTORE = false;
+
     // This path must match what the WallpaperManagerService uses
     // TODO: Will need to change if backing up non-primary user's wallpaper
     public static final String WALLPAPER_IMAGE =
@@ -130,27 +135,36 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                     if (DEBUG) Slog.d(TAG, "Restoring wallpaper image w=" + options.outWidth
                             + " h=" + options.outHeight);
 
-                    // We accept any wallpaper that is at least as wide as our preference
-                    // (i.e. wide enough to fill the screen), and is within a comfortable
-                    // factor of the target height, to avoid significant clipping/scaling/
-                    // letterboxing.
-                    final double heightRatio = mDesiredMinHeight / options.outHeight;
-                    if (options.outWidth >= mDesiredMinWidth
-                            && heightRatio > 0 && heightRatio < 1.33) {
-                        // sufficiently close to our resolution; go ahead and use it
-                        Slog.d(TAG, "Applying restored wallpaper image.");
-                        f.renameTo(new File(WALLPAPER_IMAGE));
-                        // TODO: spin a service to copy the restored image to sd/usb storage,
-                        // since it does not exist anywhere other than the private wallpaper
-                        // file.
-                    } else {
-                        Slog.i(TAG, "Restored image dimensions (w="
-                                + options.outWidth + ", h=" + options.outHeight
-                                + ") too far off target (tw="
-                                + mDesiredMinWidth + ", th=" + mDesiredMinHeight
-                                + "); falling back to default wallpaper.");
-                        f.delete();
+                    if (REJECT_OUTSIZED_RESTORE) {
+                        // We accept any wallpaper that is at least as wide as our preference
+                        // (i.e. wide enough to fill the screen), and is within a comfortable
+                        // factor of the target height, to avoid significant clipping/scaling/
+                        // letterboxing.
+                        final double heightRatio = mDesiredMinHeight / options.outHeight;
+                        if (options.outWidth < mDesiredMinWidth
+                                || heightRatio <= 0
+                                || heightRatio >= 1.33) {
+                            // Not wide enough for the screen, or too short/tall to be a good fit
+                            // for the height of the screen, broken image file, or the system's
+                            // desires for wallpaper size are in a bad state.  Probably one of the
+                            // first two.
+                            Slog.i(TAG, "Restored image dimensions (w="
+                                    + options.outWidth + ", h=" + options.outHeight
+                                    + ") too far off target (tw="
+                                    + mDesiredMinWidth + ", th=" + mDesiredMinHeight
+                                    + "); falling back to default wallpaper.");
+                            f.delete();
+                            return;
+                        }
                     }
+
+                    // We passed the acceptable-dimensions test (if any), so we're going to
+                    // use the restored image.
+                    // TODO: spin a service to copy the restored image to sd/usb storage,
+                    // since it does not exist anywhere other than the private wallpaper
+                    // file.
+                    Slog.d(TAG, "Applying restored wallpaper image.");
+                    f.renameTo(new File(WALLPAPER_IMAGE));
                 }
             } else if (key.equals(WALLPAPER_INFO_KEY)) {
                 // XML file containing wallpaper info
