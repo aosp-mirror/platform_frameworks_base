@@ -203,43 +203,20 @@ public class InputMethodSubtypeArray {
     }
 
     private static byte[] compress(final byte[] data) {
-        ByteArrayOutputStream resultStream = null;
-        GZIPOutputStream zipper = null;
-        try {
-            resultStream = new ByteArrayOutputStream();
-            zipper = new GZIPOutputStream(resultStream);
+        try (final ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
+                final GZIPOutputStream zipper = new GZIPOutputStream(resultStream)) {
             zipper.write(data);
-        } catch(IOException e) {
+            zipper.finish();
+            return resultStream.toByteArray();
+        } catch(Exception e) {
+            Slog.e(TAG, "Failed to compress the data.", e);
             return null;
-        } finally {
-            try {
-                if (zipper != null) {
-                    zipper.close();
-                }
-            } catch (IOException e) {
-                zipper = null;
-                Slog.e(TAG, "Failed to close the stream.", e);
-                // swallowed, not propagated back to the caller
-            }
-            try {
-                if (resultStream != null) {
-                    resultStream.close();
-                }
-            } catch (IOException e) {
-                resultStream = null;
-                Slog.e(TAG, "Failed to close the stream.", e);
-                // swallowed, not propagated back to the caller
-            }
         }
-        return resultStream != null ? resultStream.toByteArray() : null;
     }
 
     private static byte[] decompress(final byte[] data, final int expectedSize) {
-        ByteArrayInputStream inputStream = null;
-        GZIPInputStream unzipper = null;
-        try {
-            inputStream = new ByteArrayInputStream(data);
-            unzipper = new GZIPInputStream(inputStream);
+        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+                final GZIPInputStream unzipper = new GZIPInputStream(inputStream)) {
             final byte [] result = new byte[expectedSize];
             int totalReadBytes = 0;
             while (totalReadBytes < result.length) {
@@ -254,25 +231,9 @@ public class InputMethodSubtypeArray {
                 return null;
             }
             return result;
-        } catch(IOException e) {
+        } catch(Exception e) {
+            Slog.e(TAG, "Failed to decompress the data.", e);
             return null;
-        } finally {
-            try {
-                if (unzipper != null) {
-                    unzipper.close();
-                }
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to close the stream.", e);
-                // swallowed, not propagated back to the caller
-            }
-            try {
-                if (inputStream != null) {
-                  inputStream.close();
-                }
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to close the stream.", e);
-                // swallowed, not propagated back to the caller
-            }
         }
     }
 }
