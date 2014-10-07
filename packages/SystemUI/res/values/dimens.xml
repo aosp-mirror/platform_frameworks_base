@@ -358,6 +358,9 @@
     <!-- radius of the corners of the material rounded rect background -->
     <dimen name="notification_material_rounded_rect_radius">2dp</dimen>
 
+    <!-- radius of the corners of the material rounded rect background but negative-->
+    <dimen name="notification_material_rounded_rect_radius_negative">-2dp</dimen>
+
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
 
