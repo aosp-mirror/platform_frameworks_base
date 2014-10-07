@@ -187,7 +187,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/nfc/INfcAdapterExtras.aidl \
 	core/java/android/nfc/INfcTag.aidl \
 	core/java/android/nfc/INfcCardEmulation.aidl \
-	core/java/android/nfc/INfcLockscreenDispatch.aidl \
 	core/java/android/nfc/INfcUnlockHandler.aidl \
 	core/java/android/os/IBatteryPropertiesListener.aidl \
 	core/java/android/os/IBatteryPropertiesRegistrar.aidl \
