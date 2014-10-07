@@ -307,7 +307,6 @@ public class RecentsConfiguration {
         launchedWithAltTab = false;
         launchedWithNoRecentTasks = false;
         launchedFromAppWithThumbnail = false;
-        launchedFromAppWithScreenshot = false;
         launchedFromHome = false;
         launchedToTaskId = -1;
     }

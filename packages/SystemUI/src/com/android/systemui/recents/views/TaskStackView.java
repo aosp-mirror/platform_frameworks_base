@@ -598,22 +598,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             TaskView tv = (TaskView) getChildAt(i);
-            if (tv.isFullScreenView()) {
-                tv.measure(widthMeasureSpec, heightMeasureSpec);
+            if (tv.getBackground() != null) {
+                tv.getBackground().getPadding(mTmpRect);
             } else {
-                if (tv.getBackground() != null) {
-                    tv.getBackground().getPadding(mTmpRect);
-                } else {
-                    mTmpRect.setEmpty();
-                }
-                tv.measure(
-                    MeasureSpec.makeMeasureSpec(
-                            mLayoutAlgorithm.mTaskRect.width() + mTmpRect.left + mTmpRect.right,
-                            MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(
-                            mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom +
-                            tv.getMaxFooterHeight(), MeasureSpec.EXACTLY));
+                mTmpRect.setEmpty();
             }
+            tv.measure(
+                MeasureSpec.makeMeasureSpec(
+                        mLayoutAlgorithm.mTaskRect.width() + mTmpRect.left + mTmpRect.right,
+                        MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(
+                        mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom,
+                        MeasureSpec.EXACTLY));
         }
 
         setMeasuredDimension(width, height);
@@ -630,20 +626,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             TaskView tv = (TaskView) getChildAt(i);
-            if (tv.isFullScreenView()) {
-                tv.layout(left, top, left + tv.getMeasuredWidth(), top + tv.getMeasuredHeight());
+            if (tv.getBackground() != null) {
+                tv.getBackground().getPadding(mTmpRect);
             } else {
-                if (tv.getBackground() != null) {
-                    tv.getBackground().getPadding(mTmpRect);
-                } else {
-                    mTmpRect.setEmpty();
-                }
-                tv.layout(mLayoutAlgorithm.mTaskRect.left - mTmpRect.left,
-                        mLayoutAlgorithm.mTaskRect.top - mTmpRect.top,
-                        mLayoutAlgorithm.mTaskRect.right + mTmpRect.right,
-                        mLayoutAlgorithm.mTaskRect.bottom + mTmpRect.bottom +
-                                tv.getMaxFooterHeight());
+                mTmpRect.setEmpty();
             }
+            tv.layout(mLayoutAlgorithm.mTaskRect.left - mTmpRect.left,
+                    mLayoutAlgorithm.mTaskRect.top - mTmpRect.top,
+                    mLayoutAlgorithm.mTaskRect.right + mTmpRect.right,
+                    mLayoutAlgorithm.mTaskRect.bottom + mTmpRect.bottom);
         }
 
         if (mAwaitingFirstLayout) {
@@ -960,13 +951,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Rebind the task and request that this task's data be filled into the TaskView
         tv.onTaskBound(task);
 
-        // Mark the launch task as fullscreen
-        if (Constants.DebugFlags.App.EnableScreenshotAppTransition && mAwaitingFirstLayout) {
-            if (task.isLaunchTarget) {
-                tv.setIsFullScreen(true);
-            }
-        }
-
         // Load the task data
         RecentsTaskLoader.getInstance().loadTaskData(task);
 
@@ -1076,11 +1060,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (!mStackViewsDirty) {
             invalidate();
         }
-    }
-
-    @Override
-    public void onTaskViewFullScreenTransitionCompleted() {
-        requestSynchronizeStackViewsWithModel();
     }
 
     @Override
