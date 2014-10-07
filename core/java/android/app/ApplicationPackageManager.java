@@ -80,6 +80,9 @@ final class ApplicationPackageManager extends PackageManager {
     private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
 
+    // Default flags to use with PackageManager when no flags are given.
+    private final static int sDefaultFlags = PackageManager.GET_SHARED_LIBRARY_FILES;
+
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -730,7 +733,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
         if (appInfo == null) {
             try {
-                appInfo = getApplicationInfo(packageName, 0);
+                appInfo = getApplicationInfo(packageName, sDefaultFlags);
             } catch (NameNotFoundException e) {
                 return null;
             }
@@ -770,7 +773,7 @@ final class ApplicationPackageManager extends PackageManager {
 
     @Override public Drawable getActivityIcon(ComponentName activityName)
             throws NameNotFoundException {
-        return getActivityInfo(activityName, 0).loadIcon(this);
+        return getActivityInfo(activityName, sDefaultFlags).loadIcon(this);
     }
 
     @Override public Drawable getActivityIcon(Intent intent)
@@ -799,13 +802,13 @@ final class ApplicationPackageManager extends PackageManager {
 
     @Override public Drawable getApplicationIcon(String packageName)
             throws NameNotFoundException {
-        return getApplicationIcon(getApplicationInfo(packageName, 0));
+        return getApplicationIcon(getApplicationInfo(packageName, sDefaultFlags));
     }
 
     @Override
     public Drawable getActivityBanner(ComponentName activityName)
             throws NameNotFoundException {
-        return getActivityInfo(activityName, 0).loadBanner(this);
+        return getActivityInfo(activityName, sDefaultFlags).loadBanner(this);
     }
 
     @Override
@@ -832,13 +835,13 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public Drawable getApplicationBanner(String packageName)
             throws NameNotFoundException {
-        return getApplicationBanner(getApplicationInfo(packageName, 0));
+        return getApplicationBanner(getApplicationInfo(packageName, sDefaultFlags));
     }
 
     @Override
     public Drawable getActivityLogo(ComponentName activityName)
             throws NameNotFoundException {
-        return getActivityInfo(activityName, 0).loadLogo(this);
+        return getActivityInfo(activityName, sDefaultFlags).loadLogo(this);
     }
 
     @Override
@@ -865,7 +868,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public Drawable getApplicationLogo(String packageName)
             throws NameNotFoundException {
-        return getApplicationLogo(getApplicationInfo(packageName, 0));
+        return getApplicationLogo(getApplicationInfo(packageName, sDefaultFlags));
     }
 
     @Override
@@ -914,7 +917,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override public Resources getResourcesForActivity(
         ComponentName activityName) throws NameNotFoundException {
         return getResourcesForApplication(
-            getActivityInfo(activityName, 0).applicationInfo);
+            getActivityInfo(activityName, sDefaultFlags).applicationInfo);
     }
 
     @Override public Resources getResourcesForApplication(
@@ -926,7 +929,8 @@ final class ApplicationPackageManager extends PackageManager {
         Resources r = mContext.mMainThread.getTopLevelResources(
                 sameUid ? app.sourceDir : app.publicSourceDir,
                 sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
-                app.resourceDirs, null, Display.DEFAULT_DISPLAY, null, mContext.mPackageInfo);
+                app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
+                null, mContext.mPackageInfo);
         if (r != null) {
             return r;
         }
@@ -936,7 +940,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override public Resources getResourcesForApplication(
         String appPackageName) throws NameNotFoundException {
         return getResourcesForApplication(
-            getApplicationInfo(appPackageName, 0));
+            getApplicationInfo(appPackageName, sDefaultFlags));
     }
 
     /** @hide */
@@ -951,7 +955,7 @@ final class ApplicationPackageManager extends PackageManager {
             return mContext.mMainThread.getSystemContext().getResources();
         }
         try {
-            ApplicationInfo ai = mPM.getApplicationInfo(appPackageName, 0, userId);
+            ApplicationInfo ai = mPM.getApplicationInfo(appPackageName, sDefaultFlags, userId);
             if (ai != null) {
                 return getResourcesForApplication(ai);
             }
@@ -1136,7 +1140,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
         if (appInfo == null) {
             try {
-                appInfo = getApplicationInfo(packageName, 0);
+                appInfo = getApplicationInfo(packageName, sDefaultFlags);
             } catch (NameNotFoundException e) {
                 return null;
             }
@@ -1164,7 +1168,7 @@ final class ApplicationPackageManager extends PackageManager {
                                     ApplicationInfo appInfo) {
         if (appInfo == null) {
             try {
-                appInfo = getApplicationInfo(packageName, 0);
+                appInfo = getApplicationInfo(packageName, sDefaultFlags);
             } catch (NameNotFoundException e) {
                 return null;
             }
