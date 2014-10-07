@@ -485,6 +485,15 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mState.mDrawable.clearMutated();
+        mMutated = false;
+    }
+
+    /**
      * Represents the state of a rotation for a given drawable. The same
      * rotate drawable can be invoked with different states to drive several
      * rotations at the same time.

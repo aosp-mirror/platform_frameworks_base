@@ -917,6 +917,20 @@ public abstract class Drawable {
     }
 
     /**
+     * Clears the mutated state, allowing this drawable to be cached and
+     * mutated again.
+     * <p>
+     * This is hidden because only framework drawables can be cached, so
+     * custom drawables don't need to support constant state, mutate(), or
+     * clearMutated().
+     *
+     * @hide
+     */
+    public void clearMutated() {
+        // Default implementation is no-op.
+    }
+
+    /**
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {

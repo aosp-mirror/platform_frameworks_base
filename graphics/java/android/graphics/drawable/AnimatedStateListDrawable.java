@@ -507,6 +507,14 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     static class AnimatedStateListState extends StateListState {
         private static final int REVERSE_SHIFT = 32;
         private static final int REVERSE_MASK = 0x1;

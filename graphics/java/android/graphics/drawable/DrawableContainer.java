@@ -574,6 +574,15 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mDrawableContainerState.clearMutated();
+        mMutated = false;
+    }
+
+    /**
      * A ConstantState that can contain several {@link Drawable}s.
      *
      * This class was made public to enable testing, and its visibility may change in a future
@@ -838,6 +847,18 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             }
 
             mMutated = true;
+        }
+
+        final void clearMutated() {
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i] != null) {
+                    drawables[i].clearMutated();
+                }
+            }
+
+            mMutated = false;
         }
 
         /**
