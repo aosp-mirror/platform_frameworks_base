@@ -70,8 +70,8 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
       <li>Java 1.6 or higher is required if you are targeting other releases.</li>
       <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
       <li>This version of ADT is designed for use with
-        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r23.0.4</a>.
-        If you haven't already installed SDK Tools r23.0.4 into your SDK, use the
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r23.0.2</a>.
+        If you haven't already installed SDK Tools r23.0.2 into your SDK, use the
         Android SDK Manager to do so.</li>
     </ul>
   </dd>
