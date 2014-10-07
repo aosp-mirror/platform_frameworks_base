@@ -233,6 +233,14 @@ public class VectorDrawable extends Drawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     Object getTargetByName(String name) {
         return mVectorState.mVPathRenderer.mVGTargetsMap.get(name);
     }

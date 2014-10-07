@@ -157,6 +157,15 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mAnimatedVectorState.mVectorDrawable.clearMutated();
+        mMutated = false;
+    }
+
     @Override
     public ConstantState getConstantState() {
         mAnimatedVectorState.mChangingConfigurations = getChangingConfigurations();

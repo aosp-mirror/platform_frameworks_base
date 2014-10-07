@@ -347,6 +347,14 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     private final static class AnimationState extends DrawableContainerState {
         private int[] mDurations;
         private boolean mOneShot;

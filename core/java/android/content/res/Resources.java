@@ -2323,7 +2323,14 @@ public class Resources {
 
         final Drawable dr;
         if (cs != null) {
-            dr = cs.newDrawable(this, theme);
+            final Drawable clonedDr = cs.newDrawable(this);
+            if (theme != null) {
+                dr = clonedDr.mutate();
+                dr.applyTheme(theme);
+                dr.clearMutated();
+            } else {
+                dr = clonedDr;
+            }
         } else if (isColorDrawable) {
             dr = new ColorDrawable(value.data);
         } else {
