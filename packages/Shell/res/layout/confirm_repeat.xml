@@ -22,13 +22,18 @@
     android:paddingEnd="16dip"
     android:paddingTop="8dip"
     android:paddingBottom="16dip"
-    android:orientation="vertical">
-    <TextView
+    android:orientation="vertical"
+    android:keepScreenOn="true">
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/bugreport_confirm"
-        android:paddingBottom="16dip"
-        style="?android:attr/textAppearanceMedium" />
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bugreport_confirm"
+            android:paddingBottom="16dip"
+            style="?android:attr/textAppearanceMedium" />
+    </ScrollView>
     <CheckBox
         android:id="@android:id/checkbox"
         android:layout_width="match_parent"
