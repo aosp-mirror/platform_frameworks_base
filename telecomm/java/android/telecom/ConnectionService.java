@@ -888,6 +888,8 @@ public abstract class ConnectionService extends Service {
      * @param connectionManagerPhoneAccount
      * @param request
      * @return
+     *
+     * @hide
      */
     public Connection onCreateUnknownConnection(PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request) {
