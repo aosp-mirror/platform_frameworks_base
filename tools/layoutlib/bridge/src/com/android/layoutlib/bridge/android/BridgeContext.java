@@ -92,8 +92,15 @@ import java.util.Map;
  */
 public final class BridgeContext extends Context {
 
-    private Resources mSystemResources;
+    /** The map adds cookies to each view so that IDE can link xml tags to views. */
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
+    /**
+     * In some cases, when inflating an xml, some objects are created. Then later, the objects are
+     * converted to views. This map stores the mapping from objects to cookies which can then be
+     * used to populate the mViewKeyMap.
+     */
+    private final HashMap<Object, Object> mViewKeyHelpMap = new HashMap<Object, Object>();
+    private Resources mSystemResources;
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
     private final RenderResources mRenderResources;
@@ -188,6 +195,14 @@ public final class BridgeContext extends Context {
 
     public Object getViewKey(View view) {
         return mViewKeyMap.get(view);
+    }
+
+    public void addCookie(Object o, Object cookie) {
+        mViewKeyHelpMap.put(o, cookie);
+    }
+
+    public Object getCookie(Object o) {
+        return mViewKeyHelpMap.get(o);
     }
 
     public Object getProjectKey() {
