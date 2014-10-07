@@ -880,6 +880,8 @@ public class PackageInstaller {
         /** {@hide} */
         public String appLabel;
         /** {@hide} */
+        public long appIconLastModified = -1;
+        /** {@hide} */
         public Uri originatingUri;
         /** {@hide} */
         public Uri referrerUri;
