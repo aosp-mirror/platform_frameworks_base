@@ -55,8 +55,10 @@ public final class HdmiRecordSources {
 
     /**
      * Base class for each record source.
+     * @hide
      */
-    static abstract class RecordSource {
+    @SystemApi
+    public static abstract class RecordSource {
         protected final int mSourceType;
         protected final int mExtraDataSize;
 
