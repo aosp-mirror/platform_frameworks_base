@@ -1,0 +1,56 @@
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="288dp"
+    android:width="288dp"
+    android:viewportHeight="288"
+    android:viewportWidth="288" >
+    <group
+        android:name="ball_start"
+        android:translateX="147.411817411"
+        android:translateY="129.468428513"
+        android:scaleX="0.586201598553"
+        android:scaleY="0.586201598553" >
+        <group
+            android:name="shape_1"
+            android:scaleX="0.76"
+            android:scaleY="0.748114397321" >
+            <path
+                android:name="path_1"
+                android:pathData="M 0,-17.3838043213 c -9.625,0.0 -17.0795440674,8.28025817871 -17.0795440674,17.4052734375 c 0.0,9.75645446777 7.51704406738,17.6295623779 17.0795440674,17.353515625 c 11.5579986572,-0.333648681641 17.2784118652,-8.72853088379 17.2784118652,-17.353515625 c 0.0,-8.62501525879 -7.65341186523,-17.4052734375 -17.2784118652,-17.4052734375 Z"
+                android:fillColor="#FFFF9000"
+                android:fillAlpha="0" />
+        </group>
+    </group>
+    <group
+        android:name="ball_swoop"
+        android:translateX="144"
+        android:translateY="144"
+        android:scaleX="0.752248"
+        android:scaleY="0.752248"
+        android:rotation="-87.6585365854" >
+        <path
+            android:name="path_1_1"
+            android:pathData="M -56.7679443359,1.03857421875 c 0.0,0.0 191.916503906,-13.9097290039 191.916503906,88.0704345703 c 0.0,58.4487304688 -83.6709594727,90.1372070312 -137.004882812,90.1372070312 c -82.1782226562,0.0 -177.867431641,-63.5512695312 -177.867431641,-178.207641602 c 0.0,-115.985717773 98.7650146484,-178.160949707 177.986938477,-178.160949707 c 76.2376251221,0.0 178.1640625,60.6796875 178.1640625,178.185058594 "
+            android:strokeColor="#FFFF9000"
+            android:strokeAlpha="1"
+            android:strokeWidth="20"
+            android:strokeLineCap="round"
+            android:trimPathStart="0.93025"
+            android:trimPathEnd="0.96248"
+            android:trimPathOffset="0"
+            android:fillColor="#00000000" />
+    </group>
+</vector>

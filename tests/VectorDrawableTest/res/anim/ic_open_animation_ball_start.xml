@@ -1,0 +1,86 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="833"
+            android:propertyName="translateX"
+            android:valueFrom="144"
+            android:valueTo="144"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="100"
+            android:propertyName="translateX"
+            android:valueFrom="144"
+            android:valueTo="147.411817411"
+            android:interpolator="@interpolator/ic_open_ball_start_translatex_interpolator" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="167"
+            android:propertyName="translateY"
+            android:valueFrom="144.58457376"
+            android:valueTo="144.58457376"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="333"
+            android:propertyName="translateY"
+            android:valueFrom="144.58457376"
+            android:valueTo="196.11111456"
+            android:interpolator="@interpolator/ic_open_ball_start_translatey_interpolator_1" />
+        <objectAnimator
+            android:duration="333"
+            android:propertyName="translateY"
+            android:valueFrom="196.11111456"
+            android:valueTo="196.11111456"
+            android:interpolator="@interpolator/ic_open_ball_start_translatey_interpolator_2" />
+        <objectAnimator
+            android:duration="100"
+            android:propertyName="translateY"
+            android:valueFrom="196.11111456"
+            android:valueTo="129.468428513"
+            android:interpolator="@interpolator/ic_open_ball_start_translatey_interpolator_3" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="167"
+            android:propertyName="scaleX"
+            android:valueFrom="0"
+            android:valueTo="0.71187984"
+            android:interpolator="@interpolator/ic_open_ball_start_scalex_interpolator_1" />
+        <objectAnimator
+            android:duration="667"
+            android:propertyName="scaleX"
+            android:valueFrom="0.71187984"
+            android:valueTo="0.71187984"
+            android:interpolator="@interpolator/ic_open_ball_start_scalex_interpolator_2" />
+        <objectAnimator
+            android:duration="100"
+            android:propertyName="scaleX"
+            android:valueFrom="0.71187984"
+            android:valueTo="0.586201598553"
+            android:interpolator="@interpolator/ic_open_ball_start_scalex_interpolator_3" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="167"
+            android:propertyName="scaleY"
+            android:valueFrom="0"
+            android:valueTo="0.71187984"
+            android:interpolator="@interpolator/ic_open_ball_start_scaley_interpolator_1" />
+        <objectAnimator
+            android:duration="667"
+            android:propertyName="scaleY"
+            android:valueFrom="0.71187984"
+            android:valueTo="0.71187984"
+            android:interpolator="@interpolator/ic_open_ball_start_scaley_interpolator_2" />
+        <objectAnimator
+            android:duration="100"
+            android:propertyName="scaleY"
+            android:valueFrom="0.71187984"
+            android:valueTo="0.586201598553"
+            android:interpolator="@interpolator/ic_open_ball_start_scaley_interpolator_3" />
+    </set>
+</set>
