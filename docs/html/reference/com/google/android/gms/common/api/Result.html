@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -838,19 +843,19 @@ Summary:
               
 
 
-
+              
+              
+            
+              
                 <a href="/reference/com/google/android/gms/common/api/BatchResult.html">BatchResult</a>,
               
               
             
               
-                <a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a>,
-              
-              
-            
-              
+                <a href="/reference/com/google/android/gms/fitness/result/BleDevicesResult.html">BleDevicesResult</a>,
+
               and
-                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">37 others.</a>
+                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">46 others.</a>
               
             
           
@@ -894,86 +899,114 @@ Summary:
               <td class="jd-descrcol" width="100%">The result of a batch operation.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/BleDevicesResult.html">BleDevicesResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of a <code><a href="/reference/com/google/android/gms/fitness/BleApi.html#listClaimedBleDevices(com.google.android.gms.common.api.GoogleApiClient)">listClaimedBleDevices(GoogleApiClient)</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></td>
               <td class="jd-descrcol" width="100%">When a connection to a receiver application has been established, this object contains
  information about that application, including its <code><a href="/reference/com/google/android/gms/cast/ApplicationMetadata.html">ApplicationMetadata</a></code> and current
  status.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></td>
               <td class="jd-descrcol" width="100%">Holder for an active container.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a></td>
               <td class="jd-descrcol" width="100%">Contains a single data item.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a></td>
               <td class="jd-descrcol" width="100%">Contains the number of deleted items.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a></td>
               <td class="jd-descrcol" width="100%">Contains a file descriptor for the requested asset.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
               <td class="jd-descrcol" width="100%">Data structure holding references to a set of events.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
               <td class="jd-descrcol" width="100%">Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;</td>
           </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html">DataReadResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of a <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">DataReadRequest</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/DataSourcesResult.html">DataSourcesResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of a <code><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a></code>.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/DataTypeResult.html">DataTypeResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of
+ <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html#readDataType(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">readDataType(GoogleApiClient, String)</a></code>.&nbsp;</td>
+          </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a Contents reference.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a></code> instead.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveContentsResult.html">DriveApi.DriveContentsResult</a></td>
+              <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a DriveId.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a MetadataBuffer.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a></td>
-              <td class="jd-descrcol" width="100%">A result that contains a DriveFile.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">Result that contains a <code><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></code>.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a></td>
-              <td class="jd-descrcol" width="100%">A result that contains a DriveFolder.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a></td>
+              <td class="jd-descrcol" width="100%">A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code>.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a></td>
+              <td class="jd-descrcol" width="100%">A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code>.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a></td>
               <td class="jd-descrcol" width="100%">Result that is returned in response to metadata requests.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/Events.LoadEventsResult.html">Events.LoadEventsResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when event data has been loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesMetadata.LoadGamesResult.html">GamesMetadata.LoadGamesResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when game metadata has been loaded.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when invitations have been loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LeaderboardMetadataResult.html">Leaderboards.LeaderboardMetadataResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when leaderboard metadata has been loaded.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadPlayerScoreResult.html">Leaderboards.LoadPlayerScoreResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when a player's leaderboard score has been loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadScoresResult.html">Leaderboards.LoadScoresResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when leaderboard scores have been loaded.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when a leaderboard score has been submitted.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/ListSubscriptionsResult.html">ListSubscriptionsResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of a ListSubscriptionsRequest.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.SendMessageResult.html">MessageApi.SendMessageResult</a></td>
@@ -1004,70 +1037,82 @@ Summary:
               <td class="jd-descrcol" width="100%">Result delivered when player data has been loaded.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadProfileSettingsResult.html">Players.LoadProfileSettingsResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when the profile settings of the signed-in player have been loaded.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.AcceptQuestResult.html">Quests.AcceptQuestResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when accepting a quest.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.ClaimMilestoneResult.html">Quests.ClaimMilestoneResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when claiming a milestone.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.LoadQuestsResult.html">Quests.LoadQuestsResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when quest data has been loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.MediaChannelResult.html">RemoteMediaPlayer.MediaChannelResult</a></td>
               <td class="jd-descrcol" width="100%">Result of a media command.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.LoadRequestsResult.html">Requests.LoadRequestsResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when requests have loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.UpdateRequestsResult.html">Requests.UpdateRequestsResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when requests are updated.&nbsp;</td>
           </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/SessionReadResult.html">SessionReadResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of a <code><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.html">SessionReadRequest</a></code>.&nbsp;</td>
+          </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html">SessionStopResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of a SessionStopRequest.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.CommitSnapshotResult.html">Snapshots.CommitSnapshotResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been committed.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.DeleteSnapshotResult.html">Snapshots.DeleteSnapshotResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been deleted.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when snapshot data has been loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been opened.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></td>
               <td class="jd-descrcol" width="100%">Represents the results of work.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.CancelMatchResult.html">TurnBasedMultiplayer.CancelMatchResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when the match has been canceled.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.InitiateMatchResult.html">TurnBasedMultiplayer.InitiateMatchResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when match has been initiated.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LeaveMatchResult.html">TurnBasedMultiplayer.LeaveMatchResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when the player has left the match.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchResult.html">TurnBasedMultiplayer.LoadMatchResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when a turn-based match has been loaded.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when matches have been loaded.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.UpdateMatchResult.html">TurnBasedMultiplayer.UpdateMatchResult</a></td>
               <td class="jd-descrcol" width="100%">Result delivered when match has been updated.&nbsp;</td>
           </tr>
