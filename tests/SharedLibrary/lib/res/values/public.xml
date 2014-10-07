@@ -13,5 +13,7 @@
     <public type="attr" name="zip"          id="0x00010005" />
     <public type="attr" name="country"      id="0x00010006" />
 
+    <public type="drawable" name="size_48x48" id="0x00030000" />
+
     <public type="array" name="animals"     id="0x02050000" />
 </resources>
