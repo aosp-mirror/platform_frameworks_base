@@ -88,6 +88,14 @@ public class ColorDrawable extends Drawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         final ColorFilter colorFilter = mPaint.getColorFilter();

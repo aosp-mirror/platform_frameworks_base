@@ -55,6 +55,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;
 
+    private boolean mMutated;
+
     ClipDrawable() {
         this(null, null);
     }
@@ -266,6 +268,24 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     public void setLayoutDirection(int layoutDirection) {
         mClipState.mDrawable.setLayoutDirection(layoutDirection);
         super.setLayoutDirection(layoutDirection);
+    }
+
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mClipState.mDrawable.mutate();
+            mMutated = true;
+        }
+        return this;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mClipState.mDrawable.clearMutated();
+        mMutated = false;
     }
 
     final static class ClipState extends ConstantState {

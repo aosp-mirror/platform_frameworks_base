@@ -371,6 +371,15 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mInsetState.mDrawable.clearMutated();
+        mMutated = false;
+    }
+
+    /**
      * Returns the drawable wrapped by this InsetDrawable. May be null.
      */
     public Drawable getDrawable() {
