@@ -571,7 +571,7 @@ public class UserSwitcherController {
                 cancel();
             } else {
                 dismiss();
-                UserInfo user = mUserManager.createUser(
+                UserInfo user = mUserManager.createSecondaryUser(
                         mContext.getString(R.string.user_new_user_name), 0 /* flags */);
                 if (user == null) {
                     // Couldn't create user, most likely because there are too many, but we haven't
