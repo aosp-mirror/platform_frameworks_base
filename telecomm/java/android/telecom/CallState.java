@@ -100,6 +100,16 @@ public final class CallState {
      */
     public static final int ABORTED = 8;
 
+    /**
+     * Indicates that the call is in the process of being disconnected and will transition next
+     * to a {@link #DISCONNECTED} state.
+     * <p>
+     * This state is not expected to be communicated from the Telephony layer, but will be reported
+     * to the InCall UI for calls where disconnection has been initiated by the user but the
+     * ConnectionService has confirmed the call as disconnected.
+     */
+    public static final int DISCONNECTING = 9;
+
     public static String toString(int callState) {
         switch (callState) {
             case NEW:
@@ -120,6 +130,8 @@ public final class CallState {
                 return "DISCONNECTED";
             case ABORTED:
                 return "ABORTED";
+            case DISCONNECTING:
+                return "DISCONNECTING";
             default:
                 return "UNKNOWN";
         }
