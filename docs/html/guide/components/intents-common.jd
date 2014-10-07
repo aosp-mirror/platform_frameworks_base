@@ -1098,82 +1098,6 @@ public void composeEmail(String[] addresses, String subject) {
 
 
 
-
-
-<h2 id="Note">Notes</h2>
-
-
-<h3 id="TakeNote">Take a note</h3>
-
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
-    </a>
-  </div>
-  <p class="now-title">Google Now</p>
-  <ul>
-    <li>"take a note"</li>
-    <li>"note to self"</li>
-  </ul>
-</div>
-
-<p>To take a note, use the {@link android.content.Intent#ACTION_SEND} action and specify the
-text for the note with the {@link android.content.Intent#EXTRA_TEXT}.</p>
-
-<dl>
-<dt><b>Action</b></dt>
-<dd>{@link android.content.Intent#ACTION_SEND}</dd>
-
-<dt><b>Category</b></dt>
-<dd><code>com.google.android.voicesearch.SELF_NOTE</code></dd>
-
-<dt><b>Data URI Scheme</b></dt>
-<dd>None</dd>
-
-<dt><b>Extras</b></dt>
-<dd>
-  <dl>
-    <dt>{@link android.content.Intent#EXTRA_TEXT}</dt>
-      <dd>A string with the contents of the note.</dd>
-  </dl>
-</dd>
-
-</dl>
-
-
-<p><b>Example intent:</b></p>
-<pre>
-public void takeNote(String content) {
-    Intent intent = new Intent(Intent.ACTION_SEND);
-    intent.setType("*/*");
-    intent.putExtra(Intent.EXTRA_TEXT, content);
-    if (intent.resolveActivity(getPackageManager()) != null) {
-        startActivity(intent);
-    }
-}
-</pre>
-
-
-<p><b>Example intent filter:</b></p>
-<pre>
-&lt;activity ...>
-    &lt;intent-filter>
-        &lt;action android:name="android.intent.action.SEND" />
-        &lt;category android:name="com.google.android.voicesearch.SELF_NOTE" />
-    &lt;/intent-filter>
-&lt;/activity>
-</pre>
-
-
-
-
-
-
-
-
-
 <h2 id="Storage">File Storage</h2>
 
 
@@ -2643,7 +2567,7 @@ about declaring each intent filter, click on the action description.</p>
   <td>{@link android.provider.AlarmClock#ACTION_SET_TIMER AlarmClock.ACTION_SET_TIMER}</td>
 </tr>
 <tr>
-  <td rowspan="2" style="vertical-align:middle">Communication</td>
+  <td style="vertical-align:middle">Communication</td>
   <td>
     <p><a href="#DialPhone">Call a number</a></p>
     <ul class="now-list">
@@ -2653,16 +2577,6 @@ about declaring each intent filter, click on the action description.</p>
     </ul>
   </td>
   <td>{@link android.content.Intent#ACTION_CALL Intent.ACTION_CALL}</td>
-</tr>
-<tr>
-  <td>
-    <p><a href="#Note">Note to self</a></p>
-    <ul class="now-list">
-      <li>"take a note"</li>
-      <li>"note to self"</li>
-    </ul>
-  </td>
-  <td>{@link android.content.Intent#ACTION_SEND Intent.ACTION_SEND}</td>
 </tr>
 <tr>
   <td rowspan="5" style="vertical-align:middle">Fitness</td>
