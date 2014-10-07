@@ -146,6 +146,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                     mDetailAdapter.updateItems();
                 }
             });
+            refreshState();
         }
     };
 
