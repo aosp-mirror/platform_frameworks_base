@@ -721,6 +721,39 @@ public class UserManager {
     }
 
     /**
+     * Creates a secondary user with the specified name and options and configures it with default
+     * restrictions.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param name the user's name
+     * @param flags flags that identify the type of user and other properties.
+     * @see UserInfo
+     *
+     * @return the UserInfo object for the created user, or null if the user could not be created.
+     * @hide
+     */
+    public UserInfo createSecondaryUser(String name, int flags) {
+        try {
+            UserInfo user = mService.createUser(name, flags);
+            if (user == null) {
+                return null;
+            }
+            Bundle userRestrictions = mService.getUserRestrictions(user.id);
+            addDefaultUserRestrictions(userRestrictions);
+            mService.setUserRestrictions(userRestrictions, user.id);
+            return user;
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not create a user", re);
+            return null;
+        }
+    }
+
+    private static void addDefaultUserRestrictions(Bundle restrictions) {
+        restrictions.putBoolean(DISALLOW_OUTGOING_CALLS, true);
+        restrictions.putBoolean(DISALLOW_SMS, true);
+    }
+
+    /**
      * Creates a user with the specified name and options as a profile of another user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
