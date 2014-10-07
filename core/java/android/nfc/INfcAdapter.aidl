@@ -26,7 +26,6 @@ import android.nfc.IAppCallback;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.INfcTag;
 import android.nfc.INfcCardEmulation;
-import android.nfc.INfcLockscreenDispatch;
 import android.nfc.INfcUnlockHandler;
 import android.os.Bundle;
 
