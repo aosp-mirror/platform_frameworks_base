@@ -92,6 +92,7 @@ public class BugreportReceiver extends BroadcastReceiver {
                 .setContentIntent(PendingIntent.getActivity(
                         context, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT))
                 .setAutoCancel(true)
+                .setLocalOnly(true)
                 .setColor(context.getResources().getColor(
                         com.android.internal.R.color.system_notification_accent_color));
 
