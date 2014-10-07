@@ -485,6 +485,7 @@ public class AudioService extends IAudioService.Stub {
             AudioSystem.DEVICE_OUT_HDMI_ARC |
             AudioSystem.DEVICE_OUT_SPDIF |
             AudioSystem.DEVICE_OUT_AUX_LINE;
+    int mFullVolumeDevices = 0;
 
     // TODO merge orientation and rotation
     private final boolean mMonitorOrientation;
@@ -725,6 +726,10 @@ public class AudioService extends IAudioService.Stub {
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
             mStreamStates[streamType].checkFixedVolumeDevices();
         }
+    }
+
+    private void checkAllFixedVolumeDevices(int streamType) {
+        mStreamStates[streamType].checkFixedVolumeDevices();
     }
 
     private void createStreamStates() {
@@ -1464,6 +1469,106 @@ public class AudioService extends IAudioService.Stub {
     /** get stream mute state. */
     public boolean isStreamMute(int streamType) {
         return mStreamStates[streamType].isMuted();
+    }
+
+    private class RmtSbmxFullVolDeathHandler implements IBinder.DeathRecipient {
+        private IBinder mICallback; // To be notified of client's death
+
+        RmtSbmxFullVolDeathHandler(IBinder cb) {
+            mICallback = cb;
+            try {
+                cb.linkToDeath(this, 0/*flags*/);
+            } catch (RemoteException e) {
+                Log.e(TAG, "can't link to death", e);
+            }
+        }
+
+        boolean isHandlerFor(IBinder cb) {
+            return mICallback.equals(cb);
+        }
+
+        void forget() {
+            try {
+                mICallback.unlinkToDeath(this, 0/*flags*/);
+            } catch (NoSuchElementException e) {
+                Log.e(TAG, "error unlinking to death", e);
+            }
+        }
+
+        public void binderDied() {
+            Log.w(TAG, "Recorder with remote submix at full volume died " + mICallback);
+            forceRemoteSubmixFullVolume(false, mICallback);
+        }
+    }
+
+    /**
+     * call must be synchronized on mRmtSbmxFullVolDeathHandlers
+     * @return true if there is a registered death handler, false otherwise */
+    private boolean discardRmtSbmxFullVolDeathHandlerFor(IBinder cb) {
+        Iterator<RmtSbmxFullVolDeathHandler> it = mRmtSbmxFullVolDeathHandlers.iterator();
+        while (it.hasNext()) {
+            final RmtSbmxFullVolDeathHandler handler = it.next();
+            if (handler.isHandlerFor(cb)) {
+                handler.forget();
+                mRmtSbmxFullVolDeathHandlers.remove(handler);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** call synchronized on mRmtSbmxFullVolDeathHandlers */
+    private boolean hasRmtSbmxFullVolDeathHandlerFor(IBinder cb) {
+        Iterator<RmtSbmxFullVolDeathHandler> it = mRmtSbmxFullVolDeathHandlers.iterator();
+        while (it.hasNext()) {
+            if (it.next().isHandlerFor(cb)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int mRmtSbmxFullVolRefCount = 0;
+    private ArrayList<RmtSbmxFullVolDeathHandler> mRmtSbmxFullVolDeathHandlers =
+            new ArrayList<RmtSbmxFullVolDeathHandler>();
+
+    public void forceRemoteSubmixFullVolume(boolean startForcing, IBinder cb) {
+        if (cb == null) {
+            return;
+        }
+        if ((PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.CAPTURE_AUDIO_OUTPUT))) {
+            Log.w(TAG, "Trying to call forceRemoteSubmixFullVolume() without CAPTURE_AUDIO_OUTPUT");
+            return;
+        }
+        synchronized(mRmtSbmxFullVolDeathHandlers) {
+            boolean applyRequired = false;
+            if (startForcing) {
+                if (!hasRmtSbmxFullVolDeathHandlerFor(cb)) {
+                    mRmtSbmxFullVolDeathHandlers.add(new RmtSbmxFullVolDeathHandler(cb));
+                    if (mRmtSbmxFullVolRefCount == 0) {
+                        mFullVolumeDevices |= AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
+                        mFixedVolumeDevices |= AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
+                        applyRequired = true;
+                    }
+                    mRmtSbmxFullVolRefCount++;
+                }
+            } else {
+                if (discardRmtSbmxFullVolDeathHandlerFor(cb) && (mRmtSbmxFullVolRefCount > 0)) {
+                    mRmtSbmxFullVolRefCount--;
+                    if (mRmtSbmxFullVolRefCount == 0) {
+                        mFullVolumeDevices &= ~AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
+                        mFixedVolumeDevices &= ~AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
+                        applyRequired = true;
+                    }
+                }
+            }
+            if (applyRequired) {
+                // Assumes only STREAM_MUSIC going through DEVICE_OUT_REMOTE_SUBMIX
+                checkAllFixedVolumeDevices(AudioSystem.STREAM_MUSIC);
+                mStreamStates[AudioSystem.STREAM_MUSIC].applyAllVolumes();
+            }
+        }
     }
 
     /** @see AudioManager#setMasterMute(boolean, int) */
@@ -3243,8 +3348,8 @@ public class AudioService extends IAudioService.Stub {
             int index;
             if (isMuted()) {
                 index = 0;
-            } else if ((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
-                       mAvrcpAbsVolSupported) {
+            } else if (((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 && mAvrcpAbsVolSupported)
+                    || ((device & mFullVolumeDevices) != 0)) {
                 index = (mIndexMax + 5)/10;
             } else {
                 index = (getIndex(device) + 5)/10;
@@ -3272,8 +3377,10 @@ public class AudioService extends IAudioService.Stub {
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
                         if (isMuted()) {
                             index = 0;
-                        } else if ((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
-                                mAvrcpAbsVolSupported) {
+                        } else if (((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
+                                mAvrcpAbsVolSupported)
+                                    || ((device & mFullVolumeDevices) != 0))
+                        {
                             index = (mIndexMax + 5)/10;
                         } else {
                             index = ((Integer)entry.getValue() + 5)/10;
@@ -3403,7 +3510,8 @@ public class AudioService extends IAudioService.Stub {
                         Map.Entry entry = (Map.Entry)i.next();
                         int device = ((Integer)entry.getKey()).intValue();
                         int index = ((Integer)entry.getValue()).intValue();
-                        if (((device & mFixedVolumeDevices) != 0) && index != 0) {
+                        if (((device & mFullVolumeDevices) != 0)
+                                || (((device & mFixedVolumeDevices) != 0) && index != 0)) {
                             entry.setValue(mIndexMax);
                         }
                         applyDeviceVolume(device);
