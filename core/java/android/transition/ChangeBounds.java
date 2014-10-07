@@ -117,13 +117,16 @@ public class ChangeBounds extends Transition {
 
     private void captureValues(TransitionValues values) {
         View view = values.view;
-        values.values.put(PROPNAME_BOUNDS, new Rect(view.getLeft(), view.getTop(),
-                view.getRight(), view.getBottom()));
-        values.values.put(PROPNAME_PARENT, values.view.getParent());
-        if (mReparent) {
-            values.view.getLocationInWindow(tempLocation);
-            values.values.put(PROPNAME_WINDOW_X, tempLocation[0]);
-            values.values.put(PROPNAME_WINDOW_Y, tempLocation[1]);
+
+        if (view.isLaidOut()) {
+            values.values.put(PROPNAME_BOUNDS, new Rect(view.getLeft(), view.getTop(),
+                    view.getRight(), view.getBottom()));
+            values.values.put(PROPNAME_PARENT, values.view.getParent());
+            if (mReparent) {
+                values.view.getLocationInWindow(tempLocation);
+                values.values.put(PROPNAME_WINDOW_X, tempLocation[0]);
+                values.values.put(PROPNAME_WINDOW_Y, tempLocation[1]);
+            }
         }
     }
 
