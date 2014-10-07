@@ -508,6 +508,14 @@ public class ShapeDrawable extends Drawable {
     }
 
     /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
+    /**
      * Defines the intrinsic properties of this ShapeDrawable's Shape.
      */
     final static class ShapeState extends ConstantState {

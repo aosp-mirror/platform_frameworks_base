@@ -1479,6 +1479,14 @@ public class GradientDrawable extends Drawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     final static class GradientState extends ConstantState {
         public int mChangingConfigurations;
         public int mShape = RECTANGLE;
