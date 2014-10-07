@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -71,6 +72,20 @@ public class HotspotControllerImpl implements HotspotController {
     public boolean isHotspotSupported() {
         final boolean isSecondaryUser = ActivityManager.getCurrentUser() != UserHandle.USER_OWNER;
         return !isSecondaryUser && mConnectivityManager.isTetheringSupported();
+    }
+
+    @Override
+    public boolean isProvisioningNeeded() {
+        // Keep in sync with other usage of config_mobile_hotspot_provision_app.
+        // TetherSettings#isProvisioningNeeded and
+        // ConnectivityManager#enforceTetherChangePermission
+        String[] provisionApp = mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_mobile_hotspot_provision_app);
+        if (SystemProperties.getBoolean("net.tethering.noprovisioning", false)
+                || provisionApp == null) {
+            return false;
+        }
+        return (provisionApp.length == 2);
     }
 
     @Override
