@@ -119,7 +119,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final int MIN_USER_ID = 10;
 
-    private static final int USER_VERSION = 4;
+    private static final int USER_VERSION = 5;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -462,6 +462,17 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * If default guest restrictions haven't been initialized yet, add the basic
+     * restrictions.
+     */
+    private void initDefaultGuestRestrictions() {
+        if (mGuestRestrictions.isEmpty()) {
+            mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
+            writeUserListLocked();
+        }
+    }
+
     @Override
     public Bundle getDefaultGuestRestrictions() {
         checkManageUsersPermission("getDefaultGuestRestrictions");
@@ -693,6 +704,11 @@ public class UserManagerService extends IUserManager.Stub {
             userVersion = 4;
         }
 
+        if (userVersion < 5) {
+            initDefaultGuestRestrictions();
+            userVersion = 5;
+        }
+
         if (userVersion < USER_VERSION) {
             Slog.w(LOG_TAG, "User version " + mUserVersion + " didn't upgrade as expected to "
                     + USER_VERSION);
@@ -715,6 +731,7 @@ public class UserManagerService extends IUserManager.Stub {
         mUserRestrictions.append(UserHandle.USER_OWNER, restrictions);
 
         updateUserIdsLocked();
+        initDefaultGuestRestrictions();
 
         writeUserListLocked();
         writeUserLocked(primary);
