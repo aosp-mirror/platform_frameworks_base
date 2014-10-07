@@ -276,6 +276,15 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mScaleState.mDrawable.clearMutated();
+        mMutated = false;
+    }
+
     final static class ScaleState extends ConstantState {
         Drawable mDrawable;
         int mChangingConfigurations;

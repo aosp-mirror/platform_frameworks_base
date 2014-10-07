@@ -331,6 +331,15 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mState.mDrawable.clearMutated();
+        mMutated = false;
+    }
+
     final static class AnimatedRotateState extends Drawable.ConstantState {
         Drawable mDrawable;
 

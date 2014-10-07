@@ -153,6 +153,14 @@ public class LevelListDrawable extends DrawableContainer {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     private final static class LevelListState extends DrawableContainerState {
         private int[] mLows;
         private int[] mHighs;

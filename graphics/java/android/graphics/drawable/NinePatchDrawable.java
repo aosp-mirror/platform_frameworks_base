@@ -563,6 +563,14 @@ public class NinePatchDrawable extends Drawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     @Override
     protected boolean onStateChange(int[] stateSet) {
         final NinePatchState state = mNinePatchState;

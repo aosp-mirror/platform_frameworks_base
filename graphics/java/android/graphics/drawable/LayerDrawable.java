@@ -940,6 +940,19 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.clearMutated();
+        }
+        mMutated = false;
+    }
+
     /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {

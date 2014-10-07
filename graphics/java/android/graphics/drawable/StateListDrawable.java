@@ -263,6 +263,14 @@ public class StateListDrawable extends DrawableContainer {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {

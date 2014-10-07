@@ -684,6 +684,14 @@ public class BitmapDrawable extends Drawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     @Override
     protected boolean onStateChange(int[] stateSet) {
         final BitmapState state = mBitmapState;
