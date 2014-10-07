@@ -81,6 +81,13 @@ public final class Call {
     public static final int STATE_CONNECTING = 9;
 
     /**
+     * The state of a {@code Call} when the user has initiated a disconnection of the call, but the
+     * call has not yet been disconnected by the underlying {@code ConnectionService}.  The next
+     * state of the call is (potentially) {@link #STATE_DISCONNECTED}.
+     */
+    public static final int STATE_DISCONNECTING = 10;
+
+    /**
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
      * extras. Used to pass the phone accounts to display on the front end to the user in order to
      * select phone accounts to (for example) place a call.
@@ -828,6 +835,8 @@ public final class Call {
                 return STATE_DISCONNECTED;
             case CallState.ABORTED:
                 return STATE_DISCONNECTED;
+            case CallState.DISCONNECTING:
+                return STATE_DISCONNECTING;
             default:
                 Log.wtf(this, "Unrecognized CallState %s", parcelableCallState);
                 return STATE_NEW;
