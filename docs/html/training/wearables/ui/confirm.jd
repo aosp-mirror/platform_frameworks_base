@@ -1,0 +1,166 @@
+page.title=Showing Confirmations
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#confirmation-timers">Use Automatic Confirmation Timers</a></li>
+  <li><a href="#show-confirmation">Show Confirmation Animations</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+</ul>
+</div>
+</div>
+
+
+<p><a href="{@docRoot}design/wear/patterns.html#Countdown">Confirmations</a> in Android Wear apps
+use the whole screen or a larger portion of it than those in handheld apps. This ensures that
+users can see these confirmations by just glancing at the screen and that they have large enough
+touch targets to cancel an action.</p>
+
+<p>The Wearable UI Library helps you show confirmation animations and timers in your
+Android Wear apps:</p>
+
+<dl>
+<dt><em>Confirmation timers</em></dt>
+  <dd>Automatic confirmation timers show users an animated timer that lets them cancel an action
+  they just performed.</dd>
+<dt><em>Confirmation animations</em></dt>
+  <dd>Confirmation animations give users visual feedback when they complete an action.</dd>
+</dl>
+
+<p>The following sections show you how to implement these patterns.</p>
+
+
+<h2 id="confirmation-timers">Use Automatic Confirmation Timers</h2>
+
+<div style="float:right;margin-left:25px;width:230px;margin-top:10px">
+<img src="{@docRoot}wear/images/09_uilib.png" width="230" height="230" alt=""/>
+<p class="img-caption" style="text-align:center"><strong>Figure 1:</strong>
+A confirmation timer.</p>
+</div>
+
+<p>Automatic confirmation timers let users cancel an action they just performed. When the user
+performs the action, your app shows a button to cancel the action with a timer animation and
+starts the timer. The user has the option to cancel the action until the timer finishes. Your app
+gets notified if the user cancels the action and when the timer expires.</p>
+
+<p>To show a confirmation timer when users complete an action in your app:</p>
+
+<ol>
+<li>Add a <code>DelayedConfirmationView</code> element to your layout.</li>
+<li>Implement the <code>DelayedConfirmationListener</code> interface in your activity.</li>
+<li>Set the duration of the timer and start it when the user completes an action.</li>
+</ol>
+
+<p>Add the <code>DelayedConfirmationView</code> element to your layout as follows:</p>
+
+<pre>
+&lt;android.support.wearable.view.DelayedConfirmationView
+    android:id="@+id/delayed_confirm"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:src="@drawable/cancel_circle"
+    app:circle_border_color="@color/lightblue"
+    app:circle_border_width="4dp"
+    app:circle_radius="16dp">
+&lt;/android.support.wearable.view.DelayedConfirmationView>
+</pre>
+
+<p>You can assign a drawable resource to display inside the circle with the
+<code>android:src</code> attribute and configure the parameters of the circle directly on the
+layout definition.</p>
+
+<p>To be notified when the timer finishes or when users tap on it, implement the corresponding
+listener methods in your activity:</p>
+
+<pre>
+public class WearActivity extends Activity implements
+                           DelayedConfirmationView.DelayedConfirmationListener {
+
+    private DelayedConfirmationView mDelayedView;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_wear_activity);
+
+        mDelayedView =
+                (DelayedConfirmationView) findViewById(R.id.delayed_confirm);
+        mDelayedView.setListener(this);
+    }
+
+    &#64;Override
+    public void onTimerFinished(View view) {
+        // User didn't cancel, perform the action
+    }
+
+    &#64;Override
+    public void onTimerSelected(View view) {
+        // User canceled, abort the action
+    }
+}
+</pre>
+
+<p>To start the timer, add the following code to the point in your activity where users select
+an action:</p>
+
+<pre>
+// Two seconds to cancel the action
+mDelayedView.setTotalTimeMs(2000);
+// Start the timer
+mDelayedView.start();
+</pre>
+
+
+<h2 id="show-confirmation">Show Confirmation Animations</h2>
+
+<div style="float:right;margin-left:25px;width:200px">
+<img src="{@docRoot}wear/images/08_uilib.png" width="200" height="200" alt=""/>
+<p class="img-caption" style="text-align:center"><strong>Figure 2:</strong>
+A confirmation animation.</p>
+</div>
+
+<p>To show a confirmation animation when users complete an action in your app, create an intent
+that starts <code>ConfirmationActivity</code> from one of your activities. You can specify
+one of the these animations with the <code>EXTRA_ANIMATION_TYPE</code> intent extra:</p>
+
+<ul>
+<li><code>SUCCESS_ANIMATION</code></li>
+<li><code>FAILURE_ANIMATION</code></li>
+<li><code>OPEN_ON_PHONE_ANIMATION</code></li>
+</ul>
+
+<p>You can also add a message that appears under the confirmation icon.</p>
+
+<p>To use the <code>ConfirmationActivity</code> in your app, first declare this activity in your
+manifest file:</p>
+
+<pre>
+&lt;manifest>
+  &lt;application>
+    ...
+    &lt;activity
+        android:name="android.support.wearable.activity.ConfirmationActivity">
+    &lt;/activity>
+  &lt;/application>
+&lt;/manifest>
+</pre>
+
+<p>Then determine the result of the user action and start the activity with an intent:</p>
+
+<pre>
+Intent intent = new Intent(this, ConfirmationActivity.class);
+intent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE,
+                ConfirmationActivity.SUCCESS_ANIMATION);
+intent.putExtra(ConfirmationActivity.EXTRA_MESSAGE,
+                getString(R.string.msg_sent));
+startActivity(intent);
+</pre>
+
+<p>After showing the confirmation animation, <code>ConfirmationActivity</code> finishes and your
+activity resumes.</p>
