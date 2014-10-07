@@ -51,6 +51,13 @@ public class TelecomManager {
     public static final String ACTION_INCOMING_CALL = "android.telecom.action.INCOMING_CALL";
 
     /**
+     * Similar to {@link #ACTION_INCOMING_CALL}, but is used only by Telephony to add a new
+     * sim-initiated MO call for carrier testing.
+     * @hide
+     */
+    public static final String ACTION_NEW_UNKNOWN_CALL = "android.telecom.action.NEW_UNKNOWN_CALL";
+
+    /**
      * The {@link android.content.Intent} action used to configure a
      * {@link android.telecom.ConnectionService}.
      * @hide
@@ -123,6 +130,12 @@ public class TelecomManager {
      */
     public static final String EXTRA_OUTGOING_CALL_EXTRAS =
             "android.telecom.extra.OUTGOING_CALL_EXTRAS";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_UNKNOWN_CALL_HANDLE =
+            "android.telecom.extra.UNKNOWN_CALL_HANDLE";
 
     /**
      * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
@@ -811,6 +824,29 @@ public class TelecomManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException adding a new incoming call: " + phoneAccount, e);
+        }
+    }
+
+    /**
+     * Registers a new unknown call with Telecom. This can only be called by the system Telephony
+     * service. This is invoked when Telephony detects a new unknown connection that was neither
+     * a new incoming call, nor an user-initiated outgoing call.
+     *
+     * @param phoneAccount A {@link PhoneAccountHandle} registered with
+     *            {@link #registerPhoneAccount}.
+     * @param extras A bundle that will be passed through to
+     *            {@link ConnectionService#onCreateIncomingConnection}.
+     * @hide
+     */
+    @SystemApi
+    public void addNewUnknownCall(PhoneAccountHandle phoneAccount, Bundle extras) {
+        try {
+            if (isServiceConnected()) {
+                getTelecomService().addNewUnknownCall(
+                        phoneAccount, extras == null ? new Bundle() : extras);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException adding a new unknown call: " + phoneAccount, e);
         }
     }
 
