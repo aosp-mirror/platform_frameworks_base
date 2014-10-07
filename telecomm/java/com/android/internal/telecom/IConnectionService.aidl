@@ -39,7 +39,8 @@ oneway interface IConnectionService {
             in PhoneAccountHandle connectionManagerPhoneAccount,
             String callId,
             in ConnectionRequest request,
-            boolean isIncoming);
+            boolean isIncoming,
+            boolean isUnknown);
 
     void abort(String callId);
 
