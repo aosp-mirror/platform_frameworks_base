@@ -13,11 +13,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:top="@dimen/notification_material_rounded_rect_radius_negative" >
     <solid android:color="@color/system_primary_color" />
-    <corners
-        android:topLeftRadius="0dp"
-        android:topRightRadius="0dp"
-        android:bottomLeftRadius="@dimen/notification_material_rounded_rect_radius"
-        android:bottomRightRadius="@dimen/notification_material_rounded_rect_radius"/>
+    <corners android:radius="@dimen/notification_material_rounded_rect_radius"/>
 </shape>
