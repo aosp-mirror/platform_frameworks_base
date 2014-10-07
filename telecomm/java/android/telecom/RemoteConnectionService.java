@@ -348,7 +348,8 @@ final class RemoteConnectionService {
                     connectionManagerPhoneAccount,
                     id,
                     newRequest,
-                    isIncoming);
+                    isIncoming,
+                    false /* isUnknownCall */);
             connection.registerCallback(new RemoteConnection.Callback() {
                 @Override
                 public void onDestroyed(RemoteConnection connection) {

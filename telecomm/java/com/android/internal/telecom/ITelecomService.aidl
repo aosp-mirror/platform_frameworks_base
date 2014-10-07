@@ -177,4 +177,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#addNewIncomingCall
      */
     void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
+     * @see TelecomServiceImpl#addNewUnknownCall
+     */
+    void addNewUnknownCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
 }
