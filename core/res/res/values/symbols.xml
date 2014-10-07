@@ -1334,6 +1334,7 @@
   <java-symbol type="xml" name="audio_assets" />
   <java-symbol type="xml" name="global_keys" />
   <java-symbol type="xml" name="default_zen_mode_config" />
+  <java-symbol type="xml" name="sms_7bit_translation_table" />
 
   <java-symbol type="raw" name="color_fade_vert" />
   <java-symbol type="raw" name="color_fade_frag" />
@@ -2071,6 +2072,7 @@
   <java-symbol type="array" name="networks_not_clear_data" />
   <java-symbol type="bool" name="config_switch_phone_on_voice_reg_state_change" />
   <java-symbol type="string" name="whichHomeApplicationNamed" />
+  <java-symbol type="bool" name="config_sms_force_7bit_encoding" />
 
   <!-- From MSIM Account -->
   <java-symbol type="layout" name="simple_account_item" />
