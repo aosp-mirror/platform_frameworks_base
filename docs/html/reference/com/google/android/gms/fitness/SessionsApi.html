@@ -92,7 +92,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>IGooglePlayServicesRocks.Stub | Android Developers</title>
+<title>SessionsApi | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -421,7 +421,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
 
-        <li class="current">IGooglePlayServicesRocks.Stub</li>
+        <li class="current">SessionsApi</li>
       </ul>
     </div>
   </div>
@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -704,69 +709,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="sum-details-links">
-
-Summary:
-
-
-
-
-
-
-  <a href="#inhconstants">Inherited Constants</a>
-
-
-
-
-
-  &#124; <a href="#pubctors">Ctors</a>
-
-
-
-
-  &#124; <a href="#pubmethods">Methods</a>
-
-
-
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
-
-&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -782,29 +725,14 @@ Summary:
 
 <div id="jd-header">
     public
-    static
-
-    abstract
-    class
-<h1 itemprop="name">IGooglePlayServicesRocks.Stub</h1>
 
 
 
+    interface
+<h1 itemprop="name">SessionsApi</h1>
 
 
 
-
-
-    extends Binder<br/>
-
-
-
-
-
-
-      implements
-
-        <a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.html">IGooglePlayServicesRocks</a>
 
 
 
@@ -820,25 +748,7 @@ Summary:
 
     <tr>
 
-        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Object</td>
-    </tr>
-
-
-    <tr>
-
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
-        <td colspan="2" class="jd-inheritance-class-cell">android.os.Binder</td>
-    </tr>
-
-
-    <tr>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.annotation.IGooglePlayServicesRocks.Stub</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.SessionsApi</td>
     </tr>
 
 
@@ -854,7 +764,53 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Local-side IPC implementation stub class. </p>
+<p itemprop="articleBody">The Google Fit Sessions API provides methods for managing <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Sessions</a></code>.
+ Sessions are a way of storing user-visible groups of related stream data in a useful and
+ shareable manner, and allow for easy querying of the data in a detailed or aggregated fashion.
+ <p>
+ The <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#startSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Session)">startSession(GoogleApiClient, com.google.android.gms.fitness.data.Session)</a></code> and
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">stopSession(GoogleApiClient, String, String)</a></code> methods mark the time range of the session.
+ Data inserted using the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></code> during the period where the session is in progress
+ will be associated with that Session once it is stopped.
+ <p>
+ Another way of adding sessions is with
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#insertSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)">insertSession(GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)</a></code>.  This is designed for bulk
+ insertion when importing a user's historic data into Google Fit; for live sessions use the
+ previous API.  All data in Google Fit that falls within the time range of an inserted session
+ will be implicitly associated with that session.
+ <p>
+ Once a session has been saved, it can be retrieved using
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#readSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)">readSession(GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)</a></code>.
+ <p>
+ Clients can register to be notified of sessions, and remove existing registrations, using
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#registerForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">registerForSessions(GoogleApiClient, PendingIntent)</a></code> and
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#unregisterForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">unregisterForSessions(GoogleApiClient, PendingIntent)</a></code>.  Notifications will be sent for
+ sessions when they are started and stopped.
+ <p>
+ Deleting sessions is handled like any other data deletion, via
+ <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html#deleteData(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataDeleteRequest)">deleteData(GoogleApiClient, com.google.android.gms.fitness.request.DataDeleteRequest)</a></code>.
+ <p>
+ The Sessions API should be accessed via the <code><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></code> entry point.  Example:
+ <pre>
+     GoogleApiClient client = new GoogleApiClient.Builder(context)
+         .addApi(Fitness.API)
+         ...
+         .build();
+     client.connect();
+
+     Session session = new Session.Builder()
+         .setName(sessionName)
+         .setIdentifier(identifier)
+         .setDescription(description)
+         .setStartTimeMillis(startTime.getMillis())
+         .build();
+
+     PendingResult&lt;Status&gt; pendingResult = Fitness.SessionsApi.startSession(
+         client, session);
+
+     Status status = pendingResult.await();
+ </pre>
+</p>
 
 
 
@@ -897,134 +853,11 @@ Summary:
 
 
 
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="inhconstants" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Constants</div></th></tr>
 
 
 
 
 
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.os.IBinder" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-android.os.IBinder-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-android.os.IBinder
-<div id="inherited-constants-android.os.IBinder">
-  <div id="inherited-constants-android.os.IBinder-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-android.os.IBinder-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">DUMP_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">FIRST_CALL_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">FLAG_ONEWAY</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">INTERFACE_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">LAST_CALL_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">LIKE_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">PING_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">TWEET_TRANSACTION</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-
-
-
-</table>
-
-
-
-
-
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.Stub.html#IGooglePlayServicesRocks.Stub()">IGooglePlayServicesRocks.Stub</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Construct the stub at attach it to the interface.</div>
-
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -1039,15 +872,18 @@ android.os.IBinder
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
 
 
 
 
-
-            IBinder</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.Stub.html#asBinder()">asBinder</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#insertSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)">insertSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.html">SessionInsertRequest</a> request)</nobr>
+
+        <div class="jd-descrdiv">Inserts specified <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and corresponding data into the user's Google Fit store
+ on behalf of the current application.</div>
 
   </td></tr>
 
@@ -1055,18 +891,18 @@ android.os.IBinder
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
 
 
 
-            static
 
-            <a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.html">IGooglePlayServicesRocks</a></nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionReadResult.html">SessionReadResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.Stub.html#asInterface(android.os.IBinder)">asInterface</a></span>(IBinder obj)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#readSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)">readSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.html">SessionReadRequest</a> request)</nobr>
 
-        <div class="jd-descrdiv">Cast an IBinder object into an com.google.android.gms.common.annotation.IGooglePlayServicesRocks interface,
- generating a proxy if needed.</div>
+        <div class="jd-descrdiv">Reads data from the user's Google Fit store of the specific type(s) and for the specific
+ session(s) selected from the request parameters.</div>
 
   </td></tr>
 
@@ -1074,15 +910,71 @@ android.os.IBinder
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
 
 
 
 
-
-            boolean</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.Stub.html#onTransact(int, android.os.Parcel, android.os.Parcel, int)">onTransact</a></span>(int code, Parcel data, Parcel reply, int flags)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#registerForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">registerForSessions</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent intent)</nobr>
+
+        <div class="jd-descrdiv">Registers for notifications of session start and end events using a PendingIntent.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#startSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Session)">startSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a> session)</nobr>
+
+        <div class="jd-descrdiv">Starts a new active session for the current application.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html">SessionStopResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">stopSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String name, String identifier)</nobr>
+
+        <div class="jd-descrdiv">Stops active sessions for the current application.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#unregisterForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">unregisterForSessions</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent intent)</nobr>
+
+        <div class="jd-descrdiv">Unregisters for notifications of session start & end events using a PendingIntent.</div>
 
   </td></tr>
 
@@ -1094,776 +986,6 @@ android.os.IBinder
 
 
 
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.os.Binder" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.os.Binder-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  android.os.Binder
-
-<div id="inherited-methods-android.os.Binder">
-  <div id="inherited-methods-android.os.Binder-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.os.Binder-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">attachInterface</span>(IInterface arg0, String arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            long</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clearCallingIdentity</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dump</span>(FileDescriptor arg0, String[] arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dump</span>(FileDescriptor arg0, PrintWriter arg1, String[] arg2)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dumpAsync</span>(FileDescriptor arg0, String[] arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">finalize</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">flushPendingCommands</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getCallingPid</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getCallingUid</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            UserHandle</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getCallingUserHandle</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getInterfaceDescriptor</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">isBinderAlive</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">joinThreadPool</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">linkToDeath</span>(IBinder.DeathRecipient arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onTransact</span>(int arg0, Parcel arg1, Parcel arg2, int arg3)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">pingBinder</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            IInterface</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">queryLocalInterface</span>(String arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-            static
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">restoreCallingIdentity</span>(long arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">transact</span>(int arg0, Parcel arg1, Parcel arg2, int arg3)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unlinkToDeath</span>(IBinder.DeathRecipient arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-java.lang.Object-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  java.lang.Object
-
-<div id="inherited-methods-java.lang.Object">
-  <div id="inherited-methods-java.lang.Object-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            Object</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clone</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">finalize</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            Class&lt;?&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getClass</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">hashCode</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notify</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyAll</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">toString</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-            final
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0)</nobr>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.os.IBinder" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.os.IBinder-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.os.IBinder
-
-<div id="inherited-methods-android.os.IBinder">
-  <div id="inherited-methods-android.os.IBinder-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.os.IBinder-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dump</span>(FileDescriptor arg0, String[] arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dumpAsync</span>(FileDescriptor arg0, String[] arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getInterfaceDescriptor</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">isBinderAlive</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">linkToDeath</span>(IBinder.DeathRecipient arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">pingBinder</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            IInterface</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">queryLocalInterface</span>(String arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">transact</span>(int arg0, Parcel arg1, Parcel arg2, int arg3)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unlinkToDeath</span>(IBinder.DeathRecipient arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.os.IInterface" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.os.IInterface-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.os.IInterface
-
-<div id="inherited-methods-android.os.IInterface">
-  <div id="inherited-methods-android.os.IInterface-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.os.IInterface-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            IBinder</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">asBinder</span>()</nobr>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-
-</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -1892,42 +1014,6 @@ From interface
 <!-- Public ctors -->
 
 
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<A NAME="IGooglePlayServicesRocks.Stub()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-
-      </span>
-      <span class="sympad">IGooglePlayServicesRocks.Stub</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Construct the stub at attach it to the interface. </p></div>
-
-    </div>
-</div>
-
-
-
-
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -1941,7 +1027,7 @@ From interface
 
 
 
-<A NAME="asBinder()"></A>
+<A NAME="insertSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1949,12 +1035,12 @@ From interface
         public
 
 
+        abstract
 
-
-        IBinder
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
-      <span class="sympad">asBinder</span>
-      <span class="normal">()</span>
+      <span class="sympad">insertSession</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.html">SessionInsertRequest</a> request)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1964,26 +1050,44 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Inserts specified <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and corresponding data into the user's Google Fit store
+ on behalf of the current application.  Useful for bulk upload of a previously recorded
+ Session.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
+      this call, but the insertion will be delayed until the connection is complete.</td>
+        </tr>
+        <tr>
+          <th>request</td>
+          <td>the <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and its associated data that we are adding, which includes
+      details of the session and data set for data source(s).
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
 
 
-<A NAME="asInterface(android.os.IBinder)"></A>
+<A NAME="readSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
         public
-        static
 
 
+        abstract
 
-        <a href="/reference/com/google/android/gms/common/annotation/IGooglePlayServicesRocks.html">IGooglePlayServicesRocks</a>
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionReadResult.html">SessionReadResult</a>&gt;
       </span>
-      <span class="sympad">asInterface</span>
-      <span class="normal">(IBinder obj)</span>
+      <span class="sympad">readSession</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.html">SessionReadRequest</a> request)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1993,15 +1097,35 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Cast an IBinder object into an com.google.android.gms.common.annotation.IGooglePlayServicesRocks interface,
- generating a proxy if needed.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Reads data from the user's Google Fit store of the specific type(s) and for the specific
+ session(s) selected from the request parameters.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
+      this call, but the insertion will be delayed until the connection is complete.</td>
+        </tr>
+        <tr>
+          <th>request</td>
+          <td>a built request specifying the specific session or time interval and/or
+      data type we are interested in reading.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a pending result containing the requested session and data.  Includes a data set for
+      each session and data type that was returned.
+</li></ul>
+  </div>
 
     </div>
 </div>
 
 
-<A NAME="onTransact(int, android.os.Parcel, android.os.Parcel, int)"></A>
+<A NAME="registerForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -2009,12 +1133,12 @@ From interface
         public
 
 
+        abstract
 
-
-        boolean
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
-      <span class="sympad">onTransact</span>
-      <span class="normal">(int code, Parcel data, Parcel reply, int flags)</span>
+      <span class="sympad">registerForSessions</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2024,15 +1148,205 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Registers for notifications of session start and end events using a PendingIntent.
+ <p>
+ The application specifies a PendingIntent callback (typically an IntentService) which will be
+ called when sessions are started or stopped.  When the PendingIntent is called, the
+ application can use <code><a href="/reference/com/google/android/gms/fitness/data/Session.html#extract(android.content.Intent)">extract(android.content.Intent)</a></code> to extract the Session
+ from the intent.  In addition, the following Intent extras can be used:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_START_TIME">EXTRA_START_TIME</a></code> set to the Session's start time.
+     <li><code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_END_TIME">EXTRA_END_TIME</a></code> optionally set to the Session's end time if
+         the session has ended.
+ </ul>
+ <p>
+ Finally, the Intent's type will be set to
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#MIME_TYPE_ACTIVITY_PREFIX">MIME_TYPE_ACTIVITY_PREFIX</a></code> followed by the name of the activity
+ associated with this session, and can be computed by
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#getActivityMimeType(int)">getActivityMimeType(int)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
+        </tr>
+        <tr>
+          <th>intent</td>
+          <td>a callback intent to be sent every time a session is started or stopped.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="startSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Session)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">startSession</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a> session)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Starts a new active session for the current application.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
+        </tr>
+        <tr>
+          <th>session</td>
+          <td>the session to be started</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a pending result containing the status of request</li></ul>
+  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">
         <tr>
-            <th>RemoteException</td>
-            <td></td>
+            <th>IllegalStateException</td>
+            <td>if client is not connected
+</td>
         </tr>
       </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html">SessionStopResult</a>&gt;
+      </span>
+      <span class="sympad">stopSession</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String name, String identifier)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Stops active sessions for the current application.  The active sessions to be stopped are
+ chosen as per the specifications in the input request.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
+        </tr>
+        <tr>
+          <th>name</td>
+          <td>the name of the session to stop.</td>
+        </tr>
+        <tr>
+          <th>identifier</td>
+          <td>the identifier of the session to stop.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a pending result containing the list of sessions that were stopped</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if client is not connected
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="unregisterForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">unregisterForSessions</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent intent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Unregisters for notifications of session start & end events using a PendingIntent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if client is not connected
+</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/">ERROR(#registerForSessions(GoogleApiClient, PendingIntent)}/{@link #registerForSessions(GoogleApiClient, PendingIntent)})</a></code></li>
+      </ul>
   </div>
 
     </div>
