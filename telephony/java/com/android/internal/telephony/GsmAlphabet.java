@@ -754,6 +754,18 @@ public class GsmAlphabet {
         }
     }
 
+    public static boolean isGsmSeptets(char c) {
+        if (sCharsToGsmTables[0].get(c, -1) != -1) {
+            return true;
+        }
+
+        if (sCharsToShiftTables[0].get(c, -1) != -1) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Returns the count of 7-bit GSM alphabet characters needed
      * to represent this string, using the specified 7-bit language table
