@@ -4667,8 +4667,14 @@ package android.app {
     ctor public Notification.Action.WearableExtender(android.app.Notification.Action);
     method public android.app.Notification.Action.WearableExtender clone();
     method public android.app.Notification.Action.Builder extend(android.app.Notification.Action.Builder);
+    method public java.lang.CharSequence getCancelLabel();
+    method public java.lang.CharSequence getConfirmLabel();
+    method public java.lang.CharSequence getInProgressLabel();
     method public boolean isAvailableOffline();
     method public android.app.Notification.Action.WearableExtender setAvailableOffline(boolean);
+    method public android.app.Notification.Action.WearableExtender setCancelLabel(java.lang.CharSequence);
+    method public android.app.Notification.Action.WearableExtender setConfirmLabel(java.lang.CharSequence);
+    method public android.app.Notification.Action.WearableExtender setInProgressLabel(java.lang.CharSequence);
   }
 
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {

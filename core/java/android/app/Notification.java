@@ -1112,7 +1112,11 @@ public class Notification implements Parcelable
             /** Notification action extra which contains wearable extensions */
             private static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
 
+            // Keys within EXTRA_WEARABLE_EXTENSIONS for wearable options.
             private static final String KEY_FLAGS = "flags";
+            private static final String KEY_IN_PROGRESS_LABEL = "inProgressLabel";
+            private static final String KEY_CONFIRM_LABEL = "confirmLabel";
+            private static final String KEY_CANCEL_LABEL = "cancelLabel";
 
             // Flags bitwise-ored to mFlags
             private static final int FLAG_AVAILABLE_OFFLINE = 0x1;
@@ -1121,6 +1125,10 @@ public class Notification implements Parcelable
             private static final int DEFAULT_FLAGS = FLAG_AVAILABLE_OFFLINE;
 
             private int mFlags = DEFAULT_FLAGS;
+
+            private CharSequence mInProgressLabel;
+            private CharSequence mConfirmLabel;
+            private CharSequence mCancelLabel;
 
             /**
              * Create a {@link android.app.Notification.Action.WearableExtender} with default
@@ -1138,6 +1146,9 @@ public class Notification implements Parcelable
                 Bundle wearableBundle = action.getExtras().getBundle(EXTRA_WEARABLE_EXTENSIONS);
                 if (wearableBundle != null) {
                     mFlags = wearableBundle.getInt(KEY_FLAGS, DEFAULT_FLAGS);
+                    mInProgressLabel = wearableBundle.getCharSequence(KEY_IN_PROGRESS_LABEL);
+                    mConfirmLabel = wearableBundle.getCharSequence(KEY_CONFIRM_LABEL);
+                    mCancelLabel = wearableBundle.getCharSequence(KEY_CANCEL_LABEL);
                 }
             }
 
@@ -1153,6 +1164,15 @@ public class Notification implements Parcelable
                 if (mFlags != DEFAULT_FLAGS) {
                     wearableBundle.putInt(KEY_FLAGS, mFlags);
                 }
+                if (mInProgressLabel != null) {
+                    wearableBundle.putCharSequence(KEY_IN_PROGRESS_LABEL, mInProgressLabel);
+                }
+                if (mConfirmLabel != null) {
+                    wearableBundle.putCharSequence(KEY_CONFIRM_LABEL, mConfirmLabel);
+                }
+                if (mCancelLabel != null) {
+                    wearableBundle.putCharSequence(KEY_CANCEL_LABEL, mCancelLabel);
+                }
 
                 builder.getExtras().putBundle(EXTRA_WEARABLE_EXTENSIONS, wearableBundle);
                 return builder;
@@ -1162,6 +1182,9 @@ public class Notification implements Parcelable
             public WearableExtender clone() {
                 WearableExtender that = new WearableExtender();
                 that.mFlags = this.mFlags;
+                that.mInProgressLabel = this.mInProgressLabel;
+                that.mConfirmLabel = this.mConfirmLabel;
+                that.mCancelLabel = this.mCancelLabel;
                 return that;
             }
 
@@ -1192,6 +1215,72 @@ public class Notification implements Parcelable
                 } else {
                     mFlags &= ~mask;
                 }
+            }
+
+            /**
+             * Set a label to display while the wearable is preparing to automatically execute the
+             * action. This is usually a 'ing' verb ending in ellipsis like "Sending..."
+             *
+             * @param label the label to display while the action is being prepared to execute
+             * @return this object for method chaining
+             */
+            public WearableExtender setInProgressLabel(CharSequence label) {
+                mInProgressLabel = label;
+                return this;
+            }
+
+            /**
+             * Get the label to display while the wearable is preparing to automatically execute
+             * the action. This is usually a 'ing' verb ending in ellipsis like "Sending..."
+             *
+             * @return the label to display while the action is being prepared to execute
+             */
+            public CharSequence getInProgressLabel() {
+                return mInProgressLabel;
+            }
+
+            /**
+             * Set a label to display to confirm that the action should be executed.
+             * This is usually an imperative verb like "Send".
+             *
+             * @param label the label to confirm the action should be executed
+             * @return this object for method chaining
+             */
+            public WearableExtender setConfirmLabel(CharSequence label) {
+                mConfirmLabel = label;
+                return this;
+            }
+
+            /**
+             * Get the label to display to confirm that the action should be executed.
+             * This is usually an imperative verb like "Send".
+             *
+             * @return the label to confirm the action should be executed
+             */
+            public CharSequence getConfirmLabel() {
+                return mConfirmLabel;
+            }
+
+            /**
+             * Set a label to display to cancel the action.
+             * This is usually an imperative verb, like "Cancel".
+             *
+             * @param label the label to display to cancel the action
+             * @return this object for method chaining
+             */
+            public WearableExtender setCancelLabel(CharSequence label) {
+                mCancelLabel = label;
+                return this;
+            }
+
+            /**
+             * Get the label to display to cancel the action.
+             * This is usually an imperative verb like "Cancel".
+             *
+             * @return the label to display to cancel the action
+             */
+            public CharSequence getCancelLabel() {
+                return mCancelLabel;
             }
         }
     }
@@ -4334,7 +4423,7 @@ public class Notification implements Parcelable
         /** Notification extra which contains wearable extensions */
         private static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
 
-        // Keys within EXTRA_WEARABLE_OPTIONS for wearable options.
+        // Keys within EXTRA_WEARABLE_EXTENSIONS for wearable options.
         private static final String KEY_ACTIONS = "actions";
         private static final String KEY_FLAGS = "flags";
         private static final String KEY_DISPLAY_INTENT = "displayIntent";
