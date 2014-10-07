@@ -498,11 +498,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -563,9 +563,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -617,6 +614,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="/google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -624,7 +627,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
@@ -1073,8 +1078,6 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotEntity.html#getContents()">getContents</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> associated with this snapshot.</div>
-
   </td></tr>
 
 
@@ -1104,6 +1107,24 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
+            <a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotEntity.html#getSnapshotContents()">getSnapshotContents</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> associated with this snapshot.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1113,7 +1134,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1131,7 +1152,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1149,7 +1170,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1167,7 +1188,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1183,7 +1204,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1201,7 +1222,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1587,7 +1608,10 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#getContents()">getContents</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> associated with this snapshot.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    use <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#getSnapshotContents()">getSnapshotContents()</a></code> instead.
+</em></div>
 
   </td></tr>
 
@@ -1618,12 +1642,12 @@ From interface
 
 
 
-            boolean</nobr>
+            <a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#modifyBytes(int, byte[], int, int)">modifyBytes</a></span>(int dstOffset, byte[] content, int srcOffset, int count)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#getSnapshotContents()">getSnapshotContents</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Write the specified data into the snapshot.</div>
+        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> associated with this snapshot.</div>
 
   </td></tr>
 
@@ -1636,12 +1660,15 @@ From interface
 
 
 
-            byte[]</nobr>
+            boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#readFully()">readFully</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#modifyBytes(int, byte[], int, int)">modifyBytes</a></span>(int dstOffset, byte[] content, int srcOffset, int count)</nobr>
 
-        <div class="jd-descrdiv">Read the contents of a snapshot.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html#modifyBytes(int, byte[], int, int)">modifyBytes(int, byte[], int, int)</a></code>.
+</em></div>
 
   </td></tr>
 
@@ -1654,12 +1681,36 @@ From interface
 
 
 
+            byte[]</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#readFully()">readFully</a></span>()</nobr>
+
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html#readFully()">readFully()</a></code>.
+</em></div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#writeBytes(byte[])">writeBytes</a></span>(byte[] content)</nobr>
 
-        <div class="jd-descrdiv">Write the specified data into the snapshot.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html#writeBytes(byte[])">writeBytes(byte[])</a></code>.
+</em></div>
 
   </td></tr>
 
@@ -1875,14 +1926,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> associated with this snapshot. This object can be used to
- update the data of a snapshot. Note that this will return null if this snapshot was not
- obtained via <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#open(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)">open(GoogleApiClient, SnapshotMetadata)</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code> for this snapshot, or null if the snapshot is not opened.
-</li></ul>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1915,6 +1959,43 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></code> associated with this snapshot.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getSnapshotContents()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a>
+      </span>
+      <span class="sympad">getSnapshotContents</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> associated with this snapshot. This object can be used
+ to update the data of a snapshot. Note that this will return null if this snapshot was not
+ obtained via <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#open(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)">open(GoogleApiClient, SnapshotMetadata)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></code> for this snapshot, or null if the snapshot is not
+         opened.
 </li></ul>
   </div>
 
@@ -2044,8 +2125,7 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Whether or not the data was successfully written to disk.
-</li></ul>
+      <ul class="nolist"><li>Whether or not the data was successfully written to disk.</li></ul>
   </div>
 
     </div>
@@ -2081,8 +2161,7 @@ From interface
  been committed via <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#commitAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot, com.google.android.gms.games.snapshot.SnapshotMetadataChange)">commitAndClose(GoogleApiClient, Snapshot, SnapshotMetadataChange)</a></code> this method will throw an exception.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The bytes of the snapshot contents.
-</li></ul>
+      <ul class="nolist"><li>The bytes of the snapshot contents.</li></ul>
   </div>
 
     </div>
@@ -2146,8 +2225,8 @@ From interface
  uploaded to the server until the snapshot is committed via <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#commitAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot, com.google.android.gms.games.snapshot.SnapshotMetadataChange)">commitAndClose(GoogleApiClient, Snapshot, SnapshotMetadataChange)</a></code>.
  <p/>
  Note that this form of the API will fully overwrite the contents of the file. No previous
- data will be retained. Use <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#modifyBytes(int, byte[], int, int)">modifyBytes(int, byte[], int, int)</a></code> to overwrite
- parts of the file.
+ data will be retained. Use <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html#modifyBytes(int, byte[], int, int)">modifyBytes(int, byte[], int, int)</a></code> to overwrite parts of
+ the file.
  <p/>
  If the snapshot was not opened via <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#open(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)">open(GoogleApiClient, SnapshotMetadata)</a></code>, or if the contents have already
  been committed via <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#commitAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot, com.google.android.gms.games.snapshot.SnapshotMetadataChange)">commitAndClose(GoogleApiClient, Snapshot, SnapshotMetadataChange)</a></code>, this method will throw an exception.</p></div>
@@ -2162,8 +2241,7 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Whether or not the data was successfully written to disk.
-</li></ul>
+      <ul class="nolist"><li>Whether or not the data was successfully written to disk.</li></ul>
   </div>
 
     </div>
