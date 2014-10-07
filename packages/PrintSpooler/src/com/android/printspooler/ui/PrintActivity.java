@@ -686,43 +686,63 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         PrintAttributes currAttributes = mPrintJob.getAttributes();
         PrintAttributes newAttributes = printJobInfo.getAttributes();
 
-        // Take the media size only if the current printer supports is.
-        MediaSize oldMediaSize = currAttributes.getMediaSize();
-        MediaSize newMediaSize = newAttributes.getMediaSize();
-        if (!oldMediaSize.equals(newMediaSize)) {
-            final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
-            MediaSize newMediaSizePortrait = newAttributes.getMediaSize().asPortrait();
-            for (int i = 0; i < mediaSizeCount; i++) {
-                MediaSize supportedSizePortrait = mMediaSizeSpinnerAdapter.getItem(i)
-                        .value.asPortrait();
-                if (supportedSizePortrait.equals(newMediaSizePortrait)) {
-                    currAttributes.setMediaSize(newMediaSize);
-                    mMediaSizeSpinner.setSelection(i);
-                    if (currAttributes.getMediaSize().isPortrait()) {
-                        if (mOrientationSpinner.getSelectedItemPosition() != 0) {
-                            mOrientationSpinner.setSelection(0);
+        if (newAttributes != null) {
+            // Take the media size only if the current printer supports is.
+            MediaSize oldMediaSize = currAttributes.getMediaSize();
+            MediaSize newMediaSize = newAttributes.getMediaSize();
+            if (!oldMediaSize.equals(newMediaSize)) {
+                final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
+                MediaSize newMediaSizePortrait = newAttributes.getMediaSize().asPortrait();
+                for (int i = 0; i < mediaSizeCount; i++) {
+                    MediaSize supportedSizePortrait = mMediaSizeSpinnerAdapter.getItem(i)
+                            .value.asPortrait();
+                    if (supportedSizePortrait.equals(newMediaSizePortrait)) {
+                        currAttributes.setMediaSize(newMediaSize);
+                        mMediaSizeSpinner.setSelection(i);
+                        if (currAttributes.getMediaSize().isPortrait()) {
+                            if (mOrientationSpinner.getSelectedItemPosition() != 0) {
+                                mOrientationSpinner.setSelection(0);
+                            }
+                        } else {
+                            if (mOrientationSpinner.getSelectedItemPosition() != 1) {
+                                mOrientationSpinner.setSelection(1);
+                            }
                         }
-                    } else {
-                        if (mOrientationSpinner.getSelectedItemPosition() != 1) {
-                            mOrientationSpinner.setSelection(1);
-                        }
+                        break;
                     }
-                    break;
                 }
             }
-        }
 
-        // Take the color mode only if the current printer supports it.
-        final int currColorMode = currAttributes.getColorMode();
-        final int newColorMode = newAttributes.getColorMode();
-        if (currColorMode != newColorMode) {
-            final int colorModeCount = mColorModeSpinner.getCount();
-            for (int i = 0; i < colorModeCount; i++) {
-                final int supportedColorMode = mColorModeSpinnerAdapter.getItem(i).value;
-                if (supportedColorMode == newColorMode) {
-                    currAttributes.setColorMode(newColorMode);
-                    mColorModeSpinner.setSelection(i);
-                    break;
+            // Take the resolution only if the current printer supports is.
+            Resolution oldResolution = currAttributes.getResolution();
+            Resolution newResolution = newAttributes.getResolution();
+            if (!oldResolution.equals(newResolution)) {
+                PrinterCapabilitiesInfo capabilities = mCurrentPrinter.getCapabilities();
+                if (capabilities != null) {
+                    List<Resolution> resolutions = capabilities.getResolutions();
+                    final int resolutionCount = resolutions.size();
+                    for (int i = 0; i < resolutionCount; i++) {
+                        Resolution resolution = resolutions.get(i);
+                        if (resolution.equals(newResolution)) {
+                            currAttributes.setResolution(resolution);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Take the color mode only if the current printer supports it.
+            final int currColorMode = currAttributes.getColorMode();
+            final int newColorMode = newAttributes.getColorMode();
+            if (currColorMode != newColorMode) {
+                final int colorModeCount = mColorModeSpinner.getCount();
+                for (int i = 0; i < colorModeCount; i++) {
+                    final int supportedColorMode = mColorModeSpinnerAdapter.getItem(i).value;
+                    if (supportedColorMode == newColorMode) {
+                        currAttributes.setColorMode(newColorMode);
+                        mColorModeSpinner.setSelection(i);
+                        break;
+                    }
                 }
             }
         }
