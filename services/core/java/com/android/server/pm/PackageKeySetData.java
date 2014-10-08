@@ -41,6 +41,7 @@ public class PackageKeySetData {
     }
 
     PackageKeySetData(PackageKeySetData original) {
+        mProperSigningKeySet = original.mProperSigningKeySet;
         mSigningKeySets = ArrayUtils.cloneOrNull(original.mSigningKeySets);
         mUpgradeKeySets = ArrayUtils.cloneOrNull(original.mUpgradeKeySets);
         mDefinedKeySets = ArrayUtils.cloneOrNull(original.mDefinedKeySets);
