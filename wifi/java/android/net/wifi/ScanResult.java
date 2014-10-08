@@ -71,6 +71,12 @@ public class ScanResult implements Parcelable {
     public long seen;
 
     /**
+     * If the scan result is a valid autojoin candidate
+     * {@hide}
+     */
+    public int isAutoJoinCandidate;
+
+    /**
      * @hide
      * Update RSSI of the scan result
      * @param previousRSSI
@@ -263,6 +269,7 @@ public class ScanResult implements Parcelable {
             numConnection = source.numConnection;
             numUsage = source.numUsage;
             numIpConfigFailures = source.numIpConfigFailures;
+            isAutoJoinCandidate = source.isAutoJoinCandidate;
         }
     }
 
@@ -328,6 +335,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(numConnection);
         dest.writeInt(numUsage);
         dest.writeInt(numIpConfigFailures);
+        dest.writeInt(isAutoJoinCandidate);
         if (informationElements != null) {
             dest.writeInt(informationElements.length);
             for (int i = 0; i < informationElements.length; i++) {
@@ -364,6 +372,7 @@ public class ScanResult implements Parcelable {
                 sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
                 sr.numIpConfigFailures = in.readInt();
+                sr.isAutoJoinCandidate = in.readInt();
                 int n = in.readInt();
                 if (n != 0) {
                     sr.informationElements = new InformationElement[n];
