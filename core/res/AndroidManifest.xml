@@ -2916,6 +2916,7 @@
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
                 android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+                android:configChanges="orientation|keyboardHidden"
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.DisableCarModeActivity"

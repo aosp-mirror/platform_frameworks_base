@@ -20,10 +20,11 @@
 <resources>
     <dimen name="obstacle_spacing">380dp</dimen>
     <dimen name="translation_per_sec">100dp</dimen>
-    <dimen name="boost_dv">600dp</dimen>
+    <dimen name="boost_dv">550dp</dimen>
     <dimen name="player_hit_size">40dp</dimen>
     <dimen name="player_size">40dp</dimen>
-    <dimen name="obstacle_width">80dp</dimen>
+    <dimen name="obstacle_width">90dp</dimen>
+    <dimen name="obstacle_stem_width">12dp</dimen>
     <dimen name="obstacle_gap">170dp</dimen>
     <dimen name="obstacle_height_min">40dp</dimen>
     <dimen name="building_width_min">20dp</dimen>
@@ -38,8 +39,8 @@
     <dimen name="G">30dp</dimen>
     <dimen name="max_v">1000dp</dimen>
     <dimen name="scenery_z">6dp</dimen>
-    <dimen name="obstacle_z">15dp</dimen>
-    <dimen name="player_z">15dp</dimen>
-    <dimen name="player_z_boost">18dp</dimen>
+    <dimen name="obstacle_z">18dp</dimen>
+    <dimen name="player_z">18dp</dimen>
+    <dimen name="player_z_boost">20dp</dimen>
     <dimen name="hud_z">35dp</dimen>
 </resources>
