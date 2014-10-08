@@ -38,10 +38,8 @@
     <!-- no translation found for status_bar_latest_events_title (6594767438577593172) -->
     <skip />
     <string name="battery_low_title" msgid="6456385927409742437">"Батареянын кубаты аз"</string>
-    <!-- no translation found for battery_low_percent_format (2900940511201380775) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_saver_started (6859235584035338833) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды. Батареянын кубатын үнөмдөгүч күйүк."</string>
     <!-- no translation found for invalid_charger (4549105996740522523) -->
     <skip />
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB аркылуу кубаттоого болбойт."</string>

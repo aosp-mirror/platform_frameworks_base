@@ -181,7 +181,7 @@
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth imezimwa."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth imewashwa."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Programu ya Kuonyesha mahali ulipo imezimwa."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Programu ya Kuonyesha mahali ulipo inawaka."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Programu ya kuonyesha mahali ulipo imewashwa."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Programu ya Kuonyesha mahali ulipo imezimwa."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Programu ya Kuonyesha mahali ulipo imewashwa."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Kengele imewekwa <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -249,7 +249,7 @@
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Hakuna mitandao iliyohifadhiwa inayopatikana"</string>
     <string name="quick_settings_cast_title" msgid="1893629685050355115">"Tuma skrini"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Inatuma"</string>
-    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Kifaa kisichokuwa na jina"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Kifaa hakina jina"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Tayari kutuma"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Hakuna vifaa vilivyopatikana"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ung\'avu"</string>
