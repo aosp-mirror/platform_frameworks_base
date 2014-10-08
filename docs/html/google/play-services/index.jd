@@ -65,7 +65,7 @@ about your users' Android version.</p>
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
     class="toggle-content-img"
-      alt=""/>Google Play services, Version 6.1</a> <em>(September 2014)</em>
+      alt=""/>Google Play services, Version 6.1</a> <em>(October 2014)</em>
   </p>
 
   <div class="toggle-content-toggleme">
