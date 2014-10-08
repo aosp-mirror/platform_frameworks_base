@@ -338,6 +338,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(untrusted ? 1 : 0);
         dest.writeInt(numConnection);
         dest.writeInt(numUsage);
+        dest.writeInt(numIpConfigFailures);
         if (passpoint != null) {
             dest.writeInt(1);
             passpoint.writeToParcel(dest, flags);
@@ -379,6 +380,7 @@ public class ScanResult implements Parcelable {
                 sr.untrusted = in.readInt() != 0;
                 sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
+                sr.numIpConfigFailures = in.readInt();
                 if (in.readInt() == 1) {
                     sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
                 }
