@@ -625,12 +625,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private PlaybackState getStateWithUpdatedPosition() {
         PlaybackState state;
+        long duration = -1;
         synchronized (mLock) {
             state = mPlaybackState;
-        }
-        long duration = -1;
-        if (mMetadata != null && mMetadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
-            duration = mMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+            if (mMetadata != null && mMetadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
+                duration = mMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+            }
         }
         PlaybackState result = null;
         if (state != null) {
@@ -725,10 +725,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setMetadata(MediaMetadata metadata) {
-            // Make a copy of the metadata as the underlying bundle may be
-            // modified on this thread.
             synchronized (mLock) {
-                mMetadata = metadata == null ? null : new MediaMetadata.Builder(metadata).build();
+                MediaMetadata temp = metadata == null ? null : new MediaMetadata.Builder(metadata)
+                        .build();
+                // This is to guarantee that the underlying bundle is unparceled
+                // before we set it to prevent concurrent reads from throwing an
+                // exception
+                temp.size();
+                mMetadata = temp;
             }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
         }
