@@ -841,7 +841,7 @@ public:
 
     static int breakText(JNIEnv* env, const Paint& paint, TypefaceImpl* typeface, const jchar text[],
                          int count, float maxWidth, jint bidiFlags, jfloatArray jmeasured,
-                         Paint::TextBufferDirection textBufferDirection) {
+                         const bool forwardScan) {
         size_t measuredCount = 0;
         float measured = 0;
 
@@ -849,7 +849,7 @@ public:
         MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, 0, count, count);
         float* advances = new float[count];
         layout.getAdvances(advances);
-        const bool forwardScan = (textBufferDirection == Paint::kForward_TextBufferDirection);
+
         for (int i = 0; i < count; i++) {
             // traverse in the given direction
             int index = forwardScan ? i : (count - i - 1);
@@ -880,13 +880,13 @@ public:
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
-        Paint::TextBufferDirection tbd;
+        bool forwardTextDirection;
         if (count < 0) {
-            tbd = Paint::kBackward_TextBufferDirection;
+            forwardTextDirection = false;
             count = -count;
         }
         else {
-            tbd = Paint::kForward_TextBufferDirection;
+            forwardTextDirection = true;
         }
 
         if ((index < 0) || (index + count > env->GetArrayLength(jtext))) {
@@ -896,7 +896,7 @@ public:
 
         const jchar* text = env->GetCharArrayElements(jtext, NULL);
         count = breakText(env, *paint, typeface, text + index, count, maxWidth,
-                          bidiFlags, jmeasuredWidth, tbd);
+                          bidiFlags, jmeasuredWidth, forwardTextDirection);
         env->ReleaseCharArrayElements(jtext, const_cast<jchar*>(text),
                                       JNI_ABORT);
         return count;
@@ -909,13 +909,9 @@ public:
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
-        Paint::TextBufferDirection tbd = forwards ?
-                                        Paint::kForward_TextBufferDirection :
-                                        Paint::kBackward_TextBufferDirection;
-
         int count = env->GetStringLength(jtext);
         const jchar* text = env->GetStringChars(jtext, NULL);
-        count = breakText(env, *paint, typeface, text, count, maxWidth, bidiFlags, jmeasuredWidth, tbd);
+        count = breakText(env, *paint, typeface, text, count, maxWidth, bidiFlags, jmeasuredWidth, forwards);
         env->ReleaseStringChars(jtext, text);
         return count;
     }
