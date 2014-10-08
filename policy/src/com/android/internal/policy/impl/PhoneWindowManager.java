@@ -4421,7 +4421,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mPowerKeyTriggered = false;
                     cancelPendingScreenshotChordAction();
                     if (interceptPowerKeyUp(canceled || mPendingPowerKeyUpCanceled)) {
-                        powerShortPress(event.getEventTime());
+                        if (mScreenOnEarly && !mScreenOnFully) {
+                            Slog.i(TAG, "Suppressed redundant power key press while "
+                                    + "already in the process of turning the screen on.");
+                        } else {
+                            powerShortPress(event.getEventTime());
+                        }
                         isWakeKey = false;
                     }
                     mPendingPowerKeyUpCanceled = false;
