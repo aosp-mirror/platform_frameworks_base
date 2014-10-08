@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -24,6 +25,7 @@ import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
@@ -268,6 +270,8 @@ public class StatusBarKeyguardViewManager {
                     public void run() {
                         mStatusBarWindowManager.setKeyguardFadingAway(false);
                         mPhoneStatusBar.finishKeyguardFadingAway();
+                        WindowManagerGlobal.getInstance().trimMemory(
+                                ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
                     }
                 });
             } else {
