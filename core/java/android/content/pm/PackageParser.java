@@ -415,6 +415,7 @@ public class PackageParser {
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
+        pi.coreApp = p.coreApp;
         if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0
                 || (pi.applicationInfo.flags&ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
             pi.requiredForAllUsers = p.mRequiredForAllUsers;
@@ -1383,6 +1384,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifest_installLocation,
                 PARSE_DEFAULT_INSTALL_LOCATION);
         pkg.applicationInfo.installLocation = pkg.installLocation;
+
+        pkg.coreApp = attrs.getAttributeBooleanValue(null, "coreApp", false);
 
         sa.recycle();
 
@@ -4266,6 +4269,8 @@ public class PackageParser {
         public ArrayList<FeatureGroupInfo> featureGroups = null;
 
         public int installLocation;
+
+        public boolean coreApp;
 
         /* An app that's required for all users and cannot be uninstalled for a user */
         public boolean mRequiredForAllUsers;
