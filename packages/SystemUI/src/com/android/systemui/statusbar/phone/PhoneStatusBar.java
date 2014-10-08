@@ -40,6 +40,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -95,6 +96,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -2413,6 +2415,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncer();
         disable(mDisabledUnmodified, true /* animate */);
+
+        // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
+        // the bouncer appear animation.
+        if (!mStatusBarKeyguardViewManager.isShowing()) {
+            WindowManagerGlobal.getInstance().trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+        }
     }
 
     public boolean interceptTouchEvent(MotionEvent event) {
