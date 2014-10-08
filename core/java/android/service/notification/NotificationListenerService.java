@@ -268,9 +268,9 @@ public abstract class NotificationListenerService extends Service {
      *     {@link android.app.NotificationManager#notify(String, int, android.app.Notification)}.
      * <p>
      * @deprecated Use {@link #cancelNotification(String key)}
-     * instead. Beginning with {@link android.os.Build.VERSION_CODES#L} this method will no longer
+     * instead. Beginning with {@link android.os.Build.VERSION_CODES#LOLLIPOP} this method will no longer
      * cancel the notification. It will continue to cancel the notification for applications
-     * whose {@code targetSdkVersion} is earlier than {@link android.os.Build.VERSION_CODES#L}.
+     * whose {@code targetSdkVersion} is earlier than {@link android.os.Build.VERSION_CODES#LOLLIPOP}.
      */
     public final void cancelNotification(String pkg, String tag, int id) {
         if (!isBound()) return;

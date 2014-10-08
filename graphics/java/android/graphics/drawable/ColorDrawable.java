@@ -157,7 +157,7 @@ public class ColorDrawable extends Drawable {
     /**
      * Sets the color filter applied to this color.
      * <p>
-     * Only supported on version {@link android.os.Build.VERSION_CODES#L} and
+     * Only supported on version {@link android.os.Build.VERSION_CODES#LOLLIPOP} and
      * above. Calling this method has no effect on earlier versions.
      *
      * @see android.graphics.drawable.Drawable#setColorFilter(ColorFilter)
