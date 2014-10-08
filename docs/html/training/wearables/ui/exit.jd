@@ -28,7 +28,7 @@ the long-press-to-dismiss UI pattern to let users exit your app using the
 You must also inform your users the first time they run your app that they can exit using
 a long press.</p>
 
-<p>For design guidelines on exiting Android Wear activities, see
+<p>For design guidelines about exiting Android Wear activities, see
 <a href="{@docRoot}design/wear/structure.html#Custom">Breaking out of the card</a>.</p>
 
 
