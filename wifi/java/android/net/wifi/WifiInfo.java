@@ -456,6 +456,7 @@ public class WifiInfo implements Parcelable {
      * SSID-specific probe request must be used for scans.
      */
     public boolean getHiddenSSID() {
+        if (mWifiSsid == null) return false;
         return mWifiSsid.isHidden();
     }
 
