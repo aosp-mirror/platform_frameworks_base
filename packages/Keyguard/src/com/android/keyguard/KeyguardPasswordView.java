@@ -295,8 +295,14 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         // Check if this was the result of hitting the enter key
-        if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
-                || actionId == EditorInfo.IME_ACTION_NEXT) {
+        final boolean isSoftImeEvent = event == null
+                && (actionId == EditorInfo.IME_NULL
+                || actionId == EditorInfo.IME_ACTION_DONE
+                || actionId == EditorInfo.IME_ACTION_NEXT);
+        final boolean isKeyboardEnterKey = event != null
+                && KeyEvent.isConfirmKey(event.getKeyCode())
+                && event.getAction() == KeyEvent.ACTION_DOWN;
+        if (isSoftImeEvent || isKeyboardEnterKey) {
             verifyPasswordAndUnlock();
             return true;
         }
