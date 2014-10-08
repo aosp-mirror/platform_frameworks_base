@@ -496,7 +496,7 @@ abstract public class ManagedServices {
         synchronized (mMutex) {
             try {
                 ManagedServiceInfo info = newServiceInfo(service, component, userid,
-                        true /*isSystem*/, null, Build.VERSION_CODES.L);
+                        true /*isSystem*/, null, Build.VERSION_CODES.LOLLIPOP);
                 service.asBinder().linkToDeath(info, 0);
                 mServices.add(info);
                 return info;
@@ -585,7 +585,7 @@ abstract public class ManagedServices {
         }
 
         public boolean supportsProfiles() {
-            return targetSdkVersion >= Build.VERSION_CODES.L;
+            return targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP;
         }
 
         @Override

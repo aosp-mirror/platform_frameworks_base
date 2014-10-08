@@ -485,7 +485,7 @@ public class Build {
         public static final int JELLY_BEAN = 16;
 
         /**
-         * Android 4.2: Moar jelly beans!
+         * November 2012: Android 4.2, Moar jelly beans!
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -505,12 +505,12 @@ public class Build {
         public static final int JELLY_BEAN_MR1 = 17;
 
         /**
-         * Android 4.3: Jelly Bean MR2, the revenge of the beans.
+         * July 2013: Android 4.3, the revenge of the beans.
          */
         public static final int JELLY_BEAN_MR2 = 18;
 
         /**
-         * Android 4.4: KitKat, another tasty treat.
+         * October 2013: Android 4.4, KitKat, another tasty treat.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -553,7 +553,12 @@ public class Build {
         public static final int KITKAT_WATCH = 20;
 
         /**
-         * L!
+         * Temporary until we completely switch to {@link #LOLLIPOP}.
+         */
+        public static final int L = 21;
+
+        /**
+         * Lollipop.  A flat one with beautiful shadows.  But still tasty.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -563,7 +568,7 @@ public class Build {
          * Intent.</li>
          * </ul>
          */
-        public static final int L = 21;
+        public static final int LOLLIPOP = 21;
     }
     
     /** The type of build, like "user" or "eng". */
