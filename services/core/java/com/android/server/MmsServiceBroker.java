@@ -34,7 +34,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
@@ -56,10 +56,12 @@ public class MmsServiceBroker extends SystemService {
     private static final Uri FAKE_SMS_DRAFT_URI = Uri.parse("content://sms/draft/0");
     private static final Uri FAKE_MMS_DRAFT_URI = Uri.parse("content://mms/draft/0");
 
+    private static final long SERVICE_CONNECTION_WAIT_TIME_MS = 4 * 1000L; // 4 seconds
+    private static final long RETRY_DELAY_ON_DISCONNECTION_MS = 3 * 1000L; // 3 seconds
+
     private Context mContext;
     // The actual MMS service instance to invoke
     private volatile IMms mService;
-    private boolean mIsConnecting;
 
     // Cached system service instances
     private volatile AppOpsManager mAppOpsManager = null;
@@ -85,7 +87,7 @@ public class MmsServiceBroker extends SystemService {
             Slog.i(TAG, "MmsService connected");
             synchronized (MmsServiceBroker.this) {
                 mService = IMms.Stub.asInterface(service);
-                mIsConnecting = false;
+                MmsServiceBroker.this.notifyAll();
             }
         }
 
@@ -94,8 +96,13 @@ public class MmsServiceBroker extends SystemService {
             Slog.i(TAG, "MmsService unexpectedly disconnected");
             synchronized (MmsServiceBroker.this) {
                 mService = null;
-                mIsConnecting = false;
+                MmsServiceBroker.this.notifyAll();
             }
+            // Retry connecting, but not too eager (with a delay)
+            // since it may come back by itself.
+            mConnectionHandler.sendMessageDelayed(
+                    mConnectionHandler.obtainMessage(MSG_TRY_CONNECTING),
+                    RETRY_DELAY_ON_DISCONNECTION_MS);
         }
     };
 
@@ -103,7 +110,6 @@ public class MmsServiceBroker extends SystemService {
         super(context);
         mContext = context;
         mService = null;
-        mIsConnecting = false;
     }
 
     @Override
@@ -118,29 +124,50 @@ public class MmsServiceBroker extends SystemService {
     private void tryConnecting() {
         Slog.i(TAG, "Connecting to MmsService");
         synchronized (this) {
-            if (mIsConnecting) {
-                Slog.d(TAG, "Already connecting");
+            if (mService != null) {
+                Slog.d(TAG, "Already connected");
                 return;
             }
             final Intent intent = new Intent();
             intent.setComponent(MMS_SERVICE_COMPONENT);
             try {
-                if (mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
-                    mIsConnecting = true;
-                } else {
-                    Slog.e(TAG, "Failed to connect to MmsService");
+                if (!mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
+                    Slog.e(TAG, "Failed to bind to MmsService");
                 }
             } catch (SecurityException e) {
-                Slog.e(TAG, "Forbidden to connect to MmsService", e);
+                Slog.e(TAG, "Forbidden to bind to MmsService", e);
             }
         }
     }
 
     private void ensureService() {
-        if (mService == null) {
-            // Service instance lost, kicking off the connection again
-            mConnectionHandler.sendMessage(mConnectionHandler.obtainMessage(MSG_TRY_CONNECTING));
-            throw new RuntimeException("MMS service is not connected");
+        synchronized (this) {
+            if (mService == null) {
+                // Service is not connected. Try blocking connecting.
+                Slog.w(TAG, "MmsService not connected. Try connecting...");
+                mConnectionHandler.sendMessage(
+                        mConnectionHandler.obtainMessage(MSG_TRY_CONNECTING));
+                final long shouldEnd =
+                        SystemClock.elapsedRealtime() + SERVICE_CONNECTION_WAIT_TIME_MS;
+                long waitTime = SERVICE_CONNECTION_WAIT_TIME_MS;
+                while (waitTime > 0) {
+                    try {
+                        // TODO: consider using Java concurrent construct instead of raw object wait
+                        this.wait(waitTime);
+                    } catch (InterruptedException e) {
+                        Slog.w(TAG, "Connection wait interrupted", e);
+                    }
+                    if (mService != null) {
+                        // Success
+                        return;
+                    }
+                    // Calculate remaining waiting time to make sure we wait the full timeout period
+                    waitTime = shouldEnd - SystemClock.elapsedRealtime();
+                }
+                // Timed out. Something's really wrong.
+                Slog.e(TAG, "Can not connect to MmsService (timed out)");
+                throw new RuntimeException("Timed out in connecting to MmsService");
+            }
         }
     }
 
