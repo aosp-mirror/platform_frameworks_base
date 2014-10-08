@@ -914,11 +914,18 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     break;
                 }
                 case HDMI_DEVICE_UPDATED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String inputId = (String) args.arg1;
-                    HdmiDeviceInfo info = (HdmiDeviceInfo) args.arg2;
-                    args.recycle();
-                    mListener.onHdmiDeviceUpdated(inputId, info);
+                    HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
+                    String inputId = null;
+                    synchronized (mLock) {
+                        inputId = mHdmiInputIdMap.get(info.getId());
+                    }
+                    if (inputId != null) {
+                        mListener.onHdmiDeviceUpdated(inputId, info);
+                    } else {
+                        Slog.w(TAG, "Could not resolve input ID matching the device info; "
+                                + "ignoring.");
+                    }
+                    break;
                 }
                 default: {
                     Slog.w(TAG, "Unhandled message: " + msg);
@@ -986,11 +993,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         }
                         mHdmiDeviceList.add(deviceInfo);
                         messageType = ListenerHandler.HDMI_DEVICE_UPDATED;
-                        String inputId = mHdmiInputIdMap.get(deviceInfo.getId());
-                        SomeArgs args = SomeArgs.obtain();
-                        args.arg1 = inputId;
-                        args.arg2 = deviceInfo;
-                        obj = args;
+                        obj = deviceInfo;
                         break;
                     }
                 }
