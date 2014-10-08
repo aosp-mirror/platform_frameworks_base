@@ -3173,7 +3173,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL:
-                case WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:

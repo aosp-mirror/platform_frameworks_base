@@ -9362,7 +9362,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final int type = attrs.type;
             if (canBeSeen
                     && (type == TYPE_SYSTEM_DIALOG
-                     || type == TYPE_RECENTS_OVERLAY
                      || type == TYPE_SYSTEM_ERROR
                      || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0)) {
                 mInnerFields.mSyswin = true;
