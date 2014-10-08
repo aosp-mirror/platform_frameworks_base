@@ -508,8 +508,12 @@ public class ValueAnimator extends Animator {
                     duration);
         }
         mUnscaledDuration = duration;
-        mDuration = (long)(duration * sDurationScale);
+        updateScaledDuration();
         return this;
+    }
+
+    private void updateScaledDuration() {
+        mDuration = (long)(mUnscaledDuration * sDurationScale);
     }
 
     /**
@@ -947,6 +951,7 @@ public class ValueAnimator extends Animator {
         mStarted = true;
         mStartedDelay = false;
         mPaused = false;
+        updateScaledDuration(); // in case the scale factor has changed since creation time
         AnimationHandler animationHandler = getOrCreateAnimationHandler();
         animationHandler.mPendingAnimations.add(this);
         if (mStartDelay == 0) {
