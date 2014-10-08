@@ -29,6 +29,9 @@ import android.annotation.SystemApi;
 
 import java.util.HashMap;
 import java.util.BitSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * A class representing a configured Wi-Fi network, including the
@@ -908,13 +911,46 @@ public class WifiConfiguration implements Parcelable {
         }
     }
 
+    /* @hide */
+    private ArrayList<ScanResult> sortScanResults() {
+        ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
+        if (list.size() != 0) {
+            Collections.sort(list, new Comparator() {
+                public int compare(Object o1, Object o2) {
+                    ScanResult a = (ScanResult)o1;
+                    ScanResult b = (ScanResult)o2;
+                    if (a.numIpConfigFailures > b.numIpConfigFailures) {
+                        return 1;
+                    }
+                    if (a.numIpConfigFailures < b.numIpConfigFailures) {
+                        return -1;
+                    }
+                    if (a.seen > b.seen) {
+                        return -1;
+                    }
+                    if (a.seen < b.seen) {
+                        return 1;
+                    }
+                    if (a.level > b.level) {
+                        return -1;
+                    }
+                    if (a.level < b.level) {
+                        return 1;
+                    }
+                    return a.BSSID.compareTo(b.BSSID);
+                }
+            });
+        }
+        return list;
+    }
+
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         if (this.status == WifiConfiguration.Status.CURRENT) {
             sbuf.append("* ");
         } else if (this.status == WifiConfiguration.Status.DISABLED) {
-            sbuf.append("- DSBLE");
+            sbuf.append("- DSBLE ");
         }
         sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN).
@@ -1061,20 +1097,40 @@ public class WifiConfiguration implements Parcelable {
             }
         }
         if (this.scanResultCache != null) {
-            sbuf.append("Scan Cache:  ");
-            for(ScanResult result : this.scanResultCache.values()) {
-                sbuf.append("{").append(result.BSSID).append(",").append(result.frequency);
-                sbuf.append(",").append(result.level);
-                if (result.autoJoinStatus > 0) {
-                    sbuf.append(",st=").append(result.autoJoinStatus);
+            sbuf.append("Scan Cache:  ").append('\n');
+            ArrayList<ScanResult> list = sortScanResults();
+            if (list.size() > 0) {
+                for (ScanResult result : list) {
+                    long milli = now_ms - result.seen;
+                    long ageSec = 0;
+                    long ageMin = 0;
+                    long ageHour = 0;
+                    long ageMilli = 0;
+                    long ageDay = 0;
+                    if (now_ms > result.seen && result.seen > 0) {
+                        ageMilli = milli % 1000;
+                        ageSec   = (milli / 1000) % 60;
+                        ageMin   = (milli / (60*1000)) % 60;
+                        ageHour  = (milli / (60*60*1000)) % 24;
+                        ageDay   = (milli / (24*60*60*1000));
+                    }
+                    sbuf.append("{").append(result.BSSID).append(",").append(result.frequency);
+                    sbuf.append(",").append(String.format("%3d", result.level));
+                    if (result.autoJoinStatus > 0) {
+                        sbuf.append(",st=").append(result.autoJoinStatus);
+                    }
+                    if (ageSec > 0 || ageMilli > 0) {
+                        sbuf.append(String.format(",%4d.%02d.%02d.%02d.%03dms", ageDay,
+                                ageHour, ageMin, ageSec, ageMilli));
+                    }
+                    if (result.numIpConfigFailures > 0) {
+                        sbuf.append(",ipfail=");
+                        sbuf.append(result.numIpConfigFailures);
+                    }
+                    sbuf.append("} ");
                 }
-                if (result.numIpConfigFailures > 0) {
-                    sbuf.append(",ipfail=");
-                    sbuf.append(result.numIpConfigFailures);
-                }
-                sbuf.append(",").append(result.autoJoinStatus).append("} ");
+                sbuf.append('\n');
             }
-            sbuf.append('\n');
         }
         sbuf.append("triggeredLow: ").append(this.numUserTriggeredWifiDisableLowRSSI);
         sbuf.append(" triggeredBad: ").append(this.numUserTriggeredWifiDisableBadRSSI);
