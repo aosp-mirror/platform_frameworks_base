@@ -23,7 +23,15 @@
           <li><a href="<?cs var:toroot ?>design/wear/style.html">Style</a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>design/tv/index.html">TV</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>design/tv/index.html">TV</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>design/tv/principles.html">Creative Vision</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/patterns.html">UI Patterns</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/style.html">Style</a></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>design/auto/index.html">Auto</a></li>
     </ul>
   </li>
