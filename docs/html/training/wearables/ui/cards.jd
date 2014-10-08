@@ -167,3 +167,9 @@ protected void onCreate(Bundle savedInstanceState) {
     cardScrollView.setCardGravity(Gravity.BOTTOM);
 }
 </pre>
+
+<p><code>CardScrollView</code> detects the shape of the screen and displays the card differently
+on round and square devices, using wider side margins on round screens. However,
+placing the <code>CardScrollView</code> element inside a <code>BoxInsetLayout</code> and using the
+<code>layout_box="bottom"</code> attribute is useful to align the card to the bottom of round
+screens without cropping its content.</p>
