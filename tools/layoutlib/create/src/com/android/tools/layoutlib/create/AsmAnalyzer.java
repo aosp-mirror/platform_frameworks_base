@@ -242,7 +242,8 @@ public class AsmAnalyzer {
 
         for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
             String class_name = entry.getKey();
-            if (regexp.matcher(class_name).matches()) {
+            if (regexp.matcher(class_name).matches() &&
+                    !mExcludedClasses.contains(getOuterClassName(class_name))) {
                 findClass(class_name, zipClasses, inOutFound);
             }
         }
@@ -273,6 +274,9 @@ public class AsmAnalyzer {
      */
     void findClassesDerivingFrom(String super_name, Map<String, ClassReader> zipClasses,
             Map<String, ClassReader> inOutFound) throws LogAbortException {
+        if (mExcludedClasses.contains(getOuterClassName(super_name))) {
+            return;
+        }
         findClass(super_name, zipClasses, inOutFound);
 
         for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
@@ -352,7 +356,13 @@ public class AsmAnalyzer {
         return deps;
     }
 
-
+    private String getOuterClassName(String className) {
+        int pos = className.indexOf('$');
+        if (pos > 0) {
+            return className.substring(0, pos);
+        }
+        return className;
+    }
 
     // ----------------------------------
 
@@ -417,7 +427,7 @@ public class AsmAnalyzer {
                     mOutKeep.containsKey(className) ||
                     mInDeps.containsKey(className) ||
                     mOutDeps.containsKey(className) ||
-                    mExcludedClasses.contains(getBaseName(className))) {
+                    mExcludedClasses.contains(getOuterClassName(className))) {
                 return;
             }
 
@@ -499,14 +509,6 @@ public class AsmAnalyzer {
                     // ignore, not a valid type.
                 }
             }
-        }
-
-        private String getBaseName(String className) {
-            int pos = className.indexOf('$');
-            if (pos > 0) {
-                return className.substring(0, pos);
-            }
-            return className;
         }
 
         // ---------------------------------------------------
