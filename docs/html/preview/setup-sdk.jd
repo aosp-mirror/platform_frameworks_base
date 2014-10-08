@@ -206,6 +206,12 @@ to flash the following devices:
 experimental 64-bit system images along with standard 32-bit system images.
 </p>
 
+<p class="note"><strong>Note:</strong> The 64-bit system images require the
+Intel x86 Emulator Accelerator (HAXM) Rev.5 which can be downloaded from the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> <em>Extras</em> 
+folder.</p>
+
+
 <h3 id="installImage">Install the L Preview System Image</h3>
 
 <p class="warning"><b>Warning:</b> This is a preview version of the Android
