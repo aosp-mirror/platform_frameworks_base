@@ -172,8 +172,9 @@ specifies the layout parameters of each of the components inside a list item. Th
 definition uses the custom layout implementation from the previous section and defines an icon
 and a text view whose IDs match those in the layout implementation class:</p>
 
+<p class="code-caption">res/layout/list_item.xml</p>
+
 <pre>
-&lt;-- res/layout/list_item.xml -->
 &lt;com.example.android.support.wearable.notifications.WearableListItemLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:gravity="center_vertical"
