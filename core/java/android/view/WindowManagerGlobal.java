@@ -211,7 +211,7 @@ public final class WindowManagerGlobal {
             // system context), assume we want hardware acceleration.
             final Context context = view.getContext();
             if (context != null
-                    && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+                    && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
         }

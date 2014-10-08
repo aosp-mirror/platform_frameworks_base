@@ -417,7 +417,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * {@link Adapter#getItemViewType(int) getItemViewType(int)} on the object
      * returned from {@link #getAdapter()} will always return 0. Calling
      * {@link Adapter#getViewTypeCount() getViewTypeCount()} will always return
-     * 1. On API {@link Build.VERSION_CODES#L} and above, attempting to set an
+     * 1. On API {@link Build.VERSION_CODES#LOLLIPOP} and above, attempting to set an
      * adapter with more than one view type will throw an
      * {@link IllegalArgumentException}.
      *
@@ -434,7 +434,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         mRecycler.clear();
 
         final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion >= Build.VERSION_CODES.L
+        if (targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP
                 && adapter != null && adapter.getViewTypeCount() != 1) {
             throw new IllegalArgumentException("Spinner adapter view type count must be 1");
         }

@@ -262,7 +262,7 @@ public final class DreamManagerService extends SystemService {
         if (serviceInfo == null) {
             Slog.w(TAG, "Dream " + component + " does not exist");
             return false;
-        } else if (serviceInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.L
+        } else if (serviceInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP
                 && !BIND_DREAM_SERVICE.equals(serviceInfo.permission)) {
             Slog.w(TAG, "Dream " + component
                     + " is not available because its manifest is missing the " + BIND_DREAM_SERVICE
