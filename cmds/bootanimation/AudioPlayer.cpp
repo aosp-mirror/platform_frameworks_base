@@ -272,6 +272,9 @@ bool AudioPlayer::threadLoop()
     config.rate = chunkFmt->sample_rate;
     config.period_size = mPeriodSize;
     config.period_count = mPeriodCount;
+    config.start_threshold = mPeriodSize / 4;
+    config.stop_threshold = INT_MAX;
+    config.avail_min = config.start_threshold;
     if (chunkFmt->bits_per_sample != 16) {
         ALOGE("only 16 bit WAV files are supported");
         goto exit;
