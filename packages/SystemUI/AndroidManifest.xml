@@ -121,7 +121,7 @@
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@*android:drawable/platlogo"
+        android:icon="@drawable/icon"
         android:process="com.android.systemui"
         android:supportsRtl="true"
         android:theme="@style/systemui_theme">
@@ -288,7 +288,7 @@
         </activity>
 
         <activity android:name=".egg.LLandActivity"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar.TranslucentDecor"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
                   android:exported="true"
                   android:label="@string/lland"
                   android:hardwareAccelerated="true"
