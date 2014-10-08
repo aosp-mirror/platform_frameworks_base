@@ -193,6 +193,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.SystemClock",
         "android.os.SystemProperties",
         "android.text.AndroidBidi",
+        "android.text.StaticLayout",
         "android.text.format.Time",
         "android.util.FloatMath",
         "android.view.Display",
