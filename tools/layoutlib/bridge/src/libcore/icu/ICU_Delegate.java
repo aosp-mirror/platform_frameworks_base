@@ -228,7 +228,7 @@ public class ICU_Delegate {
         result.decimalSeparator = '.';
         result.groupingSeparator = ',';
         result.patternSeparator = ' ';
-        result.percent = '%';
+        result.percent = "%";
         result.perMill = '\u2030';
         result.monetarySeparator = ' ';
         result.minusSign = "-";
