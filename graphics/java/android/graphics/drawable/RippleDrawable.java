@@ -280,7 +280,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         setRippleActive(enabled && pressed);
-        setBackgroundActive(focused || (enabled && pressed));
+        setBackgroundActive(focused || (enabled && pressed), focused);
 
         return changed;
     }
@@ -296,11 +296,11 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
-    private void setBackgroundActive(boolean active) {
+    private void setBackgroundActive(boolean active, boolean focused) {
         if (mBackgroundActive != active) {
             mBackgroundActive = active;
             if (active) {
-                tryBackgroundEnter();
+                tryBackgroundEnter(focused);
             } else {
                 tryBackgroundExit();
             }
@@ -333,8 +333,11 @@ public class RippleDrawable extends LayerDrawable {
             }
 
             if (mBackgroundActive) {
-                tryBackgroundEnter();
+                tryBackgroundEnter(false);
             }
+
+            // Skip animations, just show the correct final states.
+            jumpToCurrentState();
         }
 
         return changed;
@@ -489,14 +492,14 @@ public class RippleDrawable extends LayerDrawable {
     /**
      * Creates an active hotspot at the specified location.
      */
-    private void tryBackgroundEnter() {
+    private void tryBackgroundEnter(boolean focused) {
         if (mBackground == null) {
             mBackground = new RippleBackground(this, mHotspotBounds);
         }
 
         final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
         mBackground.setup(mState.mMaxRadius, color, mDensity);
-        mBackground.enter();
+        mBackground.enter(focused);
     }
 
     private void tryBackgroundExit() {
