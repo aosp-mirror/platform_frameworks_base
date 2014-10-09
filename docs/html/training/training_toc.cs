@@ -836,8 +836,8 @@ include the action bar on devices running Android 2.1 or higher."
       </li>
     </ul>
   </li>
-
   <!-- End Building for wearables -->
+
 
   <!-- Start: Building for TV -->
   <li class="nav-section">
@@ -1232,6 +1232,45 @@ results."
           </li>
           <li><a href="<?cs var:toroot ?>training/system-ui/visibility.html">
             Responding to UI Visibility Changes
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/material/index.html"
+             description=
+             "How to implement material design on Android."
+            >Creating Apps with Material Design</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/material/get-started.html">
+            Getting Started
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/theme.html">
+            Using the Material Theme
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/lists-cards.html">
+            Creating Lists and Cards
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/shadows-clipping.html">
+            Defining Shadows and Clipping Views
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/drawables.html">
+            Working with Drawables
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/animations.html">
+            Defining Custom Animations
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/compatibility.html">
+            Maintaining Compatibility
           </a>
           </li>
         </ul>
