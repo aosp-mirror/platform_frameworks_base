@@ -7048,6 +7048,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         private  void startRestore() {
             sendStartRestore(mAcceptSet.size());
 
+            // If we're starting a full-system restore, set up to begin widget ID remapping
+            if (mIsSystemRestore) {
+                AppWidgetBackupBridge.restoreStarting(UserHandle.USER_OWNER);
+            }
+
             try {
                 String transportDir = mTransport.transportDirName();
                 mStateDir = new File(mBaseStateDir, transportDir);
