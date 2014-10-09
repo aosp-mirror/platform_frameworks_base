@@ -5013,10 +5013,19 @@ public final class Settings {
                     default:
                         throw new IllegalArgumentException("Invalid location mode: " + mode);
                 }
-                boolean gpsSuccess = Settings.Secure.setLocationProviderEnabledForUser(
-                        cr, LocationManager.GPS_PROVIDER, gps, userId);
+                // Note it's important that we set the NLP mode first. The Google implementation
+                // of NLP clears its NLP consent setting any time it receives a
+                // LocationManager.PROVIDERS_CHANGED_ACTION broadcast and NLP is disabled. Also,
+                // it shows an NLP consent dialog any time it receives the broadcast, NLP is
+                // enabled, and the NLP consent is not set. If 1) we were to enable GPS first,
+                // 2) a setup wizard has its own NLP consent UI that sets the NLP consent setting,
+                // and 3) the receiver happened to complete before we enabled NLP, then the Google
+                // NLP would detect the attempt to enable NLP and show a redundant NLP consent
+                // dialog. Then the people who wrote the setup wizard would be sad.
                 boolean nlpSuccess = Settings.Secure.setLocationProviderEnabledForUser(
                         cr, LocationManager.NETWORK_PROVIDER, network, userId);
+                boolean gpsSuccess = Settings.Secure.setLocationProviderEnabledForUser(
+                        cr, LocationManager.GPS_PROVIDER, gps, userId);
                 return gpsSuccess && nlpSuccess;
             }
         }
