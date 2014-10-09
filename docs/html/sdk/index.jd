@@ -308,7 +308,7 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
   If you're a new Android developer, you should consider starting with Android Studio, because the
   ADT plugin for Eclipse is no longer in active development.</p>
   <p style="margin: 0;">
-  <a href="/sdk/installing/studio.html">Learn more about Android Studio</a></p>
+  <a href="/sdk/installing/studio.html" style="position:relative;z-index:99">Learn more about Android Studio</a></p>
   </div>
 
 
