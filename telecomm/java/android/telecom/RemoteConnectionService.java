@@ -365,7 +365,7 @@ final class RemoteConnectionService {
     }
 
     private boolean hasConnection(String callId) {
-        return mConferenceById.containsKey(callId);
+        return mConnectionById.containsKey(callId);
     }
 
     private RemoteConnection findConnectionForAction(
