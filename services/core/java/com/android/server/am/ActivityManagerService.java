@@ -434,10 +434,19 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
+        public final Bundle extras;
+        public final Intent intent;
+        public final String hint;
+        public final int userHandle;
         public boolean haveResult = false;
         public Bundle result = null;
-        public PendingAssistExtras(ActivityRecord _activity) {
+        public PendingAssistExtras(ActivityRecord _activity, Bundle _extras, Intent _intent,
+                String _hint, int _userHandle) {
             activity = _activity;
+            extras = _extras;
+            intent = _intent;
+            hint = _hint;
+            userHandle = _userHandle;
         }
         @Override
         public void run() {
@@ -10449,6 +10458,31 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public Bundle getAssistContextExtras(int requestType) {
+        PendingAssistExtras pae = enqueueAssistContext(requestType, null, null,
+                UserHandle.getCallingUserId());
+        if (pae == null) {
+            return null;
+        }
+        synchronized (pae) {
+            while (!pae.haveResult) {
+                try {
+                    pae.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            if (pae.result != null) {
+                pae.extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.result);
+            }
+        }
+        synchronized (this) {
+            mPendingAssistExtras.remove(pae);
+            mHandler.removeCallbacks(pae);
+        }
+        return pae.extras;
+    }
+
+    private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
+            int userHandle) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "getAssistContextExtras()");
         PendingAssistExtras pae;
@@ -10462,13 +10496,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
             if (activity.app == null || activity.app.thread == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no process for " + activity);
-                return extras;
+                return null;
             }
             if (activity.app.pid == Binder.getCallingPid()) {
                 Slog.w(TAG, "getAssistContextExtras failed: request process same as " + activity);
-                return extras;
+                return null;
             }
-            pae = new PendingAssistExtras(activity);
+            pae = new PendingAssistExtras(activity, extras, intent, hint, userHandle);
             try {
                 activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
                         requestType);
@@ -10476,25 +10510,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.postDelayed(pae, PENDING_ASSIST_EXTRAS_TIMEOUT);
             } catch (RemoteException e) {
                 Slog.w(TAG, "getAssistContextExtras failed: crash calling " + activity);
-                return extras;
+                return null;
             }
+            return pae;
         }
-        synchronized (pae) {
-            while (!pae.haveResult) {
-                try {
-                    pae.wait();
-                } catch (InterruptedException e) {
-                }
-            }
-            if (pae.result != null) {
-                extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.result);
-            }
-        }
-        synchronized (this) {
-            mPendingAssistExtras.remove(pae);
-            mHandler.removeCallbacks(pae);
-        }
-        return extras;
     }
 
     public void reportAssistContextExtras(IBinder token, Bundle extras) {
@@ -10503,7 +10522,38 @@ public final class ActivityManagerService extends ActivityManagerNative
             pae.result = extras;
             pae.haveResult = true;
             pae.notifyAll();
+            if (pae.intent == null) {
+                // Caller is just waiting for the result.
+                return;
+            }
         }
+
+        // We are now ready to launch the assist activity.
+        synchronized (this) {
+            boolean exists = mPendingAssistExtras.remove(pae);
+            mHandler.removeCallbacks(pae);
+            if (!exists) {
+                // Timed out.
+                return;
+            }
+        }
+        pae.intent.replaceExtras(extras);
+        if (pae.hint != null) {
+            pae.intent.putExtra(pae.hint, true);
+        }
+        pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        closeSystemDialogs("assist");
+        try {
+            mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
+        } catch (ActivityNotFoundException e) {
+            Slog.w(TAG, "No activity to handle assist action.", e);
+        }
+    }
+
+    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle) {
+        return enqueueAssistContext(requestType, intent, hint, userHandle) != null;
     }
 
     public void registerProcessObserver(IProcessObserver observer) {
