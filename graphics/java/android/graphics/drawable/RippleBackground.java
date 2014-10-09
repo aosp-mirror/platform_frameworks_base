@@ -43,9 +43,11 @@ class RippleBackground {
     private static final float WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
     private static final float WAVE_OUTER_OPACITY_EXIT_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
     private static final float WAVE_OUTER_OPACITY_EXIT_VELOCITY_MIN = 1.5f * GLOBAL_SPEED;
-    private static final float WAVE_OUTER_OPACITY_ENTER_VELOCITY = 10.0f * GLOBAL_SPEED;
     private static final float WAVE_OUTER_SIZE_INFLUENCE_MAX = 200f;
     private static final float WAVE_OUTER_SIZE_INFLUENCE_MIN = 40f;
+
+    private static final int ENTER_DURATION = 667;
+    private static final int ENTER_DURATION_FAST = 100;
 
     // Hardware animators.
     private final ArrayList<RenderNodeAnimator> mRunningAnimations =
@@ -224,21 +226,20 @@ class RippleBackground {
     /**
      * Starts the enter animation.
      */
-    public void enter() {
+    public void enter(boolean fast) {
         cancel();
 
-        final int outerDuration = (int) (1000 * 1.0f / WAVE_OUTER_OPACITY_ENTER_VELOCITY);
-        final ObjectAnimator outer = ObjectAnimator.ofFloat(this, "outerOpacity", 0, 1);
-        outer.setAutoCancel(true);
-        outer.setDuration(outerDuration);
-        outer.setInterpolator(LINEAR_INTERPOLATOR);
+        final ObjectAnimator opacity = ObjectAnimator.ofFloat(this, "outerOpacity", 0, 1);
+        opacity.setAutoCancel(true);
+        opacity.setDuration(fast ? ENTER_DURATION_FAST : ENTER_DURATION);
+        opacity.setInterpolator(LINEAR_INTERPOLATOR);
 
-        mAnimOuterOpacity = outer;
+        mAnimOuterOpacity = opacity;
 
         // Enter animations always run on the UI thread, since it's unlikely
         // that anything interesting is happening until the user lifts their
         // finger.
-        outer.start();
+        opacity.start();
     }
 
     /**
