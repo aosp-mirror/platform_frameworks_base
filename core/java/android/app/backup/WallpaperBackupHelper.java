@@ -42,7 +42,7 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     // If 'true', then apply an acceptable-size heuristic at restore time, dropping back
     // to the factory default wallpaper if the restored one differs "too much" from the
     // device's preferred wallpaper image dimensions.
-    private static final boolean REJECT_OUTSIZED_RESTORE = false;
+    private static final boolean REJECT_OUTSIZED_RESTORE = true;
 
     // This path must match what the WallpaperManagerService uses
     // TODO: Will need to change if backing up non-primary user's wallpaper
