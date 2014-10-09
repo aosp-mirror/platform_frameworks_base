@@ -85,7 +85,7 @@ public class PhoneStatusBarPolicy {
             }
             else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-                updateBluetooth(intent);
+                updateBluetooth();
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 updateVolumeZen();
@@ -128,16 +128,7 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility(SLOT_CDMA_ERI, false);
 
         // bluetooth status
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        int bluetoothIcon = R.drawable.stat_sys_data_bluetooth;
-        if (adapter != null) {
-            mBluetoothEnabled = (adapter.getState() == BluetoothAdapter.STATE_ON);
-            if (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED) {
-                bluetoothIcon = R.drawable.stat_sys_data_bluetooth_connected;
-            }
-        }
-        mService.setIcon(SLOT_BLUETOOTH, bluetoothIcon, 0, null);
-        mService.setIconVisibility(SLOT_BLUETOOTH, mBluetoothEnabled);
+        updateBluetooth();
 
         // Alarm clock
         mService.setIcon(SLOT_ALARM_CLOCK, R.drawable.stat_sys_alarm, 0, null);
@@ -253,25 +244,19 @@ public class PhoneStatusBarPolicy {
         }
     }
 
-    private final void updateBluetooth(Intent intent) {
+    private final void updateBluetooth() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         int iconId = R.drawable.stat_sys_data_bluetooth;
-        String contentDescription = null;
-        String action = intent.getAction();
-        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-            mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
-        } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
-                BluetoothAdapter.STATE_DISCONNECTED);
-            if (state == BluetoothAdapter.STATE_CONNECTED) {
+        String contentDescription =
+                mContext.getString(R.string.accessibility_bluetooth_disconnected);
+        if (adapter != null) {
+            mBluetoothEnabled = (adapter.getState() == BluetoothAdapter.STATE_ON);
+            if (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED) {
                 iconId = R.drawable.stat_sys_data_bluetooth_connected;
                 contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
-            } else {
-                contentDescription = mContext.getString(
-                        R.string.accessibility_bluetooth_disconnected);
             }
         } else {
-            return;
+            mBluetoothEnabled = false;
         }
 
         mService.setIcon(SLOT_BLUETOOTH, iconId, 0, contentDescription);
