@@ -238,8 +238,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private boolean mLockdownEnabled;
     private LockdownVpnTracker mLockdownTracker;
 
-    private Nat464Xlat mClat;
-
     /** Lock around {@link #mUidRules} and {@link #mMeteredIfaces}. */
     private Object mRulesLock = new Object();
     /** Currently active network rules by UID. */
@@ -715,12 +713,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         intentFilter.addAction(Intent.ACTION_USER_STOPPING);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
-        mClat = new Nat464Xlat(mContext, mNetd, this, mTrackerHandler);
 
         try {
             mNetd.registerObserver(mTethering);
             mNetd.registerObserver(mDataActivityObserver);
-            mNetd.registerObserver(mClat);
         } catch (RemoteException e) {
             loge("Error registering observer :" + e);
         }
@@ -3549,7 +3545,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         // The NetworkAgentInfo does not know whether clatd is running on its network or not. Before
         // we do anything else, make sure its LinkProperties are accurate.
-        mClat.fixupLinkProperties(networkAgent, oldLp);
+        if (networkAgent.clatd != null) {
+            networkAgent.clatd.fixupLinkProperties(oldLp);
+        }
 
         updateInterfaces(newLp, oldLp, netId);
         updateMtu(newLp, oldLp);
@@ -3568,15 +3566,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo na) {
-        final boolean wasRunningClat = mClat.isRunningClat(na);
-        final boolean shouldRunClat = Nat464Xlat.requiresClat(na);
+    private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo nai) {
+        final boolean wasRunningClat = nai.clatd != null && nai.clatd.isStarted();
+        final boolean shouldRunClat = Nat464Xlat.requiresClat(nai);
 
         if (!wasRunningClat && shouldRunClat) {
-            // Start clatd. If it's already been started but is not running yet, this is a no-op.
-            mClat.startClat(na);
+            nai.clatd = new Nat464Xlat(mContext, mNetd, mTrackerHandler, nai);
+            nai.clatd.start();
         } else if (wasRunningClat && !shouldRunClat) {
-            mClat.stopClat();
+            nai.clatd.stop();
         }
     }
 
