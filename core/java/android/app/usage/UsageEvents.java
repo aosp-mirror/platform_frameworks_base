@@ -15,7 +15,6 @@
  */
 package android.app.usage;
 
-import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -93,14 +92,6 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public Configuration mConfiguration;
-
-        /**
-         * TODO(adamlesinski): Removed before release.
-         * {@hide}
-         */
-        public ComponentName getComponent() {
-            return new ComponentName(mPackage, mClass);
-        }
 
         /**
          * The package name of the source of this event.
@@ -233,6 +224,9 @@ public final class UsageEvents implements Parcelable {
 
     /**
      * Resets the collection so that it can be iterated over from the beginning.
+     *
+     * @hide When this object is iterated to completion, the parcel is destroyed and
+     * so resetToStart doesn't work.
      */
     public void resetToStart() {
         mIndex = 0;
