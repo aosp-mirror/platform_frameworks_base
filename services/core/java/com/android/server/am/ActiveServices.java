@@ -31,7 +31,6 @@ import android.os.Looper;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
@@ -591,7 +590,7 @@ public final class ActiveServices {
                         r.cancelNotification();
                         r.foregroundId = 0;
                         r.foregroundNoti = null;
-                    } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.L) {
+                    } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
                         r.stripForegroundServiceFlagFromNotification();
                     }
                 }

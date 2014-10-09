@@ -111,7 +111,7 @@ public class Picture {
     /**
      * Draw this picture on the canvas.
      * <p>
-     * Prior to {@link android.os.Build.VERSION_CODES#L}, this call could
+     * Prior to {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this call could
      * have the side effect of changing the matrix and clip of the canvas
      * if this picture had imbalanced saves/restores.
      *

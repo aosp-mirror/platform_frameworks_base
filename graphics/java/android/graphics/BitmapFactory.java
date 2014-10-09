@@ -260,7 +260,7 @@ public class BitmapFactory {
         public boolean inScaled;
 
         /**
-         * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this is
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this is
          * ignored.
          *
          * In {@link android.os.Build.VERSION_CODES#KITKAT} and below, if this
@@ -295,7 +295,7 @@ public class BitmapFactory {
         public boolean inPurgeable;
 
         /**
-         * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this is
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this is
          * ignored.
          *
          * In {@link android.os.Build.VERSION_CODES#KITKAT} and below, this

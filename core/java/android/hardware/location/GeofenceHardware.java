@@ -490,7 +490,7 @@ public final class GeofenceHardware {
 
             // and only call the updated callback on on L and above, this complies with the
             // documentation of GeofenceHardwareMonitorCallback
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 c.onMonitoringSystemChange(event);
             }
         }

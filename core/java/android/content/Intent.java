@@ -2226,7 +2226,7 @@ public class Intent implements Parcelable, Cloneable {
      * Same as {@link android.media.AudioManager#ACTION_HEADSET_PLUG}, to be consulted for value
      *   and documentation.
      * <p>If the minimum SDK version of your application is
-     * {@link android.os.Build.VERSION_CODES#L}, it is recommended to refer
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP}, it is recommended to refer
      * to the <code>AudioManager</code> constant in your receiver registration code instead.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

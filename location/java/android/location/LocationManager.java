@@ -1112,7 +1112,7 @@ public class LocationManager {
      * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
      *
      * <p>
-     * Before API version {@link android.os.Build.VERSION_CODES#L}, this
+     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this
      * method would throw {@link SecurityException} if the location permissions
      * were not sufficient to use the specified provider.
      *
