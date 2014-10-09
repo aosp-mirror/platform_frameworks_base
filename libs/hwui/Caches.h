@@ -415,6 +415,7 @@ private:
 
     uint32_t mFunctorsCount;
 
+    // Caches texture bindings for the GL_TEXTURE_2D target
     GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
 
     OverdrawColorSet mOverdrawDebugColorSet;
