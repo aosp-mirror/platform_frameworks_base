@@ -3498,14 +3498,24 @@ public class Activity extends ContextThemeWrapper
      * <p>You can override this function to force global search, e.g. in response to a dedicated
      * search key, or to block search entirely (by simply returning false).
      *
-     * @return Returns {@code true} if search launched, and {@code false} if activity blocks it.
-     *         The default implementation always returns {@code true}.
+     * <p>Note: when running in a {@link Configuration#UI_MODE_TYPE_TELEVISION}, the default
+     * implementation changes to simply return false and you must supply your own custom
+     * implementation if you want to support search.</p>
+     *
+     * @return Returns {@code true} if search launched, and {@code false} if the activity does
+     * not respond to search.  The default implementation always returns {@code true}, except
+     * when in {@link Configuration#UI_MODE_TYPE_TELEVISION} mode where it returns false.
      *
      * @see android.app.SearchManager
      */
     public boolean onSearchRequested() {
-        startSearch(null, false, null, false);
-        return true;
+        if ((getResources().getConfiguration().uiMode&Configuration.UI_MODE_TYPE_MASK)
+                != Configuration.UI_MODE_TYPE_TELEVISION) {
+            startSearch(null, false, null, false);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

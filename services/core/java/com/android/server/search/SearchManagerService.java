@@ -17,7 +17,9 @@
 package com.android.server.search;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.app.ISearchManager;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -32,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -259,6 +262,25 @@ public class SearchManagerService extends ISearchManager.Stub {
             Log.e(TAG, "Exception in getAssistIntent: " + e);
         }
         return null;
+    }
+
+    @Override
+    public boolean launchAssistAction(int requestType, String hint, int userHandle) {
+        ComponentName comp = getAssistIntent(userHandle);
+        if (comp == null) {
+            return false;
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            Intent intent = new Intent(Intent.ACTION_ASSIST);
+            intent.setComponent(comp);
+            IActivityManager am = ActivityManagerNative.getDefault();
+            return am.launchAssistIntent(intent, requestType, hint, userHandle);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return true;
     }
 
     @Override
