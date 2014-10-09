@@ -989,4 +989,20 @@ public class SearchManager
             return null;
         }
     }
+
+    /**
+     * Launch an assist action for the current top activity.
+     * @hide
+     */
+    public boolean launchAssistAction(int requestType, String hint, int userHandle) {
+        try {
+            if (mService == null) {
+                return false;
+            }
+            return mService.launchAssistAction(requestType, hint, userHandle);
+        } catch (RemoteException re) {
+            Log.e(TAG, "launchAssistAction() failed: " + re);
+            return false;
+        }
+    }
 }
