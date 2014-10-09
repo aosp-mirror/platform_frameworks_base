@@ -116,7 +116,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         public WallpaperObserver(WallpaperData wallpaper) {
             super(getWallpaperDir(wallpaper.userId).getAbsolutePath(),
-                    CLOSE_WRITE | DELETE | DELETE_SELF);
+                    CLOSE_WRITE | MOVED_TO | DELETE | DELETE_SELF);
             mWallpaperDir = getWallpaperDir(wallpaper.userId);
             mWallpaper = wallpaper;
             mWallpaperFile = new File(mWallpaperDir, WALLPAPER);
@@ -137,9 +137,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 File changedFile = new File(mWallpaperDir, path);
                 if (mWallpaperFile.equals(changedFile)) {
                     notifyCallbacksLocked(mWallpaper);
-                    if (mWallpaper.wallpaperComponent == null || event != CLOSE_WRITE
+                    final boolean written = (event == CLOSE_WRITE || event == MOVED_TO);
+                    if (mWallpaper.wallpaperComponent == null
+                            || event != CLOSE_WRITE // includes the MOVED_TO case
                             || mWallpaper.imageWallpaperPending) {
-                        if (event == CLOSE_WRITE) {
+                        if (written) {
                             mWallpaper.imageWallpaperPending = false;
                         }
                         bindWallpaperComponentLocked(mImageWallpaper, true,
