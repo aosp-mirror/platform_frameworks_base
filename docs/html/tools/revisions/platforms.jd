@@ -47,11 +47,42 @@ most recent release and restart the SDK Manager. If you do not, the latest Andro
 components will not be available for download.</p>
 
 
-<h2 id="4.4">Android 4.4W</h2>
+<h2 id="5.0">Android 5.0</h2>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release for Android 5.0 (API level 21).</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r21 or higher is required.</li>
+      <li>Android SDK Tools 23.0.5 or higher is required.</li>
+    </ul>
+  </div>
+
+  <h3>Device Definitions</h3>
+
+  <p>The platform includes the following new device definitions for use in creating
+  Android Virtual Devices in the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>:</p>
+ 
+  <ul>
+  <li>Nexus 6 (5.96", 1440 x 2560, Large xxxhdpi screen) </li>
+  <li>Nexus 9 (8.9", 2048 x 1536, Large xhdpi screen) </li>
+  </ul>
+
+</div>
+
+
+<h2 id="4.4">Android 4.4W</h2>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(June 2014)</em>
   </p>
 
@@ -78,9 +109,9 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(June 2014)</em>
 
 <h2 id="4.4">Android 4.4</h2>
 
-<div class="toggle-content opened">
+<div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png"
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
   </p>
 
@@ -118,9 +149,9 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
 
 <h3 id="gsi-4.4">Google APIs System Image</h3>
 
-<div class="toggle-content opened">
+<div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png"
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 4</a> <em>(March 2014)</em>
   </p>
 
