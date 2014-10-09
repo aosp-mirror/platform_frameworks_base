@@ -651,7 +651,10 @@ public final class DisplayManagerService extends SystemService {
 
         mDisplayDevices.add(device);
         addLogicalDisplayLocked(device);
-        updateDisplayStateLocked(device);
+        Runnable work = updateDisplayStateLocked(device);
+        if (work != null) {
+            work.run();
+        }
         scheduleTraversalLocked(false);
     }
 
