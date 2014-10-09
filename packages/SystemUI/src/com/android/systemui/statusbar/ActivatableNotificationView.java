@@ -403,6 +403,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void fadeBackground() {
+        mBackgroundNormal.animate().cancel();
         if (mDimmed) {
             mBackgroundDimmed.setVisibility(View.VISIBLE);
         } else {
@@ -446,11 +447,19 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundDimmed.setVisibility(View.VISIBLE);
             mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else {
+            cancelFadeAnimations();
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.VISIBLE);
             mBackgroundNormal.setAlpha(1f);
             removeCallbacks(mTapTimeoutRunnable);
         }
+    }
+
+    private void cancelFadeAnimations() {
+        if (mBackgroundAnimator != null) {
+            mBackgroundAnimator.cancel();
+        }
+        mBackgroundNormal.animate().cancel();
     }
 
     @Override
