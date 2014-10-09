@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.net.NetworkUtils;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -137,6 +139,29 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         }
     }
 
+    private static final boolean isLocalHost(URL url) {
+        if (url == null) {
+            return false;
+        }
+
+        String host = url.getHost();
+
+        if (host == null) {
+            return false;
+        }
+
+        try {
+            if (host.equalsIgnoreCase("localhost")) {
+                return true;
+            }
+            if (NetworkUtils.numericToInetAddress(host).isLoopbackAddress()) {
+                return true;
+            }
+        } catch (IllegalArgumentException iex) {
+        }
+        return false;
+    }
+
     private void seekTo(long offset) throws IOException {
         teardownConnection();
 
@@ -145,8 +170,17 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             int redirectCount = 0;
 
             URL url = mURL;
+
+            // do not use any proxy for localhost (127.0.0.1)
+            boolean noProxy = isLocalHost(url);
+
             while (true) {
-                mConnection = (HttpURLConnection)url.openConnection();
+                if (noProxy) {
+                    mConnection = (HttpURLConnection)url.openConnection(Proxy.NO_PROXY);
+                } else {
+                    mConnection = (HttpURLConnection)url.openConnection();
+                }
+
                 // handle redirects ourselves if we do not allow cross-domain redirect
                 mConnection.setInstanceFollowRedirects(mAllowCrossDomainRedirect);
 
