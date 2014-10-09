@@ -53,6 +53,7 @@ import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -288,7 +289,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
-                manageMonitoringCertificateNotification(intent);
+                new MonitoringCertNotificationTask().execute(intent);
             }
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 removeUserData(userHandle);
@@ -1610,60 +1611,91 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void manageMonitoringCertificateNotification(Intent intent) {
-        final NotificationManager notificationManager = getNotificationManager();
+    private class MonitoringCertNotificationTask extends AsyncTask<Intent, Void, Void> {
+        @Override
+        protected Void doInBackground(Intent... params) {
+            int userHandle = params[0].getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
 
-        final boolean hasCert = !(new TrustedCertificateStore().userAliases().isEmpty());
-        if (! hasCert) {
-            if (intent.getAction().equals(KeyChain.ACTION_STORAGE_CHANGED)) {
-                for (UserInfo user : mUserManager.getUsers()) {
-                    notificationManager.cancelAsUser(
-                            null, MONITORING_CERT_NOTIFICATION_ID, user.getUserHandle());
+            if (userHandle == UserHandle.USER_ALL) {
+                for (UserInfo userInfo : mUserManager.getUsers()) {
+                    manageNotification(userInfo.getUserHandle());
                 }
+            } else {
+                manageNotification(new UserHandle(userHandle));
             }
-            return;
-        }
-        final boolean isManaged = getDeviceOwner() != null;
-        int smallIconId;
-        String contentText;
-        if (isManaged) {
-            contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed,
-                    getDeviceOwnerName());
-            smallIconId = R.drawable.stat_sys_certificate_info;
-        } else {
-            contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_unknown);
-            smallIconId = android.R.drawable.stat_sys_warning;
+            return null;
         }
 
-        Intent dialogIntent = new Intent(Settings.ACTION_MONITORING_CERT_INFO);
-        dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        dialogIntent.setPackage("com.android.settings");
-        // Notification will be sent individually to all users. The activity should start as
-        // whichever user is current when it starts.
-        PendingIntent notifyIntent = PendingIntent.getActivityAsUser(mContext, 0, dialogIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT, null, UserHandle.CURRENT);
-
-        Notification noti = new Notification.Builder(mContext)
-            .setSmallIcon(smallIconId)
-            .setContentTitle(mContext.getString(R.string.ssl_ca_cert_warning))
-            .setContentText(contentText)
-            .setContentIntent(notifyIntent)
-            .setPriority(Notification.PRIORITY_HIGH)
-            .setShowWhen(false)
-            .setColor(mContext.getResources().getColor(
-                    com.android.internal.R.color.system_notification_accent_color))
-            .build();
-
-        // If this is a boot intent, this will fire for each user. But if this is a storage changed
-        // intent, it will fire once, so we need to notify all users.
-        if (intent.getAction().equals(KeyChain.ACTION_STORAGE_CHANGED)) {
-            for (UserInfo user : mUserManager.getUsers()) {
-                notificationManager.notifyAsUser(
-                        null, MONITORING_CERT_NOTIFICATION_ID, noti, user.getUserHandle());
+        private void manageNotification(UserHandle userHandle) {
+            if (!mUserManager.isUserRunning(userHandle)) {
+                return;
             }
-        } else {
-            notificationManager.notifyAsUser(
-                    null, MONITORING_CERT_NOTIFICATION_ID, noti, UserHandle.CURRENT);
+
+            boolean hasCert = false;
+            final long id = Binder.clearCallingIdentity();
+            try {
+                KeyChainConnection kcs = KeyChain.bindAsUser(mContext, userHandle);
+                try {
+                    if (!kcs.getService().getUserCaAliases().getList().isEmpty()) {
+                        hasCert = true;
+                    }
+                } catch (RemoteException e) {
+                    Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
+                } finally {
+                    kcs.close();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (RuntimeException e) {
+                Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
+            } finally {
+                Binder.restoreCallingIdentity(id);
+            }
+            if (!hasCert) {
+                getNotificationManager().cancelAsUser(
+                        null, MONITORING_CERT_NOTIFICATION_ID, userHandle);
+                return;
+            }
+
+            int smallIconId;
+            String contentText;
+            final String ownerName = getDeviceOwnerName();
+            if (ownerName != null) {
+                contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed, ownerName);
+                smallIconId = R.drawable.stat_sys_certificate_info;
+            } else {
+                contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_unknown);
+                smallIconId = android.R.drawable.stat_sys_warning;
+            }
+
+            Intent dialogIntent = new Intent(Settings.ACTION_MONITORING_CERT_INFO);
+            dialogIntent.setFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            dialogIntent.setPackage("com.android.settings");
+            PendingIntent notifyIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                    dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT, null, userHandle);
+
+            final Context userContext;
+            try {
+                userContext = mContext.createPackageContextAsUser("android", 0, userHandle);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Create context as " + userHandle + " failed", e);
+                return;
+            }
+            final Notification noti = new Notification.Builder(userContext)
+                .setSmallIcon(smallIconId)
+                .setContentTitle(mContext.getString(R.string.ssl_ca_cert_warning))
+                .setContentText(contentText)
+                .setContentIntent(notifyIntent)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setShowWhen(false)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .build();
+
+            getNotificationManager().notifyAsUser(
+                    null, MONITORING_CERT_NOTIFICATION_ID, noti, userHandle);
         }
     }
 
