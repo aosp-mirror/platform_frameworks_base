@@ -1,0 +1,205 @@
+page.title=Publishing TV Apps
+page.tags="requirements","usability"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#requirements">Publishing Requirements for TV Apps</a>
+      <ol>
+        <li><a href="#requirements-manifest">Manifest Requirements</a></li>
+        <li><a href="#requirements-usability">Usability Requirements</a></li>
+      </ol>
+    </li>
+    <li><a href="#faq">Frequently Asked Questions</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  Apps for TV devices can be published like other Android apps. You must prepare your app for
+  release and then you can publish it through <a href=
+  "{@docRoot}distribute/googleplay/index.html">Google Play</a>. In order for your app to be
+  accepted as a TV app in Google Play, it must meet some additional requirements, which are covered
+  in this document.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> You will not be able to publish apps to TV devices through <a href=
+  "{@docRoot}distribute/googleplay/index.html">Google Play</a> until Android L SDK is released.
+</p>
+
+
+<h2 id="requirements">Publishing Requirements for TV Apps</h2>
+
+<p>
+  Your app must provide specific manifest declarations and meet some minimum usability requirements
+  before it can qualify as TV app on Google Play. Make sure your app meets these requirements to
+  get your app ready for TV devices.
+</p>
+
+<p class="caution">
+  <strong>Caution:</strong> Your app must meet all of the requirements described in this section in
+  order to qualify as a TV app on Google Play. If your app does not meet the usability requirements
+  described below, the Google Play team will contact you through the email address specified in main
+  <a href="https://play.google.com/apps/publish/">Google Play Developer Console</a> account
+  associated with the app.
+</p>
+
+<h3 id="requirements-manifest">Manifest Requirements</h3>
+
+<p>
+  Developers who want their apps to be considered for publishing on TV devices <em>must</em>
+  include a manifest entry that declares an activity which handles the {@code
+  android.intent.category.LEANBACK_LAUNCHER} intent filter. For more information about including
+  the required manifest entries, see <a href=
+  "{@docRoot}preview/tv/start/index.html#tv-activity">Get Started with TV Apps</a>.
+</p>
+
+<p class="caution">
+  <strong>Caution:</strong> If you do not include the <a href=
+  "{@docRoot}preview/tv/start/index.html#tv-activity">required manifest entries</a> for TV devices,
+  your app is not considered as a TV app. The app will not be reviewed for the TV app usability
+  requirements and will not be able to qualify as a TV app on Google Play.
+</p>
+
+
+<h3 id="requirements-usability">Usability Requirements</h3>
+
+<p>
+  Users bring a different set of expectations when watching TV. Apps for Android TV devices have a
+  different interaction, look and feel from Android apps on the phone or tablet. How users interact
+  with TVs (with a remote control device) and how they view them (sitting about 10 feet away),
+  significantly changes the requirements for what makes a good user experience in an app.
+</p>
+
+<p>
+  The first step toward creating a great experience for users on TV is to review and follow the
+  <a href="{@docRoot}preview/tv/design/index.html">Design for TV</a> guidelines. These guidelines
+  provide general directions for designing a TV app as well as some specific implementation
+  instructions.
+</p>
+
+<p>
+  Apps for TV devices must meet some specific requirements for usability. Only apps that meet the
+  following usability criteria will qualify as an TV app on Google Play:
+</p>
+
+<ul>
+  <li>App functionality must be navigable using 5-way D-pad controls, unless the app requires a
+    game controller.
+    (<a href="{@docRoot}preview/tv/ui/navigation.html#d-pad-navigation">details</a>)
+    <ul>
+      <li>If the app requires a game controller, all functionality must be navigable using
+        standard Android game controller keys.
+        (<a href="{@docRoot}training/game-controllers/controller-input.html#button">details</a>)
+      </li>
+    </ul>
+  </li>
+
+  <li>Layouts used on TV devices must be designed for landscape orientation.
+    (<a href="{@docRoot}preview/tv/ui/layouts.html#structure">details</a>)</li>
+
+  <li>Core text used in TV layouts must be at least 16sp in size and all text must be at least
+    12sp.</li>
+
+  <li>Text and functionality should be placed inside an overscan margin of at least 27dp from the
+    top and bottom edges and 48dp from the left and right edges of the TV screen.
+   (<a href="{@docRoot}preview/tv/ui/layouts.html#overscan">details</a>)</li>
+
+  <li>Apps that uses full-screen, non-video ads, must ensure that the ads are immediately
+    dismissible by the user with D-pad controls.</li>
+
+  <li>Apps must not depend on having a web browser app on TV devices. Apps can use <a href=
+    "http://developer.android.com/reference/android/webkit/WebView.html">WebView components</a> to
+    show web content where needed.</li>
+
+  <li>Apps that uses clickable, non-full screen, non-video ads must ensure that the ads do not link
+    to a web URL. These ads must also not link to an app or game that is not available on TV devices
+    and, therefore, not available in the Google Play store for TV.</li>
+
+  <li>Apps must display correctly on the Android TV launcher by doing the following:
+    <ul>
+      <li>Include in the app manifest an intent filter of type {@code ACTION_MAIN} with an intent
+        category {@code CATEGORY_LEANBACK_LAUNCHER}.
+        (<a href="{@docRoot}preview/tv/start/index.html#tv-activity">details</a>)
+      </li>
+
+      <li>Provide a 320x180px banner image resource and declare it in the manifest.</li>
+
+      <li>If the app is a game, it must set the {@code isGame} property to {@code true} in the
+        manifest. (<a href="{@docRoot}preview/tv/games/index.html#manifest">details</a>)
+      </li>
+    </ul>
+  </li>
+
+  <li>App must not partially obscure other apps. Apps must fill the entire screen and have a
+    non-transparent background.
+  </li>
+
+  <li>Music and audio apps that continue to play sound after a user has left the app must provide
+    a <strong>Now Playing</strong> card on the home screen recommendation row so users can easily
+    control playback. Developers should use the {@code android.media.session.MediaSession} API
+    to enable this card and link playback to a specific activity.
+  </li>
+
+  <li>Media apps that play video or music content must toggle between play and pause of media
+    playback when a <a href="{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_MEDIA_PLAY_PAUSE">
+    play or pause key event</a> is sent during playback.
+  </li>
+
+  <li>Games that use a gamepad in order to play must define gamepad use in the app manifest.
+    (<a href="{@docRoot}preview/tv/games/index.html#gamepad">details</a>)
+  </li>
+
+  <li>Games that provide in-game instructions for game controllers must show a generic controller
+    layout that does not include any branding. You can download generic controller artwork from
+    here: <a href="http://storage.googleapis.com/androiddevelopers/design/android_tv_gamepad_template-2014-10.zip">
+    android_tv_gamepad_template_2014-10.zip</a>.
+  </li>
+</ul>
+
+
+<h2 id="faq">Frequently Asked Questions</h2>
+
+<p>
+  <strong>After I submit my app, how will find out if my app does not meet all the requirements for
+  TV devices?</strong>
+</p>
+<p>
+  If your app does not meet the usability requirements described on this page, the Play Store team
+  will contact you through the email address specified in main <a href=
+  "https://play.google.com/apps/publish/">Google Play Developer Console</a> account associated with
+  the app.
+</p>
+<p class="caution">
+  <strong>Caution:</strong> Make sure your app includes the <a href=
+  "{@docRoot}preview/tv/start/index.html#tv-activity">required manifest entries</a> for TV devices,
+  otherwise your app will not be considered a TV app and will not be reviewed for TV usability
+  requirements.
+</p>
+
+
+<p>
+  <strong>My app targets more than just TV devices. If my app does not meet the TV device
+  requirements, will my new or updated app still appear on Google Play for phones and
+  tablets?</strong>
+</p>
+<p>
+  Yes. The requirements described above only restrict distribution to the Google Play Store on TV
+  devices. Distribution to other device types, such as phones, tablets and other devices, is not
+  affected.
+</p>
+
+
+<p>
+  <strong>If my app meets the publishing requirements, when will it be available in the Google
+    Play Store on TV devices?</strong>
+</p>
+
+<p>
+  Apps that meet the requirements for TV will appear in the Google Play Store on TV devices
+  <em>after</em> the official release of Android L.
+</p>
