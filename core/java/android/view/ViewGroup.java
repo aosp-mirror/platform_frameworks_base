@@ -6501,7 +6501,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public static class MarginLayoutParams extends ViewGroup.LayoutParams {
         /**
-         * The left margin in pixels of the child.
+         * The left margin in pixels of the child. Margin values should be positive.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
          */
@@ -6509,7 +6509,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public int leftMargin;
 
         /**
-         * The top margin in pixels of the child.
+         * The top margin in pixels of the child. Margin values should be positive.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
          */
@@ -6517,7 +6517,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public int topMargin;
 
         /**
-         * The right margin in pixels of the child.
+         * The right margin in pixels of the child. Margin values should be positive.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
          */
@@ -6525,7 +6525,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public int rightMargin;
 
         /**
-         * The bottom margin in pixels of the child.
+         * The bottom margin in pixels of the child. Margin values should be positive.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
          */
@@ -6533,7 +6533,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public int bottomMargin;
 
         /**
-         * The start margin in pixels of the child.
+         * The start margin in pixels of the child. Margin values should be positive.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
          */
@@ -6541,7 +6541,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         private int startMargin = DEFAULT_MARGIN_RELATIVE;
 
         /**
-         * The end margin in pixels of the child.
+         * The end margin in pixels of the child. Margin values should be positive.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
          */
@@ -6722,6 +6722,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Sets the margins, in pixels. A call to {@link android.view.View#requestLayout()} needs
          * to be done so that the new margins are taken into account. Left and right margins may be
          * overriden by {@link android.view.View#requestLayout()} depending on layout direction.
+         * Margin values should be positive.
          *
          * @param left the left margin size
          * @param top the top margin size
@@ -6751,7 +6752,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Sets the relative margins, in pixels. A call to {@link android.view.View#requestLayout()}
          * needs to be done so that the new relative margins are taken into account. Left and right
          * margins may be overriden by {@link android.view.View#requestLayout()} depending on layout
-         * direction.
+         * direction. Margin values should be positive.
          *
          * @param start the start margin size
          * @param top the top margin size
@@ -6774,7 +6775,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
-         * Sets the relative start margin.
+         * Sets the relative start margin. Margin values should be positive.
          *
          * @param start the start margin size
          *
@@ -6807,7 +6808,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
-         * Sets the relative end margin.
+         * Sets the relative end margin. Margin values should be positive.
          *
          * @param end the end margin size
          *
