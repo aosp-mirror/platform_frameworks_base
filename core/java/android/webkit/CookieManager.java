@@ -17,7 +17,6 @@
 package android.webkit;
 
 import android.net.WebAddress;
-import android.webkit.ValueCallback;
 
 /**
  * Manages the cookies used by an application's {@link WebView} instances.
@@ -81,7 +80,7 @@ public class CookieManager {
      * <p>
      * Apps that target {@link android.os.Build.VERSION_CODES#KITKAT} or below
      * default to allowing third party cookies. Apps targeting
-     * {@link android.os.Build.VERSION_CODES#L} or later default to disallowing
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} or later default to disallowing
      * third party cookies.
      *
      * @param webview the {@link WebView} instance to set the cookie policy on

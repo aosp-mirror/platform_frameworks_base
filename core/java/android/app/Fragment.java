@@ -1125,7 +1125,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
         // Newer platform versions use the child fragment manager's LayoutInflaterFactory.
-        if (mActivity.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+        if (mActivity.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
             LayoutInflater result = mActivity.getLayoutInflater().cloneInContext(mActivity);
             getChildFragmentManager(); // Init if needed; use raw implementation below.
             result.setPrivateFactory(mChildFragmentManager.getLayoutInflaterFactory());

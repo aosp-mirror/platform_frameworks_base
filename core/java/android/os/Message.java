@@ -260,7 +260,7 @@ public final class Message implements Parcelable {
 
     /** @hide */
     public static void updateCheckRecycle(int targetSdkVersion) {
-        if (targetSdkVersion < Build.VERSION_CODES.L) {
+        if (targetSdkVersion < Build.VERSION_CODES.LOLLIPOP) {
             gCheckRecycle = false;
         }
     }

@@ -3334,7 +3334,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final int targetSdk = context.getApplicationInfo().targetSdkVersion;
         final boolean targetPreHoneycomb = targetSdk < android.os.Build.VERSION_CODES.HONEYCOMB;
         final boolean targetPreIcs = targetSdk < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-        final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.L;
+        final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.LOLLIPOP;
         final boolean targetHcNeedsOptions = context.getResources().getBoolean(
                 R.bool.target_honeycomb_needs_options_menu);
         final boolean noActionBar = !hasFeature(FEATURE_ACTION_BAR) || hasFeature(FEATURE_NO_TITLE);
