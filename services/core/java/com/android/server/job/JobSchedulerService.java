@@ -70,8 +70,7 @@ import com.android.server.job.controllers.TimeController;
  */
 public class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
-    // TODO: Switch this off for final version.
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT = 3;
     static final String TAG = "JobSchedulerService";
