@@ -1948,7 +1948,7 @@ public class Notification implements Parcelable
             mPriority = PRIORITY_DEFAULT;
             mPeople = new ArrayList<String>();
 
-            mColorUtil = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.L ?
+            mColorUtil = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.LOLLIPOP ?
                     NotificationColorUtil.getInstance(mContext) : null;
         }
 

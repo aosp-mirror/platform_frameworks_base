@@ -82,7 +82,6 @@ import android.view.RenderNode;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HardwareCanvas;
-import android.view.HardwareRenderer;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -2793,7 +2792,7 @@ public class Editor {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             final boolean legacy = mTextView.getContext().getApplicationInfo().targetSdkVersion <
-                    Build.VERSION_CODES.L;
+                    Build.VERSION_CODES.LOLLIPOP;
             final Context context = !legacy && menu instanceof MenuBuilder ?
                     ((MenuBuilder) menu).getContext() :
                     mTextView.getContext();

@@ -930,7 +930,7 @@ public class ActivityManager {
      * same time, assumptions made about the meaning of the data here for
      * purposes of control flow will be incorrect.</p>
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this method is
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method is
      * no longer available to third party applications: the introduction of
      * document-centric recents means
      * it can leak personal information to the caller.  For backwards compatibility,
@@ -1216,7 +1216,7 @@ public class ActivityManager {
      * same time, assumptions made about the meaning of the data here for
      * purposes of control flow will be incorrect.</p>
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#L}, this method
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method
      * is no longer available to third party
      * applications: the introduction of document-centric recents means
      * it can leak person information to the caller.  For backwards compatibility,
