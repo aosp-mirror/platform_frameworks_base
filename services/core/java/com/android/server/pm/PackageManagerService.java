@@ -4475,12 +4475,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Sort apps by importance for dexopt ordering. Important apps are given more priority
             // in case the device runs out of space.
             ArrayList<PackageParser.Package> sortedPkgs = new ArrayList<PackageParser.Package>();
+            // Give priority to core apps.
+            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
+                PackageParser.Package pkg = it.next();
+                if (pkg.coreApp) {
+                    if (DEBUG_DEXOPT) {
+                        Log.i(TAG, "Adding core app " + sortedPkgs.size() + ": " + pkg.packageName);
+                    }
+                    sortedPkgs.add(pkg);
+                    it.remove();
+                }
+            }
             // Give priority to system apps that listen for pre boot complete.
             Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
             HashSet<String> pkgNames = getPackageNamesForIntent(intent);
             for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
                 PackageParser.Package pkg = it.next();
                 if (pkgNames.contains(pkg.packageName)) {
+                    if (DEBUG_DEXOPT) {
+                        Log.i(TAG, "Adding pre boot system app " + sortedPkgs.size() + ": " + pkg.packageName);
+                    }
                     sortedPkgs.add(pkg);
                     it.remove();
                 }
@@ -4488,7 +4502,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Give priority to system apps.
             for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
                 PackageParser.Package pkg = it.next();
-                if (isSystemApp(pkg)) {
+                if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
+                    if (DEBUG_DEXOPT) {
+                        Log.i(TAG, "Adding system app " + sortedPkgs.size() + ": " + pkg.packageName);
+                    }
+                    sortedPkgs.add(pkg);
+                    it.remove();
+                }
+            }
+            // Give priority to updated system apps.
+            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
+                PackageParser.Package pkg = it.next();
+                if (isUpdatedSystemApp(pkg)) {
+                    if (DEBUG_DEXOPT) {
+                        Log.i(TAG, "Adding updated system app " + sortedPkgs.size() + ": " + pkg.packageName);
+                    }
                     sortedPkgs.add(pkg);
                     it.remove();
                 }
@@ -4499,6 +4527,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
                 PackageParser.Package pkg = it.next();
                 if (pkgNames.contains(pkg.packageName)) {
+                    if (DEBUG_DEXOPT) {
+                        Log.i(TAG, "Adding boot app " + sortedPkgs.size() + ": " + pkg.packageName);
+                    }
                     sortedPkgs.add(pkg);
                     it.remove();
                 }
@@ -4513,6 +4544,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             int i = 0;
             int total = sortedPkgs.size();
             for (PackageParser.Package pkg : sortedPkgs) {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, "Adding app " + sortedPkgs.size() + ": " + pkg.packageName);
+                }
                 performBootDexOpt(pkg, ++i, total);
             }
         }
@@ -5136,6 +5170,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        } else {
+            // Only allow system apps to be flagged as core apps.
+            pkg.coreApp = false;
         }
 
         if ((parseFlags&PackageParser.PARSE_IS_PRIVILEGED) != 0) {
