@@ -105,8 +105,8 @@ or more records ({@link android.nfc.NdefRecord}). Each NDEF record must be well-
 the specification of the type of record that you want to create. Android
 also supports other types of tags that do not contain NDEF data, which you can work with by using
 the classes in the {@link android.nfc.tech} package. To learn more
-about these technologies, see the <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html">Advanced
-NFC</a> topic. Working with these other types of tags involves
+about these technologies, see the <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html
+">Advanced NFC</a> topic. Working with these other types of tags involves
 writing your own protocol stack to communicate with the tags, so we recommend using NDEF when
 possible for ease of development and maximum support for Android-powered devices.
 </p>
@@ -477,8 +477,8 @@ tag from the intent. Intents can contain the following extras depending on the t
   <li>{@link android.nfc.NfcAdapter#EXTRA_TAG} (required): A {@link android.nfc.Tag} object
 representing the scanned tag.</li>
   <li>{@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES} (optional): An array of NDEF messages
-parsed from the tag. This extra is mandatory on {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED
-intents.</li>
+parsed from the tag. This extra is mandatory on
+{@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} intents.</li>
   <li>{@link android.nfc.NfcAdapter#EXTRA_ID} (optional): The low-level ID of the tag.</li></ul>
 
 <p>To obtain these extras, check to see if your activity was launched with one of
@@ -513,7 +513,8 @@ contain the payload and allow you to enumerate the tag's technologies:</p>
 <p>This section describes how to create common types of NDEF records to help you when writing to
 NFC tags or sending data with Android Beam. Starting with Android 4.0 (API level 14), the
 {@link android.nfc.NdefRecord#createUri createUri()} method is available to help you create
-URI records automatically. Starting in Android 4.1 (API level 16), {@link android.nfc.NdefRecord#createExternal createExternal()}
+URI records automatically. Starting in Android 4.1 (API level 16),
+{@link android.nfc.NdefRecord#createExternal createExternal()}
 and {@link android.nfc.NdefRecord#createMime createMime()} are available to help you create
 MIME and external type NDEF records. Use these helper methods whenever possible to avoid mistakes
 when manually creating NDEF records.</p>
@@ -528,7 +529,8 @@ record of the NDEF message that you are writing to a tag or beaming.</p>
   <a href="#well-known-uri"><code>RTD_URI</code></a> type instead
   of {@link android.nfc.NdefRecord#TNF_ABSOLUTE_URI}, because it is more efficient.</p>
 
-<p>You can create a {@link android.nfc.NdefRecord#TNF_ABSOLUTE_URI} NDEF record in the following way:</p>
+<p>You can create a {@link android.nfc.NdefRecord#TNF_ABSOLUTE_URI} NDEF record in the following way
+:</p>
 
 <pre>
 NdefRecord uriRecord = new NdefRecord(
@@ -549,7 +551,8 @@ NdefRecord uriRecord = new NdefRecord(
 </pre>
 
 <h3 id="mime">TNF_MIME_MEDIA</h3>
-<p>You can create a {@link android.nfc.NdefRecord#TNF_MIME_MEDIA} NDEF record in the following ways.</p>
+<p>You can create a {@link android.nfc.NdefRecord#TNF_MIME_MEDIA} NDEF record in the following ways:
+</p>
 
 <p>Using the {@link android.nfc.NdefRecord#createMime createMime()} method:</p>
 <pre>
@@ -576,7 +579,8 @@ NdefRecord mimeRecord = new NdefRecord(
 
 <h3 id="well-known-text">TNF_WELL_KNOWN with RTD_TEXT</h3>
 
-<p>You can create a {@link android.nfc.NdefRecord#TNF_WELL_KNOWN} NDEF record in the following way:</p>
+<p>You can create a {@link android.nfc.NdefRecord#TNF_WELL_KNOWN} NDEF record in the following way:
+</p>
 <pre>
 public NdefRecord createTextRecord(String payload, Locale locale, boolean encodeInUtf8) {
     byte[] langBytes = locale.getLanguage().getBytes(Charset.forName("US-ASCII"));
@@ -606,7 +610,8 @@ public NdefRecord createTextRecord(String payload, Locale locale, boolean encode
 
 <h3 id="well-known-uri">TNF_WELL_KNOWN with RTD_URI</h3>
 
-<p>You can create a {@link android.nfc.NdefRecord#TNF_WELL_KNOWN} NDEF record in the following ways.</p>
+<p>You can create a {@link android.nfc.NdefRecord#TNF_WELL_KNOWN} NDEF record in the following ways:
+</p>
 
 <p>Using the {@link android.nfc.NdefRecord#createUri(String)} method:</p>
 <pre>
@@ -642,7 +647,8 @@ NdefRecord rtdUriRecord = new NdefRecord(
 </pre>
 
 <h3 id="ext-type">TNF_EXTERNAL_TYPE</h3>
-<p>You can create a {@link android.nfc.NdefRecord#TNF_EXTERNAL_TYPE} NDEF record in the following ways:</p>
+<p>You can create a {@link android.nfc.NdefRecord#TNF_EXTERNAL_TYPE} NDEF record in the following
+ways:</p>
 
 <p>Using the {@link android.nfc.NdefRecord#createExternal createExternal()} method:
 <pre>
@@ -681,19 +687,19 @@ android.nfc.NdefRecord#TNF_EXTERNAL_TYPE} have a canonical format of:
 declares that the <code>urn:nfc:ext:</code> portion of the URN must be ommitted from the
 NDEF record. So all you need to provide is the domain (<code>example.com</code> in the example)
 and type (<code>externalType</code> in the example) separated by a colon.
-When dispatching TNF_EXTERNAL_TYPE, Android converts the <code>urn:nfc:ext:example.com:externalType</code> URN to a
-<code>vnd.android.nfc://ext/example.com:externalType</code> URI, which is what the intent filter in the example
-declares.</p>
+When dispatching TNF_EXTERNAL_TYPE, Android converts the <code>urn:nfc:ext:example.com:externalType
+</code> URN to a <code>vnd.android.nfc://ext/example.com:externalType</code> URI, which is what the
+intent filter in the example declares.</p>
 
 <h3 id="aar">Android Application Records</h3>
 
 <p>
 Introduced in Android 4.0 (API level 14), an Android Application Record (AAR) provides a stronger
 certainty that your application is started when an NFC tag is scanned. An AAR has the package name
-of an application embedded inside an NDEF record. You can add an AAR to any NDEF record of your NDEF message,
-because Android searches the entire NDEF message for AARs. If it finds an AAR, it starts the application based
-on the package name inside the AAR. If the application is not present on the device,
-Google Play is launched to download the application.</p>
+of an application embedded inside an NDEF record. You can add an AAR to any NDEF record of your NDEF
+message, because Android searches the entire NDEF message for AARs. If it finds an AAR, it starts
+the application based on the package name inside the AAR. If the application is not present on the
+device, Google Play is launched to download the application.</p>
 
 <p>AARs are useful if you want to prevent other applications from filtering for the same intent and
 potentially handling specific tags that you have deployed. AARs are only supported at the
@@ -717,11 +723,11 @@ application based on the AAR.</li>
 
 </p>
 
-<p class="note"><strong>Note:</strong> You can override AARs and the intent dispatch system with the <a
-href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground dispatch
-system</a>, which allows a foreground activity to have priority when an NFC tag is discovered.
-With this method, the activity must be in the foreground to
-override AARs and the intent dispatch system.</p>
+<p class="note"><strong>Note:</strong> You can override AARs and the intent dispatch system with the
+ <ahref="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground
+ dispatch system</a>, which allows a foreground activity to have priority when an NFC tag is
+ discovered. With this method, the activity must be in the foreground to override AARs and the
+ intent dispatch system.</p>
 
 <p>If you still want to filter for scanned tags that do not contain an AAR, you can declare
 intent filters as normal. This is useful if your application is interested in other tags
@@ -799,9 +805,9 @@ API level 14 (Android 4.0) and later.</li>
 
   <p class="note"><strong>Note:</strong> If your activity enables Android Beam and is
 in the foreground, the standard intent dispatch system is disabled. However, if your activity also
-enables <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground
-dispatching</a>, then it can still scan tags that match the intent filters set in the foreground
-dispatching.</p>
+enables <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">
+foreground dispatching</a>, then it can still scan tags that match the intent filters set in the
+foreground dispatching.</p>
 
   <p>To enable Android Beam:</p>
 
