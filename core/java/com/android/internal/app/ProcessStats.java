@@ -2159,13 +2159,14 @@ public final class ProcessStats implements Parcelable {
             boolean dumpAll, boolean activeOnly) {
         long totalTime = dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
+        boolean sepNeeded = false;
         if (mSysMemUsageTable != null) {
             pw.println("System memory usage:");
             dumpSysMemUsage(pw, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ);
+            sepNeeded = true;
         }
         ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
         boolean printedHeader = false;
-        boolean sepNeeded = false;
         for (int ip=0; ip<pkgMap.size(); ip++) {
             final String pkgName = pkgMap.keyAt(ip);
             final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
@@ -2193,6 +2194,7 @@ public final class ProcessStats implements Parcelable {
                     }
                     if (NPROCS > 0 || NSRVS > 0) {
                         if (!printedHeader) {
+                            if (sepNeeded) pw.println();
                             pw.println("Per-Package Stats:");
                             printedHeader = true;
                             sepNeeded = true;

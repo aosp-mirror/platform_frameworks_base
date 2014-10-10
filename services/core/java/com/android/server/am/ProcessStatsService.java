@@ -791,7 +791,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     reqPackage = arg;
                     // Include all details, since we know we are only going to
                     // be dumping a smaller set of data.  In fact only the details
-                    // container per-package data, so that are needed to be able
+                    // contain per-package data, so this is needed to be able
                     // to dump anything at all when filtering by package.
                     dumpDetails = true;
                 }

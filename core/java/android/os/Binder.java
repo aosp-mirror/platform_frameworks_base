@@ -31,15 +31,32 @@ import java.lang.reflect.Modifier;
  * Base class for a remotable object, the core part of a lightweight
  * remote procedure call mechanism defined by {@link IBinder}.
  * This class is an implementation of IBinder that provides
- * the standard support creating a local implementation of such an object.
- * 
+ * standard local implementation of such an object.
+ *
  * <p>Most developers will not implement this class directly, instead using the
  * <a href="{@docRoot}guide/components/aidl.html">aidl</a> tool to describe the desired
  * interface, having it generate the appropriate Binder subclass.  You can,
  * however, derive directly from Binder to implement your own custom RPC
  * protocol or simply instantiate a raw Binder object directly to use as a
  * token that can be shared across processes.
- * 
+ *
+ * <p>This class is just a basic IPC primitive; it has no impact on an application's
+ * lifecycle, and is valid only as long as the process that created it continues to run.
+ * To use this correctly, you must be doing so within the context of a top-level
+ * application component (a {@link android.app.Service}, {@link android.app.Activity},
+ * or {@link android.content.ContentProvider}) that lets the system know your process
+ * should remain running.</p>
+ *
+ * <p>You must keep in mind the situations in which your process
+ * could go away, and thus require that you later re-create a new Binder and re-attach
+ * it when the process starts again.  For example, if you are using this within an
+ * {@link android.app.Activity}, your activity's process may be killed any time the
+ * activity is not started; if the activity is later re-created you will need to
+ * create a new Binder and hand it back to the correct place again; you need to be
+ * aware that your process may be started for another reason (for example to receive
+ * a broadcast) that will not involve re-creating the activity and thus run its code
+ * to create a new Binder.</p>
+ *
  * @see IBinder
  */
 public class Binder implements IBinder {
