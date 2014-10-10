@@ -25,10 +25,9 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		Animator.cpp \
 		AnimatorManager.cpp \
 		AssetAtlas.cpp \
-		DamageAccumulator.cpp \
-		FontRenderer.cpp \
-		GammaFontRenderer.cpp \
 		Caches.cpp \
+		CanvasState.cpp \
+		DamageAccumulator.cpp \
 		DisplayList.cpp \
 		DeferredDisplayList.cpp \
 		DeferredLayerUpdater.cpp \
@@ -38,6 +37,8 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		DrawProfiler.cpp \
 		Extensions.cpp \
 		FboCache.cpp \
+		FontRenderer.cpp \
+		GammaFontRenderer.cpp \
 		GradientCache.cpp \
 		Image.cpp \
 		Interpolator.cpp \
@@ -62,7 +63,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		SkiaShader.cpp \
 		Snapshot.cpp \
 		SpotShadow.cpp \
-		StatefulBaseRenderer.cpp \
 		Stencil.cpp \
 		TessellationCache.cpp \
 		Texture.cpp \

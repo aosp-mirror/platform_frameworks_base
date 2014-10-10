@@ -32,7 +32,8 @@ namespace android {
 namespace uirenderer {
 
 DisplayListRenderer::DisplayListRenderer()
-    : mCaches(Caches::getInstance())
+    : mState(*this)
+    , mCaches(Caches::getInstance())
     , mDisplayListData(NULL)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)
@@ -66,10 +67,10 @@ void DisplayListRenderer::prepareDirty(float left, float top,
             "prepareDirty called a second time during a recording!");
     mDisplayListData = new DisplayListData();
 
-    initializeSaveStack(0, 0, getWidth(), getHeight(), Vector3());
+    mState.initializeSaveStack(0, 0, mState.getWidth(), mState.getHeight(), Vector3());
 
     mDeferredBarrierType = kBarrier_InOrder;
-    mDirtyClip = opaque;
+    mState.setDirtyClip(opaque);
     mRestoreSaveCount = -1;
 }
 
@@ -93,7 +94,7 @@ void DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
 
 int DisplayListRenderer::save(int flags) {
     addStateOp(new (alloc()) SaveOp(flags));
-    return StatefulBaseRenderer::save(flags);
+    return mState.save(flags);
 }
 
 void DisplayListRenderer::restore() {
@@ -104,13 +105,13 @@ void DisplayListRenderer::restore() {
 
     mRestoreSaveCount--;
     flushTranslate();
-    StatefulBaseRenderer::restore();
+    mState.restore();
 }
 
 void DisplayListRenderer::restoreToCount(int saveCount) {
     mRestoreSaveCount = saveCount;
     flushTranslate();
-    StatefulBaseRenderer::restoreToCount(saveCount);
+    mState.restoreToCount(saveCount);
 }
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
@@ -120,7 +121,7 @@ int DisplayListRenderer::saveLayer(float left, float top, float right, float bot
 
     paint = refPaint(paint);
     addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, paint, flags));
-    return StatefulBaseRenderer::save(flags);
+    return mState.save(flags);
 }
 
 void DisplayListRenderer::translate(float dx, float dy, float dz) {
@@ -129,50 +130,50 @@ void DisplayListRenderer::translate(float dx, float dy, float dz) {
     mTranslateX += dx;
     mTranslateY += dy;
     flushRestoreToCount();
-    StatefulBaseRenderer::translate(dx, dy, dz);
+    mState.translate(dx, dy, dz);
 }
 
 void DisplayListRenderer::rotate(float degrees) {
     addStateOp(new (alloc()) RotateOp(degrees));
-    StatefulBaseRenderer::rotate(degrees);
+    mState.rotate(degrees);
 }
 
 void DisplayListRenderer::scale(float sx, float sy) {
     addStateOp(new (alloc()) ScaleOp(sx, sy));
-    StatefulBaseRenderer::scale(sx, sy);
+    mState.scale(sx, sy);
 }
 
 void DisplayListRenderer::skew(float sx, float sy) {
     addStateOp(new (alloc()) SkewOp(sx, sy));
-    StatefulBaseRenderer::skew(sx, sy);
+    mState.skew(sx, sy);
 }
 
 void DisplayListRenderer::setMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) SetMatrixOp(matrix));
-    StatefulBaseRenderer::setMatrix(matrix);
+    mState.setMatrix(matrix);
 }
 
 void DisplayListRenderer::concatMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) ConcatMatrixOp(matrix));
-    StatefulBaseRenderer::concatMatrix(matrix);
+    mState.concatMatrix(matrix);
 }
 
 bool DisplayListRenderer::clipRect(float left, float top, float right, float bottom,
         SkRegion::Op op) {
     addStateOp(new (alloc()) ClipRectOp(left, top, right, bottom, op));
-    return StatefulBaseRenderer::clipRect(left, top, right, bottom, op);
+    return mState.clipRect(left, top, right, bottom, op);
 }
 
 bool DisplayListRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
     path = refPath(path);
     addStateOp(new (alloc()) ClipPathOp(path, op));
-    return StatefulBaseRenderer::clipPath(path, op);
+    return mState.clipPath(path, op);
 }
 
 bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     region = refRegion(region);
     addStateOp(new (alloc()) ClipRegionOp(region, op));
-    return StatefulBaseRenderer::clipRegion(region, op);
+    return mState.clipRegion(region, op);
 }
 
 void DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
@@ -180,7 +181,7 @@ void DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, in
 
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
-    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *currentTransform());
+    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *mState.currentTransform());
     addRenderNodeOp(op);
 }
 

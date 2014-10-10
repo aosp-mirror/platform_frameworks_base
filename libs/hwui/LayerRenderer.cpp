@@ -91,7 +91,7 @@ bool LayerRenderer::finish() {
     return retval;
 }
 
-GLuint LayerRenderer::getTargetFbo() const {
+GLuint LayerRenderer::onGetTargetFbo() const {
     return mLayer->getFbo();
 }
 
@@ -116,7 +116,7 @@ void LayerRenderer::ensureStencilBuffer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Region* LayerRenderer::getRegion() const {
-    if (currentSnapshot()->flags & Snapshot::kFlagFboTarget) {
+    if (mState.currentFlags() & Snapshot::kFlagFboTarget) {
         return OpenGLRenderer::getRegion();
     }
     return &mLayer->region;
