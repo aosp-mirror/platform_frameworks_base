@@ -1785,6 +1785,7 @@
   <java-symbol type="drawable" name="notification_icon_legacy_bg" />
   <java-symbol type="color" name="notification_media_primary_color" />
   <java-symbol type="color" name="notification_media_secondary_color" />
+  <java-symbol type="color" name="notification_progress_background_color" />
   <java-symbol type="id" name="media_actions" />
 
     <!-- From SystemUI -->
