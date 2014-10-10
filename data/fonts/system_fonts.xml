@@ -129,12 +129,22 @@
     <family>
         <nameset>
             <name>monospace</name>
-            <name>courier</name>
-            <name>courier new</name>
+            <name>sans-serif-monospace</name>
             <name>monaco</name>
         </nameset>
         <fileset>
             <file>DroidSansMono.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>serif-monospace</name>
+            <name>courier</name>
+            <name>courier new</name>
+        </nameset>
+        <fileset>
+            <file>CutiveMono.ttf</file>
         </fileset>
     </family>
 
