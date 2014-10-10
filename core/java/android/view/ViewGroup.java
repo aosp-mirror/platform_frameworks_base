@@ -3671,6 +3671,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #generateDefaultLayoutParams()
      */
     public void addView(View child, int index) {
+        if (child == null) {
+            throw new IllegalArgumentException("Cannot add a null child view to a ViewGroup");
+        }
         LayoutParams params = child.getLayoutParams();
         if (params == null) {
             params = generateDefaultLayoutParams();
@@ -3726,6 +3729,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void addView(View child, int index, LayoutParams params) {
         if (DBG) {
             System.out.println(this + " addView");
+        }
+
+        if (child == null) {
+            throw new IllegalArgumentException("Cannot add a null child view to a ViewGroup");
         }
 
         // addViewInner() will call child.requestLayout() when setting the new LayoutParams
@@ -3855,6 +3862,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected boolean addViewInLayout(View child, int index, LayoutParams params,
             boolean preventRequestLayout) {
+        if (child == null) {
+            throw new IllegalArgumentException("Cannot add a null child view to a ViewGroup");
+        }
         child.mParent = null;
         addViewInner(child, index, params, preventRequestLayout);
         child.mPrivateFlags = (child.mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
