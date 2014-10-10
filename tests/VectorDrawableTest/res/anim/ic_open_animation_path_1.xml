@@ -1,0 +1,48 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="500"
+            android:propertyName="pathData"
+            android:valueFrom="M 0,-17.3838043213 c -9.625,0.0 -17.0795440674,8.28025817871 -17.0795440674,17.4052734375 c 0.0,9.75645446777 7.51704406738,17.6295623779 17.0795440674,17.353515625 c 11.5579986572,-0.333648681641 17.2784118652,-8.72853088379 17.2784118652,-17.353515625 c 0.0,-8.62501525879 -7.65341186523,-17.4052734375 -17.2784118652,-17.4052734375 Z"
+            android:valueTo="M 0,-17.3838043213 c -9.625,0.0 -17.0795440674,8.28025817871 -17.0795440674,17.4052734375 c 0.0,9.75645446777 7.51704406738,17.6295623779 17.0795440674,17.353515625 c 11.5579986572,-0.333648681641 17.2784118652,-8.72853088379 17.2784118652,-17.353515625 c 0.0,-8.62501525879 -7.65341186523,-17.4052734375 -17.2784118652,-17.4052734375 Z"
+            android:valueType="pathType"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="267"
+            android:propertyName="pathData"
+            android:valueFrom="M 0,-17.3838043213 c -9.625,0.0 -17.0795440674,8.28025817871 -17.0795440674,17.4052734375 c 0.0,9.75645446777 7.51704406738,17.6295623779 17.0795440674,17.353515625 c 11.5579986572,-0.333648681641 17.2784118652,-8.72853088379 17.2784118652,-17.353515625 c 0.0,-8.62501525879 -7.65341186523,-17.4052734375 -17.2784118652,-17.4052734375 Z"
+            android:valueTo="M 0,-6 c -9.625,0 -23.5648803711,6.97859191895 -23.5648803711,16.1035919189 c 0.0,8.875 6.62738037109,8.39640808105 23.5648803711,8.39640808105 c 17.0625,0.0 23.8825073242,0.375 23.8825073242,-8.25 c 0.0,-8.625 -14.2574920654,-16.25 -23.8825073242,-16.25 Z"
+            android:valueType="pathType"
+            android:interpolator="@interpolator/ic_open_path_1_pathdata_interpolator_1" />
+        <objectAnimator
+            android:duration="33"
+            android:propertyName="pathData"
+            android:valueFrom="M 0,-6 c -9.625,0 -23.5648803711,6.97859191895 -23.5648803711,16.1035919189 c 0.0,8.875 6.62738037109,8.39640808105 23.5648803711,8.39640808105 c 17.0625,0.0 23.8825073242,0.375 23.8825073242,-8.25 c 0.0,-8.625 -14.2574920654,-16.25 -23.8825073242,-16.25 Z"
+            android:valueTo="M 0,-6 c -9.625,0 -23.5648803711,6.97859191895 -23.5648803711,16.1035919189 c 0.0,8.875 6.62738037109,8.39640808105 23.5648803711,8.39640808105 c 17.0625,0.0 23.8825073242,0.375 23.8825073242,-8.25 c 0.0,-8.625 -14.2574920654,-16.25 -23.8825073242,-16.25 Z"
+            android:valueType="pathType"
+            android:interpolator="@interpolator/ic_open_path_1_pathdata_interpolator_2" />
+        <objectAnimator
+            android:duration="67"
+            android:propertyName="pathData"
+            android:valueFrom="M 0,-6 c -9.625,0 -23.5648803711,6.97859191895 -23.5648803711,16.1035919189 c 0.0,8.875 6.62738037109,8.39640808105 23.5648803711,8.39640808105 c 17.0625,0.0 23.8825073242,0.375 23.8825073242,-8.25 c 0.0,-8.625 -14.2574920654,-16.25 -23.8825073242,-16.25 Z"
+            android:valueTo="M 0,-17.3838043213 c -9.625,0.0 -17.0795440674,8.28025817871 -17.0795440674,17.4052734375 c 0.0,9.75645446777 7.51704406738,17.6295623779 17.0795440674,17.353515625 c 11.5579986572,-0.333648681641 17.2784118652,-8.72853088379 17.2784118652,-17.353515625 c 0.0,-8.62501525879 -7.65341186523,-17.4052734375 -17.2784118652,-17.4052734375 Z"
+            android:valueType="pathType"
+            android:interpolator="@interpolator/ic_open_path_1_pathdata_interpolator_3" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="933"
+            android:propertyName="fillAlpha"
+            android:valueFrom="1"
+            android:valueTo="1"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="17"
+            android:propertyName="fillAlpha"
+            android:valueFrom="1"
+            android:valueTo="0"
+            android:interpolator="@android:interpolator/linear" />
+    </set>
+</set>
