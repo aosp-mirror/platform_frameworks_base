@@ -774,6 +774,14 @@ public abstract class PanelView extends FrameLayout {
         requestLayout();
     }
 
+    public void instantCollapse() {
+        abortAnimations();
+        setExpandedFraction(0f);
+        if (mExpanding) {
+            notifyExpandingFinished();
+        }
+    }
+
     private void abortAnimations() {
         cancelPeek();
         if (mHeightAnimator != null) {
