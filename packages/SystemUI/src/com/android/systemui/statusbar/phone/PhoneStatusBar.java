@@ -3746,7 +3746,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void instantCollapseNotificationPanel() {
-        mNotificationPanel.setExpandedFraction(0);
+        mNotificationPanel.instantCollapse();
     }
 
     @Override
