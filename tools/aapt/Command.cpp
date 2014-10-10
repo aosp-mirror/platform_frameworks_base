@@ -23,6 +23,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <iostream>
+#include <string>
+#include <sstream>
+
 using namespace android;
 
 #ifndef AAPT_VERSION
@@ -2504,6 +2508,37 @@ int doSingleCrunch(Bundle* bundle)
     }
 
     return NO_ERROR;
+}
+
+int runInDaemonMode(Bundle* bundle) {
+    std::cout << "Ready" << std::endl;
+    for (std::string line; std::getline(std::cin, line);) {
+        if (line == "quit") {
+            return NO_ERROR;
+        }
+        std::stringstream ss;
+        ss << line;
+        std::string s;
+
+        std::string command, parameterOne, parameterTwo;
+        std::getline(ss, command, ' ');
+        std::getline(ss, parameterOne, ' ');
+        std::getline(ss, parameterTwo, ' ');
+        if (command[0] == 's') {
+            bundle->setSingleCrunchInputFile(parameterOne.c_str());
+            bundle->setSingleCrunchOutputFile(parameterTwo.c_str());
+            std::cout << "Crunching " << parameterOne << std::endl;
+            if (doSingleCrunch(bundle) != NO_ERROR) {
+                std::cout << "Error" << std::endl;
+            }
+            std::cout << "Done" << std::endl;
+        } else {
+            // in case of invalid command, just bail out.
+            std::cerr << "Unknown command" << std::endl;
+            return -1;
+        }
+    }
+    return -1;
 }
 
 char CONSOLE_DATA[2925] = {
