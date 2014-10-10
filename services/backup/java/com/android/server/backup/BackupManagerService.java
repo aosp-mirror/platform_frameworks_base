@@ -2415,6 +2415,11 @@ public class BackupManagerService extends IBackupManager.Stub {
                     mStatus = invokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
                             IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
                     addBackupTrace("PMBA invoke: " + mStatus);
+
+                    // Because the PMBA is a local instance, it has already executed its
+                    // backup callback and returned.  Blow away the lingering (spurious)
+                    // pending timeout message for it.
+                    mBackupHandler.removeMessages(MSG_TIMEOUT);
                 }
 
                 if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
