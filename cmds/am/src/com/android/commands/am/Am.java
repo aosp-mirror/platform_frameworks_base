@@ -114,11 +114,7 @@ public class Am extends BaseCommand {
                 "       am broadcast [--user <USER_ID> | all | current] <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--user <USER_ID> | current]\n" +
-                "               [--no-window-animation]\n" +
-                "               [--abi <ABI>]\n : Launch the instrumented process with the "  +
-                "                   selected ABI. This assumes that the process supports the" +
-                "                   selected ABI." +
-                "               <COMPONENT>\n" +
+                "               [--no-window-animation] [--abi <ABI>] <COMPONENT>\n" +
                 "       am profile start [--user <USER_ID> current] <PROCESS> <FILE>\n" +
                 "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
@@ -194,6 +190,8 @@ public class Am extends BaseCommand {
                 "    --user <USER_ID> | current: Specify user instrumentation runs in;\n" +
                 "        current user if not specified.\n" +
                 "    --no-window-animation: turn off window animations while running.\n" +
+                "    --abi <ABI>: Launch the instrumented process with the selected ABI.\n"  +
+                "        This assumes that the process supports the selected ABI.\n" +
                 "\n" +
                 "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
                 "  may be either a process name or pid.  Options are:\n" +
