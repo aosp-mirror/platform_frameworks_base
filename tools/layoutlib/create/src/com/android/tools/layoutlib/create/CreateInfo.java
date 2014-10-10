@@ -23,6 +23,10 @@ import com.android.tools.layoutlib.java.IntegralToString;
 import com.android.tools.layoutlib.java.Objects;
 import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Describes the work to be done by {@link AsmGenerator}.
  */
@@ -97,6 +101,17 @@ public final class CreateInfo implements ICreateInfo {
     @Override
     public String[] getJavaPkgClasses() {
       return JAVA_PKG_CLASSES;
+    }
+
+    public Set<String> getExcludedClasses() {
+        String[] refactoredClasses = getJavaPkgClasses();
+        int count = refactoredClasses.length / 2 + EXCLUDED_CLASSES.length;
+        Set<String> excludedClasses = new HashSet<String>(count);
+        for (int i = 0; i < refactoredClasses.length; i+=2) {
+            excludedClasses.add(refactoredClasses[i]);
+        }
+        excludedClasses.addAll(Arrays.asList(EXCLUDED_CLASSES));
+        return excludedClasses;
     }
     //-----
 
@@ -240,6 +255,11 @@ public final class CreateInfo implements ICreateInfo {
             "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
+        };
+
+    private final static String[] EXCLUDED_CLASSES =
+        new String[] {
+            "org.kxml2.io.KXmlParser"
         };
 
     /**

@@ -18,6 +18,7 @@ package com.android.tools.layoutlib.create;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class Main {
 
         try {
             CreateInfo info = new CreateInfo();
-            Set<String> excludeClasses = getExcludedClasses(info);
+            Set<String> excludeClasses = info.getExcludedClasses();
             AsmGenerator agen = new AsmGenerator(log, osDestJar, info);
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
@@ -154,16 +155,6 @@ public class Main {
         }
 
         return 1;
-    }
-
-    private static Set<String> getExcludedClasses(CreateInfo info) {
-        String[] refactoredClasses = info.getJavaPkgClasses();
-        Set<String> excludedClasses = new HashSet<String>(refactoredClasses.length);
-        for (int i = 0; i < refactoredClasses.length; i+=2) {
-            excludedClasses.add(refactoredClasses[i]);
-        }
-        return excludedClasses;
-
     }
 
     private static int listDeps(ArrayList<String> osJarPath, Log log) {
