@@ -44,6 +44,16 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     // device's preferred wallpaper image dimensions.
     private static final boolean REJECT_OUTSIZED_RESTORE = true;
 
+    // When outsized restore rejection is enabled, this is the maximum ratio between the
+    // source and target image heights that will be permitted.  The ratio is checked both
+    // ways (i.e. >= MAX, or <= 1/MAX) to validate restores from both largeer-than-target
+    // and smaller-than-target sources.
+    private static final double MAX_HEIGHT_RATIO = 1.35;
+
+    // The height ratio check when applying larger images on smaller screens is separate;
+    // in current policy we accept any such restore regardless of the relative dimensions.
+    private static final double MIN_HEIGHT_RATIO = 0;
+
     // This path must match what the WallpaperManagerService uses
     // TODO: Will need to change if backing up non-primary user's wallpaper
     public static final String WALLPAPER_IMAGE =
@@ -142,8 +152,8 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                         // letterboxing.
                         final double heightRatio = mDesiredMinHeight / options.outHeight;
                         if (options.outWidth < mDesiredMinWidth
-                                || heightRatio <= 0
-                                || heightRatio >= 1.33) {
+                                || heightRatio >= MAX_HEIGHT_RATIO
+                                || heightRatio <= MIN_HEIGHT_RATIO) {
                             // Not wide enough for the screen, or too short/tall to be a good fit
                             // for the height of the screen, broken image file, or the system's
                             // desires for wallpaper size are in a bad state.  Probably one of the
