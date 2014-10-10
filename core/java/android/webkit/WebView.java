@@ -25,7 +25,6 @@ import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.net.http.SslCertificate;
 import android.os.Build;
 import android.os.Bundle;
@@ -1754,7 +1753,7 @@ public class WebView extends AbsoluteLayout
      * safety.
      * </li>
      * <li> The Java object's fields are not accessible.</li>
-     * <li> For applications targeted to API level {@link android.os.Build.VERSION_CODES#L}
+     * <li> For applications targeted to API level {@link android.os.Build.VERSION_CODES#LOLLIPOP}
      * and above, methods of injected Java objects are enumerable from
      * JavaScript.</li>
      * </ul>

@@ -256,7 +256,7 @@ public final class MediaStore {
      * object in the extra field. This is useful for applications that only need a small image.
      * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
      * value of EXTRA_OUTPUT.
-     * As of {@link android.os.Build.VERSION_CODES#L}, this uri can also be supplied through
+     * As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this uri can also be supplied through
      * {@link android.content.Intent#setClipData(ClipData)}. If using this approach, you still must
      * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
      * If you don't set a ClipData, it will be copied there for you when calling
@@ -281,7 +281,7 @@ public final class MediaStore {
      * object in the extra field. This is useful for applications that only need a small image.
      * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
      * value of EXTRA_OUTPUT.
-     * As of {@link android.os.Build.VERSION_CODES#L}, this uri can also be supplied through
+     * As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this uri can also be supplied through
      * {@link android.content.Intent#setClipData(ClipData)}. If using this approach, you still must
      * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
      * If you don't set a ClipData, it will be copied there for you when calling
@@ -304,7 +304,7 @@ public final class MediaStore {
      * where the video is written. If EXTRA_OUTPUT is not present the video will be
      * written to the standard location for videos, and the Uri of that location will be
      * returned in the data field of the Uri.
-     * As of {@link android.os.Build.VERSION_CODES#L}, this uri can also be supplied through
+     * As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this uri can also be supplied through
      * {@link android.content.Intent#setClipData(ClipData)}. If using this approach, you still must
      * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
      * If you don't set a ClipData, it will be copied there for you when calling

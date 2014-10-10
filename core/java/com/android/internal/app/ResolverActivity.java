@@ -25,7 +25,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.widget.AbsListView;
-import android.widget.GridView;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 
@@ -487,7 +486,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     }
 
     private boolean versionNumberAtLeastL(int versionNumber) {
-        return versionNumber >= Build.VERSION_CODES.L;
+        return versionNumber >= Build.VERSION_CODES.LOLLIPOP;
     }
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,

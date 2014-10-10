@@ -696,7 +696,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
             // Using custom RemoteViews
             if (entry.targetSdk >= Build.VERSION_CODES.GINGERBREAD
-                    && entry.targetSdk < Build.VERSION_CODES.L) {
+                    && entry.targetSdk < Build.VERSION_CODES.LOLLIPOP) {
                 entry.row.setShowingLegacyBackground(true);
                 entry.legacy = true;
             }
@@ -712,7 +712,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (entry.icon != null) {
-            if (entry.targetSdk >= Build.VERSION_CODES.L) {
+            if (entry.targetSdk >= Build.VERSION_CODES.LOLLIPOP) {
                 entry.icon.setColorFilter(mContext.getResources().getColor(android.R.color.white));
             } else {
                 entry.icon.setColorFilter(null);
@@ -1385,7 +1385,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
             icon.setImageDrawable(iconDrawable);
-            if (entry.targetSdk >= Build.VERSION_CODES.L
+            if (entry.targetSdk >= Build.VERSION_CODES.LOLLIPOP
                     || mNotificationColorUtil.isGrayscaleIcon(iconDrawable)) {
                 icon.setBackgroundResource(
                         com.android.internal.R.drawable.notification_icon_legacy_bg);
