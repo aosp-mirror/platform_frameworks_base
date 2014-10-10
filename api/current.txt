@@ -239,6 +239,8 @@ package android {
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
     field public static final int accessibilityFlags = 16843652; // 0x1010384
     field public static final int accessibilityLiveRegion = 16843758; // 0x10103ee
+    field public static final int accessibilityTraversalAfter = 16844036; // 0x1010504
+    field public static final int accessibilityTraversalBefore = 16844035; // 0x1010503
     field public static final int accountPreferences = 16843423; // 0x101029f
     field public static final int accountType = 16843407; // 0x101028f
     field public static final int action = 16842797; // 0x101002d
@@ -33607,6 +33609,8 @@ package android.view {
     method public static int generateViewId();
     method public int getAccessibilityLiveRegion();
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
+    method public int getAccessibilityTraversalAfter();
+    method public int getAccessibilityTraversalBefore();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
@@ -33883,6 +33887,8 @@ package android.view {
     method public void sendAccessibilityEventUnchecked(android.view.accessibility.AccessibilityEvent);
     method public void setAccessibilityDelegate(android.view.View.AccessibilityDelegate);
     method public void setAccessibilityLiveRegion(int);
+    method public void setAccessibilityTraversalAfter(int);
+    method public void setAccessibilityTraversalBefore(int);
     method public void setActivated(boolean);
     method public void setAlpha(float);
     method public void setAnimation(android.view.animation.Animation);
@@ -35162,6 +35168,8 @@ package android.view.accessibility {
     method public java.lang.CharSequence getText();
     method public int getTextSelectionEnd();
     method public int getTextSelectionStart();
+    method public android.view.accessibility.AccessibilityNodeInfo getTraversalAfter();
+    method public android.view.accessibility.AccessibilityNodeInfo getTraversalBefore();
     method public java.lang.String getViewIdResourceName();
     method public android.view.accessibility.AccessibilityWindowInfo getWindow();
     method public int getWindowId();
@@ -35232,6 +35240,10 @@ package android.view.accessibility {
     method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
     method public void setTextSelection(int, int);
+    method public void setTraversalAfter(android.view.View);
+    method public void setTraversalAfter(android.view.View, int);
+    method public void setTraversalBefore(android.view.View);
+    method public void setTraversalBefore(android.view.View, int);
     method public void setViewIdResourceName(java.lang.String);
     method public void setVisibleToUser(boolean);
     method public void writeToParcel(android.os.Parcel, int);
@@ -38429,6 +38441,8 @@ package android.widget {
     method public boolean onLoadClass(java.lang.Class);
     method public void reapply(android.content.Context, android.view.View);
     method public void removeAllViews(int);
+    method public void setAccessibilityTraversalAfter(int, int);
+    method public void setAccessibilityTraversalBefore(int, int);
     method public void setBitmap(int, java.lang.String, android.graphics.Bitmap);
     method public void setBoolean(int, java.lang.String, boolean);
     method public void setBundle(int, java.lang.String, android.os.Bundle);

@@ -2528,6 +2528,26 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling {@link android.view.View#setAccessibilityTraversalBefore(int)}.
+     *
+     * @param viewId The id of the view whose before view in accessibility traversal to set.
+     * @param nextId The id of the next in the accessibility traversal.
+     **/
+    public void setAccessibilityTraversalBefore(int viewId, int nextId) {
+        setInt(viewId, "setAccessibilityTraversalBefore", nextId);
+    }
+
+    /**
+     * Equivalent to calling {@link android.view.View#setAccessibilityTraversalAfter(int)}.
+     *
+     * @param viewId The id of the view whose after view in accessibility traversal to set.
+     * @param nextId The id of the next in the accessibility traversal.
+     **/
+    public void setAccessibilityTraversalAfter(int viewId, int nextId) {
+        setInt(viewId, "setAccessibilityTraversalAfter", nextId);
+    }
+
+    /**
      * Equivalent to calling View.setLabelFor(int).
      *
      * @param viewId The id of the view whose property to set.

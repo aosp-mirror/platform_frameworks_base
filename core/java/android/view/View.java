@@ -3109,6 +3109,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private MatchLabelForPredicate mMatchLabelForPredicate;
 
     /**
+     * Specifies a view before which this one is visited in accessibility traversal.
+     */
+    private int mAccessibilityTraversalBeforeId = NO_ID;
+
+    /**
+     * Specifies a view after which this one is visited in accessibility traversal.
+     */
+    private int mAccessibilityTraversalAfterId = NO_ID;
+
+    /**
      * Predicate for matching a view by its id.
      */
     private MatchIdPredicate mMatchIdPredicate;
@@ -3887,6 +3897,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_contentDescription:
                     setContentDescription(a.getString(attr));
+                    break;
+                case com.android.internal.R.styleable.View_accessibilityTraversalBefore:
+                    setAccessibilityTraversalBefore(a.getResourceId(attr, NO_ID));
+                    break;
+                case com.android.internal.R.styleable.View_accessibilityTraversalAfter:
+                    setAccessibilityTraversalAfter(a.getResourceId(attr, NO_ID));
                     break;
                 case com.android.internal.R.styleable.View_labelFor:
                     setLabelFor(a.getResourceId(attr, NO_ID));
@@ -5611,6 +5627,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (rootView == null) {
                 rootView = this;
             }
+
             View label = rootView.findLabelForView(this, mID);
             if (label != null) {
                 info.setLabeledBy(label);
@@ -5636,6 +5653,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             View labeled = rootView.findViewInsideOutShouldExist(this, mLabelForId);
             if (labeled != null) {
                 info.setLabelFor(labeled);
+            }
+        }
+
+        if (mAccessibilityTraversalBeforeId != View.NO_ID) {
+            View rootView = getRootView();
+            if (rootView == null) {
+                rootView = this;
+            }
+            View next = rootView.findViewInsideOutShouldExist(this,
+                    mAccessibilityTraversalBeforeId);
+            if (next != null) {
+                info.setTraversalBefore(next);
+            }
+        }
+
+        if (mAccessibilityTraversalAfterId != View.NO_ID) {
+            View rootView = getRootView();
+            if (rootView == null) {
+                rootView = this;
+            }
+            View next = rootView.findViewInsideOutShouldExist(this,
+                    mAccessibilityTraversalAfterId);
+            if (next != null) {
+                info.setTraversalAfter(next);
             }
         }
 
@@ -6043,6 +6084,94 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets the id of a view before which this one is visited in accessibility traversal.
+     * A screen-reader must visit the content of this view before the content of the one
+     * it precedes. For example, if view B is set to be before view A, then a screen-reader
+     * will traverse the entire content of B before traversing the entire content of A,
+     * regardles of what traversal strategy it is using.
+     * <p>
+     * Views that do not have specified before/after relationships are traversed in order
+     * determined by the screen-reader.
+     * </p>
+     * <p>
+     * Setting that this view is before a view that is not important for accessibility
+     * or if this view is not important for accessibility will have no effect as the
+     * screen-reader is not aware of unimportant views.
+     * </p>
+     *
+     * @param beforeId The id of a view this one precedes in accessibility traversal.
+     *
+     * @attr ref android.R.styleable#View_accessibilityTraversalBefore
+     *
+     * @see #setImportantForAccessibility(int)
+     */
+    @RemotableViewMethod
+    public void setAccessibilityTraversalBefore(int beforeId) {
+        if (mAccessibilityTraversalBeforeId == beforeId) {
+            return;
+        }
+        mAccessibilityTraversalBeforeId = beforeId;
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+    }
+
+    /**
+     * Gets the id of a view before which this one is visited in accessibility traversal.
+     *
+     * @return The id of a view this one precedes in accessibility traversal if
+     *         specified, otherwise {@link #NO_ID}.
+     *
+     * @see #setAccessibilityTraversalBefore(int)
+     */
+    public int getAccessibilityTraversalBefore() {
+        return mAccessibilityTraversalBeforeId;
+    }
+
+    /**
+     * Sets the id of a view after which this one is visited in accessibility traversal.
+     * A screen-reader must visit the content of the other view before the content of this
+     * one. For example, if view B is set to be after view A, then a screen-reader
+     * will traverse the entire content of A before traversing the entire content of B,
+     * regardles of what traversal strategy it is using.
+     * <p>
+     * Views that do not have specified before/after relationships are traversed in order
+     * determined by the screen-reader.
+     * </p>
+     * <p>
+     * Setting that this view is after a view that is not important for accessibility
+     * or if this view is not important for accessibility will have no effect as the
+     * screen-reader is not aware of unimportant views.
+     * </p>
+     *
+     * @param afterId The id of a view this one succedees in accessibility traversal.
+     *
+     * @attr ref android.R.styleable#View_accessibilityTraversalAfter
+     *
+     * @see #setImportantForAccessibility(int)
+     */
+    @RemotableViewMethod
+    public void setAccessibilityTraversalAfter(int afterId) {
+        if (mAccessibilityTraversalAfterId == afterId) {
+            return;
+        }
+        mAccessibilityTraversalAfterId = afterId;
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+    }
+
+    /**
+     * Gets the id of a view after which this one is visited in accessibility traversal.
+     *
+     * @return The id of a view this one succeedes in accessibility traversal if
+     *         specified, otherwise {@link #NO_ID}.
+     *
+     * @see #setAccessibilityTraversalAfter(int)
+     */
+    public int getAccessibilityTraversalAfter() {
+        return mAccessibilityTraversalAfterId;
+    }
+
+    /**
      * Gets the id of a view for which this view serves as a label for
      * accessibility purposes.
      *
@@ -6061,11 +6190,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @RemotableViewMethod
     public void setLabelFor(int id) {
+        if (mLabelForId == id) {
+            return;
+        }
         mLabelForId = id;
         if (mLabelForId != View.NO_ID
                 && mID == View.NO_ID) {
             mID = generateViewId();
         }
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
