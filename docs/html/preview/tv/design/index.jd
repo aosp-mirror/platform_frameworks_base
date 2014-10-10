@@ -8,6 +8,11 @@ footer.hide=1
   experience. It's important to understand how your app is presented in the main user interface and
   how your app can help users get to the content they want quickly.</p>
 
+<p class="note">
+  <strong>Important:</strong> There are specific requirements your app must meet in order to
+  qualify as an Android TV app on Google Play. For more information, see the requirements listed
+  in <a href="{@docRoot}preview/tv/publish/index.html">Publishing TV Apps</a>.
+</p>
 
 <h2>Home Screen</h2>
 
