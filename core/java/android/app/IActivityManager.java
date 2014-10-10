@@ -417,6 +417,9 @@ public interface IActivityManager extends IInterface {
 
     public void reportAssistContextExtras(IBinder token, Bundle extras) throws RemoteException;
 
+    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle)
+            throws RemoteException;
+
     public void killUid(int uid, String reason) throws RemoteException;
 
     public void hang(IBinder who, boolean allowRestart) throws RemoteException;
@@ -777,4 +780,5 @@ public interface IActivityManager extends IInterface {
     int RELEASE_SOME_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+236;
     int BOOT_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+237;
     int GET_TASK_DESCRIPTION_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+238;
+    int LAUNCH_ASSIST_INTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+239;
 }
