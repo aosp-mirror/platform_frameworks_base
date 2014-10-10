@@ -234,6 +234,7 @@ int handleCommand(Bundle* bundle)
     case kCommandPackage:      return doPackage(bundle);
     case kCommandCrunch:       return doCrunch(bundle);
     case kCommandSingleCrunch: return doSingleCrunch(bundle);
+    case kCommandDaemon:       return runInDaemonMode(bundle);
     default:
         fprintf(stderr, "%s: requested command not yet supported\n", gProgName);
         return 1;
@@ -275,6 +276,8 @@ int main(int argc, char* const argv[])
         bundle.setCommand(kCommandCrunch);
     else if (argv[1][0] == 's')
         bundle.setCommand(kCommandSingleCrunch);
+    else if (argv[1][0] == 'm')
+        bundle.setCommand(kCommandDaemon);
     else {
         fprintf(stderr, "ERROR: Unknown command '%s'\n", argv[1]);
         wantUsage = true;
