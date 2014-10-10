@@ -12588,7 +12588,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void dumpRecentsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
-        pw.println("ACTIVITY MANAGER RECENT ACTIVITIES (dumpsys activity recents)");
+        pw.println("ACTIVITY MANAGER RECENT TASKS (dumpsys activity recents)");
 
         boolean printedAnything = false;
 
@@ -13686,7 +13686,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return true;
     }
 
-    ArrayList<ProcessRecord> collectProcesses(PrintWriter pw, int start, String[] args) {
+    ArrayList<ProcessRecord> collectProcesses(PrintWriter pw, int start, boolean allPkgs,
+            String[] args) {
         ArrayList<ProcessRecord> procs;
         synchronized (this) {
             if (args != null && args.length > start
@@ -13700,6 +13701,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
                     ProcessRecord proc = mLruProcesses.get(i);
                     if (proc.pid == pid) {
+                        procs.add(proc);
+                    } else if (allPkgs && proc.pkgList != null
+                            && proc.pkgList.containsKey(args[start])) {
                         procs.add(proc);
                     } else if (proc.processName.equals(args[start])) {
                         procs.add(proc);
@@ -13717,7 +13721,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void dumpGraphicsHardwareUsage(FileDescriptor fd,
             PrintWriter pw, String[] args) {
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, args);
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, false, args);
         if (procs == null) {
             pw.println("No process found for: " + args[0]);
             return;
@@ -13753,7 +13757,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void dumpDbInfo(FileDescriptor fd, PrintWriter pw, String[] args) {
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, args);
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, false, args);
         if (procs == null) {
             pw.println("No process found for: " + args[0]);
             return;
@@ -13921,6 +13925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean oomOnly = false;
         boolean isCompact = false;
         boolean localOnly = false;
+        boolean packages = false;
         
         int opti = 0;
         while (opti < args.length) {
@@ -13941,6 +13946,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 oomOnly = true;
             } else if ("--local".equals(opt)) {
                 localOnly = true;
+            } else if ("--package".equals(opt)) {
+                packages = true;
             } else if ("-h".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [-d] [-c] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
@@ -13948,6 +13955,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  -c: dump in a compact machine-parseable representation.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("  --local: only collect details locally, don't call process.");
+                pw.println("  --package: interpret process arg as package, dumping all");
+                pw.println("             processes that have loaded that package.");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
                 return;
@@ -13961,7 +13970,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long realtime = SystemClock.elapsedRealtime();
         final long[] tmpLong = new long[1];
 
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, args);
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, packages, args);
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
             if (args != null && args.length > opti
@@ -14016,7 +14025,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
 
-        if (!brief && !oomOnly && (procs.size() == 1 || isCheckinRequest)) {
+        if (!brief && !oomOnly && (procs.size() == 1 || isCheckinRequest || packages)) {
             dumpDetails = true;
         }
 
@@ -14132,7 +14141,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         long nativeProcTotalPss = 0;
 
-        if (!isCheckinRequest && procs.size() > 1) {
+        if (!isCheckinRequest && procs.size() > 1 && !packages) {
             // If we are showing aggregations, also look for native processes to
             // include so that our aggregations are more accurate.
             updateCpuStatsNow();
