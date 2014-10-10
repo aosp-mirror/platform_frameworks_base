@@ -142,6 +142,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         launchDeviceDiscovery();
+        startQueuedActions();
     }
 
     @Override
