@@ -1,0 +1,74 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="917"
+            android:propertyName="strokeAlpha"
+            android:valueFrom="0"
+            android:valueTo="0"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="17"
+            android:propertyName="strokeAlpha"
+            android:valueFrom="0"
+            android:valueTo="1"
+            android:interpolator="@android:interpolator/linear" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="917"
+            android:propertyName="strokeWidth"
+            android:valueFrom="0"
+            android:valueTo="0"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="17"
+            android:propertyName="strokeWidth"
+            android:valueFrom="0"
+            android:valueTo="20"
+            android:interpolator="@android:interpolator/linear" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="933"
+            android:propertyName="trimPathStart"
+            android:valueFrom="0.06"
+            android:valueTo="0.06"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="383"
+            android:propertyName="trimPathStart"
+            android:valueFrom="0.06"
+            android:valueTo="0.19231"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="983"
+            android:propertyName="trimPathStart"
+            android:valueFrom="0.19231"
+            android:valueTo="0.999"
+            android:interpolator="@interpolator/ic_open_path_1_1_trimpathstart_interpolator_2" />
+    </set>
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="933"
+            android:propertyName="trimPathEnd"
+            android:valueFrom="0.061"
+            android:valueTo="0.061"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="300"
+            android:propertyName="trimPathEnd"
+            android:valueFrom="0.061"
+            android:valueTo="0.19231"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="1067"
+            android:propertyName="trimPathEnd"
+            android:valueFrom="0.19231"
+            android:valueTo="1"
+            android:interpolator="@interpolator/ic_open_path_1_1_trimpathend_interpolator_2" />
+    </set>
+</set>
