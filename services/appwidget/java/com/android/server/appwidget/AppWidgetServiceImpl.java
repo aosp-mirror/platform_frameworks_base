@@ -1839,13 +1839,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // If the provider was not found it may be because it was restored and
             // we did not know its UID so let us find if there is such one.
             if (existing == null) {
-                providerId = new ProviderId(UNKNOWN_UID, componentName);
-                existing = lookupProviderLocked(providerId);
+                ProviderId restoredProviderId = new ProviderId(UNKNOWN_UID, componentName);
+                existing = lookupProviderLocked(restoredProviderId);
             }
 
             if (existing != null) {
                 if (existing.zombie && !mSafeMode) {
                     // it's a placeholder that was set up during an app restore
+                    existing.id = providerId;
                     existing.zombie = false;
                     existing.info = provider.info; // the real one filled out from the ResolveInfo
                     if (DEBUG) {
