@@ -2772,25 +2772,32 @@
         <attr name="layout_width" />
         <attr name="layout_height" />
         <!--  Specifies extra space on the left, top, right and bottom
-              sides of this view. This space is outside this view's bounds. -->
+              sides of this view. This space is outside this view's bounds.
+              Margin values should be positive. -->
         <attr name="layout_margin" format="dimension"  />
         <!--  Specifies extra space on the left side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive. -->
         <attr name="layout_marginLeft" format="dimension"  />
         <!--  Specifies extra space on the top side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginTop" format="dimension" />
         <!--  Specifies extra space on the right side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginRight" format="dimension"  />
         <!--  Specifies extra space on the bottom side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginBottom" format="dimension"  />
         <!--  Specifies extra space on the start side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginStart" format="dimension"  />
         <!--  Specifies extra space on the end side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginEnd" format="dimension"  />
     </declare-styleable>
 
