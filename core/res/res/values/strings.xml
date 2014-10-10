@@ -2515,19 +2515,6 @@
     <!-- Shown when face unlock failed multiple times so we're just using the backup -->
     <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
-    <!-- When the lock screen is showing and the phone plugged in, and the battery
-         is not fully charged, show the current charge %.  -->
-    <string name="lockscreen_plugged_in">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
-         charged, say that it is charged. -->
-    <string name="lockscreen_charged">Charged</string>
-    <!-- A short representation of charging information, e.g "34%" -->
-    <string name="lockscreen_battery_short"><xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-
-    <!-- When the lock screen is showing and the battery is low, warn user to plug
-         in the phone soon. -->
-    <string name="lockscreen_low_battery">Connect your charger.</string>
-
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message_short">No SIM card</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
