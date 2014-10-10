@@ -34,7 +34,11 @@ public class PathParser {
         Path path = new Path();
         PathDataNode[] nodes = createNodesFromPathData(pathData);
         if (nodes != null) {
-            PathDataNode.nodesToPath(nodes, path);
+            try {
+                PathDataNode.nodesToPath(nodes, path);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Error in parsing " + pathData, e);
+            }
             return path;
         }
         return null;
@@ -128,7 +132,12 @@ public class PathParser {
 
         while (end < s.length()) {
             c = s.charAt(end);
-            if (((c - 'A') * (c - 'Z') <= 0) || (((c - 'a') * (c - 'z') <= 0))) {
+            // Note that 'e' or 'E' are not valid path commands, but could be
+            // used for floating point numbers' scientific notation.
+            // Therefore, when searching for next command, we should ignore 'e'
+            // and 'E'.
+            if ((((c - 'A') * (c - 'Z') <= 0) || ((c - 'a') * (c - 'z') <= 0))
+                    && c != 'e' && c != 'E') {
                 return end;
             }
             end++;
@@ -188,8 +197,7 @@ public class PathParser {
             }
             return Arrays.copyOf(results, count);
         } catch (NumberFormatException e) {
-            Log.e(LOGTAG, "error in parsing \"" + s + "\"");
-            throw e;
+            throw new RuntimeException("error in parsing \"" + s + "\"", e);
         }
     }
 
@@ -206,7 +214,10 @@ public class PathParser {
         boolean foundSeparator = false;
         result.mEndWithNegOrDot = false;
         boolean secondDot = false;
+        boolean isExponential = false;
         for (; currentIndex < s.length(); currentIndex++) {
+            boolean isPrevExponential = isExponential;
+            isExponential = false;
             char currentChar = s.charAt(currentIndex);
             switch (currentChar) {
                 case ' ':
@@ -214,7 +225,8 @@ public class PathParser {
                     foundSeparator = true;
                     break;
                 case '-':
-                    if (currentIndex != start) {
+                    // The negative sign following a 'e' or 'E' is not a separator.
+                    if (currentIndex != start && !isPrevExponential) {
                         foundSeparator = true;
                         result.mEndWithNegOrDot = true;
                     }
@@ -227,6 +239,10 @@ public class PathParser {
                         foundSeparator = true;
                         result.mEndWithNegOrDot = true;
                     }
+                    break;
+                case 'e':
+                case 'E':
+                    isExponential = true;
                     break;
             }
             if (foundSeparator) {

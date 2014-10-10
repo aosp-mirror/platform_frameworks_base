@@ -1,0 +1,17 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="933"
+            android:propertyName="rotation"
+            android:valueFrom="-90"
+            android:valueTo="-90"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="1367"
+            android:propertyName="rotation"
+            android:valueFrom="-90"
+            android:valueTo="-87"
+            android:interpolator="@android:interpolator/linear" />
+    </set>
+</set>
