@@ -142,9 +142,9 @@ public class PathParser {
 
     private static class ExtractFloatResult {
         // We need to return the position of the next separator and whether the
-        // next float starts with a '-'.
+        // next float starts with a '-' or a '.'.
         int mEndPosition;
-        boolean mEndWithNegSign;
+        boolean mEndWithNegOrDot;
     }
 
     /**
@@ -179,8 +179,8 @@ public class PathParser {
                             s.substring(startPosition, endPosition));
                 }
 
-                if (result.mEndWithNegSign) {
-                    // Keep the '-' sign with next number.
+                if (result.mEndWithNegOrDot) {
+                    // Keep the '-' or '.' sign with next number.
                     startPosition = endPosition;
                 } else {
                     startPosition = endPosition + 1;
@@ -201,10 +201,11 @@ public class PathParser {
      * the starting position of next number, whether it is ending with a '-'.
      */
     private static void extract(String s, int start, ExtractFloatResult result) {
-        // Now looking for ' ', ',' or '-' from the start.
+        // Now looking for ' ', ',', '.' or '-' from the start.
         int currentIndex = start;
         boolean foundSeparator = false;
-        result.mEndWithNegSign = false;
+        result.mEndWithNegOrDot = false;
+        boolean secondDot = false;
         for (; currentIndex < s.length(); currentIndex++) {
             char currentChar = s.charAt(currentIndex);
             switch (currentChar) {
@@ -215,7 +216,16 @@ public class PathParser {
                 case '-':
                     if (currentIndex != start) {
                         foundSeparator = true;
-                        result.mEndWithNegSign = true;
+                        result.mEndWithNegOrDot = true;
+                    }
+                    break;
+                case '.':
+                    if (!secondDot) {
+                        secondDot = true;
+                    } else {
+                        // This is the second dot, and it is considered as a separator.
+                        foundSeparator = true;
+                        result.mEndWithNegOrDot = true;
                     }
                     break;
             }
