@@ -22,6 +22,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.app.SearchManager;
+import android.os.UserHandle;
 import com.android.internal.R;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
@@ -4004,13 +4006,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @return true if search window opened
      */
     private boolean launchDefaultSearch() {
+        boolean result;
         final Callback cb = getCallback();
         if (cb == null || isDestroyed()) {
-            return false;
+            result = false;
         } else {
             sendCloseSystemWindows("search");
-            return cb.onSearchRequested();
+            result = cb.onSearchRequested();
         }
+        if (!result && (getContext().getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
+            // On TVs, if the app doesn't implement search, we want to launch assist.
+            return ((SearchManager)getContext().getSystemService(Context.SEARCH_SERVICE))
+                    .launchAssistAction(0, null, UserHandle.myUserId());
+        }
+        return result;
     }
 
     @Override
