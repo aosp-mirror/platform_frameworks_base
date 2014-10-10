@@ -5588,7 +5588,6 @@ package android.app.usage {
     method public int describeContents();
     method public boolean getNextEvent(android.app.usage.UsageEvents.Event);
     method public boolean hasNextEvent();
-    method public void resetToStart();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
