@@ -73,6 +73,7 @@ final class GlobalKeyManager {
             if (component != null) {
                 Intent intent = new Intent(Intent.ACTION_GLOBAL_BUTTON)
                         .setComponent(component)
+                        .setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                         .putExtra(Intent.EXTRA_KEY_EVENT, event);
                 context.sendBroadcastAsUser(intent, UserHandle.CURRENT, null);
                 return true;
