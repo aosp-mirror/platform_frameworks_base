@@ -7120,13 +7120,30 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     ViewLocationHolder holder = ViewLocationHolder.obtain(parent, child);
                     holders.add(holder);
                 }
-                Collections.sort(holders);
+                sort(holders);
                 for (int i = 0; i < childCount; i++) {
                     ViewLocationHolder holder = holders.get(i);
                     children.set(i, holder.mView);
                     holder.recycle();
                 }
                 holders.clear();
+            }
+        }
+
+        private void sort(ArrayList<ViewLocationHolder> holders) {
+            // This is gross but the least risky solution. The current comparison
+            // strategy breaks transitivity but produces very good results. Coming
+            // up with a new strategy requires time which we do not have, so ...
+            try {
+                ViewLocationHolder.setComparisonStrategy(
+                        ViewLocationHolder.COMPARISON_STRATEGY_STRIPE);
+                Collections.sort(holders);
+            } catch (IllegalArgumentException iae) {
+                // Note that in practice this occurs extremely rarely in a couple
+                // of pathological cases.
+                ViewLocationHolder.setComparisonStrategy(
+                        ViewLocationHolder.COMPARISON_STRATEGY_LOCATION);
+                Collections.sort(holders);
             }
         }
 
@@ -7148,6 +7165,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         private static final SynchronizedPool<ViewLocationHolder> sPool =
                 new SynchronizedPool<ViewLocationHolder>(MAX_POOL_SIZE);
 
+        public static final int COMPARISON_STRATEGY_STRIPE = 1;
+
+        public static final int COMPARISON_STRATEGY_LOCATION = 2;
+
+        private static int sComparisonStrategy = COMPARISON_STRATEGY_STRIPE;
+
         private final Rect mLocation = new Rect();
 
         public View mView;
@@ -7163,6 +7186,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return holder;
         }
 
+        public static void setComparisonStrategy(int strategy) {
+            sComparisonStrategy = strategy;
+        }
+
         public void recycle() {
             clear();
             sPool.release(this);
@@ -7174,6 +7201,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (another == null) {
                 return 1;
             }
+
+            if (sComparisonStrategy == COMPARISON_STRATEGY_STRIPE) {
+                // First is above second.
+                if (mLocation.bottom - another.mLocation.top <= 0) {
+                    return -1;
+                }
+                // First is below second.
+                if (mLocation.top - another.mLocation.bottom >= 0) {
+                    return 1;
+                }
+            }
+
             // We are ordering left-to-right, top-to-bottom.
             if (mLayoutDirection == LAYOUT_DIRECTION_LTR) {
                 final int leftDifference = mLocation.left - another.mLocation.left;
