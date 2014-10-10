@@ -40,6 +40,7 @@ typedef enum Command {
     kCommandPackage,
     kCommandCrunch,
     kCommandSingleCrunch,
+    kCommandDaemon
 } Command;
 
 /*
