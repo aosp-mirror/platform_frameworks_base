@@ -29,7 +29,7 @@ import java.io.PrintWriter;
  * are ready to run, or whether they must be stopped.
  */
 public abstract class StateController {
-    protected static final boolean DEBUG = true;
+    protected static final boolean DEBUG = false;
     protected Context mContext;
     protected StateChangedListener mStateChangedListener;
 
