@@ -179,7 +179,7 @@ TEST(SplitFeatureTest, TestNewResourceIsAccessible) {
     EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
 }
 
-TEST(SplitFeatureTest, TestNewResourceIsAccessibleByName) {
+TEST(SplitFeatureTest, TestNewResourceNameHasCorrectName) {
     ResTable table;
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
@@ -198,6 +198,19 @@ TEST(SplitFeatureTest, TestNewResourceIsAccessibleByName) {
 
     EXPECT_EQ(String16("test3"),
             String16(name.name, name.nameLen));
+}
+
+TEST(SplitFeatureTest, TestNewResourceIsAccessibleByName) {
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
+
+    const String16 name("test3");
+    const String16 type("string");
+    const String16 package("com.android.test.basic");
+    ASSERT_EQ(base::R::string::test3, table.identifierForName(name.string(), name.size(),
+                                                              type.string(), type.size(),
+                                                              package.string(), package.size()));
 }
 
 } // namespace
