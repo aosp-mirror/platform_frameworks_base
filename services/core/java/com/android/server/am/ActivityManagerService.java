@@ -13083,6 +13083,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  OOM levels:");
             printOomLevel(pw, "SYSTEM_ADJ", ProcessList.SYSTEM_ADJ);
             printOomLevel(pw, "PERSISTENT_PROC_ADJ", ProcessList.PERSISTENT_PROC_ADJ);
+            printOomLevel(pw, "PERSISTENT_SERVICE_ADJ", ProcessList.PERSISTENT_SERVICE_ADJ);
             printOomLevel(pw, "FOREGROUND_APP_ADJ", ProcessList.FOREGROUND_APP_ADJ);
             printOomLevel(pw, "VISIBLE_APP_ADJ", ProcessList.VISIBLE_APP_ADJ);
             printOomLevel(pw, "PERCEPTIBLE_APP_ADJ", ProcessList.PERCEPTIBLE_APP_ADJ);
@@ -13883,7 +13884,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     static final int[] DUMP_MEM_OOM_ADJ = new int[] {
             ProcessList.NATIVE_ADJ,
-            ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ, ProcessList.FOREGROUND_APP_ADJ,
+            ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ,
+            ProcessList.PERSISTENT_SERVICE_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
@@ -13891,7 +13893,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     };
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
-            "System", "Persistent", "Foreground",
+            "System", "Persistent", "Persistent Service", "Foreground",
             "Visible", "Perceptible",
             "Heavy Weight", "Backup",
             "A Services", "Home",
@@ -13899,7 +13901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     };
     static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
             "native",
-            "sys", "pers", "fore",
+            "sys", "pers", "persvc", "fore",
             "vis", "percept",
             "heavy", "backup",
             "servicea", "home",
@@ -16811,7 +16813,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             } else {
                                 if ((cr.flags&(Context.BIND_ABOVE_CLIENT
                                         |Context.BIND_IMPORTANT)) != 0) {
-                                    adj = clientAdj;
+                                    adj = clientAdj >= ProcessList.PERSISTENT_SERVICE_ADJ
+                                            ? clientAdj : ProcessList.PERSISTENT_SERVICE_ADJ;
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
