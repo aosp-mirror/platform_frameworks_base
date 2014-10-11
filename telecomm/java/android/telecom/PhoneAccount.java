@@ -110,6 +110,7 @@ public class PhoneAccount implements Parcelable {
     private final Uri mSubscriptionAddress;
     private final int mCapabilities;
     private final int mIconResId;
+    private final int mColor;
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
     private final List<String> mSupportedUriSchemes;
@@ -120,6 +121,7 @@ public class PhoneAccount implements Parcelable {
         private Uri mSubscriptionAddress;
         private int mCapabilities;
         private int mIconResId;
+        private int mColor;
         private CharSequence mLabel;
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
@@ -141,6 +143,7 @@ public class PhoneAccount implements Parcelable {
             mSubscriptionAddress = phoneAccount.getSubscriptionAddress();
             mCapabilities = phoneAccount.getCapabilities();
             mIconResId = phoneAccount.getIconResId();
+            mColor = phoneAccount.getColor();
             mLabel = phoneAccount.getLabel();
             mShortDescription = phoneAccount.getShortDescription();
             mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
@@ -163,6 +166,11 @@ public class PhoneAccount implements Parcelable {
 
         public Builder setIconResId(int value) {
             this.mIconResId = value;
+            return this;
+        }
+
+        public Builder setColor(int value) {
+            this.mColor = value;
             return this;
         }
 
@@ -219,6 +227,7 @@ public class PhoneAccount implements Parcelable {
                     mSubscriptionAddress,
                     mCapabilities,
                     mIconResId,
+                    mColor,
                     mLabel,
                     mShortDescription,
                     mSupportedUriSchemes);
@@ -231,6 +240,7 @@ public class PhoneAccount implements Parcelable {
             Uri subscriptionAddress,
             int capabilities,
             int iconResId,
+            int color,
             CharSequence label,
             CharSequence shortDescription,
             List<String> supportedUriSchemes) {
@@ -239,6 +249,7 @@ public class PhoneAccount implements Parcelable {
         mSubscriptionAddress = subscriptionAddress;
         mCapabilities = capabilities;
         mIconResId = iconResId;
+        mColor = color;
         mLabel = label;
         mShortDescription = shortDescription;
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
@@ -371,6 +382,15 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
+     * A highlight color to use in displaying information about this {@code PhoneAccount}.
+     *
+     * @return A hexadecimal color value.
+     */
+    public int getColor() {
+        return mColor;
+    }
+
+    /**
      * An icon to represent this {@code PhoneAccount} in a user interface.
      *
      * @return An icon for this {@code PhoneAccount}.
@@ -418,6 +438,7 @@ public class PhoneAccount implements Parcelable {
         out.writeParcelable(mSubscriptionAddress, 0);
         out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
+        out.writeInt(mColor);
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
         out.writeList(mSupportedUriSchemes);
@@ -444,6 +465,7 @@ public class PhoneAccount implements Parcelable {
         mSubscriptionAddress = in.readParcelable(getClass().getClassLoader());
         mCapabilities = in.readInt();
         mIconResId = in.readInt();
+        mColor = in.readInt();
         mLabel = in.readCharSequence();
         mShortDescription = in.readCharSequence();
 
