@@ -92,7 +92,6 @@ import com.android.systemui.SearchPanelView;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
@@ -2090,13 +2089,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean accessibilityForcesLaunch = isFullscreen
                 && mAccessibilityManager.isTouchExplorationEnabled();
 
-        final KeyguardTouchDelegate keyguard = KeyguardTouchDelegate.getInstance(mContext);
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && !accessibilityForcesLaunch
                 && mPowerManager.isScreenOn()
-                && !keyguard.isShowingAndNotOccluded()
-                && !keyguard.isInputRestricted();
+                && (!mStatusBarKeyguardViewManager.isShowing()
+                        || mStatusBarKeyguardViewManager.isOccluded())
+                && !mStatusBarKeyguardViewManager.isInputRestricted();
         try {
             interrupt = interrupt && !mDreamManager.isDreaming();
         } catch (RemoteException e) {
@@ -2104,10 +2103,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         if (DEBUG) Log.d(TAG, "interrupt: " + interrupt);
         return interrupt;
-    }
-
-    public boolean inKeyguardRestrictedInputMode() {
-        return KeyguardTouchDelegate.getInstance(mContext).isInputRestricted();
     }
 
     public void setInteracting(int barWindow, boolean interacting) {
@@ -2166,5 +2161,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException e) {
             // Ignore.
         }
+    }
+
+    public boolean isKeyguardSecure() {
+        return mStatusBarKeyguardViewManager.isSecure();
     }
 }

@@ -430,4 +430,8 @@ public class StatusBarKeyguardViewManager {
     public boolean isSecure(int userId) {
         return mBouncer.isSecure() || mLockPatternUtils.isSecure(userId);
     }
+
+    public boolean isInputRestricted() {
+        return mViewMediatorCallback.isInputRestricted();
+    }
 }
