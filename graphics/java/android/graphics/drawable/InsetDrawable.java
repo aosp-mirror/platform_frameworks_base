@@ -339,12 +339,14 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public int getIntrinsicWidth() {
-        return mInsetState.mDrawable.getIntrinsicWidth();
+        return mInsetState.mDrawable.getIntrinsicWidth()
+                + mInsetState.mInsetLeft + mInsetState.mInsetRight;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return mInsetState.mDrawable.getIntrinsicHeight();
+        return mInsetState.mDrawable.getIntrinsicHeight()
+                + mInsetState.mInsetTop + mInsetState.mInsetBottom;
     }
 
     @Override
