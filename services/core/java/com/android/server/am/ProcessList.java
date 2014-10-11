@@ -97,6 +97,10 @@ final class ProcessList {
     // rather not kill it!
     static final int FOREGROUND_APP_ADJ = 0;
 
+    // This is a process that the system or a persistent process has bound to,
+    // and indicated it is important.
+    static final int PERSISTENT_SERVICE_ADJ = -11;
+
     // This is a system persistent process, such as telephony.  Definitely
     // don't want to kill it, but doing so is not completely fatal.
     static final int PERSISTENT_PROC_ADJ = -12;
@@ -336,6 +340,8 @@ final class ProcessList {
             return buildOomTag("vis  ", null, setAdj, ProcessList.VISIBLE_APP_ADJ);
         } else if (setAdj >= ProcessList.FOREGROUND_APP_ADJ) {
             return buildOomTag("fore ", null, setAdj, ProcessList.FOREGROUND_APP_ADJ);
+        } else if (setAdj >= ProcessList.PERSISTENT_SERVICE_ADJ) {
+            return buildOomTag("psvc ", null, setAdj, ProcessList.PERSISTENT_SERVICE_ADJ);
         } else if (setAdj >= ProcessList.PERSISTENT_PROC_ADJ) {
             return buildOomTag("pers ", null, setAdj, ProcessList.PERSISTENT_PROC_ADJ);
         } else if (setAdj >= ProcessList.SYSTEM_ADJ) {
