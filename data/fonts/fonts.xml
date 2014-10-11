@@ -70,9 +70,14 @@
     <family name="monospace">
         <font weight="400" style="normal">DroidSansMono.ttf</font>
     </family>
-    <alias name="courier" to="monospace" />
-    <alias name="courier new" to="monospace" />
+    <alias name="sans-serif-monospace" to="monospace" />
     <alias name="monaco" to="monospace" />
+
+    <family name="serif-monospace">
+        <font weight="400" style="normal">CutiveMono.ttf</font>
+    </family>
+    <alias name="courier" to="serif-monospace" />
+    <alias name="courier new" to="serif-monospace" />
 
     <family name="casual">
         <font weight="400" style="normal">ComingSoon.ttf</font>
