@@ -1,0 +1,180 @@
+page.title=Creating TV Navigation
+page.tags="focus","selection","d-pad"
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you how to</h2>
+  <ol>
+    <li><a href="#d-pad-navigation">Enable D-pad Navigation</a></li>
+    <li><a href="#focus-selection">Provide Clear Focus and Selection</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>
+  TV devices provide a limited set of navigation controls for apps. Creating an effective
+  navigation scheme for your TV app depends on understanding these limited controls and the limits
+  of users' perception while operating your app. As you build your Android app for TVs,
+  pay special attention to how the user actually navigates around your app when using remote
+  control buttons instead of a touch screen.
+</p>
+
+<p>
+  This lesson explains the minimum requirements for creating effective TV app navigation scheme and
+  how to apply those requirements to your app.
+</p>
+
+
+<h2 id="d-pad-navigation">Enable D-pad Navigation</h2>
+
+<p>
+  On a TV device, users navigate with controls on a remote control device, using either a
+  directional pad (D-pad) or arrow keys. This type of control limits movement to up, down, left,
+  and right. To build a great TV-optimized app, you must provide a navigation scheme where the user
+  can quickly learn how to navigate your app using these limited controls.
+</p>
+
+<p>
+  The Android framework handles directional navigation between layout elements automatically, so
+  you typically do not need to do anything extra for your app. However, you should thoroughly test
+  navigation with a D-pad controller to discover any navigation problems. Follow these guidelines to
+  test that your app's navigation system works well with a D-pad on a TV device:
+</p>
+
+<ul>
+  <li>Ensure that a user with a D-pad controller can navigate to all visible controls on the
+  screen.
+  </li>
+  <li>For scrolling lists with focus, make sure that the D-pad up and down keys scroll the list,
+    and the Enter key selects an item in the list. Verify that users can select an element in the
+    list and that the list still scrolls when an element is selected.
+  </li>
+  <li>Ensure that switching between controls between controls is straightforward and predictable.
+  </li>
+</ul>
+
+
+<h3 id="modify-d-pad-nav">Modifying directional navigation</h3>
+
+<p>
+  The Android framework automatically applies a directional navigation scheme based on the
+  relative position of focusable elements in your layouts. You should test the generated
+  navigation scheme in your app using a D-pad controller. After testing, if you decide you want
+  users to move through your layouts in a specific way, you can set up explicit directional
+  navigation for your controls.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> You should only use these attributes to modify the navigation order if the
+  default order that the system applies does not work well.
+</p>
+
+<p>
+  The following code sample shows how to define the next control to receive focus for a {@link
+  android.widget.TextView} layout object:
+</p>
+
+<pre>
+&lt;TextView android:id="&#64;+id/Category1"
+        android:nextFocusDown="&#64;+id/Category2"\&gt;
+</pre>
+
+<p>
+  The following table lists all of the available navigation attributes for Android user interface
+  widgets:
+</p>
+
+<table>
+  <tr>
+    <th>Attribute</th>
+    <th>Function</th>
+  </tr>
+  <tr>
+    <td>{@link android.R.attr#nextFocusDown}</td>
+    <td>Defines the next view to receive focus when the user navigates down.</td>
+  </tr>
+  <tr>
+    <td>{@link android.R.attr#nextFocusLeft}</td>
+    <td>Defines the next view to receive focus when the user navigates left.</td>
+  </tr>
+  <tr>
+    <td>{@link android.R.attr#nextFocusRight}</td>
+    <td>Defines the next view to receive focus when the user navigates right.</td>
+  </tr>
+  <tr>
+    <td>{@link android.R.attr#nextFocusUp}</td>
+    <td>Defines the next view to receive focus when the user navigates up.</td>
+  </tr>
+</table>
+
+<p>
+  To use one of these explicit navigation attributes, set the value to the ID ({@code android:id}
+  value) of another widget in the layout. You should set up the navigation order as a loop, so that
+  the last control directs focus back to the first one.
+</p>
+
+
+
+<h2 id="focus-selection">Provide Clear Focus and Selection</h2>
+
+<p>
+  The success of an app's navigation scheme on TV devices is depends on how easy it is for
+  a user to determine what user interface element is in focus on screen. If you do not provide
+  clear indications of focused items (and therefore what item a user can take action on), they can
+  quickly become frustrated and exit your app. For the same reason, it is important to always have
+  an item in focus that a user can take action on immediately after your app starts, or any time
+  it is idle.
+</p>
+
+<p>
+  Your app layout and implementation should use color, size, animation, or a combination of these
+  attributes to help users easily determine what actions they can take next. Use a uniform scheme
+  for indicating focus across your application.
+</p>
+
+<p>
+  Android provides <a href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">
+  Drawable State List Resources</a> to implement highlights for focused and selected controls. The
+  following code example demonstrates how to enable visual behavior for a button to indicate that a
+  user has navigated to the control and then selected it:
+</p>
+
+<pre>
+&lt;!-- res/drawable/button.xml --&gt;
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:state_pressed="true"
+          android:drawable="@drawable/button_pressed" /&gt; &lt;!-- pressed --&gt;
+    &lt;item android:state_focused="true"
+          android:drawable="@drawable/button_focused" /&gt; &lt;!-- focused --&gt;
+    &lt;item android:state_hovered="true"
+          android:drawable="@drawable/button_focused" /&gt; &lt;!-- hovered --&gt;
+    &lt;item android:drawable="@drawable/button_normal" /&gt; &lt;!-- default --&gt;
+&lt;/selector&gt;
+</pre>
+
+<p>
+  The following layout XML sample code applies the previous state list drawable to a
+  {@link android.widget.Button}:
+</p>
+
+<pre>
+&lt;Button
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:background="@drawable/button" /&gt;
+</pre>
+
+<p>
+  Make sure to provide sufficient padding within the focusable and selectable controls so that the
+  highlights around them are clearly visible.
+</p>
+
+<p>
+  For more recommendations on designing effective selection and focus for your TV app, see
+  <a href="{@docRoot}design/tv/patterns.html">Patterns for TV</a>.
+</p>
