@@ -913,6 +913,12 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
+      <li>
+        <a href="<?cs var:toroot ?>training/tv/games/index.html"
+           description="How to build games for TV.">
+           Building TV Games</a>
+      </li>
+
     </ul>
   </li>
   <!-- End: Building for TV -->
