@@ -22,7 +22,6 @@
 #include <utils/KeyedVector.h>
 
 #include <SkScalar.h>
-#include <SkDeviceProperties.h>
 #include <SkGlyphCache.h>
 #include <SkScalerContext.h>
 #include <SkPaint.h>
@@ -150,7 +149,6 @@ private:
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
 
     bool mIdentityTransform;
-    SkDeviceProperties mDeviceProperties;
 };
 
 inline int strictly_order_type(const Font::FontDescription& lhs,
