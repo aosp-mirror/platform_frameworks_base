@@ -85,7 +85,7 @@
     <color name="perms_dangerous_grp_color">#33b5e5</color>
     <color name="perms_dangerous_perm_color">#33b5e5</color>
     <color name="shadow">#cc222222</color>
-    <color name="perms_costs_money">#ffffbb33</color>
+    <color name="perms_costs_money">#fff4511e</color>
     
     <!-- For search-related UIs -->
     <color name="search_url_text_normal">#7fa87f</color>
