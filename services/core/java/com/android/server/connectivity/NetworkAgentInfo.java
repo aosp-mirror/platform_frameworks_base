@@ -45,7 +45,14 @@ public class NetworkAgentInfo {
     public NetworkCapabilities networkCapabilities;
     public final NetworkMonitor networkMonitor;
     public final NetworkMisc networkMisc;
+    // Indicates if netd has been told to create this Network.  Once created the appropriate routing
+    // rules are setup and routes are added so packets can begin flowing over the Network.
+    // NOTE: This is a sticky bit; once set it is never cleared.
     public boolean created;
+    // Set to true if this Network successfully passed validation or if it did not satisfy the
+    // default NetworkRequest in which case validation will not be attempted.
+    // NOTE: This is a sticky bit; once set it is never cleared even if future validation attempts
+    // fail.
     public boolean validated;
 
     // This represents the last score received from the NetworkAgent.
@@ -58,6 +65,9 @@ public class NetworkAgentInfo {
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
+    // The list of NetworkRequests that this Network previously satisfied with the highest
+    // score.  A non-empty list indicates that if this Network was validated it is lingered.
+    // NOTE: This list is only used for debugging.
     public final ArrayList<NetworkRequest> networkLingered = new ArrayList<NetworkRequest>();
 
     public final Messenger messenger;
