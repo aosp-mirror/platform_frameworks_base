@@ -92,6 +92,7 @@ interface IBluetooth
     boolean configHciSnoopLog(boolean enable);
 
     boolean isMultiAdvertisementSupported();
+    boolean isPeripheralModeSupported();
     boolean isOffloadedFilteringSupported();
     boolean isOffloadedScanBatchingSupported();
     boolean isActivityAndEnergyReportingSupported();
