@@ -1,0 +1,257 @@
+page.title=Building Layouts for TV
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you how to</h2>
+  <ol>
+    <li><a href="#themes">Use Layout Themes for TV</a></li>
+    <li><a href="#structure">Build Basic TV Layouts</a></li>
+    <li><a href="#visibility">Build Useable Text and Controls</a></li>
+    <li><a href="#density-resources">Manage Layout Resources for TV</a></li>
+    <li><a href="#anti-patterns">Avoid Layout Anti-Patterns</a></li>
+    <li><a href="#large-bitmaps">Handle Large Bitmaps</a></li>
+  </ol>
+  <h2>You should also read</h2>
+  <ol>
+    <li><a href="{@docRoot}design/tv/index.html">Android TV Design</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  A TV screen is typically viewed from about 10 feet away, and while it is much larger than most
+  other Android device displays, this type of screen does not provide the same level of precise
+  detail and color as a smaller device. These factors require you to create app layouts with TV
+  devices in mind in order to create a useful and enjoyable user experience.
+</p>
+
+<p>
+  This lesson describes the minimum requirements and implementation details for building effective
+  layouts in TV apps.
+</p>
+
+<h2 id="themes">Use Layout Themes for TV</h2>
+
+<p>
+  Android <a href="{@docRoot}guide/topics/ui/themes.html">Themes</a> can provide a basis for
+  layouts in your TV apps. You should use a theme to modify the display of your app activities that
+  are meant to run on a TV device. This section explains which themes you should use.
+</p>
+
+<h3 id="leanback-theme">Leanback theme</h3>
+
+<p>
+  A support library for TV user interfaces called the <a href=
+  "{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback library</a> provides a
+  standard theme for TV activities, called {@code Theme.Leanback}. This theme establishes a
+  consistent visual style for TV apps. Use of this theme is recommended for most TV apps. This
+  theme is strongly recommended for any TV app that uses v17 leanback classes. The following code
+  sample shows how to apply this theme to a given activity within an app:
+</p>
+
+<pre>
+&lt;activity
+  android:name="com.example.android.TvActivity"
+  android:label="&#64;string/app_name"
+  <strong>android:theme="&#64;style/Theme.Leanback"</strong>&gt;
+</pre>
+
+
+<h3 id="notitle-theme">NoTitleBar theme</h3>
+
+<p>
+  The title bar is a standard user interface element for Android apps on phones and tablets, but it
+  is not appropriate for TV apps. If you are not using v17 leanback classes, you should apply this
+  theme to your TV activities to suppress the display of a title bar. The following code example
+  from a TV app manifest demonstrates how to apply this theme to remove the display of a title bar:
+</p>
+
+<pre>
+&lt;application&gt;
+  ...
+
+  &lt;activity
+    android:name="com.example.android.TvActivity"
+    android:label="&#64;string/app_name"
+    <strong>android:theme="&#64;android:style/Theme.NoTitleBar"</strong>&gt;
+    ...
+
+  &lt;/activity&gt;
+&lt;/application&gt;
+</pre>
+
+
+<h2 id="structure">Build Basic TV Layouts</h2>
+
+<p>Layouts for TV devices should follow some basic guidelines to ensure they are usable and
+  effective on large screens. Follow these tips to build landscape layouts optimized for TV screens:
+</p>
+
+<ul>
+  <li>Build layouts with a landscape orientation. TV screens always display in landscape mode.</li>
+  <li>Put on-screen navigation controls on the left or right side of the screen and save the
+    vertical space for content.</li>
+  <li>Create UIs that are divided into sections, using <a href="{@docRoot}guide/components/fragments.html"
+    >Fragments</a>, and use view groups like {@link android.widget.GridView} instead of {@link
+    android.widget.ListView} to make better use of the horizontal screen space.
+  </li>
+  <li>Use view groups such as {@link android.widget.RelativeLayout} or {@link
+    android.widget.LinearLayout} to arrange views. This approach allows the system to adjust the
+    position of the views to the size, alignment, aspect ratio, and pixel density of a TV screen.</li>
+  <li>Add sufficient margins between layout controls to avoid a cluttered UI.</li>
+</ul>
+
+
+<h3 id="overscan">Overscan</h3>
+
+<p>Layouts for TV have some unique requirements due to the evolution of TV standards and the
+  desire to always present a full screen picture to viewers. For this reason, TV devices may
+  clip the outside edge of an app layout in order to ensure that the entire display is filled.
+  This behavior is generally referred to as <em>overscan</em>.
+</p>
+
+<p>
+  Avoid screen elements being clipped due to overscan and by incorporating a 10% margin
+  on all sides of your layout. This translates into a 27dp margin on the left and right edges and
+  a 48dp margin on the top and bottom of your base layouts for activities. The following
+  example layout demonstrates how to set these margins in the root layout for a TV app:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/base_layout"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:layout_marginTop="27dp"
+  android:layout_marginLeft="48dp"
+  android:layout_marginRight="48dp"
+  android:layout_marginBottom="27dp" &gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p class="caution">
+  <strong>Caution:</strong> Do not apply overscan margins to your layout if you are using the
+  v17 leanback classes, such as {@link android.support.v17.leanback.app.BrowseFragment} or related
+  widgets, as those layouts already incorporate overscan-safe margins.
+</p>
+
+<h2 id="visibility">Build Useable Text and Controls</h2>
+
+<p>
+  The text and controls in a TV app layout should be easily visible and navigable from a distance.
+  Follow these tips to make your user interface elements easier to see from a distance:
+</p>
+
+<ul>
+  <li>Break text into small chunks that users can quickly scan.</li>
+  <li>Use light text on a dark background. This style is easier to read on a TV.</li>
+  <li>Avoid lightweight fonts or fonts that have both very narrow and very broad strokes.
+  Use simple sans-serif fonts and anti-aliasing to increase readability.</li>
+  <li>Use Android's standard font sizes:
+<pre>
+&lt;TextView
+      android:id="@+id/atext"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center_vertical"
+      android:singleLine="true"
+      <strong>android:textAppearance="?android:attr/textAppearanceMedium"/&gt;</strong>
+</pre>
+  </li>
+  <li>Ensure that all your view widgets are large enough to be clearly visible to someone
+    sitting 10 feet away from the screen (this distance is greater for very large screens). The
+    best way to do this is to use layout-relative sizing rather than absolute sizing, and
+    density-independent pixel (dip) units instead of absolute pixel units. For example, to set the
+    width of a widget, use {@code wrap_content} instead of a pixel measurement, and to set the
+    margin for a widget, use dip values instead of px values.</li>
+</ul>
+
+<p>
+  For more information about density-independent pixels and building layouts to handle larger
+  screen sizes, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+  Screens</a>.
+</p>
+
+<h2 id="density-resources">Manage Layout Resources for TV</h2>
+
+<p>The common high-definition TV display resolutions are 720p, 1080i, and 1080p.
+  Your TV layout should target a screen size of 1920 x 1080 pixels, and then allow the Android
+  system to downscale your layout elements to 720p if necessary. In general, downscaling
+  (removing pixels) does not degrade your layout presentation quality. However, upscaling can
+  cause display artifacts that degrade the quality of your layout and have a negative impact on
+  the user experience of your app.</p>
+
+<p>
+  To get the best scaling results for images, provide them as
+  <a href="{@docRoot}tools/help/draw9patch.html">9-patch image</a> elements if possible. If you
+  provide low quality or small images in your layouts, they will appear pixelated, fuzzy, or
+  grainy, which is not a good experience for the user. Use high-quality images instead.
+</p>
+
+<p>
+  For more information on optimizing layouts and resources for large screens see
+  <a href="{@docRoot}training/multiscreen/index.html">Designing for multiple screens</a>.
+</p>
+
+
+<h2 id="anti-patterns">Avoid Layout Anti-Patterns</h2>
+
+<p>
+  There are a few approaches to building layouts that you should avoid because they do not work
+  well on TV devices and lead to bad user experiences. Here are some user interface approaches you
+  should specifically <em>not</em> use when developing a layout for TV.
+</p>
+
+<ul>
+  <li><strong>Re-using phone or tablet layouts</strong> - Do not reuse layouts from a phone or
+    tablet app without modification. Layouts built for other Android device form factors are not
+    well suited for TV devices and should be simplified for operation on a TV.</li>
+  <li><strong>ActionBar</strong> - While this user interface convention is recommended for use
+    on phones and tablets, it is not appropriate for a TV interface. In particular, using an
+    action bar options menu (or any pull-down menu for that matter) is strongly discouraged, due
+    to the difficulty in navigating such a menu with a remote control.</li>
+  <li><strong>ViewPager</strong> - Sliding between screens can work great on a phone or tablet,
+    but don't try this on a TV!</li>
+</ul>
+
+<p>For more information on designing layouts that are appropriate to TV, see the
+  <a href="{@docRoot}design/tv/index.html">TV Design</a> guide.</p>
+
+
+<h2 id="large-bitmaps">Handle Large Bitmaps</h2>
+
+<p>TV devices, like any other Android device, have a limited amount of memory. If you build your
+  app layout with very high-resolution images or use many high-resolution images in the operation
+  of your app, it can quickly run into memory limits and cause out of memory errors.
+  To avoid these types of problems, follow these tips:</p>
+
+<ul>
+  <li>Load images only when they are displayed on the screen. For example, when displaying multiple
+  images in a {@link android.widget.GridView} or {@link android.widget.Gallery}, only load an image
+  when {@link android.widget.Adapter#getView getView()} is called on the
+  view's {@link android.widget.Adapter}.
+  </li>
+  <li>Call {@link android.graphics.Bitmap#recycle()} on {@link android.graphics.Bitmap} views that
+  are no longer needed.
+  </li>
+  <li>Use {@link java.lang.ref.WeakReference} for storing references to {@link
+  android.graphics.Bitmap} objects in an in-memory {@link java.util.Collection}.
+  </li>
+  <li>If you fetch images from the network, use {@link android.os.AsyncTask} to fetch and store
+  them on the device for faster access. Never do network transactions on the application's main
+  user interface thread.
+  </li>
+  <li>Scale down large images to a more appropriate size as you download them; otherwise,
+  downloading the image itself may cause an out of memory exception.
+  </li>
+</ul>
+
+<p>
+  For more information on getting the best performance when working with images, see
+  <a href="{@docRoot}training/displaying-bitmaps/index.html">Displaying Bitmaps Efficiently</a>.
+</p>
