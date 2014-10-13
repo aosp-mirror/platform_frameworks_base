@@ -860,6 +860,11 @@ class MountService extends IMountService.Stub
         } catch (RemoteException e) {
             Slog.e(TAG, "Error setting system locale from mount service", e);
         }
+
+        // Temporary workaround for http://b/17945169.
+        Slog.d(TAG, "Setting system properties to " + systemLocale + " from mount service");
+        SystemProperties.set("persist.sys.language", locale.getLanguage());
+        SystemProperties.set("persist.sys.country", locale.getCountry());
     }
 
     /**
