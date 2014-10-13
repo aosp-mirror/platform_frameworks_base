@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Оболочка"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Отчет об ошибках сохранен"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Проведите пальцем влево, чтобы отправить отчет об ошибке"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Отчет об ошибке сохранен"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Проведите влево, чтобы отправить отчет"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Нажмите, чтобы отправить отчет об ошибках"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Отчеты об ошибках содержат данные различных системных журналов и могут включать личную информацию. Рекомендуем открывать к ним доступ только лицам и приложениям, заслуживающим доверие."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Показать это сообщение в следующий раз"</string>
