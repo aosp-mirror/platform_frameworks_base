@@ -469,8 +469,8 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"ऐप्स  को सिस्टम सेटिंग डेटा संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स  आपके सिस्टम के कॉन्फ़िगरेशन को दूषित कर सकते हैं."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"सुरक्षित सिस्‍टम सेटिंग बदलें"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"ऐप्स  को सिस्टम के सुरक्षित सेटिंग डेटा को संशोधित करने देता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google सेवाएं नक्शा बदलें"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"ऐप्स को Google सेवाओं का नक्शे संशोधित करने देता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google सेवाएं मानचित्र बदलें"</string>
+    <string name="permdesc_writeGservices" msgid="1287309437638380229">"ऐप्स को Google सेवाओं का मानचित्र संशोधित करने देता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"प्रारंभ होने पर चलाएं"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही स्वतः आरंभ करने देता है. इससे टेबलेट को आरंभ होने में अधिक समय लग सकता है और ऐप्स  को निरंतर चलाकर संपूर्ण टेबलेट को धीमा करने देता है."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही स्वतः प्रारंभ होने देता है. इससे फ़ोन को प्रारंभ होने में अधिक समय लग सकता है और ऐप्स  के निरंतर चलते रहने से संपूर्ण फ़ोन प्रक्रियाएं धीमी हो सकती हैं."</string>
@@ -666,9 +666,9 @@
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"एप्‍लिकेशन के द्वारा ब्लूटूथ युग्‍मन करने देती है"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"एप्‍लिकेशन को उपयोगकर्ता के इंटरैक्शन के बिना दूरस्‍थ डिवाइस के साथ युग्‍मित करने देती है."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"एप्‍लिकेशन को उपयोगकर्ता के इंटरैक्शन के बिना दूरस्‍थ डिवाइस के साथ युग्‍मित करने देती है."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ब्लूटूथ नक्शा डेटा एक्सेस करें"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ऐप्स को ब्लूटूथ नक्शा डेटा एक्सेस करने दें."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ऐप्स को ब्लूटूथ नक्शा डेटा एक्सेस करने दें."</string>
+    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ब्लूटूथ मानचित्र डेटा एक्सेस करें"</string>
+    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ऐप्स को ब्लूटूथ मानचित्र डेटा एक्सेस करने दें."</string>
+    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ऐप्स को ब्लूटूथ मानचित्र डेटा एक्सेस करने दें."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX से कनेक्ट और डिस्कनेक्ट करें"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ऐप्स  को WiMAX सक्षम है या नहीं और कनेक्‍ट किए गए किसी WiMAX नेटवर्क के बारे में जानकारी निर्धारित करने देता है."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX स्‍थिति बदलें"</string>
