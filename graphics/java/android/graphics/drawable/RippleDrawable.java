@@ -348,7 +348,8 @@ public class RippleDrawable extends LayerDrawable {
      */
     @Override
     public boolean isProjected() {
-        return getNumberOfLayers() == 0;
+        // Always project ripples. We'll handle bounding in draw().
+        return true;
     }
 
     @Override
@@ -851,7 +852,7 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public Rect getDirtyBounds() {
-        if (isProjected()) {
+        if (getNumberOfLayers() == 0) {
             final Rect drawingBounds = mDrawingBounds;
             final Rect dirtyBounds = mDirtyBounds;
             dirtyBounds.set(drawingBounds);
