@@ -7226,11 +7226,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void updateShowImeWithHardKeyboard() {
-        boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
+        final boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0,
                 mCurrentUserId) == 1;
         synchronized (mWindowMap) {
-            mShowImeWithHardKeyboard = showImeWithHardKeyboard;
+            if (mShowImeWithHardKeyboard != showImeWithHardKeyboard) {
+                mShowImeWithHardKeyboard = showImeWithHardKeyboard;
+                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
+            }
         }
     }
 
