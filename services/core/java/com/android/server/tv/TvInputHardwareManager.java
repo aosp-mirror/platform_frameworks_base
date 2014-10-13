@@ -122,6 +122,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error registering listeners to HdmiControlService:", e);
                 }
+            } else {
+                Slog.w(TAG, "HdmiControlService is not available");
             }
         }
     }
