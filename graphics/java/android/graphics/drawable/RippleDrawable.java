@@ -719,10 +719,12 @@ public class RippleDrawable extends LayerDrawable {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int count = mLayerState.mNum;
 
-        // We don't need a layer if we don't expect to draw any ripples, we have
-        // an explicit mask, or if the non-mask content is all opaque.
+        // We don't need a layer if we don't expect to draw any ripples or
+        // a background, we have an explicit mask, or if the non-mask content
+        // is all opaque.
         boolean needsLayer = false;
-        if ((mExitingRipplesCount > 0 || mBackground != null) && mMask == null) {
+        if ((mExitingRipplesCount > 0 || (mBackground != null && mBackground.shouldDraw()))
+                && mMask == null) {
             for (int i = 0; i < count; i++) {
                 if (array[i].mId != R.id.mask
                         && array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
