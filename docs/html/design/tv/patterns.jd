@@ -1,6 +1,6 @@
-page.title=Patterns for TV
-page.tags="design"
+page.title=UI Patterns for TV
 @jd:body
+
 
 <p>As a developer of apps for TV, you should follow certain patterns to enable users to
   quickly understand and operate your app. This section describes recommended design patterns
@@ -13,7 +13,7 @@ page.tags="design"
   user interface has clear paths for two-axis navigation by aligning objects in lists and
   grids.</p>
 
-<img src="{@docRoot}preview/tv/design/images/focus.png" alt="TV navigation and focus diagram" />
+<img src="{@docRoot}design/tv/images/focus.png" alt="TV navigation and focus diagram" />
 
 <p>A key aspect of making your application work well with a D-Pad controller is to make sure
   that there is always an object that is obviously in focus. Your app must clearly indicate
@@ -47,7 +47,7 @@ page.tags="design"
 <p>Recommendation cards include a small icon that is imposed over a colored background.
   An example and specifications for this icon are shown below:</p>
 
-<img src="{@docRoot}preview/tv/design/images/icon.png" alt="Recommendation icon examples" />
+<img src="{@docRoot}design/tv/images/icon.png" alt="Recommendation icon examples" />
 
 <p>Here are the requirements for recommendation icons:</p>
 
@@ -65,16 +65,20 @@ page.tags="design"
 <h2>Background Images</h2>
 
 <p>Background images are displayed in the background of your app to provide additional visual
-  interest, information, or branding. The BrowseFragment and DetailsFragment classes in the Leanback
-  support library provide specific support for background images and for updating them as items gain
-  and lose focus. Here are the specific requirements for background images:</p>
+  interest, information, or branding. The user interface widgets provided in the <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support
+  library</a> provide specific support for background images and for updating them as items gain
+  and lose focus. The specific requirements for background images on TV devices is that they
+  should be full color and a size of 1920 x 1080 pixels.
+</p>
 
-<ul>
-  <li>Full color, 1920 x 1080 pixels</li>
-</ul>
+<p class="note" id="solid-background">
+  <strong>Important:</strong> Background images must not be transparent. Your must not allow any
+  portion of another app to be seen through your app.
+</p>
 
 <p class="note">
-  <strong>Note:</strong> If the image does not meet this requirement, it is scaled to fit.
+  <strong>Note:</strong> If you background image does not meet the size requirements, it is scaled
+  to fit.
 </p>
 
 <h2>Audio Feedback</h2>
@@ -82,5 +86,6 @@ page.tags="design"
 <p>Sounds on Android TV bring a cinematic quality to the interaction experience. You should
   consider adding sounds for user actions or to provide feedback when a user is only partially
   visually engaged with the screen (e.g., because they are distracted or multitasking).
-  You should also consider using sounds as alternatives to visual messages, for example to indicate
-  that a user has reached the end of a list or is trying to navigate to an undefined location.</p>
+  You should also consider using sounds as alternatives to visual messages. For example, use sounds
+  to indicate that a user has reached the end of a list or is trying to navigate to an undefined
+  location.</p>

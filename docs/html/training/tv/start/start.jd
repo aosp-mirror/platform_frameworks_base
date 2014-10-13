@@ -31,7 +31,7 @@ startpage=true
 </p>
 
 <p class="note">
-  <strong>Important:</strong> There are specific requirements your app must meet in order to
+  <strong>Important:</strong> There are specific requirements your app must meet to
   qualify as an Android TV app on Google Play. For more information, see the requirements listed
   in <a href="{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a>.
 </p>
