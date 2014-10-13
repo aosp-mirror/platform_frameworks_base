@@ -16543,15 +16543,21 @@ package android.media.tv {
     method public static java.lang.String[] decode(java.lang.String);
     method public static java.lang.String encode(java.lang.String...);
     field public static final java.lang.String ANIMAL_WILDLIFE = "ANIMAL_WILDLIFE";
+    field public static final java.lang.String ARTS = "ARTS";
     field public static final java.lang.String COMEDY = "COMEDY";
     field public static final java.lang.String DRAMA = "DRAMA";
     field public static final java.lang.String EDUCATION = "EDUCATION";
+    field public static final java.lang.String ENTERTAINMENT = "ENTERTAINMENT";
     field public static final java.lang.String FAMILY_KIDS = "FAMILY_KIDS";
     field public static final java.lang.String GAMING = "GAMING";
+    field public static final java.lang.String LIFE_STYLE = "LIFE_STYLE";
     field public static final java.lang.String MOVIES = "MOVIES";
+    field public static final java.lang.String MUSIC = "MUSIC";
     field public static final java.lang.String NEWS = "NEWS";
+    field public static final java.lang.String PREMIER = "PREMIER";
     field public static final java.lang.String SHOPPING = "SHOPPING";
     field public static final java.lang.String SPORTS = "SPORTS";
+    field public static final java.lang.String TECH_SCIENCE = "TECH_SCIENCE";
     field public static final java.lang.String TRAVEL = "TRAVEL";
   }
 
