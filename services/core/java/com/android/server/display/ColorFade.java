@@ -226,12 +226,15 @@ final class ColorFade {
                 GLES20.GL_VERTEX_SHADER);
         int fshader = loadShader(context, com.android.internal.R.raw.color_fade_frag,
                 GLES20.GL_FRAGMENT_SHADER);
+        GLES20.glReleaseShaderCompiler();
         if (vshader == 0 || fshader == 0) return false;
 
         mProgram = GLES20.glCreateProgram();
 
         GLES20.glAttachShader(mProgram, vshader);
         GLES20.glAttachShader(mProgram, fshader);
+        GLES20.glDeleteShader(vshader);
+        GLES20.glDeleteShader(fshader);
 
         GLES20.glLinkProgram(mProgram);
 
@@ -252,6 +255,11 @@ final class ColorFade {
         GLES20.glUseProgram(0);
 
         return true;
+    }
+
+    private void destroyGLShaders() {
+        GLES20.glDeleteProgram(mProgram);
+        checkGlErrors("glDeleteProgram");
     }
 
     private boolean initGLBuffers() {
@@ -288,6 +296,11 @@ final class ColorFade {
         return true;
     }
 
+    private void destroyGLBuffers() {
+        GLES20.glDeleteBuffers(2, mGLBuffers, 0);
+        checkGlErrors("glDeleteBuffers");
+    }
+
     private static void setQuad(FloatBuffer vtx, float x, float y, float w, float h) {
         if (DEBUG) {
             Slog.d(TAG, "setQuad: x=" + x + ", y=" + y + ", w=" + w + ", h=" + h);
@@ -314,10 +327,20 @@ final class ColorFade {
             Slog.d(TAG, "dismiss");
         }
 
-        destroyScreenshotTexture();
-        destroyEglSurface();
-        destroySurface();
-        mPrepared = false;
+        if (mPrepared) {
+            attachEglContext();
+            try {
+                destroyScreenshotTexture();
+                destroyGLShaders();
+                destroyGLBuffers();
+                destroyEglSurface();
+            } finally {
+                detachEglContext();
+            }
+            destroySurface();
+            GLES20.glFlush();
+            mPrepared = false;
+        }
     }
 
     /**
@@ -468,14 +491,8 @@ final class ColorFade {
     private void destroyScreenshotTexture() {
         if (mTexNamesGenerated) {
             mTexNamesGenerated = false;
-            if (attachEglContext()) {
-                try {
-                    GLES20.glDeleteTextures(1, mTexNames, 0);
-                    checkGlErrors("glDeleteTextures");
-                } finally {
-                    detachEglContext();
-                }
-            }
+            GLES20.glDeleteTextures(1, mTexNames, 0);
+            checkGlErrors("glDeleteTextures");
         }
     }
 
