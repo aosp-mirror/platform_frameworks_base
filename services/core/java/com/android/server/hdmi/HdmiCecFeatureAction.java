@@ -73,8 +73,9 @@ abstract class HdmiCecFeatureAction {
     }
 
     /**
-     * Called right after the action is created. Initialization or first step to take
-     * for the action can be done in this method.
+     * Called after the action is created. Initialization or first step to take
+     * for the action can be done in this method. Shall update {@code mState} to
+     * indicate that the action has started.
      *
      * @return true if the operation is successful; otherwise false.
      */
@@ -159,6 +160,10 @@ abstract class HdmiCecFeatureAction {
     // delayMillis.
     protected void addTimer(int state, int delayMillis) {
         mActionTimer.sendTimerMessage(state, delayMillis);
+    }
+
+    boolean started() {
+        return mState != STATE_NONE;
     }
 
     protected final void sendCommand(HdmiCecMessage cmd) {
