@@ -839,6 +839,48 @@ include the action bar on devices running Android 2.1 or higher."
 
   <!-- End Building for wearables -->
 
+  <!-- Start: Building for TV -->
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/tv/index.html">
+      <span class="small">Building Apps for</span><br/>
+              TV
+      </a>
+    </div>
+    <ul>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/start/index.html"
+             description="How to start building TV apps or extend your existing app to run on TV
+             devices.">
+             Building TV Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/start.html">
+              Getting Started with TV Apps</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/hardware.html">
+              Handling TV Hardware</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/layouts.html">
+              Building TV Layouts</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/navigation.html">
+              Creating TV Navigation</a>
+          </li>
+        </ul>
+      </li>
+
+    </ul>
+  </li>
+  <!-- End: Building for TV -->
+
+
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/best-ux.html">
@@ -1041,29 +1083,6 @@ results."
             ja-lang="順応性のある UI フローの実装"
             es-lang="Cómo implementar interfaces de usuario adaptables"
             >Implementing Adaptive UI Flows</a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/tv/index.html"
-             description=
-             "How to optimize your app's user interface and user input for
-             the &quot;ten foot experience&quot; of a TV screen."
-            >Designing for TV</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/tv/optimizing-layouts-tv.html">
-            Optimizing Layouts for TV
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/tv/optimizing-navigation-tv.html">
-            Optimizing Navigation for TV
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/tv/unsupported-features-tv.html">
-            Handling Features Not Supported on TV
-          </a>
           </li>
         </ul>
       </li>
