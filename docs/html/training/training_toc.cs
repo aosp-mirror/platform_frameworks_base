@@ -876,6 +876,24 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/playback/index.html"
+             description="How to build apps that provide media catalogs and play content.">
+             Building TV Playback Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/browse.html">
+              Creating a Catalog Browser</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/details.html">
+              Building a Details View</a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li>
   <!-- End: Building for TV -->
