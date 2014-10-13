@@ -1355,9 +1355,10 @@ public abstract class WebSettings {
     public synchronized boolean getJavaScriptCanOpenWindowsAutomatically() {
         throw new MustOverrideException();
     }
+
     /**
      * Sets the default text encoding name to use when decoding html pages.
-     * The default is "Latin-1".
+     * The default is "UTF-8".
      *
      * @param encoding the text encoding name
      */
