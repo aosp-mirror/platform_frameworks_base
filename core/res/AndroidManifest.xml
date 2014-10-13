@@ -1239,7 +1239,7 @@
          @hide Pending API council approval -->
     <permission android:name="android.permission.READ_PRECISE_PHONE_STATE"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system"
         android:label="@string/permlab_readPrecisePhoneState"
         android:description="@string/permdesc_readPrecisePhoneState" />
 
