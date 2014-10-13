@@ -69,7 +69,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"មិនអាចថតអេក្រង់ដោយសារតែទំហំផ្ទុកមានដែនកំណត់ ឬវាមិនត្រូវបានអនុញ្ញាត​ដោយកម្មវិធី ឬ​ស្ថាប័ន​របស់​អ្នក។"</string>
@@ -152,7 +152,7 @@
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"សម្អាត​ការ​ជូន​ដំណឹង។"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"បាន​បើក GPS ។"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"ទទួល​​ GPS ។"</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ​"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"កម្មវិធី​រោទ៍​ញ័រ។"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"កម្មវិធី​រោទ៍​ស្ងាត់។"</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
@@ -236,7 +236,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"បញ្ឈរ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ទេសភាព"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"វិធីសាស្ត្រ​បញ្ចូល"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង​"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -280,11 +280,11 @@
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"ចាក់​សោ​ទៅ​កម្មវិធី"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ស្វែងរក"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APP">%s</xliff:g> ទេ។"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម​​"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
-    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"រុញ​ទៅ​ឆ្វេង​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
