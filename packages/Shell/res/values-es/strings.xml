@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Informe de error capturado"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Informe de error registrado"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Desliza el dedo hacia la izquierda para compartir el informe de error"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca para compartir tu informe de error"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Los informes de errores contienen datos de los distintos archivos de registro del sistema, incluida información personal y privada. Comparte los informes de errores únicamente con aplicaciones y usuarios en los que confíes."</string>
