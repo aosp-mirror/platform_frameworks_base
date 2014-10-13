@@ -303,6 +303,7 @@ public final class HdmiControlService extends SystemService {
             }
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
+            return;
         }
 
         mMhlController = HdmiMhlControllerStub.create(this);
