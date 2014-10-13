@@ -1,47 +1,59 @@
-page.title=DetailFragment
+page.title=Building a Details View
+page.tags="detailsfragment"
+
+trainingnavtop=true
 
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
-  <h2>In this document</h2>
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
   <ol>
     <li><a href="#details-presenter">Build a Details Presenter</a></li>
     <li><a href="#details-fragment">Extend the Details Fragment</a>
-      <li><a href="#activity">Creating a Details Activity</a></li>
-      <li><a href="#item-listener">Listener for Clicked Items</a></li>
-    </li>
+    <li><a href="#activity">Create a Details Activity</a></li>
+    <li><a href="#item-listener">Define a Listener for Clicked Items</a></li>
   </ol>
 </div>
 </div>
 
-<p>The media browsing interface classes provided by the
-  <a href="{@docRoot}preview/tv/start/index.html#tv-libraries">Leanback support library</a>
+<p>
+  The media browsing interface classes provided by the <a href=
+  "{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support library</a>
   include classes for displaying additional information about a media item, such as a description
-  or reviews, and for taking action on that item, such as purchasing it or playing its content. This
-  section discusses how to create a presenter class for media item details and extend the
-  {@code DetailsFragment} class to implement a details view for a media item when it
-  is selected by a user.
+  or reviews, and for taking action on that item, such as purchasing it or playing its content.
+</p>
+
+<p>
+  This lesson discusses how to create a presenter class for media item details, and how to extend
+  the {@link android.support.v17.leanback.app.DetailsFragment} class to implement a details view
+  for a media item when it is selected by a user.
 </p>
 
 <p class="note">
   <strong>Note:</strong> The implementation example shown here uses an additional activity to
-  contain the {@code DetailsFragment}. However, it is possible to avoid creating a second activity
-  by replacing the current {@code BrowseFragment} with a {@code DetailsFragment} within the <em>same</em>
-  activity using fragment transactions. For more information on using fragment transactions, see the
-  <a href="{@docRoot}training/basics/fragments/fragment-ui.html#Replace">Building a Dynamic
-    UI with Fragments</a> training.
+  contain the {@link android.support.v17.leanback.app.DetailsFragment}. However, it is possible to
+  avoid creating a second activity by replacing the current {@link
+  android.support.v17.leanback.app.BrowseFragment} with a {@link
+  android.support.v17.leanback.app.DetailsFragment} within the <em>same</em> activity using
+  fragment transactions. For more information on using fragment transactions, see the <a href=
+  "{@docRoot}training/basics/fragments/fragment-ui.html#Replace">Building a Dynamic UI with
+  Fragments</a> training.
 </p>
 
 
 <h2 id="details-presenter">Build a Details Presenter</h2>
 
-<p>In the media browsing framework provided for by the leanback support library, you use
-  presenter objects to control the display of data on screen, including media item details. The
-  framework provides the {@code AbstractDetailsDescriptionPresenter} class for this purpose, which
-  is a nearly complete implementation of the presenter for media item details. All you have to do is
-  implement the {@code onBindDescription()} method to bind the view fields to your data objects, as shown in
-  the following code sample:</p>
+<p>
+  In the media browsing framework provided by the leanback library, you use presenter
+  objects to control the display of data on screen, including media item details. The framework
+  provides the {@link android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter}
+  class for this purpose, which is a nearly complete implementation of the presenter for media item
+  details. All you have to do is implement the {@link
+  android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter#onBindDescription
+  onBindDescription()} method to bind the view fields to your data objects, as shown in the
+  following code sample:
+</p>
 
 <pre>
 public class DetailsDescriptionPresenter
@@ -69,13 +81,18 @@ public class DetailsDescriptionPresenter
 
 <h2 id="details-fragment">Extend the Details Fragment</h2>
 
-<p>When you use the {@code DetailsFragment} class for displaying your media item details, you
-  extend that class to provide additional content such as a preview image and actions for the media
-  item. You can also provide additional content, such as a list of related media items.</p>
+<p>
+  When using the {@link android.support.v17.leanback.app.DetailsFragment} class for displaying
+  your media item details, extend that class to provide additional content such as a preview
+  image and actions for the media item. You can also provide additional content, such as a list of
+  related media items.
+</p>
 
-<p>The following example code demonstrates how to use the presenter class you created in the
-  previous section, add a preview image and actions for the media item being viewed. This example
-  also shows the addition of a related media items row, which appears below the details listing.</p>
+<p>
+  The following example code demonstrates how to use the presenter class shown in the
+  previous section, to add a preview image and actions for the media item being viewed. This example
+  also shows the addition of a related media items row, which appears below the details listing.
+</p>
 
 <pre>
 public class MediaItemDetailsFragment extends DetailsFragment {
@@ -126,15 +143,21 @@ public class MediaItemDetailsFragment extends DetailsFragment {
 </pre>
 
 
-<h3 id="activity">Creating a Details Activity</h3>
+<h3 id="activity">Create a Details Activity</h3>
 
-<p>Fragments such as the {@code DetailsFragment} must be contained within an activity in order
-  to be used for display. Creating an activity for your details view, separate from the browse
-  activity, enables you to invoke your details view using an Intent. This section explains how to
-  build an activity to contain your implementation of the detail view for your media items.</p>
+<p>
+  Fragments such as the {@link android.support.v17.leanback.app.DetailsFragment} must be contained
+  within an activity in order to be used for display. Creating an activity for your details view,
+  separate from the browse activity, enables you to invoke your details view using an
+  {@link android.content.Intent}. This
+  section explains how to build an activity to contain your implementation of the detail view for
+  your media items.
+</p>
 
-<p>Start creating the details activity by building a layout that references your implementation
-  of the {@code DetailsFragment}:</p>
+<p>
+  Start creating the details activity by building a layout that references your implementation of
+  the {@link android.support.v17.leanback.app.DetailsFragment}:
+</p>
 
 <pre>
 &lt;!-- file: res/layout/details.xml --&gt;
@@ -147,7 +170,9 @@ public class MediaItemDetailsFragment extends DetailsFragment {
 /&gt;
 </pre>
 
-<p>Next, create an activity class that uses the layout shown in the previous code example:</p>
+<p>
+  Next, create an activity class that uses the layout shown in the previous code example:
+</p>
 
 <pre>
 public class DetailsActivity extends Activity
@@ -160,8 +185,10 @@ public class DetailsActivity extends Activity
 }
 </pre>
 
-<p>Finally, add this new activity to the manifest. Remember to apply the Leanback theme to
-  ensure that the user interface is consistent with the media browse activity:</p>
+<p>
+  Finally, add this new activity to the manifest. Remember to apply the Leanback theme to ensure
+  that the user interface is consistent with the media browse activity:
+</p>
 
 <pre>
 &lt;application&gt;
@@ -175,15 +202,21 @@ public class DetailsActivity extends Activity
 </pre>
 
 
-<h3 id="item-listener">Listener for Clicked Items</h3>
+<h3 id="item-listener">Define a Listener for Clicked Items</h3>
 
-<p>After you have implemented the {@code DetailsFragment}, you must modify your main media
-  browsing view to move to your details view when a user clicks on a media item. In order to enable
-  this behavior, add an {@code OnItemClickedListener} object to the BrowseFragment that fires an
-  intent to start the item details activity.</p>
+<p>
+  After you have implemented the {@link android.support.v17.leanback.app.DetailsFragment},
+  modify your main media browsing view to move to your details view when a user clicks on a media
+  item. In order to enable this behavior, add an
+  {@link android.support.v17.leanback.widget.OnItemViewClickedListener} object to the
+  {@link android.support.v17.leanback.app.BrowseFragment} that fires an intent to start the item
+  details activity.
+</p>
 
-<p>The following example shows how to implement a listener to start the details view when a user
-  clicks a media item in the main media browsing activity:</p>
+<p>
+  The following example shows how to implement a listener to start the details view when a user
+  clicks a media item in the main media browsing activity:
+</p>
 
 <pre>
 public class BrowseMediaActivity extends Activity {
@@ -197,8 +230,8 @@ public class BrowseMediaActivity extends Activity {
         buildRowsAdapter();
 
         // add a listener for selected items
-        mBrowseFragment.setOnItemClickedListener(
-            new OnItemClickedListener() {
+        mBrowseFragment.OnItemViewClickedListener(
+            new OnItemViewClickedListener() {
                 &#64;Override
                 public void onItemClicked(Object item, Row row) {
                     System.out.println("Media Item clicked: " + item.toString());
