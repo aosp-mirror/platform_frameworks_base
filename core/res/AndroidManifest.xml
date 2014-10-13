@@ -405,7 +405,7 @@
     <!-- @hide -->
     <permission android:name="android.permission.RECEIVE_BLUETOOTH_MAP"
         android:permissionGroup="android.permission-group.MESSAGES"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system"
         android:label="@string/permlab_receiveBluetoothMap"
         android:description="@string/permdesc_receiveBluetoothMap" />
 
