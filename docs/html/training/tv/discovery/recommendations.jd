@@ -1,39 +1,57 @@
-page.title=Making Recommendations
+page.title=Recommending TV Content
+page.tags="recommendation","recommend"
+
+trainingnavtop=true
 
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
-  <h2>In this document</h2>
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
   <ol>
     <li><a href="#service">Create a Recommendations Service</a></li>
     <li><a href="#build">Build Recommendations</a></li>
     <li><a href="#run-service">Run Recommendations Service</a></li>
   </ol>
-
 </div>
 </div>
 
+<p>
+  When interacting with TVs, users generally prefer to give minimal input before watching
+  content. An ideal scenario for many TV users is: sit down, turn on, and watch. The fewest steps
+  to get users to content they enjoy is generally the path they prefer.
+</p>
 
-<p>Content recommendations appear as the first row of the TV launch screen after the first use
-  of the device. This row is intended to help users quickly find content they enjoy. Contributing
-  recommendations from your apps content catalog can help bring users back to your app.</p>
-
+<p>
+  The Android framework assists with minimum-input interaction by providing a recommendations row
+  on the home screen. Content recommendations appear as the first row of the TV launch screen after
+  the first use of the device. Contributing recommendations from your app's content catalog can help
+  bring users back to your app.
+</p>
 
 <img src="{@docRoot}preview/tv/images/home-recommendations.png" alt="" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> An example of the recommendations row.
 </p>
 
+<p>
+  This lesson teaches you how to create recommendations and provide them to the Android framework
+  so your app content can be easily discovered and enjoyed by users.
+</p>
+
 
 <h2 id="service">Create a Recommendations Service</h2>
 
-<p>Content recommendations are created with background processing. In order for your application
-  to contribute to recommendations, you create a service that periodically adds listings from your
-  app's catalog to the system list of recommendations.</p>
+<p>
+  Content recommendations are created with background processing. In order for your application to
+  contribute to recommendations, create a service that periodically adds listings from your
+  app's catalog to the system list of recommendations.
+</p>
 
-<p>The following code example illustrates how to extend the {@link android.app.IntentService} to
-  create a recommendation service for your application.</p>
+<p>
+  The following code example illustrates how to extend {@link android.app.IntentService} to
+  create a recommendation service for your application:
+</p>
 
 <pre>
 public class RecommendationsService extends IntentService {
@@ -66,9 +84,10 @@ public class RecommendationsService extends IntentService {
 }
 </pre>
 
-<p>In order for this class to be recognized and run as a service, you must register this service
-  using your app manifest. The following code snippet illustrates how to add this class as a
-  service:</p>
+<p>
+  In order for this service to be recognized by the system and run, register it using your
+  app manifest. The following code snippet illustrates how to declare this class as a service:
+</p>
 
 <pre>
 &lt;manifest ... &gt;
@@ -81,14 +100,20 @@ public class RecommendationsService extends IntentService {
 &lt;/manifest&gt;
 </pre>
 
+
 <h2 id="build">Build Recommendations</h2>
 
-<p>Once it starts running, your service must create recommendations and pass them to the Android
-  framework. The framework receives the recommendations as {@link android.app.Notification} objects
-  that use a specific style and are marked with a specific category.</p>
+<p>
+  Once your recommendation server starts running, it must create recommendations and pass them to
+  the Android framework. The framework receives the recommendations as {@link
+  android.app.Notification} objects that use a specific template and are marked with a specific
+  category.
+</p>
 
-<p>The following code example demonstrates how to get an instance of the {@link
-  android.app.NotificationManager}, build a recommendation, and post it to the manager:</p>
+<p>
+  The following code example demonstrates how to get an instance of the {@link
+  android.app.NotificationManager}, build a recommendation, and post it to the manager:
+</p>
 
 <pre>
 public class RecommendationsService extends IntentService {
@@ -113,8 +138,11 @@ public class RecommendationsService extends IntentService {
                 new NotificationCompat.Builder(context)
                         .setContentTitle(movie.getTitle())
                         .setContentText(movie.getDescription())
+                        .setContentInfo(APP_NAME)
+                        .setGroup("ActionMovies")
+                        .setSortKey("0.8")
                         .setPriority(movie.getPriority())
-                        .setOngoing(true)
+                        .setColor(#FFFF2020)
                         .setCategory("recommendation")
                         .setLargeIcon(movie.getImage())
                         .setSmallIcon(movie.getSmallIcon())
@@ -148,11 +176,13 @@ public class RecommendationsService extends IntentService {
 
 <h3 id="run-service">Run Recommendations Service</h3>
 
-<p>Your app's recommendation service must run periodically in order to create current
-  recommendations. In order to run your service, you should create a class that runs a timer and
-  invokes it at regular intervals. The following code example extends the {@link
+<p>
+  Your app's recommendation service must run periodically in order to create current
+  recommendations. To run your service, create a class that runs a timer and invokes
+  it at regular intervals. The following code example extends the {@link
   android.content.BroadcastReceiver} class to start periodic execution of a recommendation service
-  every 12 hours:</p>
+  every 12 hours:
+</p>
 
 <pre>
 public class BootupReceiver extends BroadcastReceiver {
@@ -183,10 +213,12 @@ public class BootupReceiver extends BroadcastReceiver {
 }
 </pre>
 
-<p>In order for the {@link android.content.BroadcastReceiver} class to execute after a TV
-  device starts up, you must register this class in your app manifest and attach an intent filter
-  in order for the device boot process to complete. This sample code demonstrates how to add this
-  configuration to the manifest:</p>
+<p>
+  This implementation of the {@link android.content.BroadcastReceiver} class must run after start
+  up of the TV device where it is installed. To accomplish this, register this class in your app
+  manifest with an intent filter that listens for the completion of the device boot process. The
+  following sample code demonstrates how to add this configuration to the manifest:
+</p>
 
 <pre>
 &lt;manifest ... &gt;
@@ -203,6 +235,6 @@ public class BootupReceiver extends BroadcastReceiver {
 
 <p class="important">
   <strong>Important:</strong> Receiving a boot completed notification requires that your app
-  request the {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission.
+  requests the {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission.
   For more information, see {@link android.content.Intent#ACTION_BOOT_COMPLETED}.
 </p>
