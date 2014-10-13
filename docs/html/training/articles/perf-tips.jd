@@ -388,7 +388,7 @@ was 2x slower; the actual difference was more like 6% slower. Furthermore,
 the JIT makes the two effectively indistinguishable.</p>
 
 <p>On devices without a JIT, caching field accesses is about 20% faster than
-repeatedly accesssing the field. With a JIT, field access costs about the same
+repeatedly accessing the field. With a JIT, field access costs about the same
 as local access, so this isn't a worthwhile optimization unless you feel it
 makes your code easier to read. (This is true of final, static, and static
 final fields too.)
