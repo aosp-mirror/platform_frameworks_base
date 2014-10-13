@@ -421,9 +421,11 @@ public class DocumentsActivity extends Activity {
         if (showRootIcon) {
             mToolbar.setNavigationIcon(
                     root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
+            mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(null);
         } else {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
+            mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
