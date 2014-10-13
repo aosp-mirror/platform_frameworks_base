@@ -250,7 +250,7 @@ public class Surface implements Parcelable {
                 // double-lock, but that won't happen if mNativeObject was updated.  We can't
                 // abandon the old mLockedObject because it might still be in use, so instead
                 // we just refuse to re-lock the Surface.
-                throw new IllegalStateException("Surface was already locked");
+                throw new IllegalArgumentException("Surface was already locked");
             }
             mLockedObject = nativeLockCanvas(mNativeObject, mCanvas, inOutDirty);
             return mCanvas;
@@ -279,9 +279,12 @@ public class Surface implements Parcelable {
             if (mLockedObject == 0) {
                 throw new IllegalStateException("Surface was not locked");
             }
-            nativeUnlockCanvasAndPost(mLockedObject, canvas);
-            nativeRelease(mLockedObject);
-            mLockedObject = 0;
+            try {
+                nativeUnlockCanvasAndPost(mLockedObject, canvas);
+            } finally {
+                nativeRelease(mLockedObject);
+                mLockedObject = 0;
+            }
         }
     }
 
