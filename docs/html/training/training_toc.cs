@@ -851,6 +851,7 @@ include the action bar on devices running Android 2.1 or higher."
 
       <li class="nav-section">
         <div class="nav-section-header">
+
           <a href="<?cs var:toroot ?>training/tv/start/index.html"
              description="How to start building TV apps or extend your existing app to run on TV
              devices.">
@@ -890,6 +891,24 @@ include the action bar on devices running Android 2.1 or higher."
           <li>
             <a href="<?cs var:toroot ?>training/tv/playback/details.html">
               Building a Details View</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/discovery/index.html"
+             description="How to help users discovery content from your app.">
+             Helping Users Find Content on TV</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/discovery/recommendations.html">
+              Recommending TV Content</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/discovery/in-app-search.html">
+              Searching within TV Apps</a>
           </li>
         </ul>
       </li>
