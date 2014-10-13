@@ -1261,7 +1261,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Sonnerie par défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Aucune"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Aucun"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sonneries"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Sonnerie inconnue"</string>
   <plurals name="wifi_available">
@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Pour optimiser l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil et limite les données en arrière-plan. Vous devrez peut-être ouvrir manuellement les applications d\'e-mail, de SMS/MMS et les autres applications synchronisées pour les mettre à jour.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Pour optimiser l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil et limite les données en arrière-plan. Vous devrez peut-être ouvrir manuellement vos applications d\'e-mail, de messagerie instantanée et autres applications synchronisées pour les mettre à jour.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Jusqu\'à ce que le temps d\'arrêt se termine à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Pendant une minute"</item>
