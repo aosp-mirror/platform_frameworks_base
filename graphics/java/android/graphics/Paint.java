@@ -29,7 +29,7 @@ import java.util.Locale;
  */
 public class Paint {
 
-    private long mNativePaint;
+    /*package*/ long mNativePaint;
     private long mNativeShader = 0;
 
     /**
