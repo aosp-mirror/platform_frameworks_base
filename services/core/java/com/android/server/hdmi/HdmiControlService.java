@@ -416,12 +416,17 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         // A container for [Device type, Local device info].
         ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
-        clearLocalDevices();
         for (int type : mLocalDevices) {
-            final HdmiCecLocalDevice localDevice = HdmiCecLocalDevice.create(this, type);
+            HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
+            if (localDevice == null) {
+                localDevice = HdmiCecLocalDevice.create(this, type);
+            }
             localDevice.init();
             localDevices.add(localDevice);
         }
+        // It's now safe to flush existing local devices from mCecController since they were
+        // already moved to 'localDevices'.
+        clearLocalDevices();
         allocateLogicalAddress(localDevices, initiatedBy);
     }
 
