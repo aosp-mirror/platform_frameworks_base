@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Încercaţi din nou"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Încercaţi din nou"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S-a depăşit numărul maxim de încercări pentru Deblocare facială"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Se încarcă, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Încărcată"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conectaţi încărcătorul."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Niciun card SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nu există card SIM în computerul tablet PC."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonul nu are card SIM."</string>

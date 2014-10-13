@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"আবার চেষ্টা করুন"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"আবার চেষ্টা করুন"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"মুখের সাহায্যে আনলক করার প্রচেষ্টা যতবার করা যায় তার সীমা পেরিয়ে গেছে"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"চার্জ হচ্ছে, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"চার্জ হয়েছে"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"আপনার চার্জার সংযুক্ত করুন৷"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"কোনো সিম কার্ড নেই"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ট্যাবলেটের মধ্যে কোনো সিম কার্ড নেই৷"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ফোনের মধ্যে কোনো সিম কার্ড নেই৷"</string>

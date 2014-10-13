@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Կրկին փորձեք"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Կրկին փորձեք"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Առավելագույն Դեմքով ապակողպման փորձերը գերազանցված են"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Լիցքավորում, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Լիցքավորված է"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Միացրեք ձեր լիցքավորիչը:"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM քարտ չկա"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Գրասալիկում SIM քարտ չկա:"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Հեռախոսում SIM քարտ չկա:"</string>

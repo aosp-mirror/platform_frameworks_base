@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"다시 시도"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"다시 시도"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"얼굴 인식 잠금해제 최대 시도 횟수를 초과했습니다."</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"충전 중(<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"충전됨"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"충전기를 연결하세요."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"태블릿에 SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"휴대전화에 SIM 카드가 없습니다."</string>

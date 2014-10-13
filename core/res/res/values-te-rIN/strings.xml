@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ముఖంతో అన్‌లాక్ ప్రయత్నాల గరిష్ట పరిమితి మించిపోయారు"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"ఛార్జ్ అవుతోంది, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"ఛార్జ్ అయింది"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"మీ ఛార్జర్‌ను కనెక్ట్ చేయండి."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM కార్డు లేదు"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"టాబ్లెట్‌లో SIM కార్డు లేదు."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ఫోన్‌లో SIM కార్డు లేదు."</string>

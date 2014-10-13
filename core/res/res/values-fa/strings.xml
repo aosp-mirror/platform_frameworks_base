@@ -376,8 +376,8 @@
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"‏به برنامه اجازه می‎دهد پنجره‎هایی را ایجاد کند که می‎خواهد توسط رابط کاربر سیستم داخلی استفاده شود. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ترسیم روی برنامه‌های دیگر"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"به برنامه اجازه می‌دهد که در بالا یا بخش‌هایی از رابط کاربری دیگر برنامه‌های کاربردی متصل شود. این کار می‌تواند در استفاده شما از رابط هر برنامه کاربردی تداخل ایجاد کند یا آنچه را که به نظر خود در دیگر برنامه‌های کاربردی می‌بینید، تغییر دهد."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"اصلاح سرعت انیمیشن کلی"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"‏به برنامه اجازه می‎دهد سرعت کلی انیمیشن را هر زمان که بخواهد تغییر دهد (انیمیشن‎های سریعتر یا آهسته‎تر)."</string>
+    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"اصلاح سرعت پویانمایی کلی"</string>
+    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"‏به برنامه اجازه می‎دهد سرعت پویانمایی کلی را هر زمان که بخواهد تغییر دهد (پویانمایی‌های تندتر و کندتر)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"‏مدیریت نشانه‎های برنامه"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"‏به برنامه اجازه می‎دهد با ایجاد کنارگذر از سفارش عادی Z، نشانه‎های خود را ایجاد و مدیریت کند. برای برنامه‎های عادی مورد نیاز است."</string>
     <string name="permlab_freezeScreen" msgid="4708181184441880175">"ثابت نگه داشتن صفحه"</string>
@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"دوباره امتحان کنید"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"‏دفعات تلاش برای Face Unlock از حداکثر مجاز بیشتر شد"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"در حال شارژ، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"شارژ شد"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"شارژر خود را متصل کنید."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانهٔ لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"سیم کارت درون تلفن نیست."</string>

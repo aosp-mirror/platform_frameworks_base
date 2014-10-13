@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Tente novamente"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Tente novamente"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Carregando, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Carregado"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecte o seu carregador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sem cartão SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Não há um cartão SIM no tablet."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Não há um cartão SIM no telefone."</string>
