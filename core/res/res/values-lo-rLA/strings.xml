@@ -905,10 +905,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ລອງໃໝ່ອີກຄັ້ງ"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ທົດລອງອີກຄັ້ງ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ຄວາມພະຍາຍາມປົດລັອກດ້ວຍໜ້ານັ້ນ ເກີນຈຳນວນທີ່ກຳນົດແລ້ວ"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"ກຳລັງສາກ <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"ສາກເຕັມແລ້ວ."</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"ເຊື່ອມຕໍ່ສາຍສາກຂອງທ່ານ."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ບໍ່ມີ SIM card."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ບໍ່ມີຊິມກາດໃນແທັບເລັດ."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ບໍ່ມີ SIM card ໃນໂທລະສັບ."</string>
@@ -1740,7 +1736,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
