@@ -1,5 +1,4 @@
 page.title=Style for TV
-page.tags="design"
 @jd:body
 
 
@@ -19,9 +18,10 @@ page.tags="design"
 </p>
 
 <p>If you are creating an app for browsing and playing content, use the prebuilt fragments in the
-  Leanback support library. These layouts have been built specifically for use on TV devices with
+  <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support
+  library</a>. These layouts have been built specifically for use on TV devices with
   the guidance of the Android User Experience team. For more information on using these classes,
-  see the <a href="{@docRoot}preview/tv/build-ui/index.html">User Interfaces</a> guide.
+  see the <a href="{@docRoot}training/tv/index.html">Building Apps for TV</a> training.
 </p>
 
 <p>Here are some additional recommendations for creating functional and attractive layouts for TV
@@ -33,8 +33,12 @@ page.tags="design"
   <li>Design your artwork assets for best viewing at HD resolution (1920 x 1080 pixels).</li>
   <li>Put on-screen navigational controls on the left or right side of the screen, and
       save the vertical space for content.</li>
-  <li>Use Fragments to create UIs that are divided into sections, and use view groups
-      like GridView instead of ListView to make better use of the horizontal screen space.</li>
+  <li>Use <a href="{@docRoot}guide/components/fragments.html">fragments</a> to create UIs that are
+    divided into sections, and use view groups like <a href=
+    "{@docRoot}guide/topics/ui/layout/gridview.html">Grid View</a> instead of <a href=
+    "{@docRoot}guide/topics/ui/layout/listview.html">List View</a> to make better use of the
+    horizontal screen space.
+  </li>
   <li>Avoid a cluttered interface by adding sufficient margins between layout controls.</li>
 </ul>
 
@@ -45,7 +49,7 @@ page.tags="design"
   outside of a safe zone that most TVs could reliably display. Even on some of today’s HDTV flat
   screens, areas outside that zone may not be visible.</p>
 
-<img src="{@docRoot}preview/tv/design/images/overscan.png" alt="Overscan borders for TV" />
+<img src="{@docRoot}design/tv/images/overscan.png" alt="Overscan borders for TV" />
 
 <p>Build a 10% margin into your TV screen designs to account for overscan area the TV may not
   display correctly. On a 1920 x 1080 pixel screen, this margin should be a minimum of 27px from the
