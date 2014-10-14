@@ -905,10 +905,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Poskusi znova"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Poskusite znova"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Presegli ste dovoljeno število poskusov odklepanja z obrazom"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Polnjenje (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Napolnjeno"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Priključite napajalnik."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ni kartice SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabličnem računalniku ni kartice SIM."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu ni kartice SIM."</string>
