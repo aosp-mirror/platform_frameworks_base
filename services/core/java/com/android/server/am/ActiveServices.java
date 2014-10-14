@@ -69,6 +69,7 @@ public final class ActiveServices {
     static final boolean DEBUG_DELAYED_SERVICE = ActivityManagerService.DEBUG_SERVICE;
     static final boolean DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
+    static final boolean LOG_SERVICE_START_STOP = false;
     static final String TAG = ActivityManagerService.TAG;
     static final String TAG_MU = ActivityManagerService.TAG_MU;
 
@@ -1447,8 +1448,10 @@ public final class ActiveServices {
             String nameTerm;
             int lastPeriod = r.shortName.lastIndexOf('.');
             nameTerm = lastPeriod >= 0 ? r.shortName.substring(lastPeriod) : r.shortName;
-            EventLogTags.writeAmCreateService(
-                    r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
+            if (LOG_SERVICE_START_STOP) {
+                EventLogTags.writeAmCreateService(
+                        r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
+            }
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
@@ -1632,8 +1635,10 @@ public final class ActiveServices {
         }
 
         if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down " + r + " " + r.intent);
-        EventLogTags.writeAmDestroyService(
-                r.userId, System.identityHashCode(r), (r.app != null) ? r.app.pid : -1);
+        if (LOG_SERVICE_START_STOP) {
+            EventLogTags.writeAmDestroyService(
+                    r.userId, System.identityHashCode(r), (r.app != null) ? r.app.pid : -1);
+        }
 
         final ServiceMap smap = getServiceMap(r.userId);
         smap.mServicesByName.remove(r.name);
