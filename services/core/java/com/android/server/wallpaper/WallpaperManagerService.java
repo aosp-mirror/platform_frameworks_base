@@ -275,9 +275,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         } else {
                             mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
                         }
+                        final String flattened = name.flattenToString();
                         EventLog.writeEvent(EventLogTags.WP_WALLPAPER_CRASHED,
-                                name.flattenToString().substring(0,
-                                        MAX_WALLPAPER_COMPONENT_LOG_LENGTH));
+                                flattened.substring(0, Math.min(flattened.length(),
+                                        MAX_WALLPAPER_COMPONENT_LOG_LENGTH)));
                     }
                 }
             }
