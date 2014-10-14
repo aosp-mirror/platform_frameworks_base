@@ -1005,12 +1005,21 @@ public class ViewDebug {
             return fields;
         }
 
-        final ArrayList<Field> foundFields = new ArrayList<Field>();
-        fields = klass.getDeclaredFields();
+        final ArrayList<Field> declaredFields = new ArrayList();
+        klass.getDeclaredFields(false, declaredFields);
 
-        int count = fields.length;
+        final ArrayList<Field> foundFields = new ArrayList<Field>();
+        final int count = declaredFields.size();
         for (int i = 0; i < count; i++) {
-            final Field field = fields[i];
+            final Field field = declaredFields.get(i);
+
+            // Ensure the field type can be resolved.
+            try {
+                field.getType();
+            } catch (NoClassDefFoundError e) {
+                continue;
+            }
+
             if (field.isAnnotationPresent(ExportedProperty.class)) {
                 field.setAccessible(true);
                 foundFields.add(field);
@@ -1039,12 +1048,22 @@ public class ViewDebug {
             return methods;
         }
 
-        final ArrayList<Method> foundMethods = new ArrayList<Method>();
-        methods = klass.getDeclaredMethods();
+        final ArrayList<Method> declaredMethods = new ArrayList();
+        klass.getDeclaredMethods(false, declaredMethods);
 
-        int count = methods.length;
+        final ArrayList<Method> foundMethods = new ArrayList<Method>();
+        final int count = declaredMethods.size();
         for (int i = 0; i < count; i++) {
-            final Method method = methods[i];
+            final Method method = declaredMethods.get(i);
+
+            // Ensure the method return and parameter types can be resolved.
+            try {
+                method.getReturnType();
+                method.getParameterTypes();
+            } catch (NoClassDefFoundError e) {
+                continue;
+            }
+
             if (method.getParameterTypes().length == 0 &&
                     method.isAnnotationPresent(ExportedProperty.class) &&
                     method.getReturnType() != Void.class) {
