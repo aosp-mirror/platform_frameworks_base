@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -189,7 +190,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
-
         // Short circuit if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
@@ -334,6 +334,30 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             }
         }
         return true;
+    }
+
+    /** Handles generic motion events */
+    public boolean onGenericMotionEvent(MotionEvent ev) {
+        if ((ev.getSource() & InputDevice.SOURCE_CLASS_POINTER) ==
+                InputDevice.SOURCE_CLASS_POINTER) {
+            int action = ev.getAction();
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_SCROLL:
+                    // Find the front most task and scroll the next task to the front
+                    float vScroll = ev.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    if (vScroll > 0) {
+                        if (mSv.ensureFocusedTask()) {
+                            mSv.focusNextTask(true, false);
+                        }
+                    } else {
+                        if (mSv.ensureFocusedTask()) {
+                            mSv.focusNextTask(false, false);
+                        }
+                    }
+                    return true;
+            }
+        }
+        return false;
     }
 
     /**** SwipeHelper Implementation ****/
