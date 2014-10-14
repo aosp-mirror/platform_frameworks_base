@@ -464,7 +464,8 @@ public final class BluetoothAdapter {
         if (getState() != STATE_ON) {
             return null;
         }
-        if (!isMultipleAdvertisementSupported()) {
+        if (!isMultipleAdvertisementSupported() && !isPeripheralModeSupported()) {
+            Log.e(TAG, "bluetooth le advertising not supported");
             return null;
         }
         synchronized(mLock) {
@@ -912,6 +913,21 @@ public final class BluetoothAdapter {
             return mService.isMultiAdvertisementSupported();
         } catch (RemoteException e) {
             Log.e(TAG, "failed to get isMultipleAdvertisementSupported, error: ", e);
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether peripheral mode is supported.
+     *
+     * @hide
+     */
+    public boolean isPeripheralModeSupported() {
+        if (getState() != STATE_ON) return false;
+        try {
+            return mService.isPeripheralModeSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get peripheral mode capability: ", e);
         }
         return false;
     }
