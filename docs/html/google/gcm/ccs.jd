@@ -21,7 +21,7 @@ page.title=GCM Cloud Connection Server (XMPP)
       </li>
   <li><a href="#upstream">Upstream Messages</a>
     <ol>
-      <li><a href="#receipts">Receive return receipts</a></li>
+      <li><a href="#receipts">Receive delivery receipts</a></li>
     </ol>
   </li>
   <li><a href="#flow">Flow Control</a> </li>
@@ -45,10 +45,14 @@ page.title=GCM Cloud Connection Server (XMPP)
 </div>
 </div>
 
-<p>The GCM Cloud Connection Server (CCS) is an XMPP endpoint that provides a
+<p>The Google Cloud Messaging (GCM) Cloud Connection Server (CCS) is an XMPP endpoint that provides a
 persistent, asynchronous, bidirectional connection to Google servers. The
 connection can be used to send and receive messages between your server and
 your users' GCM-connected devices.</p>
+
+<p class="note"><strong>Note:</strong> The content in this document
+applies to <a href="http://developer.chrome.com/apps/cloudMessaging">
+GCM with Chrome apps</a> as well as Android.
 
 <p>You can continue to use the HTTP request mechanism to send messages to GCM
 servers, side-by-side with CCS which uses XMPP. Some of the benefits of CCS include:</p>
@@ -259,22 +263,6 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 &lt;/message&gt;
 </pre>
 
-<p>Quota exceeded:</p>
-
-<pre>&lt;message&gt;
- &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
- {
-   &quot;message_type&quot;:&quot;nack&quot;,
-   &quot;message_id&quot;:&quot;msgId1&quot;,
-   &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
-   &quot;error&quot;:&quot;QUOTA_EXCEEDED&quot;,
-   &quot;error_description&quot;:&quot;Short-term downstream quota exceeded for this registration id&quot;
- }
- &lt;/gcm&gt;
-&lt;/message&gt;
-</pre>
-
-
 <p>The following table lists NACK error codes. Unless otherwise
 indicated, a NACKed message should not be retried. Unexpected NACK error codes
 should be treated the same as {@code INTERNAL_SERVER_ERROR}.</p>
@@ -312,11 +300,11 @@ message should be immediately retried over another connection.</td>
 <td>{@code INVALID_JSON}</td>
 <td>The JSON message payload is not valid.</td>
 </tr>
-<tr>
-<td>{@code QUOTA_EXCEEDED}</td>
-<td>The rate of messages to a particular registration ID (in other words, to a
-sender/device pair) is too high. If you want to retry the message, try using a slower
-rate.</td>
+<td>{@code DEVICE_MESSAGE_RATE_EXCEEDED}</td>
+<td>The rate of messages to a particular device is too high. You should reduce
+the number of messages sent to this device and should not immediately retry
+sending to this device. This error code replaces {@code QUOTA_EXCEEDED},
+which has been deprecated.</td>
 </tr>
 <tr>
   <td>{@code SERVICE_UNAVAILABLE}</td>
@@ -429,15 +417,17 @@ response to the above message:</p>
   &lt;/gcm&gt;
 &lt;/message&gt;</pre>
 
-<h3 id="receipts">Receive return receipts</h3>
+<h3 id="receipts">Receive delivery receipts</h3>
 
-<p>You can use upstream messaging to get receipt notifications, confirming
-that a given message was sent to a device. Your 3rd-party app server receives the receipt
-notification from CCS once the message has been sent to the device.</p>
+<p>You can use upstream messaging to get delivery receipts (sent from CCS to
+your 3rd party app server) when
+a device confirms that it received a message sent by CCS.</p>
 
 <p>To enable this feature, the message your 3rd-party app server sends to CCS must include
 a field called <code>&quot;delivery_receipt_requested&quot;</code>. When this field is set to
-<code>true</code>, CCS sends a return receipt. Here is an XMPP stanza containing a JSON
+<code>true</code>, CCS sends a delivery receipt when a device confirms that it received a particular message.</p>
+
+<p>Here is an XMPP stanza containing a JSON
 message with <code>&quot;delivery_receipt_requested&quot;</code> set to <code>true</code>:</p>
 
 <pre>&lt;message id=&quot;&quot;&gt;
@@ -457,8 +447,10 @@ message with <code>&quot;delivery_receipt_requested&quot;</code> set to <code>tr
 &lt;/message&gt;
 </pre>
 
-<p>Here is an example of a receipt notification message that CCS sends back to your 3rd-party
-app server:</p>
+
+
+<p>Here is an example of the delivery receipt that CCS sends to tell your 3rd-party
+app server that a device received a message that CCS sent it:</p>
 
 </p>
 <pre>&lt;message id=&quot;&quot;&gt;
@@ -483,12 +475,12 @@ app server:</p>
 <ul>
   <li>The {@code &quot;message_type&quot;} is set to {@code &quot;receipt&quot;}.
   <li>The {@code &quot;message_status&quot;} is set to {@code &quot;MESSAGE_SENT_TO_DEVICE&quot;},
-  indicating that the message was delivered. Notice that in this case,
+  indicating that the device received the message. Notice that in this case,
 {@code &quot;message_status&quot;} is not a field but rather part of the data payload.</li>
   <li>The receipt message ID consists of the original message ID, but with a
-<code>dr:</code> prefix. Your 3rd-party app server must send an ACK back with this ID,
+<code>dr2:</code> prefix. Your 3rd-party app server must send an ACK back with this ID,
 which in this example is {@code dr2:m-1366082849205}.</li>
-  <li>The original message ID and status are inside the
+  <li>The original message ID, the device registration ID, and the status are inside the
 {@code &quot;data&quot;} field.</li>
 </ul>
 

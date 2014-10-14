@@ -33,13 +33,16 @@ page.title=GCM HTTP Connection Server
 </div>
 </div>
 
-<p>This document describes the GCM HTTP connection server. Connection servers
+<p>This document describes the Google Cloud Messaging (GCM) HTTP
+connection server. Connection servers
 are the Google-provided servers that take messages from the 3rd-party
 application server and sending them to the device.</p>
 
+<p class="note"><strong>Note:</strong> The content in this document
+applies to <a href="http://developer.chrome.com/apps/cloudMessaging">
+GCM with Chrome apps</a> as well as Android.</p>
 
-
-<p class="note"><strong>Note:</strong> See
+<p>See
 <a href="server.html#params">Implementing GCM Server</a> for a list of all the message
 parameters and which connection server(s) supports them.</p>
 
@@ -163,7 +166,7 @@ before the request can be retried.</td>
   </tr>
   <tr>
     <td>5xx</td>
-    <td>Errors in the 500-599 range (such as 500 or 503) indicate that there wa
+    <td>Errors in the 500-599 range (such as 500 or 503) indicate that there was
 an internal error in the GCM server while trying to process the request, or that
 the server is temporarily unavailable (for example, because of timeouts). Sender
 must retry later, honoring any <code>Retry-After</code> header included in the
@@ -416,6 +419,12 @@ A message was addressed to a registration ID whose package name did not match
 the value passed in the request. Happens when error code is
 <code>InvalidPackageName</code>.
 </dd>
+
+<dt id="big_msg"><strong>Device Message Rate Exceeded</strong></dt>
+  <dd>The rate of messages to a particular device is too high. You should reduce the number
+of messages sent to this device and should not retry sending to this device immediately.
+<br/>Happens when error code is <code>DeviceMessageRateExceeded</code>.</dd>
+
 </dl>
 
 <h3 id="example-responses">Example responses</h3>
