@@ -16617,8 +16617,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(true);
             refreshDrawableState();
             dispatchSetSelected(selected);
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            if (selected) {
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            } else {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            }
         }
     }
 
