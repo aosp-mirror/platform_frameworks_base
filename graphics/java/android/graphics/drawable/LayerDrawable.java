@@ -100,10 +100,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param state The constant drawable state.
      */
     LayerDrawable(Drawable[] layers, LayerState state) {
-        this(state, null, null);
-        int length = layers.length;
-        ChildDrawable[] r = new ChildDrawable[length];
+        this(state, null);
 
+        final int length = layers.length;
+        final ChildDrawable[] r = new ChildDrawable[length];
         for (int i = 0; i < length; i++) {
             r[i] = new ChildDrawable();
             r[i].mDrawable = layers[i];
@@ -117,17 +117,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     LayerDrawable() {
-        this((LayerState) null, null, null);
+        this((LayerState) null, null);
     }
 
-    LayerDrawable(LayerState state, Resources res, Theme theme) {
-        final LayerState as = createConstantState(state, res);
-        mLayerState = as;
-        if (as.mNum > 0) {
+    LayerDrawable(LayerState state, Resources res) {
+        mLayerState = createConstantState(state, res);
+        if (mLayerState.mNum > 0) {
             ensurePadding();
-        }
-        if (theme != null && canApplyTheme()) {
-            applyTheme(theme);
         }
     }
 
@@ -256,8 +252,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             a.recycle();
         }
 
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
+        final ChildDrawable[] array = state.mChildren;
+        final int N = state.mNum;
         for (int i = 0; i < N; i++) {
             final ChildDrawable layer = array[i];
             if (layer.mThemeAttrs != null) {
@@ -279,25 +275,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public boolean canApplyTheme() {
-        final LayerState state = mLayerState;
-        if (state == null) {
-            return false;
-        }
-
-        if (state.mThemeAttrs != null) {
-            return true;
-        }
-
-        final ChildDrawable[] array = state.mChildren;
-        final int N = state.mNum;
-        for (int i = 0; i < N; i++) {
-            final ChildDrawable layer = array[i];
-            if (layer.mThemeAttrs != null || layer.mDrawable.canApplyTheme()) {
-                return true;
-            }
-        }
-
-        return false;
+        return super.canApplyTheme() || mLayerState != null && mLayerState.canApplyTheme();
     }
 
     /**
@@ -1042,22 +1020,30 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            if (mThemeAttrs != null) {
+                return true;
+            }
+
+            final ChildDrawable[] array = mChildren;
+            final int N = mNum;
+            for (int i = 0; i < N; i++) {
+                final ChildDrawable layer = array[i];
+                if (layer.mThemeAttrs != null || layer.mDrawable.canApplyTheme()) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         @Override
         public Drawable newDrawable() {
-            return new LayerDrawable(this, null, null);
+            return new LayerDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new LayerDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new LayerDrawable(this, res, theme);
+            return new LayerDrawable(this, res);
         }
 
         @Override

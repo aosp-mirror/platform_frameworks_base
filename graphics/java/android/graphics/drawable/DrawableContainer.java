@@ -592,8 +592,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         final DrawableContainer mOwner;
         final Resources mRes;
 
-        Theme mTheme;
-
         SparseArray<ConstantStateFuture> mDrawableFutures;
 
         int mChangingConfigurations;
@@ -801,17 +799,17 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         final void applyTheme(Theme theme) {
-            // No need to call createAllFutures, since future drawables will
-            // apply the theme when they are prepared.
-            final int N = mNumChildren;
-            final Drawable[] drawables = mDrawables;
-            for (int i = 0; i < N; i++) {
-                if (drawables[i] != null) {
-                    drawables[i].applyTheme(theme);
+            if (theme != null) {
+                createAllFutures();
+
+                final int N = mNumChildren;
+                final Drawable[] drawables = mDrawables;
+                for (int i = 0; i < N; i++) {
+                    if (drawables[i] != null && drawables[i].canApplyTheme()) {
+                        drawables[i].applyTheme(theme);
+                    }
                 }
             }
-
-            mTheme = theme;
         }
 
         @Override
@@ -1068,10 +1066,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 final Drawable result;
                 if (state.mRes == null) {
                     result = mConstantState.newDrawable();
-                } else if (state.mTheme == null) {
-                    result = mConstantState.newDrawable(state.mRes);
                 } else {
-                    result = mConstantState.newDrawable(state.mRes, state.mTheme);
+                    result = mConstantState.newDrawable(state.mRes);
                 }
                 result.setLayoutDirection(state.mLayoutDirection);
                 result.setCallback(state.mOwner);
