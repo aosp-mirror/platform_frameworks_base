@@ -2924,9 +2924,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceCrossUserPermission(userHandle);
-        if ((flags & DevicePolicyManager.WIPE_EXTERNAL_STORAGE) != 0) {
-            enforceNotManagedProfile(userHandle, "wipe external storage");
-        }
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
@@ -3526,7 +3523,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceCrossUserPermission(userHandle);
-        enforceNotManagedProfile(userHandle, "enable/disable cameras");
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
