@@ -313,6 +313,26 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         }
     }
 
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final AnimatedRotateState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        if (state.mDrawable != null) {
+            state.mDrawable.applyTheme(t);
+        }
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        final AnimatedRotateState state = mState;
+        return state != null && state.mDrawable != null && state.mDrawable.canApplyTheme();
+    }
+
     public void setFramesCount(int framesCount) {
         mState.mFramesCount = framesCount;
         mIncrement = 360.0f / mState.mFramesCount;

@@ -1216,7 +1216,7 @@ public abstract class Drawable {
          * implemented for drawables that can have a theme applied.
          */
         public Drawable newDrawable(Resources res, Theme theme) {
-            return newDrawable();
+            return newDrawable(null);
         }
 
         /**

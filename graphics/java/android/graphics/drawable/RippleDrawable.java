@@ -167,7 +167,7 @@ public class RippleDrawable extends LayerDrawable {
      * Constructor used for drawable inflation.
      */
     RippleDrawable() {
-        this(new RippleState(null, null, null), null, null);
+        this(new RippleState(null, null, null), null);
     }
 
     /**
@@ -180,7 +180,7 @@ public class RippleDrawable extends LayerDrawable {
      */
     public RippleDrawable(@NonNull ColorStateList color, @Nullable Drawable content,
             @Nullable Drawable mask) {
-        this(new RippleState(null, null, null), null, null);
+        this(new RippleState(null, null, null), null);
 
         if (color == null) {
             throw new IllegalArgumentException("RippleDrawable requires a non-null color");
@@ -474,7 +474,7 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mState != null && mState.mTouchThemeAttrs != null;
+        return super.canApplyTheme() || mState != null && mState.canApplyTheme();
     }
 
     @Override
@@ -928,17 +928,12 @@ public class RippleDrawable extends LayerDrawable {
 
         @Override
         public Drawable newDrawable() {
-            return new RippleDrawable(this, null, null);
+            return new RippleDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new RippleDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new RippleDrawable(this, res, theme);
+            return new RippleDrawable(this, res);
         }
     }
 
@@ -972,35 +967,16 @@ public class RippleDrawable extends LayerDrawable {
         return mState.mMaxRadius;
     }
 
-    private RippleDrawable(RippleState state, Resources res, Theme theme) {
-        boolean needsTheme = false;
+    private RippleDrawable(RippleState state, Resources res) {
+        mState = new RippleState(state, this, res);
+        mLayerState = mState;
 
-        final RippleState ns;
-        if (theme != null && state != null && state.canApplyTheme()) {
-            ns = new RippleState(state, this, res);
-            needsTheme = true;
-        } else if (state == null) {
-            ns = new RippleState(null, this, res);
-        } else {
-            // We always need a new state since child drawables contain local
-            // state but live within the parent's constant state.
-            // TODO: Move child drawables into local state.
-            ns = new RippleState(state, this, res);
+        if (mState.mNum > 0) {
+            ensurePadding();
         }
 
         if (res != null) {
             mDensity = res.getDisplayMetrics().density;
-        }
-
-        mState = ns;
-        mLayerState = ns;
-
-        if (ns.mNum > 0) {
-            ensurePadding();
-        }
-
-        if (needsTheme) {
-            applyTheme(theme);
         }
 
         initializeFromState();
