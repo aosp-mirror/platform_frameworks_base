@@ -47,7 +47,6 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     }
 
     private final Context mContext;
-    private final Handler mHandler;
     private final H mUiHandler = new H();
     private final Callback mCallback;
     private final Uri mDefaultUri;
@@ -55,8 +54,9 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     private final int mStreamType;
     private final int mMaxStreamVolume;
     private final Receiver mReceiver = new Receiver();
-    private final Observer mVolumeObserver;
 
+    private Handler mHandler;
+    private Observer mVolumeObserver;
     private int mOriginalStreamVolume;
     private Ringtone mRingtone;
     private int mLastProgress = -1;
@@ -75,16 +75,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mStreamType = streamType;
         mMaxStreamVolume = mAudioManager.getStreamMaxVolume(mStreamType);
-        HandlerThread thread = new HandlerThread(TAG + ".CallbackHandler");
-        thread.start();
-        mHandler = new Handler(thread.getLooper(), this);
         mCallback = callback;
         mOriginalStreamVolume = mAudioManager.getStreamVolume(mStreamType);
-        mVolumeObserver = new Observer(mHandler);
-        mContext.getContentResolver().registerContentObserver(
-                System.getUriFor(System.VOLUME_SETTINGS[mStreamType]),
-                false, mVolumeObserver);
-        mReceiver.setListening(true);
         if (defaultUri == null) {
             if (mStreamType == AudioManager.STREAM_RING) {
                 defaultUri = Settings.System.DEFAULT_RINGTONE_URI;
@@ -95,7 +87,6 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             }
         }
         mDefaultUri = defaultUri;
-        mHandler.sendEmptyMessage(MSG_INIT_SAMPLE);
     }
 
     public void setSeekBar(SeekBar seekBar) {
@@ -173,11 +164,27 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     }
 
     public void stop() {
+        if (mHandler == null) return;  // already stopped
         postStopSample();
         mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
-        mSeekBar.setOnSeekBarChangeListener(null);
         mReceiver.setListening(false);
+        mSeekBar.setOnSeekBarChangeListener(null);
         mHandler.getLooper().quitSafely();
+        mHandler = null;
+        mVolumeObserver = null;
+    }
+
+    public void start() {
+        if (mHandler != null) return;  // already started
+        HandlerThread thread = new HandlerThread(TAG + ".CallbackHandler");
+        thread.start();
+        mHandler = new Handler(thread.getLooper(), this);
+        mHandler.sendEmptyMessage(MSG_INIT_SAMPLE);
+        mVolumeObserver = new Observer(mHandler);
+        mContext.getContentResolver().registerContentObserver(
+                System.getUriFor(System.VOLUME_SETTINGS[mStreamType]),
+                false, mVolumeObserver);
+        mReceiver.setListening(true);
     }
 
     public void revertVolume() {
