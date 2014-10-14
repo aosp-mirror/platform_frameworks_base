@@ -62,6 +62,7 @@ import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
 import android.service.wallpaper.WallpaperService;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -87,6 +88,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.R;
+import com.android.server.EventLogTags;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
@@ -99,6 +101,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
      * restarting it vs. just reverting to the static wallpaper.
      */
     static final long MIN_WALLPAPER_CRASH_TIME = 10000;
+    static final int MAX_WALLPAPER_COMPONENT_LOG_LENGTH = 128;
     static final String WALLPAPER = "wallpaper";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
 
@@ -272,6 +275,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         } else {
                             mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
                         }
+                        EventLog.writeEvent(EventLogTags.WP_WALLPAPER_CRASHED,
+                                name.flattenToString().substring(0,
+                                        MAX_WALLPAPER_COMPONENT_LOG_LENGTH));
                     }
                 }
             }
