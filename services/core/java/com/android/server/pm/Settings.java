@@ -2371,7 +2371,8 @@ final class Settings {
                 intent.getType(), flags, 0);
         if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Queried " + intent
                 + " results: " + ri);
-        int match = 0;
+        int systemMatch = 0;
+        int thirdPartyMatch = 0;
         if (ri != null && ri.size() > 1) {
             boolean haveAct = false;
             ComponentName haveNonSys = null;
@@ -2380,13 +2381,10 @@ final class Settings {
                 ActivityInfo ai = ri.get(i).activityInfo;
                 set[i] = new ComponentName(ai.packageName, ai.name);
                 if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    if (ri.get(i).match >= match) {
-                        // If any of the matches are not system apps, then
-                        // there is a third party app that is now an option...
-                        // so don't set a default since we don't want to hide it.
-                        // Only do this if the match of this one is at least as good
-                        // as what we have found as the built-in app; if it isn't
-                        // as good, the user won't want it anyway, right?
+                    if (ri.get(i).match >= thirdPartyMatch) {
+                        // Keep track of the best match we find of all third
+                        // party apps, for use later to determine if we actually
+                        // want to set a preferred app for this intent.
                         if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
                                 + ai.packageName + "/" + ai.name + ": non-system!");
                         haveNonSys = set[i];
@@ -2397,11 +2395,18 @@ final class Settings {
                     if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
                             + ai.packageName + "/" + ai.name + ": default!");
                     haveAct = true;
-                    match = ri.get(i).match;
+                    systemMatch = ri.get(i).match;
                 } else {
                     if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
                             + ai.packageName + "/" + ai.name + ": skipped");
                 }
+            }
+            if (haveNonSys != null && thirdPartyMatch < systemMatch) {
+                // If we have a matching third party app, but its match is not as
+                // good as the built-in system app, then we don't want to actually
+                // consider it a match because presumably the built-in app is still
+                // the thing we want users to see by default.
+                haveNonSys = null;
             }
             if (haveAct && haveNonSys == null) {
                 IntentFilter filter = new IntentFilter();
@@ -2435,7 +2440,7 @@ final class Settings {
                         Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
                     }
                 }
-                PreferredActivity pa = new PreferredActivity(filter, match, set, cn, true);
+                PreferredActivity pa = new PreferredActivity(filter, systemMatch, set, cn, true);
                 editPreferredActivitiesLPw(userId).addFilter(pa);
             } else if (haveNonSys == null) {
                 StringBuilder sb = new StringBuilder();
