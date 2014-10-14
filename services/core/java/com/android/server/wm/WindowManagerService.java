@@ -2331,6 +2331,11 @@ public class WindowManagerService extends IWindowManager.Stub
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
+                if (type == TYPE_ACCESSIBILITY_OVERLAY) {
+                    Slog.w(TAG, "Attempted to add Accessibility overlay window with unknown token "
+                            + attrs.token + ".  Aborting.");
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
                 token = new WindowToken(this, attrs.token, -1, false);
                 addToken = true;
             } else if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
@@ -2373,6 +2378,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Attempted to add Dream window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
+            } else if (type == TYPE_ACCESSIBILITY_OVERLAY) {
+                if (token.windowType != TYPE_ACCESSIBILITY_OVERLAY) {
+                    Slog.w(TAG, "Attempted to add Accessibility overlay window with bad token "
+                            + attrs.token + ".  Aborting.");
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
             } else if (token.appWindowToken != null) {
                 Slog.w(TAG, "Non-null appWindowToken for system window of type=" + type);
@@ -11608,6 +11619,24 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 mH.sendEmptyMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, timeout);
                 checkDrawnWindowsLocked();
+            }
+        }
+
+        @Override
+        public void addWindowToken(IBinder token, int type) {
+            WindowManagerService.this.addWindowToken(token, type);
+        }
+
+        @Override
+        public void removeWindowToken(IBinder token, boolean removeWindows) {
+            synchronized(mWindowMap) {
+                if (removeWindows) {
+                    WindowToken wtoken = mTokenMap.remove(token);
+                    if (wtoken != null) {
+                        wtoken.removeAllWindows();
+                    }
+                }
+                WindowManagerService.this.removeWindowToken(token);
             }
         }
     }
