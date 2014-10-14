@@ -25,8 +25,6 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
-            // Enables the screenshot app->Recents transition
-            public static final boolean EnableScreenshotAppTransition = false;
             // Enables debug drawing for the transition thumbnail
             public static final boolean EnableTransitionThumbnailDebugMode = false;
             // Enables the filtering of tasks according to their grouping
