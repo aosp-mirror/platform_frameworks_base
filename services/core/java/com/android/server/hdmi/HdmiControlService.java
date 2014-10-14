@@ -826,6 +826,7 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void handleMhlHotplugEvent(int portId, boolean connected) {
         assertRunOnServiceThread();
+        // Hotplug event is used to add/remove MHL devices as TV input.
         if (connected) {
             HdmiMhlLocalDeviceStub newDevice = new HdmiMhlLocalDeviceStub(this, portId);
             HdmiMhlLocalDeviceStub oldDevice = mMhlController.addLocalDevice(newDevice);
@@ -833,17 +834,14 @@ public final class HdmiControlService extends SystemService {
                 oldDevice.onDeviceRemoved();
                 Slog.i(TAG, "Old device of port " + portId + " is removed");
             }
+            invokeDeviceEventListeners(newDevice.getInfo(), DEVICE_EVENT_ADD_DEVICE);
+            updateSafeMhlInput();
         } else {
             HdmiMhlLocalDeviceStub device = mMhlController.removeLocalDevice(portId);
             if (device != null) {
                 device.onDeviceRemoved();
-                // There is no explicit event for device removal.
-                // Hence we remove the device on hotplug event.
-                HdmiDeviceInfo deviceInfo = device.getInfo();
-                if (deviceInfo != null) {
-                    invokeDeviceEventListeners(deviceInfo, DEVICE_EVENT_REMOVE_DEVICE);
-                    updateSafeMhlInput();
-                }
+                invokeDeviceEventListeners(device.getInfo(), DEVICE_EVENT_REMOVE_DEVICE);
+                updateSafeMhlInput();
             } else {
                 Slog.w(TAG, "No device to remove:[portId=" + portId);
             }
@@ -879,11 +877,8 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         HdmiMhlLocalDeviceStub device = mMhlController.getLocalDevice(portId);
 
-        // Hotplug event should already have been called before device status change event.
         if (device != null) {
             device.setDeviceStatusChange(adopterId, deviceId);
-            invokeDeviceEventListeners(device.getInfo(), DEVICE_EVENT_ADD_DEVICE);
-            updateSafeMhlInput();
         } else {
             Slog.w(TAG, "No mhl device exists for device status event[portId:"
                     + portId + ", adopterId:" + adopterId + ", deviceId:" + deviceId + "]");
@@ -2007,9 +2002,7 @@ public final class HdmiControlService extends SystemService {
         // may not be the MHL-enabled one. In this case the device info to be passed to
         // input change listener should be the one describing the corresponding HDMI port.
         HdmiMhlLocalDeviceStub device = mMhlController.getLocalDevice(portId);
-        HdmiDeviceInfo info = (device != null && device.getInfo() != null)
-                ? device.getInfo()
-                : mPortDeviceMap.get(portId);
+        HdmiDeviceInfo info = (device != null) ? device.getInfo() : mPortDeviceMap.get(portId);
         invokeInputChangeListener(info);
     }
 
