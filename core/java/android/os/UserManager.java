@@ -367,6 +367,7 @@ public class UserManager {
      * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
+     * @hide
      */
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
 
