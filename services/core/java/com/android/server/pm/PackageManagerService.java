@@ -4538,14 +4538,24 @@ public class PackageManagerService extends IPackageManager.Stub {
             filterRecentlyUsedApps(pkgs);
             // Add all remaining apps.
             for (PackageParser.Package pkg : pkgs) {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, "Adding app " + sortedPkgs.size() + ": " + pkg.packageName);
+                }
                 sortedPkgs.add(pkg);
             }
 
             int i = 0;
             int total = sortedPkgs.size();
+            File dataDir = Environment.getDataDirectory();
+            long lowThreshold = StorageManager.from(mContext).getStorageLowBytes(dataDir);
+            if (lowThreshold == 0) {
+                throw new IllegalStateException("Invalid low memory threshold");
+            }
             for (PackageParser.Package pkg : sortedPkgs) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Adding app " + sortedPkgs.size() + ": " + pkg.packageName);
+                long usableSpace = dataDir.getUsableSpace();
+                if (usableSpace < lowThreshold) {
+                    Log.w(TAG, "Not running dexopt on remaining apps due to low memory: " + usableSpace);
+                    break;
                 }
                 performBootDexOpt(pkg, ++i, total);
             }
