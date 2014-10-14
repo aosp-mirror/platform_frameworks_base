@@ -2208,15 +2208,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
-                // If an incoming call is ringing, HOME is totally disabled.
-                // (The user is already on the InCallUI at this point,
-                // and his ONLY options are to answer or reject the call.)
-                TelecomManager telecomManager = getTelecommService();
-                if (telecomManager != null && telecomManager.isRinging()) {
-                    Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
-                    return -1;
-                }
-
                 // Delay handling home if a double-tap is possible.
                 if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_NOTHING) {
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
