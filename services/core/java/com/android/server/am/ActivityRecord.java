@@ -205,17 +205,20 @@ final class ActivityRecord {
                     pw.print(" resultWho="); pw.print(resultWho);
                     pw.print(" resultCode="); pw.println(requestCode);
         }
-        final String iconFilename = taskDescription.getIconFilename();
-        if (iconFilename != null || taskDescription.getLabel() != null ||
-                taskDescription.getPrimaryColor() != 0) {
-            pw.print(prefix); pw.print("taskDescription:");
-                    pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
-                    pw.print(" label=\""); pw.print(taskDescription.getLabel()); pw.print("\"");
-                    pw.print(" color=");
-                    pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
-        }
-        if (iconFilename == null && taskDescription.getIcon() != null) {
-            pw.print(prefix); pw.println("taskDescription contains Bitmap");
+        if (taskDescription != null) {
+            final String iconFilename = taskDescription.getIconFilename();
+            if (iconFilename != null || taskDescription.getLabel() != null ||
+                    taskDescription.getPrimaryColor() != 0) {
+                pw.print(prefix); pw.print("taskDescription:");
+                        pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
+                        pw.print(" label=\""); pw.print(taskDescription.getLabel());
+                                pw.print("\"");
+                        pw.print(" color=");
+                        pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
+            }
+            if (iconFilename == null && taskDescription.getIcon() != null) {
+                pw.print(prefix); pw.println("taskDescription contains Bitmap");
+            }
         }
         if (results != null) {
             pw.print(prefix); pw.print("results="); pw.println(results);
