@@ -40,8 +40,8 @@
 
     <!-- Message that is read when you enter recent apps in TalkBack -->
     <plurals name="status_bar_accessibility_recent_apps">
-        <item quantity="one">1 recent app</item>
-        <item quantity="other">%d recent apps</item>
+        <item quantity="one">1 screen in Overview</item>
+        <item quantity="other">%d screens in Overview</item>
     </plurals>
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
@@ -206,7 +206,7 @@
     <!-- Content description of the menu button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_menu">Menu</string>
     <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_recent">Recent screens</string>
+    <string name="accessibility_recent">Overview</string>
     <!-- Content description of the search button for accessibility. [CHAR LIMIT=NONE] -->
     <string name="accessibility_search_light">Search</string>
     <!-- Content description of the camera button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -413,7 +413,7 @@
     <!-- Content description for the settings button in the status bar header. [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_settings">Settings</string>
     <!-- Content description for the recent apps panel (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_recent_apps">Recent screens.</string>
+    <string name="accessibility_desc_recent_apps">Overview.</string>
 
     <!-- Content description of the user tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_user">User <xliff:g id="user" example="John Doe">%s</xliff:g>.</string>
