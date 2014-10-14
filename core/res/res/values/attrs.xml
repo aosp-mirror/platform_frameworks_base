@@ -4869,6 +4869,12 @@
         <attr name="thickness" format="dimension" />
         <!-- Indicates whether the drawable's level affects the way the gradient is drawn. -->
         <attr name="useLevel" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
     </declare-styleable>
 
     <!-- Used to specify the size of the shape for GradientDrawable. -->

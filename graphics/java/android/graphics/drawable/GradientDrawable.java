@@ -29,6 +29,8 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -134,6 +136,7 @@ public class GradientDrawable extends Drawable {
     private Rect mPadding;
     private Paint mStrokePaint;   // optional, set by the caller
     private ColorFilter mColorFilter;   // optional, set by the caller
+    private PorterDuffColorFilter mTintFilter;
     private int mAlpha = 0xFF;  // modified by the caller
 
     private final Path mPath = new Path();
@@ -523,13 +526,15 @@ public class GradientDrawable extends Drawable {
                 mStrokePaint.getStrokeWidth() > 0;
         final boolean haveFill = currFillAlpha > 0;
         final GradientState st = mGradientState;
+        final ColorFilter colorFilter = mColorFilter != null ? mColorFilter : mTintFilter;
+
         /*  we need a layer iff we're drawing both a fill and stroke, and the
             stroke is non-opaque, and our shapetype actually supports
             fill+stroke. Otherwise we can just draw the stroke (if any) on top
             of the fill (if any) without worrying about blending artifacts.
          */
-         final boolean useLayer = haveStroke && haveFill && st.mShape != LINE &&
-                 currStrokeAlpha < 255 && (mAlpha < 255 || mColorFilter != null);
+        final boolean useLayer = haveStroke && haveFill && st.mShape != LINE &&
+                 currStrokeAlpha < 255 && (mAlpha < 255 || colorFilter != null);
 
         /*  Drawing with a layer is slower than direct drawing, but it
             allows us to apply paint effects like alpha and colorfilter to
@@ -544,7 +549,7 @@ public class GradientDrawable extends Drawable {
             }
             mLayerPaint.setDither(st.mDither);
             mLayerPaint.setAlpha(mAlpha);
-            mLayerPaint.setColorFilter(mColorFilter);
+            mLayerPaint.setColorFilter(colorFilter);
 
             float rad = mStrokePaint.getStrokeWidth();
             canvas.saveLayer(mRect.left - rad, mRect.top - rad,
@@ -561,14 +566,14 @@ public class GradientDrawable extends Drawable {
             */
             mFillPaint.setAlpha(currFillAlpha);
             mFillPaint.setDither(st.mDither);
-            mFillPaint.setColorFilter(mColorFilter);
-            if (mColorFilter != null && st.mColorStateList == null) {
+            mFillPaint.setColorFilter(colorFilter);
+            if (colorFilter != null && st.mColorStateList == null) {
                 mFillPaint.setColor(mAlpha << 24);
             }
             if (haveStroke) {
                 mStrokePaint.setAlpha(currStrokeAlpha);
                 mStrokePaint.setDither(st.mDither);
-                mStrokePaint.setColorFilter(mColorFilter);
+                mStrokePaint.setColorFilter(colorFilter);
             }
         }
 
@@ -593,7 +598,7 @@ public class GradientDrawable extends Drawable {
                         canvas.drawRoundRect(mRect, rad, rad, mStrokePaint);
                     }
                 } else {
-                    if (mFillPaint.getColor() != 0 || mColorFilter != null ||
+                    if (mFillPaint.getColor() != 0 || colorFilter != null ||
                             mFillPaint.getShader() != null) {
                         canvas.drawRect(mRect, mFillPaint);
                     }
@@ -768,6 +773,11 @@ public class GradientDrawable extends Drawable {
             }
         }
 
+        if (s.mTint != null && s.mTintMode != null) {
+            mTintFilter = updateTintFilter(mTintFilter, s.mTint, s.mTintMode);
+            invalidateSelf = true;
+        }
+
         if (invalidateSelf) {
             invalidateSelf();
             return true;
@@ -781,7 +791,8 @@ public class GradientDrawable extends Drawable {
         final GradientState s = mGradientState;
         return super.isStateful()
                 || (s.mColorStateList != null && s.mColorStateList.isStateful())
-                || (s.mStrokeColorStateList != null && s.mStrokeColorStateList.isStateful());
+                || (s.mStrokeColorStateList != null && s.mStrokeColorStateList.isStateful())
+                || (s.mTint != null && s.mTint.isStateful());
     }
 
     @Override
@@ -821,6 +832,20 @@ public class GradientDrawable extends Drawable {
             mColorFilter = cf;
             invalidateSelf();
         }
+    }
+
+    @Override
+    public void setTintList(ColorStateList tint) {
+        mGradientState.mTint = tint;
+        mTintFilter = updateTintFilter(mTintFilter, tint, mGradientState.mTintMode);
+        invalidateSelf();
+    }
+
+    @Override
+    public void setTintMode(PorterDuff.Mode tintMode) {
+        mGradientState.mTintMode = tintMode;
+        mTintFilter = updateTintFilter(mTintFilter, mGradientState.mTint, tintMode);
+        invalidateSelf();
     }
 
     @Override
@@ -1045,6 +1070,18 @@ public class GradientDrawable extends Drawable {
             state.mUseLevelForShape = a.getBoolean(
                     R.styleable.GradientDrawable_useLevel, state.mUseLevelForShape);
         }
+
+        final int tintMode = a.getInt(R.styleable.GradientDrawable_tintMode, -1);
+        if (tintMode != -1) {
+            state.mTintMode = Drawable.parseTintMode(tintMode, PorterDuff.Mode.SRC_IN);
+        }
+
+        final ColorStateList tint = a.getColorStateList(R.styleable.GradientDrawable_tint);
+        if (tint != null) {
+            state.mTint = tint;
+        }
+
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 
     @Override
@@ -1522,6 +1559,9 @@ public class GradientDrawable extends Drawable {
         private boolean mOpaqueOverBounds;
         private boolean mOpaqueOverShape;
 
+        ColorStateList mTint = null;
+        PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
+
         int[] mThemeAttrs;
         int[] mAttrSize;
         int[] mAttrGradient;
@@ -1574,6 +1614,8 @@ public class GradientDrawable extends Drawable {
             mUseLevelForShape = state.mUseLevelForShape;
             mOpaqueOverBounds = state.mOpaqueOverBounds;
             mOpaqueOverShape = state.mOpaqueOverShape;
+            mTint = state.mTint;
+            mTintMode = state.mTintMode;
             mThemeAttrs = state.mThemeAttrs;
             mAttrSize = state.mAttrSize;
             mAttrGradient = state.mAttrGradient;
