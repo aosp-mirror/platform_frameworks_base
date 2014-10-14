@@ -268,13 +268,17 @@ public class TaskViewHeader extends FrameLayout {
     }
 
     /** Notifies the associated TaskView has been focused. */
-    void onTaskViewFocusChanged(boolean focused) {
+    void onTaskViewFocusChanged(boolean focused, boolean animateFocusedState) {
+        // If we are not animating the visible state, just return
+        if (!animateFocusedState) return;
+
         boolean isRunning = false;
         if (mFocusAnimator != null) {
             isRunning = mFocusAnimator.isRunning();
             mFocusAnimator.removeAllListeners();
             mFocusAnimator.cancel();
         }
+
         if (focused) {
             int secondaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             int[][] states = new int[][] {
