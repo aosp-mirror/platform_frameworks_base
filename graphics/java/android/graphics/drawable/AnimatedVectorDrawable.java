@@ -16,7 +16,6 @@ package android.graphics.drawable;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -137,15 +136,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     private boolean mMutated;
 
     public AnimatedVectorDrawable() {
-        mAnimatedVectorState = new AnimatedVectorDrawableState(null);
+        this(null, null);
     }
 
-    private AnimatedVectorDrawable(AnimatedVectorDrawableState state, Resources res,
-            Theme theme) {
-        mAnimatedVectorState = new AnimatedVectorDrawableState(state);
-        if (theme != null && canApplyTheme()) {
-            applyTheme(theme);
-        }
+    private AnimatedVectorDrawable(AnimatedVectorDrawableState state, Resources res) {
+        mAnimatedVectorState = new AnimatedVectorDrawableState(state, mCallback, res);
     }
 
     @Override
@@ -290,7 +285,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                         VectorDrawable vectorDrawable = (VectorDrawable) res.getDrawable(
                                 drawableRes, theme).mutate();
                         vectorDrawable.setAllowCaching(false);
+                        vectorDrawable.setCallback(mCallback);
                         pathErrorScale = vectorDrawable.getPixelSize();
+                        if (mAnimatedVectorState.mVectorDrawable != null) {
+                            mAnimatedVectorState.mVectorDrawable.setCallback(null);
+                        }
                         mAnimatedVectorState.mVectorDrawable = vectorDrawable;
                     }
                     a.recycle();
@@ -338,14 +337,22 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         ArrayList<Animator> mAnimators;
         ArrayMap<Animator, String> mTargetNameMap;
 
-        public AnimatedVectorDrawableState(AnimatedVectorDrawableState copy) {
+        public AnimatedVectorDrawableState(AnimatedVectorDrawableState copy,
+                Callback owner, Resources res) {
             if (copy != null) {
                 mChangingConfigurations = copy.mChangingConfigurations;
                 if (copy.mVectorDrawable != null) {
-                    mVectorDrawable = (VectorDrawable) copy.mVectorDrawable.getConstantState().newDrawable();
-                    mVectorDrawable.mutate();
-                    mVectorDrawable.setAllowCaching(false);
+                    final ConstantState cs = copy.mVectorDrawable.getConstantState();
+                    if (res != null) {
+                        mVectorDrawable = (VectorDrawable) cs.newDrawable(res);
+                    } else {
+                        mVectorDrawable = (VectorDrawable) cs.newDrawable();
+                    }
+                    mVectorDrawable = (VectorDrawable) mVectorDrawable.mutate();
+                    mVectorDrawable.setCallback(owner);
+                    mVectorDrawable.setLayoutDirection(copy.mVectorDrawable.getLayoutDirection());
                     mVectorDrawable.setBounds(copy.mVectorDrawable.getBounds());
+                    mVectorDrawable.setAllowCaching(false);
                 }
                 if (copy.mAnimators != null) {
                     final int numAnimators = copy.mAnimators.size();
@@ -368,17 +375,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
         @Override
         public Drawable newDrawable() {
-            return new AnimatedVectorDrawable(this, null, null);
+            return new AnimatedVectorDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new AnimatedVectorDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new AnimatedVectorDrawable(this, res, theme);
+            return new AnimatedVectorDrawable(this, res);
         }
 
         @Override
@@ -482,4 +484,21 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         }
         return true;
     }
+
+    private final Callback mCallback = new Callback() {
+        @Override
+        public void invalidateDrawable(Drawable who) {
+            invalidateSelf();
+        }
+
+        @Override
+        public void scheduleDrawable(Drawable who, Runnable what, long when) {
+            scheduleSelf(what, when);
+        }
+
+        @Override
+        public void unscheduleDrawable(Drawable who, Runnable what) {
+            unscheduleSelf(what);
+        }
+    };
 }

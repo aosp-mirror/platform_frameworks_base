@@ -17,7 +17,6 @@
 package android.graphics.drawable;
 
 import android.content.res.Resources;
-import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
 import android.os.SystemClock;
 
@@ -86,11 +85,11 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * @see #TransitionDrawable(Drawable[])
      */
     TransitionDrawable() {
-        this(new TransitionState(null, null, null), null, null);
+        this(new TransitionState(null, null, null), (Resources) null);
     }
 
-    private TransitionDrawable(TransitionState state, Resources res, Theme theme) {
-        super(state, res, theme);
+    private TransitionDrawable(TransitionState state, Resources res) {
+        super(state, res);
     }
 
     private TransitionDrawable(TransitionState state, Drawable[] layers) {
@@ -245,24 +244,18 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     }
 
     static class TransitionState extends LayerState {
-        TransitionState(TransitionState orig, TransitionDrawable owner,
-                Resources res) {
+        TransitionState(TransitionState orig, TransitionDrawable owner, Resources res) {
             super(orig, owner, res);
         }
 
         @Override
         public Drawable newDrawable() {
-            return new TransitionDrawable(this, null, null);
+            return new TransitionDrawable(this, (Resources) null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new TransitionDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new TransitionDrawable(this, res, theme);
+            return new TransitionDrawable(this, res);
         }
 
         @Override
