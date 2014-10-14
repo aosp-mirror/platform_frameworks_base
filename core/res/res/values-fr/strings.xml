@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Veuillez réessayer."</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Veuillez réessayer."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Nombre maximal autorisé de tentatives Face Unlock atteint."</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"En charge (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Chargé"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Branchez votre chargeur."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Aucune carte SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Aucune carte SIM n\'est insérée dans la tablette."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Aucune carte SIM n\'est insérée dans le téléphone."</string>
@@ -1779,7 +1775,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Pour optimiser l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil et limite les données en arrière-plan. Vous devrez peut-être ouvrir manuellement les applications d\'e-mail, de SMS/MMS et les autres applications synchronisées pour les mettre à jour.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Pour optimiser l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil et limite les données en arrière-plan. Vous devrez peut-être ouvrir manuellement vos applications d\'e-mail, de messagerie instantanée et autres applications synchronisées pour les mettre à jour.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Jusqu\'à ce que le temps d\'arrêt se termine à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Pendant une minute"</item>

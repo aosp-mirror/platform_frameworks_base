@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Thử lại"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Thử lại"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Đã vượt quá số lần Mở khóa bằng khuôn mặt tối đa"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Đang sạc, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Pin đầy"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Kết nối bộ sạc của bạn."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Không có thẻ SIM nào"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Không có thẻ SIM nào trong máy tính bảng."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Không có thẻ SIM nào trong điện thoại."</string>

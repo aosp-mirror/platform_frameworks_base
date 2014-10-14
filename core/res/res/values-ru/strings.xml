@@ -436,15 +436,15 @@
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Приложение сможет удалять пакеты Android. Вредоносные программы смогут таким образом удалять важные программы."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"Удаление данных других приложений"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Приложение сможет удалять пользовательские данные."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"Удаление данных из кэш-памяти других приложений"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Приложение сможет удалять файлы из кэша."</string>
+    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"Удаление данных из кеш-памяти других приложений"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Приложение сможет удалять файлы из кеша."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"Вычисление объема памяти приложений"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Приложение сможет получать сведения о размере кода, данных и кэша."</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Приложение сможет получать сведения о размере кода, данных и кеша."</string>
     <string name="permlab_installPackages" msgid="2199128482820306924">"Прямая установка приложений"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Приложение сможет устанавливать новые или обновленные пакеты Android. Вредоносные программы смогут таким образом добавлять новые программы с любыми разрешениями."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"Очистка кэша приложений"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Разрешает приложению освобождать место на планшетном ПК, удаляя кэшированные файлы других программ. В результате другие приложения могут запускаться медленнее, так как им потребуется повторно извлекать необходимые данные."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Разрешает приложению освобождать место на телефоне, удаляя кэшированные файлы других программ. В результате другие приложения могут запускаться медленнее, так как им потребуется повторно извлекать необходимые данные."</string>
+    <string name="permlab_clearAppCache" msgid="7487279391723526815">"Очистка кеша приложений"</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Разрешает приложению освобождать место на планшетном ПК, удаляя кешированные файлы других программ. В результате другие приложения могут запускаться медленнее, так как им потребуется повторно извлекать необходимые данные."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Разрешает приложению освобождать место на телефоне, удаляя кешированные файлы других программ. В результате другие приложения могут запускаться медленнее, так как им потребуется повторно извлекать необходимые данные."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"Перемещение ресурсов приложения"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Приложение сможет перемещать ресурсы из внутреннего накопителя на внешний и наоборот."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"Просмотр конфиденциальных данных в журнале"</string>
@@ -712,8 +712,8 @@
     <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Приложение сможет управлять хранением документов."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"Доступ к внешним накопителям из всех аккаунтов"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Приложение сможет обращаться к внешним накопителям из всех аккаунтов."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Доступ к файловой системе кэша"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Приложение сможет выполнять чтение и запись в файловую систему кэша."</string>
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Доступ к файловой системе кеша"</string>
+    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Приложение сможет выполнять чтение и запись в файловую систему кеша."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"Входящие и исходящие вызовы SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Разрешить вызовы по протоколу SIP."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"Управление экраном во время разговора"</string>
@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторите попытку"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторите попытку"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Все попытки войти с помощью Фейсконтроля использованы"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Заряжено"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Подключите зарядное устройство"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Нет SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIM-карта не установлена."</string>

@@ -702,9 +702,9 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čítať obsah karty SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Povoľuje ap. čítať obsah USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Povoľuje aplikácii čítať obsah karty SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah úložiska USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah v úložisku USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava alebo odstránenie obsahu na karte SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikácii zápis do ukladacieho priestoru USB."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikácii zapisovať do úložiska USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Umožňuje aplikácii zápis na kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"úprava alebo odstránenie obsahu interného ukladacieho priestoru média"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Umožňuje aplikácii zmeniť obsah interného ukladacieho priestoru média."</string>
@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Skúsiť znova"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Skúsiť znova"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Prekročili ste maximálny povolený počet pokusov o odomknutie tvárou"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Prebieha nabíjanie, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Nabitá batéria"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Pripojte nabíjačku."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nie je vložená karta SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tablete nie je žiadna karta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefóne nie je žiadna karta SIM."</string>

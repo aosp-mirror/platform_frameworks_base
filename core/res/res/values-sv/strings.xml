@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Försök igen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Försök igen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Laddar (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Batteriet har laddats"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Anslut din laddare."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Inget SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Inget SIM-kort i surfplattan."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Inget SIM-kort i telefonen."</string>

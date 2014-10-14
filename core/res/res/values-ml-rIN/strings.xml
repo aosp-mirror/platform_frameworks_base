@@ -907,10 +907,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ശ്രമങ്ങളുടെ പരമാവധി കഴിഞ്ഞു"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"ചാർജ്ജുചെയ്യുന്നു, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"ചാർജ്ജുചെയ്‌തു"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"നിങ്ങളുടെ ചാർജർ കണക്റ്റുചെയ്യുക."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM കാർഡൊന്നുമില്ല"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ടാബ്‌ലെറ്റിൽ SIM കാർഡൊന്നുമില്ല."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ഫോണിൽ SIM കാർഡൊന്നുമില്ല."</string>
