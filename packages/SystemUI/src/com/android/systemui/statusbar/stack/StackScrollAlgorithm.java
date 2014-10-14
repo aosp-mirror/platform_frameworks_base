@@ -738,8 +738,9 @@ public class StackScrollAlgorithm {
             if (mExpandedOnStart) {
 
                 // We are collapsing the shade, so the first child can get as most as high as the
-                // current height.
-                mFirstChildMaxHeight = mFirstChildWhileExpanding.getActualHeight();
+                // current height or the end value of the animation.
+                mFirstChildMaxHeight = StackStateAnimator.getFinalActualHeight(
+                        mFirstChildWhileExpanding);
             } else {
                 updateFirstChildMaxSizeToMaxHeight();
             }
@@ -801,9 +802,14 @@ public class StackScrollAlgorithm {
         this.mIsExpanded = isExpanded;
     }
 
-    public void notifyChildrenChanged(ViewGroup hostView) {
+    public void notifyChildrenChanged(final ViewGroup hostView) {
         if (mIsExpansionChanging) {
-            updateFirstChildHeightWhileExpanding(hostView);
+            hostView.post(new Runnable() {
+                @Override
+                public void run() {
+                    updateFirstChildHeightWhileExpanding(hostView);
+                }
+            });
         }
     }
 

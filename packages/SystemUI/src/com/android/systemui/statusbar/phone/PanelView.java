@@ -372,6 +372,7 @@ public abstract class PanelView extends FrameLayout {
     }
 
     protected void onTrackingStarted() {
+        mClosing = false;
         mTracking = true;
         mCollapseAfterPeek = false;
         mBar.onTrackingStarted(PanelView.this);
