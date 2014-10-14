@@ -819,6 +819,11 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         }
                         ResolveInfo ri = new ResolveInfo();
                         ri.activityInfo = ai;
+                        UserManager userManager =
+                                (UserManager) getSystemService(Context.USER_SERVICE);
+                        if (userManager.isManagedProfile()) {
+                            ri.noResourceId = true;
+                        }
                         if (ii instanceof LabeledIntent) {
                             LabeledIntent li = (LabeledIntent)ii;
                             ri.resolvePackageName = li.getSourcePackage();
