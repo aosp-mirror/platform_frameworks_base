@@ -228,6 +228,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             if (isTaskViewLaunchTargetTask) {
                 // Set the dim to 0 so we can animate it in
                 initialDim = 0;
+                // Hide the action button
+                mActionButtonView.setAlpha(0f);
             } else if (occludesLaunchTarget) {
                 // Move the task view off screen (below) so we can animate it in
                 setTranslationY(offscreenY);
