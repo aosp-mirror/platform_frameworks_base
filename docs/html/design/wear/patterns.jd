@@ -58,7 +58,7 @@ page.title=UI Patterns for Android Wear
 
 <p>Where the user may need to take action on the information shown in a notification, you can provide action buttons. These are system-rendered buttons that appear to the right of detail cards. They consist of a white icon set on a blue system-rendered circular button and a short caption with a verb. Actions should be limited to three for a single card row.</p>
 
-<p>Tapping on an action button can cause an action to be executed; or an action to be continued on the companion handheld; or a full screen activity to be invoked for further input (see the <a href="#2DPicker">2D Picker</a> section below).</p>
+<p>Tapping on an action button can cause an action to be executed, an action to be continued on the companion handheld, or a full screen activity to be invoked for further input (see the <a href="#2DPicker">2D Picker</a> section below).</p>
 
 <p>Refer to the UI Toolkit provided in the <a href="{@docRoot}design/downloads/index.html#Wear">Downloads</a> page for detailed specs regarding action icons.</p>
 
@@ -94,10 +94,11 @@ page.title=UI Patterns for Android Wear
 <li>This pattern should be used when only one possible action could be reasonably expected. For example, tapping on an address with a car icon and ETA seems like it would very obviously launch directions. Conversely, if you see a contact's photo and name, it's not clear what tapping would do (call them? email them?), so the pattern shouldn't be used in this case.</li>
 <li>On-card actions should not require a text label to be understood.</li>
 <li>On-card actions should only result in something happening on the wearable (apart from web links to open them on the phone).</li>
-<li>Only one action per card: no menus on a single card.</li>
+<li>You should only have one action per card.</li>
+<li>Do not put menus on a single card.</li>
 </ul>
 
-<p>Good examples of using an action on card include: play / pause music; toggle light switch on and off; navigate to an address; call a phone number.</p>
+<p>Good examples of using an action on card include: play and pause music, toggle light switch on and off, navigate to an address, and call a phone number.</p>
 
 
 <h2 id="Stacks" style="clear:both">Card stacks</h2>
@@ -143,7 +144,7 @@ to check-in to.</p>
   <img src="{@docRoot}design/media/wear/selection_list.png" width="147" height="147" style="float:right;margin:0 0 20px 40px;border:1px solid #ddd">
 
 <p>Choosing an item from a list is a common interaction. The Selection List pattern (available as the <a
-href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WearableListView</code></a> component) creates a simple list optimized for ease of use on a small screen: the focused item snaps to the center of the screen, and a single tap selects. This widget is recommended as a common pattern for selecting items. It is used throughout the system UI, including in the list that can be accessed by swiping up on the cue card.</p>
+href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WearableListView</code></a> component) creates a simple list optimized for ease of use on a small screen where the focused item snaps to the center of the screen and a single tap selects. This widget is recommended as a common pattern for selecting items. It is used throughout the system UI, including in the list that can be accessed by swiping up on the cue card.</p>
 
 
 <p>Of course, it is possible for Android Wear apps to extend themselves beyond the familiarities of these patterns. For a deeper look at the options available, see the <a href="{@docRoot}design/wear/structure.html">App Structure</a> guide.</p>
