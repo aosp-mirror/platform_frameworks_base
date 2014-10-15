@@ -1033,7 +1033,8 @@ public class WifiConfiguration implements Parcelable {
         if (this.didSelfAdd) sbuf.append(" didSelfAdd");
         if (this.selfAdded) sbuf.append(" selfAdded");
         if (this.noInternetAccess) sbuf.append(" noInternetAccess");
-        if (this.didSelfAdd || this.selfAdded || this.noInternetAccess) {
+        if (this.ephemeral) sbuf.append(" ephemeral");
+        if (this.didSelfAdd || this.selfAdded || this.noInternetAccess || this.ephemeral) {
             sbuf.append("\n");
         }
         sbuf.append(" KeyMgmt:");
@@ -1509,6 +1510,7 @@ public class WifiConfiguration implements Parcelable {
             autoJoinStatus = source.autoJoinStatus;
             selfAdded = source.selfAdded;
             noInternetAccess = source.noInternetAccess;
+            ephemeral = source.ephemeral;
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
             }
@@ -1588,6 +1590,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(selfAdded ? 1 : 0);
         dest.writeInt(didSelfAdd ? 1 : 0);
         dest.writeInt(noInternetAccess ? 1 : 0);
+        dest.writeInt(ephemeral ? 1 : 0);
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
@@ -1651,6 +1654,7 @@ public class WifiConfiguration implements Parcelable {
                 config.selfAdded = in.readInt() != 0;
                 config.didSelfAdd = in.readInt() != 0;
                 config.noInternetAccess = in.readInt() != 0;
+                config.ephemeral = in.readInt() != 0;
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
