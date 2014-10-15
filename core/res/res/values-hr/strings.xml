@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Odabrana je stavka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Izbrisan je broj <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Da biste otkvačili ovaj zaslon, istovremeno dodirnite i zadržite prste na gumbima Natrag i Nedavno."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite prst na gumbu Nedavno."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Da biste otkvačili ovaj zaslon, istovremeno dodirnite i zadržite Natrag i Pregled."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite Pregled."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pričvršćen. Vaša organizacija ne dopušta otkvačivanje."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Želite li upotrijebiti prikvačivanje?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Prikvačivanje zaslona zaključava zaslon u jednom prikazu. \n\n Za izlaz istovremeno dodirnite i zadržite prste na gumbima Natrag i Nedavno."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Prikvačivanje zaslona zaključava zaslon u jednom prikazu.\n\nZa izlazak dodirnite i zadržite prst na gumbu Nedavno."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Prikvačivanje zaslona blokira zaslon na jednom prikazu.\n\nDa biste otkvačili zaslon, istovremeno dodirnite i zadržite Natrag i Pregled."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Prikvačivanje zaslona blokira zaslon na jednom prikazu.\n\nDa biste otkvačili zaslon, dodirnite i zadržite Pregled."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NE, HVALA"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"POKRENI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pričvršćen"</string>
