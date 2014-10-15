@@ -21,6 +21,7 @@
 #include <SkMatrix.h>
 
 #include "Caches.h"
+#include "Extensions.h"
 #include "Layer.h"
 #include "Matrix.h"
 #include "SkiaShader.h"

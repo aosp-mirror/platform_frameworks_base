@@ -52,6 +52,7 @@
 #include "ShadowTessellator.h"
 #include "SpotShadow.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
 #include "utils/MathUtils.h"
 
 // TODO: After we settle down the new algorithm, we can remove the old one and

@@ -19,10 +19,11 @@
 
 #include "Debug.h"
 #include "Vector.h"
-#include "VertexBuffer.h"
 
 namespace android {
 namespace uirenderer {
+
+class VertexBuffer;
 
 class SpotShadow {
 public:

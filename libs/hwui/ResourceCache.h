@@ -20,15 +20,16 @@
 #include <cutils/compiler.h>
 
 #include <SkBitmap.h>
+#include <SkPath.h>
 
 #include <utils/KeyedVector.h>
 
 #include <androidfw/ResourceTypes.h>
 
-#include "Layer.h"
-
 namespace android {
 namespace uirenderer {
+
+class Layer;
 
 /**
  * Type of Resource being cached

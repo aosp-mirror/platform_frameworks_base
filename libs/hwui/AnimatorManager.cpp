@@ -17,7 +17,9 @@
 
 #include <algorithm>
 
+#include "Animator.h"
 #include "AnimationContext.h"
+#include "DamageAccumulator.h"
 #include "RenderNode.h"
 
 namespace android {

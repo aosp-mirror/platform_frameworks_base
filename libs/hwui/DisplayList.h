@@ -38,8 +38,9 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "Debug.h"
-#include "Matrix.h"
+#include "CanvasProperty.h"
 #include "DeferredDisplayList.h"
+#include "Matrix.h"
 #include "RenderProperties.h"
 
 class SkBitmap;

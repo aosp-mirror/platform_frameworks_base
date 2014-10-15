@@ -21,6 +21,7 @@
 
 #include "Caches.h"
 #include "DisplayListRenderer.h"
+#include "GammaFontRenderer.h"
 #include "Properties.h"
 #include "LayerRenderer.h"
 #include "ShadowTessellator.h"

@@ -31,13 +31,13 @@
 
 #include <cutils/compiler.h>
 
+#include <SkPath.h>
+
 #include "thread/TaskProcessor.h"
 #include "thread/TaskManager.h"
 
 #include "AssetAtlas.h"
 #include "Extensions.h"
-#include "FontRenderer.h"
-#include "GammaFontRenderer.h"
 #include "TextureCache.h"
 #include "LayerCache.h"
 #include "RenderBufferCache.h"
@@ -54,6 +54,8 @@
 
 namespace android {
 namespace uirenderer {
+
+class GammaFontRenderer;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals

@@ -20,10 +20,12 @@
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPath.h>
+#include <SkRegion.h>
 #include <cutils/compiler.h>
 
+#include "DisplayList.h"
 #include "DisplayListLogBuffer.h"
-#include "RenderNode.h"
+#include "StatefulBaseRenderer.h"
 
 namespace android {
 namespace uirenderer {
@@ -44,9 +46,10 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 class DeferredDisplayList;
-class DisplayListRenderer;
 class DisplayListOp;
+class DisplayListRenderer;
 class DrawOp;
+class RenderNode;
 class StateOp;
 
 /**

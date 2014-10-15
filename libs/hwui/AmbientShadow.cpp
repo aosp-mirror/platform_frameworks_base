@@ -60,6 +60,7 @@
 #include "AmbientShadow.h"
 #include "ShadowTessellator.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
 #include "utils/MathUtils.h"
 
 namespace android {

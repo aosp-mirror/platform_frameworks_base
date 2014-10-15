@@ -24,7 +24,6 @@
 #include "Debug.h"
 #include "utils/Macros.h"
 #include "utils/Pair.h"
-#include "VertexBuffer.h"
 
 class SkBitmap;
 class SkCanvas;
@@ -36,6 +35,7 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
+class VertexBuffer;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

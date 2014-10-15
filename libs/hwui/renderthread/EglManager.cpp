@@ -19,6 +19,7 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 
+#include "../Caches.h"
 #include "../RenderState.h"
 #include "RenderThread.h"
 

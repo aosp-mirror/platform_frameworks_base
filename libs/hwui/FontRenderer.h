@@ -31,8 +31,6 @@
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
 #include "utils/SortedList.h"
-#include "Matrix.h"
-#include "Properties.h"
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include "RenderScript.h"

@@ -24,7 +24,6 @@
 
 #include "Layer.h"
 #include "Rect.h"
-#include "RenderNode.h"
 #include "renderthread/RenderThread.h"
 
 namespace android {

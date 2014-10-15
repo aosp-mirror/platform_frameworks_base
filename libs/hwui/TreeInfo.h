@@ -20,7 +20,6 @@
 
 #include <utils/Timers.h>
 
-#include "DamageAccumulator.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -30,6 +29,7 @@ namespace renderthread {
 class CanvasContext;
 }
 
+class DamageAccumulator;
 class OpenGLRenderer;
 class RenderState;
 
