@@ -702,7 +702,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lasīt SD kartes saturu"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Ļauj liet. lasīt USB atm. sat."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Ļauj lietotnei lasīt SD kartes saturu."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"mainīt vai dzēst USB atm. sat."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB krātuves satura mainīšana/dzēšana"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kartes satura pārveidošana vai dzēšana"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ļauj lietotnei rakstīt USB atmiņā."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Ļauj lietotnei rakstīt SD kartē."</string>
@@ -1761,12 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Atlasīts: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> tika dzēsts."</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbā: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Lai atspraustu šo ekrānu, vienlaikus pieskarieties pogām “Atpakaļ” un “Pēdējās” un turiet tās nospiestas."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Lai atspraustu šo ekrānu, pieskarieties pogai “Pēdējās” un turiet to nospiestu."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Lai atspraustu šo ekrānu, vienlaicīgi pieskarieties pogām “Atpakaļ” un “Kopsavilkums” un turiet tās."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Lai atspraustu šo ekrānu, pieskarieties pogai “Kopsavilkums” un turiet to."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ekrāns ir piesprausts. Jūsu organizācija nav atļāvusi atspraušanu."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Vai izmantot ekrāna piespraušanu?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Ekrāna piespraušana bloķē ekrānu vienā skatā.\n\nLai izietu, vienlaikus pieskarieties pogām “Atpakaļ” un “Pēdējās” un turiet tās nospiestas."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Ekrāna piespraušana bloķē ekrānu vienā skatā.\n\nLai izietu, pieskarieties un pogai “Pēdējās” un turiet to nospiestu."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Izmantojot ekrāna piespraušanu, ekrāns tiek bloķēts, lai tiktu rādīts viens skats.\n\nLai atspraustu ekrānu, vienlaicīgi pieskarieties pogām “Atpakaļ” un “Kopsavilkums” un turiet tās."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Izmantojot ekrāna piespraušanu, ekrāns tiek bloķēts, lai tiktu rādīts viens skats.\n\nLai atspraustu ekrānu, pieskarieties pogai “Kopsavilkums” un turiet to."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NĒ, PALDIES"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SĀKT"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
