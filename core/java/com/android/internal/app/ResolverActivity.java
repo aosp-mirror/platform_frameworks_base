@@ -641,7 +641,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             return;
         }
         try {
-            startActivityAsCaller(intent, null);
+            startActivityAsCaller(intent, null, UserHandle.USER_NULL);
         } catch (RuntimeException e) {
             String launchedFromPackage;
             try {
