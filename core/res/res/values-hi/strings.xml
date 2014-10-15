@@ -643,7 +643,7 @@
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"ऐप्स  को प्रमाणीकरण टोकन का अनुरोध करने देता है."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"नेटवर्क कनेक्‍शन देखें"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ऐप्स  को नेटवर्क कनेक्‍शन के बारे में जानकारी देखने देता है जैसे कौन से नेटवर्क मौजूद हैं और कनेक्‍ट हैं."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"पूर्ण नेटवर्क पहुंच"</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"पूर्ण नेटवर्क एक्सेस"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"ऐप्स  को नेटवर्क सॉकेट बनाने और कस्‍टम नेटवर्क प्रोटोकॉल का उपयोग करने देता है. ब्राउज़र और अन्‍य ऐप्स  इंटरनेट को डेटा भेजने के साधन उपलब्‍ध कराते हैं, ताकि इंटरनेट को डेटा भेजने के लिए इस अनुमति की आवश्‍यकता नहीं हो."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"नेटवर्क सेटिंग और ट्रैफ़िक बदलें/रोकें"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"ऐप्स  को नेटवर्क सेटिंग बदलने और सभी ट्रैफ़िक नेटवर्क को बाधित और निरीक्षण करने देता है, उदाहरण के लिए किसी APN का प्रॉक्सी और पोर्ट बदलना. दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना नेटवर्क पैकेट की निगरानी कर सकते हैं, उन्हें रीडायरेक्ट, या संशोधित कर सकते हैं."</string>
@@ -1757,12 +1757,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयनित"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> को हटा दिया गया"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"इस स्‍क्रीन को अनपिन करने के लिए, वापस और हाल ही के एक साथ दबाकर रखें."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"इस स्‍क्रीन को अनपिन करने के लिए, हाल ही के दबाकर रखें."</string>
+    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्‍क्रीन पिन की गई है. आपके संगठन के द्वारा अनपिन करने की अनुमति नहीं है."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"स्‍क्रीन पिन करने का उपयोग करें?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"स्‍क्रीन को पिन करने से प्रदर्शन एकल दृश्‍य में लॉक हो जाता है.\n\nबाहर निकलने के लिए, वापस और हाल ही के एक साथ दबाकर रखें."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"स्‍क्रीन को पिन करने से प्रदर्शन एकल दृश्‍य में लॉक हो जाता है.\n\nबाहर निकलने के लिए, हाल ही के दबाकर रखें."</string>
+    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"रहने दें"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ करें"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
