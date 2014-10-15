@@ -399,7 +399,7 @@ public class PackageInstaller {
         }
 
         try {
-            return mInstaller.getAllSessions(mUserId);
+            return mInstaller.getAllSessions(mUserId).getList();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -410,7 +410,7 @@ public class PackageInstaller {
      */
     public @NonNull List<SessionInfo> getMySessions() {
         try {
-            return mInstaller.getMySessions(mInstallerPackageName, mUserId);
+            return mInstaller.getMySessions(mInstallerPackageName, mUserId).getList();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
