@@ -617,12 +617,23 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     void addAndStartAction(final HdmiCecFeatureAction action) {
         assertRunOnServiceThread();
+        mActions.add(action);
         if (mService.isPowerStandbyOrTransient()) {
-            Slog.w(TAG, "Skip the action during Standby: " + action);
+            Slog.i(TAG, "Not ready to start action. Queued for deferred start:" + action);
             return;
         }
-        mActions.add(action);
         action.start();
+    }
+
+    @ServiceThreadOnly
+    void startQueuedActions() {
+        assertRunOnServiceThread();
+        for (HdmiCecFeatureAction action : mActions) {
+            if (!action.started()) {
+                Slog.i(TAG, "Starting queued action:" + action);
+                action.start();
+            }
+        }
     }
 
     // See if we have an action of a given type in progress.
