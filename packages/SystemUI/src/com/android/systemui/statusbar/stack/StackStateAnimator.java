@@ -709,7 +709,7 @@ public class StackStateAnimator {
         };
     }
 
-    private <T> T getChildTag(View child, int tag) {
+    private static <T> T getChildTag(View child, int tag) {
         return (T) child.getTag(tag);
     }
 
@@ -846,6 +846,22 @@ public class StackStateAnimator {
         ValueAnimator currentAnimator = onTop ? mTopOverScrollAnimator : mBottomOverScrollAnimator;
         if (currentAnimator != null) {
             currentAnimator.cancel();
+        }
+    }
+
+    /**
+     * Get the end value of the height animation running on a view or the actualHeight
+     * if no animation is running.
+     */
+    public static int getFinalActualHeight(ExpandableView view) {
+        if (view == null) {
+            return 0;
+        }
+        ValueAnimator heightAnimator = getChildTag(view, TAG_ANIMATOR_HEIGHT);
+        if (heightAnimator == null) {
+            return view.getActualHeight();
+        } else {
+            return getChildTag(view, TAG_END_HEIGHT);
         }
     }
 }
