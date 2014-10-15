@@ -99,6 +99,7 @@ public class DctConstants {
     public static final int EVENT_PROVISIONING_APN_ALARM = BASE + 39;
     public static final int CMD_NET_STAT_POLL = BASE + 40;
     public static final int EVENT_DATA_RAT_CHANGED = BASE + 41;
+    public static final int CMD_CLEAR_PROVISIONING_SPINNER = BASE + 42;
 
     /***** Constants *****/
 
