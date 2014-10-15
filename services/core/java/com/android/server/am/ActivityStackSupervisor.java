@@ -2061,7 +2061,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final TaskRecord topTask = targetStack.topTask();
             if (topTask != sourceTask) {
                 targetStack.moveTaskToFrontLocked(sourceTask, r, options);
-                Slog.w(TAG, "top task and source task don't match. would have caused anr");
             } else {
                 mWindowManager.moveTaskToTop(topTask.taskId);
             }
