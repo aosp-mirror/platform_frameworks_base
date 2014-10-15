@@ -33,6 +33,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IMountService;
@@ -556,11 +557,18 @@ public class LockPatternUtils {
             getLockSettings().setLockPattern(patternToString(pattern), userId);
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (pattern != null) {
-
-                int userHandle = userId;
-                if (userHandle == UserHandle.USER_OWNER) {
-                    String stringPattern = patternToString(pattern);
-                    updateEncryptionPassword(StorageManager.CRYPT_TYPE_PATTERN, stringPattern);
+                // Update the device encryption password.
+                if (userId == UserHandle.USER_OWNER
+                        && LockPatternUtils.isDeviceEncryptionEnabled()) {
+                    final ContentResolver cr = mContext.getContentResolver();
+                    final boolean required = Settings.Global.getInt(cr,
+                            Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, 1) == 1 ? true : false;
+                    if (!required) {
+                        clearEncryptionPassword();
+                    } else {
+                        String stringPattern = patternToString(pattern);
+                        updateEncryptionPassword(StorageManager.CRYPT_TYPE_PATTERN, stringPattern);
+                    }
                 }
 
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
@@ -785,13 +793,23 @@ public class LockPatternUtils {
                 getLockSettings().setLockPassword(password, userHandle);
                 int computedQuality = computePasswordQuality(password);
 
-                if (userHandle == UserHandle.USER_OWNER) {
-                    // Update the encryption password.
-                    int type = computedQuality == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                        || computedQuality == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
-                        ? StorageManager.CRYPT_TYPE_PIN
-                        : StorageManager.CRYPT_TYPE_PASSWORD;
-                    updateEncryptionPassword(type, password);
+                // Update the device encryption password.
+                if (userHandle == UserHandle.USER_OWNER
+                        && LockPatternUtils.isDeviceEncryptionEnabled()) {
+                    final ContentResolver cr = mContext.getContentResolver();
+                    final boolean required = Settings.Global.getInt(cr,
+                            Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, 1) == 1 ? true : false;
+                    if (!required) {
+                        clearEncryptionPassword();
+                    } else {
+                        boolean numeric = computedQuality
+                                == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+                        boolean numericComplex = computedQuality
+                                == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
+                        int type = numeric || numericComplex ? StorageManager.CRYPT_TYPE_PIN
+                                : StorageManager.CRYPT_TYPE_PASSWORD;
+                        updateEncryptionPassword(type, password);
+                    }
                 }
 
                 if (!isFallback) {
@@ -892,6 +910,17 @@ public class LockPatternUtils {
             Log.e(TAG, "Error getting encryption state", re);
         }
         return true;
+    }
+
+    /**
+     * Determine if the device supports encryption, even if it's set to default. This
+     * differs from isDeviceEncrypted() in that it returns true even if the device is
+     * encrypted with the default password.
+     * @return true if device encryption is enabled
+     */
+    public static boolean isDeviceEncryptionEnabled() {
+        final String status = SystemProperties.get("ro.crypto.state", "unsupported");
+        return "encrypted".equalsIgnoreCase(status);
     }
 
     /**
