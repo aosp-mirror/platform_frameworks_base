@@ -66,10 +66,8 @@ public class TaskViewHeader extends FrameLayout {
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
     AnimatorSet mFocusAnimator;
-    ValueAnimator backgroundColorAnimator;
     PorterDuffColorFilter mDimFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
 
-    boolean mIsFullscreen;
     boolean mCurrentPrimaryColorIsDark;
     int mCurrentPrimaryColor;
 
@@ -159,21 +157,14 @@ public class TaskViewHeader extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (!mIsFullscreen) {
-            // Draw the highlight at the top edge (but put the bottom edge just out of view)
-            float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
-            float radius = mConfig.taskViewRoundedCornerRadiusPx;
-            int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
-            canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-            canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
-                    getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
-            canvas.restoreToCount(count);
-        }
-    }
-
-    /** Sets whether the current task is full screen or not. */
-    void setIsFullscreen(boolean isFullscreen) {
-        mIsFullscreen = isFullscreen;
+        // Draw the highlight at the top edge (but put the bottom edge just out of view)
+        float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
+        float radius = mConfig.taskViewRoundedCornerRadiusPx;
+        int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
+        canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+        canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
+                getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
+        canvas.restoreToCount(count);
     }
 
     @Override
