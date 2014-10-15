@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Дозволи пристап кон јадрото на двигателот MTP за да спроведе протоколот за MTP за УСБ меморија."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тестирај хардвер"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Дозволува апликацијата да контролира различни периферни уреди со цел да се тестира хардвер."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"пристапување до ФМ-радио"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Дозволува апликацијата да пристапи до ФМ-радио за да слуша програми."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно избирај телефонски броеви"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Овозможува апликацијата да повикува телефонски броеви без ваша интервенција. Ова може да предизвика неочекувани трошоци или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви на служби за итна помош. Злонамерните апликации може да ве чинат пари поради повици без ваша потврда."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"директно избирај кои било телефонски броеви"</string>
@@ -611,10 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"вклучи или исклучи телефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дозволува апликацијата да го вклучува или исклучува таблетот."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Дозволува апликацијата да го вклучува или исклучува телефонот."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ресетирај истечено време на екран"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Овозможува апликацијата да го ресетира истеченото време на екранот."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"извршувај во режим на фабричко тестирање"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Изврши во режим на фабричко тестирање од ниско ниво; дозволи целосен пристап кон хардверот на таблетот. Достапно само кога таблетот работи во режимот на фабричко тестирање."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Изврши во режим на фабричко тестирање од ниско ниво; дозволи целосен пристап кон хардверот на телефонот. Достапно само кога телефонот работи во режимот на фабричко тестирање."</string>
@@ -905,10 +905,6 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Обидете се повторно"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Обидете се повторно"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Максималниот број обиди на отклучување со лице е надминат"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Се полни, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Наполнета"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Поврзете го полначот."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Нема СИМ картичка"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Во таблетот нема СИМ картичка."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Во телефонот нема СИМ картичка."</string>
@@ -1185,6 +1181,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дејства со текст"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Меморијата е речиси полна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некои системски функции може да не работат"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 МБ и рестартирајте."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> работи"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Допри за повеќе информации или да се запре апликацијата"</string>
     <string name="ok" msgid="5970060430562524910">"Во ред"</string>
@@ -1203,8 +1200,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Уреди со %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Сподели со"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Сподели со %1$s"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Избери почетна апликација"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Изберете ја апликацијата Почетен"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Користете ја %1$s како Почетен"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Користи ја стандардно за ова дејство."</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Користи различна апликација"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Избриши ги стандардните вредности во Системски поставки &gt; Апликации &gt; Преземено."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Избери дејство"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Изберете апликација за УСБ-уредот"</string>
@@ -1296,8 +1295,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Дозволи"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Одбиј"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; би сакала да испрати порака до &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Ова "<font fgcolor="#ffffb060">"може да направи трошоци"</font>" на вашата сметка за мобилен телефон."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Ова ќе направи трошоци на вашата сметка за мобилен телефон."</font></string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Ова "<b>"може да направи трошоци"</b>" на вашата сметка за мобилен телефон."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Ова ќе направи трошоци на вашата сметка за мобилен телефон."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Испрати"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Откажи"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запомни го мојот избор"</string>
@@ -1425,8 +1424,7 @@
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Побарана е дозвола"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Побарана е дозвола\nза сметка <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Ја користите апликацијата надвор од работниот профил"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Ја користите апликацијата во работниот профил"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод на внес"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизирај"</string>
@@ -1571,8 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Прифати повик?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Секогаш"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Само еднаш"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s не поддржува работен профил"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Слушалки"</string>
@@ -1597,11 +1594,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Прекривка #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g>х<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безбедно"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Префрлање екран"</string>
-    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Се поврзува на <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Префрлање екран"</string>
-    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Поврзан на <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Исклучи"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Итен повик"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Заборавив шема"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Погрешна шема"</string>
@@ -1767,12 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Избрано <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Избришано <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"За да го откачите екранот, допрете и задржете Назад и Неодамнешни истовремено."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"За да го откачите екранот, допрете и задржете Неодамнешни."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"За да го откачите екранот, допрете и задржете Назад и Краток преглед во исто време."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да го откачите екранот, допрете и задржете Краток преглед."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Екранот е закачен. Откачување не е дозволено од вашата организација."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Да се употреби закачување на екранот?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Закачувањето на екранот го заклучува екранот во еден приказ.\n\nЗа да излезете, допрете и задржете Назад и Неодамнешни истовремено."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Закачувањето на екранот го заклучува екранот во еден приказ.\n\nЗа да излезете, допрете и задржете Неодамнешни."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Закачувањето на екранот го заклучува екранот во еден приказ.\n\nЗа откачување, допрете и задржете Назад и Краток преглед во исто време."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Закачувањето на екранот го заклучува екранот во еден приказ.\n\nЗа откачување, допрете и задржете Краток преглед."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"НЕ, БЛАГОДАРАМ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"СТАРТ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
@@ -1782,4 +1774,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"За да помогне во подобрување на трајноста на батеријата, штедачот на батерија го намалува учинокот на уредот и ги ограничува вибрациите и повеќето податоци во заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизирање може да не се ажурираат освен ако не ги отворите.\n\nШтедачот на батерија автоматски се исклучува кога уредот се полни."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Додека не заврши паузата во <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"За една минута"</item>
+    <item quantity="other" msgid="6924190729213550991">"За %d минути"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"За еден час"</item>
+    <item quantity="other" msgid="5408537517529822157">"За %d часа"</item>
+  </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Неодредено време"</string>
 </resources>

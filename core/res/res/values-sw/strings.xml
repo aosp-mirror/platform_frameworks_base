@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kimechaguliwa"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> kimefutwa"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ya kazini <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Ili ubandue skrini hii, gusa na ushikilie Nyuma na Ya hivi majuzi kwa wakati mmoja."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Ili ubandue skrini hii, gusa na ushikilie Ya hivi karibuni."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ili ubanue skrini hii, gusa na ushikilie Nyuma na Muhtasari kwa wakati mmoja."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ili ubanue skrini hii, gusa na ushikilie Muhtasari."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skrini imebandikwa. Ubanduaji hauruhusiwi na shirika lako."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Ungependa kutumia ubandikaji skrini?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Ubandikaji skrini hufunga skrini kwenye onyesho moja.\n\nIli uondoe, gusa na ushikilie Nyuma na Ya hivi majuzi kwa wakati mmoja."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Ubandikaji skrini hufunga skrini kwenye onyesho moja.\n\nIli uondoe, gusa na ushikilie Ya hivi majuzi."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Ubandikaji skrini hufunga skrini kwenye onyesho moja.\n\nIli uibanue, gusa na ushikilie Nyuma na Muhtasari kwa wakati mmoja."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Ubandikaji skrini hufunga skrini kwenye onyesho moja. \n\nIli uibanue, gusa na ushikilie Muhtasari."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"HAPANA, ASANTE"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ANZA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrini imebandikwa"</string>

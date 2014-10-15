@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> har markerats"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> har tagits bort"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> för arbetet"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Om du inte vill att skärmen ska vara fäst håller du ned Föregående och Senaste samtidigt."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Håll ned Senaste om du inte vill att skärmen ska vara fäst."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Om du vill lossa skärmen trycker du länge på Tillbaka och Översikt samtidigt."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Om du vill lossa skämen trycker du länge på Översikt."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skärmen är fäst. Din organisation tillåter inte att du avslutar läget."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Fäst skärmen?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Om skärmen fästs låses bilden.\n\nAvsluta läget genom att hålla ned Föregående och Senaste samtidigt."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Om skärmen fästs låses bilden.\n\nAnsluta läget genom att hålla ned Senaste."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"När du fäster skärmen blir den låst i en viss vy.\n\nOm du vill lossa den trycker du länge på Tillbaka och Översikt samtidigt."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"När du fäster skärmen blir den låst i en viss vy.\n\nOm du vill lossa den trycker du länge på Översikt."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TACK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"STARTA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skärmen är fäst"</string>
