@@ -439,14 +439,20 @@ public class DevicePolicyManager {
             = "android.app.action.SET_NEW_PASSWORD";
 
     /**
-     * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from a
-     * managed profile to its parent.
+     * Flag used by {@link #addCrossProfileIntentFilter} to allow access
+     * <em>from</em> a managed profile <em>to</em> its parent. That is, any
+     * matching activities in the parent profile are included in the
+     * disambiguation list shown when an app in the managed profile calls
+     * {@link Activity#startActivity(Intent)}.
      */
     public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 0x0001;
 
     /**
-     * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from the
-     * parent to its managed profile.
+     * Flag used by {@link #addCrossProfileIntentFilter} to allow access
+     * <em>from</em> a parent <em>to</em> its managed profile. That is, any
+     * matching activities in the managed profile are included in the
+     * disambiguation list shown when an app in the parent profile calls
+     * {@link Activity#startActivity(Intent)}.
      */
     public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
 
