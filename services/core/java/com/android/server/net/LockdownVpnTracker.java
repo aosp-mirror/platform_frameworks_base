@@ -190,7 +190,7 @@ public class LockdownVpnTracker {
 
                 mNetService.setFirewallInterfaceRule(iface, true);
                 for (LinkAddress addr : sourceAddrs) {
-                    mNetService.setFirewallEgressSourceRule(addr.toString(), true);
+                    setFirewallEgressSourceRule(addr, true);
                 }
 
                 mErrorCount = 0;
@@ -277,13 +277,21 @@ public class LockdownVpnTracker {
             }
             if (mAcceptedSourceAddr != null) {
                 for (LinkAddress addr : mAcceptedSourceAddr) {
-                    mNetService.setFirewallEgressSourceRule(addr.toString(), false);
+                    setFirewallEgressSourceRule(addr, false);
                 }
                 mAcceptedSourceAddr = null;
             }
         } catch (RemoteException e) {
             throw new RuntimeException("Problem setting firewall rules", e);
         }
+    }
+
+    private void setFirewallEgressSourceRule(
+            LinkAddress address, boolean allow) throws RemoteException {
+        // Our source address based firewall rules must only cover our own source address, not the
+        // whole subnet
+        final String addrString = address.getAddress().getHostAddress();
+        mNetService.setFirewallEgressSourceRule(addrString, allow);
     }
 
     public void onNetworkInfoChanged() {
