@@ -71,9 +71,11 @@ public class PhoneAccountHandle implements Parcelable {
 
     @Override
     public String toString() {
+        // Note: Log.pii called for mId as it can contain personally identifying phone account
+        // information such as SIP account IDs.
         return new StringBuilder().append(mComponentName)
                     .append(", ")
-                    .append(mId)
+                    .append(Log.pii(mId))
                     .toString();
     }
 
