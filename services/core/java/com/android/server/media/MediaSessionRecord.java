@@ -731,7 +731,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 // This is to guarantee that the underlying bundle is unparceled
                 // before we set it to prevent concurrent reads from throwing an
                 // exception
-                temp.size();
+                if (temp != null) {
+                    temp.size();
+                }
                 mMetadata = temp;
             }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
