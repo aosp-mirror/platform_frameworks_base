@@ -17,10 +17,12 @@
 #ifndef ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 #define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
+#include <SkDrawFilter.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkRegion.h>
+#include <SkTLazy.h>
 #include <cutils/compiler.h>
 
 #include "DisplayList.h"
@@ -96,9 +98,8 @@ public:
     virtual bool clipPath(const SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
-    // Misc - should be implemented with SkPaint inspection
-    virtual void resetPaintFilter();
-    virtual void setupPaintFilter(int clearBits, int setBits);
+    // Misc
+    virtual void setDrawFilter(SkDrawFilter* filter);
 
     bool isCurrentTransformSimple() {
         return currentTransform()->isSimple();
@@ -221,15 +222,27 @@ private:
     inline const SkPaint* refPaint(const SkPaint* paint) {
         if (!paint) return NULL;
 
-        const SkPaint* paintCopy = mPaintMap.valueFor(paint);
-        if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
-            paintCopy = new SkPaint(*paint);
-            // replaceValueFor() performs an add if the entry doesn't exist
-            mPaintMap.replaceValueFor(paint, paintCopy);
-            mDisplayListData->paints.add(paintCopy);
+        // If there is a draw filter apply it here and store the modified paint
+        // so that we don't need to modify the paint every time we access it.
+        SkTLazy<SkPaint> filteredPaint;
+        if (mDrawFilter.get()) {
+           paint = filteredPaint.init();
+           mDrawFilter->filter(filteredPaint.get(), SkDrawFilter::kPaint_Type);
         }
 
-        return paintCopy;
+        // compute the hash key for the paint and check the cache.
+        const uint32_t key = paint->getHash();
+        const SkPaint* cachedPaint = mPaintMap.valueFor(key);
+        // In the unlikely event that 2 unique paints have the same hash we do a
+        // object equality check to ensure we don't erroneously dedup them.
+        if (cachedPaint == NULL || *cachedPaint != *paint) {
+            cachedPaint =  new SkPaint(*paint);
+            // replaceValueFor() performs an add if the entry doesn't exist
+            mPaintMap.replaceValueFor(key, cachedPaint);
+            mDisplayListData->paints.add(cachedPaint);
+        }
+
+        return cachedPaint;
     }
 
     inline SkPaint* copyPaint(const SkPaint* paint) {
@@ -285,7 +298,7 @@ private:
         return patch;
     }
 
-    DefaultKeyedVector<const SkPaint*, const SkPaint*> mPaintMap;
+    DefaultKeyedVector<uint32_t, const SkPaint*> mPaintMap;
     DefaultKeyedVector<const SkPath*, const SkPath*> mPathMap;
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
 
@@ -299,6 +312,8 @@ private:
     bool mHighContrastText;
 
     int mRestoreSaveCount;
+
+    SkAutoTUnref<SkDrawFilter> mDrawFilter;
 
     friend class RenderNode;
 

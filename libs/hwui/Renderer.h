@@ -20,10 +20,11 @@
 #include <SkColorFilter.h>
 #include <SkPaint.h>
 #include <SkRegion.h>
-
 #include <utils/String8.h>
 
 #include "AssetAtlas.h"
+
+class SkDrawFilter;
 
 namespace android {
 
@@ -173,9 +174,8 @@ public:
     virtual bool clipPath(const SkPath* path, SkRegion::Op op) = 0;
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
 
-    // Misc - should be implemented with SkPaint inspection
-    virtual void resetPaintFilter() = 0;
-    virtual void setupPaintFilter(int clearBits, int setBits) = 0;
+    // Misc
+    virtual void setDrawFilter(SkDrawFilter* filter) = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations

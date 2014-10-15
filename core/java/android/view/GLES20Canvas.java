@@ -517,16 +517,10 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void setDrawFilter(DrawFilter filter) {
         mFilter = filter;
-        if (filter == null) {
-            nResetPaintFilter(mRenderer);
-        } else if (filter instanceof PaintFlagsDrawFilter) {
-            PaintFlagsDrawFilter flagsFilter = (PaintFlagsDrawFilter) filter;
-            nSetupPaintFilter(mRenderer, flagsFilter.clearBits, flagsFilter.setBits);
-        }
+        nSetDrawFilter(mRenderer, (filter != null) ? filter.mNativeInt : 0);
     }
 
-    private static native void nResetPaintFilter(long renderer);
-    private static native void nSetupPaintFilter(long renderer, int clearBits, int setBits);
+    private static native void nSetDrawFilter(long renderer, long nativeFilter);
 
     @Override
     public DrawFilter getDrawFilter() {

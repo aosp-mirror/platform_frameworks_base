@@ -437,12 +437,8 @@ status_t DisplayListRenderer::drawRects(const float* rects, int count, const SkP
     return DrawGlInfo::kStatusDone;
 }
 
-void DisplayListRenderer::resetPaintFilter() {
-    addStateOp(new (alloc()) ResetPaintFilterOp());
-}
-
-void DisplayListRenderer::setupPaintFilter(int clearBits, int setBits) {
-    addStateOp(new (alloc()) SetupPaintFilterOp(clearBits, setBits));
+void DisplayListRenderer::setDrawFilter(SkDrawFilter* filter) {
+    mDrawFilter.reset(filter);
 }
 
 void DisplayListRenderer::insertReorderBarrier(bool enableReorder) {
