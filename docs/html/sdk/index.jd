@@ -352,16 +352,17 @@ the ADT plugin to it.</p>
 <h5>Operating Systems</h5>
 <ul>
   <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
-  <li>Mac OS X 10.5.8 or later (x86 only)</li>
-  <li>Linux (tested on Ubuntu Linux, Lucid Lynx)
+  <li>Mac OS X 10.8.5 or later</li>
+  <li>Linux
     <ul>
-      <li>GNU C Library (glibc) 2.7 or later is required.</li>
-      <li>On Ubuntu Linux, version 8.04 or later is required.</li>
-      <li>64-bit distributions must be capable of running 32-bit applications.</li>
+      <li>64-bit distribution capable of running 32-bit applications</li>
+      <li>GNU C Library (glibc) 2.11 or later is required.</li>
+      <li>Tested on Ubuntu 12.04, Precise Pangolin</li>
     </ul>
   </li>
 </ul>
 </div>
+
 
 <div class="col-7 reqs" style="margin:0 0 80px 20px;display:none;">
 
