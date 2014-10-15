@@ -27,6 +27,11 @@ interface IPhoneSubInfo {
      */
     String getDeviceId();
 
+     /**
+     * Retrieves the unique Network Access ID
+     */
+    String getNaiForSubscriber(long subId);
+
     /**
      * Retrieves the unique device ID of a subId for the device, e.g., IMEI
      * for GSM phones.
