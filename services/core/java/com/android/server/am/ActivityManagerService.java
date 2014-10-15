@@ -3561,7 +3561,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle options) {
+            int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) {
 
         // This is very dangerous -- it allows you to perform a start activity (including
         // permission grants) as any app that may launch one of your own activities.  So
@@ -3599,11 +3599,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             targetPackage = sourceRecord.launchedFromPackage;
         }
 
+        if (userId == UserHandle.USER_NULL) {
+            userId = UserHandle.getUserId(sourceRecord.app.uid);
+        }
+
         // TODO: Switch to user app stacks here.
         try {
             int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
                     resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null,
-                    null, null, options, UserHandle.getUserId(sourceRecord.app.uid), null, null);
+                    null, null, options, userId, null, null);
             return ret;
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
