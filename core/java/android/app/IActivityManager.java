@@ -69,7 +69,7 @@ public interface IActivityManager extends IInterface {
             ProfilerInfo profilerInfo, Bundle options, int userId) throws RemoteException;
     public int startActivityAsCaller(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int flags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException;
+            int flags, ProfilerInfo profilerInfo, Bundle options, int userId) throws RemoteException;
     public WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int flags, ProfilerInfo profilerInfo, Bundle options,
