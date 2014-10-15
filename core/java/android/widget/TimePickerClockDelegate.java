@@ -43,7 +43,7 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
 /**
- * A delegate implementing the basic TimePicker
+ * A delegate implementing the basic spinner-based TimePicker.
  */
 class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private static final boolean DEFAULT_ENABLED_STATE = true;
