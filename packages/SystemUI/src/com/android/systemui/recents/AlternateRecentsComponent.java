@@ -59,7 +59,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
     final public static String EXTRA_FROM_SEARCH_HOME = "recents.triggeredOverSearchHome";
     final public static String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
-    final public static String EXTRA_FROM_APP_FULL_SCREENSHOT = "recents.thumbnail";
     final public static String EXTRA_FROM_TASK_ID = "recents.activeTaskId";
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
     final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
@@ -74,7 +73,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final static String sRecentsPackage = "com.android.systemui";
     final static String sRecentsActivity = "com.android.systemui.recents.RecentsActivity";
 
-    static Bitmap sLastScreenshot;
     static RecentsComponent.Callbacks sRecentsComponentCallbacks;
 
     Context mContext;
@@ -256,7 +254,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     public void onConfigurationChanged(Configuration newConfig) {
         // Reload the header bar layout
         reloadHeaderBarLayout();
-        sLastScreenshot = null;
     }
 
     /** Prepares the header bar layout. */
@@ -394,20 +391,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      */
     ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask,
             boolean isTopTaskHome) {
-        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-            // Recycle the last screenshot
-            consumeLastScreenshot();
-
-            // Take the full screenshot
-            sLastScreenshot = mSystemServicesProxy.takeAppScreenshot();
-            if (sLastScreenshot != null) {
-                mStartAnimationTriggered = false;
-                return ActivityOptions.makeCustomAnimation(mContext,
-                        R.anim.recents_from_app_enter,
-                        R.anim.recents_from_app_exit, mHandler, this);
-            }
-        }
-
         // Update the destination rect
         Task toTask = new Task();
         TaskViewTransform toTransform = getThumbnailTransitionTransform(topTask.id, isTopTaskHome,
@@ -493,11 +476,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Try starting with a thumbnail transition
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, isTopTaskHome);
             if (opts != null) {
-                if (sLastScreenshot != null) {
-                    startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_FULL_SCREENSHOT);
-                } else {
-                    startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL);
-                }
+                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL);
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -558,19 +537,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-        }
-    }
-
-    /** Returns the last screenshot taken, this will be called by the RecentsActivity. */
-    public static Bitmap getLastScreenshot() {
-        return sLastScreenshot;
-    }
-
-    /** Recycles the last screenshot taken, this will be called by the RecentsActivity. */
-    public static void consumeLastScreenshot() {
-        if (sLastScreenshot != null) {
-            sLastScreenshot.recycle();
-            sLastScreenshot = null;
         }
     }
 

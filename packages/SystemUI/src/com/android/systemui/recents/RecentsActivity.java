@@ -189,8 +189,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_FROM_HOME, false);
         mConfig.launchedFromAppWithThumbnail = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_APP_THUMBNAIL, false);
-        mConfig.launchedFromAppWithScreenshot = launchIntent.getBooleanExtra(
-                AlternateRecentsComponent.EXTRA_FROM_APP_FULL_SCREENSHOT, false);
         mConfig.launchedToTaskId = launchIntent.getIntExtra(
                 AlternateRecentsComponent.EXTRA_FROM_TASK_ID, -1);
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
