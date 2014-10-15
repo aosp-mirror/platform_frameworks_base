@@ -1341,7 +1341,7 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
-     * Can not be called from a managed profile.
+     * <p>Calling this from a managed profile will throw a security exception.
      *
      * @param password The new password for the user.
      * @param flags May be 0 or {@link #RESET_PASSWORD_REQUIRE_ENTRY}.
@@ -1887,8 +1887,8 @@ public class DevicePolicyManager {
 
     /**
      * Called by an application that is administering the device to disable all cameras
-     * on the device.  After setting this, no applications will be able to access any cameras
-     * on the device.
+     * on the device, for this user. After setting this, no applications running as this user
+     * will be able to access any cameras on the device.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call
@@ -1908,8 +1908,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not the device's cameras have been disabled either by the current
-     * admin, if specified, or all admins.
+     * Determine whether or not the device's cameras have been disabled for this user,
+     * either by the current admin, if specified, or all admins.
      * @param admin The name of the admin component to check, or null to check if any admins
      * have disabled the camera
      */
@@ -2017,6 +2017,8 @@ public class DevicePolicyManager {
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>Calling this from a managed profile will throw a security exception.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param which {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
