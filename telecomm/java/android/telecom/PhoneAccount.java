@@ -451,4 +451,19 @@ public class PhoneAccount implements Parcelable {
         in.readList(supportedUriSchemes, classLoader);
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder().append("[PhoneAccount: ")
+                .append(mAccountHandle)
+                .append(" Capabilities: ")
+                .append(mCapabilities)
+                .append(" Schemes: ");
+        for (String scheme : mSupportedUriSchemes) {
+            sb.append(scheme)
+                    .append(" ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }
