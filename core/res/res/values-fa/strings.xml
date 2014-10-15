@@ -1761,12 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> انتخاب شد"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> حذف شد"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> محل کار"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"برای برداشتن پین این صفحه، کلید بازگشت و برنامه‌های اخیر را همزمان لمس کنید و نگه دارید."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"برای برداشتن پین این صفحه، کلید برنامه‌های اخیر را لمس کنید و نگه دارید."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"برای برداشتن پین این صفحه، هم‌زمان «بازگشت» و «نمای کلی» را لمس کنید و نگه دارید."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"برای برداشتن پین این صفحه، «نمای کلی» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"صفحه پین شده است. سازمان شما برداشتن پین را غیرمجاز کرده است."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"از پین کردن صفحه استفاده شود؟"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای خروج، کلیدهای بازگشت و برنامه‌های اخیر را همزمان لمس کنید و نگه دارید."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای خروج، کلید برنامه‌های اخیر را لمس کنید و نگه دارید."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای برداشتن پین، هم‌زمان «بازگشت» و «نمای کلی» را لمس کنید و نگه دارید."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"پین کردن صفحه، نمایشگر را در یک نمای واحد قفل می‌کند.\n\nبرای برداشتن پین، «نمای کلی» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"خیر، سپاسگزارم"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"شروع"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>

@@ -644,7 +644,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"visualizzazione connessioni di rete"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Consente all\'applicazione di visualizzare informazioni sulle connessioni di rete, ad esempio le reti esistenti e connesse."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"accesso di rete completo"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Consente all\'applicazione di creare socket di rete e di utilizzare protocolli di rete personalizzati. Il browser e altre applicazioni forniscono mezzi per inviare i dati a Internet, quindi non è richiesta questa autorizzazione per inviare dati a Internet."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Consente all\'app di creare socket di rete e di utilizzare protocolli di rete personalizzati. Il browser e altre applicazioni forniscono mezzi per inviare i dati a Internet, quindi non è richiesta questa autorizzazione per inviare dati a Internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"modifica/intercettazione delle impostazioni di rete e del traffico"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Consente all\'applicazione di modificare le impostazioni di rete e di intercettare e analizzare tutto il traffico di rete, ad esempio di cambiare il proxy e la porta di qualsiasi APN. Le applicazioni dannose potrebbero monitorare, reindirizzare o modificare i pacchetti di rete a tua insaputa."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifica connettività di rete"</string>
@@ -1761,12 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Elemento selezionato: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminato"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Per sbloccare questa schermata, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Per sbloccare questa schermata, tocca e tieni premuto Recenti."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Per sbloccare questa schermata, tocca e tieni premute contemporaneamente le opzioni Indietro e Panoramica."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per sbloccare questa schermata, tocca e tieni premuta l\'opzione Panoramica."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La schermata è bloccata. La tua organizzazione non ne consente lo sblocco."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare il blocco su schermo?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Il blocco su schermo fissa la visualizzazione attuale sullo schermo.\n\nPer uscire, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Il blocco su schermo fissa la visualizzazione attuale sullo schermo.\n\nPer uscire, tocca e tieni premuto Recenti."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Il blocco su schermo blocca il display in un\'unica visualizzazione.\n\nPer sbloccare, tocca e tieni premute contemporaneamente le opzioni Indietro e Panoramica."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Il blocco su schermo blocca il display in un\'unica visualizzazione.\n\nPer sbloccare, tocca e tieni premuta l\'opzione Panoramica."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRAZIE"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"AVVIA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
