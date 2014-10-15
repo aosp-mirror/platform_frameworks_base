@@ -1759,12 +1759,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> کو منتخب کیا گیا"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> کو حذف کر دیا گیا"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"دفتر <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"اس اسکرین کا پن ہٹانے کیلئے، پیچھے اور حالیہ کو ایک ہی وقت میں ٹچ کریں اور دبائے رکھیں۔"</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"اس اسکرین کا پن ہٹانے کیلئے، حالیہ کو ٹچ کریں اور دبائے رکھیں۔"</string>
+    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"اسکرین کو پن کر دیا گیا ہے۔ آپ کی تنظیم کی جانب سے پن ہٹانے کی اجازت نہیں ہے۔"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"اسکرین پننگ کا استعمال کریں؟"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"اسکرین پننگ ڈسپلے کو ایک واحد منظر میں مقفل کر دیتی ہے۔\n\nخارج ہونے کیلئے، پیچھے اور حالیہ کو ایک ہی وقت میں ٹچ کریں اور دبائے رکھیں۔"</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"اسکرین پننگ ڈسپلے کو ایک واحد منظر میں مقفل کر دیتی ہے۔\n\nخارج ہونے کیلئے، حالیہ کو ٹچ کریں اور دبائے رکھیں۔"</string>
+    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"نہیں، شکریہ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"شروع کریں"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"اسکرین کو پن کر دیا گیا"</string>

@@ -1759,12 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ఎంచుకోబడింది"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు ఇటీవలివి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, ఇటీవలివి బటన్‌ను నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు స్థూలదృష్టి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, స్థూలదృష్టిని నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"స్క్రీన్ పిన్ చేయబడింది. మీ సంస్థలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"స్క్రీన్ పిన్నింగ్‌ను ఉపయోగించాలా?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nనిష్క్రమించడానికి, వెనుకకు మరియు ఇటీవలివి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nనిష్క్రమించడానికి, ఇటీవలివి బటన్‌ను నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nఅన్‌పిన్ చేయడానికి, వెనుకకు మరియు స్థూలదృష్టి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nఅన్‌పిన్ చేయడానికి, స్థూలదృష్టిని నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"వద్దు, ధన్యవాదాలు"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ప్రారంభించు"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>

@@ -1767,12 +1767,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयन गरियो"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"स्क्रिन अनपिन गर्न, उही समयमा भर्खरहरू टच गरेर फेरि होल्ड गर्नुहोस्।"</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"यो स्क्रिन अनपिन गर्न, भर्खरहरू टच गर्नुहोस् र होल्ड गर्नुहोस्।"</string>
+    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्क्रिन अनपिन हुँदैछ। अनपिन गर्ने तपाईँको संगठन द्वारा समर्थित छैन।"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"स्क्रिन पिन गर्ने प्रयोग गर्नुहुन्छ?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"स्क्रिन पिनिङले एकल दृश्यमा डिस्प्ले लक गर्छ।\n\n बाहिर निस्कन, भर्खरहरू छुनुहोस् होल्ड गर्नुहोस् उही समयमा।"</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"स्क्रिन पिनिङले एकल दृश्यमा डिस्प्ले लक गर्छ।\n\n बाहिर निस्कन, भर्खरहरू छुनुहोस् होल्ड गर्नुहोस्"</string>
+    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"होइन, धन्यवाद"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>

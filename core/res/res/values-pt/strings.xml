@@ -1759,12 +1759,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selecionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> excluído"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Trabalho: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Para liberar esta tela, mantenha pressionados \"Voltar\" e \"Recentes\"."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Para liberar esta tela, mantenha pressionado \"Recentes\"."</string>
+    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"A tela está fixada. A liberação não é permitida por sua organização."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Usar fixação de tela?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"A fixação de tela bloqueia o visor em uma visualização única.\n\nPara sair, mantenha pressionados \"Voltar\" e \"Recentes\"."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"A fixação de tela bloqueia o visor em uma visualização única.\n\nPara sair, mantenha pressionado \"Recentes\"."</string>
+    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NÃO, OBRIGADO"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Tela fixada"</string>

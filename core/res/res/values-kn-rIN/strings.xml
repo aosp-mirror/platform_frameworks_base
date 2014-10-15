@@ -1759,12 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ಕೆಲಸ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"ಈ ಪರದೆ ಅನ್‌ಪಿನ್‌ ಮಾಡಲು, ಹಿಂದೆ ಹಾಗೂ ಇತ್ತೀಚಿನವು ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ಈ ಪರದೆ ಅನ್‌ಪಿನ್‌ ಮಾಡಲು, ಇತ್ತೀಚಿನವು ಬಟನ್‌ ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದೆ ಮತ್ತು ಅವಲೋಕನವನ್ನು ಏಕ ಸಮಯದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ಪರದೆ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ. ಅನ್‌ಪಿನ್‌ ಮಾಡಲು ನಿಮ್ಮ ಸಂಸ್ಥೆ ಅವಕಾಶ ಮಾಡಿಕೊಟ್ಟಿಲ್ಲ."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್ನಿಂಗ್‌ ಬಳಸುವುದೇ?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\n ಹೊರಹೋಗಲು, ‘ಹಿಂದೆ’ ಹಾಗೂ ‘ಇತ್ತೀಚಿನವು’ ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ, ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"ಸ್ಕ್ರೀನ್‌‌ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\nಹೊರಹೋಗಲು  ‘ಇತ್ತೀಚಿನವು’ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"ಪರದೆ ಪಿನ್ ಮಾಡುವಿಕೆಯು ಪ್ರದರ್ಶನವನ್ನು ಏಕ ವೀಕ್ಷಣೆಯಲ್ಲಿ ಲಾಕ್ ಮಾಡುತ್ತದೆ.\n\nಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದೆ ಮತ್ತು ಅವಲೋಕನವನ್ನು ಏಕ ಸಮಯದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"ಪರದೆ ಪಿನ್ ಮಾಡುವಿಕೆಯು ಪ್ರದರ್ಶನವನ್ನು ಏಕ ವೀಕ್ಷಣೆಯಲ್ಲಿ ಲಾಕ್ ಮಾಡುತ್ತದೆ.\n\nಅನ್‌ಪಿನ್ ಮಾಡಲು, ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ಬೇಡ, ಧನ್ಯವಾದಗಳು"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ಪ್ರಾರಂಭಿಸು"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
