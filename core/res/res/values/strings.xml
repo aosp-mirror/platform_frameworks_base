@@ -4823,17 +4823,17 @@
     <string name="day_of_week_label_typeface">sans-serif</string>
 
     <!-- Notify use that they are in Lock-to-app -->
-    <string name="lock_to_app_toast">To unpin this screen, touch and hold  Back and Recents at the same time.</string>
+    <string name="lock_to_app_toast">To unpin this screen, touch and hold Back and Overview at the same time.</string>
     <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-    <string name="lock_to_app_toast_accessible">To unpin this screen, touch and hold Recents.</string>
+    <string name="lock_to_app_toast_accessible">To unpin this screen, touch and hold Overview.</string>
     <!-- Notify user that they are locked in lock-to-app mode -->
     <string name="lock_to_app_toast_locked">Screen is pinned. Unpinning isn\'t allowed by your organization.</string>
     <!-- Lock-to-app dialog title. -->
     <string name="lock_to_app_title">Use screen pinning?</string>
     <!-- Lock-to-app dialog description. -->
-    <string name="lock_to_app_description">Screen pinning locks the display in a single view.\n\nTo exit, touch and hold Back and Recents at the same time.</string>
+    <string name="lock_to_app_description">Screen pinning locks the display in a single view.\n\nTo unpin, touch and hold Back and Overview at the same time.</string>
     <!-- Lock-to-app dialog description when in accessibility mode. -->
-    <string name="lock_to_app_description_accessible">Screen pinning locks the display in a single view.\n\nTo exit, touch and hold Recents.</string>
+    <string name="lock_to_app_description_accessible">Screen pinning locks the display in a single view.\n\nTo unpin, touch and hold Overview.</string>
     <!-- Lock-to-app negative response. -->
     <string name="lock_to_app_negative">NO, THANKS</string>
     <!-- Lock-to-app positive response. -->
