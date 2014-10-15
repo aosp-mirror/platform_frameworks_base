@@ -476,7 +476,7 @@
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ermöglicht der App, sich selbst zu starten, sobald das System gebootet wurde. Dadurch kann es länger dauern, bis das Telefon gestartet wird, und durch die ständige Aktivität der App wird die gesamte Leistung des Telefons beeinträchtigt."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"Dauerhaften Broadcast senden"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ermöglicht der App, weiluerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Tablet langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ermöglicht der App, weiluerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Telefon langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Telefon langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"Kontakte lesen"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Ermöglicht der App, Daten zu den auf Ihrem Tablet gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der Sie bestimmte Personen angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Ihre Kontaktdaten zu speichern, und schädliche Apps können Kontaktdaten ohne Ihr Wissen weiterleiten."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Ermöglicht der App, Daten zu den auf Ihrem Telefon gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der Sie bestimmte Personen angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Ihre Kontaktdaten zu speichern, und schädliche Apps können Kontaktdaten ohne Ihr Wissen weiterleiten."</string>
@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ausgewählt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> gelöscht"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Berühren und halten Sie zum Beenden der Bildschirmfixierung gleichzeitig die Schaltfläche \"Zurück\" und \"Neueste\"."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Berühren und halten Sie zum Beenden der Bildschirmfixierung die Schaltfläche \"Neueste\"."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Um die Fixierung dieses Bildschirms aufzuheben, berühren und halten Sie gleichzeitig \"Zurück\" und \"Übersicht\"."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Um die Fixierung dieses Bildschirms aufzuheben, berühren und halten Sie \"Übersicht\"."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Der Bildschirm ist fixiert. Sie sind nicht berechtigt, diese Einstellung zu beenden."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Bildschirmfixierung verwenden?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Durch die Bildschirmfixierung wird das Display in einer bestimmten Ansicht gesperrt.\n\nBerühren und halten Sie zum Beenden gleichzeitig die Schaltfläche \"Zurück\" und \"Neueste\"."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Durch die Bildschirmfixierung wird das Display in einer bestimmten Ansicht gesperrt.\n\nBerühren und halten Sie zum Beenden die Schaltfläche \"Neueste\"."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Mit der Bildschirmfixierung wird die Anzeige in einer einzelnen Ansicht gesperrt.\n\nUm die Fixierung aufzuheben, berühren und halten Sie gleichzeitig \"Zurück\" und \"Übersicht\"."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Mit der Bildschirmfixierung wird die Anzeige in einer einzelnen Ansicht gesperrt.\n\nUm die Fixierung aufzuheben, berühren und halten Sie \"Übersicht\"."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"Nein danke"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"Starten"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Bildschirm fixiert"</string>

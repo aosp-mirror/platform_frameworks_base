@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> – arbejde"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Hvis du vil frigøre dette skærmbillede, skal du trykke på og holde Tilbage og Seneste nede på samme tid."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Hvis du vil frigøre dette skærmbillede, skal du trykke på og holde Seneste nede."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Tilbage og Oversigt på samme tid og holde fingeren nede."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Oversigt og holde fingeren nede."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skærmen er fastgjort. Frigørelse er ikke tilladt af din organisation."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruge Bliv i app?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Bliv i app låser skærmen i en enkelt visning.\n\nAfslut ved at trykke på Tilbage og Seneste samtidig og holde dem nede."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Bliv i app låser skærmen i en enkelt visning.\n\nHvis du vil afslutte, skal du trykke på knappen Seneste og holde den nede."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Skærmfastholdelse låser skærmbilledet i en enkelt visning.\n\nDu frigør det ved at trykke på Tilbage og Oversigt på samme tid og holde fingeren nede."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Skærmfastholdelse låser skærmbilledet i en enkelt visning.\n\nDu frigør det ved at trykke på Oversigt og holde fingeren nede."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TAK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>

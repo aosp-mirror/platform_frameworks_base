@@ -292,8 +292,8 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Aplikaciji omogoča branje SMS-ov, shranjenih v tabličnem računalniku ali na kartici SIM. S tem lahko aplikacija bere vse SMS-e, ne glede na njihovo vsebino ali zaupnost."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Aplikaciji omogoča branje SMS-ov, shranjenih v telefonu ali na kartici SIM. S tem lahko aplikacija bere vse SMS-e, ne glede na njihovo vsebino ali zaupnost."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"urejanje sporočil (SMS ali MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Programu omogoča zapisovanje v sporočila SMS, shranjena v tabličnem računalniku ali na kartici SIM. Zlonamerni programi lahko izbrišejo vaša sporočila."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Programu omogoča zapisovanje v sporočila SMS, shranjena v telefonu ali na kartici SIM. Zlonamerni programi lahko izbrišejo vaša sporočila."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Aplikaciji omogoča pisanje v sporočila SMS, shranjena v tabličnem računalniku ali na kartici SIM. Zlonamerne aplikacije lahko izbrišejo vaša sporočila."</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Aplikaciji omogoča pisanje v sporočila SMS, shranjena v telefonu ali na kartici SIM. Zlonamerne aplikacije lahko izbrišejo vaša sporočila."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"prejemanje sporočil (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogoča prejemanje in obdelavo sporočil WAP. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"prejemanje sporočil Bluetooth (MAP)"</string>
@@ -704,7 +704,7 @@
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Aplikaciji omogoča branje vsebine kartice SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"spreminjanje ali brisanje vsebine shrambe USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"spreminjanje ali brisanje vsebine kartice SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Programu omogoča zapisovanje v pomnilnik USB."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Aplikaciji omogoča zapisovanje v pomnilnik USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Programu omogoča pisanje na kartico SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"spreminjanje/brisanje vsebine notranje shrambe nosilca podatkov"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Programu omogoča spreminjanje vsebine notranje shrambe nosilca podatkov."</string>
@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Izbrano: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Če želite odpeti ta zaslon, se hkrati dotaknite in pridržite »Nazaj« in »Nedavni«."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Če želite odpeti ta zaslon, se dotaknite in pridržite »Nedavni«."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Če želite odpeti ta zaslon, se hkrati dotaknite tipk za nazaj in za pregled ter ju pridržite."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Če želite odpeti ta zaslon, se dotaknite tipke za pregled in jo pridržite."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pripet. Vaša organizacija ne dovoli odpenjanja."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Želite uporabljati pripenjanje zaslona?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Pripenjanje zaslona zaklene zaslon v en pogled.\n\nČe ga želite zapustiti, se hkrati dotaknite ter pridržite »Nazaj« in »Nedavni«."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Pripenjanje zaslona zaklene zaslon v en pogled.\n\nČe ga želite zapustiti, se dotaknite in pridržite »Nedavni«."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se hkrati dotaknite tipk za nazaj in za pregled ter ju pridržite."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se dotaknite tipke za pregled in jo pridržite."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NE, HVALA"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ZAŽENI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>
