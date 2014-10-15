@@ -101,7 +101,7 @@ function buildButton(form) {
             + selectedValue + imageEnd);
             
     // Send the event to Analytics
-    _gaq.push(['_trackEvent', 'Distribute', 'Create Google Play Badge', 'Package ' + selectedValue]);
+    ga('send', 'event', 'Distribute', 'Create Google Play Badge', 'Package ' + selectedValue);
   } else if (form["publisher"].value != "Example, Inc.") {
     $("#preview").show();
     var publisherName = escapeHTML(form["publisher"].value);
@@ -113,7 +113,7 @@ function buildButton(form) {
             + selectedValue + imageEnd);
    
     // Send the event to Analytics
-    _gaq.push(['_trackEvent', 'Distribute', 'Create Google Play Badge', 'Publisher ' + selectedValue]);
+    ga('send', 'event', 'Distribute', 'Create Google Play Badge', 'Publisher ' + selectedValue);
   } else {
     alert("Please enter your package name or publisher name");
   }
