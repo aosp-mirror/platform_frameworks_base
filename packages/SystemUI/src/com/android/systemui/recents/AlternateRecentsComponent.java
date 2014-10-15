@@ -514,7 +514,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             } else {
                 // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startAlternateRecentsActivity(topTask, opts, null);
+                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_HOME);
             }
         }
         mLastToggleTime = System.currentTimeMillis();
