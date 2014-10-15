@@ -697,7 +697,7 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
           window.location = "/sdk/installing/index.html?pkg=studio";
         }, 1000);
       });
-      _gaq.push(['_trackEvent', 'SDK', 'Android Studio', $("#downloadForRealz").html()]);
+      ga('send', 'event', 'SDK', 'Android Studio', $("#downloadForRealz").html());
       return true;
     } else {
       $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,
