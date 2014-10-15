@@ -128,6 +128,26 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final ScaleState state = mScaleState;
+        if (state == null) {
+            return;
+        }
+
+        if (state.mDrawable != null) {
+            state.mDrawable.applyTheme(t);
+        }
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        final ScaleState state = mScaleState;
+        return state != null && state.mDrawable != null && state.mDrawable.canApplyTheme();
+    }
+
     // overrides from Drawable.Callback
 
     public void invalidateDrawable(Drawable who) {
