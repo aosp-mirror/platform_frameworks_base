@@ -66,6 +66,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.provider.Settings.System;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -1175,7 +1176,7 @@ public class AudioService extends IAudioService.Stub {
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
             }
-            setRingerMode(newRingerMode);
+            setRingerMode(newRingerMode, false /*checkZen*/);
         }
     }
 
@@ -1738,7 +1739,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#setRingerMode(int) */
-    public void setRingerMode(int ringerMode) {
+    public void setRingerMode(int ringerMode, boolean checkZen) {
         if (mUseFixedVolume || isPlatformTelevision()) {
             return;
         }
@@ -1746,10 +1747,26 @@ public class AudioService extends IAudioService.Stub {
         if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }
+        if (checkZen) {
+            checkZen(ringerMode);
+        }
         if (ringerMode != getRingerMode()) {
             setRingerModeInt(ringerMode, true);
             // Send sticky broadcast
             broadcastRingerMode(ringerMode);
+        }
+    }
+
+    private void checkZen(int ringerMode) {
+        // leave zen when callers set ringer-mode = normal or vibrate
+        final int zen = Global.getInt(mContentResolver, Global.ZEN_MODE, Global.ZEN_MODE_OFF);
+        if (ringerMode != AudioManager.RINGER_MODE_SILENT && zen != Global.ZEN_MODE_OFF) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                Global.putInt(mContentResolver, Global.ZEN_MODE, Global.ZEN_MODE_OFF);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -2993,7 +3010,7 @@ public class AudioService extends IAudioService.Stub {
             break;
         }
 
-        setRingerMode(ringerMode);
+        setRingerMode(ringerMode, false /*checkZen*/);
 
         mPrevVolDirection = direction;
 

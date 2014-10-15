@@ -982,12 +982,21 @@ public class AudioManager {
      * @see #isVolumeFixed()
      */
     public void setRingerMode(int ringerMode) {
+        setRingerMode(ringerMode, true /*checkZen*/);
+    }
+
+    /**
+     * @see #setRingerMode(int)
+     * @param checkZen  Update zen mode if necessary to compensate.
+     * @hide
+     */
+    public void setRingerMode(int ringerMode, boolean checkZen) {
         if (!isValidRingerMode(ringerMode)) {
             return;
         }
         IAudioService service = getService();
         try {
-            service.setRingerMode(ringerMode);
+            service.setRingerMode(ringerMode, checkZen);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setRingerMode", e);
         }
