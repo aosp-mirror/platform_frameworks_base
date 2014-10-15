@@ -45,6 +45,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -714,7 +715,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public List<SessionInfo> getAllSessions(int userId) {
+    public ParceledListSlice<SessionInfo> getAllSessions(int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "getAllSessions");
 
         final List<SessionInfo> result = new ArrayList<>();
@@ -726,11 +727,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 }
             }
         }
-        return result;
+        return new ParceledListSlice<>(result);
     }
 
     @Override
-    public List<SessionInfo> getMySessions(String installerPackageName, int userId) {
+    public ParceledListSlice<SessionInfo> getMySessions(String installerPackageName, int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "getMySessions");
         mAppOps.checkPackage(Binder.getCallingUid(), installerPackageName);
 
@@ -744,7 +745,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 }
             }
         }
-        return result;
+        return new ParceledListSlice<>(result);
     }
 
     @Override
