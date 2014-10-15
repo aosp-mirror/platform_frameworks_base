@@ -4786,6 +4786,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
                 }
             }
+            sendChangedNotification(userHandle);
         }
     }
 
