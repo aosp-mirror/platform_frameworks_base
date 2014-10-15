@@ -4855,8 +4855,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // Where to start adding?
         for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
             AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            int pos = findAppWindowInsertionPointLocked(tokens.get(0));
             final int numTokens = tokens.size();
+            if (numTokens == 0) {
+                continue;
+            }
+            int pos = findAppWindowInsertionPointLocked(tokens.get(0));
             for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
                 final AppWindowToken wtoken = tokens.get(tokenNdx);
                 if (wtoken != null) {
