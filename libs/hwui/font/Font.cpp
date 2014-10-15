@@ -22,6 +22,7 @@
 #include <utils/JenkinsHash.h>
 #include <utils/Trace.h>
 
+#include <SkDeviceProperties.h>
 #include <SkGlyph.h>
 #include <SkGlyphCache.h>
 #include <SkUtils.h>
@@ -41,9 +42,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Font::Font(FontRenderer* state, const Font::FontDescription& desc) :
-        mState(state), mDescription(desc) {
-    mDeviceProperties = SkDeviceProperties::Make(SkDeviceProperties::Geometry::MakeDefault(), 1.0f);
-}
+        mState(state), mDescription(desc) { }
 
 Font::FontDescription::FontDescription(const SkPaint* paint, const SkMatrix& rasterMatrix)
         : mLookupTransform(rasterMatrix) {
@@ -285,7 +284,8 @@ CachedGlyphInfo* Font::getCachedGlyph(const SkPaint* paint, glyph_t textUnit, bo
     if (cachedGlyph) {
         // Is the glyph still in texture cache?
         if (!cachedGlyph->mIsValid) {
-            SkAutoGlyphCache autoCache(*paint, &mDeviceProperties, &mDescription.mLookupTransform);
+            SkDeviceProperties deviceProperties(kUnknown_SkPixelGeometry, 1.0f);
+            SkAutoGlyphCache autoCache(*paint, &deviceProperties, &mDescription.mLookupTransform);
             const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), textUnit);
             updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), cachedGlyph, precaching);
         }
@@ -477,7 +477,8 @@ CachedGlyphInfo* Font::cacheGlyph(const SkPaint* paint, glyph_t glyph, bool prec
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
-    SkAutoGlyphCache autoCache(*paint, &mDeviceProperties, &mDescription.mLookupTransform);
+    SkDeviceProperties deviceProperties(kUnknown_SkPixelGeometry, 1.0f);
+    SkAutoGlyphCache autoCache(*paint, &deviceProperties, &mDescription.mLookupTransform);
     const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), glyph);
     newGlyph->mIsValid = false;
     newGlyph->mGlyphIndex = skiaGlyph.fID;
