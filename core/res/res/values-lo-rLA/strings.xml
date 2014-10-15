@@ -1759,12 +1759,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ຖືກເລືອກແລ້ວ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"ເພື່ອ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ໃຫ້​ແຕະ​ປຸ່ມ​ກັບ​ຄືນ​​ແລະ​ປຸ່ມ​ແອັບຯ​​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງໄວ້​ພ້ອມ​ກັນ."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ເພື່ອ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ໃຫ້​ແຕະ​ປຸ່ມ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງ​ໄວ້."</string>
+    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ໜ້າ​ຈໍ​ຖືກ​ປັກ​ໝຸດ​ໄວ້. ​ອົງ​ກອນ​ຂອງ​ທ່ານບໍ່​​ອະ​ນຸ​ຍາດ​ໃຫ້​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໄດ້."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"ໃຊ້​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ບໍ່?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ຈະ​ລັອກ​ໜ້າ​ຈໍ​ໄວ້​ທີ່​ມຸມມອງ​ໃດ​ນຶ່ງ.\n\nເພື່ອ​ອອກ, ໃຫ້​ແຕະ​ປຸ່ມ​ກັບ​ຄືນ​​ແລະ​ປຸ່ມ​ແອັບຯ​​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງໄວ້​ພ້ອມ​ກັນ."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ຈະ​ລັອກ​ໜ້າ​ຈໍ​ໄວ້​ທີ່​ມຸມມອງ​ໃດ​ນຶ່ງ.\n\nເພື່​ອ​ອອກ, ໃຫ້​ແຕະ​ປຸ່ມ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງ​ໄວ້."</string>
+    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ບໍ່, ຂອບ​ໃຈ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"​ເລີ່ມ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>

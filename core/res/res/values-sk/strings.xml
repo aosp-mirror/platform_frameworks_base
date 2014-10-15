@@ -700,9 +700,9 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čítať obsah karty SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Povoľuje ap. čítať obsah USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Povoľuje aplikácii čítať obsah karty SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah úložiska USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah v úložisku USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava alebo odstránenie obsahu na karte SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikácii zápis do ukladacieho priestoru USB."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikácii zapisovať do úložiska USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Umožňuje aplikácii zápis na kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"úprava alebo odstránenie obsahu interného ukladacieho priestoru média"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Umožňuje aplikácii zmeniť obsah interného ukladacieho priestoru média."</string>
@@ -1759,12 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Bola vybratá položka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Číslo <xliff:g id="KEY">%1$s</xliff:g> bolo odstránené"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Ak chcete obrazovku uvoľniť, súčasne stlačte a podržte tlačidlá Späť a Nedávne."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Ak chcete obrazovku uvoľniť, stlačte a podržte tlačidlo Nedávne."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ak chcete uvoľniť túto obrazovku, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Obrazovka je pripnutá. Uvoľnenie vaša organizácia nepovoľuje."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Použiť pripnutie k obrazovke?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Pripnutím k obrazovke uzamknete displej v jednom zobrazení.\n\nRežim ukončíte súčasným klepnutím na tlačidlá Späť a Nedávne."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Pripnutím k obrazovke uzamknete displej v jednom zobrazení.\n\nRežim ukončíte stlačením a podržaním tlačidla Nedávne."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripnutie k obrazovke uzamkne obrazovku v jednom zobrazení.\n\nAk ju chcete uvoľniť, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripnutie k obrazovke uzamkne obrazovku v jednom zobrazení.\n\nAk ju chcete uvoľniť, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NIE, ĎAKUJEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SPUSTIŤ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
