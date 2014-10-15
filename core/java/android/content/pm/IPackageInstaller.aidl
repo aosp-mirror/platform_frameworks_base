@@ -20,6 +20,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInstaller;
+import android.content.pm.ParceledListSlice;
 import android.content.IntentSender;
 
 import android.graphics.Bitmap;
@@ -37,8 +38,8 @@ interface IPackageInstaller {
 
     PackageInstaller.SessionInfo getSessionInfo(int sessionId);
 
-    List<PackageInstaller.SessionInfo> getAllSessions(int userId);
-    List<PackageInstaller.SessionInfo> getMySessions(String installerPackageName, int userId);
+    ParceledListSlice getAllSessions(int userId);
+    ParceledListSlice getMySessions(String installerPackageName, int userId);
 
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
