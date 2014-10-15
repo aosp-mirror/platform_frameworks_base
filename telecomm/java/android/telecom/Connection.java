@@ -1009,16 +1009,6 @@ public abstract class Connection {
      */
     public void onPostDialContinue(boolean proceed) {}
 
-    /**
-     * Merge this connection and the specified connection into a conference call.  Once the
-     * connections are merged, the calls should be added to the an existing or new
-     * {@code Conference} instance. For new {@code Conference} instances, use
-     * {@code ConnectionService#addConference}.
-     *
-     * @param otherConnection The connection with which this connection should be conferenced.
-     */
-    public void onConferenceWith(Connection otherConnection) {}
-
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
         if (number == null) {
