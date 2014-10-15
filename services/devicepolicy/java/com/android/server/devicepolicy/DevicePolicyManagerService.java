@@ -5320,6 +5320,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         @Override
         public List<String> getCrossProfileWidgetProviders(int profileId) {
             synchronized (DevicePolicyManagerService.this) {
+                if (mDeviceOwner == null) {
+                    return Collections.emptyList();
+                }
                 ComponentName ownerComponent = mDeviceOwner.getProfileOwnerComponent(profileId);
                 if (ownerComponent == null) {
                     return Collections.emptyList();
