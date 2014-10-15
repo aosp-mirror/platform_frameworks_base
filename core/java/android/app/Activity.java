@@ -3847,14 +3847,14 @@ public class Activity extends ContextThemeWrapper
      * their launch had come from the original activity.
      * @hide
      */
-    public void startActivityAsCaller(Intent intent, @Nullable Bundle options) {
+    public void startActivityAsCaller(Intent intent, @Nullable Bundle options, int userId) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
-                        intent, -1, options);
+                        intent, -1, options, userId);
         if (ar != null) {
             mMainThread.sendActivityResult(
                 mToken, mEmbeddedID, -1, ar.getResultCode(),

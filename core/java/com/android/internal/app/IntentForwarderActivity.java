@@ -20,26 +20,28 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
-import android.os.Bundle;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.widget.Toast;
+
 import java.util.List;
-import java.util.Set;
 
-/*
- * This is used in conjunction with the {@link setCrossProfileIntentFilter} method of
- * {@link DevicePolicyManager} to enable intents to be passed in and out of a managed profile.
+/**
+ * This is used in conjunction with
+ * {@link DevicePolicyManager#addCrossProfileIntentFilter} to enable intents to
+ * be passed in and out of a managed profile.
  */
-
 public class IntentForwarderActivity extends Activity  {
 
     public static String TAG = "IntentForwarderActivity";
@@ -104,7 +106,23 @@ public class IntentForwarderActivity extends Activity  {
             final boolean shouldShowDisclosure =
                     !UserHandle.isSameApp(ri.activityInfo.applicationInfo.uid, Process.SYSTEM_UID);
 
-            startActivityAsUser(newIntent, userDest);
+            try {
+                startActivityAsCaller(newIntent, null, userDest.getIdentifier());
+            } catch (RuntimeException e) {
+                int launchedFromUid = -1;
+                String launchedFromPackage = "?";
+                try {
+                    launchedFromUid = ActivityManagerNative.getDefault().getLaunchedFromUid(
+                            getActivityToken());
+                    launchedFromPackage = ActivityManagerNative.getDefault().getLaunchedFromPackage(
+                            getActivityToken());
+                } catch (RemoteException ignored) {
+                }
+
+                Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
+                        + launchedFromPackage + ", while running in "
+                        + ActivityThread.currentProcessName(), e);
+            }
 
             if (shouldShowDisclosure) {
                 Toast.makeText(this, getString(userMessageId), Toast.LENGTH_LONG).show();
