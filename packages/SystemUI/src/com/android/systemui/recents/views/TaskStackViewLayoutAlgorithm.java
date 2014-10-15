@@ -199,18 +199,14 @@ public class TaskStackViewLayoutAlgorithm {
         return transformOut;
     }
 
-    /**
-     * Returns the untransformed task view size.
-     */
+    /** Returns the untransformed task view size. */
     public Rect getUntransformedTaskViewSize() {
         Rect tvSize = new Rect(mTaskRect);
         tvSize.offsetTo(0, 0);
         return tvSize;
     }
 
-    /**
-     * Returns the scroll to such task top = 1f;
-     */
+    /** Returns the scroll to such task top = 1f; */
     float getStackScrollForTask(Task t) {
         return mTaskProgressMap.get(t.key);
     }

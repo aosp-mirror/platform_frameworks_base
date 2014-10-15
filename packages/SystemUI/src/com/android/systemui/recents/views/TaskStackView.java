@@ -414,7 +414,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Focuses the task at the specified index in the stack */
-    void focusTask(int taskIndex, boolean scrollToNewPosition) {
+    void focusTask(int taskIndex, boolean scrollToNewPosition, final boolean animateFocusedState) {
         // Return early if the task is already focused
         if (taskIndex == mFocusedTaskIndex) return;
 
@@ -426,7 +426,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView tv = getChildViewForTask(t);
             Runnable postScrollRunnable = null;
             if (tv != null) {
-                tv.setFocusedTask();
+                tv.setFocusedTask(animateFocusedState);
             } else {
                 postScrollRunnable = new Runnable() {
                     @Override
@@ -434,7 +434,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         Task t = mStack.getTasks().get(mFocusedTaskIndex);
                         TaskView tv = getChildViewForTask(t);
                         if (tv != null) {
-                            tv.setFocusedTask();
+                            tv.setFocusedTask(animateFocusedState);
                         }
                     }
                 };
@@ -454,18 +454,50 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    /** Focuses the next task in the stack */
-    void focusNextTask(boolean forward) {
+    /**
+     * Ensures that there is a task focused, if nothign is focused, then we will use the task
+     * at the center of the visible stack.
+     */
+    public boolean ensureFocusedTask() {
+        if (mFocusedTaskIndex < 0) {
+            // If there is no task focused, then find the task that is closes to the center
+            // of the screen and use that as the currently focused task
+            int x = mLayoutAlgorithm.mStackVisibleRect.centerX();
+            int y = mLayoutAlgorithm.mStackVisibleRect.centerY();
+            int childCount = getChildCount();
+            for (int i = childCount - 1; i >= 0; i--) {
+                TaskView tv = (TaskView) getChildAt(i);
+                tv.getHitRect(mTmpRect);
+                if (mTmpRect.contains(x, y)) {
+                    mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
+                    break;
+                }
+            }
+            // If we can't find the center task, then use the front most index
+            if (mFocusedTaskIndex < 0 && childCount > 0) {
+                mFocusedTaskIndex = childCount - 1;
+            }
+        }
+        return mFocusedTaskIndex >= 0;
+    }
+
+    /**
+     * Focuses the next task in the stack.
+     * @param animateFocusedState determines whether to actually draw the highlight along with
+     *                            the change in focus, as well as whether to scroll to fit the
+     *                            task into view.
+     */
+    public void focusNextTask(boolean forward, boolean animateFocusedState) {
         // Find the next index to focus
         int numTasks = mStack.getTaskCount();
         if (numTasks == 0) return;
 
-        int nextFocusIndex = numTasks - 1;
-        if (0 <= mFocusedTaskIndex && mFocusedTaskIndex < numTasks) {
-            nextFocusIndex = Math.max(0, Math.min(numTasks - 1,
-                    mFocusedTaskIndex + (forward ? -1 : 1)));
+        int direction = (forward ? -1 : 1);
+        int newIndex = mFocusedTaskIndex + direction;
+        if (newIndex >= 0 && newIndex <= (numTasks - 1)) {
+            newIndex = Math.max(0, Math.min(numTasks - 1, newIndex));
+            focusTask(newIndex, true, animateFocusedState);
         }
-        focusTask(nextFocusIndex, true);
     }
 
     /** Dismisses the focused task. */
@@ -502,6 +534,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return mTouchHandler.onTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent ev) {
+        return mTouchHandler.onGenericMotionEvent(ev);
     }
 
     @Override
@@ -652,9 +689,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // When Alt-Tabbing, we scroll to and focus the previous task
         if (mConfig.launchedWithAltTab) {
             if (mConfig.launchedFromHome) {
-                focusTask(Math.max(0, mStack.getTaskCount() - 1), false);
+                focusTask(Math.max(0, mStack.getTaskCount() - 1), false, true);
             } else {
-                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false, true);
             }
         }
     }
@@ -1018,14 +1055,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 tv.getTask().activityLabel));
         // Remove the task from the view
         mStack.removeTask(task);
-        // If the dismissed task was focused, then we should focus the next task in front
+        // If the dismissed task was focused, then we should focus the new task in the same index
         if (taskWasFocused) {
             ArrayList<Task> tasks = mStack.getTasks();
-            int nextTaskIndex = Math.min(tasks.size() - 1, taskIndex);
+            int nextTaskIndex = Math.min(tasks.size() - 1, taskIndex - 1);
             if (nextTaskIndex >= 0) {
                 Task nextTask = tasks.get(nextTaskIndex);
                 TaskView nextTv = getChildViewForTask(nextTask);
-                nextTv.setFocusedTask();
+                if (nextTv != null) {
+                    // Focus the next task, and only animate the visible state if we are launched
+                    // from Alt-Tab
+                    nextTv.setFocusedTask(mConfig.launchedWithAltTab);
+                }
             }
         }
     }

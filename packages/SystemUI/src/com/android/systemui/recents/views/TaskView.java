@@ -716,11 +716,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * if the view is not currently visible, or we are in touch state (where we still want to keep
      * track of focus).
      */
-    public void setFocusedTask() {
+    public void setFocusedTask(boolean animateFocusedState) {
         mIsFocused = true;
         if (mFocusAnimationsEnabled) {
             // Focus the header bar
-            mHeaderView.onTaskViewFocusChanged(true);
+            mHeaderView.onTaskViewFocusChanged(true, animateFocusedState);
         }
         // Update the thumbnail alpha with the focus
         mThumbnailView.onFocusChanged(true);
@@ -742,7 +742,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mIsFocused = false;
         if (mFocusAnimationsEnabled) {
             // Un-focus the header bar
-            mHeaderView.onTaskViewFocusChanged(false);
+            mHeaderView.onTaskViewFocusChanged(false, true);
         }
 
         // Update the thumbnail alpha with the focus
@@ -776,7 +776,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mFocusAnimationsEnabled = true;
         if (mIsFocused && !wasFocusAnimationsEnabled) {
             // Re-notify the header if we were focused and animations were not previously enabled
-            mHeaderView.onTaskViewFocusChanged(true);
+            mHeaderView.onTaskViewFocusChanged(true, true);
         }
     }
 
