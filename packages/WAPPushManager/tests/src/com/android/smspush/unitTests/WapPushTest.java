@@ -552,6 +552,25 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
     }
 
     /**
+     * Add sqlite injection test
+     */
+    public void testAddPackage0() {
+        String inject = "' union select 0,'com.android.settings','com.android.settings.Settings',0,0,0--";
+
+        // insert new data
+        IWapPushManager iwapman = getInterface();
+        try {
+            assertFalse(iwapman.addPackage(
+                    inject,
+                    Integer.toString(mContentTypeValue),
+                    mPackageName, mClassName,
+                    WapPushManagerParams.APP_TYPE_SERVICE, true, true));
+        } catch (RemoteException e) {
+            assertTrue(false);
+        }
+    }
+
+    /**
      * Add duprecated package test.
      */
     public void testAddPackage2() {
@@ -1477,7 +1496,7 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
         System.arraycopy(mWspHeader, 0, array,
                 mGsmHeader.length + mUserDataHeader.length, mWspHeader.length);
         System.arraycopy(mMessageBody, 0, array,
-                mGsmHeader.length + mUserDataHeader.length + mWspHeader.length, 
+                mGsmHeader.length + mUserDataHeader.length + mWspHeader.length,
                 mMessageBody.length);
         return array;
 
