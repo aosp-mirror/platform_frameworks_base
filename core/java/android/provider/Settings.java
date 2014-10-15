@@ -6579,6 +6579,15 @@ public final class Settings {
         public static final String NETWORK_SCORING_PROVISIONED = "network_scoring_provisioned";
 
         /**
+         * Whether the user wants to be prompted for password to decrypt the device on boot.
+         * This only matters if the storage is encrypted.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
