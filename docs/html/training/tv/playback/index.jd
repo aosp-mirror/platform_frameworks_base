@@ -46,4 +46,7 @@ startpage=true
 
   <dt><b><a href="details.html">Building a Details View</a></b></dt>
     <dd>Learn how to use the Leanback support library to build a details page for media items.</dd>
+
+  <dt><b><a href="now-playing.html">Displaying a Now Playing Card</a></b></dt>
+    <dd>Learn how to use a MediaSession to display a Now Playing card on the home screen.</dd>
 </dl>
