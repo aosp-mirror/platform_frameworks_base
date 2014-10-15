@@ -92,43 +92,54 @@ public final class PhoneCapabilities {
             | ADD_CALL | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE | SEPARATE_FROM_CONFERENCE
             | DISCONNECT_FROM_CONFERENCE;
 
+    /**
+     * Whether this set of capabilities supports the specified capability.
+     * @param capabilities The set of capabilities.
+     * @param capability The capability to check capabilities for.
+     * @return Whether the specified capability is supported.
+     * @hide
+     */
+    public static boolean can(int capabilities, int capability) {
+        return (capabilities & capability) != 0;
+    }
+
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
         builder.append("[Capabilities:");
-        if ((capabilities & HOLD) != 0) {
+        if (can(capabilities, HOLD)) {
             builder.append(" HOLD");
         }
-        if ((capabilities & SUPPORT_HOLD) != 0) {
+        if (can(capabilities, SUPPORT_HOLD)) {
             builder.append(" SUPPORT_HOLD");
         }
-        if ((capabilities & MERGE_CONFERENCE) != 0) {
+        if (can(capabilities, MERGE_CONFERENCE)) {
             builder.append(" MERGE_CONFERENCE");
         }
-        if ((capabilities & SWAP_CONFERENCE) != 0) {
+        if (can(capabilities, SWAP_CONFERENCE)) {
             builder.append(" SWAP_CONFERENCE");
         }
-        if ((capabilities & ADD_CALL) != 0) {
+        if (can(capabilities, ADD_CALL)) {
             builder.append(" ADD_CALL");
         }
-        if ((capabilities & RESPOND_VIA_TEXT) != 0) {
+        if (can(capabilities, RESPOND_VIA_TEXT)) {
             builder.append(" RESPOND_VIA_TEXT");
         }
-        if ((capabilities & MUTE) != 0) {
+        if (can(capabilities, MUTE)) {
             builder.append(" MUTE");
         }
-        if ((capabilities & MANAGE_CONFERENCE) != 0) {
+        if (can(capabilities, MANAGE_CONFERENCE)) {
             builder.append(" MANAGE_CONFERENCE");
         }
-        if ((capabilities & SUPPORTS_VT_LOCAL) != 0) {
+        if (can(capabilities, SUPPORTS_VT_LOCAL)) {
             builder.append(" SUPPORTS_VT_LOCAL");
         }
-        if ((capabilities & SUPPORTS_VT_REMOTE) != 0) {
+        if (can(capabilities, SUPPORTS_VT_REMOTE)) {
             builder.append(" SUPPORTS_VT_REMOTE");
         }
-        if ((capabilities & VoLTE) != 0) {
+        if (can(capabilities, VoLTE)) {
             builder.append(" VoLTE");
         }
-        if ((capabilities & VoWIFI) != 0) {
+        if (can(capabilities, VoWIFI)) {
             builder.append(" VoWIFI");
         }
         builder.append("]");
