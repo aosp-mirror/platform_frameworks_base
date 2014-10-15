@@ -26,13 +26,13 @@ available.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <!--<a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Fireworks Stencil']);"
+  <!--<a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Fireworks Stencil');"
     href="{@docRoot}downloads/design/Android_Design_Fireworks_Stencil_20120814.png">Adobe&reg; Fireworks&reg; PNG Stencil</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Illustrator Stencil']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Illustrator Stencil');"
     href="{@docRoot}downloads/design/Android_Design_Illustrator_Vectors_20120814.ai">Adobe&reg; Illustrator&reg; Stencil</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'OmniGraffle Stencil']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'OmniGraffle Stencil');"
     href="{@docRoot}downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle">Omni&reg; OmniGraffle&reg; Stencil</a>-->
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Photoshop Sources']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Photoshop Sources');"
     href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Photoshop&reg; Stencils and Sources</a>
 </p>
 
@@ -64,7 +64,7 @@ modify to match your theme, plus source files.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Action Bar Icons');"
     href="{@docRoot}downloads/design/Android_Design_Icons_20131106.zip">Action Bar Icon Pack</a>
 </p>
 
@@ -89,10 +89,10 @@ modify to match your theme, plus source files.</p>
 
   </div>
   <div class="layout-content-col span-4">
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit AI']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Toolkit AI');"
     href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
 
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit PDF']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Toolkit PDF');"
     href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.pdf">PDF Toolkit</a>
   </div>
 </div>
@@ -110,9 +110,9 @@ modify to match your theme, plus source files.</p>
 
   </div>
   <div class="layout-content-col span-4">
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear App Patterns AI']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear App Patterns AI');"
     href="{@docRoot}downloads/design/Android_Wear_Patterns_20140722.ai">Adobe&reg; Illustrator&reg; App Patterns</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear App Patterns PDF']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear App Patterns PDF');"
     href="{@docRoot}downloads/design/Android_Wear_Patterns_20140722.pdf">PDF App Patterns</a>
   </div>
 </div>
@@ -131,7 +131,7 @@ modify to match your theme, plus source files.</p>
 
   </div>
   <div class="layout-content-col span-4">
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Sample PSD Mocks']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Sample PSD Mocks');"
     href="{@docRoot}downloads/design/Android_Wear_Sample_Assets.zip">Adobe&reg; Photoshop&reg; mocks</a>
   </div>
 </div>
@@ -164,9 +164,9 @@ requirements of UI and high-resolution screens.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Roboto ZIP');"
     href="{@docRoot}downloads/design/roboto-1.2.zip">Roboto</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specemin Book']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Roboto Specemin Book');"
     href="{@docRoot}downloads/design/Roboto_Specimen_Book_20131031.pdf">Specimen Book</a>
 </p>
 
@@ -190,7 +190,7 @@ shade that can be used as a complement when needed.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Color Swatches']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Color Swatches');"
     href="{@docRoot}downloads/design/Android_Design_Color_Swatches_20120229.zip">Color Swatches</a>
 </p>
 

@@ -350,7 +350,7 @@ sure that you theme extends the material theme:</p>
     if ($("input#agree").is(':checked')) {
       $("#tos").fadeOut('fast');
       $("#landing").fadeIn('fast');
-      _gaq.push(['_trackEvent', 'L Preview', 'System Image', $("#downloadForRealz").html()]);
+      ga('send', 'event', 'L Preview', 'System Image', $("#downloadForRealz").html());
       location.hash = "";
       return true;
     } else {
