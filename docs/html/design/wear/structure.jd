@@ -13,7 +13,7 @@ margin: 0 10px 20px 20px;
 }
 </style>
 
-<p>Users are used to tapping icons to launch apps. Android Wear is different. A typical Wear app adds a card to the stream at a contextually relevant moment. It might have a button that opens a full screen view for a fast micro interaction, like below, but it just as well might not.
+<p>Users are used to tapping icons to launch apps. Android Wear is different. A typical Wear app adds a card to the stream at a contextually relevant moment. It might have a button that opens a full screen view for a fast micro interaction, but it just as well might not.
 </p>
 
 <p>These are the building blocks, ordered by simplicity. You can use one of them or some of them, but we strongly recommend not building apps the user has to launch and quit before thinking really hard about how you could react to a specific location, activity, time of day, or something happening in the cloud.</p>
