@@ -170,24 +170,30 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         super.applyTheme(t);
 
         final InsetState state = mInsetState;
-        if (state == null || state.mThemeAttrs == null) {
+        if (state == null) {
             return;
         }
 
-        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.InsetDrawable);
-        try {
-            updateStateFromTypedArray(a);
-            verifyRequiredAttributes(a);
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        } finally {
-            a.recycle();
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.InsetDrawable);
+            try {
+                updateStateFromTypedArray(a);
+                verifyRequiredAttributes(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
+        }
+
+        if (state.mDrawable != null && state.mDrawable.canApplyTheme()) {
+            state.mDrawable.applyTheme(t);
         }
     }
 
     @Override
     public boolean canApplyTheme() {
-        return mInsetState != null && mInsetState.mThemeAttrs != null;
+        return super.canApplyTheme() || mInsetState != null && mInsetState.canApplyTheme();
     }
 
     @Override
@@ -436,6 +442,12 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return super.canApplyTheme() || mThemeAttrs != null
+                    || mDrawable != null && mDrawable.canApplyTheme();
         }
 
         boolean canConstantState() {

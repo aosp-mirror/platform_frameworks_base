@@ -16,6 +16,8 @@
 
 package android.graphics.drawable;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -473,6 +475,26 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         if (drawable != null) {
             drawable.setCallback(this);
         }
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final RotateState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        if (state.mDrawable != null) {
+            state.mDrawable.applyTheme(t);
+        }
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        final RotateState state = mState;
+        return state != null && state.mDrawable != null && state.mDrawable.canApplyTheme();
     }
 
     @Override

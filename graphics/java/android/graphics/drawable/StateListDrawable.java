@@ -288,7 +288,16 @@ public class StateListDrawable extends DrawableContainer {
             super(orig, owner, res);
 
             if (orig != null) {
-                mStateSets = Arrays.copyOf(orig.mStateSets, orig.mStateSets.length);
+                // Perform a deep copy.
+                final int[][] sets = orig.mStateSets;
+                final int count = sets.length;
+                mStateSets = new int[count][];
+                for (int i = 0; i < count; i++) {
+                    final int[] set = sets[i];
+                    if (set != null) {
+                        mStateSets[i] = set.clone();
+                    }
+                }
             } else {
                 mStateSets = new int[getCapacity()][];
             }
@@ -328,6 +337,13 @@ public class StateListDrawable extends DrawableContainer {
             System.arraycopy(mStateSets, 0, newStateSets, 0, oldSize);
             mStateSets = newStateSets;
         }
+    }
+
+    @Override
+    public void applyTheme(Theme theme) {
+        super.applyTheme(theme);
+
+        onStateChange(getState());
     }
 
     void setConstantState(StateListState state) {
