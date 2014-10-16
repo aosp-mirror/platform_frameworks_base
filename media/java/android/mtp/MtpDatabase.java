@@ -306,8 +306,10 @@ public class MtpDatabase {
         try {
             File f = new File(path);
             String canonical = f.getCanonicalPath();
-            if (canonical.startsWith(mMediaStoragePath)) {
-                return true;
+            for (String root: mStorageMap.keySet()) {
+                if (canonical.startsWith(root)) {
+                    return true;
+                }
             }
         } catch (IOException e) {
             // ignore
