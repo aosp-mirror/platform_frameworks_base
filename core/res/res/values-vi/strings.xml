@@ -1764,12 +1764,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Đã chọn <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Đã xóa <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> làm việc"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Để bỏ ghim màn hình này, hãy chạm và giữ Quay lại và Gần đây đồng thời."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Để bỏ ghim màn hình này, hãy chạm và giữ Gần đây."</string>
+    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Màn hình đã được ghim. Tổ chức của bạn không cho phép bỏ ghim."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Sử dụng ghim màn hình?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Ghim màn hình sẽ khóa màn hình ở một chế độ xem.\n\nĐể thoát, hãy chạm và giữ Quay lại và Gần đây đồng thời."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Ghim màn hình sẽ khóa màn hình ở một chế độ xem.\n\nĐể thoát, hãy chạm và giữ Gần đây."</string>
+    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"KHÔNG, CẢM ƠN"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"BẮT ĐẦU"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Đã ghim màn hình"</string>

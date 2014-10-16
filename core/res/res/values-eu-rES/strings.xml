@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> hautatu da"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ezabatu da"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Laneko <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Pantailari aingura kentzeko, eduki ukituta Atzera eta Azkenak botoiak aldi berean."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Pantailari aingura kentzeko, eduki ukituta Azkenak botoia."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Aingura kentzeko, eduki ukituta Atzera eta Ikuspegi orokorra botoiak aldi berean."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Aingura kentzeko, eduki ukituta Ikuspegi orokorra botoia."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Pantaila ainguratu da. Erakundeak ez du aingura kentzea onartzen."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Pantaila ainguratzeko aukera erabili nahi duzu?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"Pantaila-ainguratzeak ikuspegi bakarrean blokeatzen du pantaila.\n\nIrteteko, eduki ukituta Atzera eta Azkenak botoiak aldi berean."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Pantaila ainguratzeko aukerak ikuspegi bakarrean blokeatzen du pantaila.\n\nIrteteko, eduki ukituta Azkenak botoia."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Pantaila ainguratzen denean, bistaratutakoa ikuspegi bakarrean blokeatzen da.\n\nAingura kentzeko, eduki ukituta Atzera eta Ikuspegi orokorra botoiak aldi berean."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pantaila ainguratzen denean, bistaratutakoa ikuspegi bakarrean blokeatzen da.\n\nAingura kentzeko, eduki ukituta Ikuspegi orokorra botoia."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"EZ, ESKERRIK ASKO"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"HASI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantaila ainguratu da"</string>
