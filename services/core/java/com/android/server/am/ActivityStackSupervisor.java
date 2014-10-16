@@ -2058,7 +2058,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             targetStack = sourceTask.stack;
             targetStack.moveToFront();
-            mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
+            final TaskRecord topTask = targetStack.topTask();
+            if (topTask != sourceTask) {
+                targetStack.moveTaskToFrontLocked(sourceTask, r, options);
+                Slog.w(TAG, "top task and source task don't match. would have caused anr");
+            } else {
+                mWindowManager.moveTaskToTop(topTask.taskId);
+            }
             if (!addingToTask && (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
@@ -3097,10 +3103,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
             pw.print("Display #"); pw.print(activityDisplay.mDisplayId);
-                    pw.println(" (activities from bottom to top):");
+                    pw.println(" (activities from top to bottom):");
             ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
-            final int numStacks = stacks.size();
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 StringBuilder stackHeader = new StringBuilder(128);
                 stackHeader.append("  Stack #");
