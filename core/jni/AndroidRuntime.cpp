@@ -95,8 +95,6 @@ extern int register_android_media_AudioTrack(JNIEnv *env);
 extern int register_android_media_JetPlayer(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
 
-extern int register_android_util_FloatMath(JNIEnv* env);
-
 namespace android {
 
 /*
@@ -1228,7 +1226,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_SystemClock),
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),
-    REG_JNI(register_android_util_FloatMath),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
     REG_JNI(register_android_content_XmlBlock),
