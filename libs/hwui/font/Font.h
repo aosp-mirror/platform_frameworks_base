@@ -27,7 +27,7 @@
 #include <SkPaint.h>
 #include <SkPathMeasure.h>
 
-#include "CachedGlyphInfo.h"
+#include "FontUtil.h"
 #include "../Rect.h"
 #include "../Matrix.h"
 
@@ -38,6 +38,8 @@ namespace uirenderer {
 // Font
 ///////////////////////////////////////////////////////////////////////////////
 
+class CachedGlyphInfo;
+class CacheTexture;
 class FontRenderer;
 
 /**

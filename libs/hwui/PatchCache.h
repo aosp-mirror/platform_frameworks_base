@@ -25,11 +25,12 @@
 
 #include "AssetAtlas.h"
 #include "Debug.h"
-#include "Patch.h"
 #include "utils/Pair.h"
 
 namespace android {
 namespace uirenderer {
+
+class Patch;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Defines

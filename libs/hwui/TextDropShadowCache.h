@@ -24,13 +24,14 @@
 #include <utils/LruCache.h>
 #include <utils/String16.h>
 
-#include "FontRenderer.h"
+#include "font/Font.h"
 #include "Texture.h"
 
 namespace android {
 namespace uirenderer {
 
 class Caches;
+class FontRenderer;
 
 struct ShadowText {
     ShadowText(): len(0), radius(0.0f), textSize(0.0f), typeface(NULL),

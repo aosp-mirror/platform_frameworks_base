@@ -32,6 +32,9 @@
 #include "AssetAtlas.h"
 #include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
+#include "GammaFontRenderer.h"
+#include "Patch.h"
+#include "RenderNode.h"
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
 

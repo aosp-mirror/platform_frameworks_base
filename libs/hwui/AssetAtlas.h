@@ -27,7 +27,6 @@
 
 #include <SkBitmap.h>
 
-#include "Image.h"
 #include "Texture.h"
 #include "UvMapper.h"
 
@@ -35,6 +34,7 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
+class Image;
 
 /**
  * An asset atlas holds a collection of framework bitmaps in a single OpenGL

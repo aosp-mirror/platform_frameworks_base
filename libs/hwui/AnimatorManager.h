@@ -21,7 +21,6 @@
 #include <cutils/compiler.h>
 #include <utils/StrongPointer.h>
 
-#include "TreeInfo.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -30,6 +29,7 @@ namespace uirenderer {
 class AnimationHandle;
 class BaseRenderNodeAnimator;
 class RenderNode;
+class TreeInfo;
 
 // Responsible for managing the animators for a single RenderNode
 class AnimatorManager {

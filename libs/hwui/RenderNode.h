@@ -33,13 +33,10 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "AnimatorManager.h"
-#include "DamageAccumulator.h"
 #include "Debug.h"
 #include "Matrix.h"
-#include "DeferredDisplayList.h"
 #include "DisplayList.h"
 #include "RenderProperties.h"
-#include "TreeInfo.h"
 
 class SkBitmap;
 class SkPaint;
@@ -61,6 +58,7 @@ class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
 class DrawRenderNodeOp;
+class TreeInfo;
 
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.

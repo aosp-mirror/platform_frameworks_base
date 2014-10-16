@@ -24,6 +24,7 @@
 #include <utils/Mutex.h>
 
 #include "Caches.h"
+#include "Texture.h"
 #include "TextureCache.h"
 #include "Properties.h"
 

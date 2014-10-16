@@ -26,8 +26,8 @@
 #include <SkCamera.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
+#include <SkXfermode.h>
 
-#include "Animator.h"
 #include "Rect.h"
 #include "RevealClip.h"
 #include "Outline.h"

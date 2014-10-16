@@ -24,7 +24,6 @@
 #include <utils/Vector.h>
 
 #include "Debug.h"
-#include "Properties.h"
 #include "Texture.h"
 #include "utils/Macros.h"
 #include "utils/Pair.h"

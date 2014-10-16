@@ -17,6 +17,7 @@
 #include <SkGlyph.h>
 
 #include "CacheTexture.h"
+#include "FontUtil.h"
 #include "../Caches.h"
 #include "../Debug.h"
 #include "../Extensions.h"

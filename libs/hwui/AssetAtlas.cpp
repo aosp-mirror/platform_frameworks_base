@@ -18,6 +18,7 @@
 
 #include "AssetAtlas.h"
 #include "Caches.h"
+#include "Image.h"
 
 #include <GLES2/gl2ext.h>
 

@@ -33,6 +33,7 @@
 #include "DisplayListLogBuffer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
+#include "TreeInfo.h"
 #include "utils/MathUtils.h"
 #include "renderthread/CanvasContext.h"
 

@@ -20,6 +20,7 @@
 
 #include "Caches.h"
 #include "Debug.h"
+#include "FontRenderer.h"
 #include "TextDropShadowCache.h"
 #include "Properties.h"
 

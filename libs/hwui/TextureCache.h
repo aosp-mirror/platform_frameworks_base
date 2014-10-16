@@ -24,10 +24,11 @@
 #include <utils/Vector.h>
 
 #include "Debug.h"
-#include "Texture.h"
 
 namespace android {
 namespace uirenderer {
+
+class Texture;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Defines

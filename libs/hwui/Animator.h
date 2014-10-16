@@ -19,10 +19,8 @@
 #include <cutils/compiler.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
+#include <utils/Timers.h>
 
-#include "CanvasProperty.h"
-#include "Interpolator.h"
-#include "TreeInfo.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -30,6 +28,9 @@ namespace uirenderer {
 
 class AnimationContext;
 class BaseRenderNodeAnimator;
+class CanvasPropertyPrimitive;
+class CanvasPropertyPaint;
+class Interpolator;
 class RenderNode;
 class RenderProperties;
 

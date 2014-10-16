@@ -20,6 +20,7 @@
 #include <set>
 
 #include "AnimationContext.h"
+#include "Interpolator.h"
 #include "RenderNode.h"
 #include "RenderProperties.h"
 

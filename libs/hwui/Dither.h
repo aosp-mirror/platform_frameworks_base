@@ -19,12 +19,11 @@
 
 #include <GLES3/gl3.h>
 
-#include "Program.h"
-
 namespace android {
 namespace uirenderer {
 
 class Caches;
+class Program;
 
 // Must be a power of two
 #define DITHER_KERNEL_SIZE 4

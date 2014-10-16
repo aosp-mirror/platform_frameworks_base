@@ -20,14 +20,17 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <utils/Mutex.h>
+#include <utils/Functor.h>
 
 #include <private/hwui/DrawGlInfo.h>
 
-#include "Caches.h"
 #include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
+
+class Caches;
+class Layer;
 
 namespace renderthread {
 class CanvasContext;

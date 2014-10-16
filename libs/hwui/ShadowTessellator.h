@@ -18,13 +18,15 @@
 #ifndef ANDROID_HWUI_SHADOW_TESSELLATOR_H
 #define ANDROID_HWUI_SHADOW_TESSELLATOR_H
 
+#include <SkPath.h>
+
 #include "Debug.h"
 #include "Matrix.h"
-#include "OpenGLRenderer.h"
-#include "VertexBuffer.h"
 
 namespace android {
 namespace uirenderer {
+
+class VertexBuffer;
 
 // All SHADOW_* are used to define all the geometry property of shadows.
 // Use a simplified example to illustrate the geometry setup here.

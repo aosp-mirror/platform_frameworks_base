@@ -20,6 +20,7 @@
 #include <utils/Log.h>
 
 #include "Caches.h"
+#include "Patch.h"
 #include "PatchCache.h"
 #include "Properties.h"
 

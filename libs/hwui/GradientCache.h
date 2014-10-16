@@ -25,10 +25,10 @@
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 
-#include "Texture.h"
-
 namespace android {
 namespace uirenderer {
+
+class Texture;
 
 struct GradientCacheEntry {
     GradientCacheEntry() {

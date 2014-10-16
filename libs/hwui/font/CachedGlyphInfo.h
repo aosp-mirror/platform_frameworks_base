@@ -19,10 +19,10 @@
 
 #include <SkFixed.h>
 
-#include "CacheTexture.h"
-
 namespace android {
 namespace uirenderer {
+
+class CacheTexture;
 
 struct CachedGlyphInfo {
     // Has the cache been invalidated?

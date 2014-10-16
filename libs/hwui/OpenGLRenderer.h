@@ -43,13 +43,11 @@
 #include "Matrix.h"
 #include "Program.h"
 #include "Rect.h"
-#include "Renderer.h"
 #include "Snapshot.h"
 #include "StatefulBaseRenderer.h"
 #include "UvMapper.h"
 #include "Vertex.h"
 #include "Caches.h"
-#include "CanvasProperty.h"
 
 class SkShader;
 

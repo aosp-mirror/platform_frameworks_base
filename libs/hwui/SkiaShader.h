@@ -24,15 +24,11 @@
 
 #include <cutils/compiler.h>
 
-#include "Extensions.h"
-#include "ProgramCache.h"
-#include "TextureCache.h"
-#include "GradientCache.h"
-
 namespace android {
 namespace uirenderer {
 
 class Caches;
+class Extensions;
 class Layer;
 
 /**

@@ -23,7 +23,6 @@
 
 #include <utils/Log.h>
 
-#include "FontUtil.h"
 #include "../PixelBuffer.h"
 #include "../Rect.h"
 #include "../Vertex.h"

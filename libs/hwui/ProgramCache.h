@@ -25,7 +25,6 @@
 
 #include "Debug.h"
 #include "Program.h"
-#include "Properties.h"
 
 namespace android {
 namespace uirenderer {

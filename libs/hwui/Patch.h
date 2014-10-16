@@ -27,10 +27,11 @@
 
 #include "Rect.h"
 #include "UvMapper.h"
-#include "Vertex.h"
 
 namespace android {
 namespace uirenderer {
+
+class TextureVertex;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 9-patch structures
