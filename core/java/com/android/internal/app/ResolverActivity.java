@@ -74,6 +74,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
 /**
  * This activity is displayed when the system attempts to start an Intent for
  * which there is more than one matching activity, allowing the user to decide
@@ -269,6 +272,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             mListView = (ListView) findViewById(R.id.resolver_list);
             mListView.setVisibility(View.GONE);
         }
+        // Prevent the Resolver window from becoming the top fullscreen window and thus from taking
+        // control of the system bars.
+        getWindow().clearFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR);
 
         final ResolverDrawerLayout rdl = (ResolverDrawerLayout) findViewById(R.id.contentPanel);
         if (rdl != null) {
