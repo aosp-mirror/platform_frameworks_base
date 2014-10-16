@@ -8857,6 +8857,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     Slog.w(TAG, "Null transport getting restore sets");
                     return -1;
                 }
+
+                // We know we're doing legit work now, so halt the timeout
+                // until we're done.  It gets started again when the result
+                // comes in.
+                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+
                 // spin off the transport request to our service thread
                 mWakelock.acquire();
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_GET_RESTORE_SETS,
@@ -8909,6 +8915,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             synchronized (mQueueLock) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
+                        // Real work, so stop the session timeout until we finalize the restore
+                        mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         if (MORE_DEBUG) {
@@ -8988,6 +8997,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             synchronized (mQueueLock) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
+                        // Stop the session timeout until we finalize the restore
+                        mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         if (MORE_DEBUG) {
@@ -9067,6 +9079,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 Slog.e(TAG, "Unable to contact transport for restore");
                 return -1;
             }
+
+            // Stop the session timeout until we finalize the restore
+            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
 
             // Ready to go:  enqueue the restore request and claim success
             long oldId = Binder.clearCallingIdentity();
