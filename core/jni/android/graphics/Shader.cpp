@@ -8,7 +8,6 @@
 #include "SkTemplates.h"
 #include "SkXfermode.h"
 
-#include <SkiaShader.h>
 #include <Caches.h>
 
 using namespace android::uirenderer;

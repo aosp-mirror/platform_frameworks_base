@@ -24,12 +24,15 @@
 
 #include <cutils/compiler.h>
 
+#include "Matrix.h"
+
 namespace android {
 namespace uirenderer {
 
 class Caches;
 class Extensions;
 class Layer;
+struct ProgramDescription;
 
 /**
  * Type of Skia shader in use.
