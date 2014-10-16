@@ -142,8 +142,8 @@
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"הקובץ המבוקש לא נמצא."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"בקשות רבות מדי מעובדות. נסה שוב מאוחר יותר."</string>
     <string name="notification_title" msgid="8967710025036163822">"שגיאת כניסה עבור <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"סינכרון"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"סינכרון"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"סנכרון"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"סנכרון"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"יש מחיקות רבות מדי של <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"שטח האחסון של הטאבלט מלא. מחק קבצים כדי לפנות מקום."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"שטח האחסון של השעון מלא. מחק כמה קבצים כדי לפנות שטח."</string>
@@ -1432,7 +1432,7 @@
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"אתה משתמש באפליקציה זו מחוץ לפרופיל העבודה שלך"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"אתה משתמש באפליקציה זו בפרופיל העבודה שלך"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"שיטת קלט"</string>
-    <string name="sync_binding_label" msgid="3687969138375092423">"סינכרון"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"סנכרון"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"נגישות"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"טפט"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"שנה טפט"</string>
@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> נבחר"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> נמחק"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"כדי לבטל הצמדה של מסך זה, גע נגיעה ארוכה בלחצנים \'הקודם\' ו\'אחרונים\' בו-זמנית."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"כדי לבטל הצמדה של מסך זה, גע נגיעה ארוכה בלחצן \'אחרונים\'."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"כדי לבטל את הקפאת המסך הזה, גע בו-זמנית נגיעה ממושכת ב\'הקודם\' ו\'סקירה\'."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"כדי לבטל את הקפאת המסך הזה, גע נגיעה ממושכת ב\'סקירה\'."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"המסך מוצמד. הארגון אוסר לבטל את הצמדתו."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"להשתמש בהצמדת מסך?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"הצמדת מסך נועלת את התצוגה בתצוגה אחת.\n\nכדי לצאת, גע נגיעה ארוכה בלחצנים \'הקודם\' ו\'אחרונים\' בו-זמנית."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"הצמדת מסך נועלת את התצוגה בתצוגה אחת.\n\nכדי לצאת, גע נגיעה ארוכה בלחצן \'אחרונים\'."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"הקפאת המסך נועלת את התצוגה.\n\nכדי לבטל את ההקפאה, גע בו-זמנית נגיעה ממושכת ב\'הקודם\' ו\'סקירה\'."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"הקפאת המסך נועלת את התצוגה.\n\nכדי לבטל את ההקפאה, גע נגיעה ממושכת ב\'סקירה\'."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"לא, תודה"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"הפעל"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>

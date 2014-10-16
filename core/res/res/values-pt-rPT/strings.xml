@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selecionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"Para soltar este ecrã, toque sem soltar em Anterior e Recentes ao mesmo tempo."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Para soltar este ecrã, toque sem soltar em Recentes."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para soltar este ecrã, toque sem soltar em Retroceder e Visão geral em simultâneo."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para soltar este ecrã, toque sem soltar em Visão geral."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"O ecrã está fixo. A sua entidade não o(a) autoriza a soltá-lo."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Pretende utilizar a fixação do ecrã?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"A fixação do ecrã bloqueia o visor numa única vista.\n\nPara sair, toque sem soltar em Anterior e Recentes ao mesmo tempo."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"A fixação do ecrã bloqueia o visor numa única vista.\n\nPara sair, toque sem soltar em Recentes."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"A fixação do ecrã bloqueia o ecrã numa vista única.\n\nPara soltar, toque sem soltar em Retroceder e Visão geral em simultâneo."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"A fixação do ecrã bloqueia o ecrã numa vista única.\n\nPara soltar, toque sem soltar em Visão geral."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NÃO, OBRIGADO"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ecrã fixo"</string>

@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kiválasztva"</string>
     <string name="deleted_key" msgid="7659477886625566590">"A(z) <xliff:g id="KEY">%1$s</xliff:g> érték törölve"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1230563865743799321">"A képernyő rögzítésének feloldásához érintse meg és tartsa megérintve egyszerre a Vissza és a Legutóbbi feliratot."</string>
-    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"A képernyő rögzítésének feloldásához érintse meg és tartsa megérintve a Legutóbbi feliratot."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza és az Áttekintés lehetőséget egyszerre."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"A képernyő rögzítésének feloldásához tartsa lenyomva az Áttekintés lehetőséget."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"A képernyő rögzítve van. Szervezete nem engedélyezi a rögzítés feloldását."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Rögzíti a képernyőt?"</string>
-    <string name="lock_to_app_description" msgid="9076084599283282800">"A képernyő rögzítése a kijelzőt egyetlen nézetben zárolja.\n\nA kilépéshez érintse meg és tartsa megérintve egyidejűleg a Vissza és Legutóbbi feliratokat."</string>
-    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"A képernyő rögzítése a kijelzőt egyetlen nézetben zárolja.\n\nA kilépéshez érintse meg és tartsa megérintve a Legutóbbi feliratot."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"A képernyőrögzítés lezárja a kijelzőt egyetlen nézetben.\n\nA feloldáshoz tartsa lenyomva a Vissza és az Áttekintés lehetőséget egyszerre."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"A képernyőrögzítés lezárja a kijelzőt egyetlen nézetben.\n\nA feloldáshoz tartsa lenyomva az Áttekintés lehetőséget."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"KÖSZÖNÖM, NEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INDÍT"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Képernyő rögzítve"</string>
