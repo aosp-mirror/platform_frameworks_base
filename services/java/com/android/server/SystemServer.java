@@ -416,6 +416,8 @@ public final class SystemServer {
         boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
         boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
+        boolean disableNetworkTimeProtocol = SystemProperties.getBoolean("config.disable_networktimeprotocol",
+                false);
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
@@ -863,7 +865,7 @@ public final class SystemServer {
                 reportWtf("starting SamplingProfiler Service", e);
             }
 
-            if (!disableNetwork) {
+            if (!disableNetwork && !disableNetworkTimeProtocol) {
                 try {
                     Slog.i(TAG, "NetworkTimeUpdateService");
                     networkTimeUpdater = new NetworkTimeUpdateService(context);
