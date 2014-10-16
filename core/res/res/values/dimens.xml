@@ -367,12 +367,15 @@
     <dimen name="timepicker_time_label_size">60sp</dimen>
     <dimen name="timepicker_extra_time_label_margin">-30dp</dimen>
     <dimen name="timepicker_ampm_label_size">16sp</dimen>
-    <dimen name="timepicker_ampm_left_padding">6dip</dimen>
-    <dimen name="timepicker_separator_padding">4dip</dimen>
-    <dimen name="timepicker_header_height">96dip</dimen>
-    <dimen name="timepicker_minimum_margin_sides">48dip</dimen>
-    <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
-    <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
+    <dimen name="timepicker_ampm_horizontal_padding">12dp</dimen>
+    <dimen name="timepicker_ampm_vertical_padding">16dp</dimen>
+    <dimen name="timepicker_am_bottom_padding">1dp</dimen>
+    <dimen name="timepicker_pm_top_padding">2dp</dimen>
+    <dimen name="timepicker_separator_padding">4dp</dimen>
+    <dimen name="timepicker_header_height">96dp</dimen>
+    <dimen name="timepicker_minimum_margin_sides">48dp</dimen>
+    <dimen name="timepicker_minimum_margin_top_bottom">24dp</dimen>
+    <dimen name="timepicker_radial_picker_dimen">270dp</dimen>
 
     <!-- Used by SimpleMonthView -->
     <dimen name="datepicker_day_number_size">12sp</dimen>
