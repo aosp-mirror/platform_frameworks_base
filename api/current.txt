@@ -38125,6 +38125,7 @@ package android.widget {
   public class PopupMenu {
     ctor public PopupMenu(android.content.Context, android.view.View);
     ctor public PopupMenu(android.content.Context, android.view.View, int);
+    ctor public PopupMenu(android.content.Context, android.view.View, int, int, int);
     method public void dismiss();
     method public android.view.View.OnTouchListener getDragToOpenListener();
     method public android.view.Menu getMenu();
