@@ -346,10 +346,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 + " notifyNow=" + notifyNow + " subId=" + subId + " myUid=" + myUid
                 + " callerUid=" + callerUid);
         }
-        if (events != 0) {
+
+        if (events != PhoneStateListener.LISTEN_NONE) {
             /* Checks permission and throws Security exception */
             checkListenerPermission(events);
-
             synchronized (mRecords) {
                 // register
                 Record r = null;
@@ -364,26 +364,26 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     r = new Record();
                     r.binder = b;
-                    r.callback = callback;
-                    r.pkgForDebug = pkgForDebug;
-                    r.callerUid = callerUid;
-                    // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
-                    // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
-                    if (!SubscriptionManager.isValidSubId(subId)) {
-                        r.subId = SubscriptionManager.DEFAULT_SUB_ID;
-                     } else {//APP specify subID
-                        r.subId = subId;
-                    }
-                    r.phoneId = SubscriptionManager.getPhoneId(r.subId);
-
                     mRecords.add(r);
                     if (DBG) log("listen: add new record");
                 }
 
+                r.callback = callback;
+                r.pkgForDebug = pkgForDebug;
+                r.callerUid = callerUid;
+                // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
+                // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
+                if (!SubscriptionManager.isValidSubId(subId)) {
+                    r.subId = SubscriptionManager.DEFAULT_SUB_ID;
+                 } else {//APP specify subID
+                    r.subId = subId;
+                }
+                r.phoneId = SubscriptionManager.getPhoneId(r.subId);
+
                 int phoneId = r.phoneId;
                 r.events = events;
                 if (DBG) {
-                    log("listen: r=" + r + " r.subId=" + r.subId + " phoneId=" + phoneId);
+                    log("listen:  Register r=" + r + " r.subId=" + r.subId + " phoneId=" + phoneId);
                 }
                 if (VDBG) toStringLogSSC("listen");
                 if (notifyNow && validatePhoneId(phoneId)) {
@@ -503,6 +503,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
             }
         } else {
+            if(DBG) log("listen: Unregister");
             remove(callback.asBinder());
         }
     }
