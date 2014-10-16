@@ -310,50 +310,6 @@ public class TelecomManager {
     }
 
     /**
-     * Return the corresponding PhoneAccount id of a given subscription id.
-     *
-     * @param subscriptionId The value of the subscription id the caller is trying to get a phone
-     * account id for.
-     * @return A string representing the phone account id or null.
-     *
-     * @hide
-     */
-    @SystemApi
-    public String getPhoneAccountIdForSubscriptionId(long subscriptionId) {
-        try {
-            if (isServiceConnected()) {
-                return getTelecomService().getPhoneAccountIdForSubscriptionId(subscriptionId);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getSubscriptionIdForPhoneAccount", e);
-        }
-        return null;
-    }
-
-    /**
-     * Return the subscription id of the PhoneAccount if it exists. This only applies to PSTN
-     * or SIM-based phone accounts. Return -1 otherwise.
-     *
-     * @param accountHandle The {@link PhoneAccountHandle} the caller is trying to get the
-     * subscription id for.
-     * @return The subscription id (a long) or -1 if the phone account is not a SIM or
-     * a subscription id does not exist.
-     *
-     * @hide
-     */
-    @SystemApi
-    public long getSubscriptionIdForPhoneAccount(PhoneAccountHandle accountHandle) {
-        try {
-            if (isServiceConnected()) {
-                return getTelecomService().getSubscriptionIdForPhoneAccount(accountHandle);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getSubscriptionIdForPhoneAccount", e);
-        }
-        return -1;
-    }
-
-    /**
      * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
      * calls with a specified URI scheme.
      * <p>

@@ -35,16 +35,6 @@ interface ITelecomService {
     void showInCallScreen(boolean showDialpad);
 
     /**
-     * @see TelecomServiceImpl#getPhoneAccountIdForSubscriptionId
-     */
-    String getPhoneAccountIdForSubscriptionId(in long subscriptionId);
-
-    /**
-     * @see TelecomServiceImpl#getSubscriptionIdForPhoneAccount
-     */
-    long getSubscriptionIdForPhoneAccount(in PhoneAccountHandle account);
-
-    /**
      * @see TelecomServiceImpl#getDefaultOutgoingPhoneAccount
      */
     PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme);
