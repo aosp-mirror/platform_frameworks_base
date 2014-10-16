@@ -669,6 +669,32 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the NAI. Return null if NAI is not available.
+     *
+     */
+    /** {@hide}*/
+    public String getNai() {
+        return getNai(getDefaultSim());
+    }
+
+    /**
+     * Returns the NAI. Return null if NAI is not available.
+     *
+     *  @param slotId of which Nai is returned
+     */
+    /** {@hide}*/
+    public String getNai(int slotId) {
+        long[] subId = SubscriptionManager.getSubId(slotId);
+        try {
+            return getSubscriberInfo().getNaiForSubscriber(subId[0]);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the current location of the device.
      *<p>
      * If there is only one radio in the device and that radio has an LTE connection,
