@@ -104,17 +104,16 @@ private:
         if (mY > mMaxY) mY = mMaxY;
     }
 
-    virtual void fade(Transition transition) {
+    virtual void fade(Transition) {
     }
 
-    virtual void unfade(Transition transition) {
+    virtual void unfade(Transition) {
     }
 
-    virtual void setPresentation(Presentation presentation) {
+    virtual void setPresentation(Presentation) {
     }
 
-    virtual void setSpots(const PointerCoords* spotCoords,
-            const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
+    virtual void setSpots(const PointerCoords*, const uint32_t*, BitSet32) {
     }
 
     virtual void clearSpots() {
@@ -186,11 +185,11 @@ private:
         mInputDevices = inputDevices;
     }
 
-    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor) {
+    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8&) {
         return NULL;
     }
 
-    virtual String8 getDeviceAlias(const InputDeviceIdentifier& identifier) {
+    virtual String8 getDeviceAlias(const InputDeviceIdentifier&) {
         return String8::empty();
     }
 };
@@ -472,7 +471,7 @@ private:
         return device ? device->identifier : InputDeviceIdentifier();
     }
 
-    virtual int32_t getDeviceControllerNumber(int32_t deviceId) const {
+    virtual int32_t getDeviceControllerNumber(int32_t) const {
         return 0;
     }
 
@@ -505,7 +504,7 @@ private:
         return false;
     }
 
-    virtual bool hasInputProperty(int32_t deviceId, int property) const {
+    virtual bool hasInputProperty(int32_t, int) const {
         return false;
     }
 
@@ -543,8 +542,7 @@ private:
         return NULL;
     }
 
-    virtual status_t mapAxis(int32_t deviceId, int32_t scanCode,
-            AxisInfo* outAxisInfo) const {
+    virtual status_t mapAxis(int32_t, int32_t, AxisInfo*) const {
         return NAME_NOT_FOUND;
     }
 
@@ -552,7 +550,7 @@ private:
         mExcludedDevices = devices;
     }
 
-    virtual size_t getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) {
+    virtual size_t getEvents(int, RawEvent* buffer, size_t) {
         if (mEvents.empty()) {
             return 0;
         }
@@ -670,25 +668,25 @@ private:
         }
     }
 
-    virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const {
+    virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t) const {
         return NULL;
     }
 
-    virtual bool setKeyboardLayoutOverlay(int32_t deviceId, const sp<KeyCharacterMap>& map) {
+    virtual bool setKeyboardLayoutOverlay(int32_t, const sp<KeyCharacterMap>&) {
         return false;
     }
 
-    virtual void vibrate(int32_t deviceId, nsecs_t duration) {
+    virtual void vibrate(int32_t, nsecs_t) {
     }
 
-    virtual void cancelVibrate(int32_t deviceId) {
+    virtual void cancelVibrate(int32_t) {
     }
 
-    virtual bool isExternal(int32_t deviceId) const {
+    virtual bool isExternal(int32_t) const {
         return false;
     }
 
-    virtual void dump(String8& dump) {
+    virtual void dump(String8&) {
     }
 
     virtual void monitor() {
@@ -753,18 +751,17 @@ private:
         return mListener.get();
     }
 
-    virtual void disableVirtualKeysUntil(nsecs_t time) {
+    virtual void disableVirtualKeysUntil(nsecs_t) {
     }
 
-    virtual bool shouldDropVirtualKey(nsecs_t now,
-            InputDevice* device, int32_t keyCode, int32_t scanCode) {
+    virtual bool shouldDropVirtualKey(nsecs_t, InputDevice*, int32_t, int32_t) {
         return false;
     }
 
     virtual void fadePointer() {
     }
 
-    virtual void requestTimeoutAtTime(nsecs_t when) {
+    virtual void requestTimeoutAtTime(nsecs_t) {
     }
 
     virtual int32_t bumpGeneration() {
@@ -857,12 +854,11 @@ private:
         }
     }
 
-    virtual void configure(nsecs_t when,
-            const InputReaderConfiguration* config, uint32_t changes) {
+    virtual void configure(nsecs_t, const InputReaderConfiguration*, uint32_t) {
         mConfigureWasCalled = true;
     }
 
-    virtual void reset(nsecs_t when) {
+    virtual void reset(nsecs_t) {
         mResetWasCalled = true;
     }
 
@@ -871,22 +867,22 @@ private:
         mProcessWasCalled = true;
     }
 
-    virtual int32_t getKeyCodeState(uint32_t sourceMask, int32_t keyCode) {
+    virtual int32_t getKeyCodeState(uint32_t, int32_t keyCode) {
         ssize_t index = mKeyCodeStates.indexOfKey(keyCode);
         return index >= 0 ? mKeyCodeStates.valueAt(index) : AKEY_STATE_UNKNOWN;
     }
 
-    virtual int32_t getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
+    virtual int32_t getScanCodeState(uint32_t, int32_t scanCode) {
         ssize_t index = mScanCodeStates.indexOfKey(scanCode);
         return index >= 0 ? mScanCodeStates.valueAt(index) : AKEY_STATE_UNKNOWN;
     }
 
-    virtual int32_t getSwitchState(uint32_t sourceMask, int32_t switchCode) {
+    virtual int32_t getSwitchState(uint32_t, int32_t switchCode) {
         ssize_t index = mSwitchStates.indexOfKey(switchCode);
         return index >= 0 ? mSwitchStates.valueAt(index) : AKEY_STATE_UNKNOWN;
     }
 
-    virtual bool markSupportedKeyCodes(uint32_t sourceMask, size_t numCodes,
+    virtual bool markSupportedKeyCodes(uint32_t, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) {
         bool result = false;
         for (size_t i = 0; i < numCodes; i++) {
@@ -1526,7 +1522,7 @@ protected:
 };
 
 void KeyboardInputMapperTest::testDPadKeyRotation(KeyboardInputMapper* mapper,
-        int32_t originalScanCode, int32_t originalKeyCode, int32_t rotatedKeyCode) {
+        int32_t originalScanCode, int32_t, int32_t rotatedKeyCode) {
     NotifyKeyArgs args;
 
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, originalScanCode, 1);
