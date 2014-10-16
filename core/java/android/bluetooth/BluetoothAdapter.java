@@ -454,8 +454,9 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Returns a {@link BluetoothLeAdvertiser} object for Bluetooth LE Advertising operations, or
-     * null if Bluetooth LE Advertising is not support on this device.
+     * Returns a {@link BluetoothLeAdvertiser} object for Bluetooth LE Advertising operations.
+     * Will return null if Bluetooth is turned off or if Bluetooth LE Advertising is not
+     * supported on this device.
      * <p>
      * Use {@link #isMultipleAdvertisementSupported()} to check whether LE Advertising is supported
      * on this device before calling this method.
