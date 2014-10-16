@@ -360,7 +360,6 @@ public final class LoadedApk {
 
                 mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, lib,
                         mBaseClassLoader);
-                initializeJavaContextClassLoader();
 
                 StrictMode.setThreadPolicy(oldPolicy);
             } else {
@@ -552,6 +551,9 @@ public final class LoadedApk {
 
         try {
             java.lang.ClassLoader cl = getClassLoader();
+            if (!mPackageName.equals("android")) {
+                initializeJavaContextClassLoader();
+            }
             ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
             app = mActivityThread.mInstrumentation.newApplication(
                     cl, appClass, appContext);
