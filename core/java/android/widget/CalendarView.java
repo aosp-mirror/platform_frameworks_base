@@ -775,9 +775,14 @@ public class CalendarView extends FrameLayout {
         private ViewGroup mDayNamesHeader;
 
         /**
-         * Cached labels for the week names header.
+         * Cached abbreviations for day of week names.
          */
-        private String[] mDayLabels;
+        private String[] mDayNamesShort;
+
+        /**
+         * Cached full-length day of week names.
+         */
+        private String[] mDayNamesLong;
 
         /**
          * The first day of the week.
@@ -1306,11 +1311,14 @@ public class CalendarView extends FrameLayout {
          * Sets up the strings to be used by the header.
          */
         private void setUpHeader() {
-            mDayLabels = new String[mDaysPerWeek];
+            mDayNamesShort = new String[mDaysPerWeek];
+            mDayNamesLong = new String[mDaysPerWeek];
             for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
                 int calendarDay = (i > Calendar.SATURDAY) ? i - Calendar.SATURDAY : i;
-                mDayLabels[i - mFirstDayOfWeek] = DateUtils.getDayOfWeekString(calendarDay,
+                mDayNamesShort[i - mFirstDayOfWeek] = DateUtils.getDayOfWeekString(calendarDay,
                         DateUtils.LENGTH_SHORTEST);
+                mDayNamesLong[i - mFirstDayOfWeek] = DateUtils.getDayOfWeekString(calendarDay,
+                        DateUtils.LENGTH_LONG);
             }
 
             TextView label = (TextView) mDayNamesHeader.getChildAt(0);
@@ -1325,7 +1333,8 @@ public class CalendarView extends FrameLayout {
                     label.setTextAppearance(mContext, mWeekDayTextAppearanceResId);
                 }
                 if (i < mDaysPerWeek + 1) {
-                    label.setText(mDayLabels[i - 1]);
+                    label.setText(mDayNamesShort[i - 1]);
+                    label.setContentDescription(mDayNamesLong[i - 1]);
                     label.setVisibility(View.VISIBLE);
                 } else {
                     label.setVisibility(View.GONE);
