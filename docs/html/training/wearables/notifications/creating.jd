@@ -155,7 +155,7 @@ PendingIntent actionPendingIntent =
 // Create the action
 NotificationCompat.Action action =
         new NotificationCompat.Action.Builder(R.drawable.ic_action,
-                getString(R.string.label, actionPendingIntent))
+                getString(R.string.label), actionPendingIntent)
                 .build();
 
 // Build the notification and add the action via WearableExtender
