@@ -519,6 +519,7 @@ aidl_files := \
 	frameworks/base/core/java/android/view/inputmethod/ExtractedTextRequest.aidl \
 	frameworks/base/core/java/android/view/DragEvent.aidl \
 	frameworks/base/core/java/android/view/KeyEvent.aidl \
+	frameworks/base/core/java/android/view/WindowManager.aidl \
 	frameworks/base/core/java/android/view/WindowAnimationFrameStats.aidl \
 	frameworks/base/core/java/android/view/MotionEvent.aidl \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityNodeInfo.aidl \
