@@ -919,6 +919,10 @@ include the action bar on devices running Android 2.1 or higher."
            Building TV Games</a>
       </li>
 
+      <li>
+        <a href="<?cs var:toroot ?>training/tv/tif/index.html">
+          TV Input Framework</a>
+      </li>
     </ul>
   </li>
   <!-- End: Building for TV -->
