@@ -59,8 +59,91 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
-  <p><a href="#" onclick="return toggleContent(this)">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21</a> <em>(October 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added support for {@link android.support.v4.app.Fragment}
+              transitions for devices running Android 5.0 (API level 21).
+              Be aware that transitions have no effect on devices running
+              Android 4.4 and lower.
+          </li>
+          <li>Added {@link android.support.v4.provider.DocumentFile} to ease
+              the transition from {@link java.io.File}
+              while working with document trees. However, this class demands
+              more processing overhead compared to the platform's
+              {@link android.provider.DocumentsContract} API added in
+              Android 4.4 (API level 19). So you should switch to using {@link
+              android.provider.DocumentsContract} when running on Android 4.4
+              and higher.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat
+        library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added support for <a href="{@docRoot}design/material/">material
+              design</a> user interfaces.</li>
+          <li>Added {@link android.support.v7.widget.Toolbar}, which generalizes
+              the functionality of {@link android.support.v7.app.ActionBar} for
+              use within app layouts.</li>
+          <li>Updated {@link android.support.v7.app.ActionBarDrawerToggle},
+              which contains the menu-to-arrow animation</li>
+          <li>Updated common user interface widgets to allow tinting via theme
+              attributes when running on pre-Android 5.0 devices</li>
+          <li>Added {@link android.support.v7.widget.SwitchCompat}, a backport
+              of the {@link android.widget.Switch} widget that was added in 
+              Android 4.0 (API level 14).</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v7-cardview">v7 cardview library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.CardView} widget, which
+            provides a material design-compatible implementation for displaying
+            data items.</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v7-recyclerview">v7 recyclerview
+        library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.RecyclerView} widget,
+            which provides a flexible list view for providing a limited window
+            into a large data set.</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v7-palette">v7 palette library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.graphics.Palette} class,
+          which lets you extract prominent colors from an image.</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added support for building TV user interfaces, including
+            {@link android.support.v17.leanback.app.BrowseFragment},
+            {@link android.support.v17.leanback.app.DetailsFragment}, and
+            {@link android.support.v17.leanback.app.PlaybackOverlayFragment}.
+            For more information about using these user interface widgets,
+            see <a href="{@docRoot}training/tv/playback/index.html">Building TV
+            Playback Apps</a>.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 20</a> <em>(July 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
