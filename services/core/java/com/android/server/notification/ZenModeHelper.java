@@ -260,7 +260,7 @@ public class ZenModeHelper {
                 }
             }
             if (forcedRingerMode != -1) {
-                mAudioManager.setRingerMode(forcedRingerMode);
+                mAudioManager.setRingerMode(forcedRingerMode, false /*checkZen*/);
                 ZenLog.traceSetRingerMode(forcedRingerMode);
             }
         }
