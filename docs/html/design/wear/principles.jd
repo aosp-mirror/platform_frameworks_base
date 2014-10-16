@@ -37,7 +37,7 @@ The time required for each action on the left is 5 seconds.</p>
 <p class="img-caption" style="width:315px;float:right;clear:right;margin:5px 0 30px 40px">
 Use few and large touch targets.</p>
 
-<p>When you swipe through photos on your phone you’re using a large area of the display, and you don’t have to be precise at all. That’s the best kind of interaction for a wearable device. Your users are going to use your app in all sorts of situations, the least frequent one might actually be sitting down at their desk.</p>
+<p>When you swipe through photos on your phone, you’re using a large area of the display and precision isn't required. That’s the best kind of interaction for a wearable device. Your users are going to use your app in all sorts of situations, the least frequent one might actually be sitting down at their desk.</p>
 
 <p class="try"><b>Try this:</b> Use your app in various everyday situations, such as walking, eating, talking to people, or ordering coffee. If you have to slow down while walking or stop the conversation to be precise, you should consider how your gestures could be bigger.</p>
 
@@ -58,18 +58,18 @@ Use few and large touch targets.</p>
 
 <p>While users will engage with your app for only a few seconds at time, they'll use it many times throughout the day. A well-designed stream card carries one bit of information and potentially offers a few action buttons when the user swipes over.</p>
 
-<p class="try"><b>Try this:</b> How many bits of information is there in your design? Is everything absolutely necessary, or could you split it up into separate cards? If you’re designing a card, don’t forget that you can use multiple pages.</p>
+<p class="try"><b>Try this:</b> How many bits of information are there in your design? Is everything absolutely necessary, or could you split it up into separate cards? If you’re designing a card, don’t forget that you can use multiple pages.</p>
 
 
 <h2 id="CornerOfEye">Design for the corner of the eye</h2>
 
 <p>The longer the user is looking at your app, the more you are pulling them out of the real world. Thinking about how to design your app for glanceability can vastly help the user get full value from your app and quickly go back to what they were doing.</p>
 
-<p class="try"><b>Try this:</b> To view your app with your peripheral vision, try focusing on your knuckles while your watch is displaying the app. Do you get a sense of what it is trying to do? Is it distinguishable from other apps? Does the background image help conveying the message? Does it use photos or a distinct shape and color?</p>
+<p class="try"><b>Try this:</b> To view your app with your peripheral vision, try focusing on your knuckles while your watch is displaying the app. Do you get a sense of what it is trying to do? Is it distinguishable from other apps? Does the background image help convey the message? Does it use photos or a distinct shape and color?</p>
 
 
 <h2 id="Tapper">Don’t be a constant shoulder tapper</h2>
 
-<p>A watch constantly touches the user’s skin. Being this intimate, you want to buzz the watch fewer times than you’re used to on the phone.</p>
+<p>A watch constantly touches the user’s skin. Being this intimate, you want to vibrate the watch fewer times than you might on a phone.</p>
 
-<p class="try"><b>Try this:</b> Next time you’re in a conversation, imagine someone tapping you your shoulder, interrupting you with the information you want your app to deliver. If the information delivered did not justify suspending a conversation, you should not make the notification interruptive.</p>
+<p class="try"><b>Try this:</b> Next time you’re in a conversation, imagine someone tapping you on your shoulder, interrupting you with the information you want your app to deliver. If the information delivered did not justify suspending a conversation, you should not make the notification interruptive.</p>
