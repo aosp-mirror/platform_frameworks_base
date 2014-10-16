@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ikusitako azken pantailak erakusten dira hemen"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Baztertu azken aplikazioak"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"Aplikazio bat duela gutxi"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d aplikazio duela gutxi"</item>
+    <item quantity="one" msgid="3969335317929254918">"Pantaila bat dago ikuspegi orokorrean"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d pantaila daude ikuspegi orokorrean"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ez dago jakinarazpenik"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Abian"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Atzera"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Hasiera"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menua"</string>
-    <string name="accessibility_recent" msgid="1606470783629913980">"Azken pantailak"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"Ikuspegi orokorra"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Bilatu"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefonoa"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Ezarpen bizkorrak."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantaila blokeatzeko aukera."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Ezarpenak"</string>
-    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"Azken pantailak."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Ikuspegi orokorra."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"<xliff:g id="USER">%s</xliff:g> erabiltzailea."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi konexioa desaktibatu egin da."</string>
