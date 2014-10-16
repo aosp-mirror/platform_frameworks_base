@@ -692,6 +692,7 @@ public class VectorDrawable extends Drawable {
 
             if (mTempPaint == null) {
                 mTempPaint = new Paint();
+                mTempPaint.setFilterBitmap(true);
             }
             mTempPaint.setAlpha(mVPathRenderer.getRootAlpha());
             mTempPaint.setColorFilter(filter);
