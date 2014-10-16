@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.LinkAddress;
 import android.net.NetworkInfo;
@@ -113,7 +114,6 @@ public class LockdownVpnTracker {
      * connection when ready, or setting firewall rules once VPN is connected.
      */
     private void handleStateChangedLocked() {
-        Slog.d(TAG, "handleStateChanged()");
 
         final NetworkInfo egressInfo = mConnService.getActiveNetworkInfoUnfiltered();
         final LinkProperties egressProp = mConnService.getActiveLinkProperties();
@@ -126,6 +126,14 @@ public class LockdownVpnTracker {
                 || State.DISCONNECTED.equals(egressInfo.getState());
         final boolean egressChanged = egressProp == null
                 || !TextUtils.equals(mAcceptedEgressIface, egressProp.getInterfaceName());
+
+        final String egressTypeName = (egressInfo == null) ?
+                null : ConnectivityManager.getNetworkTypeName(egressInfo.getType());
+        final String egressIface = (egressProp == null) ?
+                null : egressProp.getInterfaceName();
+        Slog.d(TAG, "handleStateChanged: egress=" + egressTypeName +
+                " " + mAcceptedEgressIface + "->" + egressIface);
+
         if (egressDisconnected || egressChanged) {
             clearSourceRulesLocked();
             mAcceptedEgressIface = null;
@@ -252,6 +260,7 @@ public class LockdownVpnTracker {
     }
 
     public void reset() {
+        Slog.d(TAG, "reset()");
         synchronized (mStateLock) {
             // cycle tracker, reset error count, and trigger retry
             shutdownLocked();
@@ -277,7 +286,7 @@ public class LockdownVpnTracker {
         }
     }
 
-    public void onNetworkInfoChanged(NetworkInfo info) {
+    public void onNetworkInfoChanged() {
         synchronized (mStateLock) {
             handleStateChangedLocked();
         }
