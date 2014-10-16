@@ -71,8 +71,8 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
   Android Virtual Devices in the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>:</p>
  
   <ul>
-  <li>Nexus 6 (5.96", 1440 x 2560, Large xxxhdpi screen) </li>
-  <li>Nexus 9 (8.9", 2048 x 1536, Large xhdpi screen) </li>
+  <li>Nexus 6 (5.96", 1440 x 2560, Normal 560dpi screen) </li>
+  <li>Nexus 9 (8.9", 2048 x 1536, X-Large xhdpi screen) </li>
   </ul>
 
 </div>
