@@ -35,6 +35,7 @@ import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.security.Credentials;
 import android.security.KeyStore;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -63,6 +64,8 @@ public class LockdownVpnTracker {
 
     private static final String ACTION_VPN_SETTINGS = "android.net.vpn.SETTINGS";
     private static final String EXTRA_PICK_LOCKDOWN = "android.net.vpn.PICK_LOCKDOWN";
+
+    private static final int ROOT_UID = 0;
 
     private final Context mContext;
     private final INetworkManagementService mNetService;
@@ -193,6 +196,9 @@ public class LockdownVpnTracker {
                     setFirewallEgressSourceRule(addr, true);
                 }
 
+                mNetService.setFirewallUidRule(ROOT_UID, true);
+                mNetService.setFirewallUidRule(Os.getuid(), true);
+
                 mErrorCount = 0;
                 mAcceptedIface = iface;
                 mAcceptedSourceAddr = sourceAddrs;
@@ -279,6 +285,10 @@ public class LockdownVpnTracker {
                 for (LinkAddress addr : mAcceptedSourceAddr) {
                     setFirewallEgressSourceRule(addr, false);
                 }
+
+                mNetService.setFirewallUidRule(ROOT_UID, false);
+                mNetService.setFirewallUidRule(Os.getuid(), false);
+
                 mAcceptedSourceAddr = null;
             }
         } catch (RemoteException e) {
