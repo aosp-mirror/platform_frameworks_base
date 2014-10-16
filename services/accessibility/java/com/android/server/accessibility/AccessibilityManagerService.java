@@ -148,6 +148,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int MAX_POOL_SIZE = 10;
 
+    private static final int WINDOW_ID_UNKNOWN = -1;
+
     private static int sIdCounter = 0;
 
     private static int sNextWindowId;
@@ -1079,7 +1081,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return false;
         }
 
-        if (!event.isImportantForAccessibility()
+        if (event.getWindowId() != WINDOW_ID_UNKNOWN && !event.isImportantForAccessibility()
                 && (service.mFetchFlags
                         & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
             return false;
