@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuPresenter;
@@ -37,10 +38,11 @@ import android.widget.ListPopupWindow.ForwardingListener;
  * of the popup will dismiss it.
  */
 public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
-    private Context mContext;
-    private MenuBuilder mMenu;
-    private View mAnchor;
-    private MenuPopupHelper mPopup;
+    private final Context mContext;
+    private final MenuBuilder mMenu;
+    private final View mAnchor;
+    private final MenuPopupHelper mPopup;
+
     private OnMenuItemClickListener mMenuItemClickListener;
     private OnDismissListener mDismissListener;
     private OnTouchListener mDragListener;
@@ -58,31 +60,56 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
     }
 
     /**
-     * Construct a new PopupMenu.
+     * Constructor to create a new popup menu with an anchor view.
      *
-     * @param context Context for the PopupMenu.
-     * @param anchor Anchor view for this popup. The popup will appear below the anchor if there
-     *               is room, or above it if there is not.
+     * @param context Context the popup menu is running in, through which it
+     *        can access the current theme, resources, etc.
+     * @param anchor Anchor view for this popup. The popup will appear below
+     *        the anchor if there is room, or above it if there is not.
      */
     public PopupMenu(Context context, View anchor) {
         this(context, anchor, Gravity.NO_GRAVITY);
     }
 
     /**
-     * Construct a new PopupMenu.
+     * Constructor to create a new popup menu with an anchor view and alignment
+     * gravity.
      *
-     * @param context Context for the PopupMenu.
-     * @param anchor Anchor view for this popup. The popup will appear below the anchor if there
-     *               is room, or above it if there is not.
-     * @param gravity The {@link Gravity} value for aligning the popup with its anchor
+     * @param context Context the popup menu is running in, through which it
+     *        can access the current theme, resources, etc.
+     * @param anchor Anchor view for this popup. The popup will appear below
+     *        the anchor if there is room, or above it if there is not.
+     * @param gravity The {@link Gravity} value for aligning the popup with its
+     *        anchor.
      */
     public PopupMenu(Context context, View anchor, int gravity) {
-        // TODO Theme?
+        this(context, anchor, gravity, R.attr.popupMenuStyle, 0);
+    }
+
+    /**
+     * Constructor a create a new popup menu with a specific style.
+     *
+     * @param context Context the popup menu is running in, through which it
+     *        can access the current theme, resources, etc.
+     * @param anchor Anchor view for this popup. The popup will appear below
+     *        the anchor if there is room, or above it if there is not.
+     * @param gravity The {@link Gravity} value for aligning the popup with its
+     *        anchor.
+     * @param popupStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the popup window. Can be 0 to not look for defaults.
+     * @param popupStyleRes A resource identifier of a style resource that
+     *        supplies default values for the popup window, used only if
+     *        popupStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public PopupMenu(Context context, View anchor, int gravity, int popupStyleAttr,
+            int popupStyleRes) {
         mContext = context;
         mMenu = new MenuBuilder(context);
         mMenu.setCallback(this);
         mAnchor = anchor;
-        mPopup = new MenuPopupHelper(context, mMenu, anchor);
+        mPopup = new MenuPopupHelper(context, mMenu, anchor, false, popupStyleAttr, popupStyleRes);
         mPopup.setGravity(gravity);
         mPopup.setCallback(this);
     }
