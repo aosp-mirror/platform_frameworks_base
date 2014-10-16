@@ -543,10 +543,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected ArrayList<View> createSnapshots(Bundle state, Collection<String> names) {
         int numSharedElements = names.size();
-        if (numSharedElements == 0) {
-            return null;
-        }
         ArrayList<View> snapshots = new ArrayList<View>(numSharedElements);
+        if (numSharedElements == 0) {
+            return snapshots;
+        }
         Context context = getWindow().getContext();
         int[] decorLoc = new int[2];
         ViewGroup decorView = getDecor();
