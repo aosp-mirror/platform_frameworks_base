@@ -902,7 +902,7 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/tv/discovery/index.html"
-             description="How to help users discovery content from your app.">
+             description="How to help users discover content from your app.">
              Helping Users Find Content on TV</a>
         </div>
         <ul>
@@ -924,8 +924,9 @@ include the action bar on devices running Android 2.1 or higher."
       </li>
 
       <li>
-        <a href="<?cs var:toroot ?>training/tv/tif/index.html">
-          TV Input Framework</a>
+        <a href="<?cs var:toroot ?>training/tv/tif/index.html"
+           description="How to build Live TV apps.">
+           Building Live TV Apps</a>
       </li>
     </ul>
   </li>
