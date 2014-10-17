@@ -29,7 +29,7 @@ page.title=UI Patterns for TV
   The visual specifications for these icons are shown below.</p>
 
 
-<h3>Banners</h3>
+<h3 id="banner">Banners</h3>
 
 <p>App Banners represent your app on the home screen of TV devices and serve and as a way for
   users to launch your app. Here are specific requirements for a banner image:
