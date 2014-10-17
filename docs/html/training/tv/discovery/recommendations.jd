@@ -29,7 +29,7 @@ trainingnavtop=true
   bring users back to your app.
 </p>
 
-<img src="{@docRoot}preview/tv/images/home-recommendations.png" alt="" id="figure1" />
+<img src="{@docRoot}images/tv/home-recommendations.png" alt="" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> An example of the recommendations row.
 </p>
