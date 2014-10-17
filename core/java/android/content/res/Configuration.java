@@ -1365,9 +1365,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         ArrayList<String> parts = new ArrayList<String>();
 
         if (config.mcc != 0) {
-            parts.add(config.mcc + "mcc");
+            parts.add("mcc" + config.mcc);
             if (config.mnc != 0) {
-                parts.add(config.mnc + "mnc");
+                parts.add("mnc" + config.mnc);
             }
         }
 
