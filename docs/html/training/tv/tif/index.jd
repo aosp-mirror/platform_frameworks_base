@@ -1,7 +1,18 @@
 page.title=Building Live TV Apps
 page.tags=tif
+page.article=true
 
 @jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}reference/android/media/tv/package-summary.html">
+      android.media.tv</a></li>
+  </ul>
+</div>
+</div>
 
 <p>
   Watching live television shows and other continuous, channel-based content is a big part of the
