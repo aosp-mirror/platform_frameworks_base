@@ -52,6 +52,11 @@ parent.link=index.html
     <td>User pressed back or canceled a dialog</td>
   </tr>
   <tr>
+    <td>{@code BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE}</td>
+    <td>2</td>
+    <td>Network connection is down</td>
+  </tr>
+  <tr>
     <td>{@code BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE}</td>
     <td>3</td>
     <td>Billing API version is not supported for the type requested</td>
