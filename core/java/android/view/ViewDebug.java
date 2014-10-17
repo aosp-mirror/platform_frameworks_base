@@ -1006,7 +1006,7 @@ public class ViewDebug {
         }
 
         final ArrayList<Field> declaredFields = new ArrayList();
-        klass.getDeclaredFields(false, declaredFields);
+        klass.getDeclaredFieldsUnchecked(false, declaredFields);
 
         final ArrayList<Field> foundFields = new ArrayList<Field>();
         final int count = declaredFields.size();
@@ -1049,7 +1049,7 @@ public class ViewDebug {
         }
 
         final ArrayList<Method> declaredMethods = new ArrayList();
-        klass.getDeclaredMethods(false, declaredMethods);
+        klass.getDeclaredMethodsUnchecked(false, declaredMethods);
 
         final ArrayList<Method> foundMethods = new ArrayList<Method>();
         final int count = declaredMethods.size();
