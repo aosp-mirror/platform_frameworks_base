@@ -34,7 +34,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     public HotspotTile(Host host) {
         super(host);
         mController = host.getHotspotController();
-        mUsageTracker = new UsageTracker(host.getContext(), HotspotTile.class);
+        mUsageTracker = newUsageTracker(host.getContext());
         mUsageTracker.setListening(true);
     }
 
@@ -84,6 +84,10 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
+    private static UsageTracker newUsageTracker(Context context) {
+        return new UsageTracker(context, HotspotTile.class, R.integer.days_to_show_hotspot_tile);
+    }
+
     private final class Callback implements HotspotController.Callback {
         @Override
         public void onHotspotChanged(boolean enabled) {
@@ -101,7 +105,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mUsageTracker == null) {
-                mUsageTracker = new UsageTracker(context, HotspotTile.class);
+                mUsageTracker = newUsageTracker(context);
             }
             mUsageTracker.trackUsage();
         }
