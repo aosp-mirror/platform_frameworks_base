@@ -12,7 +12,7 @@ page.title=Android Lollipop
 
 
   <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" >
+    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
   </div>
 
   <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
@@ -43,11 +43,17 @@ page.title=Android Lollipop
 
 
 
-<p>Welcome to Android 5.0 Lollipop&#8212;-the largest and most ambitious release for Android yet!</p>
+<p>Welcome to Android 5.0 Lollipop&mdash;the largest and most ambitious release for Android yet!</p>
 
 <p>This release is packed with new features for users and thousands of new APIs for developers. It extends Android even further, from phones, tablets, and wearables, to TVs and cars.</p>
 
-<p>For a closer look at the new developer APIs, see the Android 5.0 API Overview. Or, read more about Android 5.0 for consumers at www.android.com.</p>
+<p>For a closer look at the new developer APIs, see the
+<a href="{@docRoot}about/versions/android-5.0.html">Android
+5.0 API Overview</a>. Or, read more
+about Android 5.0 for consumers at
+<a href="http://www.android.com/versions/lollipop-5-0/"
+>www.android.com</a>.</p>
+
 
 
 <p style="
@@ -66,7 +72,7 @@ page.title=Android Lollipop
 
 
 
-<p>New<em>* 3D views</em>* let you set a Z-level to raise elements off of the main view hierarchy and cast <strong>realtime shadows</strong> from your views, even as they move.</p>
+<p>New <strong>3D views</strong> let you set a z-level to raise elements off of the view hierarchy and cast <strong>realtime shadows</strong>, even as they move.</p>
 
 
 <p>Built-in <strong>activity transitions</strong> take the user seamlessly from one state to another with beautiful, animated motion. The material theme adds transitions for your activities, including the ability to use <strong>shared visual elements</strong> across activities.</p>
@@ -97,11 +103,11 @@ page.title=Android Lollipop
 
 <p>Android 5.0 provides a faster, smoother and more powerful computing experience.</p>
 
-<p>Android now runs exclusively on the new <strong>ART runtime</strong> &#8212; built from the ground up to support a mix of ahead-of-time (AOT), just-in-time (JIT), and interpreted code. It’s truly cross platform and is supported on ARM, x86, and MIPS architectures. It is also fully 64-bit compatible.</p>
+<p>Android now runs exclusively on the new <strong>ART runtime</strong>, built from the ground up to support a mix of ahead-of-time (AOT), just-in-time (JIT), and interpreted code. It’s truly cross-platform and is supported on ARM, x86, and MIPS architectures. It is also fully 64-bit compatible.</p>
 
 <p>ART improves app performance and responsiveness. Efficient garbage collection reduces the number and duration of pauses for GC events, which fit comfortably within the v-sync window so your app doesn’t skip frames. ART also dynamically moves memory to optimize performance for foreground uses. </p>
 
-<p>Android 5.0 introduces platform support for <strong>64-bit architectures</strong>, such as used in the Nexus 9&#8217;s NVIDIA Tegra K1. Optimizations provide larger address space and improved performance for certain compute workloads. Apps written in the Java language run as 64-bit apps automatically &#8212; no modifications are needed. If your app uses native code, we’ve extended NDK to support new ABIs for ARM v8, and x86-64, and MIPS-64.</p>
+<p>Android 5.0 introduces platform support for <strong>64-bit architectures</strong>&mdash;used by the Nexus 9's NVIDIA Tegra K1. Optimizations provide larger address space and improved performance for certain compute workloads. Apps written in the Java language run as 64-bit apps automatically&mdash;no modifications are needed. If your app uses native code, we’ve extended the NDK to support new ABIs for ARM v8, and x86-64, and MIPS-64.</p>
 
 
 
@@ -109,24 +115,23 @@ page.title=Android Lollipop
 
 <p>Notifications in Android 5.0 are more visible, accessible, and configurable. </p>
 
-<img src="{@docRoot}images/versions/notification-headsup.png" style="float:right; margin:0 0 40px 60px" width="300" />
+<img src="{@docRoot}images/versions/notification-headsup.png" style="float:right; margin:0 0 40px 60px" width="300" height="224" />
 
 <p>Varying notification details may appear <strong>on the lock screen</strong> if desired by the user. Users may elect to allow none, some, or all notification content to be shown on a secure lock screen. </p>
 
-
-<p>Key notification alerts such as incoming calls appear in a <strong>heads-up notification</strong>&#8212;-a small floating window that allows the user to respond or dismiss without leaving the current app.</p>
+<p>Key notification alerts such as incoming calls appear in a <strong>heads-up notification</strong>&mdash;a small floating window that allows the user to respond or dismiss without leaving the current app.</p>
 
 <p>You can now add <strong>new metadata</strong> to notifications to collect associated contacts (for ranking), category, and priority.</p>
 
-<p>A new MediaStyle notification template provides consistent media controls for notifications, including on the lock screen, with options for custom controls such as "thumbs up."</p>
+<p>A new media notification template provides consistent media controls for notifications with up to 6 action buttons, including custom controls such as "thumbs up"&mdash;no more need for RemoteViews!</p>
 
 
 
 <h2 id="TV">Your apps on the big screen</h2>
 
-<p><a href="http://developer.android.com/tv/index.html">Android TV</a> provides a complete TV platform for your app&#8217;s big screen experience. Android TV is centered around a simplified home screen experience that allows users to discover content easily, with personalized recommendations and voice search.</p>
+<p><a href="http://developer.android.com/tv/index.html">Android TV</a> provides a complete TV platform for your app's big screen experience. Android TV is centered around a simplified home screen experience that allows users to discover content easily, with personalized recommendations and voice search.</p>
 
-<p>With Android TV you can now <strong>create big, bold experiences</strong> for your app or game content and support interactions with game controllers and other input devices. To help you build cinematic, 10-foot UIs for television, Android 5.0 provides a <strong>leanback UI framework</strong> in the v17 Support Library.</p>
+<p>With Android TV you can now <strong>create big, bold experiences</strong> for your app or game content and support interactions with game controllers and other input devices. To help you build cinematic, 10-foot UIs for television, Android provides a <strong>leanback UI framework</strong> in the <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 support library</a>.</p>
 
 <p>The <strong>Android TV Input Framework</strong> (TIF) allows TV apps to handle video streams from sources such as HDMI inputs, TV tuners, and IPTV receivers. It also enables live TV search and recommendations via metadata published by the TV Input and includes an HDMI-CEC Control Service to handle multiple devices with a single remote. </p>
 
@@ -134,15 +139,15 @@ page.title=Android Lollipop
 
 
 
-<img src="{@docRoot}images/versions/recents_screen.png" style="float:right; margin:0 0 40px 60px" width="300" />
+<img src="{@docRoot}images/versions/recents_screen.png" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
 
 <h2 id="Documents">Document-centric apps</h2>
 
-<p>Android 5.0 introduces an redesigned Overview space (formerly called Recents) that’s more versatile and useful for multitasking.</p>
+<p>Android 5.0 introduces a redesigned Overview space (formerly called Recents) that’s more versatile and useful for multitasking.</p>
 
-<p>New APIs allow you to show individual activities in your app as individual documents alongside other recent screens.</p>
+<p>New APIs allow you to show separate activities in your app as individual documents alongside other recent screens.</p>
 
-<p>You can take advantage of concurrent documents to provide users instant access to more of your content or services. For example, you could use concurrent documents to represent files in a productivity app, player matches in a game, or chats in a messaging app. </p>
+<p>You can take advantage of concurrent documents to provide users instant access to more of your content or services. For example, you might use concurrent documents to represent files in a productivity app, player matches in a game, or chats in a messaging app. </p>
 
 
 
@@ -150,11 +155,9 @@ page.title=Android Lollipop
 
 <p>Android 5.0 adds new APIs that allow apps to perform concurrent operations with <strong>Bluetooth Low Energy</strong> (BLE), allowing both scanning (central mode) and advertising (peripheral mode).</p>
 
-<p>New <strong>multi-networking</strong> features allow apps to query available networks for available features such as whether they are Wi-Fi, cellular, metered, or provide certain network features, then request a connection and respond to connectivity loss or other network changes.</p>
+<p>New <strong>multi-networking</strong> features allow apps to query available networks for available features such as whether they are Wi-Fi, cellular, metered, or provide certain network features. Then the app can request a connection and respond to connectivity loss or other network changes.</p>
 
 <p><strong>NFC</strong> APIs now allow apps to register an NFC application ID (AID) dynamically. They can also set the preferred card emulation service per active service and create an NDEF record containing UTF-8 text data.</p>
-
-<p>The <strong>Android Beam</strong> feature for wirelessly sharing files between devices is now available in the ShareActionProvider, so users can select Android Beam as the share action before touching the other device.</p>
 
 
 
@@ -166,7 +169,7 @@ page.title=Android Lollipop
 
 
 <div class="figure" style="width:350px; margin:0 0 0 60px">
-<img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" />
+<img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" height="525" />
 <p class="img-caption">Gameloft's Rival Knights uses ASTC from AEP and Compute Shaders from ES 3.1 to deliver HDR Bloom effects and provide more graphical detail.</p>
 </div>
 
@@ -185,12 +188,12 @@ page.title=Android Lollipop
 
 <p>Android now includes support for standard <strong>USB audio</strong> peripherals, allowing users to connect USB headsets, speakers, microphones, or other high performance digital peripherals. Android 5.0 also adds support for <strong>Opus</strong> audio codecs.</p>
 
-<p>New <strong>MediaSession</strong> APIs for controlling media playback make it easier to provide consistent media controls across screens.</p>
+<p>New <strong>{@link android.media.session.MediaSession}</strong> APIs for controlling media playback now make it easier to provide consistent media controls across screens and other controllers.</p>
 
 
 <h2 id="Camera">Enhanced Camera &amp; Video</h2>
 
-<p>Android 5.0 introduces a <strong>new camera API</strong> that lets you capture raw formats such as YUV and Bayer RAW, and control parameters such as exposure time, ISO sensitivity, and frame duration, on a per-frame basis. Burst capture mode lets you uncompressed 8 megapixel YUV images at 30 FPS on supported devices. </p>
+<p>Android 5.0 introduces <strong>all new camera APIs</strong> that let you capture raw formats such as YUV and Bayer RAW, and control parameters such as exposure time, ISO sensitivity, and frame duration on a per-frame basis. The new fully-synchronized camera pipeline allows you to capture uncompressed 8 megapixel YUV images at 30 FPS on supported devices.</p>
 
 <p>Along with images, you can also capture metadata like noise models and optical information from the camera.</p>
 
@@ -208,7 +211,7 @@ page.title=Android Lollipop
 
 <h2 id="Sensors">New types of sensors</h2>
 
-<p>In Android 5.0 a new <strong>tilt detector</strong> sensor helps improve activity recognition on supported devices, and a <strong>heart rate sensor</strong> reports the heart rate of the person touching the device. </p>
+<p>In Android 5.0, a new <strong>tilt detector</strong> sensor helps improve activity recognition on supported devices, and a <strong>heart rate sensor</strong> reports the heart rate of the person touching the device. </p>
 
 <p>New <strong>interaction composite sensors</strong> are now available to detect special interactions such as a <em>wake up</em> gesture, a <em>pick up</em> gesture, and a <em>glance</em> gesture.</p>
 
@@ -220,17 +223,17 @@ page.title=Android Lollipop
   <img src="/images/kk-chromium-icon.png" alt="" height="160" style="margin-bottom:0em;">
 </div>
 
-<p>The initial release for Android 5.0 includes a version of Chromium for WebView based on the Chromium M37 release, adding support for <strong>WebRTC</strong>, <strong>WebAudio</strong>, and <strong>WebGL</strong>. </p>
+<p>The initial release for Android 5.0 includes a version of Chromium for {@link android.webkit.WebView} based on the Chromium M37 release, adding support for <strong>WebRTC</strong>, <strong>WebAudio</strong>, and <strong>WebGL</strong>. </p>
 
 <p>Although WebView has been based on Chromium since Android 4.4, the Chromium layer is now updatable from Google Play.</p>
 
-<p>As new versions of Chromium become available, users can update from Google Play to ensure they get the latest enhancements and bug fixes for WebView, providing the latest web APIs and bug fixes for apps using WebView.</p>
+<p>As new versions of Chromium become available, users can update from Google Play to ensure they get the latest enhancements and bug fixes for WebView, providing the latest web APIs and bug fixes for apps using WebView on Android 5.0 and higher.</p>
 
 
 
 <h2 id="Accessibility">Accessibility &amp; Input</h2>
 
-<p>Accessibility APIs can retrieve detailed information about the properties of windows on the screen that sighted users can interact with and define standard or customized input actions for UI elements.</p>
+<p>New accessibility APIs can retrieve detailed information about the properties of windows on the screen that sighted users can interact with and define standard or customized input actions for UI elements.</p>
 
 <p>New Input method editor (IME) APIs enable faster switching to other IMEs directly from the input method.</p>
 
