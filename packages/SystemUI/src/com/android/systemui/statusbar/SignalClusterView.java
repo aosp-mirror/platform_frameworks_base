@@ -49,7 +49,6 @@ public class SignalClusterView
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
-    private boolean mRoaming;
     private boolean mIsMobileTypeIconWide;
 
     ViewGroup mWifiGroup, mMobileGroup;
@@ -143,14 +142,12 @@ public class SignalClusterView
 
     @Override
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-            String contentDescription, String typeContentDescription, boolean roaming,
-            boolean isTypeIconWide) {
+            String contentDescription, String typeContentDescription, boolean isTypeIconWide) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
-        mRoaming = roaming;
         mIsMobileTypeIconWide = isTypeIconWide;
 
         apply();
@@ -244,7 +241,7 @@ public class SignalClusterView
             mWifiAirplaneSpacer.setVisibility(View.GONE);
         }
 
-        if (mRoaming && mMobileVisible && mWifiVisible) {
+        if (mMobileVisible && mMobileTypeId != 0 && mWifiVisible) {
             mWifiSignalSpacer.setVisibility(View.VISIBLE);
         } else {
             mWifiSignalSpacer.setVisibility(View.GONE);
@@ -257,7 +254,7 @@ public class SignalClusterView
                     (mMobileVisible ? "VISIBLE" : "GONE"),
                     mMobileStrengthId, mMobileTypeId));
 
-        mMobileType.setVisibility((mRoaming || mMobileTypeId != 0) ? View.VISIBLE : View.GONE);
+        mMobileType.setVisibility(mMobileTypeId != 0 ? View.VISIBLE : View.GONE);
     }
 }
 
