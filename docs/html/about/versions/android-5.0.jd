@@ -228,10 +228,9 @@ the system can present notifications correctly in
 {@link android.app.Notification.Builder} methods to add sounds and
 vibration.</p>
 
-<p>Setting the device to
-{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} now
-causes the device to enter the new priority mode. The device stays in priority
-mode when you leave silent mode.</p>
+<p>Setting a device to {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL}
+  or {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}
+  causes the device to leave priority mode.</p>
 
 <p>Previously, Android used {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC}
 as the master stream to control volume on tablet devices. In Android 5.0, the
@@ -1179,7 +1178,7 @@ provide the features your app needs.</p>
 
 <h3 id="Permissions">User permissions</h3>
 
-<p>The following permissions are now supported in the
+<p>The following permission is now supported in the
 <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code &lt;uses-permission&gt;}</a>
 element to declare the permissions your app requires to access certain APIs.</p>
 
@@ -1188,10 +1187,4 @@ element to declare the permissions your app requires to access certain APIs.</p>
   level 21 and higher, this permission is required by a
   <a href="{@docRoot}about/versions/android-4.2.html#Daydream">Daydream</a> service,
   to ensure that only the system can bind to it.</li>
-
-<li>{@link android.Manifest.permission#READ_VOICEMAIL}: Required to allow your
-  app to read voicemails in the system.</li>
-
-<li>{@link android.Manifest.permission#WRITE_VOICEMAIL}: Required to allow your
-  app to modify and remove existing voicemails in the system.</li>
 </ul>
