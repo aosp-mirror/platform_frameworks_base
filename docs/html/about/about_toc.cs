@@ -7,7 +7,7 @@
     </ul>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/android-5.0.html">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/lollipop.html">
       <span class="en">Lollipop</span></a></div>
       <ul>
         <li><a href="<?cs var:toroot ?>about/versions/android-5.0.html">Android 5.0 APIs</a></li>
