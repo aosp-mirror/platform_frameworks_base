@@ -1,0 +1,127 @@
+page.title=Defining Shadows and Clipping Views
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Elevation">Assign Elevation to Your Views</a></li>
+  <li><a href="#Shadows">Customize View Shadows and Outlines</a></li>
+  <li><a href="#Clip">Clip Views</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material design on Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Material design introduces depth for UI elements. Depth helps users understand the relative
+importance of each element and focus their attention to the task at hand.</p>
+
+<p>The elevation of a view, represented by the Z property, determines the size of its shadow:
+views with higher Z values cast bigger shadows. Views only cast shadows on the Z=0 plane; they
+don't cast shadows on other views placed below them and above the Z=0 plane.</p>
+
+<p>Views with higher Z values occlude views with lower Z values. However, the Z value of a view
+does not affect the view's size.</p>
+
+<p>Elevation is also useful to create animations where widgets temporarily rise above the
+view plane when performing some action.</p>
+
+
+<h2 id="Elevation">Assign Elevation to Your Views</h2>
+
+<p>The Z value for a view has two components, elevation and translation. The elevation is the
+static component, and the translation is used for animations:</p>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="680" height="177" alt=""/>
+<p class="img-caption"><strong>Figure 1</strong> - Shadows for different view elevations.</p>
+
+<p>To set the elevation of a view in a layout definition, use the <code>android:elevation</code>
+attribute. To set the elevation of a view in the code of an activity, use the
+{@link android.view.View#setElevation View.setElevation()} method.</p>
+
+<p>To set the translation of a view, use the {@link android.view.View#setTranslationZ
+View.setTranslationZ()} method.</p>
+
+<p>The new {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} and {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} methods enable
+you to easily animate the elevation of views. For more information, see the API reference for
+{@link android.view.ViewPropertyAnimator} and the <a
+href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> developer
+guide.</p>
+
+<p>You can also use a {@link android.animation.StateListAnimator} to
+specify these animations in a declarative way. This is especially useful for cases where state
+changes trigger animations, like when a user presses a button. For more information, see
+<a href="{@docRoot}training/material/animations.html#ViewState">Animate View State Changes</a></p>.
+
+<p>The Z values are measured in the same units as the X and Y values.</p>
+
+
+<h2 id="Shadows">Customize View Shadows and Outlines</h2>
+
+<p>The bounds of a view's background drawable determine the default shape of its shadow.
+<strong>Outlines</strong> represent the outer shape of a graphics object and define the ripple
+area for touch feedback.</p>
+
+<p>Consider this view, defined with a background drawable:</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>The background drawable is defined as a rectangle with rounded corners:</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>The view casts a shadow with rounded corners, since the background drawable defines the
+view's outline. Providing a custom outline overrides the default shape of a view's shadow.</p>
+
+<p>To define a custom outline for a view in your code:<p>
+
+<ol>
+<li>Extend the {@link android.view.ViewOutlineProvider} class.</li>
+<li>Override the {@link android.view.ViewOutlineProvider#getOutline getOutline()} method.</li>
+<li>Assign the new outline provider to your view with the {@link
+android.view.View#setOutlineProvider View.setOutlineProvider()} method.</li>
+</ol>
+
+<p>You can create oval and rectangular outlines with rounded corners using the methods in the
+{@link android.graphics.Outline} class. The default outline provider for views obtains the outline
+from the view's background. To prevent a view from casting a shadow, set its outline provider
+to <code>null</code>.</p>
+
+
+<h2 id="Clip">Clip Views</h2>
+
+<p>Clipping views enables you to easily change the shape of a view. You can clip views for
+consistency with other design elements or to change the shape of a view in response to user input.
+You can clip a view to its outline area using the {@link android.view.View#setClipToOutline
+View.setClipToOutline()} method or the <code>android:clipToOutline</code> attribute. Only
+rectangle, circle, and round rectangle outlines support clipping, as determined by the
+{@link android.graphics.Outline#canClip Outline.canClip()} method.</p>
+
+<p>To clip a view to the shape of a drawable, set the drawable as the background of the view
+(as shown above) and call the {@link android.view.View#setClipToOutline View.setClipToOutline()}
+method.</p>
+
+<p>Clipping views is an expensive operation, so don't animate the shape you use to
+clip a view. To achieve this effect, use the <a
+href="{@docRoot}training/material/animations.html#Reveal">Reveal Effect</a> animation.</p>

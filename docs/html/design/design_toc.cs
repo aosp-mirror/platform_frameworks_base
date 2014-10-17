@@ -9,6 +9,10 @@
   </li>
 
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/material/index.html">Material Design</a></div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>design/devices.html">Devices</a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>design/handhelds/index.html">Phones &amp; Tablets</a></li>

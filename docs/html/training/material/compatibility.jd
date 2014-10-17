@@ -1,0 +1,172 @@
+page.title=Maintaining Compatibility
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Theme">Define Alternative Styles</a></li>
+  <li><a href="#Layouts">Provide Alternative Layouts</a></li>
+  <li><a href="#SupportLib">Use the Support Library</a></li>
+  <li><a href="#CheckVersion">Check the System Version</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material design on Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Some material design features like the material theme and custom activity transitions are
+only available on Android 5.0 (API level 21) and above. However, you can design your apps to make
+use of these features when running on devices that support material design and still be compatible
+with devices running previous releases of Android.</p>
+
+
+<h2 id="Theme">Define Alternative Styles</h2>
+
+<p>You can configure your app to use the material theme on devices that support it and revert
+to an older theme on devices running earlier versions of Android:</p>
+
+<ol>
+<li>Define a theme that inherits from an older theme (like Holo) in
+    <code>res/values/styles.xml</code>.</li>
+<li>Define a theme with the same name that inherits from the material theme in
+    <code>res/values-v21/styles.xml</code>.</li>
+<li>Set this theme as your app's theme in the manifest file.</li>
+</ol>
+
+<p class="note"><strong>Note:</strong>
+If your app uses the material theme but does not provide an alternative theme in this manner,
+your app will not run on versions of Android earlier than 5.0.
+</p>
+
+
+<h2 id="Layouts">Provide Alternative Layouts</h2>
+
+<p>If the layouts that you design according to the material design guidelines do not use any of
+the new XML attributes introduced in Android 5.0 (API level 21), they will work on previous
+versions of Android. Otherwise, you can provide alternative layouts. You can also provide
+alternative layouts to customize how your app looks on earlier versions of Android.</p>
+
+<p>Create your layout files for Android 5.0 (API level 21) inside <code>res/layout-v21/</code> and
+your alternative layout files for earlier versions of Android inside <code>res/layout/</code>.
+For example, <code>res/layout/my_activity.xml</code> is an alternative layout for
+<code>res/layout-v21/my_activity.xml</code>.</p>
+
+<p>To avoid duplication of code, define your styles inside <code>res/values/</code>, modify the
+styles in <code>res/values-v21/</code> for the new APIs, and use style inheritance, defining base
+styles in <code>res/values/</code> and inheriting from those in <code>res/values-v21/</code>.</p>
+
+
+<h2 id="SupportLib">Use the Support Library</h2>
+
+<p>The <a href="{@docRoot}tools/support-library/features.html#v7">v7 Support Libraries</a>
+r21 and above includes the following material design features:</p>
+
+<ul>
+<li><a href="{@docRoot}training/material/theme.html">Material design styles</a> for some system
+    widgets when you apply one of the <code>Theme.AppCompat</code> themes.</li>
+<li><a href="{@docRoot}training/material/theme.html#ColorPalette">Color palette theme attributes</a>
+    in the <code>Theme.AppCompat</code> themes.</li>
+<li>The {@link android.support.v7.widget.RecyclerView} widget to <a
+    href="{@docRoot}training/material/lists-cards.html#RecyclerView">display data
+    collections</a>.</li>
+<li>The {@link android.support.v7.widget.CardView} widget to <a
+    href="{@docRoot}training/material/lists-cards.html#CardView">create cards</a>.</li>
+<li>The {@link android.support.v7.graphics.Palette} class to <a
+    href="{@docRoot}training/material/drawables.html#ColorExtract">extract prominent colors from
+    images</a>.</li>
+</ul>
+
+<h3>System widgets</h3>
+
+<p>The <code>Theme.AppCompat</code> themes provide material design styles for these widgets:</p>
+
+<ul>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.CheckBox}</li>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.support.v7.widget.SwitchCompat}</li>
+  <li>{@link android.widget.CheckedTextView}</li>
+</ul>
+
+<h3>Color Palette</h3>
+
+<p>To obtain material design styles and customize the color palette with the Android v7 Support
+Library, apply one of the <code>Theme.AppCompat</code> themes:</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>Lists and Cards</h3>
+
+<p>The {@link android.support.v7.widget.RecyclerView} and {@link
+android.support.v7.widget.CardView} widgets are available in earlier versions of Android through
+the Android v7 Support Library with these limitations:</p>
+<ul>
+<li>{@link android.support.v7.widget.CardView} falls back to a programmatic shadow implementation
+    using additional padding.</li>
+<li>{@link android.support.v7.widget.CardView} does not clip its children views that intersect
+    with rounded corners.</li>
+</ul>
+
+
+<h3>Dependencies</h3>
+
+<p>To use these features in versions of Android earlier than 5.0 (API level 21), include the
+Android v7 Support Library in your project as a <a
+href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle dependency</a>:</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:cardview-v7:+'
+    compile 'com.android.support:recyclerview-v7:+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">Check the System Version</h2>
+
+<p>The following features are available only in Android 5.0 (API level 21) and above:</p>
+
+<ul>
+<li>Activity transitions</li>
+<li>Touch feedback</li>
+<li>Reveal animations</li>
+<li>Path-based animations</li>
+<li>Vector drawables</li>
+<li>Drawable tinting</li>
+</ul>
+
+<p>To preserve compatibility with earlier versions of Android, check the system {@link
+android.os.Build.VERSION#SDK_INT version} at runtime before you invoke the APIs for any of these
+features:</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> To specify which versions of Android your app supports,
+use the <code>android:minSdkVersion</code> and <code>android:targetSdkVersion</code>
+attributes in your manifest file. To use the material design features in Android 5.0, set
+the <code>android:targetSdkVersion</code> attribute to <code>21</code>. For more information, see
+the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt; API
+guide</a>.</p>
