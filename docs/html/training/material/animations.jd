@@ -1,0 +1,548 @@
+page.title=Defining Custom Animations
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Touch">Customize Touch Feedback</a></li>
+  <li><a href="#Reveal">Use the Reveal Effect</a></li>
+  <li><a href="#Transitions">Customize Activity Transitions</a></li>
+  <li><a href="#ViewState">Animate View State Changes</a></li>
+  <li><a href="#AnimVector">Animate Vector Drawables</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material design on Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Animations in material design give users feedback on their actions and provide visual
+continuity as users interact with your app. The material theme provides some default animations
+for buttons and activity transitions, and Android 5.0 (API level 21) and above lets you customize
+these animations and create new ones:</p>
+
+<ul>
+<li>Touch feedback</li>
+<li>Circular Reveal</li>
+<li>Activity transitions</li>
+<li>Curved motion</li>
+<li>View state changes</li>
+</ul>
+
+
+<h2 id="Touch">Customize Touch Feedback</h2>
+
+<p>Touch feedback in material design provides an instantaneous visual confirmation at the
+point of contact when users interact with UI elements. The default touch feedback animations
+for buttons use the new {@link android.graphics.drawable.RippleDrawable} class, which transitions
+between different states with a ripple effect.</p>
+
+<p>In most cases, you should apply this functionality in your view XML by specifying the view
+background as:</p>
+
+<ul>
+<li><code>?android:attr/selectableItemBackground</code> for a bounded ripple</li>
+<li><code>?android:attr/selectableItemBackgroundBorderless</code> for a ripple that extends beyond
+the view</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> <code>selectableItemBackgroundBorderless</code> is a new
+attribute introduced in API level 21.</p>
+
+
+<p>Alternatively, you can define a {@link android.graphics.drawable.RippleDrawable}
+as an XML resource using the <code>ripple</code> element.</p>
+
+<p>You can assign a color to {@link android.graphics.drawable.RippleDrawable} objects. To change
+the default touch feedback color, use the theme's <code>android:colorControlHighlight</code>
+attribute.</p>
+
+<p>For more information, see the API reference for the {@link
+android.graphics.drawable.RippleDrawable} class.</p>
+
+
+<h2 id="Reveal">Use the Reveal Effect</h2>
+
+<p>Reveal animations provide users visual continuity when you show or hide a group of UI
+elements. The {@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} method enables you to animate a clipping circle to
+reveal or hide a view.</p>
+
+<p>To reveal a previously invisible view using this effect:</p>
+
+<pre>
+// previously invisible view
+View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the final radius for the clipping circle
+int finalRadius = myView.getWidth();
+
+// create and start the animator for this view
+// (the start radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+anim.start();
+</pre>
+
+<p>To hide a previously visible view using this effect:</p>
+
+<pre>
+// previously visible view
+final View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the initial radius for the clipping circle
+int initialRadius = myView.getWidth();
+
+// create the animation (the final radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+
+// make the view invisible when the animation is done
+anim.addListener(new AnimatorListenerAdapter() {
+    &#64;Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+        myView.setVisibility(View.INVISIBLE);
+    }
+});
+
+// start the animation
+anim.start();
+</pre>
+
+
+<h2 id="Transitions">Customize Activity Transitions</h2>
+
+<!-- shared transition video -->
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Figure 1</strong> - A
+    transition with shared elements.</p>
+    <em>To replay the movie, click on the device screen</em>
+  </div>
+</div>
+
+<p>Activity transitions in material design apps provide visual connections between different states
+through motion and transformations between common elements. You can specify custom animations for
+enter and exit transitions and for transitions of shared elements between activities.</p>
+
+<ul>
+<li>An <strong>enter</strong> transition determines how views in an activity enter the scene.
+For example, in the <em>explode</em> enter transition, the views enter the scene from the outside
+and fly in towards the center of the screen.</li>
+
+<li>An <strong>exit</strong> transition determines how views in an activity exit the scene. For
+  example, in the <em>explode</em> exit transition, the views exit the scene away from the
+center.</li>
+
+<li>A <strong>shared elements</strong> transition determines how views that are shared between
+two activities transition between these activities. For example, if two activities have the same
+image in different positions and sizes, the <em>changeImageTransform</em> shared element transition
+translates and scales the image smoothly between these activities.</li>
+</ul>
+
+<p>Android 5.0 (API level 21) supports these enter and exit transitions:</p>
+
+<ul>
+<li><em>explode</em> - Moves views in or out from the center of the scene.</li>
+<li><em>slide</em> - Moves views in or out from one of the edges of the scene.</li>
+<li><em>fade</em> - Adds or removes a view from the scene by changing its opacity.</li>
+</ul>
+
+<p>Any transition that extends the {@link android.transition.Visibility} class is supported
+as an enter or exit transition. For more information, see the API reference for the
+{@link android.transition.Transition} class.</p>
+
+<p>Android 5.0 (API level 21) also supports these shared elements transitions:</p>
+
+<ul>
+<li><em>changeBounds</em> - Animates the changes in layout bounds of target views.</li>
+<li><em>changeClipBounds</em> - Animates the changes in clip bounds of target views.</li>
+<li><em>changeTransform</em> - Animates the changes in scale and rotation of target views.</li>
+<li><em>changeImageTransform</em> - Animates changes in size and scale of target images.</li>
+</ul>
+
+<p>When you enable activity transitions in your app, the default cross-fading transition is
+activated between the entering and exiting activities.</p>
+
+<img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405"
+     style="margin-top:20px"/>
+<p class="img-caption">
+  <strong>Figure 2</strong> - A scene transition with one shared element.
+</p>
+
+<h3>Specify custom transitions</h3>
+
+<p>First, enable window content transitions with the <code>android:windowContentTransitions</code>
+attribute when you define a style that inherits from the material theme. You can also specify
+enter, exit, and shared element transitions in your style definition:</p>
+
+<pre>
+&lt;style name="BaseAppTheme" parent="android:Theme.Material">
+  &lt;!-- enable window content transitions -->
+  &lt;item name="android:windowContentTransitions">true&lt;/item>
+
+  &lt;!-- specify enter and exit transitions -->
+  &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
+  &lt;item name="android:windowExitTransition">@transition/explode&lt;/item>
+
+  &lt;!-- specify shared element transitions -->
+  &lt;item name="android:windowSharedElementEnterTransition">
+    &#64;transition/change_image_transform&lt;/item>
+  &lt;item name="android:windowSharedElementExitTransition">
+    &#64;transition/change_image_transform&lt;/item>
+&lt;/style>
+</pre>
+
+<p>The <code>change_image_transform</code> transition in this example is defined as follows:</p>
+
+<pre>
+&lt;!-- res/transition/change_image_transform.xml -->
+&lt;!-- (see also Shared Transitions below) -->
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;changeImageTransform/>
+&lt;/transitionSet>
+</pre>
+
+<p>The <code>changeImageTransform</code> element corresponds to the
+{@link android.transition.ChangeImageTransform} class. For more information, see the API
+reference for {@link android.transition.Transition}.</p>
+
+<p>To enable window content transitions in your code instead, call the
+{@link android.view.Window#requestFeature Window.requestFeature()} method:</p>
+
+<pre>
+// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>To specify transitions in your code, call these methods with a {@link
+android.transition.Transition} object:</p>
+
+<ul>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
+</ul>
+
+<p>The {@link android.view.Window#setExitTransition setExitTransition()} and {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} methods define
+the exit transition for the calling activity. The {@link android.view.Window#setEnterTransition
+setEnterTransition()} and {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} methods define the enter transition for the called activity.</p>
+
+<p>To get the full effect of a transition, you must enable window content transitions on both the
+calling and called activities. Otherwise, the calling activity will start the exit transition,
+but then you'll see a window transition (like scale or fade).</p>
+
+<p>To start an enter transition as soon as possible, use the
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+method on the called activity. This lets you have more dramatic enter transitions.</p>
+
+<h3>Start an activity using transitions</h3>
+
+<p>If you enable transitions and set an exit transition for an activity, the transition is activated
+when you launch another activity as follows:</p>
+
+<pre>
+startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</pre>
+
+<p>If you have set an enter transition for the second activity, the transition is also activated
+when the activity starts. To disable transitions when you start another activity, provide
+a <code>null</code> options bundle.</p>
+
+<h3>Start an activity with a shared element</h3>
+
+<p>To make a screen transition animation between two activities that have a shared element:</p>
+
+<ol>
+<li>Enable window content transitions in your theme.</li>
+<li>Specify a shared elements transition in your style.</li>
+<li>Define your transition as an XML resource.</li>
+<li>Assign a common name to the shared elements in both layouts with the
+    <code>android:transitionName</code> attribute.</li>
+<li>Use the {@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()} method.</li>
+</ol>
+
+<pre>
+// get the element that receives the click event
+final View imgContainerView = findViewById(R.id.img_container);
+
+// get the common element for the transition in this activity
+final View androidRobotView = findViewById(R.id.image_small);
+
+// define a click listener
+imgContainerView.setOnClickListener(new View.OnClickListener() {
+    &#64;Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Activity2.class);
+        // create the transition animation - the images in the layouts
+        // of both activities are defined with android:transitionName="robot"
+        ActivityOptions options = ActivityOptions
+            .makeSceneTransitionAnimation(this, androidRobotView, "robot");
+        // start the new activity
+        startActivity(intent, options.toBundle());
+    }
+});
+</pre>
+
+<p>For shared dynamic views that you generate in your code, use the
+{@link android.view.View#setTransitionName View.setTransitionName()} method to specify a common
+element name in both activities.</p>
+
+<p>To reverse the scene transition animation when you finish the second activity, call the
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+method instead of {@link android.app.Activity#finish Activity.finish()}.</p>
+
+<h3>Start an activity with multiple shared elements</h3>
+
+<p>To make a scene transition animation between two activities that have more than one shared
+element, define the shared elements in both layouts with the <code>android:transitionName</code>
+attribute (or use the {@link android.view.View#setTransitionName View.setTransitionName()} method
+in both activities), and create an {@link android.app.ActivityOptions} object as follows:</p>
+
+<pre>
+ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+        Pair.create(view1, "agreedName1"),
+        Pair.create(view2, "agreedName2"));
+</pre>
+
+
+<h2 id="CurvedMotion">Use Curved Motion</h2>
+
+<p>Animations in material design rely on curves for time interpolation and spatial movement
+patterns. With Android 5.0 (API level 21) and above, you can define custom timing curves and
+curved motion patterns for animations.</p>
+
+<p>The {@link android.view.animation.PathInterpolator} class is a new interpolator based on a
+Bézier curve or a {@link android.graphics.Path} object. This interpolator specifies a motion curve
+in a 1x1 square, with anchor points at (0,0) and (1,1) and control points as specified using the
+constructor arguments. You can also define a path interpolator as an XML resource:</p>
+
+<pre>
+&lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1"/>
+</pre>
+
+<p>The system provides XML resources for the three basic curves in the material design
+specification:</p>
+
+<ul>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+</ul>
+
+<p>You can pass a {@link android.view.animation.PathInterpolator} object to the {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()} method.</p>
+
+<p>The {@link android.animation.ObjectAnimator} class has new constructors that enable you to animate
+coordinates along a path using two or more properties at once. For example, the following animator
+uses a {@link android.graphics.Path} object to animate the X and Y properties of a view:</p>
+
+<pre>
+ObjectAnimator mAnimator;
+mAnimator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+...
+mAnimator.start();
+</pre>
+
+
+<h2 id="ViewState">Animate View State Changes</h2>
+
+<p>The {@link android.animation.StateListAnimator} class lets you define animators that run when
+the state of a view changes. The following example shows how to define an {@link
+android.animation.StateListAnimator}  as an XML resource:</p>
+
+<pre>
+&lt;!-- animate the translationZ property of a view when pressed -->
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;item android:state_pressed="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="@android:integer/config_shortAnimTime"
+        android:valueTo="2dp"
+        android:valueType="floatType"/>
+        &lt;!-- you could have other objectAnimator elements
+             here for "x" and "y", or other properties -->
+    &lt;/set>
+  &lt;/item>
+  &lt;item android:state_enabled="true"
+    android:state_pressed="false"
+    android:state_focused="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="100"
+        android:valueTo="0"
+        android:valueType="floatType"/>
+    &lt;/set>
+  &lt;/item>
+&lt;/selector>
+</pre>
+
+<p>To attach custom view state animations to a view, define an animator using the
+<code>selector</code> element in an XML resource file as in this example, and assign it to your
+view with the <code>android:stateListAnimator</code> attribute. To assign a state list animator
+to a view in your code, use the {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()} method, and assign the animator to your view with the
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()} method.</p>
+
+<p>When your theme extends the material theme, buttons have a Z animation by default. To avoid this
+behavior in your buttons, set the <code>android:stateListAnimator</code> attribute to
+<code>@null</code>.</p>
+
+<p>The {@link android.graphics.drawable.AnimatedStateListDrawable} class lets you create drawables
+that show animations between state changes of the associated view. Some of the system widgets in
+Android 5.0 use these animations by default. The following example shows how
+to define an {@link android.graphics.drawable.AnimatedStateListDrawable} as an XML resource:</p>
+
+<pre>
+&lt;!-- res/drawable/myanimstatedrawable.xml -->
+&lt;animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- provide a different drawable for each state-->
+    &lt;item android:id="@+id/pressed" android:drawable="@drawable/drawableP"
+        android:state_pressed="true"/>
+    &lt;item android:id="@+id/focused" android:drawable="@drawable/drawableF"
+        android:state_focused="true"/>
+    &lt;item android:id="@id/default"
+        android:drawable="@drawable/drawableD"/>
+
+    &lt;!-- specify a transition -->
+    &lt;transition android:fromId="@+id/default" android:toId="@+id/pressed">
+        &lt;animation-list>
+            &lt;item android:duration="15" android:drawable="@drawable/dt1"/>
+            &lt;item android:duration="15" android:drawable="@drawable/dt2"/>
+            ...
+        &lt;/animation-list>
+    &lt;/transition>
+    ...
+&lt;/animated-selector>
+</pre>
+
+
+<h2 id="AnimVector">Animate Vector Drawables</h2>
+
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">Vector Drawables</a> are
+scalable without losing definition. The {@link android.graphics.drawable.AnimatedVectorDrawable}
+class lets you animate the properties of a vector drawable.</p>
+
+<p>You normally define animated vector drawables in three XML files:</p>
+
+<ul>
+<li>A vector drawable with the <code>&lt;vector&gt;</code> element in
+<code>res/drawable/</code></li>
+<li>An animated vector drawable with the <code>&lt;animated-vector&gt;</code> element in
+<code>res/drawable/</code></li>
+<li>One or more object animators with the <code>&lt;objectAnimator&gt;</code> element in
+<code>res/anim/</code></li>
+</ul>
+
+<p>Animated vector drawables can animate the attributes of the <code>&lt;group&gt;</code> and
+<code>&lt;path&gt;</code> elements. The <code>&lt;group&gt;</code> elements defines a set of
+paths or subgroups, and the <code>&lt;path&gt;</code> element defines paths to be drawn.</p>
+
+<p>When you define a vector drawable that you want to animate, use the <code>android:name</code>
+attribute to assign a unique name to groups and paths, so you can refer to them from your animator
+definitions. For example:</p>
+
+<pre>
+&lt;!-- res/drawable/vectordrawable.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600">
+    &lt;group
+        <strong>android:name="rotationGroup"</strong>
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        &lt;path
+            <strong>android:name="v"</strong>
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+    &lt;/group>
+&lt;/vector>
+</pre>
+
+<p>The animated vector drawable definition refers to the groups and paths in the vector drawable
+by their names:</p>
+
+<pre>
+&lt;!-- res/drawable/animvectordrawable.xml -->
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:drawable="@drawable/vectordrawable" >
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" />
+    &lt;target
+        android:name="v"
+        android:animation="@anim/path_morph" />
+&lt;/animated-vector>
+</pre>
+
+<p>The animation definitions represent {@link android.animation.ObjectAnimator} or {@link
+android.animation.AnimatorSet} objects. The first animator in this example rotates the target
+group 360 degrees:</p>
+
+<pre>
+&lt;!-- res/anim/rotation.xml -->
+&lt;objectAnimator
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" />
+</pre>
+
+<p>The second animator in this example morphs the vector drawable's path from one shape to
+another. Both paths must be compatible for morphing: they must have the same number of commands
+and the same number of parameters for each command.</p>
+
+<pre>
+&lt;!-- res/anim/path_morph.xml -->
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+        android:valueType="pathType" />
+&lt;/set>
+</pre>
+
+<p>For more information, see the API reference for {@link
+android.graphics.drawable.AnimatedVectorDrawable}.</p>
