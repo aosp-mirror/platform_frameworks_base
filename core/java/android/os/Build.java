@@ -570,6 +570,11 @@ public class Build {
          * </ul>
          */
         public static final int LOLLIPOP = 21;
+
+        /**
+         * Lollipop with an extra sugar coating on the outside!
+         */
+        public static final int LOLLIPOP_MR1 = 22;
     }
     
     /** The type of build, like "user" or "eng". */
