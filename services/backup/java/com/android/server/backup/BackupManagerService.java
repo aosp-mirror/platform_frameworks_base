@@ -2855,9 +2855,12 @@ public class BackupManagerService extends IBackupManager.Stub {
             try { if (mSavedState != null) mSavedState.close(); } catch (IOException e) {}
             try { if (mBackupData != null) mBackupData.close(); } catch (IOException e) {}
             try { if (mNewState != null) mNewState.close(); } catch (IOException e) {}
-            mSavedState = mBackupData = mNewState = null;
             synchronized (mCurrentOpLock) {
+                // Current-operation callback handling requires the validity of these various
+                // bits of internal state as an invariant of the operation still being live.
+                // This means we make sure to clear all of the state in unison inside the lock.
                 mCurrentOperations.clear();
+                mSavedState = mBackupData = mNewState = null;
             }
 
             // If this was a pseudopackage there's no associated Activity Manager state
