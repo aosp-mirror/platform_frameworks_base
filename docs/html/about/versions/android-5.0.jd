@@ -123,12 +123,23 @@ Differences Report (L Developer Preview to 21) &raquo;</a> </li>
   offers new features for users and app developers. This document provides an
   introduction to the most notable new APIs.</p>
 
-<p>As an app developer, you should download the Android 5.0 system image and
-SDK platform from the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
-as soon as possible. If you don’t have a device running Android 5.0 on which to
-test your app, use the Android 5.0 system image to test your app on the
-<a href="{@docRoot}tools/devices/emulator.html">Android emulator</a>. Then
-build your apps against the Android 5.0 platform to begin using the latest APIs.</p>
+
+<h3 id="Start">Start developing</h3>
+
+<p>To start building apps for Android 5.0, you must first <a href="{@docRoot}sdk/index.html">get
+the Android SDK</a>. Then use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
+to download the Android 5.0 SDK Platform and System Images.</p>
+
+<p style="
+    padding: 10px;
+    background: #eee;
+    width: 445px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+">To test your apps on a real device, flash a Nexus 5 or Nexus 7 with the <br>
+<a href="/preview/index.html#Start"><b>ANDROID PREVIEW SYSTEM IMAGE</b></a>.</p>
+
+
 
 <h3 id="ApiLevel">Update your target API level</h3>
 
