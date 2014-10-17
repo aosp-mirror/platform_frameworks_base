@@ -2,59 +2,31 @@ ndk=true
 page.template=sdk
 
 
-ndk.mac64_download=android-ndk32-r10b-darwin-x86_64.tar.bz2
-ndk.mac64_bytes=413652124
-ndk.mac64_checksum=7ca4a84e9c56c38acdafb007e7cd33c5
+ndk.mac64_download=android-ndk-r10c-darwin-x86_64.bin
+ndk.mac64_bytes=436952863
+ndk.mac64_checksum=bc04ef44b920cf6cd2157b6f2c3531d6
 
-ndk.mac32_download=android-ndk32-r10b-darwin-x86.tar.bz2
-ndk.mac32_bytes=406998070
-ndk.mac32_checksum=db3626b2c5f3245d90e2724f7bcf4c3e
+ndk.mac32_download=android-ndk-r10c-darwin-x86.bin
+ndk.mac32_bytes=435858709
+ndk.mac32_checksum=6b3e143f7e64d5cd337b727513e27913
 
-ndk.linux64_download=android-ndk32-r10b-linux-x86_64.tar.bz2
-ndk.linux64_bytes=422237011
-ndk.linux64_checksum=5c0f301aa789a1a747d5d2aeb8c69ef3
+ndk.linux64_download=android-ndk-r10c-linux-x86_64.bin
+ndk.linux64_bytes=449013322
+ndk.linux64_checksum=792c61706cd9ec6713fa1b69b2f42996
 
-ndk.linux32_download=android-ndk32-r10b-linux-x86.tar.bz2
-ndk.linux32_bytes=421052081
-ndk.linux32_checksum=e8f55daa5c9de7ab79aaaf5d7d751b69
+ndk.linux32_download=android-ndk-r10c-linux-x86.bin
+ndk.linux32_bytes=438555265
+ndk.linux32_checksum=d1595d9ca5e15484e047f1ac326c4ceb
 
-ndk.win64_download=android-ndk32-r10b-windows-x86_64.zip
-ndk.win64_bytes=531912027
-ndk.win64_checksum=e4dd2e0c6f38e3ad936c366bdf6b1d4e
+ndk.win64_download=android-ndk-r10c-windows-x86_64.exe
+ndk.win64_bytes=458925419
+ndk.win64_checksum=af8edf5d316e1bf1a5a72e04a9faec41
 
-ndk.win32_download=android-ndk32-r10b-windows-x86.zip
-ndk.win32_bytes=502720425
-ndk.win32_checksum=9fa4f19bca7edd6eefa63fe788737987
+ndk.win32_download=android-ndk-r10c-windows-x86.exe
+ndk.win32_bytes=433102815
+ndk.win32_checksum=805a04810719886674d3c7bff5eca53f
 
 
-
-ndk.mac64_64_download=android-ndk64-r10b-darwin-x86_64.tar.bz2
-ndk.mac64_64_bytes=346423776
-ndk.mac64_64_checksum=5bae7feed20ebf0762c0baefe6b84b6d
-
-ndk.mac32_64_download=android-ndk64-r10b-darwin-x86.tar.bz2
-ndk.mac32_64_bytes=344052876
-ndk.mac32_64_checksum=4447049ac2b5877176b9b6b1cf3bcdb2
-
-ndk.linux64_64_download=android-ndk64-r10b-linux-x86_64.tar.bz2
-ndk.linux64_64_bytes=358835298
-ndk.linux64_64_checksum=2aa12a0d9a70bcab83e42d010a685136
-
-ndk.linux32_64_download=android-ndk64-r10b-linux-x86.tar.bz2
-ndk.linux32_64_bytes=358060577
-ndk.linux32_64_checksum=b77eb583626d8c7f5c11e49181fd5eac
-
-ndk.win64_64_download=android-ndk64-r10b-windows-x86_64.zip
-ndk.win64_64_bytes=437152652
-ndk.win64_64_checksum=df39185e6c5a4d72eb9fca3f9aaabc46
-
-ndk.win32_64_download=android-ndk64-r10b-windows-x86.zip
-ndk.win32_64_bytes=417290468
-ndk.win32_64_checksum=0f0324cb11f04e8b2641e5422ee39c81
-
-ndk.debug_info_download=android-ndk-r10b-cxx-stl-libs-with-debug-info.zip
-ndk.debug_info_bytes=227302317
-ndk.debug_info_checksum=bed1bb855a41bdb572a804dbf6d45aa6
 
 
 page.title=Android NDK
@@ -407,12 +379,6 @@ injunctive remedies (or an equivalent type of urgent legal relief) in any jurisd
 $('#Downloads').after($('#download-table'));
 </script>
 
-
-<p>With NDK revision 9 and higher, the release packages have been split to reduce download size.
-  The first download for each platform contains the default NDK toolchain. The additional download
-  contains legacy NDK toolchains for that platform, which is only required if you are not using
-  the current, recommended toolchain for your NDK builds.</p>
-
 <h2 id="Revisions">Revisions</h2>
 
 <p>The following sections provide information about releases of the NDK.</p>
@@ -422,6 +388,196 @@ $('#Downloads').after($('#download-table'));
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
      src="/assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 10c</a> <em>(October 2014)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
+      <dd>
+      <ul>
+ <li>Made the following changes to download structure:</li>
+       <ul>
+       <li>Each package now contains both the 32- and the 64-bit headers, libraries, and tools for
+       its respective platform.</li>
+       <li>STL libraries with debugging info no longer need be downloaded separately.</li>
+       </ul>
+  <li>Changed everything previously called <code>Android-L</code> to the official release
+  designation: <code>android-21</code>.</li>
+  <li>Updated GCC 4.9 by rebasing to the <code>google</code> branch
+  of the GCC repository. Major differences from the upstream version of GCC 4.9 include:</li>
+
+  <ul>
+  <li>The <code>-O2</code> option now turns on vectorization, without loop peeling but with more
+  aggressive unrolling.</li>
+  <li>Enhancements to FDO and <a href="https://gcc.gnu.org/wiki/LightweightIpo#LIPO_-_Profile_Feedback_Based_Lightweight_IPO">
+  LIPO</a></li>
+  <p>For more detailed information, see <em>Important bug fixes</em> below.</p>
+  </ul>
+
+  <li>Added Clang 3.5 support to all hosts: <code>NDK_TOOLCHAIN_VERSION=clang</code>
+  now picks Clang 3.5. Note that:</li>
+  <ul>
+
+  <li>ARM and x86 default to using the integrated assembler. If this causes issues, use
+  <code>-fno-integrated-as</code> as a workaround.</code>
+  <li>Clang 3.5 issues more warnings for unused flags, such as the <code>-finline-functions</code>
+  option that GCC supports.</li>
+  <p>When migrating from projects using GCC, you can use
+  <code>-Wno-invalid-command-line-argument</code> and <code>-Wno-unused-command-line-argument</code>
+  to ignore the unused flags until you're able decide on what to do with them longer-term.</p>
+
+     </ul>
+  <li>Made it possible to enter ART debugging mode, when debugging on an Android 5.0 device using
+  ART as its virtual machine, by specifying the <code>art-on</code> option. For more information,
+  see <code>prebuilt/common/gdb/common.setup</code> in the directory containing the NDK.</li>
+  <li>Removed support for Clang 3.3.</li>
+  <li>Deprecated GCC 4.6, and may remove it from future releases.</li>
+  <li>Updated mclinker to 2.8 with Identical Code Folding ("ICF") support. Specify ICF using the
+  <code>--icf</code> option.</li>
+  <li>Broadened <code>arm_neon.h</code> support in x86 and x86_64, attaining coverage of ~93% of
+  NEON intrinsics. For more information about NEON support:
+     <ul>
+     <li>Navigate to the NDK Programmer's Guide (<code>docs/Programmers_Guide/html/</code>), and see
+     Architectures and CPUs > Neon.</li>
+     <li>Examine the updated <code>hello-neon</code> sample in <code>samples/</code>.
+     <li>See Intel's guide to <a href="https://software.intel.com/en-us/blogs/2012/12/12/from-arm-neon-to-intel-mmxsse-automatic-porting-solution-tips-and-tricks"> porting from ARM NEON to Intel SSE.</a></li>
+     </ul>
+  <li>Documented support for <code>_FORTIFY_SOURCE</code> in <code>headers/libs/android-21</code>,
+  which appeared in r10 (when <code>android-21</code> was still called <code>Android-L</code>),
+  but had no documentation.</li>
+      </ul>
+      </dd>
+   <dl>
+
+
+     <dt>Important bug fixes:</dt>
+     <dd>
+     <ul>
+       <li>Fixed an internal compiler error with GCC4.9/aarch64 that was causing the following
+       error message (Issue <a href="http://b.android.com/77564">77564</a>):</li>
+<pre>
+internal compiler error: in simplify_const_unary_operation, at simplify-rtx.c:1539
+</pre>
+       <li>Fixed incorrect code generation from GCC4.9/arm. (Issue
+       <a href="http://b.android.com/77567">77567<a>)</li>
+       <li>Fixed an internal compiler error with GCC4.9/mips involving inline-assembly. (Issue
+       <a href="http://b.android.com/77568">77568</a>)</li>
+       <li>Fixed incorrect code that GCC4.9/arm was generating for <code>x = (cond) ? y : x</code>.
+       (Issue <a href="http://b.android.com/77569">77569</a>)</li>
+       <li>Fixed GCC4.9/aarch64 and Clang3.5/aarch64 to work around the
+       <a href="http://lists.cs.uiuc.edu/pipermail/cfe-commits/Week-of-Mon-20141006/116322.html">
+       Cortex-A53 erratum (835769)</a>  by default.  Disable the workaround by specifying
+       <code>-mno-fix-cortex-a53-835769</code>.</li>
+     </ul>
+     </dd>
+
+
+     <dt>Other bug fixes:</dt>
+     <dd>
+     <ul>
+     <li>Made the following header and library fixes to <code>android-21</code>:
+        <ul>
+
+        <li>Added more TV keycodes: <code>android/keycodes.h</code></li>
+        <li>Added more constants and six new sensor functions to <code>android/sensor.h</code>:
+        <code>ASensorManager_getDefaultSensorEx</code>, <code>ASensor_getFifoMaxEventCount</code>,
+        <code>ASensor_getFifoReservedEventCount</code>, <code>ASensor_getStringType</code>,
+        <code>ASensor_getReportingMode</code>, and <code>ASensor_isWakeUpSensor</code>.</li>
+        <li>Fixed <code>stdatomic.h</code> to improve compatibility with GCC 4.6, and provide support
+        for the <code>&lt;atomic&gt;</code> header.</li>
+        <li>Added <code>sys/ucontext.h</code> and <code>sys/user.h</code> to all API levels. The
+        <code>signal.h</code> header now includes <code>&lt;sys/ucontext.h&gt;</code>.  You may
+        remove any existing definition of <code>struct ucontext</code>.</li>
+        <li>Added <code>posix_memalign</code> to API levels 17, 18, and 19.</li>
+        <li>Added the following functions to all architectures:
+        <code>android_set_abort_message</code>, <code>posix_fadvise</code>,
+        <code>posix_fadvise64</code>, <code>pthread_gettid_np</code>.</li>
+        <li>Added the required permissions to the <code>native-media/AndroidManifest.xml</code>
+        sample.
+        (Issue <a href="https://android-review.googlesource.com/#/c/106640/">106640</a>)</li>
+        <li>Added <code>clock_nanosleep</code> and <code>clock_settime</code> to API level 21. (Issue
+        <a href="http://b.android.com/77372">77372</a>)
+        <li>Removed the following symbols from all architectures:
+        <code>get_malloc_leak_info</code>, <code>free_malloc_leak_info</code>,
+        <code>__srget</code>, <code>__swbuf</code>, <code>__srefill</code>, <code>__swsetup</code>,
+        <code>__sdidinit</code>, <code>__sflags</code>, <code>__sfp</code>,
+        <code>__sinit</code>, <code>__smakebuf</code>, <code>__sflush</code>, <code>__sread</code>,
+        <code>__swrite</code>, <code>__sseek</code>, <code>__sclose</code>,
+        <code>_fwalk</code>, <code>__sglue</code>, <code>__get_thread</code>, <code>__wait4</code>,
+        <code>__futex_wake</code>, <code>__open</code>, <code>__get_tls</code>,
+        <code>__getdents64</code>, and <code>dlmalloc</code>.</li>
+        <li>Removed the following functions from the 64-bit architectures: <code>basename_r</code>,
+        <code>dirname_r</code>, <code>__isthreaded</code>, <code>_flush_cache</code> (mips64).</li>
+        <li>Removed the following function from the 32-bit architectures:
+        <code>__signalfd4</code>.</li>
+        <li>Changed the type of the third argument from <code>size_t</code> to <code>int</code> in
+        the following functions: <code>strtoll_l</code>, <code>strtoull_l</code>,
+        <code>wcstoll_l</code>, and <code>wcstoull_l</code>.</li>
+        <li>Restored the following functions to the 64-bit architecture: <code>arc4random</code>,
+        <code>arc4random_buf</code>, and <code>arc4random_uniform</code>.</li>
+        <li>Moved <code>cxa_*</code> and the <code>new</code> and <code>delete</code> operators back
+        to <code>libstdc++.so</code>. This change restores r9d behavior; previous versions of r10
+        contained dummy files.</li>
+
+        </ul>
+     <li>Restored MXU support in GCC 4.8 and 4.9 for mips. This support had been absent from
+     r10 and r10b because those versions of GCC had been compiled with binutils-2.24, which did
+     not support MXU. It now does.</li>
+     <li>Fixed <code>--toolchain=</code> in <code>make-standalone-toolchain.sh</code> so that it
+     now properly supports use of a suffix specifying a version of Clang.</li>
+     <li>Fixed the libc++/armeabi <code>strtod()</code> functions.</li>
+     <li>Made fixes to NDK documentation in <code>docs/</code>.</li>
+     </ul>
+     </dd>
+
+     <dt>Other changes:</dt>
+     <dd>
+       <ul>
+       <li>Enhanced <code>cpu-features</code> to detect ARMv8 support for the following
+       instruction sets: AES, CRC32, SHA2, SHA1, and 64-bit PMULL/PMULL2. (Issue
+       <a href="https://android-review.googlesource.com/#/c/106360/">106360</a>)</li>
+
+       <li>Modified ndk-build to use <code>*-gcc-ar</code>, which is available in GCC 4.8, GCC 4.9, and
+       Clang. Clang specifies it, instead of <code>*-ar</code>. This setting brings improved LTO
+       support.</li>
+
+       <li>Removed the <code>include-fixed/linux/a.out.h</code> and
+       <code>include-fixed/linux/compiler.h</code> headers from the GCC compiler.
+       (Issue <a href ="http://b.android.com/73728">73728</a>)</li>
+
+       <li>Fixed an issue related to <code>-flto</code> with GCC 4.8 on Mac OS X. The error message
+       read:</li>
+
+       <pre>
+.../ld: error: .../libexec/gcc/arm-linux-androideabi/4.9/liblto_plugin.so
+Symbol not found: _environ
+</pre>
+
+       <li>Fixed a typo in <code>build-binary.mk.</code> (Issue
+       <a href="http://b.android.com/76992">76992</a>)</li>
+     </ul>
+     </dd>
+
+   <dt>Important known issues:</dt>
+     <dd>
+     <ul>
+     <li>Specifying -Os (<code>-fauto-profile</code>) in GCC4.9 may cause crashing.
+     (Issue <a href="http://b.android.com/77571">77571</a>)</li>
+     </ul>
+     </dd>
+
+   </dl>
+ </div>
+</div>
+
+
+
+
+
+<div class="toggle-content closed">
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10b</a> <em>(September 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -484,19 +640,9 @@ $('#Downloads').after($('#download-table'));
      </dd>
      </ul>
 
-
-
    </dl>
  </div>
 </div>
-
-
-
-
-
-
-
-
 
 <div class="toggle-content closed">
  <p>
@@ -3555,18 +3701,38 @@ tools.
 Software Requirements</a>
   for the NDK, if you haven't already.</p>
 
-  <p>To install the NDK, follow these steps:</p>
-
-  <ol>
-    <li>From the table at the top of this page, select the NDK package that is appropriate for your
-    development computer and download the package.</li>
-
-    <li>Uncompress the NDK download package using tools available on your computer. When
-    uncompressed, the NDK files are contained in a directory called
+  <p>To install the NDK, first download the appropriate package from the table at the top of this
+  page. Then, follow the procedure for your development platform:</p>
+       <ul>
+       <li>On Linux and Mac OS X (Darwin):
+          <ul>
+          <ol>
+          <li>Download the appropriate package from this page.</li>
+          <li>Open a terminal window.</li>
+          <li>Go to the directory to which you downloaded the package.</li>
+          <li>Run <code>chmod a+x</code> on the downloaded package.</li>
+          <li>Execute the package. For example:</li>
+          <pre>
+ndk$ chmod a+x android-ndk-r10c-darwin-x86_64.bin
+ndk$ ./android-ndk-r10c-darwin-x86_64.bin
+          </pre>
+          <p>The folder containing the NDK extracts itself.</p>
+          <p>Note that you can also use a program like 7z to extract the package.</p>
+          </ol>
+          </ul>
+    <li>On Windows:</li>
+       <ul>
+       <ol>
+       <li>Download the appropriate package from this page.</li>
+       <li>Navigate to the folder to which you downloaded the package.</li>
+       <li>Double-click the downloaded file. The folder containing the NDK extracts itself.</li>
+       </ol>
+       </ul>
+     </ul>When uncompressed, the NDK files are contained in a directory called
     <code>android-ndk-&lt;version&gt;</code>. You can rename the NDK directory if necessary and you
     can move it to any location on your computer. This documentation refers to the NDK directory as
-    <code>&lt;ndk&gt;</code>.</li>
-  </ol>
+    <code>&lt;ndk&gt;</code>.
+
 
   <p>You are now ready to start working with the NDK.</p>
 
@@ -3689,7 +3855,7 @@ also build for
 
   <h3 id="Tools">Development tools</h3>
 
-  <p>The NDK includes a set of cross-toolchains (compilers, linkers, etc..) that can generate
+  <p>The NDK includes a set of cross-toolchains (compilers, linkers, etc.) that can generate
   native ARM binaries on Linux, OS X, and Windows (with Cygwin) platforms.</p>
 
   <p>It provides a set of system headers for stable native APIs that are guaranteed to be supported
