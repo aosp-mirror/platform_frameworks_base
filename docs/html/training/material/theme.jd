@@ -1,0 +1,131 @@
+page.title=Using the Material Theme
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ColorPalette">Customize the Color Palette</a></li>
+  <li><a href="#StatusBar">Customize the Status Bar</a></li>
+  <li><a href="#Inheritance">Theme Individual Views</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material design on Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>The new material theme provides:</p>
+
+<ul>
+  <li>System widgets that let you set their color palette</li>
+  <li>Touch feedback animations for the system widgets</li>
+  <li>Activity transition animations</li>
+</ul>
+
+<p>You can customize the look of the material theme
+according to your brand identity with a color palette you control. You can tint the action bar and
+the status bar using theme attributes, as shown in <a href="#fig3">Figure 3</a>.</p>
+
+<p>The system widgets have a new design and touch feedback animations. You can customize the
+color palette, the touch feedback animations, and the activity transitions for your app.</p>
+
+<p>The material theme is defined as:</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (dark version)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (light version)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>For a list of material styles that you can use, see the API reference for
+{@link android.R.style R.style}.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Figure 1</strong>. Dark material theme</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Figure 2</strong>. Light material theme</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>Note:</strong> The material theme is only available in Android 5.0 (API level 21) and
+above. The <a href="{@docRoot}tools/support-library/features.html#v7">v7 Support Libraries</a>
+provide themes with material design styles for some widgets and support for customizing the color
+palette. For more information, see
+<a href="{@docRoot}training/material/compatibility.html">Maintaining Compatibility</a>.
+</p>
+
+
+<h2 id="ColorPalette">Customize the Color Palette</h2>
+
+<p style="margin-bottom:30px">To customize the theme's base colors to fit your brand, define
+your custom colors using theme attributes when you inherit from the material theme:</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445"/>
+<p class="img-caption" style="margin-bottom:0px">
+<strong>Figure 3.</strong> Customizing the material theme.</p>
+</div>
+
+
+<h2 id="StatusBar">Customize the Status Bar</h2>
+
+<p>The material theme lets you easily customize the status bar, so you can specify a
+color that fits your brand and provides enough contrast to show the white status icons. To
+set a custom color for the status bar, use the <code>android:statusBarColor</code> attribute when
+you extend the material theme. By default, <code>android:statusBarColor</code> inherits the
+value of <code>android:colorPrimaryDark</code>.</p>
+
+<p>You can also draw behind the status bar yourself. For example, if you want to show
+the status bar transparently over a photo, with a subtle dark gradient to ensure the white
+status icons are visible. To do so, set the <code>android:statusBarColor</code> attribute to
+<code>&#64;android:color/transparent</code> and adjust the window flags as required. You can
+also use the {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} method for
+animations or fading.</p>
+
+<p class="note">
+<strong>Note:</strong> The status bar should almost always have a clear delineation from the
+primary toolbar, except for cases where you show edge-to-edge rich imagery or media content behind
+these bars and when you use a gradient to ensure that the icons are still visible.
+</p>
+
+<p>When you customize the navigation and status bars, either make them both transparent or modify
+only the status bar. The navigation bar should remain black in all other cases.</p>
+
+
+<h2 id="Inheritance">Theme Individual Views</h3>
+
+<p>Elements in XML layout definitions can specify the <code>android:theme</code> attribute,
+which references a theme resource. This attribute modifies the theme for the element and any
+child elements, which is useful for altering theme color palettes in a specific portion
+of an interface.</p>

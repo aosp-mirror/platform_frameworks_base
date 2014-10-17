@@ -1,0 +1,173 @@
+page.title=Getting Started
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ApplyTheme">Apply the Material Theme</a></li>
+  <li><a href="#Layouts">Design Your Layouts</a></li>
+  <li><a href="#Depth">Specify Elevation in Your Views</a></li>
+  <li><a href="#ListsCards">Create Lists and Cards</a></li>
+  <li><a href="#Animations">Customize Your Animations</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material design on Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>To create apps with material design:</p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    Review the <a href="http://www.google.com/design/spec">material design specification</a>.</li>
+  <li style="margin-bottom:10px">
+    Apply the material <strong>theme</strong> to your app.</li>
+  <li style="margin-bottom:10px">
+    Create your <strong>layouts</strong> following material design guidelines.</li>
+  <li style="margin-bottom:10px">
+    Specify the <strong>elevation</strong> of your views to cast shadows.</li>
+  <li style="margin-bottom:10px">
+    Use system <strong>widgets</strong> for lists and cards.</li>
+  <li style="margin-bottom:10px">
+    Customize the <strong>animations</strong> in your app.</li>
+</ol>
+
+<h3>Maintain backward compatibility</h3>
+
+<p>You can add many material design features to your app while maintaining compatibility with
+versions of Android earlier than 5.0. For more information, see
+<a href="{@docRoot}training/material/compatibility.html">Maintaining Compatibility</a>.</p>
+
+<h3>Update your app with material design</h3>
+
+<p>To update an existing app to incorporate material design, update your layouts following
+material design guidelines. Also make sure to incorporate depth, touch feedback, and
+animations.</p>
+
+<h3>Create new apps with material design</h3>
+
+<p>If you are creating a new app with material design features, the <a
+href="http://www.google.com/design/spec">material design guidelines</a> provide you with a
+cohesive design framework. Follow those guidelines and use the new functionality in the Android
+framework to design and develop your app.</p>
+
+
+<h2 id="ApplyTheme">Apply the Material Theme</h2>
+
+<p>To apply the material theme in your app, specify a style that inherits from
+<code>android:Theme.Material</code>:</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>The material theme provides updated system widgets that let you set their color palette and
+default animations for touch feedback and activity transitions. For more details, see
+<a href="{@docRoot}training/material/theme.html">Using the Material Theme</a>.</p>
+
+
+<h2 id="Layouts">Design Your Layouts</h2>
+
+<p>In addition to applying and customizing the material theme, your layouts should conform to
+the <a href="http://www.google.com/design/spec">material design guidelines</a>. When you design
+your layouts, pay special attention to the following:</p>
+
+<ul>
+<li>Baseline grids</li>
+<li>Keylines</li>
+<li>Spacing</li>
+<li>Touch target size</li>
+<li>Layout structure</li>
+</ul>
+
+
+<h2 id="Depth">Specify Elevation in Your Views</h2>
+
+<p>Views can cast shadows, and the elevation value of a view
+determines the size of its shadow and its drawing order. To set the elevation of a view, use the
+<code>android:elevation</code> attribute in your layouts:</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>The new <code>translationZ</code> property lets you create animations that reflect temporary
+changes in the elevation of a view. Elevation changes can be useful when
+<a href="{@docRoot}training/material/animations.html#ViewState">responding to touch
+gestures</a>.</p>
+
+<p>For more details, see <a href="{@docRoot}training/material/shadows-clipping.html">Defining
+Shadows and Clipping Views</a>.</p>
+
+
+<h2 id="ListsCards">Create Lists and Cards</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} is a more pluggable version of {@link
+android.widget.ListView} that supports different layout types and provides performance improvements.
+{@link android.support.v7.widget.CardView} lets you show pieces of information inside cards with
+a consistent look across apps. The following code example demonstrates how to include a
+{@link android.support.v7.widget.CardView} in your layout:</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>For more information, see <a href="{@docRoot}training/material/lists-cards.html">Creating Lists
+and Cards</a>.</p>
+
+
+<h2 id="Animations">Customize Your Animations</h2>
+
+<p>Android 5.0 (API level 21) includes new APIs to create custom animations in your app.
+For example, you can enable activity transitions and define an exit transition inside an
+activity:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>When you start another activity from this activity, the exit transition is activated.</p>
+
+<p>To learn more about the new animation APIs, see <a
+href="{@docRoot}training/material/animations.html">Defining Custom Animations</a>.</p>
