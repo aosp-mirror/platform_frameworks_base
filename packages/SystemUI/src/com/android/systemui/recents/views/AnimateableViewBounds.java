@@ -68,7 +68,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
             mSourceView.invalidateOutline();
             updateClipBounds();
             if (!mConfig.useHardwareLayers) {
-                mSourceView.mThumbnailView.updateVisibility(
+                mSourceView.mThumbnailView.updateThumbnailVisibility(
                         bottom - mSourceView.getPaddingBottom());
             }
         }
