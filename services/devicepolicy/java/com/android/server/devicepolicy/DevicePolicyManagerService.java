@@ -3390,7 +3390,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private int getEncryptionStatus() {
         String status = SystemProperties.get("ro.crypto.state", "unsupported");
         if ("encrypted".equalsIgnoreCase(status)) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
+            return LockPatternUtils.isDeviceEncrypted()
+                    ? DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
+                    : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else if ("unencrypted".equalsIgnoreCase(status)) {
             return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else {
