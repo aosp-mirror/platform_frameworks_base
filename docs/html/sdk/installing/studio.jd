@@ -311,7 +311,7 @@ download (or continue to use)
 </td>
 <td>
 <ul>
-  <li>Mac OS X 10.5 or higher, up to 10.9 (Mavericks)</li>
+  <li>Mac OS X 10.8.5 or higher, up to 10.9 (Mavericks)</li>
   <li>1 GB of RAM minimum, 2 GB recommended</li>
   <li>400 MB of disk space</li>
   <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
@@ -324,6 +324,9 @@ rendering. You can then configure your project to use Java Development Kit (JDK)
 </td>
 <td>
 <ul>
+  <li>64-bit distribution capable of running 32-bit applications</li>
+  <li>GNU C Library (glibc) 2.11 or later is required.</li>
+  <li>Tested on Ubuntu 12.04, Precise Pangolin</li>
   <li>GNOME or KDE desktop</li>
   <li>1 GB of RAM minimum, 2 GB recommended</li>
   <li>400 MB of disk space</li>
