@@ -1,8 +1,11 @@
 page.title=Regulatory Disclosures for ADT-1
-parent.title=ADT-1 Developer Kit
-parent.link=index.html
+fullpage=1
 
 @jd:body
+
+<div class="wrap" style="width:940px;">
+
+<h1>Regulatory Disclosures for ADT-1</h1>
 
 <p>Disclosures for the <a href="index.html">ADT-1</a> device.</p>
 
@@ -77,3 +80,9 @@ parent.link=index.html
   doit être utilisé de sorte que la possibilité d'un contact humain pendant le fonctionnement
   normal soit limitée.
 </p>
+
+</div> <!-- end.class.wrap -->
+
+<div class="layout-content-col col-16" style="padding-top:1px">
+  <!-- layout div, so auto-gen footer sits correctly; do not remove -->
+</div>
