@@ -4,9 +4,9 @@ fullpage=1
 @jd:body
 
 <div class="wrap" style="width:940px;">
-  
+
 <h1>Legal Notice</h1>
-  
+
 <p>Android is an open platform that's freely available to you as an app developer. You can
 immediately download the Android SDK, develop apps, and distribute them to the world without any
 registration or fees.</p>
@@ -107,7 +107,7 @@ must agree to the terms of a legal agreement between you and Google. Registratio
     <p><a href="https://developers.google.com/android/c2dm/terms">Android Cloud to Device
 Messaging Terms of Service</a></p>
     </dd>
-    
+
   <dt>Android Backup Service</dt>
     <dd>Android Backup Service is integrated with Android's data backup framework to perform data
 backup and restore for most devices running Android 2.2 or greater, using Google servers and a
@@ -124,4 +124,8 @@ documented on their respective web sites. </p>
 
 
 
+</div> <!-- end.class.wrap -->
+
+<div class="layout-content-col col-16" style="padding-top:1px">
+  <!-- layout div, so auto-gen footer sits correctly; do not remove -->
 </div>
