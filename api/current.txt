@@ -21398,7 +21398,6 @@ package android.os {
     field public static final int JELLY_BEAN_MR2 = 18; // 0x12
     field public static final int KITKAT = 19; // 0x13
     field public static final int KITKAT_WATCH = 20; // 0x14
-    field public static final int L = 21; // 0x15
     field public static final int LOLLIPOP = 21; // 0x15
   }
 
