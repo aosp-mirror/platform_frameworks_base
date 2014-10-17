@@ -1505,7 +1505,7 @@ status_t postProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
     // At this point, now that we have all the resource data, all we need to
     // do is compile XML files.
     if (strcmp(ext.string(), ".xml") == 0) {
-        String16 resourceName(parseResourceName(file->getPath().getPathLeaf()));
+        String16 resourceName(parseResourceName(file->getSourceFile().getPathLeaf()));
         return compileXmlFile(bundle, assets, resourceName, file, table);
     }
 
