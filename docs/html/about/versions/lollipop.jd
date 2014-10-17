@@ -172,7 +172,7 @@ video apps and games to display smooth synchronized content.</p>
 
 <div class="figure" style="width:350px; margin:0 0 0 60px">
 <img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" height="525" />
-<p class="img-caption">Gameloft's Rival Knights uses ASTC from AEP and Compute Shaders from ES 3.1 to deliver HDR Bloom effects and provide more graphical detail.</p>
+<p class="img-caption">Gameloft's Rival Knights uses ASTC (Adaptive Scalable Texture Compression) from AEP and Compute Shaders from ES 3.1 to deliver HDR (High Dynamic Range) Bloom effects and provide more graphical detail.</p>
 </div>
 
 <p>Android 5.0 also introduces the <strong>Android Extension Pack</strong> (AEP), a set of OpenGL ES extensions that give you access to features like tessellation shaders, geometry shaders, ASTC texture compression, per-sample interpolation and shading, and other advanced rendering capabilities. With AEP you can deliver high-performance graphics across a range of GPUs.</p>
