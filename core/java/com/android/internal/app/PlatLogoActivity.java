@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -54,6 +55,7 @@ public class PlatLogoActivity extends Activity {
     };
     FrameLayout mLayout;
     int mTapCount;
+    int mKeyCount;
     PathInterpolator mInterpolator = new PathInterpolator(0f, 0f, 0.5f, 1f);
 
     static int newColorIndex() {
@@ -200,6 +202,28 @@ public class PlatLogoActivity extends Activity {
                     im.setBackground(makeRipple());
                 }
                 mTapCount++;
+            }
+        });
+
+        // Enable hardware keyboard input for TV compatibility.
+        im.setFocusable(true);
+        im.requestFocus();
+        im.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode != KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    ++mKeyCount;
+                    if (mKeyCount > 2) {
+                        if (mTapCount > 5) {
+                            im.performLongClick();
+                        } else {
+                            im.performClick();
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
             }
         });
 
