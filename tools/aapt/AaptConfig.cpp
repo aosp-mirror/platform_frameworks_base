@@ -240,7 +240,9 @@ void applyVersionForCompatibility(ConfigDescription* config) {
     }
 
     uint16_t minSdk = 0;
-    if (config->smallestScreenWidthDp != ResTable_config::SCREENWIDTH_ANY
+    if (config->density == ResTable_config::DENSITY_ANY) {
+        minSdk = SDK_L;
+    } else if (config->smallestScreenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || config->screenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || config->screenHeightDp != ResTable_config::SCREENHEIGHT_ANY) {
         minSdk = SDK_HONEYCOMB_MR2;
@@ -255,8 +257,6 @@ void applyVersionForCompatibility(ConfigDescription* config) {
                 != ResTable_config::SCREENLONG_ANY
             || config->density != ResTable_config::DENSITY_DEFAULT) {
         minSdk = SDK_DONUT;
-    } else if ((config->density == ResTable_config::DENSITY_ANY)) {
-        minSdk = SDK_L;
     }
 
     if (minSdk > config->sdkVersion) {
