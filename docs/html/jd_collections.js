@@ -3,7 +3,7 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "training/building-wearables.html",
-      "preview/material/index.html",
+      "training/material/index.html",
       "sdk/installing/studio.html" 
     ]
   },
