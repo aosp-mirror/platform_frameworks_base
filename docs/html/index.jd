@@ -15,20 +15,21 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           <div class="resource resource-card resource-card-18x6">
 
       <div class="landing-section-header">
-            <div class="col-10"><img src="{@docRoot}preview/images/l-dev-prev.png"
-            style="margin:40px 60px 0 20px"></div>
+            <div class="col-10"><img src="{@docRoot}images/home/l-hero_2x.png"
+                 srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x"
+                 width="510" style="margin:20px 30px 0 30px"></div>
             <div class="col-5" style=" margin-top:70px ">
-            <h3 stye="font-weight:300;">L Developer Preview</h3>
-            <p>The L Developer Preview lets you design and develop against the next major
-            release of Android. Take the time to test and build your app before the platform
-            officially launches. </p>
-            <a href="{@docRoot}preview/index.html" class="landing-button landing-primary">Learn More</a>
+            <h3 stye="font-weight:300;">Android 5.0 Lollipop</h3>
+            <p>The Android 5.0 update adds a variety of new
+            features for your apps, such as notifications on the lock screen, an all-new camera API,
+            OpenGL ES 3.1, the new Material design interface, and much more.</p>
+            <a href="{@docRoot}about/versions/lollipop.html" class="landing-button landing-primary">Learn More</a>
             </div>
           </div>
           </div>
         </div>
        <h2>&nbsp;</h2>
-        <div style="margin-top:20px" class="resource-widget resource-flow-layout wrap col-16
+        <div style="margin-top:20px;height:115px" class="resource-widget resource-flow-layout wrap col-16
         no-section" data-query="collection:index/primary" data-resourcestyle="card"
         data-sortorder="-timestamp" data-maxresults="3" data-cardsizes="6x2,6x2,6x2"></div> <!-- end .resource-widget -->
       </div> <!-- end .wrap -->
@@ -53,7 +54,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   <div class="landing-section">
     <div class="wrap">
       <div class="landing-section-header">
-        
+
             <div class="landing-h1" style="margin-top:0px">Build for a Multi-Screen World</div>
         <div class="landing-subhead" style="margin-top: 20px;">
           Android runs on hundreds of millions of handheld devices around the world, <br>
