@@ -390,7 +390,7 @@
     <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
 
     <!-- Integer indicating associated partial scan interval in milliseconds -->
-    <integer translatable="false" name="config_wifi_framework_associated_scan_interval">10000</integer>
+    <integer translatable="false" name="config_wifi_framework_associated_scan_interval">20000</integer>
 
     <!-- Integer indicating associated full scan backoff, representing a fraction: xx/8 -->
     <integer translatable="false" name="config_wifi_framework_associated_full_scan_backoff">12</integer>
