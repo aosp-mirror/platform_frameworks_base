@@ -560,9 +560,7 @@ public class LockPatternUtils {
                 // Update the device encryption password.
                 if (userId == UserHandle.USER_OWNER
                         && LockPatternUtils.isDeviceEncryptionEnabled()) {
-                    final ContentResolver cr = mContext.getContentResolver();
-                    final boolean required = Settings.Global.getInt(cr,
-                            Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, 1) == 1 ? true : false;
+                    final boolean required = isCredentialRequiredToDecrypt(true);
                     if (!required) {
                         clearEncryptionPassword();
                     } else {
@@ -793,10 +791,7 @@ public class LockPatternUtils {
                 // Update the device encryption password.
                 if (userHandle == UserHandle.USER_OWNER
                         && LockPatternUtils.isDeviceEncryptionEnabled()) {
-                    final ContentResolver cr = mContext.getContentResolver();
-                    final boolean required = Settings.Global.getInt(cr,
-                            Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, 1) == 1 ? true : false;
-                    if (!required) {
+                    if (!isCredentialRequiredToDecrypt(true)) {
                         clearEncryptionPassword();
                     } else {
                         boolean numeric = computedQuality
@@ -1657,5 +1652,20 @@ public class LockPatternUtils {
 
     private void onAfterChangingPassword() {
         getTrustManager().reportEnabledTrustAgentsChanged(getCurrentOrCallingUserId());
+    }
+
+    public boolean isCredentialRequiredToDecrypt(boolean defaultValue) {
+        final int value = Settings.Global.getInt(mContentResolver,
+                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, -1);
+        return value == -1 ? defaultValue : (value != 0);
+    }
+
+    public void setCredentialRequiredToDecrypt(boolean required) {
+        if (getCurrentUser() != UserHandle.USER_OWNER) {
+            Log.w(TAG, "Only device owner may call setCredentialRequiredForDecrypt()");
+            return;
+        }
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
     }
 }
