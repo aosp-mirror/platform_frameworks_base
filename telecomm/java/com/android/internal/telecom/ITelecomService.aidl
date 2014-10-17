@@ -115,6 +115,11 @@ interface ITelecomService {
     void clearAccounts(String packageName);
 
     /**
+     * @see TelecomServiceImpl#isVoiceMailNumber
+     */
+    boolean isVoiceMailNumber(in PhoneAccountHandle accountHandle, String number);
+
+    /**
      * @see TelecomServiceImpl#getDefaultPhoneApp
      */
     ComponentName getDefaultPhoneApp();
