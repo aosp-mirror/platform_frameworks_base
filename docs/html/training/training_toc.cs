@@ -892,6 +892,10 @@ include the action bar on devices running Android 2.1 or higher."
             <a href="<?cs var:toroot ?>training/tv/playback/details.html">
               Building a Details View</a>
           </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/now-playing.html">
+              Displaying a Now Playing Card</a>
+          </li>
         </ul>
       </li>
 
