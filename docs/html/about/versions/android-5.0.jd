@@ -426,12 +426,9 @@ the persistence behavior, use the
 <a href="{@docRoot}reference/android/R.attr.html#persistableMode">android:persistableMode</a>
 attribute. You can also change
 the visual properties of an activity in the recents screen, such as the
-activity’s color, label, and icon. To do this, make sure the
-<a href="{@docRoot}reference/android/R.attr.html#relinquishTaskIdentity">android:relinquishTaskIdentity</a>
-attribute of the task’s root activity is set
-to {@code true}. You can then use the
+activity’s color, label, and icon, by calling the
 {@link android.app.Activity#setTaskDescription(android.app.ActivityManager.TaskDescription) setTaskDescription()}
-method to set its appearance properties.</p>
+method.</p>
 
 <h3 id="WebView">WebView updates</h3>
 <p>Android 5.0 updates the {@link android.webkit.WebView}
