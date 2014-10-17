@@ -28387,6 +28387,7 @@ package android.telecom {
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public boolean handleMmi(java.lang.String);
+    method public boolean handleMmi(android.telecom.PhoneAccountHandle, java.lang.String);
     method public boolean hasMultipleCallCapableAccounts();
     method public boolean isInCall();
     method public void registerPhoneAccount(android.telecom.PhoneAccount);
