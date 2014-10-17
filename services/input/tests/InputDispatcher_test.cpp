@@ -46,16 +46,16 @@ public:
     }
 
 private:
-    virtual void notifyConfigurationChanged(nsecs_t when) {
+    virtual void notifyConfigurationChanged(nsecs_t) {
     }
 
-    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<InputWindowHandle>& inputWindowHandle,
-            const String8& reason) {
+    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>&,
+            const sp<InputWindowHandle>&,
+            const String8&) {
         return 0;
     }
 
-    virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle) {
+    virtual void notifyInputChannelBroken(const sp<InputWindowHandle>&) {
     }
 
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
@@ -66,35 +66,33 @@ private:
         return true;
     }
 
-    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
+    virtual bool filterInputEvent(const InputEvent*, uint32_t) {
         return true;
     }
 
-    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) {
+    virtual void interceptKeyBeforeQueueing(const KeyEvent*, uint32_t&) {
     }
 
-    virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
+    virtual void interceptMotionBeforeQueueing(nsecs_t, uint32_t&) {
     }
 
-    virtual nsecs_t interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
-            const KeyEvent* keyEvent, uint32_t policyFlags) {
+    virtual nsecs_t interceptKeyBeforeDispatching(const sp<InputWindowHandle>&,
+            const KeyEvent*, uint32_t) {
         return 0;
     }
 
-    virtual bool dispatchUnhandledKey(const sp<InputWindowHandle>& inputWindowHandle,
-            const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) {
+    virtual bool dispatchUnhandledKey(const sp<InputWindowHandle>&,
+            const KeyEvent*, uint32_t, KeyEvent*) {
         return false;
     }
 
-    virtual void notifySwitch(nsecs_t when,
-            uint32_t switchValues, uint32_t switchMask, uint32_t policyFlags) {
+    virtual void notifySwitch(nsecs_t, uint32_t, uint32_t, uint32_t) {
     }
 
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
+    virtual void pokeUserActivity(nsecs_t, int32_t) {
     }
 
-    virtual bool checkInjectEventsPermissionNonReentrant(
-            int32_t injectorPid, int32_t injectorUid) {
+    virtual bool checkInjectEventsPermissionNonReentrant(int32_t, int32_t) {
         return false;
     }
 };
