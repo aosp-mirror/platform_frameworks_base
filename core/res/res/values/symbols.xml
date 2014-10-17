@@ -1939,7 +1939,9 @@
   <java-symbol type="id" name="time_header" />
   <java-symbol type="id" name="hours" />
   <java-symbol type="id" name="minutes" />
-  <java-symbol type="id" name="ampm_label" />
+  <java-symbol type="id" name="ampm_layout" />
+  <java-symbol type="id" name="am_label" />
+  <java-symbol type="id" name="pm_label" />
   <java-symbol type="id" name="radial_picker" />
   <java-symbol type="id" name="separator" />
   <java-symbol type="id" name="date_picker_header" />
