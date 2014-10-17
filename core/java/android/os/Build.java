@@ -555,6 +555,7 @@ public class Build {
 
         /**
          * Temporary until we completely switch to {@link #LOLLIPOP}.
+         * @hide
          */
         public static final int L = 21;
 
@@ -567,6 +568,24 @@ public class Build {
          * <li> {@link android.content.Context#bindService Context.bindService} now
          * requires an explicit Intent, and will throw an exception if given an implicit
          * Intent.</li>
+         * <li> {@link android.app.Notification.Builder Notification.Builder} will
+         * not have the colors of their various notification elements adjusted to better
+         * match the new material design look.</li>
+         * <li> {@link android.os.Message} will validate that a message is not currently
+         * in use when it is recycled.</li>
+         * <li> Hardware accelerated drawing in windows will be enabled automatically
+         * in most places.</li>
+         * <li> {@link android.widget.Spinner} throws an exception if attaching an
+         * adapter with more than one item type.</li>
+         * <li> If the app is a launcher, the launcher will be available to the user
+         * even when they are using corporate profiles (which requires that the app
+         * use {@link android.content.pm.LauncherApps} to correctly populate its
+         * apps UI).</li>
+         * <li> Calling {@link android.app.Service#stopForeground Service.stopForeground}
+         * with removeNotification false will modify the still posted notification so that
+         * it is no longer forced to be ongoing.</li>
+         * <li> A {@link android.service.dreams.DreamService} must require the
+         * {@link android.Manifest.permission#BIND_DREAM_SERVICE} permission to be usable.</li>
          * </ul>
          */
         public static final int LOLLIPOP = 21;
