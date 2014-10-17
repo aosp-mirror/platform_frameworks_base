@@ -4,7 +4,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/building-wearables.html",
       "training/material/index.html",
-      "sdk/installing/studio.html" 
+      "sdk/installing/studio.html"
     ]
   },
   "distribute/edu/videos/stories": {
@@ -66,9 +66,9 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html",
+      "distribute/essentials/quality/tv.html",
       "https://developers.google.com/edu/guidelines",
       "distribute/essentials/optimizing-your-app.html",
-      "distribute/essentials/best-practices/apps.html",
       "distribute/essentials/best-practices/games.html"
     ]
   },
@@ -316,6 +316,20 @@ var RESOURCE_COLLECTIONS = {
       "http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
       "guide/components/tasks-and-back-stack.html",
       "training/basics/activity-lifecycle/recreating.html"
+    ]
+  },
+  "distribute/essentials/tvqualityguidelines/visualdesign": {
+    "title": "",
+    "resources": [
+      "design/tv/index.html",
+      "training/tv/start/index.html"
+    ]
+  },
+  "distribute/essentials/tvqualityguidelines/functionality": {
+    "title": "",
+    "resources": [
+      "training/tv/start/hardware.html",
+      "training/tv/games/index.html"
     ]
   },
   "distribute/essentials/core/performance": {
@@ -705,7 +719,7 @@ var RESOURCE_COLLECTIONS = {
       "google/play/billing/index.html",
       "https://support.google.com/googleplay/android-developer/answer/4407611"
     ]
-  },  
+  },
   "distribute/monetize/freemium": {
     "title": "",
     "resources": [
