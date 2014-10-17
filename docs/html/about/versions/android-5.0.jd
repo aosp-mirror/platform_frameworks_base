@@ -228,9 +228,12 @@ the system can present notifications correctly in
 {@link android.app.Notification.Builder} methods to add sounds and
 vibration.</p>
 
-<p>Setting a device to {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL}
-  or {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}
-  causes the device to leave priority mode.</p>
+<p>Setting the device to
+{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} now
+causes the device to enter the new priority mode. The device leaves priority
+mode if you set it to
+{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} or
+{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}.</p>
 
 <p>Previously, Android used {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC}
 as the master stream to control volume on tablet devices. In Android 5.0, the
