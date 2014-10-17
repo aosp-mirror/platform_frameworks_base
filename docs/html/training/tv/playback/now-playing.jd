@@ -1,0 +1,167 @@
+page.title=Displaying a Now Playing Card
+page.tags="nowplaying","mediasession"
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#session">Start a Media Session</a></li>
+    <li><a href="#card">Display a Now Playing Card</a></li>
+    <li><a href="#state">Update the Playback State</a></li>
+    <li><a href="#respond">Respond to User Action</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>TV apps may allow users to play music or other media in the background while using other
+applications. If your app allows this type of use, it must must
+provide a means for the user to return to the app to pause the music or switch to a new song. The
+Android framework enables TV apps to do this by displaying a <em>Now Playing</em> card on the home
+screen in the recommendations row.</p>
+
+<p>The Now Playing card is a system artifact that displays on the
+home screen in the recommendations row for an active media session. It includes the media metadata
+such as the album art, title, and app icon. When the user selects it, the system opens the the app
+that owns the session.</p>
+
+<p>This lesson shows how to use the {@link android.media.session.MediaSession} class to implement
+the Now Playing card.</p>
+
+<h2 id="session">Start a Media Session</h2>
+
+<p>A playback app can run as an <a href="{@docRoot}guide/components/activities">activity</a> or
+as a <a href="{@docRoot}guide/components/services">service</a>. The service is required for
+background playback because it can continue to play media even after the activity that launched it
+has been destroyed. For this discussion, the media playback app is assumed to be running in a
+{@link android.service.media.MediaBrowserService}.</p>
+
+<p>In your service's {@link android.service.media.MediaBrowserService#onCreate() onCreate()}
+method, create a new {@link android.media.session.MediaSession#MediaSession(android.content.Context, java.lang.String) MediaSession},
+set the callback and flags appropriate to a media app, and set the session token for the
+{@link android.service.media.MediaBrowserService}.</p>
+
+<pre>
+mSession = new MediaSession(this, "MusicService");
+mSession.setCallback(new MediaSessionCallback());
+mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+        MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+// for the MediaBrowserService
+setSessionToken(mSession.getSessionToken());
+</pre>
+
+<p class="note"<strong>Note:</strong> The Now Playing card will display only for a media session with
+the {@link android.media.session.MediaSession#FLAG_HANDLES_TRANSPORT_CONTROLS} flag set.</p>
+
+<h2 id="card">Display a Now Playing Card</h2>
+
+<p>The Now Playing card shows up after {@link android.media.session.MediaSession#setActive(boolean) setActive(true)}
+is called, if the session is the highest priority session in the system. Also, note that your app
+must request the audio focus, as described in <a href="{@docRoot}training/managing-audio/audio-focus">
+Managing Audio Focus</a>.</p>
+
+<pre>
+private void handlePlayRequest() {
+
+    tryToGetAudioFocus();
+
+    if (!mSession.isActive()) {
+        mSession.setActive(true);
+    }
+...
+</pre>
+
+<p>The card is removed from the home screen when {@link android.media.session.MediaSession#setActive(boolean) setActive(false)}
+is called or if another app initiates media playback. You may want to remove the card from the home
+screen some time after playback is paused, depending on how long you want to keep the card up,
+usually 5 to 30 minutes.</p>
+
+<h2 id="state">Update the Playback State</h2>
+
+<p>As with any media app, update the playback state in the {@link android.media.session.MediaSession}
+so that the card can display the current metadata, as shown in the following example:</p>
+
+<pre>
+private void updatePlaybackState() {
+    long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+    if (mMediaPlayer != null &amp;&amp; mMediaPlayer.isPlaying()) {
+        position = mMediaPlayer.getCurrentPosition();
+    }
+    PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+            .setActions(getAvailableActions());
+    stateBuilder.setState(mState, position, 1.0f);
+    mSession.setPlaybackState(stateBuilder.build());
+}
+private long getAvailableActions() {
+    long actions = PlaybackState.ACTION_PLAY |
+            PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
+            PlaybackState.ACTION_PLAY_FROM_SEARCH;
+    if (mPlayingQueue == null || mPlayingQueue.isEmpty()) {
+        return actions;
+    }
+    if (mState == PlaybackState.STATE_PLAYING) {
+        actions |= PlaybackState.ACTION_PAUSE;
+    }
+    if (mCurrentIndexOnQueue &gt; 0) {
+        actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+    }
+    if (mCurrentIndexOnQueue &lt; mPlayingQueue.size() - 1) {
+        actions |= PlaybackState.ACTION_SKIP_TO_NEXT;
+    }
+    return actions;
+}
+</pre>
+
+<h2 id="metadata">Display the Media Metadata</h2>
+
+<p>For the track currently playing, set the {@link android.media.MediaMetadata} with the
+{@link android.media.session.MediaSession#setMetadata(android.media.MediaMetadata) setMetadata()}
+method. This method of the media session object lets you provide information to the Now Playing card
+about the track such as the title, subtitle, and various icons. The following example assumes your
+track's data is stored in a custom data class, {@code MediaData}.</p>
+
+<pre>
+private void updateMetadata(MediaData myData) {
+    MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
+    // To provide most control over how an item is displayed set the
+    // display fields in the metadata
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
+            myData.displayTitle);
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
+            myData.displaySubtitle);
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
+            myData.artUri);
+    // And at minimum the title and artist for legacy support
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE,
+            myData.title);
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST,
+            myData.artist);
+    // A small bitmap for the artwork is also recommended
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_ART,
+            myData.artBitmap);
+    // Add any other fields you have for your data as well
+    mSession.setMetadata(metadataBuilder.build());
+}
+</pre>
+
+<h2 id="respond">Respond to User Action</h2>
+
+<p>When the user selects the Now Playing card, the system opens the app that owns the session.
+If your app provides a {@link android.app.PendingIntent} to pass to
+{@link android.media.session.MediaSession#setSessionActivity(android.app.PendingIntent) setSessionActivity()},
+the system launches the activity you specify, as demonstrated below. If not, the default system
+intent opens. The activity you specify must provide playback controls that allow users to pause or
+stop playback.</p>
+
+<pre>
+Intent intent = new Intent(mContext, MyActivity.class);
+    PendingIntent pi = PendingIntent.getActivity(context, 99 /*request code*/,
+            intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    mSession.setSessionActivity(pi);
+</pre>
+
