@@ -109,7 +109,9 @@ sdk.platform.apiLevel=21
 <h2>See also</h2>
 <ol>
 <li><a href="{@docRoot}sdk/api_diff/21/changes.html">API
-Differences Report &raquo;</a> </li>
+Differences Report (API level 20 to 21) &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">API
+Differences Report (L Developer Preview to 21) &raquo;</a> </li>
 </ol>
 
 </div>
@@ -117,7 +119,7 @@ Differences Report &raquo;</a> </li>
 
 <p>API Level: {@sdkPlatformApiLevel}</p>
 
-<p>Android 5.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#L">Lollipop</a>)
+<p>Android 5.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#LOLLIPOP">LOLLIPOP</a>)
   offers new features for users and app developers. This document provides an
   introduction to the most notable new APIs.</p>
 
@@ -1184,6 +1186,3 @@ element to declare the permissions your app requires to access certain APIs.</p>
 <li>{@link android.Manifest.permission#WRITE_VOICEMAIL}: Required to allow your
   app to modify and remove existing voicemails in the system.</li>
 </ul>
-
-<p class="note">For a detailed view of all API changes in Android 5.0, see the
-<a href="{@docRoot}sdk/api_diff/21/changes.html">API Differences Report</a>.</p>
