@@ -70,7 +70,7 @@ page.title=Style for TV
   exaggerated contrast, causing them to be indistinguishable.</p>
 
 
-<h2>Typography</h2>
+<h2 id="typography">Typography</h2>
 
 <p>The text and controls in a TV application's UI should be easily visible and navigable from a
   distance. The minimum recommended font size for TV is 12sp. The default text size setting should
