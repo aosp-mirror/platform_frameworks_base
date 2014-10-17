@@ -238,8 +238,11 @@
     <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
     <integer name="volume_panel_dismiss_delay">200</integer>
 
-    <!-- Tiles with feature timeouts: number of days to show after feature is used. -->
-    <integer name="days_to_show_timeout_tiles">30</integer>
+    <!-- Hotspot tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_hotspot_tile">30</integer>
+
+    <!-- Color inversion tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_color_inversion_tile">7</integer>
 
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>

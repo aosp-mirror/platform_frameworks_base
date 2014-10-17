@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.Listenable;
 
 public class UsageTracker implements Listenable {
@@ -35,11 +34,10 @@ public class UsageTracker implements Listenable {
 
     private boolean mRegistered;
 
-    public UsageTracker(Context context, Class<?> tile) {
+    public UsageTracker(Context context, Class<?> tile, int timeoutResource) {
         mContext = context;
         mPrefKey = tile.getSimpleName() + "LastUsed";
-        mTimeToShowTile = MILLIS_PER_DAY * mContext.getResources()
-                .getInteger(R.integer.days_to_show_timeout_tiles);
+        mTimeToShowTile = MILLIS_PER_DAY * mContext.getResources().getInteger(timeoutResource);
         mResetAction = "com.android.systemui.qs." + tile.getSimpleName() + ".usage_reset";
     }
 
