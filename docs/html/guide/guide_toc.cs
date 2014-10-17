@@ -55,6 +55,9 @@
           <li><a href="<?cs var:toroot ?>guide/components/tasks-and-back-stack.html">
               <span class="en">Tasks and Back Stack</span>
             </a></li>
+          <li><a href="<?cs var:toroot ?>guide/components/recents.html">
+              <span class="en">Overview Screen</span>
+            </a></li>
         </ul>
       </li>
       <li class="nav-section">
