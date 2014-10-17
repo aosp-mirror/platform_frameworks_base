@@ -103,12 +103,14 @@ about Android 5.0 for consumers at
 
 <p>Android 5.0 provides a faster, smoother and more powerful computing experience.</p>
 
-<p>Android now runs exclusively on the new <strong>ART runtime</strong>, built from the ground up to support a mix of ahead-of-time (AOT), just-in-time (JIT), and interpreted code. It’s truly cross-platform and is supported on ARM, x86, and MIPS architectures. It is also fully 64-bit compatible.</p>
+<p>Android now runs exclusively on the new <strong>ART runtime</strong>, built from the ground up to support a mix of ahead-of-time (AOT), just-in-time (JIT), and interpreted code. It’s supported on ARM, x86, and MIPS architectures and is fully 64-bit compatible.</p>
 
 <p>ART improves app performance and responsiveness. Efficient garbage collection reduces the number and duration of pauses for GC events, which fit comfortably within the v-sync window so your app doesn’t skip frames. ART also dynamically moves memory to optimize performance for foreground uses. </p>
 
 <p>Android 5.0 introduces platform support for <strong>64-bit architectures</strong>&mdash;used by the Nexus 9's NVIDIA Tegra K1. Optimizations provide larger address space and improved performance for certain compute workloads. Apps written in the Java language run as 64-bit apps automatically&mdash;no modifications are needed. If your app uses native code, we’ve extended the NDK to support new ABIs for ARM v8, and x86-64, and MIPS-64.</p>
 
+<p>Continuing the focus on smoother performance, Android 5.0 offers improved A/V sync. The audio and graphics pipelines have been instrumented for more accurate timestamps, enabling
+video apps and games to display smooth synchronized content.</p>
 
 
 <h2 id="Notifications">Notifications</h2>
@@ -165,7 +167,7 @@ about Android 5.0 for consumers at
 
 <p>Support for <strong><a href="http://www.khronos.org/opengles/3_X/">Khronos OpenGL ES 3.1</a></strong> now provides games and other apps the highest-performance 2D and 3D graphics capabilities on supported devices. </p>
 
-<p>OpenGL ES 3.1 adds compute shaders, geometry shaders, stencil textures, accelerated visual effects, high quality ETC2/EAC texture compression, advanced texture rendering, standardized texture size and render-buffer formats, and more.</p>
+<p>OpenGL ES 3.1 adds compute shaders, stencil textures, accelerated visual effects, high quality ETC2/EAC texture compression, advanced texture rendering, standardized texture size and render-buffer formats, and more.</p>
 
 
 <div class="figure" style="width:350px; margin:0 0 0 60px">
@@ -193,7 +195,7 @@ about Android 5.0 for consumers at
 
 <h2 id="Camera">Enhanced Camera &amp; Video</h2>
 
-<p>Android 5.0 introduces <strong>all new camera APIs</strong> that let you capture raw formats such as YUV and Bayer RAW, and control parameters such as exposure time, ISO sensitivity, and frame duration on a per-frame basis. The new fully-synchronized camera pipeline allows you to capture uncompressed 8 megapixel YUV images at 30 FPS on supported devices.</p>
+<p>Android 5.0 introduces <strong>all new camera APIs</strong> that let you capture raw formats such as YUV and Bayer RAW, and control parameters such as exposure time, ISO sensitivity, and frame duration on a per-frame basis. The new fully-synchronized camera pipeline allows you to capture uncompressed full-resolution YUV images at 30 FPS on supported devices.</p>
 
 <p>Along with images, you can also capture metadata like noise models and optical information from the camera.</p>
 
@@ -246,3 +248,5 @@ about Android 5.0 for consumers at
 <p>A new <code>dumpsys batterystats</code> command generates <strong>battery usage statistics</strong> that you can use to understand system-wide power use and understand the impact of your app on the device battery. You can look at a history of power events, approximate power use per UID and system component, and more.</p>
 
 <img src="{@docRoot}images/versions/battery_historian.png" srcset="{@docRoot}images/versions/battery_historian@2x.png 2x" alt="" width="760" height="462" />
+<p class="img-caption">Battery Historian is a new tool to convert the statistics from <code>dumpsys batterystats</code> into a visualization for battery-related debugging. You can find it at <a href="https://github.com/google/battery-historian"
+>https://github.com/google/battery-historian</a>.</p>
