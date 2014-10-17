@@ -30,7 +30,7 @@ page.tags="recents","overview"
 
   <h2>Sample code</h2>
   <ol>
-    <li><a href="{@docRoot}samples/activitytasks/index.html">Document-centric Apps</a></li>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">Document-centric Apps</a></li>
   </ol>
 
 </div>
@@ -84,7 +84,7 @@ the new document, the system always creates a new task with the target activity 
 This setting allows the same document to be opened in more than one task. The following code demonstrates
 how the main activity does this:</p>
 
-<p class="code-caption"><a href="{@docRoot}samples/activitytasks/src/com/example/android/documentcentricrecents/DocumentCentricActivity.html">
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
 DocumentCentricActivity.java</a></p>
 <pre>
 public void createNewDocument(View view) {
@@ -122,7 +122,7 @@ to the front and passes the new intent to {@link android.app.Activity#onNewInten
 The new activity gets the intent and creates a new document in the overview screen, as in the
 following example:</p>
 
-<p class="code-caption"><a href="{@docRoot}samples/activitytasks/src/com/example/android/documentcentricrecents/NewDocumentActivity.html">
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
 NewDocumentActivity.java</a></p>
 <pre>
 &#64;Override
@@ -209,7 +209,7 @@ is 50 (25 on low memory devices); values less than 1 are not valid.</p>
 specify when to remove the task and finish all activities associated with it by calling
 the {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} method.</p>
 
-<p class="code-caption"><a href="{@docRoot}samples/activitytasks/index.html">
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
 NewDocumentActivity.java</a></p>
 <pre>
 public void onRemoveFromRecents(View view) {
@@ -229,7 +229,7 @@ discussed below.</p>
 the {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} flag in the
 {@link android.content.Intent#addFlags(int) addFlags()} method of the Intent that launches the activity.</p>
 
-<p class="code-caption"><a href="{@docRoot}samples/activitytasks/src/com/example/android/documentcentricrecents/DocumentCentricActivity.html">
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
 DocumentCentricActivity.java</a></p>
 <pre>
 private Intent newDocumentIntent() {
