@@ -67,7 +67,6 @@ import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.AccessibilityManagerInternal;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.InputDevice;
@@ -235,7 +234,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 context.getContentResolver());
-        LocalServices.addService(AccessibilityManagerInternal.class, new LocalService());
     }
 
     private UserState getUserStateLocked(int userId) {
@@ -1331,7 +1329,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayColorAdjustmentSettingsLocked(userState);
-        updateEncryptionState(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
     }
@@ -1606,22 +1603,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void updateDisplayColorAdjustmentSettingsLocked(UserState userState) {
         DisplayAdjustmentUtils.applyAdjustments(mContext, userState.mUserId);
-    }
-
-    private void updateEncryptionState(UserState userState) {
-        if (userState.mUserId != UserHandle.USER_OWNER) {
-            return;
-        }
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            if (hasRunningServicesLocked(userState) && LockPatternUtils.isDeviceEncrypted()) {
-                // If there are running accessibility services we do not have encryption as
-                // the user needs the accessibility layer to be running to authenticate.
-                mLockPatternUtils.clearEncryptionPassword();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     private boolean hasRunningServicesLocked(UserState userState) {
@@ -3966,16 +3947,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         onUserStateChangedLocked(userState);
                     }
                 }
-            }
-        }
-    }
-
-    private final class LocalService extends AccessibilityManagerInternal {
-        @Override
-        public boolean isNonDefaultEncryptionPasswordAllowed() {
-            synchronized (mLock) {
-                UserState userState = getCurrentUserStateLocked();
-                return !hasRunningServicesLocked(userState);
             }
         }
     }
