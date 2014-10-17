@@ -728,12 +728,9 @@ public class LockPatternUtils {
 
     /** Update the encryption password if it is enabled **/
     private void updateEncryptionPassword(final int type, final String password) {
-        DevicePolicyManager dpm = getDevicePolicyManager();
-        if (dpm.getStorageEncryptionStatus(getCurrentOrCallingUserId())
-                != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
+        if (!isDeviceEncryptionEnabled()) {
             return;
         }
-
         final IBinder service = ServiceManager.getService("mount");
         if (service == null) {
             Log.e(TAG, "Could not find the mount service to update the encryption password");
