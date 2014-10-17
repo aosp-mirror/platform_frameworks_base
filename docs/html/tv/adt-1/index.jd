@@ -1,7 +1,13 @@
 page.title=ADT-1 Developer Kit
 page.tags="emote","e-mote","adt"
+fullpage=1
 
 @jd:body
+
+
+<div class="wrap" style="width:940px;">
+
+<h1>ADT-1 Developer Kit</h1>
 
 <div id="qv-wrapper">
 <div id="qv">
@@ -29,9 +35,9 @@ Android TV platform.</p>
 <p class="note">
   <strong>Note:</strong> The ADT-1 kit <em>is not required</em> for building and testing apps
   for Android TV. You can build apps for TV and test them using an emulator for TV devices. The
-  L Developer Preview includes all the software needed to build TV apps and an emulator for running
+  Android SDK includes all the software needed to build TV apps and an emulator for running
   and testing them. For more information, see the
-  <a href="{@docRoot}preview/tv/start/index.html">Get Started</a> guide for TV apps.
+  <a href="{@docRoot}training/tv/start/index.html">Get Started</a> guide for TV apps.
 </p>
 
 <h2 id="faq">ADT-1 Frequently Asked Questions</h2>
@@ -280,7 +286,7 @@ $ adb connect &lt;ip-address-for-adt-1&gt;:4321
 <h2 id="emote">Android TV Remote Control App</h2>
 
 <div class="figure" style="width:250px;margin-top:0">
-<img src="/preview/tv/images/android-tv-remote.png" alt="Android TV Remote Screenshots">
+<img src="{@docRoot}tv/images/android-tv-remote.png" alt="Android TV Remote Screenshots">
 </div>
 
 <p>A remote control app is available for Android phones and tablets that allows you to interact
@@ -308,3 +314,9 @@ read this information before using the device:</p>
   <li><a href="regulatory.html">Regulatory Disclosures</a></li>
   <li><a href="safety.html">Important Safety Information</a></li>
 </ul>
+
+</div> <!-- end.class.wrap -->
+
+<div class="layout-content-col col-16" style="padding-top:1px">
+  <!-- layout div, so auto-gen footer sits correctly; do not remove -->
+</div>
