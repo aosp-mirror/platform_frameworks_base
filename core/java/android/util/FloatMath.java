@@ -17,13 +17,10 @@
 package android.util;
 
 /**
- * Math routines similar to those found in {@link java.lang.Math}.
- *
- * <p>Historically these methods were faster than the equivalent double-based
- * {@link java.lang.Math} methods. On versions of Android with a JIT they
- * became slower and have since been re-implemented to wrap calls to
- * {@link java.lang.Math}. {@link java.lang.Math} should be used in
- * preference.
+ * Math routines similar to those found in {@link java.lang.Math}. On
+ * versions of Android with a JIT, these are significantly slower than
+ * the equivalent {@code Math} functions, which should be used in preference
+ * to these.
  */
 public class FloatMath {
 
