@@ -28,6 +28,7 @@ page.title=Android Lollipop
   <li><a href="#Graphics">High-performance graphics</a></li>
   <li><a href="#Audio">More Powerful Audio</a></li>
   <li><a href="#Camera">Enhanced Camera & Video</a></li>
+  <li><a href="#Work">Android in the Workplace</a></li>
   <li><a href="#ScreenCapture">Screen capturing and sharing</a></li>
   <li><a href="#Sensors">New types of sensors</a></li>
   <li><a href="#WebView">Chromium WebView</a></li>
@@ -202,6 +203,23 @@ video apps and games to display smooth synchronized content.</p>
 <p>Apps sending video streams over the network can now take advantage of H.265 <strong>High Efficiency Video Coding (HEVC)</strong> for optimized encoding and decoding of video data. </p>
 
 <p>Android 5.0 also adds support for <strong>multimedia tunneling</strong> to provide the best experience for ultra-high definition (4K) content and the ability to play compressed audio and video data together. </p>
+
+
+
+<img style="float:right; margin:0 0 40px 60px"
+    src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"
+    srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"
+    alt="" width="300" />
+
+<h2 id="Work">Android in the Workplace</h2>
+
+<p>In an enterprise work environment, an Android device can now be configured with separate profiles for both work and personal use. The employer administers the work profile and can control the apps available within it. Employees can then control their personal space on the device, which is not accessible by the employer.</p>
+
+<p>Notifications and apps for both the personal and work profile are
+visible in a unified view. Apps for work are badged so users can identify them easily. The data for each profile is kept separate
+and secure from each other, including when the same app is used by both profiles&mdash;similar to the <a href="{@docRoot}about/versions/jelly-bean.html#42-multiuser">multi-user support</a> introduced in
+Android 4.2.</p>
+
 
 
 <h2 id="ScreenCapture">Screen capturing and sharing</h2>
