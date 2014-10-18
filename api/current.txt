@@ -28114,6 +28114,7 @@ package android.telecom {
     method public void onAbort();
     method public void onAnswer();
     method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onConferenceChanged();
     method public void onDisconnect();
     method public void onHold();
     method public void onPlayDtmfTone(char);

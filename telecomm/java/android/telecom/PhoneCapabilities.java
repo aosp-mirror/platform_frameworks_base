@@ -103,6 +103,17 @@ public final class PhoneCapabilities {
         return (capabilities & capability) != 0;
     }
 
+    /**
+     * Removes the specified capability from the set of capabilities and returns the new set.
+     * @param capabilities The set of capabilities.
+     * @param capability The capability to remove from the set.
+     * @return The set of capabilities, with the capability removed.
+     * @hide
+     */
+    public static int remove(int capabilities, int capability) {
+        return capabilities & ~capability;
+    }
+
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
         builder.append("[Capabilities:");
