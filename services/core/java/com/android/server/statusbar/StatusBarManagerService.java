@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.util.Slog;
+import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
@@ -295,9 +296,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
-    /** 
+    /**
      * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
-     * response to a window with FLAG_NEEDS_MENU_KEY set.
+     * response to a window with {@link android.view.WindowManager.LayoutParams#needsMenuKey} set
+     * to {@link android.view.WindowManager.LayoutParams#NEEDS_MENU_SET_TRUE}.
      */
     @Override
     public void topAppWindowChanged(final boolean menuVisible) {
