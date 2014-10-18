@@ -165,7 +165,7 @@ public abstract class Spline {
                         throw new IllegalArgumentException("The control points must have "
                                 + "monotonic Y values.");
                     }
-                    float h = FloatMath.hypot(a, b);
+                    float h = (float) Math.hypot(a, b);
                     if (h > 9f) {
                         float t = 3f / h;
                         m[i] = t * a * d[i];
