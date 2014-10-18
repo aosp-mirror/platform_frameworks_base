@@ -552,6 +552,10 @@ enum {
     MEMINFO_SWAP_TOTAL,
     MEMINFO_SWAP_FREE,
     MEMINFO_ZRAM_TOTAL,
+    MEMINFO_MAPPED,
+    MEMINFO_VMALLOC_USED,
+    MEMINFO_PAGE_TABLES,
+    MEMINFO_KERNEL_STACK,
     MEMINFO_COUNT
 };
 
@@ -590,6 +594,11 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             "Slab:",
             "SwapTotal:",
             "SwapFree:",
+            "ZRam:",
+            "Mapped:",
+            "VmallocUsed:",
+            "PageTables:",
+            "KernelStack:",
             NULL
     };
     static const int tagsLen[] = {
@@ -601,12 +610,17 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             5,
             10,
             9,
+            5,
+            7,
+            12,
+            11,
+            12,
             0
     };
-    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     char* p = buffer;
-    while (*p && numFound < 8) {
+    while (*p && numFound < 13) {
         int i = 0;
         while (tags[i]) {
             if (strncmp(p, tags[i], tagsLen[i]) == 0) {

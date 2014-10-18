@@ -1734,8 +1734,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         logBuilder.append("  MemInfo: ");
                         logBuilder.append(infos[Debug.MEMINFO_SLAB]).append(" kB slab, ");
                         logBuilder.append(infos[Debug.MEMINFO_SHMEM]).append(" kB shmem, ");
+                        logBuilder.append(infos[Debug.MEMINFO_VM_ALLOC_USED]).append(" kB vm alloc, ");
+                        logBuilder.append(infos[Debug.MEMINFO_PAGE_TABLES]).append(" kB page tables ");
+                        logBuilder.append(infos[Debug.MEMINFO_KERNEL_STACK]).append(" kB kernel stack\n");
+                        logBuilder.append("           ");
                         logBuilder.append(infos[Debug.MEMINFO_BUFFERS]).append(" kB buffers, ");
                         logBuilder.append(infos[Debug.MEMINFO_CACHED]).append(" kB cached, ");
+                        logBuilder.append(infos[Debug.MEMINFO_MAPPED]).append(" kB mapped, ");
                         logBuilder.append(infos[Debug.MEMINFO_FREE]).append(" kB free\n");
                         if (infos[Debug.MEMINFO_ZRAM_TOTAL] != 0) {
                             logBuilder.append("  ZRAM: ");
@@ -1952,9 +1957,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 + (SystemClock.uptimeMillis()-start) + "ms");
                         mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
                                 memInfo.getFreeSizeKb(), memInfo.getZramTotalSizeKb(),
-                                memInfo.getBuffersSizeKb()+memInfo.getShmemSizeKb()
-                                        +memInfo.getSlabSizeKb(),
-                                nativeTotalPss);
+                                memInfo.getKernelUsedSizeKb(), nativeTotalPss);
                     }
                 }
 
@@ -14240,8 +14243,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
                             memInfo.getFreeSizeKb(), memInfo.getZramTotalSizeKb(),
-                            memInfo.getBuffersSizeKb()+memInfo.getShmemSizeKb()+memInfo.getSlabSizeKb(),
-                            nativeProcTotalPss);
+                            memInfo.getKernelUsedSizeKb(), nativeProcTotalPss);
                 }
             }
             if (!brief) {
@@ -14280,16 +14282,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (!isCompact) {
                 pw.print(" Used RAM: "); pw.print(totalPss - cachedPss
-                        + memInfo.getBuffersSizeKb() + memInfo.getShmemSizeKb()
-                        + memInfo.getSlabSizeKb()); pw.print(" kB (");
+                        + memInfo.getKernelUsedSizeKb()); pw.print(" kB (");
                         pw.print(totalPss - cachedPss); pw.print(" used pss + ");
-                        pw.print(memInfo.getBuffersSizeKb()); pw.print(" buffers + ");
-                        pw.print(memInfo.getShmemSizeKb()); pw.print(" shmem + ");
-                        pw.print(memInfo.getSlabSizeKb()); pw.println(" slab)");
+                        pw.print(memInfo.getKernelUsedSizeKb()); pw.print(" kernel)\n");
                 pw.print(" Lost RAM: "); pw.print(memInfo.getTotalSizeKb()
                         - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                        - memInfo.getBuffersSizeKb() - memInfo.getShmemSizeKb()
-                        - memInfo.getSlabSizeKb()); pw.println(" kB");
+                        - memInfo.getKernelUsedSizeKb()); pw.println(" kB");
             }
             if (!brief) {
                 if (memInfo.getZramTotalSizeKb() != 0) {
