@@ -398,7 +398,15 @@ public abstract class CompoundButton extends Button implements Checkable {
         super.onDraw(canvas);
 
         if (buttonDrawable != null) {
-            buttonDrawable.draw(canvas);
+            final int scrollX = mScrollX;
+            final int scrollY = mScrollY;
+            if (scrollX == 0 && scrollY == 0) {
+                buttonDrawable.draw(canvas);
+            } else {
+                canvas.translate(scrollX, scrollY);
+                buttonDrawable.draw(canvas);
+                canvas.translate(-scrollX, -scrollY);
+            }
         }
     }
 
