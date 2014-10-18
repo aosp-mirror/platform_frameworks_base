@@ -121,6 +121,11 @@ sdk.platform.apiLevel=21
   offers new features for users and app developers. This document provides an
   introduction to the most notable new APIs.</p>
 
+<p>For a high-level look at the new platform features, instead
+see the
+<a href="{@docRoot}about/versions/lollipop.html">Android Lollipop
+highlights</a>.</p>
+
 
 <h3 id="Start">Start developing</h3>
 
@@ -254,15 +259,6 @@ allow media playback control on the notification, call the
 method and set the notification's visibility level to
 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}.
 </p>
-
-<div class="figure" style="width:320px">
-  <img src="{@docRoot}images/android-5.0/hun-example.png"
-    srcset="{@docRoot}images/android-5.0/hun-example@2x.png 2x"
-    alt="" width="320" height="541" id="figure1" />
-  <p class="img-caption">
-    <strong>Figure 1.</strong> Fullscreen activity showing a heads-up notification
-  </p>
-</div>
 
 <h4 id="NotificationsMediaPlayback">Media playback</h4>
 <p>If you are implementing notifications that present media playback
@@ -932,16 +928,6 @@ related issues.</p>
 
 <h2 id="Enterprise">Android in the Workplace and in Education</h2>
 <h3 id="ManagedProvisioning">Managed provisioning</h3>
-
-<div class="figure" style="width:360px">
-  <img src="../../images/android-5.0/managed_apps_launcher.png"
-    srcset="../../images/android-5.0/managed_apps_launcher@2x.png 2x"
-    alt="" width="360" height="609" id="figure3" />
-  <p class="img-caption">
-    <strong>Figure 2.</strong> Launcher screen showing managed apps (marked with
-    a lock badge)
-  </p>
-</div>
 
 <p>Android 5.0 provides new functionality for running apps within
 an enterprise environment. A
