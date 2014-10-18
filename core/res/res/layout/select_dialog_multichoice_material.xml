@@ -23,8 +23,8 @@
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textColor="?android:attr/textColorAlertDialogListItem"
     android:gravity="center_vertical"
-    android:paddingStart="16dip"
-    android:paddingEnd="16dip"
+    android:paddingStart="@dimen/alert_dialog_padding_material"
+    android:paddingEnd="@dimen/alert_dialog_padding_material"
     android:checkMark="?android:attr/listChoiceIndicatorMultiple"
     android:checkMarkGravity="start"
     android:ellipsize="marquee" />
