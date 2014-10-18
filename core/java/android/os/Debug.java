@@ -1093,7 +1093,15 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /** @hide */
     public static final int MEMINFO_ZRAM_TOTAL = 8;
     /** @hide */
-    public static final int MEMINFO_COUNT = 9;
+    public static final int MEMINFO_MAPPED = 9;
+    /** @hide */
+    public static final int MEMINFO_VM_ALLOC_USED = 10;
+    /** @hide */
+    public static final int MEMINFO_PAGE_TABLES = 11;
+    /** @hide */
+    public static final int MEMINFO_KERNEL_STACK = 12;
+    /** @hide */
+    public static final int MEMINFO_COUNT = 13;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields
