@@ -1759,16 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"已選取 <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已刪除 <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"如要取消固定這個畫面，請同時輕觸並按住返回按鈕和總覽按鈕。"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"如要取消固定這個畫面，請輕觸並按住總覽按鈕。"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"螢幕已固定，且貴機構不允許取消固定。"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"使用螢幕固定功能？"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"螢幕鎖定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請同時輕觸並按住返回按鈕和總覽按鈕。"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"螢幕鎖定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請輕觸並按住總覽按鈕。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了，謝謝"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"啟動"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定螢幕"</string>

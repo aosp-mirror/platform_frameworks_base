@@ -176,7 +176,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ටැබ්ලට් විකල්ප"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"දුරකථන විකල්ප"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"තිර අගුල"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"බලය අක්‍රිය කරමින්"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"බලය අක්‍රිය කරන්න"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"දෝෂ වර්තාව"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"දෝෂ වාර්තාවක් ගන්න"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ඊ-තැපැල් පණිවිඩයක් ලෙස යැවීමට මෙය ඔබගේ වත්මන් උපාංග තත්වය ගැන තොරතුරු එකතු කරනු ඇත. දෝෂ වාර්තාව ආරම්භ කර එය යැවීමට සූදානම් කරන තෙක් එයට කිසියම් කාලයක් ගතවනු ඇත; කරුණාකර ඉවසන්න."</string>
