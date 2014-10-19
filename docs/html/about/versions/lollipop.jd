@@ -142,7 +142,7 @@ video apps and games to display smooth synchronized content.</p>
 
 
 
-<img src="{@docRoot}images/versions/recents_screen.png" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
+<img src="{@docRoot}images/versions/recents_screen_2x.png" srcset="{@docRoot}images/versions/recents_screen.png 1x, {@docRoot}images/versions/recents_screen_2x.png 2x" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
 
 <h2 id="Documents">Document-centric apps</h2>
 
