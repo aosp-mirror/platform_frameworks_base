@@ -1759,16 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> தேர்ந்தெடுக்கப்பட்டது"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> நீக்கப்பட்டது"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"இந்தத் திரையை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"இந்தத் திரையை விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"திரை பின் செய்யப்பட்டது. பின்னை அகற்ற உங்கள் நிறுவனம் ஆதரிக்கவில்லை."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"திரையை பின் செய்தலைப் பயன்படுத்தவா?"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"திரை பொருத்துதல், ஒரே காட்சியில் தோன்றுமாறு திரையைப் பூட்டும்.\n\nஅதை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"திரை பொருத்துதல், ஒரே காட்சியில் தோன்றுமாறு திரையைப் பூட்டும்.\n\nஅதை விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"வேண்டாம், நன்றி"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"தொடங்கு"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>

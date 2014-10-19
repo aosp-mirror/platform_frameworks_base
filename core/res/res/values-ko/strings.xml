@@ -1759,16 +1759,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>이(가) 선택됨"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"화면을 고정 해제하려면 \'뒤로\'와 \'개요\'를 동시에 길게 터치합니다."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"화면을 고정 해제하려면 \'개요\'를 길게 터치합니다."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"화면이 고정되었습니다. 소속된 조직에서 고정 해제를 허용하지 않습니다."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"화면을 고정하시겠습니까?"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"화면을 고정하면 단일 보기에서 디스플레이를 잠급니다.\n\n고정 해제하려면 \'뒤로\'와 \'개요\'를 동시에 길게 터치합니다."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"화면을 고정하면 단일 보기에서 디스플레이를 잠급니다.\n\n고정 해제하려면 \'개요\'를 길게 터치합니다."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"아니요"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"시작"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
