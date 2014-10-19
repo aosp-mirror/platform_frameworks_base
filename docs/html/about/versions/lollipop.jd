@@ -213,12 +213,19 @@ video apps and games to display smooth synchronized content.</p>
 
 <h2 id="Work">Android in the Workplace</h2>
 
-<p>In an enterprise work environment, an Android device can now be configured with separate profiles for both work and personal use. The employer administers the work profile and can control the apps available within it. Employees can then control their personal space on the device, which is not accessible by the employer.</p>
+<p>In an enterprise work environment, an Android device can now be
+configured with separate profiles for both work and personal use.</p>
+
+<p>Employers can issue devices with a <em>device owner</em> app
+installed that can create and remove secondary profiles and configure
+global device settings. Alternatively, employees can bring their own
+device and the employer can add a secure work profile to the device.</p>
 
 <p>Notifications and apps for both the personal and work profile are
-visible in a unified view. Apps for work are badged so users can identify them easily. The data for each profile is kept separate
-and secure from each other, including when the same app is used by both profiles&mdash;similar to the <a href="{@docRoot}about/versions/jelly-bean.html#42-multiuser">multi-user support</a> introduced in
-Android 4.2.</p>
+visible in a unified view, and apps for work are badged so users can
+identify them easily. The data for each profile is always kept separate
+and secure from each other, including when the same app is used by both
+profiles.</p>
 
 
 
