@@ -23,5 +23,6 @@ package android.hardware.hdmi;
  * @hide
  */
 oneway interface IHdmiVendorCommandListener {
-    void onReceived(int logicalAddress, in byte[] operands, boolean hasVendorId);
+    void onReceived(int logicalAddress, int destAddress, in byte[] operands, boolean hasVendorId);
+    void onControlStateChanged(boolean enabled, int reason);
 }

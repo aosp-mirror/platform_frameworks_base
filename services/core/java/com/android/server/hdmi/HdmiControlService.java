@@ -316,20 +316,23 @@ public final class HdmiControlService extends SystemService {
         mMessageValidator = new HdmiCecMessageValidator(this);
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
-        // Register broadcast receiver for power state change.
         if (mCecController != null) {
+            // Register broadcast receiver for power state change.
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             getContext().registerReceiver(mHdmiControlBroadcastReceiver, filter);
+
+            // Register ContentObserver to monitor the settings change.
+            registerContentObserver();
         }
     }
 
     /**
      * Called when the initialization of local devices is complete.
      */
-    private void onInitializeCecComplete() {
+    private void onInitializeCecComplete(int initiatedBy) {
         if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
             mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
         }
@@ -337,7 +340,22 @@ public final class HdmiControlService extends SystemService {
 
         if (isTvDevice()) {
             mCecController.setOption(OPTION_CEC_AUTO_WAKEUP, toInt(tv().getAutoWakeup()));
-            registerContentObserver();
+        }
+        int reason = -1;
+        switch (initiatedBy) {
+            case INITIATED_BY_BOOT_UP:
+                reason = HdmiControlManager.CONTROL_STATE_CHANGED_REASON_START;
+                break;
+            case INITIATED_BY_ENABLE_CEC:
+                reason = HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING;
+                break;
+            case INITIATED_BY_SCREEN_ON:
+            case INITIATED_BY_WAKE_UP_MESSAGE:
+                reason = HdmiControlManager.CONTROL_STATE_CHANGED_REASON_WAKEUP;
+                break;
+        }
+        if (reason != -1) {
+            invokeVendorCommandListenersOnControlStateChanged(true, reason);
         }
     }
 
@@ -402,10 +420,6 @@ public final class HdmiControlService extends SystemService {
         Global.putInt(cr, key, toInt(value));
     }
 
-    private void unregisterSettingsObserver() {
-        getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
-    }
-
     private void initializeCec(int initiatedBy) {
         mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, ENABLED);
         initializeLocalDevices(initiatedBy);
@@ -460,7 +474,7 @@ public final class HdmiControlService extends SystemService {
                         if (initiatedBy != INITIATED_BY_HOTPLUG) {
                             // In case of the hotplug we don't call onInitializeCecComplete()
                             // since we reallocate the logical address only.
-                            onInitializeCecComplete();
+                            onInitializeCecComplete(initiatedBy);
                         }
                         notifyAddressAllocated(allocatedDevices, initiatedBy);
                     }
@@ -1789,6 +1803,8 @@ public final class HdmiControlService extends SystemService {
     private void onStandby() {
         assertRunOnServiceThread();
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
+        invokeVendorCommandListenersOnControlStateChanged(false,
+                HdmiControlManager.CONTROL_STATE_CHANGED_REASON_STANDBY);
 
         final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
         disableDevices(new PendingActionClearedCallback() {
@@ -1826,9 +1842,6 @@ public final class HdmiControlService extends SystemService {
         if (mCecController != null) {
             for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
                 device.disableDevice(mStandbyMessageReceived, callback);
-            }
-            if (isTvDevice()) {
-                unregisterSettingsObserver();
             }
         }
 
@@ -1874,8 +1887,8 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    boolean invokeVendorCommandListeners(int deviceType, int srcAddress, byte[] params,
-            boolean hasVendorId) {
+    boolean invokeVendorCommandListenersOnReceived(int deviceType, int srcAddress, int destAddress,
+            byte[] params, boolean hasVendorId) {
         synchronized (mLock) {
             if (mVendorCommandListenerRecords.isEmpty()) {
                 return false;
@@ -1885,9 +1898,25 @@ public final class HdmiControlService extends SystemService {
                     continue;
                 }
                 try {
-                    record.mListener.onReceived(srcAddress, params, hasVendorId);
+                    record.mListener.onReceived(srcAddress, destAddress, params, hasVendorId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to notify vendor command reception", e);
+                }
+            }
+            return true;
+        }
+    }
+
+    boolean invokeVendorCommandListenersOnControlStateChanged(boolean enabled, int reason) {
+        synchronized (mLock) {
+            if (mVendorCommandListenerRecords.isEmpty()) {
+                return false;
+            }
+            for (VendorCommandListenerRecord record : mVendorCommandListenerRecords) {
+                try {
+                    record.mListener.onControlStateChanged(enabled, reason);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to notify control-state-changed to vendor handler", e);
                 }
             }
             return true;
@@ -1943,6 +1972,11 @@ public final class HdmiControlService extends SystemService {
     void setControlEnabled(boolean enabled) {
         assertRunOnServiceThread();
 
+        if (!enabled) {
+            // Call the vendor handler before the service is disabled.
+            invokeVendorCommandListenersOnControlStateChanged(false,
+                    HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING);
+        }
         int value = toInt(enabled);
         mCecController.setOption(OPTION_CEC_ENABLE, value);
         mMhlController.setOption(OPTION_MHL_ENABLE, value);
