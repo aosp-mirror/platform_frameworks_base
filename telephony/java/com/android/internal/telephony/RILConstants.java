@@ -161,6 +161,7 @@ cat include/telephony/ril.h | \
     public static final int DATA_PROFILE_FOTA      = 3;
     public static final int DATA_PROFILE_CBS       = 4;
     public static final int DATA_PROFILE_OEM_BASE  = 1000;
+    public static final int DATA_PROFILE_INVALID   = 0xFFFFFFFF;
 
     int RIL_REQUEST_GET_SIM_STATUS = 1;
     int RIL_REQUEST_ENTER_SIM_PIN = 2;
