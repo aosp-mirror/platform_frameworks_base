@@ -521,10 +521,10 @@
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"ఫ్రేమ్ బఫర్ యొక్క కంటెంట్‌ను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlingerను ప్రాప్యత చేయడం"</string>
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlinger తక్కువ స్థాయి లక్షణాలను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi డిస్‌ప్లేలను కాన్ఫిగర్ చేయడం"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wifi డిస్‌ప్లేలను కాన్ఫిగర్ చేయడానికి మరియు వాటికి కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi డిస్‌ప్లేలను నియంత్రించడం"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wifi డిస్‌ప్లేల యొక్క తక్కువ-స్థాయి లక్షణాలను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"వైఫై డిస్‌ప్లేలను కాన్ఫిగర్ చేయడం"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"వైఫై డిస్‌ప్లేలను కాన్ఫిగర్ చేయడానికి మరియు వాటికి కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"వైఫై డిస్‌ప్లేలను నియంత్రించడం"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"వైఫై డిస్‌ప్లేల యొక్క తక్కువ-స్థాయి లక్షణాలను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ఆడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేయడం"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ఆడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేసి, దారి మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"హాట్‌వర్డ్ గుర్తింపు"</string>

@@ -1757,16 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"要取消固定此屏幕，请同时触摸并按住“返回”和“概览”按钮。"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"要取消固定此屏幕，请触摸并按住概览按钮。"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"屏幕处于固定状态。您所属的单位不允许取消固定。"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"要固定屏幕吗？"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"固定屏幕后，设备会一直显示某一个屏幕。\n\n要取消固定屏幕，请同时触摸并按住“返回”和“概览”按钮。"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"固定屏幕后，设备会一直显示某一个屏幕。\n\n要取消固定屏幕，请触摸并按住概览按钮。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"固定"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
