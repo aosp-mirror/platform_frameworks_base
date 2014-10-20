@@ -3,10 +3,9 @@ parent.title=Building Your First App
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Creating a Project
-previous.link=creating-project.html
-next.title=Building a Simple User Interface
-next.link=building-ui.html
+
+page.tags=emulator, virtual device
+helpoutsWidget=true
 
 @jd:body
 
