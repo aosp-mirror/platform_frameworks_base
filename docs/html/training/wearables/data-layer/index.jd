@@ -66,7 +66,7 @@ channel.
 
 <h2>Lessons</h2>
   <dl>
-    <dt><a href="{@docRoot}training/wearables/data-layer/data-items.html">Accessing the Wearable Data Layer</a></dt>
+    <dt><a href="{@docRoot}training/wearables/data-layer/accessing.html">Accessing the Wearable Data Layer</a></dt>
     <dd>This lesson shows you how to create a client to access the Data Layer APIs.</dd>
 
     <dt><a href="{@docRoot}training/wearables/data-layer/data-items.html">Syncing Data Items</a></dt>

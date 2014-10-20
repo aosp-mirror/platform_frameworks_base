@@ -60,7 +60,8 @@ to <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</
       <a href="{@docRoot}sdk/installing/studio-build.html">Building Your Project with
       Gradle</a> for more information about Gradle.</p></li>
   <li>Add a new build rule under <code>dependencies</code> for the latest version of
-<code>play-services</code>. For example:
+      <code>play-services</code>.
+      <p>For example, for mobile modules:</p>
 <pre class="no-pretty-print">
 apply plugin: 'android'
 ...
@@ -70,7 +71,16 @@ dependencies {
     <strong>compile 'com.google.android.gms:play-services:6.1.+'</strong>
 }
 </pre>
-<p>Be sure you update this version number each time Google Play services is updated.</p>
+      <p>For wearable modules:</p>
+<pre class="no-pretty-print">
+apply plugin: 'android'
+...
+
+dependencies {
+    <strong>compile 'com.google.android.gms:play-services-wearable:6.1.+'</strong>
+}
+</pre>
+      <p>Be sure you update this version number each time Google Play services is updated.</p>
   </li>
   <li>Save the changes and click <strong>Sync Project with Gradle Files</strong>
 <img src="{@docRoot}images/tools/sync-project.png" style="vertical-align:bottom;margin:0;height:19px" />
