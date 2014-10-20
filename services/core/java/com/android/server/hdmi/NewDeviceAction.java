@@ -47,6 +47,7 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
 
     private final int mDeviceLogicalAddress;
     private final int mDevicePhysicalAddress;
+    private final int mDeviceType;
 
     private int mVendorId;
     private String mDisplayName;
@@ -57,12 +58,14 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
      * @param source {@link HdmiCecLocalDevice} instance
      * @param deviceLogicalAddress logical address of the device in interest
      * @param devicePhysicalAddress physical address of the device in interest
+     * @param deviceType type of the device
      */
     NewDeviceAction(HdmiCecLocalDevice source, int deviceLogicalAddress,
-            int devicePhysicalAddress) {
+            int devicePhysicalAddress, int deviceType) {
         super(source);
         mDeviceLogicalAddress = deviceLogicalAddress;
         mDevicePhysicalAddress = devicePhysicalAddress;
+        mDeviceType = deviceType;
         mVendorId = Constants.UNKNOWN_VENDOR_ID;
     }
 
@@ -155,8 +158,7 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
         HdmiDeviceInfo deviceInfo = new HdmiDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 tv().getPortId(mDevicePhysicalAddress),
-                HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress),
-                mVendorId, mDisplayName);
+                mDeviceType, mVendorId, mDisplayName);
         tv().addCecDevice(deviceInfo);
 
         if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
