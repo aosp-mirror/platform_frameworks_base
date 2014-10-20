@@ -300,6 +300,9 @@
     <protected-broadcast android:name="android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE" />
     <protected-broadcast android:name="android.intent.action.ACTION_SUBINFO_RECORD_UPDATED" />
 
+    <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE" />
+    <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
