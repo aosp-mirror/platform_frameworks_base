@@ -401,4 +401,23 @@ public class TelephonyIntents {
      */
     public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
             = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
+
+    /*
+     * Broadcast Action: An attempt to set phone radio type and access technology has changed.
+     * This has the following extra values:
+     * <ul>
+     *   <li><em>phones radio access family </em> - A RadioAccessFamily
+     *   array, contain phone ID and new radio access family for each phone.</li>
+     * </ul>
+     */
+    public static final String ACTION_SET_RADIO_CAPABILITY_DONE =
+            "android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE";
+
+    public static final String EXTRA_RADIO_ACCESS_FAMILY = "rafs";
+
+    /*
+     * Broadcast Action: An attempt to set phone radio access family has failed.
+     */
+    public static final String ACTION_SET_RADIO_CAPABILITY_FAILED =
+            "android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED";
 }
