@@ -4459,6 +4459,9 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     // Look to see if we already have an overriding v21 configuration.
     sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
             String16(target->getResourceType()), resourceName);
+    //if (cl == NULL) {
+    //    fprintf(stderr, "fuuuuck\n");
+    //}
     if (cl->getEntries().indexOfKey(newConfig) < 0) {
         // We don't have an overriding entry for v21, so we must duplicate this one.
         sp<XMLNode> newRoot = root->clone();
@@ -4466,7 +4469,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                 AaptGroupEntry(newConfig), target->getResourceType());
         String8 resPath = String8::format("res/%s/%s",
                 newFile->getGroupEntry().toDirName(target->getResourceType()).string(),
-                target->getPath().getPathLeaf().string());
+                target->getSourceFile().getPathLeaf().string());
         resPath.convertToResPath();
 
         // Add a resource table entry.
