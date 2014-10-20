@@ -2,10 +2,18 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
+# TODO: Trying to link libsigchain as a static library prevents
+# static linker from exporting necessary symbols. So as a workaround
+# we use sigchain.o
 LOCAL_SRC_FILES:= \
-	app_main.cpp
+	app_main.cpp \
+	sigchain_proxy.cpp
+
+LOCAL_LDFLAGS := -Wl,--version-script,art/sigchainlib/version-script.txt -Wl,--export-dynamic
+LOCAL_CPPFLAGS := -std=c++11 -Iart
 
 LOCAL_SHARED_LIBRARIES := \
+	libdl \
 	libcutils \
 	libutils \
 	liblog \
@@ -28,8 +36,10 @@ ifeq ($(TARGET_ARCH),arm)
 
 include $(CLEAR_VARS)
 
+# see comment above (~l5)
 LOCAL_SRC_FILES:= \
-	app_main.cpp
+	app_main.cpp \
+	sigchain_proxy.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
@@ -37,6 +47,9 @@ LOCAL_SHARED_LIBRARIES := \
 	liblog \
 	libbinder \
 	libandroid_runtime
+
+LOCAL_LDFLAGS := -ldl -Wl,--version-script,art/sigchainlib/version-script.txt -Wl,--export-dynamic
+LOCAL_CPPFLAGS := -std=c++11 -Iart
 
 LOCAL_MODULE := app_process__asan
 LOCAL_MODULE_TAGS := eng
