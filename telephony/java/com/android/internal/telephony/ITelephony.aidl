@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.telephony.CellInfo;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.NeighboringCellInfo;
+import android.telephony.RadioAccessFamily;
 import java.util.List;
 
 
@@ -813,4 +814,21 @@ interface ITelephony {
      * Shutdown Mobile Radios
      */
     void shutdownMobileRadios();
+
+    /**
+     * Set phone radio type and access technology.
+     *
+     * @param rafs an RadioAccessFamily array to indicate all phone's
+     *        new radio access family. The length of RadioAccessFamily
+     *        must equ]]al to phone count.
+     */
+    void setRadioCapability(in RadioAccessFamily[] rafs);
+
+    /**
+     * Get phone radio type and access technology.
+     *
+     * @param phoneId which phone you want to get
+     * @return phone radio type and access technology
+     */
+    int getRadioAccessFamily(in int phoneId);
 }
