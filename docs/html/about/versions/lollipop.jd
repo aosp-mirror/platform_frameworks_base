@@ -28,7 +28,7 @@ page.title=Android Lollipop
   <li><a href="#Graphics">High-performance graphics</a></li>
   <li><a href="#Audio">More Powerful Audio</a></li>
   <li><a href="#Camera">Enhanced Camera & Video</a></li>
-  <li><a href="#Work">Android in the Workplace</a></li>
+  <li><a href="#Work">Android in the workplace</a></li>
   <li><a href="#ScreenCapture">Screen capturing and sharing</a></li>
   <li><a href="#Sensors">New types of sensors</a></li>
   <li><a href="#WebView">Chromium WebView</a></li>
@@ -211,21 +211,22 @@ video apps and games to display smooth synchronized content.</p>
     srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"
     alt="" width="300" />
 
-<h2 id="Work">Android in the Workplace</h2>
+<h2 id="Work">Android in the workplace</h2>
 
-<p>In an enterprise work environment, an Android device can now be
-configured with separate profiles for both work and personal use.</p>
+<p>To enable bring-your-own-device for enterprise environments, a new
+<a href="{@docRoot}about/versions/android-5.0.html#Enterprise">managed provisioning process</a>
+creates a secure work profile on the device. In the launcher, apps are shown with a Work badge to
+indicate that the app and its data are administered inside of the work profile by an IT
+administrator.</p>
 
-<p>Employers can issue devices with a <em>device owner</em> app
-installed that can create and remove secondary profiles and configure
-global device settings. Alternatively, employees can bring their own
-device and the employer can add a secure work profile to the device.</p>
+<p>Notifications for both the personal and work profile are visible in a unified view. The data
+for each profile is always kept separate and secure from each other, including when the same
+app is used by both profiles.</p>
 
-<p>Notifications and apps for both the personal and work profile are
-visible in a unified view, and apps for work are badged so users can
-identify them easily. The data for each profile is always kept separate
-and secure from each other, including when the same app is used by both
-profiles.</p>
+<p>For company-owned devices, IT administrators can start with a new device and configure it with a
+<a href="{@docRoot}about/versions/android-5.0.html#DeviceOwner">device owner</a>. Employers can
+issue these devices with a device owner app already installed that
+can configure global device settings.</p>
 
 
 
