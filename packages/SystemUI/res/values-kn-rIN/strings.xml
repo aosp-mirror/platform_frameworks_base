@@ -49,7 +49,7 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ಮ್ಯೂಟ್"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ಸ್ವಯಂ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"ಅಧಿಸೂಚನೆಗಳು"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ವ್ಯಾಪ್ತಿ ತಲುಪಿದೆ"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ಬ್ಲೂಟೂತ್‌‌ ವ್ಯಾಪ್ತಿ ತಲುಪಿದೆ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ಇನ್‌ಪುಟ್ ವಿಧಾನಗಳನ್ನು ಹೊಂದಿಸು"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB ಸಾಧನವನ್ನು ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
@@ -91,8 +91,8 @@
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ಇನ್‌ಪುಟ್ ವಿಧಾನ ಬದಲಿಸು ಬಟನ್."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ಹೊಂದಾಣಿಕೆಯ ಝೂಮ್ ಬಟನ್."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ಚಿಕ್ಕ ಪರದೆಯಿಂದ ದೊಡ್ಡ ಪರದೆಗೆ ಝೂಮ್ ಮಾಡು."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ಬ್ಲೂಟೂತ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ಬ್ಲೂಟೂತ್‌‌ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"ಬ್ಯಾಟರಿ ಇಲ್ಲ."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ಬ್ಯಾಟರಿ ಒಂದು ಪಟ್ಟಿ."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ಬ್ಯಾಟರಿ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
@@ -108,12 +108,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ಡೇಟಾ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ಡೇಟಾ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ಡೇಟಾ ಸಂಕೇತ ತುಂಬಿದೆ."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi ಆಫ್."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi ಒಂದು ಪಟ್ಟಿ."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi ಎರಡು ಪಟ್ಟಿಗಳು."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi ಮೂರು ಪಟ್ಟಿಗಳು."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi ಸಿಗ್ನಲ್‌‌ ಪೂರ್ತಿ ಇದೆ."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"ವೈಫೈ ಆಫ್."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"ವೈಫೈ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"ವೈಫೈ ಒಂದು ಪಟ್ಟಿ."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"ವೈಫೈ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"ವೈಫೈ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"ವೈಫೈ ಸಿಗ್ನಲ್‌‌ ಪೂರ್ತಿ ಇದೆ."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX ಸಂಕೇತವಿಲ್ಲ."</string>
@@ -143,8 +143,8 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ರೋಮಿಂಗ್"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"ಎಡ್ಜ್‌"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"ಯಾವುದೇ SIM ಇಲ್ಲ."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ಟೆಥರಿಂಗ್."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"ಯಾವುದೇ ಸಿಮ್‌ ಇಲ್ಲ."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ಬ್ಲೂಟೂತ್‌‌ ಟೆಥರಿಂಗ್."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ಏರೋಪ್ಲೇನ್‌ ಮೋಡ್‌"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ಬ್ಯಾಟರಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರತಿಶತ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು."</string>
@@ -168,8 +168,8 @@
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ಅವಲೋಕನ."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ಬಳಕೆದಾರ <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ವೈಫೈ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"ವೈಫೈ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ಮೊಬೈಲ್ <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ಬ್ಯಾಟರಿ <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -179,7 +179,7 @@
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ಬ್ಲೂಟೂತ್ ಆಫ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ಬ್ಲೂಟೂತ್ ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ಬ್ಲೂಟೂತ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ಬ್ಲೂಟೂತ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ಬ್ಲೂಟೂತ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯು ಆಫ್ ಆಗಿದೆ."</string>
