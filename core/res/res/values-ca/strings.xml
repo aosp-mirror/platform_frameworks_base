@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionat"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Per anul·lar la fixació d\'aquesta pantalla, mantén premudes les opcions Enrere i Vista general alhora."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per anul·lar la fixació d\'aquesta pantalla, mantén premuda l\'opció Vista general."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Per anul·lar la fixació d\'aquesta pantalla, mantén premudes les opcions Enrere i Visió general alhora."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per anul·lar la fixació d\'aquesta pantalla, mantén premuda l\'opció Visió general."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"S\'ha fixat la pantalla. La teva organització no permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Vols fixar aquesta pantalla?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Si fixes la pantalla, es bloquejarà en una sola vista.\n\nPer anul·lar la fixació, mantén premudes les opcions Enrere i Vista general alhora."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Si fixes la pantalla, es bloquejarà en una sola vista.\n\nPer anul·lar la fixació, mantén premuda l\'opció Vista general."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Si fixes la pantalla, es bloquejarà en una sola vista.\n\nPer anul·lar la fixació, mantén premudes les opcions Enrere i Visió general alhora."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Si fixes la pantalla, es bloquejarà en una sola vista.\n\nPer anul·lar la fixació, mantén premuda l\'opció Visió general."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRÀCIES"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
