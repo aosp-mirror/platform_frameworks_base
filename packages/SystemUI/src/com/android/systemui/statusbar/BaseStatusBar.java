@@ -266,6 +266,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) {
                 Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
+            // The intent we are sending is for the application, which
+            // won't have permission to immediately start an activity after
+            // the user switches to home.  We know it is safe to do at this
+            // point, so make sure new activity switches are now allowed.
+            try {
+                ActivityManagerNative.getDefault().resumeAppSwitches();
+            } catch (RemoteException e) {
+            }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
                 final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
@@ -278,11 +286,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                             try {
                                 ActivityManagerNative.getDefault()
                                         .keyguardWaitingForActivityDrawn();
-                                // The intent we are sending is for the application, which
-                                // won't have permission to immediately start an activity after
-                                // the user switches to home.  We know it is safe to do at this
-                                // point, so make sure new activity switches are now allowed.
-                                ActivityManagerNative.getDefault().resumeAppSwitches();
                             } catch (RemoteException e) {
                             }
                         }
@@ -1486,20 +1489,21 @@ public abstract class BaseStatusBar extends SystemUI implements
                     if (mIsHeadsUp) {
                         mHeadsUpNotificationView.clear();
                     }
-                    AsyncTask.execute(new Runnable() {
+                    new Thread() {
                         @Override
                         public void run() {
-                            if (keyguardShowing && !afterKeyguardGone) {
-                                try {
+                            try {
+                                if (keyguardShowing && !afterKeyguardGone) {
                                     ActivityManagerNative.getDefault()
                                             .keyguardWaitingForActivityDrawn();
-                                    // The intent we are sending is for the application, which
-                                    // won't have permission to immediately start an activity after
-                                    // the user switches to home.  We know it is safe to do at this
-                                    // point, so make sure new activity switches are now allowed.
-                                    ActivityManagerNative.getDefault().resumeAppSwitches();
-                                } catch (RemoteException e) {
                                 }
+
+                                // The intent we are sending is for the application, which
+                                // won't have permission to immediately start an activity after
+                                // the user switches to home.  We know it is safe to do at this
+                                // point, so make sure new activity switches are now allowed.
+                                ActivityManagerNative.getDefault().resumeAppSwitches();
+                            } catch (RemoteException e) {
                             }
 
                             if (mIntent != null) {
@@ -1524,7 +1528,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 // system process is dead if we're here.
                             }
                         }
-                    });
+                    }.start();
 
                     // close the shade if it was open
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
