@@ -8,7 +8,7 @@ page.title=Sending and Syncing Data
     <h2>Dependencies and prerequisites</h2>
     <ul>
       <li>Android 4.3 (API Level 18) or higher on the handset device</li>
-      <li>The latest version of <a href="{@docRoot}google/play">Google Play services</a></li>
+      <li>The latest version of <a href="{@docRoot}google/play-services/index.html">Google Play services</a></li>
       <li>An Android Wear device or Wear AVD</li>
     </ul>
   </div>
