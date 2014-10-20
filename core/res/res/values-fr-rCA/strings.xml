@@ -1761,16 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"« <xliff:g id="ITEM">%1$s</xliff:g> » a été sélectionné"</string>
     <string name="deleted_key" msgid="7659477886625566590">"« <xliff:g id="KEY">%1$s</xliff:g> » a été supprimé"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage de cet écran, maintenez enfoncées les touches Retour et Aperçu simultanément."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pour annuler l\'épinglage de cet écran, maintenez enfoncée la touche Aperçu."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"L\'écran est épinglé. Votre organisation n\'autorise pas l\'annulation d\'épinglage."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Utiliser l\'épinglage d\'écran?"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, maintenez le doigt sur Retour et Aperçu simultanément."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, maintenez le doigt sur Aperçu."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NON, MERCI"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"COMMENCER"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé"</string>
