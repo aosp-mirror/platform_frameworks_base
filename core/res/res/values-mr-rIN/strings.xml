@@ -52,9 +52,9 @@
     <string name="serviceErased" msgid="1288584695297200972">"मिटवणे यशस्वी झाले."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"अयोग्य संकेतशब्द."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI पूर्ण."</string>
-    <string name="badPin" msgid="9015277645546710014">"आपण टाइप केलेला जुना PIN योग्य नाही."</string>
+    <string name="badPin" msgid="9015277645546710014">"आपण टाइप केलेला जुना पिन योग्य नाही."</string>
     <string name="badPuk" msgid="5487257647081132201">"आपण टाइप केलेला PUK योग्य नाही."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"आपण टाइप केलेले PIN जुळत नाहीत."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"आपण टाइप केलेले पिन जुळत नाहीत."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 ते 8 अंकांचा पिन टाइप करा."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 अंकांचा किंवा मोठा PUK टाइप करा."</string>
     <string name="needPuk" msgid="919668385956251611">"आपले सिम कार्ड PUK-लॉक केलेले आहे. ते अनलॉक करण्यासाठी PUK कोड टाइप करा."</string>
@@ -74,7 +74,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल सोडून"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"संकेतशब्द बदल"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"PIN बदल"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"पिन बदल"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"कॉल करण्‍याचा नंबर आहे"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"कॉल करणारे नंबर प्रतिबंधित"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"तीन मार्गांनी कॉल करणे"</string>
@@ -203,8 +203,8 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"आपल्या प्रत्यक्ष स्थानाचे परीक्षण करेल."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"नेटवर्क संप्रेषण"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"विविध नेटवर्क वैशिष्ट्यांवर प्रवेश करेल."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Bluetooth द्वारे डिव्हाइसेसवर आणि नेटवर्कवर प्रवेश करेल."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ब"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ब द्वारे डिव्हाइसेसवर आणि नेटवर्कवर प्रवेश करेल."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ऑडिओ सेटिंग्ज"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ऑडिओ सेटिंग्ज बदला."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"बॅटरी प्रभावित करेल"</string>
@@ -294,8 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"आपल्या फोनवर किंवा सिम कार्डवर संचयित केलेल्या SMS संदेशांवर लिहिण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपले संदेश हटवू शकतात."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"मजकूर संदेश प्राप्त करा (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले संदेश आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth संदेश (नकाशा) प्राप्त करा"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth नकाशा संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अॅप ला अनुमती देते. याचा अर्थ अॅप आपल्या डिव्हाइसवर पाठविलेले संदेश आपल्याला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ब संदेश (नकाशा) प्राप्त करा"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ब नकाशा संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अॅप ला अनुमती देते. याचा अर्थ अॅप आपल्या डिव्हाइसवर पाठविलेले संदेश आपल्याला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अनुप्रयोग वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
     <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"अलीकडील वरील कार्य प्रारंभ करा"</string>
@@ -512,19 +512,19 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"स्‍थान प्रदाता स्‍थापित करण्‍यासाठी परवानगी"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"चाचणीसाठी किंवा नवीन स्थान प्रदाता स्थापित करण्यासाठी बनावट स्थान स्त्रोत तयार करा. हे GPS किंवा स्थान प्रदात्यांसारख्या स्थान आणि/किंवा अन्य स्थान स्त्रोतांकडून मिळालेली स्थिती अधिशून्य करण्यास अॅप ला अनुमती देते."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"अचूक स्थान (GPS आणि नेटवर्क-आधारित)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"सेल टॉवर आणि Wi-Fi सारखी समग्र स्थिती निर्धारण प्रणाली (GPS) किंवा नेटवर्क स्थान स्त्रोत वापरून आपले अचूक स्थान मिळवण्यासाठी अॅप ला अनुमती देते. अॅपला त्या वापरण्यासाठी या स्थान सेवा चालू असणे आणि आपल्या डिव्हाइसवर उपलब्ध असणे आवश्यक आहे. आपण कुठे आहात हे निर्धारित करण्यासाठी अॅप्स याचा वापर करू शकतात आणि अतिरिक्त बॅटरी उर्जा वापरली जाऊ शकते."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"सेल टॉवर आणि वाय-फाय सारखी समग्र स्थिती निर्धारण प्रणाली (GPS) किंवा नेटवर्क स्थान स्त्रोत वापरून आपले अचूक स्थान मिळवण्यासाठी अॅप ला अनुमती देते. अॅपला त्या वापरण्यासाठी या स्थान सेवा चालू असणे आणि आपल्या डिव्हाइसवर उपलब्ध असणे आवश्यक आहे. आपण कुठे आहात हे निर्धारित करण्यासाठी अॅप्स याचा वापर करू शकतात आणि अतिरिक्त बॅटरी उर्जा वापरली जाऊ शकते."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"अंदाजे स्थान (नेटवर्क-आधारित)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"आपले अंदाजे स्थान देण्याची अॅप ला अनुमती देते. हे स्थान सेल टॉवर आणि Wi-Fi सारखे नेटवर्क स्थान स्त्रोत वापरून स्थान सेवांद्वारे मिळवले आहे. अॅपला त्या वापरण्यासाठी या स्थान सेवा चालू असणे आणि आपल्या डिव्हाइसवर उपलब्ध असणे आवश्यक आहे. अॅप्स हे आपण कुठे आहात याचा अंदाज लावण्यासाठी वापरू शकतात."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"आपले अंदाजे स्थान देण्याची अॅप ला अनुमती देते. हे स्थान सेल टॉवर आणि वाय-फाय सारखे नेटवर्क स्थान स्त्रोत वापरून स्थान सेवांद्वारे मिळवले आहे. अॅपला त्या वापरण्यासाठी या स्थान सेवा चालू असणे आणि आपल्या डिव्हाइसवर उपलब्ध असणे आवश्यक आहे. अॅप्स हे आपण कुठे आहात याचा अंदाज लावण्यासाठी वापरू शकतात."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger वर प्रवेश करा"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlinger निम्‍न-स्‍तर वैशिष्‍ट्‍ये वापरण्‍यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"फ्रेम बफर वाचा"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"फ्रेम बफरची सामग्री वाचण्यास अॅप ला अनुमती देते."</string>
     <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger मध्‍ये प्रवेश करा"</string>
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"अ‍ॅपला InputFlinger निम्‍न-स्‍तर वैशिष्‍ट्‍ये वापरण्‍याची अनुमती देते."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WiFi प्रदर्शने कॉन्फिगर करा"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"WiFi प्रदर्शने कॉन्फिगर करण्यासाठी आणि त्यावर कनेक्ट करण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi प्रदर्शने नियंत्रित करा"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"WiFi प्रदर्शनांची निम्न-स्तर वैशिष्ट्ये नियंत्रित करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"वायफाय प्रदर्शने कॉन्फिगर करा"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"वायफाय प्रदर्शने कॉन्फिगर करण्यासाठी आणि त्यावर कनेक्ट करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"वायफाय प्रदर्शने नियंत्रित करा"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"वायफाय प्रदर्शनांची निम्न-स्तर वैशिष्ट्ये नियंत्रित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ऑडिओ आउटपुट कॅप्‍चर करा"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"अ‍ॅपला ऑडिओ आउटपुट कॅप्‍चर करण्‍याची आणि पुनर्निर्देशित करण्‍याची अनुमती देते."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotword शोध"</string>
@@ -653,22 +653,22 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"टेदर केलेल्या नेटवर्क कनेक्टिव्हिटीची स्थिती बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"पार्श्वभूमी डेटा वापर सेटिंग बदला"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"पार्श्वभूमी डेटा वापर सेटिंग बदलण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi कनेक्शन पहा"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-Fi सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या Wi-Fi डिव्हाइसेसचे नाव यासारख्या, Wi-Fi नेटवर्किंग विषयीची माहिती पाहण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi वरून कनेक्ट करा आणि डिस्कनेक्ट करा"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fi प्रवेश बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि Wi-Fi नेटवर्कसाठी डिव्हाइस कॉन्फिगरेशनमध्ये बदल करण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या टॅब्लेटवर नाही, तर Wi-Fi नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या फोनवर नाही, तर Wi-Fi नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth सेटिंग्जवर प्रवेश करा"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक Bluetooth टॅब्लेट कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक Bluetooth फोन कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"अनुप्रयोगाद्वारे Bluetooth जोडणीला अनुमती द्या"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"वाय-फाय कनेक्शन पहा"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"वाय-फाय सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या वाय-फाय डिव्हाइसेसचे नाव यासारख्या, वाय-फाय नेटवर्किंग विषयीची माहिती पाहण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाय-फाय वरून कनेक्ट करा आणि डिस्कनेक्ट करा"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय प्रवेश बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉन्फिगरेशनमध्ये बदल करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाय-फाय मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब सेटिंग्जवर प्रवेश करा"</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब टॅब्लेट कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक ब फोन कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"अनुप्रयोगाद्वारे ब जोडणीला अनुमती द्या"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"अ‍ॅपला वापरकर्ता परस्‍परसंवादाशिवाय दूरस्‍थ डिव्‍हाइसेससह जोडण्‍याची अनुमती देते."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"अ‍ॅपला वापरकर्ता परस्‍परसंवादाशिवाय दूरस्‍थ डिव्‍हाइसेससह जोडण्‍याची अनुमती देते."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth नकाशा डेटामध्ये प्रवेश करा"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"अॅपला Bluetooth नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"अॅपला Bluetooth नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
+    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ब नकाशा डेटामध्ये प्रवेश करा"</string>
+    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"अॅपला ब नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
+    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"अॅपला ब नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX कनेक्ट करा आणि त्यावरून डिस्कनेक्ट करा"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या कोणत्याही WiMAX नेटवर्क विषयीची माहिती निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX स्थिती बदला"</string>
@@ -677,9 +677,9 @@
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"स्कोअर नेटवर्क"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"नेटवर्क रँक करण्यासाठी आणि टॅब्लेट प्राधान्य देत असलेल्या नेटवर्कच्या प्रभावासाठी अॅप ला अनुमती देते."</string>
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"नेटवर्क रँक करण्यासाठी आणि फोन प्राधान्य देत असलेल्या नेटवर्कच्या प्रभावासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth डिव्हाइसेससह जोडा"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"टॅब्लेटवर Bluetooth चे कॉन्फिगरेशन पाहण्यासाठी आणि जोडलेल्या डिव्हाइसेससह कनेक्शन करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"फोनवर Bluetooth चे कॉन्फिगरेशन पाहण्यासाठी आणि जोडलेल्या डिव्हाइसेससह कनेक्शन करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"ब डिव्हाइसेससह जोडा"</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"टॅब्लेटवर ब चे कॉन्फिगरेशन पाहण्यासाठी आणि जोडलेल्या डिव्हाइसेससह कनेक्शन करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"फोनवर ब चे कॉन्फिगरेशन पाहण्यासाठी आणि जोडलेल्या डिव्हाइसेससह कनेक्शन करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"फील्ड जवळील संप्रेषण नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील संप्रेषण (NFC) टॅग, कार्ड आणि वाचक यांच्यासह संप्रेषण करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"आपले स्क्रीन लॉक अक्षम करा"</string>
@@ -886,14 +886,14 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"कार्य"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"अन्य"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"हा संपर्क पाहण्‍यासाठी कोणताही क्रियाकलाप आढळला नाही."</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN कोड टाइप करा"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK आणि नवीन PIN कोड टाइप करा"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"पिन कोड टाइप करा"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK आणि नवीन पिन कोड टाइप करा"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK कोड"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"नवीन PIN कोड"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"नवीन पिन कोड"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"संकेतशब्द टाइप करण्यासाठी स्पर्श करा"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करण्यासाठी संकेतशब्द टाइप करा"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी PIN टाइप करा"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य PIN कोड."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य पिन कोड."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"अनलॉक करण्यासाठी, मेनू दाबा नंतर 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"आणीबाणीचा नंबर"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"सेवा नाही."</string>
@@ -929,7 +929,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"सिम कार्ड अनलॉक करत आहे…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"आपण आपला PIN <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"आपण आपला पिन <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, आपल्याला आपले Google साइन इन वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, आपल्याला आपले Google साइन इन वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचे चुकीचे प्रयत्न केले. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, टॅब्लेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावला जाईल."</string>
@@ -1245,14 +1245,14 @@
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर व्हॉल्यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया व्हॉल्यूम"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth द्वारे प्‍ले करत आहे"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"ब द्वारे प्‍ले करत आहे"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"मूक रिंगटोन सेट केला"</string>
     <string name="volume_call" msgid="3941680041282788711">"कॉल-मधील व्हॉल्यूम"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth कॉल-मधील व्हॉल्यूम"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"ब कॉल-मधील व्हॉल्यूम"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"अलार्म व्हॉल्यूम"</string>
     <string name="volume_notification" msgid="2422265656744276715">"सूचना व्हॉल्यूम"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"व्हॉल्यूम"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth व्हॉल्यूम"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ब व्हॉल्यूम"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"रिंगटोन व्हॉल्यूम"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"कॉल व्हॉल्यूम"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"मीडिया व्हॉल्यूम"</string>
@@ -1263,26 +1263,26 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"रिंगटोन"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"अज्ञात रिंगटोन"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi नेटवर्क उपलब्‍ध"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi नेटवर्क उपलब्‍ध"</item>
+    <item quantity="one" msgid="6654123987418168693">"वाय-फाय नेटवर्क उपलब्‍ध"</item>
+    <item quantity="other" msgid="4192424489168397386">"वाय-फाय नेटवर्क उपलब्‍ध"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"खुले Wi-Fi नेटवर्क उपलब्‍ध"</item>
-    <item quantity="other" msgid="7915895323644292768">"खुले Wi-Fi नेटवर्क उपलब्‍ध"</item>
+    <item quantity="one" msgid="1634101450343277345">"खुले वाय-फाय नेटवर्क उपलब्‍ध"</item>
+    <item quantity="other" msgid="7915895323644292768">"खुले वाय-फाय नेटवर्क उपलब्‍ध"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi नेटवर्कवर साइन इन करा"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"वाय-फाय नेटवर्कवर साइन इन करा"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"नेटवर्क वर साइन इन करा"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ला कनेक्ट करू शकलो नाही"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाय-फाय ला कनेक्ट करू शकलो नाही"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" खराब इंटरनेट कनेक्शन आहे."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"कनेक्शनला अनुमती द्यायची?"</string>
     <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s %2$s शी कनेक्ट करू इच्छितात"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"अनुप्रयोग"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi थेट"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi थेट प्रारंभ करा. हे Wi-Fi क्लायंट/हॉटस्पॉट बंद करेल."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi थेट प्रारंभ करू शकलो नाही."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi थेट चालू आहे"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाय-फाय थेट"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाय-फाय थेट प्रारंभ करा. हे वाय-फाय क्लायंट/हॉटस्पॉट बंद करेल."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"वाय-फाय थेट प्रारंभ करू शकलो नाही."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाय-फाय थेट चालू आहे"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"सेटिंग्जसाठी स्पर्श करा"</string>
     <string name="accept" msgid="1645267259272829559">"स्वीकार करा"</string>
     <string name="decline" msgid="2112225451706137894">"नकार द्या"</string>
@@ -1290,10 +1290,10 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"कनेक्ट करण्यासाठी आमंत्रण"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"प्रेषक:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"प्रति:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"आवश्यक PIN टाइप करा:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"टॅब्‍लेट <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ला कनेक्‍ट केलेले असताना तात्‍पुरते Wi-Fi वरून डिस्‍कनेक्‍ट होईल"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> वर फोन कनेक्ट केलेला असताना तो Wi-Fi वरून तात्पुरता डिस्कनेक्ट केला जाईल"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"आवश्यक पिन टाइप करा:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"पिन:"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"टॅब्‍लेट <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ला कनेक्‍ट केलेले असताना तात्‍पुरते वाय-फाय वरून डिस्‍कनेक्‍ट होईल"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> वर फोन कनेक्ट केलेला असताना तो वाय-फाय वरून तात्पुरता डिस्कनेक्ट केला जाईल"</string>
     <string name="select_character" msgid="3365550120617701745">"वर्ण घाला"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS संदेश पाठवत आहे"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; मोठ्या संख्येने SMS संदेश पाठवत आहे. आपण या अॅप ला संदेश पाठविणे सुरु ठेवण्याची अनुमती देऊ इच्छिता?"</string>
@@ -1540,12 +1540,12 @@
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा मर्यादा गाठली"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा मर्यादा गाठली"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"सेल्‍युलर डेटा मर्यादा गाठली"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi डेटा मर्यादा गाठली"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"वाय-फाय डेटा मर्यादा गाठली"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"उर्वरित चक्रासाठी डेटास विराम दिला"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा मर्यादा ओलांडली"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा मर्यादा ओलांडली"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेल्युलर डेटा मर्यादा ओलांडली"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi डेटा मर्यादा ओलांडली"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"वाय-फाय डेटा मर्यादा ओलांडली"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"निर्दिष्ट केलेल्या मर्यादेबाहेर <xliff:g id="SIZE">%s</xliff:g>."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पार्श्वभूमी डेटा प्रतिबंधित केला"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"प्रतिबंध काढण्यासाठी स्पर्श करा."</string>
@@ -1579,7 +1579,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"स्पीकर डॉक करा"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"सिस्टम"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ऑडिओ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ब ऑडिओ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"वायरलेस प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"कास्‍ट करा"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"डिव्हाइसला कनेक्ट करा"</string>
@@ -1601,21 +1601,21 @@
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"नमुना विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा नमुना"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा संकेतशब्द"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"चुकीचा PIN"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"चुकीचा पिन"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"आपला नमुना काढा"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम PIN प्रविष्ट करा"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN प्रविष्ट करा"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम पिन प्रविष्ट करा"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"पिन प्रविष्ट करा"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"संकेतशब्द प्रविष्ट करा"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम आता अक्षम केले आहे. सुरु ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित PIN कोड प्रविष्ट करा"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित PIN कोड ची पुष्टी करा"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड प्रविष्ट करा"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड ची पुष्टी करा"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"सिम कार्ड अनलॉक करत आहे…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"अयोग्य PIN कोड."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 ते 8 अंक असलेला PIN टाइप करा."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"अयोग्य पिन कोड."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 ते 8 अंक असलेला पिन टाइप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK कोड 8 संख्‍येचा असावा."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"योग्य PUK कोड पुन्हा-प्रविष्ट करा. परत प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN कोड जुळत नाहीत"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड जुळत नाहीत"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बरेच नमुना प्रयत्न"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"वापरकर्तानाव (ईमेल)"</string>
@@ -1624,7 +1624,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"अवैध वापरकर्तानाव किंवा संकेतशब्द."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"आपले वापरकर्तानाव किंवा संकेतशब्द विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते तपासत आहे…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला PIN <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला पिन <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने काढला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, टॅब्लेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
@@ -1772,7 +1772,7 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रीन अनपिन केली"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी PIN साठी विचारा"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>

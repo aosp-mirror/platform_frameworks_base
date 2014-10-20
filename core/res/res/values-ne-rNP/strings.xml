@@ -1770,16 +1770,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयन गरियो"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"यो पर्दा अनपिन गर्न, छुनुहोस् र पछाडि पकड्नुहोस् र सोही समयमा अवलोकन गर्नुहोस्।"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"यो पर्दा अनपिन गर्न, छुनुहोस् र अवलोकन पकड्नुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्क्रिन अनपिन हुँदैछ। अनपिन गर्ने तपाईँको संगठन द्वारा समर्थित छैन।"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"स्क्रिन पिन गर्ने प्रयोग गर्नुहुन्छ?"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"पर्दा पिन गर्नाले एकल दृश्यमा प्रदर्शन बन्द हुन्छ।\n\nअनपिन गर्न, छुनुहोस् र पछाडि पकड्नुहोस् र सोही समयमा अवलोकन गर्नुहोस्।"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"पर्दा पिन गर्नाले एकल दृश्यमा प्रदर्शन बन्द हुन्छ।\n\nअनपिन गर्न, छुनुहोस् र अवलोकन पकड्नुहोस्।"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"होइन, धन्यवाद"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
