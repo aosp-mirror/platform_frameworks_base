@@ -4078,9 +4078,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      */
     public void removeView(View view) {
-        removeViewInternal(view);
-        requestLayout();
-        invalidate(true);
+        if (removeViewInternal(view)) {
+            requestLayout();
+            invalidate(true);
+        }
     }
 
     /**
@@ -4143,11 +4144,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         invalidate(true);
     }
 
-    private void removeViewInternal(View view) {
+    private boolean removeViewInternal(View view) {
         final int index = indexOfChild(view);
         if (index >= 0) {
             removeViewInternal(index, view);
+            return true;
         }
+        return false;
     }
 
     private void removeViewInternal(int index, View view) {
