@@ -41,7 +41,7 @@
     <string name="battery_low_why" msgid="4553600287639198111">"Nustatymai"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Įjungti Akumuliatoriaus tausojimo priemonę?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Įjungti"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Įjungti Akumuliatoriaus tausojimo priemonę"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Įj. Akum. tausojimo priemonę"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nustatymai"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Lėktuvo režimas"</string>
