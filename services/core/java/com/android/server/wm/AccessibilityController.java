@@ -346,8 +346,7 @@ final class AccessibilityController {
                         case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
                         case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
                         case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:
-                        case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
-                        case WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY: {
+                        case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL: {
                             Rect magnifiedRegionBounds = mTempRect2;
                             mMagnifedViewport.getMagnifiedFrameInContentCoordsLocked(
                                     magnifiedRegionBounds);
