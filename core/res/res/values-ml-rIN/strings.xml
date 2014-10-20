@@ -57,14 +57,14 @@
     <string name="badPin" msgid="9015277645546710014">"നിങ്ങൾ ടൈപ്പുചെയ്‌ത പഴയ പിൻ തെറ്റാണ്."</string>
     <string name="badPuk" msgid="5487257647081132201">"നിങ്ങൾ ടൈപ്പുചെയ്‌ത PUK തെറ്റാണ്."</string>
     <string name="mismatchPin" msgid="609379054496863419">"നിങ്ങൾ ടൈപ്പുചെയ്‌ത് പിൻ പൊരുത്തപ്പെടുന്നില്ല."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു PIN ടൈപ്പുചെയ്യുക."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു പിൻ ടൈപ്പുചെയ്യുക."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"എട്ടോ അതിലധികമോ അക്കങ്ങളുള്ള ഒരു PUK ടൈപ്പുചെയ്യുക."</string>
-    <string name="needPuk" msgid="919668385956251611">"നിങ്ങളുടെ SIM കാർഡ് PUK ലോക്ക് ചെയ്‌തതാണ്. ഇത് അൺലോക്ക് ചെയ്യാൻ PUK കോഡ് ടൈപ്പുചെയ്യുക."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"SIM കാർഡ് തടഞ്ഞത് മാറ്റാൻ PUK2 ടൈപ്പുചെയ്യുക."</string>
-    <string name="enablePin" msgid="209412020907207950">"വിജയകരമല്ല, SIM/RUIM ലോക്ക് പ്രവർത്തനക്ഷമമാക്കുക."</string>
+    <string name="needPuk" msgid="919668385956251611">"നിങ്ങളുടെ സിം കാർഡ് PUK ലോക്ക് ചെയ്‌തതാണ്. ഇത് അൺലോക്ക് ചെയ്യാൻ PUK കോഡ് ടൈപ്പുചെയ്യുക."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"സിം കാർഡ് തടഞ്ഞത് മാറ്റാൻ PUK2 ടൈപ്പുചെയ്യുക."</string>
+    <string name="enablePin" msgid="209412020907207950">"വിജയകരമല്ല, സിം/RUIM ലോക്ക് പ്രവർത്തനക്ഷമമാക്കുക."</string>
   <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"SIM ലോക്കാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമം കൂടി ബാക്കിയുണ്ട്."</item>
-    <item quantity="other" msgid="7530597808358774740">"SIM ലോക്കാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ബാക്കിയുണ്ട്."</item>
+    <item quantity="one" msgid="6596245285809790142">"സിം ലോക്കാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമം കൂടി ബാക്കിയുണ്ട്."</item>
+    <item quantity="other" msgid="7530597808358774740">"സിം ലോക്കാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ബാക്കിയുണ്ട്."</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -76,7 +76,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"കോൾ വെയ്‌റ്റിംഗ്"</string>
     <string name="BaMmi" msgid="455193067926770581">"കോൾ നിരോധിക്കൽ"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"പാസ്‌വേഡ് മാറ്റം"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"PIN മാറ്റം"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"പിൻ മാറ്റം"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"കോൾ ചെയ്യേണ്ട നമ്പർ ഉണ്ട്"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"കോൾ ചെയ്യാനുള്ള നമ്പർ നിയന്ത്രിച്ചു"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"മൂന്നുവിധത്തിൽ കോൾ ചെയ്യൽ"</string>
@@ -183,9 +183,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"നിശബ്‌ദ മോഡ്"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ശബ്‌ദം ഓഫാണ്"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ശബ്‌ദം ഓണാണ്"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"വിമാന മോഡ്"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"വിമാന മോഡ് ഓണാണ്"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"വിമാന മോഡ് ഓഫാണ്"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ഫ്ലൈറ്റ് മോഡ്"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ഫ്ലൈറ്റ് മോഡ് ഓണാണ്"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ഫ്ലൈറ്റ് മോഡ് ഓഫാണ്"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ക്രമീകരണങ്ങൾ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ഇപ്പോൾ ലോക്കുചെയ്യുക"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -205,8 +205,8 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"നിങ്ങളുടെ ഭൗതിക ലൊക്കേഷൻ നിരീക്ഷിക്കുക."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"നെറ്റ്‌വർക്ക് ആശയവിനിമയം"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"വ്യത്യസ്‌ത നെറ്റ്‌വർക്ക് സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യുക."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Bluetooth മുഖേന ഉപകരണങ്ങളും നെറ്റ്‌വർക്കുകളും ആക്‌സസ്സുചെയ്യുക."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ബ്ലൂടൂത്ത്"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ബ്ലൂടൂത്ത് മുഖേന ഉപകരണങ്ങളും നെറ്റ്‌വർക്കുകളും ആക്‌സസ്സുചെയ്യുക."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ഓഡിയോ ക്രമീകരണങ്ങൾ"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"ബാറ്ററിയെ ബാധിക്കുന്നു"</string>
@@ -289,15 +289,15 @@
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"സന്ദേശം വഴി പ്രതികരിക്കുക ഇവന്റുകൾ അയയ്‌ക്കുക"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ഇൻകമിംഗ് കോളുകൾക്കായി സന്ദേശം മുഖേന പ്രതികരിക്കുക ഇവന്റുകൾ കൈകാര്യം ചെയ്യുന്ന മറ്റ് സന്ദേശമയയ്‌ക്കൽ അപ്ലിക്കേഷനുകൾക്ക് അഭ്യർത്ഥനകൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"നിങ്ങളുടെ വാചക സന്ദേശങ്ങൾ വായിക്കുക (SMS അല്ലെങ്കിൽ MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"നിങ്ങളുടെ ടാബ്‌ലെറ്റിലോ SIM കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ പരിഗണിക്കാതെ എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"നിങ്ങളുടെ ഫോണിലോ SIM കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ പരിഗണിക്കാതെ എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"നിങ്ങളുടെ ടാബ്‌ലെറ്റിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ പരിഗണിക്കാതെ എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"നിങ്ങളുടെ ഫോണിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ പരിഗണിക്കാതെ എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"നിങ്ങളുടെ വാചക സന്ദേശങ്ങൾ എഡിറ്റുചെയ്യുക (SMS അല്ലെങ്കിൽ MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"നിങ്ങളുടെ ടാബ്‌ലെറ്റിലോ SIM കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങളിലേക്ക് റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സന്ദേശങ്ങളെ ഇല്ലാതാക്കിയേക്കാം."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"നിങ്ങളുടെ ഫോണിലോ SIM കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങളിലേക്ക് റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സന്ദേശങ്ങളെ ഇല്ലാതാക്കിയേക്കാം."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"നിങ്ങളുടെ ടാബ്‌ലെറ്റിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങളിലേക്ക് റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സന്ദേശങ്ങളെ ഇല്ലാതാക്കിയേക്കാം."</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"നിങ്ങളുടെ ഫോണിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങളിലേക്ക് റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സന്ദേശങ്ങളെ ഇല്ലാതാക്കിയേക്കാം."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"വാചക സന്ദേശം നേടുക (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP സന്ദേശങ്ങൾ നേടാനും പ്രോസസ്സുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങൾക്ക് അയയ്‌ക്കുന്ന സന്ദേശങ്ങൾ നിങ്ങൾക്ക് ദൃശ്യമാക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ ഉള്ള കഴിവ് ഈ അനുമതികളിൽ ഉൾപ്പെടുന്നു."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth സന്ദേശങ്ങൾ (MAP) സ്വീകരിക്കുക"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നതിനും പ്രോസസ്സുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉപകരണത്തിലേക്ക് അയച്ച സന്ദേശങ്ങൾ നിങ്ങളെ കാണിക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ അപ്ലിക്കേഷനാവും."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ബ്ലൂടൂത്ത് സന്ദേശങ്ങൾ (MAP) സ്വീകരിക്കുക"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ബ്ലൂടൂത്ത് MAP സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നതിനും പ്രോസസ്സുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉപകരണത്തിലേക്ക് അയച്ച സന്ദേശങ്ങൾ നിങ്ങളെ കാണിക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ അപ്ലിക്കേഷനാവും."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകൾ വീണ്ടെടുക്കുക"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"നിലവിലും സമീപകാലത്തും പ്രവർത്തിക്കുന്ന ടാസ്‌ക്കുകളെക്കുറിച്ചുള്ള വവിവരങ്ങൾ വീണ്ടെടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉപകരണത്തിൽ ഉപയോഗിച്ച അപ്ലിക്കേഷനുകളെക്കുറിച്ചുള്ള വിവരം കണ്ടെത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"\'അടുത്തിടെയുള്ളവ\' എന്നതിൽ നിന്ന് ഒരു ടാസ്‌ക് ആരംഭിക്കുക"</string>
@@ -521,10 +521,10 @@
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"ഫ്രെയിം ബഫറിന്റെ ഉള്ളടക്കം റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger ആക്‌സസ്സുചെയ്യുക"</string>
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlinger കുറഞ്ഞ നിലയിലുള്ള സവിശേഷതകൾ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi ഡിസ്‌പ്ലേകൾ കോൺഫിഗർ ചെയ്യുക"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wifi ഡിസ്പ്ലേകൾ കോൺഫിഗർ ചെയ്യാനും അതിലേക്ക് കണക്റ്റുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi ഡിസ്‌പ്ലേകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wifi ഡിസ്‌പ്ലേകളുടെ കുറഞ്ഞ നിലയിലുള്ള സവിശേഷതകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"വൈഫൈ ഡിസ്‌പ്ലേകൾ കോൺഫിഗർ ചെയ്യുക"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"വൈഫൈ ഡിസ്പ്ലേകൾ കോൺഫിഗർ ചെയ്യാനും അതിലേക്ക് കണക്റ്റുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"വൈഫൈ ഡിസ്‌പ്ലേകൾ നിയന്ത്രിക്കുക"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"വൈഫൈ ഡിസ്‌പ്ലേകളുടെ കുറഞ്ഞ നിലയിലുള്ള സവിശേഷതകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ഓഡിയോ ഔട്ട്പുട്ട് ക്യാപ്‌ചർ ചെയ്യുക"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ഓഡിയോ ഔട്ട്‌പുട്ട് ക്യാപ്‌ചർ ചെയ്‌ത് റീഡയറക്‌ടുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ഹോട്ട്‌വേഡ് തിരിച്ചറിയൽ"</string>
@@ -542,7 +542,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"മൈക്രോഫോൺ ഉപയോഗിച്ച് ഓഡിയോ റെക്കോർഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ ഏതുസമയത്തും ഓഡിയോ റെക്കോർഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്ന്ഉ."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"സിം ആശയവിനിമയം"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM-ലേക്ക് കമാൻഡുകൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"സിമ്മിലേക്ക് കമാൻഡുകൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ക്യാമറ ഉപയോഗിച്ച് ചിത്രങ്ങളും വീഡിയോകളും എടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ ഏതുസമയത്തും ക്യാമറ ഉപയോഗിക്കാൻ ഈ അനുമതി അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ക്യാമറ ഉപയോഗത്തിലായിരിക്കുമ്പോൾ ട്രാൻസ്‌മിറ്റ് ഇൻഡിക്കേറ്റർ LED പ്രവർത്തനരഹിതമാക്കുക"</string>
@@ -658,15 +658,15 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi മൾട്ടികാസ്‌റ്റ് റിസപ്‌ഷൻ അനുവദിക്കുക"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"മൾട്ടികാസ്‌റ്റ് വിലാസങ്ങൾ ഉപയോഗിച്ച് നിങ്ങളുടെ ടബ്‌ലെറ്റിലേക്ക് മാത്രമല്ലാതെ, ഒരു Wi-Fi നെറ്റ്‌വർക്കിലെ എല്ലാ ഉപകരണങ്ങളിലേക്കും അയച്ച പായ്‌ക്കറ്റുകൾ നേടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് മൾട്ടികാസ്റ്റ് ഇതര മോഡിനേക്കാൾ അധികം പവർ ഉപയോഗിക്കുന്നു."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"മൾട്ടികാസ്‌റ്റ് വിലാസങ്ങൾ ഉപയോഗിച്ച് നിങ്ങളുടെ ഫോണിലേക്ക് മാത്രമല്ലാതെ, ഒരു Wi-Fi നെറ്റ്‌വർക്കിലെ എല്ലാ ഉപകരണങ്ങളിലേക്കും അയച്ച പായ്‌ക്കറ്റുകൾ നേടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് മൾട്ടികാസ്റ്റ് ഇതര മോഡിനേക്കാൾ അധികം പവർ ഉപയോഗിക്കുന്നു."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ക്രമീകരണങ്ങൾ ആക്സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ഒരു പ്രാദേശിക Bluetooth ടാബ്‌ലെറ്റ് കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങളെ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ഒരു പ്രാദേശിക Bluetooth ഫോണിനെ കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങളെ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"അപ്ലിക്കേഷൻ ഉപയോഗിച്ച് Bluetooth ജോടിയാക്കൽ അനുവദിക്കുക"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ബ്ലൂടൂത്ത് ക്രമീകരണങ്ങൾ ആക്സസ്സുചെയ്യുക"</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ഒരു പ്രാദേശിക ബ്ലൂടൂത്ത് ടാബ്‌ലെറ്റ് കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങളെ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ഒരു പ്രാദേശിക ബ്ലൂടൂത്ത് ഫോണിനെ കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങളെ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"അപ്ലിക്കേഷൻ ഉപയോഗിച്ച് ബ്ലൂടൂത്ത് ജോടിയാക്കൽ അനുവദിക്കുക"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ വിദൂര ഉപകരണങ്ങളുമായി ജോടിയാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ വിദൂര ഉപകരണങ്ങളുമായി ജോടിയാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Bluetooth MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Bluetooth MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യുക"</string>
+    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX കണക്റ്റുചെയ്യുക, അതിൽ നിന്നും വിച്ഛേദിക്കുക"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX പ്രവർത്തനക്ഷമമാണോയെന്നതും കണക്റ്റുചെയ്‌തിരിക്കുന്ന ഏതെങ്കിലും WiMAX നെറ്റ്‌വർക്കുകളെക്കുറിച്ചുള്ള വിവരങ്ങളും നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX നില മാറ്റുക"</string>
@@ -675,9 +675,9 @@
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"സ്കോർ നെറ്റ്‌വർക്ക്"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"നെറ്റ്‌വർക്കുകളെ റാങ്ക് ചെയ്യുന്നതിനും ടാബ്‌ലെറ്റ് മുൻഗണന നൽകുന്ന നെറ്റ്‌വർക്കിനെ സ്വാധീനിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"നെറ്റ്‌വർക്കുകളെ റാങ്ക് ചെയ്യുന്നതിനും ഫോൺ മുൻഗണന നൽകുന്ന നെറ്റ്‌വർക്കുകളെ സ്വാധീനിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth ഉപകരണങ്ങളുമായി ജോടിയാക്കുക"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ടാബ്‌ലെറ്റിലെ Bluetooth കോൺഫിഗറേഷൻ കാണാനും ജോടിയാക്കിയ ഉപകരണങ്ങളുമായി കണക്ഷനുകൾ നടത്തി അംഗീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ഫോണിലെ Bluetooth കോൺഫിഗറേഷൻ കാണാനും ജോടിയാക്കിയ ഉപകരണങ്ങളുമായി കണക്ഷനുകൾ നടത്തി അംഗീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"ബ്ലൂടൂത്ത് ഉപകരണങ്ങളുമായി ജോടിയാക്കുക"</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ടാബ്‌ലെറ്റിലെ ബ്ലൂടൂത്ത് കോൺഫിഗറേഷൻ കാണാനും ജോടിയാക്കിയ ഉപകരണങ്ങളുമായി കണക്ഷനുകൾ നടത്തി അംഗീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ഫോണിലെ ബ്ലൂടൂത്ത് കോൺഫിഗറേഷൻ കാണാനും ജോടിയാക്കിയ ഉപകരണങ്ങളുമായി കണക്ഷനുകൾ നടത്തി അംഗീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"സമീപ ഫീൽഡുമായുള്ള ആശയവിനിമയം നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
@@ -889,7 +889,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"പാസ്‌വേഡ് ടൈപ്പുചെയ്യുന്നതിന് സ്‌പർശിക്കുക"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"അൺലോക്കുചെയ്യുന്നതിന് പാസ്‌വേഡ് ടൈപ്പുചെയ്യുക"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"അൺലോക്കുചെയ്യുന്നതിന് പിൻ ടൈപ്പുചെയ്യുക"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN കോഡ് തെറ്റാണ്."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"പിൻ കോഡ് തെറ്റാണ്."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"അൺലോക്ക് ചെയ്യുന്നതിന് മെനു, 0 എന്നിവ അമർത്തുക."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"അടിയന്തര നമ്പർ"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"സേവനമില്ല."</string>
@@ -907,13 +907,13 @@
     <string name="lockscreen_charged" msgid="321635745684060624">"ചാർജ്ജുചെയ്‌തു"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"നിങ്ങളുടെ ചാർജർ കണക്റ്റുചെയ്യുക."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM കാർഡൊന്നുമില്ല"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ടാബ്‌ലെറ്റിൽ SIM കാർഡൊന്നുമില്ല."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ഫോണിൽ SIM കാർഡൊന്നുമില്ല."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ഒരു SIM കാർഡ് ചേർക്കുക."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM കാർഡ് കാണുന്നില്ല അല്ലെങ്കിൽ റീഡുചെയ്യാനായില്ല. ഒരു SIM കാർഡ് ചേർക്കുക."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"ഉപയോഗശൂന്യമായ SIM കാർഡ്."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"നിങ്ങളുടെ SIM കാർഡ് ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കി.\n മറ്റൊരു SIM കാർഡിനായി നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"സിം കാർഡൊന്നുമില്ല"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ടാബ്‌ലെറ്റിൽ സിം കാർഡൊന്നുമില്ല."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ഫോണിൽ സിം കാർഡൊന്നുമില്ല."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ഒരു സിം കാർഡ് ചേർക്കുക."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"സിം കാർഡ് കാണുന്നില്ല അല്ലെങ്കിൽ റീഡുചെയ്യാനായില്ല. ഒരു സിം കാർഡ് ചേർക്കുക."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"ഉപയോഗശൂന്യമായ സിം കാർഡ്."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"നിങ്ങളുടെ സിം കാർഡ് ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കി.\n മറ്റൊരു സിം കാർഡിനായി നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"മുമ്പത്തെ ട്രാക്ക്"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"അടുത്ത ട്രാക്ക്"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"താൽക്കാലികമായി നിർത്തുക"</string>
@@ -923,13 +923,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"വേഗത്തിലുള്ള കൈമാറൽ"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"അടിയന്തര കോളുകൾ മാത്രം"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM കാർഡ് PUK ലോക്ക് ചെയ്‌തതാണ്."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"സിം കാർഡ് PUK ലോക്ക് ചെയ്‌തതാണ്."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"ഉപയോക്തൃ ഗൈഡ് കാണുകയോ കസ്‌റ്റമർ കെയറുമായി ബന്ധപ്പെടുകയോ ചെയ്യുക."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM കാർഡ് ലോക്കുചെയ്‌തു."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"സിം കാർഡ് ലോക്കുചെയ്‌തു."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"സിം കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"നിങ്ങളുടെ പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"നിങ്ങളുടെ പാസ്‌വേഡ് <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"നിങ്ങളുടെ PIN <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"നിങ്ങളുടെ പിൻ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"നിങ്ങളുടെ അൺലോക്കുചെയ്യൽ പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> തെറ്റായ ശ്രമങ്ങൾക്കുശേഷം, Google സൈൻ ഇൻ ചെയ്യൽ ഉപയോഗിച്ച് നിങ്ങളുടെ ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യുന്നതിന് ആവശ്യപ്പടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"നിങ്ങൾ അൺലോക്കുചെയ്യൽ പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> തെറ്റായ ശ്രമങ്ങൾക്കുശേഷം, Google സൈൻ ഇൻ ചെയ്യൽ ഉപയോഗിച്ച് നിങ്ങളുടെ ഫോൺ അൺലോക്കുചെയ്യുന്നതിന് ആവശ്യപ്പടും. \n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER_0">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ടാബ്‌ലെറ്റ് ഫാക്‌ടറി സ്ഥിരമായതിലേക്ക് പുനഃസജ്ജികരിക്കുകയും ഉപയോക്തൃ ഡാറ്റയെല്ലാം നഷ്‌ടപ്പെടുകയും ചെയ്യും."</string>
@@ -1055,7 +1055,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"തിരയൽ അന്വേഷണം"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"അന്വേഷണം മായ്‌ക്കുക"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ചോദ്യം സമർപ്പിക്കുക"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"വോയ്‌സ് തിരയൽ"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"ശബ്ദ തിരയൽ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കണോ?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കാൻ <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു. ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ ഓൺ ചെയ്യുമ്പോൾ, നിങ്ങളുടെ വിരലിനടിയിലുള്ളവയുടെ വിവരണം കേൾക്കാനോ കാണാനോ അല്ലെങ്കിൽ ടാബ്‌ലെറ്റുമായി സംവദിക്കുന്ന ജെസ്റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കാൻ <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു. ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ ഓൺ ചെയ്യുമ്പോൾ, നിങ്ങളുടെ വിരലിനടിയിലുള്ളവയുടെ വിവരണം കേൾക്കാനോ കാണാനോ അല്ലെങ്കിൽ ഫോണുമായി സംവദിക്കുന്ന ജെസ്റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
@@ -1245,14 +1245,14 @@
     <string name="sendText" msgid="5209874571959469142">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="5421651157138628171">"മീഡിയ വോളിയം"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth മുഖേന പ്ലേ ചെയ്യുന്നു"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"ബ്ലൂടൂത്ത് മുഖേന പ്ലേ ചെയ്യുന്നു"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"നിശബ്‌ദ റിംഗ്ടോൺ സജ്ജമാക്കിയിരിക്കുന്നു"</string>
     <string name="volume_call" msgid="3941680041282788711">"ഫോൺ കോൾ വോളിയം"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth-ൽ കണക്‌റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള കോൾ വോളിയം"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"ബ്ലൂടൂത്തിൽ കണക്‌റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള കോൾ വോളിയം"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"അലാറം വോളിയം"</string>
     <string name="volume_notification" msgid="2422265656744276715">"അറിയിപ്പ് വോളിയം"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"വോളിയം"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth വോളിയം"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ബ്ലൂടൂത്ത് വോളിയം"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"റിംഗ്ടോൺ വോളിയം"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"കോൾ വോളിയം"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"മീഡിയ വോളിയം"</string>
@@ -1287,8 +1287,8 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"കണക്റ്റുചെയ്യാനുള്ള ക്ഷണം"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"അയച്ചത്:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"സ്വീകർത്താവ്:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ആവശ്യമായ PIN ടൈപ്പുചെയ്യുക:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ആവശ്യമായ പിൻ ടൈപ്പുചെയ്യുക:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"പിൻ:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ടാബ്‌ലെറ്റ് <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതിൽ കണക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ അത് താൽക്കാലികമായി Wi-Fi-യിൽ നിന്നും വിച്ഛേദിക്കപ്പെടും."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ ഫോൺ Wi-Fi-യിൽ നിന്ന് താൽക്കാലികമായി വിച്ഛേദിക്കും"</string>
     <string name="select_character" msgid="3365550120617701745">"പ്രതീകം ചേർക്കുക"</string>
@@ -1305,10 +1305,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"നിങ്ങൾക്ക് ഇത് പിന്നീട് ക്രമീകരണങ്ങൾ &gt; അപ്ലിക്കേഷനുകൾ എന്നതിൽ മാറ്റാനാകും"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"എല്ലായ്‌പ്പോഴും അനുവദിക്കുക"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ഒരിക്കലും അനുവദിക്കരുത്"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"SIM കാർഡ് നീക്കംചെയ്‌തു"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"സാധുതയുള്ള ഒരു SIM കാർഡ് ചേർത്ത് പുനരാരംഭിക്കുന്നതുവരെ സെല്ലുലാർ നെറ്റ്‌വർക്ക് ലഭ്യമാകില്ല."</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"സിം കാർഡ് നീക്കംചെയ്‌തു"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"സാധുതയുള്ള ഒരു സിം കാർഡ് ചേർത്ത് പുനരാരംഭിക്കുന്നതുവരെ സെല്ലുലാർ നെറ്റ്‌വർക്ക് ലഭ്യമാകില്ല."</string>
     <string name="sim_done_button" msgid="827949989369963775">"പൂർത്തിയായി"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"SIM കാർഡ് ചേർത്തു"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"സിം കാർഡ് ചേർത്തു"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"സെല്ലുലാർ നെറ്റ്‌വർക്ക് ആക്‌സസ്സുചെയ്യാൻ നിങ്ങളുടെ ഉപകരണം പുനരാരംഭിക്കുക."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"പുനരാരംഭിക്കുക"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"സമയം സജ്ജീകരിക്കുക"</string>
@@ -1576,7 +1576,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"ഡോക്ക് സ്‌പീക്കറുകൾ"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"സിസ്റ്റം"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ഓഡിയോ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ബ്ലൂടൂത്ത് ഓഡിയോ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"വയർലെസ് ഡിസ്‌പ്ലേ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"കാസ്‌റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ഉപകരണത്തിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
@@ -1598,21 +1598,21 @@
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"പാറ്റേൺ മറന്നു"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"പാറ്റേൺ തെറ്റാണ്"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN തെറ്റാണ്"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"പിൻ തെറ്റാണ്"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"നിങ്ങളുടെ പാറ്റേൺ വരയ്‌ക്കുക"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN നൽകുക"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN നൽകുക"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"സിം പിൻ നൽകുക"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"പിൻ നൽകുക"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"പാസ്‌വേഡ് നൽകുക"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"താൽപ്പര്യപ്പെട്ട PIN കോഡ് നൽകുക"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"താൽപ്പര്യപ്പെട്ട PIN കോഡ് സ്ഥിരീകരിക്കുക"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN കോഡ് തെറ്റാണ്."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു PIN നൽകുക."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"താൽപ്പര്യപ്പെട്ട പിൻ കോഡ് നൽകുക"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"താൽപ്പര്യപ്പെട്ട പിൻ കോഡ് സ്ഥിരീകരിക്കുക"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"സിം കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"പിൻ കോഡ് തെറ്റാണ്."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു പിൻ നൽകുക."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK കോഡ് 8 അക്കങ്ങളായിരിക്കണം."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ SIM ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ സിം ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"പിൻ കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ഉപയോക്തൃനാമം (ഇമെയിൽ)"</string>
@@ -1621,7 +1621,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ അസാധുവാണ്."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"നിങ്ങളുടെ ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ മറന്നുപോയോ?\n"<b>"google.com/accounts/recovery"</b>" സന്ദർശിക്കുക."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"അക്കൗണ്ട് പരിശോധിക്കുന്നു…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"നിങ്ങളുടെ PIN <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"നിങ്ങളുടെ പിൻ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"നിങ്ങളുടെ പാസ്‌വേഡ് <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"നിങ്ങളുടെ പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER_0">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ടാബ്‌ലെറ്റ് ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനഃസജ്ജികരിക്കുകയും ഉപയോക്തൃ ഡാറ്റയെല്ലാം നഷ്‌ടപ്പെടുകയും ചെയ്യും."</string>
@@ -1732,15 +1732,15 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"പ്രിന്റ് സേവനം പ്രവർത്തനക്ഷമമല്ല"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> സേവനം ഇൻസ്റ്റാളുചെയ്‌തു"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"പ്രവർത്തനക്ഷമമാക്കാൻ ടാപ്പുചെയ്യുക"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"അഡ്‌മിനിസ്‌ട്രേറ്റർ PIN നൽകുക"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN നൽകുക"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"അഡ്‌മിനിസ്‌ട്രേറ്റർ പിൻ നൽകുക"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"പിൻ നൽകുക"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"തെറ്റാണ്"</string>
-    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"നിലവിലെ PIN"</string>
-    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"പുതിയ PIN"</string>
-    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"പുതിയ PIN സ്ഥിരീകരിക്കുക"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"നിയന്ത്രണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ ഒരു PIN സൃഷ്‌ടിക്കുക"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-കൾ പൊരുത്തപ്പെടുന്നില്ല. വീണ്ടും ശ്രമിക്കുക"</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN തീരെ ചെറുതാണ്. 4 അക്കമെങ്കിലും ഉണ്ടായിരിക്കണം."</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"നിലവിലെ പിൻ"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"പുതിയ പിൻ"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"പുതിയ പിൻ സ്ഥിരീകരിക്കുക"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"നിയന്ത്രണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ ഒരു പിൻ സൃഷ്‌ടിക്കുക"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"പിൻ നമ്പറുകൾ പൊരുത്തപ്പെടുന്നില്ല. വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"പിൻ തീരെ ചെറുതാണ്. 4 അക്കമെങ്കിലും ഉണ്ടായിരിക്കണം."</string>
   <plurals name="restr_pin_countdown">
     <item quantity="one" msgid="311050995198548675">"ഒരു സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക"</item>
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക"</item>
@@ -1769,7 +1769,7 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ആരംഭിക്കുക"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"സ്ക്രീൻ അൺപിൻ ചെയ്തു"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് PIN ആവശ്യപ്പെടുക"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പിൻ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല ഡാറ്റയെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ യാന്ത്രികമായി ഓഫാകും."</string>
