@@ -26,14 +26,14 @@ page.title=Android Lollipop
   <li><a href="#Documents">Document-centric apps</a></li>
   <li><a href="#Connectivity">Advanced connectivity</a></li>
   <li><a href="#Graphics">High-performance graphics</a></li>
-  <li><a href="#Audio">More Powerful Audio</a></li>
-  <li><a href="#Camera">Enhanced Camera & Video</a></li>
+  <li><a href="#Audio">More powerful audio</a></li>
+  <li><a href="#Camera">Enhanced camera & video</a></li>
   <li><a href="#Work">Android in the workplace</a></li>
   <li><a href="#ScreenCapture">Screen capturing and sharing</a></li>
   <li><a href="#Sensors">New types of sensors</a></li>
   <li><a href="#WebView">Chromium WebView</a></li>
-  <li><a href="#Accessibility">Accessibility & Input</a></li>
-  <li><a href="#Battery">Tools for building battery-efficient apps</a></li>
+  <li><a href="#Accessibility">Accessibility & input</a></li>
+  <li><a href="#Battery">Tools for battery-efficient apps</a></li>
     </ul>
   </div>
 </div>
@@ -94,10 +94,11 @@ about Android 5.0 for consumers at
 </div>
 
 
-<p>Ripple animations are available for buttons, checkboxes, and other touch controls in your app.</p>
+<p>Ripple animations are available for buttons, checkboxes, and other touch controls in your app. 
+
+<p>You can also define vector drawables in XML and animate them in a variety of ways. Vector drawables scale without losing definition, so they are perfect for single-color in-app icons.</p>
 
 <p>A new system-managed processing thread called <strong>RenderThread</strong> keeps animations smooth even when there are delays in the main UI thread. </p>
-
 
 
 <h2 id="Perf">Performance focus</h2>
@@ -179,7 +180,7 @@ video apps and games to display smooth synchronized content.</p>
 <p>Android 5.0 also introduces the <strong>Android Extension Pack</strong> (AEP), a set of OpenGL ES extensions that give you access to features like tessellation shaders, geometry shaders, ASTC texture compression, per-sample interpolation and shading, and other advanced rendering capabilities. With AEP you can deliver high-performance graphics across a range of GPUs.</p>
 
 
-<h2 id="Audio">More Powerful Audio</h2>
+<h2 id="Audio">More powerful audio</h2>
 
 <p>A new audio-capture design offers <strong>low-latency audio input</strong>. The new design includes: a fast capture thread that never blocks except during a read; fast track capture clients at native sample rate, channel count, and bit depth; and normal capture clients offer resampling, up/down channel mix, and up/down bit depth.</p>
 
@@ -194,7 +195,7 @@ video apps and games to display smooth synchronized content.</p>
 <p>New <strong>{@link android.media.session.MediaSession}</strong> APIs for controlling media playback now make it easier to provide consistent media controls across screens and other controllers.</p>
 
 
-<h2 id="Camera">Enhanced Camera &amp; Video</h2>
+<h2 id="Camera">Enhanced camera &amp; video</h2>
 
 <p>Android 5.0 introduces <strong>all new camera APIs</strong> that let you capture raw formats such as YUV and Bayer RAW, and control parameters such as exposure time, ISO sensitivity, and frame duration on a per-frame basis. The new fully-synchronized camera pipeline allows you to capture uncompressed full-resolution YUV images at 30 FPS on supported devices.</p>
 
@@ -205,11 +206,15 @@ video apps and games to display smooth synchronized content.</p>
 <p>Android 5.0 also adds support for <strong>multimedia tunneling</strong> to provide the best experience for ultra-high definition (4K) content and the ability to play compressed audio and video data together. </p>
 
 
-
-<img style="float:right; margin:0 0 40px 60px"
+<!--
+<div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
+<img style="float:right; margin:0 1em 1em 2em"
     src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"
     srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"
     alt="" width="300" />
+<p class="img-caption">Android Work users have a unified view of their personal and work apps, which are badged for easy identification.</p>
+</div>
+-->
 
 <h2 id="Work">Android in the workplace</h2>
 
@@ -253,13 +258,15 @@ can configure global device settings.</p>
 
 <p>The initial release for Android 5.0 includes a version of Chromium for {@link android.webkit.WebView} based on the Chromium M37 release, adding support for <strong>WebRTC</strong>, <strong>WebAudio</strong>, and <strong>WebGL</strong>. </p>
 
+<p>Chromium M37 also includes native support for all of the <strong>Web Components</strong> specifications: Custom Elements, Shadow DOM, HTML Imports, and Templates. This means you can use <a href="http://polymer-project.org/">Polymer</a> and its <a href="https://www.polymer-project.org/docs/elements/material.html">material design elements</a> in a WebView without needing polyfills.</p>
+
 <p>Although WebView has been based on Chromium since Android 4.4, the Chromium layer is now updatable from Google Play.</p>
 
 <p>As new versions of Chromium become available, users can update from Google Play to ensure they get the latest enhancements and bug fixes for WebView, providing the latest web APIs and bug fixes for apps using WebView on Android 5.0 and higher.</p>
 
 
 
-<h2 id="Accessibility">Accessibility &amp; Input</h2>
+<h2 id="Accessibility">Accessibility &amp; input</h2>
 
 <p>New accessibility APIs can retrieve detailed information about the properties of windows on the screen that sighted users can interact with and define standard or customized input actions for UI elements.</p>
 
