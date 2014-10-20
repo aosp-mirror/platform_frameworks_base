@@ -22,9 +22,9 @@
     <string name="app_label" msgid="7164937344850004466">"Sistemski uporabniški vmesnik"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Počisti"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odstrani s seznama"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Podatki o programu"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Podatki o aplikaciji"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vaši nedavni zasloni so prikazani tu"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zapre nedavne programe"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zapre nedavne aplikacije"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="3969335317929254918">"En zaslon v pregledu"</item>
     <item quantity="other" msgid="5523506463832158203">"Št. zaslonov v pregledu: %d"</item>
@@ -52,8 +52,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Internetna povezava prek Bluetootha"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavi načine vnosa"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Fizična tipkovnica"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Želite programu <xliff:g id="APPLICATION">%1$s</xliff:g> dovoliti dostop do naprave USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Želite dovoliti programu <xliff:g id="APPLICATION">%1$s</xliff:g> dostop do dodatka USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Želite aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovoliti dostop do naprave USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Želite dovoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dostop do dodatka USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Želite, da se odpre <xliff:g id="ACTIVITY">%1$s</xliff:g>, ko priključite to napravo USB?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Želite, da se odpre <xliff:g id="ACTIVITY">%1$s</xliff:g>, ko priključite ta dodatek USB?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Namešč. prog. ne delujejo s tem dodatkom USB. Več o tem dodatku preberite na <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -158,7 +158,7 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Opusti aplikacijo <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Program <xliff:g id="APP">%s</xliff:g> je bil odstranjen."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Aplikacija <xliff:g id="APP">%s</xliff:g> je bila odstranjena."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Zaganjanje aplikacije <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Obvestilo je bilo odstranjeno."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Zaslon z obvestili."</string>
