@@ -1757,16 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Выбран элемент <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Цифра <xliff:g id="KEY">%1$s</xliff:g> удалена"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Чтобы открепить экран, нажмите и удерживайте клавишу \"Назад\" и кнопку \"Обзор\" одновременно."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Чтобы открепить экран, нажмите и удерживайте кнопку \"Обзор\"."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Блокировка включена. Ее отключение запрещено правилами организации."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Использовать блокировку в приложении?"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Функция закрепления позволяет зафиксировать текущий экран.\n\nЧтобы открепить его, нажмите и удерживайте клавишу \"Назад\" и кнопку \"Обзор\" одновременно."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Функция закрепления позволяет зафиксировать текущий экран.\n\nЧтобы открепить его, нажмите и удерживайте кнопку \"Обзор\"."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"НЕТ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ДА"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Блокировка включена"</string>
@@ -1775,7 +1771,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибросигнала и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Когда период простоя завершится (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"До отключения режима (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1 мин."</item>
     <item quantity="other" msgid="6924190729213550991">"%d мин."</item>
