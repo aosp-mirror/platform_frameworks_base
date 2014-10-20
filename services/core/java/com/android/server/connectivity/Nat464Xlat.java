@@ -217,7 +217,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 NetworkUtils.resetConnections(
                     CLAT_INTERFACE_NAME,
                     NetworkUtils.RESET_IPV4_ADDRESSES);
-                mBaseLP.removeStackedLink(mLP);
+                mBaseLP.removeStackedLink(CLAT_INTERFACE_NAME);
                 updateConnectivityService();
             }
             Slog.i(TAG, "interface " + CLAT_INTERFACE_NAME +
