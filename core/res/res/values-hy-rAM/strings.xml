@@ -1762,16 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Ընտրված է <xliff:g id="ITEM">%1$s</xliff:g> տարրը"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> թիվը ջնջված է"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Աշխատանքային <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Այս էկրան ապամրացնելու համար միաժամանակ հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Այս էկրան ապամրացնելու համար հպեք և պահեք Համատեսքի կոճակին:"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Էկրանն ամրացված է: Ապամրացումը չի թույլատրվում ձեր կազմակերպության կողմից:"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Օգտագործե՞լ էկրանի ամրացումը:"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Էկրանի ամրացումը կողպում է էկրանը ընթացիկ տեսքով:\n\nԱպամրացնելու համար միաժամանակ հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Էկրանի ամրացումը կողպում է էկրանը տվյալ պահի տեսքով:\n\nԱպամրացնելու համար հպեք և պահեք Համատեսքի կոճակին:"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ՈՉ, ՇՆՈՐՀԱԿԱԼՈՒԹՅՈՒՆ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"Այո"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Էկրանն ամրացված է"</string>

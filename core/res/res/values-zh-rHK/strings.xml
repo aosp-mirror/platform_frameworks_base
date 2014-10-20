@@ -252,7 +252,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存空間"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"存取 USB 儲存裝置。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"存取 SD 卡。"</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"協助工具功能"</string>
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"無障礙功能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"輔助技術可要求的功能。"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您使用中的視窗內容。"</string>
@@ -334,8 +334,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"允許應用程式擷取系統內部狀態。惡意應用程式可能會擷取他們通常不需要的各類私密資訊。"</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"取得螢幕內容"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允許應用程式擷取使用中的視窗內容。惡意應用程式可能會擷取整個視窗的內容，以及檢視密碼除外的所有文字。"</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暫時啟用協助工具"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允許應用程式在裝置上暫時啟用協助工具。惡意應用程式可能藉此在未經使用者同意的情況下擅自啟用協助工具。"</string>
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暫時啟用無障礙功能"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允許應用程式在裝置上暫時啟用無障礙功能。惡意應用程式可能藉此在未經使用者同意的情況下擅自啟用無障礙功能。"</string>
     <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"擷取視窗憑證"</string>
     <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"允許應用程式擷取視窗憑證。惡意應用程式可能會在未經授權的情況下，與冒充系統的應用程式視窗互動。"</string>
     <string name="permlab_frameStats" msgid="7056374987314361639">"擷取畫格統計資料"</string>
@@ -389,8 +389,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"允許應用程式監看您的按鍵操作，包括使用其他應用程式時的按鍵操作 (例如輸入密碼) (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"限定輸入法"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允許應用程式繫結至輸入法的頂層介面 (不建議一般應用程式使用)。"</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"繫結至協助工具服務"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允許應用程式繫結至協助工具服務的頂層介面 (不建議一般應用程式使用)。"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"繫結至無障礙服務"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允許應用程式繫結至無障礙服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"繫結至列印服務"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"允許應用程式繫結至列印服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"繫結至列印多工緩衝處理器服務"</string>
@@ -1433,7 +1433,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"您目前透過公司檔案使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"無障礙功能"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
@@ -1636,9 +1636,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致您的聽力受損。"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"以兩隻手指按住不放，即可啟用協助工具。"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"協助工具已啟用。"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"協助工具已取消。"</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"以兩隻手指按住不放，即可啟用無障礙功能。"</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"無障礙功能已啟用。"</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"無障礙功能已取消。"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"擁有者"</string>
@@ -1762,16 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"已選取<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"如要取消固定這個畫面，請同時輕觸並按住 [返回] 和 [概覽]。"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"如要取消固定這個畫面，請輕觸並按住 [概覽]。"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"螢幕已固定，而您的機構不允許取消固定。"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"使用螢幕固定功能？"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"螢幕鎖定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請同時輕觸並按住 [返回] 和 [概覽]。"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"螢幕鎖定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請輕觸並按住 [概覽]。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了，謝謝"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"啟動"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"螢幕已固定"</string>
