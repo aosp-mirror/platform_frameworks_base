@@ -1765,8 +1765,8 @@
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Obrazovka je pripnutá. Uvoľnenie vaša organizácia nepovoľuje."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Použiť pripnutie k obrazovke?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripnutie k obrazovke uzamkne obrazovku v jednom zobrazení.\n\nAk ju chcete uvoľniť, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripnutie k obrazovke uzamkne obrazovku v jednom zobrazení.\n\nAk ju chcete uvoľniť, klepnite na tlačidlo Prehľad a podržte ho."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripnutie obrazovky uzamkne obrazovku v jednom zobrazení.\n\nAk ju chcete uvoľniť, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripnutie obrazovky uzamkne obrazovku v jednom zobrazení.\n\nAk ju chcete uvoľniť, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NIE, ĎAKUJEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SPUSTIŤ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
