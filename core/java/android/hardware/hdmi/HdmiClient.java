@@ -3,7 +3,6 @@ package android.hardware.hdmi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.hdmi.HdmiControlManager.VendorCommandListener;
-import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -91,8 +90,13 @@ public abstract class HdmiClient {
             final VendorCommandListener listener) {
         return new IHdmiVendorCommandListener.Stub() {
             @Override
-            public void onReceived(int srcAddress, byte[] params, boolean hasVendorId) {
-                listener.onReceived(srcAddress, params, hasVendorId);
+            public void onReceived(int srcAddress, int destAddress, byte[] params,
+                    boolean hasVendorId) {
+                listener.onReceived(srcAddress, destAddress, params, hasVendorId);
+            }
+            @Override
+            public void onControlStateChanged(boolean enabled, int reason) {
+                listener.onControlStateChanged(enabled, reason);
             }
         };
     }

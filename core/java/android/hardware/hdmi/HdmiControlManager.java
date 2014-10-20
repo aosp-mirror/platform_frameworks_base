@@ -236,6 +236,15 @@ public final class HdmiControlManager {
     /** Clear timer error - CEC is disabled. */
     public static final int CLEAR_TIMER_STATUS_CEC_DISABLE = 0xA2;
 
+    /** The HdmiControlService is started. */
+    public static final int CONTROL_STATE_CHANGED_REASON_START = 0;
+    /** The state of HdmiControlService is changed by changing of settings. */
+    public static final int CONTROL_STATE_CHANGED_REASON_SETTING = 1;
+    /** The HdmiControlService is enabled to wake up. */
+    public static final int CONTROL_STATE_CHANGED_REASON_WAKEUP = 2;
+    /** The HdmiControlService will be disabled to standby. */
+    public static final int CONTROL_STATE_CHANGED_REASON_STANDBY = 3;
+
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
     // True if we have a logical device of type TV hosted in the system.
@@ -339,11 +348,29 @@ public final class HdmiControlManager {
          * Called when a vendor command is received.
          *
          * @param srcAddress source logical address
+         * @param destAddress destination logical address
          * @param params vendor-specific parameters
          * @param hasVendorId {@code true} if the command is &lt;Vendor Command
          *        With ID&gt;. The first 3 bytes of params is vendor id.
          */
-        void onReceived(int srcAddress, byte[] params, boolean hasVendorId);
+        void onReceived(int srcAddress, int destAddress, byte[] params, boolean hasVendorId);
+
+        /**
+         * The callback is called:
+         * <ul>
+         *     <li> before HdmiControlService is disabled.
+         *     <li> after HdmiControlService is enabled and the local address is assigned.
+         * </ul>
+         * The client shouldn't hold the thread too long since this is a blocking call.
+         *
+         * @param enabled {@code true} if HdmiControlService is enabled.
+         * @param reason the reason code why the state of HdmiControlService is changed.
+         * @see #CONTROL_STATE_CHANGED_REASON_START
+         * @see #CONTROL_STATE_CHANGED_REASON_SETTING
+         * @see #CONTROL_STATE_CHANGED_REASON_WAKEUP
+         * @see #CONTROL_STATE_CHANGED_REASON_STANDBY
+         */
+        void onControlStateChanged(boolean enabled, int reason);
     }
 
     /**
