@@ -1461,7 +1461,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_PHONE:
             case TYPE_POINTER:
             case TYPE_PRIORITY_PHONE:
-            case TYPE_RECENTS_OVERLAY:
             case TYPE_SEARCH_BAR:
             case TYPE_STATUS_BAR:
             case TYPE_STATUS_BAR_PANEL:
@@ -1580,7 +1579,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_VOICE_INTERACTION:
             // voice interaction layer is almost immediately above apps.
             return 5;
-        case TYPE_RECENTS_OVERLAY:
         case TYPE_SYSTEM_DIALOG:
             return 6;
         case TYPE_TOAST:
