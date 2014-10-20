@@ -22,6 +22,9 @@ import android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.Collections;
+import java.util.List;
+
 import libcore.util.EmptyArray;
 
 /**
@@ -147,6 +150,21 @@ public final class HdmiTvClient extends HdmiClient {
                 listener.onChanged(info);
             }
         };
+    }
+
+    /**
+     * Returns all the CEC devices connected to TV.
+     *
+     * @return list of {@link HdmiDeviceInfo} for connected CEC devices.
+     *         Empty list is returned if there is none.
+     */
+    public List<HdmiDeviceInfo> getDeviceList() {
+        try {
+            return mService.getDeviceList();
+        } catch (RemoteException e) {
+            Log.e("TAG", "Failed to call getDeviceList():", e);
+            return Collections.<HdmiDeviceInfo>emptyList();
+        }
     }
 
     /**

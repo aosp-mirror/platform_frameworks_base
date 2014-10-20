@@ -1232,6 +1232,19 @@ public final class HdmiControlService extends SystemService {
             }
         }
 
+        // Returns all the CEC devices on the bus including system audio, switch,
+        // even those of reserved type.
+        @Override
+        public List<HdmiDeviceInfo> getDeviceList() {
+            enforceAccessPermission();
+            HdmiCecLocalDeviceTv tv = tv();
+            synchronized (mLock) {
+                return (tv == null)
+                        ? Collections.<HdmiDeviceInfo>emptyList()
+                        : tv.getSafeCecDevicesLocked();
+            }
+        }
+
         @Override
         public void setSystemAudioVolume(final int oldIndex, final int newIndex,
                 final int maxIndex) {

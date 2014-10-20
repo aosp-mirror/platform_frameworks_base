@@ -57,8 +57,9 @@ final class ActiveSourceHandler {
      * Handles the incoming active source command.
      *
      * @param newActive new active source information
+     * @param deviceType device type of the new active source
      */
-    void process(ActiveSource newActive) {
+    void process(ActiveSource newActive, int deviceType) {
         // Seq #17
         HdmiCecLocalDeviceTv tv = mSource;
         ActiveSource activeSource = tv.getActiveSource();
@@ -68,7 +69,7 @@ final class ActiveSourceHandler {
         }
         HdmiDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
         if (device == null) {
-            tv.startNewDeviceAction(newActive);
+            tv.startNewDeviceAction(newActive, deviceType);
         }
 
         if (!tv.isProhibitMode()) {
