@@ -19,6 +19,8 @@
 
 #include <SkUtils.h>
 
+#include "Properties.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +51,7 @@
         return g;
     }
 #else
+#error here
     typedef SkUnichar glyph_t;
     #define TO_GLYPH(g) ((SkUnichar) g)
     #define GET_METRICS(cache, glyph) cache->getUnicharMetrics(glyph)
