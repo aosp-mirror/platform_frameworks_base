@@ -110,6 +110,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // If true, TV wakes itself up when receiving <Text/Image View On>.
     private boolean mAutoWakeup;
 
+    // List of the logical address of local CEC devices. Unmodifiable, thread-safe.
+    private List<Integer> mLocalDeviceAddresses;
+
     private final HdmiCecStandbyModeHandler mStandbyHandler;
 
     // If true, do not do routing control/send active source for internal source.
@@ -141,8 +144,20 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mSkipRoutingControl = (reason == HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE);
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
+        mLocalDeviceAddresses = initLocalDeviceAddresses();
         launchDeviceDiscovery();
         startQueuedActions();
+    }
+
+
+    @ServiceThreadOnly
+    private List<Integer> initLocalDeviceAddresses() {
+        assertRunOnServiceThread();
+        List<Integer> addresses = new ArrayList<>();
+        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
+            addresses.add(device.getDeviceInfo().getLogicalAddress());
+        }
+        return Collections.unmodifiableList(addresses);
     }
 
     @Override
@@ -390,11 +405,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        if (getCecDeviceInfo(logicalAddress) == null) {
+        HdmiDeviceInfo info = getCecDeviceInfo(logicalAddress);
+        if (info == null) {
             handleNewDeviceAtTheTailOfActivePath(physicalAddress);
         } else {
             ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
-            ActiveSourceHandler.create(this, null).process(activeSource);
+            ActiveSourceHandler.create(this, null).process(activeSource, info.getDeviceType());
         }
         return true;
     }
@@ -484,7 +500,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!isInDeviceList(address, path)) {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
-        startNewDeviceAction(ActiveSource.of(address, path));
+        startNewDeviceAction(ActiveSource.of(address, path), type);
         return true;
     }
 
@@ -520,7 +536,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return false;
     }
 
-    void startNewDeviceAction(ActiveSource activeSource) {
+    void startNewDeviceAction(ActiveSource activeSource, int deviceType) {
         for (NewDeviceAction action : getActions(NewDeviceAction.class)) {
             // If there is new device action which has the same logical address and path
             // ignore new request.
@@ -536,7 +552,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
 
         addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
-                activeSource.physicalAddress));
+                activeSource.physicalAddress, deviceType));
     }
 
     private void handleNewDeviceAtTheTailOfActivePath(int path) {
@@ -1195,15 +1211,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    @ServiceThreadOnly
     private boolean isLocalDeviceAddress(int address) {
-        assertRunOnServiceThread();
-        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
-            if (device.isAddressOf(address)) {
-                return true;
-            }
-        }
-        return false;
+        return mLocalDeviceAddresses.contains(address);
     }
 
     @ServiceThreadOnly
@@ -1251,6 +1260,17 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
             return null;
         }
+    }
+
+    List<HdmiDeviceInfo> getSafeCecDevicesLocked() {
+        ArrayList<HdmiDeviceInfo> infoList = new ArrayList<>();
+        for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {
+            if (isLocalDeviceAddress(info.getLogicalAddress())) {
+                continue;
+            }
+            infoList.add(info);
+        }
+        return infoList;
     }
 
     /**
