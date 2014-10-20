@@ -535,6 +535,21 @@ import java.lang.IllegalArgumentException;
             return this;
         }
 
+        @Override
+        public synchronized MetadataEditor putObject(int key, Object object)
+                throws IllegalArgumentException {
+            super.putObject(key, object);
+            if (mMetadataBuilder != null &&
+                    (key == MediaMetadataEditor.RATING_KEY_BY_USER ||
+                    key == MediaMetadataEditor.RATING_KEY_BY_OTHERS)) {
+                String metadataKey = MediaMetadata.getKeyFromMetadataEditorKey(key);
+                if (metadataKey != null) {
+                    mMetadataBuilder.putRating(metadataKey, (Rating) object);
+                }
+            }
+            return this;
+        }
+
         /**
          * Clears all the metadata that has been set since the MetadataEditor instance was created
          * (with {@link RemoteControlClient#editMetadata(boolean)}).
