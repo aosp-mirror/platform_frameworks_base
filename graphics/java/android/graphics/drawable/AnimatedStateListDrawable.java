@@ -139,27 +139,15 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
     @Override
     protected boolean onStateChange(int[] stateSet) {
-        final int keyframeIndex = mState.indexOfKeyframe(stateSet);
-        if (keyframeIndex == getCurrentIndex()) {
-            // Propagate state change to current keyframe.
-            final Drawable current = getCurrent();
-            if (current != null) {
-                return current.setState(stateSet);
-            }
-            return false;
-        }
+        // If we're not already at the target index, either attempt to find a
+        // valid transition to it or jump directly there.
+        final int targetIndex = mState.indexOfKeyframe(stateSet);
+        final boolean changedIndex = targetIndex != getCurrentIndex()
+                && (selectTransition(targetIndex) || selectDrawable(targetIndex));
 
-        // Attempt to find a valid transition to the keyframe.
-        if (selectTransition(keyframeIndex)) {
-            return true;
-        }
-
-        // No valid transition, attempt to jump directly to the keyframe.
-        if (selectDrawable(keyframeIndex)) {
-            return true;
-        }
-
-        return super.onStateChange(stateSet);
+        // Always call super.onStateChanged() to propagate the state change to
+        // the current drawable.
+        return super.onStateChange(stateSet) || changedIndex;
     }
 
     private boolean selectTransition(int toIndex) {
