@@ -21,14 +21,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="719438068451601849">"कीगार्ड"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN कोड टाइप करा"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"पिन कोड टाइप करा"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"सिम PUK आणि नवीन पिन कोड टाइप करा"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"सिम PUK कोड"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"नवीन सिम पिन कोड"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"संकेतशब्द टाइप करण्यासाठी स्पर्श करा"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करण्यासाठी संकेतशब्द टाइप करा"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी PIN टाइप करा"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य PIN कोड."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य पिन कोड."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"अनलॉक करण्यासाठी, मेनू दाबा नंतर 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"कमाल चेहरा अनलॉक प्रयत्न ओलांडले"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"चार्ज झाली"</string>
@@ -103,20 +103,20 @@
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"नमुना विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा नमुना"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा संकेतशब्द"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"चुकीचा PIN"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"चुकीचा पिन"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"आपला नमुना काढा"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम PIN प्रविष्ट करा"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN प्रविष्ट करा"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम पिन प्रविष्ट करा"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"पिन प्रविष्ट करा"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"संकेतशब्द प्रविष्ट करा"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम आता अक्षम केले आहे. सुरु ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित PIN कोड प्रविष्ट करा"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित PIN कोड ची पुष्टी करा"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड प्रविष्ट करा"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड ची पुष्टी करा"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"सिम कार्ड अनलॉक करत आहे…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 ते 8 अंक असलेला PIN टाइप करा."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 ते 8 अंक असलेला पिन टाइप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड 8 अंकी किंवा त्यापेक्षा अधिकचा असावा."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"योग्य PUK कोड पुन्हा-प्रविष्ट करा. परत प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN कोड जुळत नाहीत"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड जुळत नाहीत"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बरेच नमुना प्रयत्न"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"वापरकर्तानाव (ईमेल)"</string>
@@ -125,7 +125,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"अवैध वापरकर्तानाव किंवा संकेतशब्द."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"आपले वापरकर्तानाव किंवा संकेतशब्द विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते तपासत आहे…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला PIN <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला पिन <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने काढला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, टॅब्लेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
