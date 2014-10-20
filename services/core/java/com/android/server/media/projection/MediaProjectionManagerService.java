@@ -325,7 +325,7 @@ public final class MediaProjectionManagerService extends SystemService
 
             final long token = Binder.clearCallingIdentity();
             try {
-                dump(pw);
+                MediaProjectionManagerService.this.dump(pw);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
