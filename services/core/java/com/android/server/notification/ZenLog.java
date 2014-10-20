@@ -34,6 +34,7 @@ import java.util.Date;
 
 public class ZenLog {
     private static final String TAG = "ZenLog";
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     private static final int SIZE = Build.IS_DEBUGGABLE ? 100 : 20;
 
@@ -166,7 +167,7 @@ public class ZenLog {
                 sSize++;
             }
         }
-        Slog.d(TAG, typeToString(type) + ": " + msg);
+        if (DEBUG) Slog.d(TAG, typeToString(type) + ": " + msg);
     }
 
     public static void dump(PrintWriter pw, String prefix) {
