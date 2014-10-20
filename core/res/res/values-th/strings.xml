@@ -704,7 +704,7 @@
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"อนุญาตให้แอปอ่านเนื้อหาในการ์ด SD"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"แก้ไขหรือลบเนื้อหาใน USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"แก้ไขหรือลบเนื้อหาในการ์ด SD ของคุณ"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"อนุญาตให้แอปฯ เขียนลงใน USB"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"อนุญาตให้แอปเขียนลงใน USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"อนุญาตให้แอปพลิเคชันเขียนลงบนการ์ด SD"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"แก้/ลบเนื้อหาข้อมูลสื่อภายใน"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"อนุญาตให้แอปพลิเคชันแก้ไขเนื้อหาของที่เก็บข้อมูลสื่อภายใน"</string>
@@ -1757,16 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"เลือก <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"ลบ <xliff:g id="KEY">%1$s</xliff:g> แล้ว"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
-    <!-- no translation found for lock_to_app_toast (7570091317001980053) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"หากต้องการเลิกตรึงหน้าจอนี้ แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้พร้อมกัน"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"หากต้องการเลิกตรึงหน้าจอ แตะ \"ภาพรวม\" ค้างไว้"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ตรึงหน้าจอแล้ว องค์กรของคุณไม่อนุญาตให้เลิกตรึง"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"ใช้การตรึงหน้าจอไหม"</string>
-    <!-- no translation found for lock_to_app_description (4120623404152035221) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (199664191087836099) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="4120623404152035221">"การตรึงหน้าจอล็อกหน้าจอให้อยู่ในมุมมองเดียว\n\nหากต้องการเลิกตรึง ให้แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้พร้อมกัน"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"การตรึงหน้าจอล็อกหน้าจอให้อยู่ในมุมมองเดียว\n\nหากต้องการเลิกตรึง ให้แตะ \"ภาพรวม\" ค้างไว้"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ไม่เป็นไร ขอบคุณ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"เริ่มต้น"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ตรึงหน้าจอแล้ว"</string>
