@@ -44,12 +44,12 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി സേവർ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണങ്ങൾ"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"വിമാന മോഡ്"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ യാന്ത്രികമായി തിരിക്കുക"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"മ്യൂട്ടുചെയ്യുക"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"യാന്ത്രികം"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"അറിയിപ്പുകൾ"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ടെതർ ചെയ്‌തു"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ബ്ലൂടൂത്ത് ടെതർ ചെയ്‌തു"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ടൈപ്പുചെയ്യൽ രീതികൾ സജ്ജീകരിക്കുക"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഭൗതിക കീബോർഡ്"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB ഉപകരണം ആക്‌സസ്സ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്‌ളിക്കേഷനെ അനുവദിക്കണോ?"</string>
@@ -91,8 +91,8 @@
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ടൈപ്പുചെയ്യൽ രീതി ബട്ടൺ മാറുക."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"അനുയോജ്യതാ സൂം ബട്ടൺ."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ചെറുതിൽ നിന്ന് വലിയ സ്‌ക്രീനിലേക്ക് സൂം ചെയ്യുക."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth കണക്‌റ്റുചെയ്തു."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth വിച്ഛേദിച്ചു."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്തു."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ബ്ലൂടൂത്ത് വിച്ഛേദിച്ചു."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"ബാറ്ററിയില്ല."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ബാറ്ററി ഒരു ബാർ."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ബാറ്ററി രണ്ട് ബാർ."</string>
@@ -108,12 +108,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ഡാറ്റ രണ്ട് ബാറുകൾ."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ഡാറ്റ മൂന്ന് ബാർ."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ഡാറ്റ സിഗ്‌നൽ പൂർണ്ണമാണ്."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi ഓഫാണ്."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi വിച്ഛേദിച്ചു."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi ഒരു ബാർ."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi രണ്ട് ബാറുകൾ."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi മൂന്ന് ബാറുകൾ."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi മികച്ച സിഗ്‌നൽ."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"വൈഫൈ ഓഫാണ്."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"വൈഫൈ വിച്ഛേദിച്ചു."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"വൈഫൈ ഒരു ബാർ."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"വൈഫൈ രണ്ട് ബാറുകൾ."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"വൈഫൈ മൂന്ന് ബാറുകൾ."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"വൈഫൈ മികച്ച സിഗ്‌നൽ."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX ഇല്ല."</string>
@@ -143,9 +143,9 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"റോമിംഗ്"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM ഇല്ല."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ടെതറിംഗ്."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"വിമാന മോഡ്."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"സിം ഇല്ല."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"അറിയിപ്പുകൾ."</string>
@@ -168,20 +168,20 @@
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ചുരുക്കവിവരണം."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ഉപയോക്താവ് <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi ഓഫാക്കി."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi ഓണാക്കി."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"വൈഫൈ ഓഫാക്കി."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"വൈഫൈ ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"മൊബൈൽ <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ബാറ്ററി <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"വിമാന മോഡ് ഓഫാണ്."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"വിമാന മോഡ് ഓണാണ്."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"വിമാന മോഡ് ഓഫാക്കി."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"വിമാന മോഡ് ഓണാക്കി."</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth ഓഫാണ്."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth ഓണാണ്."</string>
-    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth കണക്‌റ്റുചെയ്യുന്നു."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth കണക്‌റ്റുചെയ്തു."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth ഓഫാക്കി."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth ഓണാക്കി."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"ഫ്ലൈറ്റ് മോഡ് ഓഫാണ്."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ഫ്ലൈറ്റ് മോഡ് ഓണാണ്."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ഫ്ലൈറ്റ് മോഡ് ഓഫാക്കി."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ഫ്ലൈറ്റ് മോഡ് ഓണാക്കി."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ബ്ലൂടൂത്ത് ഓഫാണ്."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ബ്ലൂടൂത്ത് ഓണാണ്."</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്യുന്നു."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്തു."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ബ്ലൂടൂത്ത് ഓഫാക്കി."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ബ്ലൂടൂത്ത് ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"ലൊക്കേഷൻ റിപ്പോർട്ടുചെയ്യൽ ഓഫാണ്."</string>
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"ലൊക്കേഷൻ റിപ്പോർട്ടുചെയ്യൽ ഓണാണ്."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"ലൊക്കേഷൻ റിപ്പോർട്ടുചെയ്യൽ ഓഫാക്കി."</string>
@@ -223,10 +223,10 @@
     <string name="dessert_case" msgid="1295161776223959221">"ഡെസേർട്ട് കെയ്സ്"</string>
     <string name="start_dreams" msgid="7219575858348719790">"ഡേഡ്രീം"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ഇതർനെറ്റ്"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"വിമാന മോഡ്"</string>
-    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> ഉപകരണങ്ങൾ)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth ഓഫുചെയ്യുക"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"ഫ്ലൈറ്റ് മോഡ്"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ബ്ലൂടൂത്ത്"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ബ്ലൂടൂത്ത് (<xliff:g id="NUMBER">%d</xliff:g> ഉപകരണങ്ങൾ)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ബ്ലൂടൂത്ത് ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ജോടിയാക്കിയ ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"തെളിച്ചം"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ഓട്ടോ റൊട്ടേറ്റ്"</string>
@@ -299,7 +299,7 @@
     <string name="phone_hint" msgid="3101468054914424646">"ഫോണിനായി വലതുവശത്ത് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ക്യാമറയ്‌ക്കായി ഇടതുവശത്ത് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"ഒന്നുമില്ല"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"മുന്‍‌ഗണന"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"പ്രധാനപ്പെട്ടവ"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"എല്ലാം"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ചാർജ്ജുചെയ്യുന്നു (പൂർണ്ണമാകുന്നതിന്, <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ഉപയോക്താവ് മാറുക"</string>
@@ -348,7 +348,7 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"ഈ ഉപകരണത്തെ നിയന്ത്രിക്കുന്നത്:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nനിങ്ങളുടെ പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത്:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nഇമെയിലുകൾ, അപ്ലിക്കേഷനുകൾ, സുരക്ഷാ വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാൻ നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ പ്രാപ്‌തനാണ്. കൂടുതൽ വിവരങ്ങൾക്ക് അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക.\n\nഒരു VPN കണക്ഷൻ സജ്ജമാക്കാൻ \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" അനുമതിയും നിങ്ങൾ നൽകി. നെറ്റ്‌വർക്കും പ്രവർത്തനവും നിരീക്ഷിക്കാൻ ഈ അപ്ലിക്കേഷനാകും."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"ഈ ഉപകരണത്തെ നിയന്ത്രിക്കുന്നത്:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nനിങ്ങളുടെ പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത്:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nഇമെയിലുകൾ, അപ്ലിക്കേഷനുകൾ, സുരക്ഷാ വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാൻ നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ പ്രാപ്‌തനാണ്.\n\nഒരു VPN-ലേക്കും (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\")കണക്‌റ്റുചെയ്‌തിരിക്കുന്നു. നിങ്ങളുടെ VPN സേവന ദാതാവിന് നെറ്റ്‌വർക്ക് പ്രവർത്തനവും നിരീക്ഷിക്കാനാകും."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"നിങ്ങൾ സ്വമേധയാ അൺലോക്കുചെയ്യുന്നതുവരെ ഉപകരണം ലോക്കുചെയ്‌തതായി തുടരും"</string>
-    <string name="hidden_notifications_title" msgid="7139628534207443290">"അറിയിപ്പുകൾ വേഗത്തിൽ നേടുക"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"അറിയിപ്പുകൾ വേഗത്തിൽ സ്വീകരിക്കുക"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"അൺലോക്കുചെയ്യുന്നതിന് മുമ്പ് അവ കാണുക"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"വേണ്ട, നന്ദി"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"സജ്ജീകരിക്കുക"</string>

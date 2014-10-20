@@ -25,8 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"आपकी हाल की स्‍क्रीन यहां दिखाई देती हैं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
-    <!-- no translation found for status_bar_accessibility_recent_apps:one (3969335317929254918) -->
-    <!-- no translation found for status_bar_accessibility_recent_apps:other (5523506463832158203) -->
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"ओवरव्यू मेें 1 स्क्रीन"</item>
+    <item quantity="other" msgid="5523506463832158203">"ओवरव्यू में %d स्क्रीन"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कोई नोटिफिकेशन नहीं"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
@@ -62,7 +64,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबगिंग करने दें?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>
-    <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने हेतु ज़ूम करें"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन को भरने के लिए खींचें"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
@@ -78,8 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"वापस जाएं"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
-    <!-- no translation found for accessibility_recent (5208608566793607626) -->
-    <skip />
+    <string name="accessibility_recent" msgid="5208608566793607626">"ओवरव्यू"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"खोजें"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"कैमरा"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"फ़ोन"</string>
@@ -164,8 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"त्वरित सेटिंग."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"सेटिंग"</string>
-    <!-- no translation found for accessibility_desc_recent_apps (4876900986661819788) -->
-    <skip />
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ओवरव्यू."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"उपयोगकर्ता <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाई-फ़ाई को बंद किया गया."</string>
@@ -204,7 +204,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G डेटा बंद है"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"सेल्युलर डेटा बंद है"</string>
     <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"डेटा बंद है"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"आपके डिवाइस ने डेटा बंद कर दिया है क्योंकि आपके द्वारा सेट की गई सीमा पार हो गई है.\n\nइसे पुनः चालू करने से आपका वाहक शुल्क ले सकता है."</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"आपके डिवाइस ने डेटा बंद कर दिया है क्योंकि आपके द्वारा सेट की गई सीमा पार हो गई है.\n\nइसे फिर से चालू करने से आपका वाहक शुल्क ले सकता है."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"डेटा चालू करें"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"कोई इंटरनेट कनेक्शन नहीं"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाई-फ़ाई  कनेक्‍ट किया गया"</string>
@@ -345,7 +345,7 @@
     <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"यह डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी डिवाइस और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
     <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nप्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nव्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित नेटवर्क गतिविधि मॉनीटर कर सकते हैं. अधिक जानकारी हेतु, व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nप्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nव्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित नेटवर्क गतिविधि मॉनीटर कर सकते हैं. अधिक जानकारी के लिए, व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"यह डिवाइस इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक डिवाइस लॉक रहेगा"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचनाएं अधिक तेज़ी से प्राप्त करें"</string>
