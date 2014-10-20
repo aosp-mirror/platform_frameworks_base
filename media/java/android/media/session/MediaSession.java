@@ -1175,6 +1175,7 @@ public final class MediaSession {
                     break;
                 case MSG_SKIP_TO_ITEM:
                     mCallback.onSkipToQueueItem((Long) msg.obj);
+                    break;
                 case MSG_PAUSE:
                     mCallback.onPause();
                     break;
