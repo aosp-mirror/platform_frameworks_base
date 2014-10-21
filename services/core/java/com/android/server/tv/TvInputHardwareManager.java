@@ -188,6 +188,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return;
             }
             connection.updateConfigsLocked(configs);
+            String inputId = mHardwareInputIdMap.get(deviceId);
+            if (inputId != null) {
+                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                        convertConnectedToState(config.length > 0), 0, inputId).sendToTarget();
+            }
             try {
                 connection.getCallbackLocked().onStreamConfigChanged(configs);
             } catch (RemoteException e) {
@@ -257,6 +262,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             mHardwareInputIdMap.put(deviceId, info.getId());
             mInputMap.put(info.getId(), info);
 
+            // Process pending state changes
+
+            // For logical HDMI devices, they have information from HDMI CEC signals.
             for (int i = 0; i < mHdmiStateMap.size(); ++i) {
                 TvInputHardwareInfo hardwareInfo =
                         findHardwareInfoForHdmiPortLocked(mHdmiStateMap.keyAt(i));
@@ -268,7 +276,16 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
                             convertConnectedToState(mHdmiStateMap.valueAt(i)), 0,
                             inputId).sendToTarget();
+                    return;
                 }
+            }
+            // For the rest of the devices, we can tell by the number of available streams.
+            Connection connection = mConnections.get(deviceId);
+            if (connection != null) {
+                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                        convertConnectedToState(connection.getConfigsLocked().length > 0), 0,
+                        info.getId()).sendToTarget();
+                return;
             }
         }
     }
