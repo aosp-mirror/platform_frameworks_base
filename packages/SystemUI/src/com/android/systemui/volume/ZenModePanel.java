@@ -690,7 +690,7 @@ public class ZenModePanel extends LinearLayout {
         }
 
         private SharedPreferences prefs() {
-            return mContext.getSharedPreferences(ZenModePanel.class.getSimpleName(), 0);
+            return mContext.getSharedPreferences(mContext.getPackageName(), 0);
         }
 
         private void updateMinuteIndex() {
