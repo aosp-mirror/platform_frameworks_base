@@ -803,7 +803,7 @@ public class StaticLayout extends Layout {
 
     // This is used to return three arrays from a single JNI call when
     // performing line breaking
-    private static class LineBreaks {
+    /*package*/ static class LineBreaks {
         private static final int INITIAL_SIZE = 16;
         public int[] breaks = new int[INITIAL_SIZE];
         public float[] widths = new float[INITIAL_SIZE];
