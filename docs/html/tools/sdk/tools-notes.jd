@@ -13,7 +13,7 @@ latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory
 of the SDK Tools, use the <em>Android SDK Manager</em> to get the
 update, rather than downloading a new SDK starter package. For more information
 about how to update, see <a
-href="{@docRoot}sdk/exploring.html#UpdatingComponents">Exploring the SDK</a>.</p>
+href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</p>
 
 
 <h2 id="notes">Revisions</h2>
