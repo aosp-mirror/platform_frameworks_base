@@ -105,6 +105,10 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     private String mMinutePickerDescription;
     private String mSelectMinutes;
 
+    // Most recent time announcement values for accessibility.
+    private CharSequence mLastAnnouncedText;
+    private boolean mLastAnnouncedIsHour;
+
     private Calendar mTempCalendar;
 
     public TimePickerSpinnerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
@@ -224,11 +228,11 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         // Enable or disable the AM/PM view.
         updateHeaderAmPm();
         // Update Hour and Minutes
-        updateHeaderHour(mInitialHourOfDay, true);
+        updateHeaderHour(mInitialHourOfDay, false);
         // Update time separator
         updateHeaderSeparator();
         // Update Minutes
-        updateHeaderMinute(mInitialMinute);
+        updateHeaderMinute(mInitialMinute, false);
         // Invalidate everything
         mDelegator.invalidate();
     }
@@ -293,7 +297,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             return;
         }
         mInitialHourOfDay = currentHour;
-        updateHeaderHour(currentHour, true /* accessibility announce */);
+        updateHeaderHour(currentHour, true);
         updateHeaderAmPm();
         mRadialTimePickerView.setCurrentHour(currentHour);
         mRadialTimePickerView.setAmOrPm(mInitialHourOfDay < 12 ? AM : PM);
@@ -329,7 +333,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             return;
         }
         mInitialMinute = currentMinute;
-        updateHeaderMinute(currentMinute);
+        updateHeaderMinute(currentMinute, true);
         mRadialTimePickerView.setCurrentMinute(currentMinute);
         mDelegator.invalidate();
         onTimeChanged();
@@ -357,7 +361,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         generateLegalTimesTree();
         int hour = mRadialTimePickerView.getCurrentHour();
         mInitialHourOfDay = hour;
-        updateHeaderHour(hour, false /* no accessibility announce */);
+        updateHeaderHour(hour, false);
         updateHeaderAmPm();
         updateRadialPicker(mRadialTimePickerView.getCurrentItemShowing());
         mDelegator.invalidate();
@@ -604,19 +608,17 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     @Override
     public void onValueSelected(int pickerIndex, int newValue, boolean autoAdvance) {
         if (pickerIndex == HOUR_INDEX) {
-            updateHeaderHour(newValue, false);
-            String announcement = String.format("%d", newValue);
             if (mAllowAutoAdvance && autoAdvance) {
+                updateHeaderHour(newValue, false);
                 setCurrentItemShowing(MINUTE_INDEX, true, false);
-                announcement += ". " + mSelectMinutes;
+                mRadialTimePickerView.announceForAccessibility(newValue + ". " + mSelectMinutes);
             } else {
+                updateHeaderHour(newValue, true);
                 mRadialTimePickerView.setContentDescription(
                         mHourPickerDescription + ": " + newValue);
             }
-
-            mRadialTimePickerView.announceForAccessibility(announcement);
         } else if (pickerIndex == MINUTE_INDEX){
-            updateHeaderMinute(newValue);
+            updateHeaderMinute(newValue, true);
             mRadialTimePickerView.setContentDescription(mMinutePickerDescription + ": " + newValue);
         } else if (pickerIndex == AMPM_INDEX) {
             updateAmPmLabelStates(newValue);
@@ -664,7 +666,16 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         CharSequence text = String.format(format, value);
         mHourView.setText(text);
         if (announce) {
-            mRadialTimePickerView.announceForAccessibility(text);
+            tryAnnounceForAccessibility(text, true);
+        }
+    }
+
+    private void tryAnnounceForAccessibility(CharSequence text, boolean isHour) {
+        if (mLastAnnouncedIsHour != isHour || !text.equals(mLastAnnouncedText)) {
+            // TODO: Find a better solution, potentially live regions?
+            mDelegator.announceForAccessibility(text);
+            mLastAnnouncedText = text;
+            mLastAnnouncedIsHour = isHour;
         }
     }
 
@@ -715,13 +726,15 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         return -1;
     }
 
-    private void updateHeaderMinute(int value) {
+    private void updateHeaderMinute(int value, boolean announceForAccessibility) {
         if (value == 60) {
             value = 0;
         }
-        CharSequence text = String.format(mCurrentLocale, "%02d", value);
-        mRadialTimePickerView.announceForAccessibility(text);
+        final CharSequence text = String.format(mCurrentLocale, "%02d", value);
         mMinuteView.setText(text);
+        if (announceForAccessibility) {
+            tryAnnounceForAccessibility(text, false);
+        }
     }
 
     /**
@@ -921,8 +934,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         if (!allowEmptyDisplay && mTypedTimes.isEmpty()) {
             int hour = mRadialTimePickerView.getCurrentHour();
             int minute = mRadialTimePickerView.getCurrentMinute();
-            updateHeaderHour(hour, true);
-            updateHeaderMinute(minute);
+            updateHeaderHour(hour, false);
+            updateHeaderMinute(minute, false);
             if (!mIs24HourView) {
                 updateAmPmLabelStates(hour < 12 ? AM : PM);
             }
