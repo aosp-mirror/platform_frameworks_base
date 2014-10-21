@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <utils/misc.h>
 #include <signal.h>
+#include <time.h>
 
 #include <cutils/properties.h>
 
@@ -55,10 +56,6 @@
 #define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
 #define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
 #define EXIT_PROP_NAME "service.bootanim.exit"
-
-extern "C" int clock_nanosleep(clockid_t clock_id, int flags,
-                           const struct timespec *request,
-                           struct timespec *remain);
 
 namespace android {
 
