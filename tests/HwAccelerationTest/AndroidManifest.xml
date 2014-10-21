@@ -342,6 +342,24 @@
         </activity>
 
         <activity
+                android:name="HardwareCanvasTextureViewActivity"
+                android:label="TextureView/HardwareCanvas">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="HardwareCanvasSurfaceViewActivity"
+                android:label="SurfaceView/HardwareCanvas">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="GLTextureViewActivity"
                 android:label="TextureView/OpenGL">
             <intent-filter>
