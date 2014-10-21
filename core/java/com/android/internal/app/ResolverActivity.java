@@ -644,10 +644,12 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     public void safelyStartActivity(Intent intent) {
         if (!mSafeForwardingMode) {
             startActivity(intent);
+            onActivityStarted(intent);
             return;
         }
         try {
             startActivityAsCaller(intent, null, UserHandle.USER_NULL);
+            onActivityStarted(intent);
         } catch (RuntimeException e) {
             String launchedFromPackage;
             try {
@@ -660,6 +662,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     + " package " + launchedFromPackage + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
+    }
+
+    public void onActivityStarted(Intent intent) {
+        // Do nothing
     }
 
     void showAppDetails(ResolveInfo ri) {

@@ -7433,6 +7433,7 @@ package android.content {
     method public java.lang.Object clone();
     method public android.content.Intent cloneFilter();
     method public static android.content.Intent createChooser(android.content.Intent, java.lang.CharSequence);
+    method public static android.content.Intent createChooser(android.content.Intent, java.lang.CharSequence, android.content.IntentSender);
     method public int describeContents();
     method public int fillIn(android.content.Intent, int);
     method public boolean filterEquals(android.content.Intent);
@@ -7708,6 +7709,8 @@ package android.content {
     field public static final java.lang.String EXTRA_CHANGED_COMPONENT_NAME_LIST = "android.intent.extra.changed_component_name_list";
     field public static final java.lang.String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final java.lang.String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
+    field public static final java.lang.String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
+    field public static final java.lang.String EXTRA_CHOSEN_COMPONENT_INTENT_SENDER = "android.intent.extra.CHOSEN_COMPONENT_INTENT_SENDER";
     field public static final java.lang.String EXTRA_DATA_REMOVED = "android.intent.extra.DATA_REMOVED";
     field public static final java.lang.String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
     field public static final int EXTRA_DOCK_STATE_CAR = 2; // 0x2

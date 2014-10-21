@@ -876,10 +876,42 @@ public class Intent implements Parcelable, Cloneable {
      * related methods.
      */
     public static Intent createChooser(Intent target, CharSequence title) {
+        return createChooser(target, title, null);
+    }
+
+    /**
+     * Convenience function for creating a {@link #ACTION_CHOOSER} Intent.
+     *
+     * <p>Builds a new {@link #ACTION_CHOOSER} Intent that wraps the given
+     * target intent, also optionally supplying a title.  If the target
+     * intent has specified {@link #FLAG_GRANT_READ_URI_PERMISSION} or
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, then these flags will also be
+     * set in the returned chooser intent, with its ClipData set appropriately:
+     * either a direct reflection of {@link #getClipData()} if that is non-null,
+     * or a new ClipData built from {@link #getData()}.</p>
+     *
+     * <p>The caller may optionally supply an {@link IntentSender} to receive a callback
+     * when the user makes a choice. This can be useful if the calling application wants
+     * to remember the last chosen target and surface it as a more prominent or one-touch
+     * affordance elsewhere in the UI for next time.</p>
+     *
+     * @param target The Intent that the user will be selecting an activity
+     * to perform.
+     * @param title Optional title that will be displayed in the chooser.
+     * @param sender Optional IntentSender to be called when a choice is made.
+     * @return Return a new Intent object that you can hand to
+     * {@link Context#startActivity(Intent) Context.startActivity()} and
+     * related methods.
+     */
+    public static Intent createChooser(Intent target, CharSequence title, IntentSender sender) {
         Intent intent = new Intent(ACTION_CHOOSER);
         intent.putExtra(EXTRA_INTENT, target);
         if (title != null) {
             intent.putExtra(EXTRA_TITLE, title);
+        }
+
+        if (sender != null) {
+            intent.putExtra(EXTRA_CHOSEN_COMPONENT_INTENT_SENDER, sender);
         }
 
         // Migrate any clip data and flags from target.
@@ -3138,6 +3170,26 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_REPLACEMENT_EXTRAS =
             "android.intent.extra.REPLACEMENT_EXTRAS";
+
+    /**
+     * An {@link IntentSender} that will be notified if a user successfully chooses a target
+     * component to handle an action in an {@link #ACTION_CHOOSER} activity. The IntentSender
+     * will have the extra {@link #EXTRA_CHOSEN_COMPONENT} appended to it containing the
+     * {@link ComponentName} of the chosen component.
+     *
+     * <p>In some situations this callback may never come, for example if the user abandons
+     * the chooser, switches to another task or any number of other reasons. Apps should not
+     * be written assuming that this callback will always occur.</p>
+     */
+    public static final String EXTRA_CHOSEN_COMPONENT_INTENT_SENDER =
+            "android.intent.extra.CHOSEN_COMPONENT_INTENT_SENDER";
+
+    /**
+     * The {@link ComponentName} chosen by the user to complete an action.
+     *
+     * @see #EXTRA_CHOSEN_COMPONENT_INTENT_SENDER
+     */
+    public static final String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
 
     /**
      * A {@link android.view.KeyEvent} object containing the event that
