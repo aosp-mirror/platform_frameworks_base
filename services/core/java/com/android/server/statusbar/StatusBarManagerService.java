@@ -523,6 +523,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
+    public void onNotificationActionClick(String key, int actionIndex) {
+        enforceStatusBarService();
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationActionClick(callingUid, callingPid, key,
+                    actionIndex);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
     public void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId) {
         enforceStatusBarService();
