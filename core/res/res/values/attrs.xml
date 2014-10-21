@@ -4911,7 +4911,7 @@
         <!-- Y coordinate of the origin of the gradient within the shape. -->
         <attr name="centerY" format="float|fraction" />
         <!-- Radius of the gradient, used only with radial gradient. -->
-        <attr name="gradientRadius" format="float|fraction" />
+        <attr name="gradientRadius" format="float|fraction|dimension" />
     </declare-styleable>
 
     <!-- Used to fill the shape of GradientDrawable with a solid color. -->
