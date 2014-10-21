@@ -202,6 +202,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IUpdateLock.aidl \
 	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
+	core/java/android/service/carriermessaging/ICarrierMessagingCallback.aidl \
+	core/java/android/service/carriermessaging/ICarrierMessagingService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
 	core/java/android/service/notification/IConditionListener.aidl \
@@ -522,6 +524,8 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SpellCheckerInfo.aidl \
 	frameworks/base/core/java/android/view/textservice/SentenceSuggestionsInfo.aidl \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
+	frameworks/base/core/java/android/service/carriermessaging/MessagePdu.aidl \
+	frameworks/base/core/java/android/service/carriermessaging/CarrierMessagingService.aidl \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
