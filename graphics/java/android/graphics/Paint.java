@@ -29,7 +29,7 @@ import java.util.Locale;
  */
 public class Paint {
 
-    /*package*/ long mNativePaint;
+    private long mNativePaint;
     private long mNativeShader = 0;
 
     /**
@@ -535,7 +535,8 @@ public class Paint {
      */
     public long getNativeInstance() {
         if (mShader != null && mShader.getNativeInstance() != mNativeShader) {
-            native_setShader(mNativePaint, mShader.getNativeInstance());
+            mNativeShader = mShader.getNativeInstance();
+            native_setShader(mNativePaint, mNativeShader);
         }
         return mNativePaint;
     }
@@ -930,12 +931,7 @@ public class Paint {
      * @return       shader
      */
     public Shader setShader(Shader shader) {
-        if (shader != null) {
-            mNativeShader = shader.getNativeInstance();
-        } else {
-            mNativeShader = 0;
-        }
-        native_setShader(mNativePaint, mNativeShader);
+        // Defer setting the shader natively until getNativeInstance() is called
         mShader = shader;
         return shader;
     }

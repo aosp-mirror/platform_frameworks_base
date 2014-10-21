@@ -251,7 +251,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getFlags(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -264,7 +264,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setFlags(Paint thisPaint, int flags) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -280,7 +280,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getHinting(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return Paint.HINTING_ON;
         }
@@ -291,7 +291,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setHinting(Paint thisPaint, int mode) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -337,7 +337,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getColor(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -348,7 +348,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setColor(Paint thisPaint, int color) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -359,7 +359,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getAlpha(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -370,7 +370,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setAlpha(Paint thisPaint, int a) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -381,7 +381,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float getStrokeWidth(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 1.f;
         }
@@ -392,7 +392,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setStrokeWidth(Paint thisPaint, float width) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -403,7 +403,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float getStrokeMiter(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 1.f;
         }
@@ -414,7 +414,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setStrokeMiter(Paint thisPaint, float miter) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -441,14 +441,14 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean isElegantTextHeight(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         return delegate != null && delegate.mFontVariant == FontVariant.ELEGANT;
     }
 
     @LayoutlibDelegate
     /*package*/ static void setElegantTextHeight(Paint thisPaint, boolean elegant) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -459,7 +459,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float getTextSize(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 1.f;
         }
@@ -470,7 +470,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setTextSize(Paint thisPaint, float textSize) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -482,7 +482,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float getTextScaleX(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 1.f;
         }
@@ -493,7 +493,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setTextScaleX(Paint thisPaint, float scaleX) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -505,7 +505,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float getTextSkewX(Paint thisPaint) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 1.f;
         }
@@ -516,7 +516,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setTextSkewX(Paint thisPaint, float skewX) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
@@ -528,7 +528,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float ascent(Paint thisPaint) {
         // get the delegate
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -545,7 +545,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float descent(Paint thisPaint) {
         // get the delegate
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -562,7 +562,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float getFontMetrics(Paint thisPaint, FontMetrics metrics) {
         // get the delegate
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -573,7 +573,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int getFontMetricsInt(Paint thisPaint, FontMetricsInt fmi) {
         // get the delegate
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -599,7 +599,7 @@ public class Paint_Delegate {
     /*package*/ static float native_measureText(Paint thisPaint, char[] text, int index,
             int count, int bidiFlags) {
         // get the delegate
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return 0;
         }
@@ -1232,7 +1232,7 @@ public class Paint_Delegate {
 
     private static void setFlag(Paint thisPaint, int flagMask, boolean flagValue) {
         // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.getNativeInstance());
         if (delegate == null) {
             return;
         }
