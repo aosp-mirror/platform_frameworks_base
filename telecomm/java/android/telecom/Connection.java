@@ -927,6 +927,7 @@ public abstract class Connection {
             Log.d(this, "Conference reset");
             mConference = null;
             fireConferenceChanged();
+            onConferenceChanged();
         }
     }
 
