@@ -1395,8 +1395,11 @@ public class GradientDrawable extends Drawable {
                     } else {
                         radiusType = RADIUS_TYPE_FRACTION;
                     }
-                } else {
+                } else if (tv.type == TypedValue.TYPE_DIMENSION) {
                     radius = tv.getDimension(r.getDisplayMetrics());
+                    radiusType = RADIUS_TYPE_PIXELS;
+                } else {
+                    radius = tv.getFloat();
                     radiusType = RADIUS_TYPE_PIXELS;
                 }
 
