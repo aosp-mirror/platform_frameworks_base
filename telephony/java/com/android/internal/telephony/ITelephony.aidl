@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Interface used to interact with the phone.  Mostly this is used by the
  * TelephonyManager class.  A few places are still using this directly.
- * Please clean them up if possible and use TelephonyManager insteadl.
+ * Please clean them up if possible and use TelephonyManager instead.
  *
  * {@hide}
  */
@@ -831,4 +831,18 @@ interface ITelephony {
      * @return phone radio type and access technology
      */
     int getRadioAccessFamily(in int phoneId);
+
+    /**
+     * Enables or disables video calling.
+     *
+     * @param enable Whether to enable video calling.
+     */
+    void enableVideoCalling(boolean enable);
+
+    /**
+     * Whether video calling has been enabled by the user.
+     *
+     * @return {@code True} if the user has enabled video calling, {@code false} otherwise.
+     */
+    boolean isVideoCallingEnabled();
 }
