@@ -430,7 +430,8 @@ public class ZenModePanel extends LinearLayout {
         }
         tag.condition = condition;
         tag.rb.setEnabled(enabled);
-        if (sameConditionId(mSessionExitCondition, tag.condition)) {
+        if (mSessionExitCondition != null
+                && sameConditionId(mSessionExitCondition, tag.condition)) {
             tag.rb.setChecked(true);
         }
         tag.rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
