@@ -1025,6 +1025,7 @@ public final class HdmiControlService extends SystemService {
 
         @Override
         public HdmiDeviceInfo getActiveSource() {
+            enforceAccessPermission();
             HdmiCecLocalDeviceTv tv = tv();
             if (tv == null) {
                 Slog.w(TAG, "Local tv device not available");
@@ -1344,11 +1345,13 @@ public final class HdmiControlService extends SystemService {
 
         @Override
         public void setHdmiRecordListener(IHdmiRecordListener listener) {
+            enforceAccessPermission();
             HdmiControlService.this.setHdmiRecordListener(listener);
         }
 
         @Override
         public void startOneTouchRecord(final int recorderAddress, final byte[] recordSource) {
+            enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1363,6 +1366,7 @@ public final class HdmiControlService extends SystemService {
 
         @Override
         public void stopOneTouchRecord(final int recorderAddress) {
+            enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1378,6 +1382,7 @@ public final class HdmiControlService extends SystemService {
         @Override
         public void startTimerRecording(final int recorderAddress, final int sourceType,
                 final byte[] recordSource) {
+            enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1393,6 +1398,7 @@ public final class HdmiControlService extends SystemService {
         @Override
         public void clearTimerRecording(final int recorderAddress, final int sourceType,
                 final byte[] recordSource) {
+            enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
