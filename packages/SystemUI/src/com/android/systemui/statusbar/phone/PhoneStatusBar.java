@@ -175,6 +175,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter {
@@ -2962,6 +2963,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mSecurityController != null) {
             mSecurityController.dump(fd, pw, args);
+        }
+        pw.println("SharedPreferences:");
+        for (Map.Entry<String, ?> entry : mContext.getSharedPreferences(mContext.getPackageName(),
+                Context.MODE_PRIVATE).getAll().entrySet()) {
+            pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
         }
     }
 
