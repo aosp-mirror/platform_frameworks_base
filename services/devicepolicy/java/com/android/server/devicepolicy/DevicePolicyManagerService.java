@@ -1687,7 +1687,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setContentTitle(mContext.getString(R.string.ssl_ca_cert_warning))
                 .setContentText(contentText)
                 .setContentIntent(notifyIntent)
-                .setOngoing(true)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setShowWhen(false)
                 .setColor(mContext.getResources().getColor(
