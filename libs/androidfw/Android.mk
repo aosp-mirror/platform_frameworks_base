@@ -42,6 +42,7 @@ hostSources := \
 # =====================================================
 
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_SRC_FILES:= $(hostSources)
 
@@ -63,6 +64,7 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 # =====================================================
 
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_SRC_FILES:= $(deviceSources)
 
