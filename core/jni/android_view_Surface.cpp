@@ -47,6 +47,11 @@
 
 #include <ScopedUtfChars.h>
 
+#include <AnimationContext.h>
+#include <DisplayListRenderer.h>
+#include <RenderNode.h>
+#include <renderthread/RenderProxy.h>
+
 // ----------------------------------------------------------------------------
 
 namespace android {
@@ -352,7 +357,52 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     parcel->writeStrongBinder( self != 0 ? self->getIGraphicBufferProducer()->asBinder() : NULL);
 }
 
+namespace uirenderer {
+
+using namespace android::uirenderer::renderthread;
+
+class ContextFactory : public IContextFactory {
+public:
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
+        return new AnimationContext(clock);
+    }
+};
+
+static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr) {
+    RenderNode* rootNode = reinterpret_cast<RenderNode*>(rootNodePtr);
+    sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
+    ContextFactory factory;
+    RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
+    proxy->loadSystemProperties();
+    proxy->initialize(surface);
+    // Shadows can't be used via this interface, so just set the light source
+    // to all 0s. (and width & height are unused, TODO remove them)
+    proxy->setup(0, 0, (Vector3){0, 0, 0}, 0, 0, 0);
+    return (jlong) proxy;
+}
+
+static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfacePtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
+    sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
+    proxy->updateSurface(surface);
+}
+
+static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
+    nsecs_t frameTimeNs = systemTime(CLOCK_MONOTONIC);
+    proxy->syncAndDrawFrame(frameTimeNs, 0, 1.0f);
+}
+
+static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
+    delete proxy;
+}
+
+} // uirenderer
+
 // ----------------------------------------------------------------------------
+
+namespace hwui = android::uirenderer;
 
 static JNINativeMethod gSurfaceMethods[] = {
     {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
@@ -375,6 +425,12 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
+
+    // HWUI context
+    {"nHwuiCreate", "(JJ)J", (void*) hwui::create },
+    {"nHwuiSetSurface", "(JJ)V", (void*) hwui::setSurface },
+    {"nHwuiDraw", "(J)V", (void*) hwui::draw },
+    {"nHwuiDestroy", "(J)V", (void*) hwui::destroy },
 };
 
 int register_android_view_Surface(JNIEnv* env)
