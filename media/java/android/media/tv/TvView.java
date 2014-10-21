@@ -59,8 +59,6 @@ public class TvView extends ViewGroup {
     private static final String TAG = "TvView";
     private static final boolean DEBUG = false;
 
-    private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
-
     private static final int ZORDER_MEDIA = 0;
     private static final int ZORDER_MEDIA_OVERLAY = 1;
     private static final int ZORDER_ON_TOP = 2;
@@ -69,7 +67,7 @@ public class TvView extends ViewGroup {
     private static final int CAPTION_ENABLED = 1;
     private static final int CAPTION_DISABLED = 2;
 
-    private static final WeakReference<TvView> NULL_TV_VIEW = new WeakReference(null);
+    private static final WeakReference<TvView> NULL_TV_VIEW = new WeakReference<>(null);
 
     private static final Object sMainTvViewLock = new Object();
     private static WeakReference<TvView> sMainTvView = NULL_TV_VIEW;
@@ -86,8 +84,6 @@ public class TvView extends ViewGroup {
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
     private boolean mHasStreamVolume;
     private float mStreamVolume;
-    private int mVideoWidth = VIDEO_SIZE_VALUE_UNKNOWN;
-    private int mVideoHeight = VIDEO_SIZE_VALUE_UNKNOWN;
     private int mCaptionEnabled;
     private String mAppPrivateCommandAction;
     private Bundle mAppPrivateCommandData;
@@ -200,7 +196,7 @@ public class TvView extends ViewGroup {
     @SystemApi
     public void setMain() {
         synchronized (sMainTvViewLock) {
-            sMainTvView = new WeakReference(this);
+            sMainTvView = new WeakReference<>(this);
             if (hasWindowFocus() && mSession != null) {
                 mSession.setMain();
             }
@@ -294,7 +290,7 @@ public class TvView extends ViewGroup {
         }
         synchronized (sMainTvViewLock) {
             if (sMainTvView.get() == null) {
-                sMainTvView = new WeakReference(this);
+                sMainTvView = new WeakReference<>(this);
             }
         }
         if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
@@ -716,19 +712,8 @@ public class TvView extends ViewGroup {
         }
 
         /**
-         * This is invoked when the view is tuned to a specific channel and starts decoding video
-         * stream from there. It is also called later when the video size is changed.
-         *
-         * @param inputId The ID of the TV input bound to this view.
-         * @param width The width of the video.
-         * @param height The height of the video.
-         */
-        public void onVideoSizeChanged(String inputId, int width, int height) {
-        }
-
-        /**
          * This is invoked when the channel of this TvView is changed by the underlying TV input
-         * with out any {@link TvView#tune(String, Uri)} request.
+         * without any {@link TvView#tune(String, Uri)} request.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param channelUri The URI of a channel.
@@ -755,6 +740,18 @@ public class TvView extends ViewGroup {
          * @param trackId The ID of the track selected.
          */
         public void onTrackSelected(String inputId, int type, String trackId) {
+        }
+
+        /**
+         * This is invoked when the video size has been changed. It is also called when the first
+         * time video size information becomes available after this view is tuned to a specific
+         * channel.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param width The width of the video.
+         * @param height The height of the video.
+         */
+        public void onVideoSizeChanged(String inputId, int width, int height) {
         }
 
         /**
@@ -841,15 +838,16 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onSessionCreated(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onSessionCreated()");
+            }
             if (this != mSessionCallback) {
+                Log.w(TAG, "onSessionCreated - session already created");
                 // This callback is obsolete.
                 if (session != null) {
                     session.release();
                 }
                 return;
-            }
-            if (DEBUG) {
-                Log.d(TAG, "onSessionCreated()");
             }
             mSession = session;
             if (session != null) {
@@ -891,7 +889,11 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onSessionReleased(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onSessionReleased()");
+            }
             if (this != mSessionCallback) {
+                Log.w(TAG, "onSessionReleased - session not created");
                 return;
             }
             mOverlayViewCreated = false;
@@ -905,11 +907,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onChannelRetuned(Session session, Uri channelUri) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
                 Log.d(TAG, "onChannelChangedByTvInput(" + channelUri + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onChannelRetuned - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onChannelRetuned(mInputId, channelUri);
@@ -918,11 +921,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onTracksChanged(Session session, List<TvTrackInfo> tracks) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
-                Log.d(TAG, "onTracksChanged()");
+                Log.d(TAG, "onTracksChanged(" + tracks + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTracksChanged - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onTracksChanged(mInputId, tracks);
@@ -931,25 +935,40 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onTrackSelected(Session session, int type, String trackId) {
+            if (DEBUG) {
+                Log.d(TAG, "onTrackSelected(type=" + type + ", trackId=" + trackId + ")");
+            }
             if (this != mSessionCallback) {
+                Log.w(TAG, "onTrackSelected - session not created");
                 return;
             }
-            if (DEBUG) {
-                Log.d(TAG, "onTrackSelected()");
-            }
-            // TODO: Update the video size when the type is TYPE_VIDEO.
             if (mCallback != null) {
                 mCallback.onTrackSelected(mInputId, type, trackId);
             }
         }
 
         @Override
-        public void onVideoAvailable(Session session) {
+        public void onVideoSizeChanged(Session session, int width, int height) {
+            if (DEBUG) {
+                Log.d(TAG, "onVideoSizeChanged()");
+            }
             if (this != mSessionCallback) {
+                Log.w(TAG, "onVideoSizeChanged - session not created");
                 return;
             }
+            if (mCallback != null) {
+                mCallback.onVideoSizeChanged(mInputId, width, height);
+            }
+        }
+
+        @Override
+        public void onVideoAvailable(Session session) {
             if (DEBUG) {
                 Log.d(TAG, "onVideoAvailable()");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onVideoAvailable - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onVideoAvailable(mInputId);
@@ -958,11 +977,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onVideoUnavailable(Session session, int reason) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
-                Log.d(TAG, "onVideoUnavailable(" + reason + ")");
+                Log.d(TAG, "onVideoUnavailable(reason=" + reason + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onVideoUnavailable - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onVideoUnavailable(mInputId, reason);
@@ -971,11 +991,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onContentAllowed(Session session) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
                 Log.d(TAG, "onContentAllowed()");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onContentAllowed - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onContentAllowed(mInputId);
@@ -984,11 +1005,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onContentBlocked(Session session, TvContentRating rating) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
-                Log.d(TAG, "onContentBlocked()");
+                Log.d(TAG, "onContentBlocked(rating=" + rating + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onContentBlocked - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onContentBlocked(mInputId, rating);
@@ -997,12 +1019,13 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
                 Log.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top + ", right="
                         + right + ", bottom=" + bottom + ",)");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onLayoutSurface - session not created");
+                return;
             }
             mSurfaceViewLeft = left;
             mSurfaceViewTop = top;
@@ -1014,11 +1037,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
-            if (this != mSessionCallback) {
-                return;
-            }
             if (DEBUG) {
                 Log.d(TAG, "onSessionEvent(" + eventType + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSessionEvent - session not created");
+                return;
             }
             if (mCallback != null) {
                 mCallback.onEvent(mInputId, eventType, eventArgs);
