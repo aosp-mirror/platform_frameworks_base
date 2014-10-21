@@ -20,7 +20,7 @@ namespace uirenderer {
 namespace renderthread {
 
 TimeLord::TimeLord()
-        : mFrameIntervalNanos(0)
+        : mFrameIntervalNanos(milliseconds_to_nanoseconds(16))
         , mFrameTimeNanos(0) {
 }
 
