@@ -3528,4 +3528,25 @@ public class TelephonyManager {
         }
         return -1;
     }
+
+    /** @hide */
+    @SystemApi
+    public void enableVideoCalling(boolean enable) {
+        try {
+            getITelephony().enableVideoCalling(enable);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#enableVideoCalling", e);
+        }
+    }
+
+    /** @hide */
+    @SystemApi
+    public boolean isVideoCallingEnabled() {
+        try {
+            return getITelephony().isVideoCallingEnabled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isVideoCallingEnabled", e);
+        }
+        return false;
+    }
 }
