@@ -81,8 +81,8 @@ int main(int argc, char* argv[]) {
     rootNode->mutateStagingProperties().setClipToBounds(false);
     rootNode->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-    RenderProxy* proxy = new RenderProxy(false, rootNode, new ContextFactory());
-    proxy->setFrameInterval(milliseconds_to_nanoseconds(16));
+    ContextFactory factory;
+    RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
     proxy->loadSystemProperties();
     proxy->initialize(surface);
     float lightX = width / 2.0;
