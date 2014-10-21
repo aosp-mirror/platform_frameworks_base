@@ -120,8 +120,9 @@ public class TrustManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY && !isSafeMode()) {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
-            maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_OWNER);
             refreshAgentList(UserHandle.USER_ALL);
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED && !isSafeMode()) {
+            maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_OWNER);
         }
     }
 
