@@ -117,7 +117,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
 
     public void onActivityStop() {
         if (mSeekBarVolumizer != null) {
-            mSeekBarVolumizer.postStopSample();
+            mSeekBarVolumizer.stopSample();
         }
     }
 

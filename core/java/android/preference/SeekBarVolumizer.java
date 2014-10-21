@@ -130,6 +130,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     }
 
     private void postStartSample() {
+        if (mHandler == null) return;
         mHandler.removeMessages(MSG_START_SAMPLE);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_START_SAMPLE),
                 isSamplePlaying() ? CHECK_RINGTONE_PLAYBACK_DELAY_MS : 0);
@@ -150,7 +151,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
     }
 
-    void postStopSample() {
+    private void postStopSample() {
+        if (mHandler == null) return;
         // remove pending delayed start messages
         mHandler.removeMessages(MSG_START_SAMPLE);
         mHandler.removeMessages(MSG_STOP_SAMPLE);
@@ -200,7 +202,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         postSetVolume(progress);
     }
 
-    void postSetVolume(int progress) {
+    private void postSetVolume(int progress) {
+        if (mHandler == null) return;
         // Do the volume changing separately to give responsive UI
         mLastProgress = progress;
         mHandler.removeMessages(MSG_SET_STREAM_VOLUME);
