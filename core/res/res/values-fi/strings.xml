@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> on valittu"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> poistettiin"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (työ)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Poista näytön kiinnitys painamalla Edellinen- ja Yleistä-kohtaa samanaikaisesti pitkään."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Poista näytön kiinnitys painamalla Yleistä-kohtaa pitkään."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Poista näytön kiinnitys painamalla Edellinen- ja Viimeisimmät-kohtaa samanaikaisesti pitkään."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Poista näytön kiinnitys painamalla Viimeisimmät-kohtaa pitkään."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Näyttö on kiinnitetty. Irrottaminen ei ole sallittu organisaatiossasi."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Käytetäänkö näytön kiinnitystä?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Näytön kiinnitys lukitsee näytön yhteen näkymään.\n\nVoit poistaa kiinnityksen painamalla Edellinen- ja Yleistä-kohtaa samanaikaisesti pitkään."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Näytön lukitus lukitsee näytön yhteen näkymään.\n\nVoit poistaa kiinnityksen painamalla Yleistä-kohtaa pitkään."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Näytön kiinnitys lukitsee näytön yhteen näkymään.\n\nVoit poistaa kiinnityksen painamalla Edellinen- ja Viimeisimmät-kohtaa samanaikaisesti pitkään."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Näytön lukitus lukitsee näytön yhteen näkymään.\n\nVoit poistaa kiinnityksen painamalla Viimeisimmät-kohtaa pitkään."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"EI KIITOS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ALOITA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Näyttö kiinnitetty"</string>

@@ -52,17 +52,17 @@
     <string name="serviceErased" msgid="1288584695297200972">"ఎరేజ్ చేయడం విజయవంతమైంది."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"చెల్లని పాస్‌వర్డ్."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI పూర్తయింది."</string>
-    <string name="badPin" msgid="9015277645546710014">"మీరు టైప్ చేసిన పాత PIN చెల్లదు."</string>
+    <string name="badPin" msgid="9015277645546710014">"మీరు టైప్ చేసిన పాత పిన్‌ చెల్లదు."</string>
     <string name="badPuk" msgid="5487257647081132201">"మీరు టైప్ చేసిన PUK చెల్లదు."</string>
     <string name="mismatchPin" msgid="609379054496863419">"మీరు టైప్ చేసిన PINలు సరిపోలలేదు."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"4 నుండి 8 సంఖ్యలు ఉండే PINను టైప్ చేయండి."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 సంఖ్యలు లేదా అంతకంటే పొడవు ఉండే PUKని టైప్ చేయండి."</string>
-    <string name="needPuk" msgid="919668385956251611">"మీ SIM కార్డు PUK-లాక్ చేయబడింది. దీన్ని అన్‌లాక్ చేయడానికి PUK కోడ్‌ను టైప్ చేయండి."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"SIM కార్డు‌ను అన్‌బ్లాక్ చేయడానికి PUK2ని టైప్ చేయండి."</string>
-    <string name="enablePin" msgid="209412020907207950">"వైఫల్యం, SIM/RUIM లాక్‌ను ప్రారంభించండి."</string>
+    <string name="needPuk" msgid="919668385956251611">"మీ సిమ్ కార్డు PUK-లాక్ చేయబడింది. దీన్ని అన్‌లాక్ చేయడానికి PUK కోడ్‌ను టైప్ చేయండి."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"సిమ్ కార్డు‌ను అన్‌బ్లాక్ చేయడానికి PUK2ని టైప్ చేయండి."</string>
+    <string name="enablePin" msgid="209412020907207950">"వైఫల్యం, సిమ్/RUIM లాక్‌ను ప్రారంభించండి."</string>
   <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"SIM లాక్ కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది."</item>
-    <item quantity="other" msgid="7530597808358774740">"SIM లాక్ కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి."</item>
+    <item quantity="one" msgid="6596245285809790142">"సిమ్ లాక్ కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది."</item>
+    <item quantity="other" msgid="7530597808358774740">"సిమ్ లాక్ కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి."</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -74,7 +74,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"కాల్ నిరీక్షణ"</string>
     <string name="BaMmi" msgid="455193067926770581">"కాల్ బేరింగ్"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"పాస్‌వర్డ్ మార్పు"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"PIN మార్పు"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"పిన్‌ మార్పు"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"కాలింగ్ నంబర్ అందుబాటులో ఉంది"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"కాలింగ్ నంబర్ పరిమితం చేయబడింది"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"మూడు మార్గాల కాలింగ్"</string>
@@ -287,11 +287,11 @@
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"సందేశం ద్వారా ప్రతిస్పందించే ఈవెంట్‌లను పంపడం"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ఇన్‌కమింగ్ కాల్‌ల కోసం సందేశం ద్వారా ప్రతిస్పందించే ఈవెంట్‌లను నిర్వహించడానికి ఇతర సందేశ విధాన అనువర్తనాలకు అభ్యర్థనలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"మీ వచన సందేశాలు (SMS లేదా MMS) చదవడం"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"మీ టాబ్లెట్ లేదా SIM కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"మీ ఫోన్ లేదా SIM కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"మీ టాబ్లెట్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"మీ ఫోన్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"మీ వచన సందేశాలను (SMS లేదా MMS) సవరించడం"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"మీ టాబ్లెట్‌లో లేదా SIM కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"మీ ఫోన్‌లో లేదా SIM కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"మీ టాబ్లెట్‌లో లేదా సిమ్ కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"మీ ఫోన్‌లో లేదా సిమ్ కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"వచన సందేశాలను (WAP) స్వీకరించడం"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీకు పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగల లేదా తొలగించగల సామర్థ్యాన్ని కలిగి ఉంటుంది."</string>
     <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"బ్లూటూత్ సందేశాల స్వీకరణ (MAP)"</string>
@@ -541,8 +541,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"వాల్యూమ్ మరియు అవుట్‌పుట్ కోసం ఉపయోగించాల్సిన స్పీకర్ వంటి సార్వజనీన ఆడియో సెట్టింగ్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ఆడియోను రికార్డ్ చేయడం"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"మైక్రోఫోన్‌తో ఆడియోను రికార్డ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ నిర్ధారణ లేకుండానే ఎప్పుడైనా ఆడియోను రికార్డ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim కమ్యూనికేషన్"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMకు ఆదేశాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"సిమ్ కమ్యూనికేషన్"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"సిమ్‌కు ఆదేశాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"కెమెరాతో చిత్రాలు మరియు వీడియోలను తీయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ నిర్ధారణ లేకుండానే ఎప్పుడైనా కెమెరాను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"కెమెరా ఉపయోగంలో ఉన్నప్పుడు ప్రసరణ సూచీ LEDని నిలిపివేయడం"</string>
@@ -886,14 +886,14 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"కార్యాలయం"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"ఇతరం"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"ఈ పరిచయాన్ని వీక్షించడానికి అనువర్తనం కనుగొనబడలేదు."</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN కోడ్‌ను టైప్ చేయండి"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK మరియు కొత్త PIN కోడ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"పిన్‌ కోడ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK మరియు కొత్త పిన్‌ కోడ్‌ను టైప్ చేయండి"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK కోడ్"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"కొత్త PIN కోడ్"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"కొత్త పిన్‌ కోడ్"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"పాస్‌వర్డ్‌ను టైప్ చేయడానికి తాకండి"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"అన్‌లాక్ చేయడానికి PINను టైప్ చేయండి"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"చెల్లని PIN కోడ్."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"అన్‌లాక్ చేయడానికి పిన్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"చెల్లని పిన్‌ కోడ్."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"అన్‌లాక్ చేయడానికి, మెను ఆపై 0ని నొక్కండి."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"అత్యవసర నంబర్"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"సేవ లేదు."</string>
@@ -907,13 +907,13 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ముఖంతో అన్‌లాక్ ప్రయత్నాల గరిష్ట పరిమితి మించిపోయారు"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM కార్డు లేదు"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"టాబ్లెట్‌లో SIM కార్డు లేదు."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ఫోన్‌లో SIM కార్డు లేదు."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM కార్డును చొప్పించండి."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM కార్డు లేదు లేదా చదవగలిగేలా లేదు. SIM కార్డును చొప్పించండి."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"నిరుపయోగ SIM కార్డు."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"మీ SIM కార్డు శాశ్వతంగా నిలిపివేయబడింది.\n మరో SIM కార్డు కోసం మీ వైర్‌లెస్ సేవా ప్రదాతను సంప్రదించండి."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"సిమ్ కార్డు లేదు"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"టాబ్లెట్‌లో సిమ్ కార్డు లేదు."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ఫోన్‌లో సిమ్ కార్డు లేదు."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"సిమ్ కార్డును చొప్పించండి."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"సిమ్ కార్డు లేదు లేదా చదవగలిగేలా లేదు. సిమ్ కార్డును చొప్పించండి."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"నిరుపయోగ సిమ్ కార్డు."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"మీ సిమ్ కార్డు శాశ్వతంగా నిలిపివేయబడింది.\n మరో సిమ్ కార్డు కోసం మీ వైర్‌లెస్ సేవా ప్రదాతను సంప్రదించండి."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"మునుపటి ట్రాక్"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"తదుపరి ట్రాక్"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"పాజ్ చేయి"</string>
@@ -923,13 +923,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"వేగంగా ఫార్వార్డ్ చేయి"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"అత్యవసర కాల్‌లు మాత్రమే"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM కార్డు PUK-లాక్ చేయబడింది."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"సిమ్ కార్డు PUK-లాక్ చేయబడింది."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"వినియోగదారు గైడ్‌ను చూడండి లేదా కస్టమర్ కేర్‌ను సంప్రదించండి."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM కార్డు లాక్ చేయబడింది."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM కార్డు‌ను అన్‌లాక్ చేస్తోంది…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"సిమ్ కార్డు లాక్ చేయబడింది."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"సిమ్ కార్డు‌ను అన్‌లాక్ చేస్తోంది…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"మీరు మీ PINను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> వైఫల్య ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది మరియు మొత్తం వినియోగదారు డేటాను కోల్పోవడం సంభవిస్తుంది."</string>
@@ -1290,8 +1290,8 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"కనెక్ట్ చేయడానికి ఆహ్వానం"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"వీరి నుండి:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"వీరికి:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"అవసరమైన PIN‌ను టైప్ చేయండి:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"అవసరమైన పిన్‌ను టైప్ చేయండి:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"పిన్‌:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"టాబ్లెట్ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>కు కనెక్ట్ చేయబడినప్పుడు Wi-Fi నుండి తాత్కాలికంగా డిస్‌కనెక్ట్ చేయబడుతుంది"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ఫోన్ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>కి కనెక్ట్ అయినప్పుడు అది Wi-Fi నుండి తాత్కాలికంగా డిస్‌కనెక్ట్ చేయబడుతుంది"</string>
     <string name="select_character" msgid="3365550120617701745">"అక్షరాన్ని చొప్పించండి"</string>
@@ -1308,10 +1308,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"మీరు దీన్ని తర్వాత సెట్టింగ్‌లు &gt; అనువర్తనాలులో మార్చవచ్చు"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ఎప్పటికీ అనుమతించవద్దు"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"SIM కార్డు తీసివేయబడింది"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"మీరు చెల్లుబాటు అయ్యే SIM కార్డును చొప్పించి, దాన్ని పునఃప్రారంభించే వరకు సెల్యులార్ నెట్‌వర్క్ అందుబాటులో ఉండదు."</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"సిమ్ కార్డు తీసివేయబడింది"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"మీరు చెల్లుబాటు అయ్యే సిమ్ కార్డును చొప్పించి, దాన్ని పునఃప్రారంభించే వరకు సెల్యులార్ నెట్‌వర్క్ అందుబాటులో ఉండదు."</string>
     <string name="sim_done_button" msgid="827949989369963775">"పూర్తయింది"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"SIM కార్డు జోడించబడింది"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"సెల్యులార్ నెట్‌వర్క్‌ను ప్రాప్యత చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"సమయాన్ని సెట్ చేయండి"</string>
@@ -1601,21 +1601,21 @@
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"నమూనాను మర్చిపోయాను"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"నమూనా తప్పు"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"పాస్‌వర్డ్ తప్పు"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN తప్పు"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"పిన్‌ తప్పు"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"మీ నమూనాను గీయండి"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PINను నమోదు చేయండి"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN‌ను నమోదు చేయండి"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"సిమ్ పిన్‌ను నమోదు చేయండి"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"పిన్‌ను నమోదు చేయండి"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"పాస్‌వర్డ్‌ని నమోదు చేయండి"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM ఇప్పుడు నిలిపివేయబడింది. కొనసాగడానికి PUK కోడ్‌ను నమోదు చేయండి. వివరాల కోసం క్యారియర్‌ను సంప్రదించండి."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"కోరుకునే PIN కోడ్‌ను నమోదు చేయండి"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"కావల్సిన PIN కోడ్‌ను నిర్ధారించండి"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM కార్డు‌ను అన్‌లాక్ చేస్తోంది…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"చెల్లని PIN కోడ్."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 నుండి 8 సంఖ్యలు ఉండే PINను టైప్ చేయండి."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"సిమ్ ఇప్పుడు నిలిపివేయబడింది. కొనసాగడానికి PUK కోడ్‌ను నమోదు చేయండి. వివరాల కోసం క్యారియర్‌ను సంప్రదించండి."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"కోరుకునే పిన్‌ కోడ్‌ను నమోదు చేయండి"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"కావల్సిన పిన్‌ కోడ్‌ను నిర్ధారించండి"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"సిమ్ కార్డు‌ను అన్‌లాక్ చేస్తోంది…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"చెల్లని పిన్‌ కోడ్."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK కోడ్ 8 సంఖ్యలు ఉండాలి."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"సరైన PUK కోడ్‌ను మళ్లీ నమోదు చేయండి. పునరావృత ప్రయత్నాల వలన SIM శాశ్వతంగా నిలిపివేయబడుతుంది."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN కోడ్‌లు సరిపోలలేదు"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"సరైన PUK కోడ్‌ను మళ్లీ నమోదు చేయండి. పునరావృత ప్రయత్నాల వలన సిమ్ శాశ్వతంగా నిలిపివేయబడుతుంది."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"పిన్‌ కోడ్‌లు సరిపోలలేదు"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"చాలా ఎక్కువ నమూనా ప్రయత్నాలు చేసారు"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"వినియోగదారు పేరు (ఇమెయిల్)"</string>
@@ -1624,7 +1624,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"ఖాతాను తనిఖీ చేస్తోంది…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"మీరు మీ PINను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%d</xliff:g> చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది మరియు మొత్తం వినియోగదారు డేటాను కోల్పోవడం సంభవిస్తుంది."</string>
@@ -1735,15 +1735,15 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"ముద్రణ సేవ ప్రారంభించబడలేదు"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> సేవ ఇన్‌స్టాల్ చేయబడింది"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ప్రారంభించడానికి నొక్కండి"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"నిర్వాహకుని PINను నమోదు చేయండి"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PINను నమోదు చేయండి"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"నిర్వాహకుని పిన్‌ను నమోదు చేయండి"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"పిన్‌ను నమోదు చేయండి"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"తప్పు"</string>
-    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"ప్రస్తుత PIN"</string>
-    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"కొత్త PIN"</string>
-    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"కొత్త PINను నిర్ధారించండి"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"నియంత్రణలను సవరించడానికి PINను రూపొందించండి"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"ప్రస్తుత పిన్‌"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"కొత్త పిన్‌"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"కొత్త పిన్‌ను నిర్ధారించండి"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"నియంత్రణలను సవరించడానికి పిన్‌ను రూపొందించండి"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINలు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
   <plurals name="restr_pin_countdown">
     <item quantity="one" msgid="311050995198548675">"1 సెకనులో మళ్లీ ప్రయత్నించండి"</item>
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి"</item>
@@ -1762,17 +1762,17 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ఎంచుకోబడింది"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు స్థూలదృష్టి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, స్థూలదృష్టిని నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు అవలోకనం బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, అవలోకనం నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"స్క్రీన్ పిన్ చేయబడింది. మీ సంస్థలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"స్క్రీన్ పిన్నింగ్‌ను ఉపయోగించాలా?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nఅన్‌పిన్ చేయడానికి, వెనుకకు మరియు స్థూలదృష్టి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nఅన్‌పిన్ చేయడానికి, స్థూలదృష్టిని నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nఅన్‌పిన్ చేయడానికి, వెనుకకు మరియు అవలోకనం బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nఅన్‌పిన్ చేయడానికి, అవలోకనం నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"వద్దు, ధన్యవాదాలు"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ప్రారంభించు"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"స్క్రీన్ అన్‌పిన్ చేయబడింది"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు PIN కోసం అడుగు"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"బ్యాటరీ సామర్థ్యాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరుని తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను మరియు అత్యధిక నేపథ్య డేటాను పరిమితపరుస్తుంది. అలాగే సమకాలీకరణపై ఆధారపడే ఇమెయిల్, సందేశ సేవ మరియు ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడకపోవచ్చు.\n\nమీ పరికరం ఛార్జింగ్‌లో ఉన్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ చేయబడుతుంది."</string>
