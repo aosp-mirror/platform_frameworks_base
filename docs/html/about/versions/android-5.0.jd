@@ -23,6 +23,7 @@ sdk.platform.apiLevel=21
 <li><a href="#BehaviorGetRecentTasks">If your app uses getRecentTasks()...</a></li>
 <li><a href="#64BitSupport">If you are using the Android Native Development Kit (NDK)...</a></li>
 <li><a href="#BindService">If your app binds to a Service...</a></li>
+<li><a href="#BehaviorWebView">If your app uses a WebView...</a></li>
     </ol>
   </li>
   <li><a href="#UI">User Interface</a>
@@ -234,8 +235,8 @@ the system can present notifications correctly in
 vibration.</p>
 
 <p>Setting the device to
-{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} now
-causes the device to enter the new priority mode. The device leaves priority
+{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} causes
+the device to enter the new priority mode. The device leaves priority
 mode if you set it to
 {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} or
 {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}.</p>
@@ -366,6 +367,31 @@ and throws an exception if given an implicit intent.
 To ensure your app is secure, use an explicit intent when starting or binding
 your {@link android.app.Service}, and do not declare intent filters for the service.</p>
 
+<h3 id="BehaviorWebView">If your app uses WebView...</h3>
+
+<p>Android 5.0 changes the default behavior for your app.</p>
+<ul>
+<li><strong>If your app targets API level 21 or higher:</strong>
+  <ul>
+    <li>The system
+  blocks <a href="https://developer.mozilla.org/en-US/docs/Security/MixedContent"
+  class="external-link">mixed content</a> and third party cookies by default. To allow mixed
+  content and third party cookies, use the
+  {@link android.webkit.WebSettings#setMixedContentMode(int) setMixedContentMode()}
+and {@link android.webkit.CookieManager#setAcceptThirdPartyCookies(android.webkit.WebView, boolean) setAcceptThirdPartyCookies()}
+methods respectively.</li>
+    <li>The system now intelligently chooses portions of the HTML
+      document to draw. This new default behavior helps to reduce memory
+      footprint and increase performance. If you want to
+      render the whole document at once, disable this optimization by calling
+      {@link android.webkit.WebView#enableSlowWholeDocumentDraw()}.</li>
+  </ul>
+</li>
+<li><strong>If your app targets API levels lower than 21:</strong> The system
+  allows mixed content and third party cookies, and always renders the whole
+  document at once.</li>
+</ul>
+
 <h2 id="UI">User Interface</h2>
 
 <h3 id="MaterialDesign">Material design support</h3>
@@ -470,7 +496,7 @@ request the user’s permission by launching a screen capture dialog using an
 method.</p>
 
 <p>For an example of how to use the new APIs, see the {@code MediaProjectionDemo}
-class in the {@code ApiDemos} sample project.</p>
+class in the sample project.</p>
 
 <h2 id="Notifications">Notifications</h2>
 
