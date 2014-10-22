@@ -1,5 +1,8 @@
 page.title=Installing the Android SDK
 
+page.tags=studio, sdk tools, eclipse adt
+helpoutsWidget=true
+
 @jd:body
 
 <style>
