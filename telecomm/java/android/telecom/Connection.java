@@ -898,6 +898,13 @@ public abstract class Connection {
     }
 
     /**
+     * @hide
+     */
+    public final ConnectionService getConnectionService() {
+        return mConnectionService;
+    }
+
+    /**
      * Sets the conference that this connection is a part of. This will fail if the connection is
      * already part of a conference call. {@link #resetConference} to un-set the conference first.
      *
