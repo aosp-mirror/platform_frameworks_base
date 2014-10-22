@@ -3057,47 +3057,10 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 ///////////////////////////////////////////////////////////////////////////////
 // Draw filters
 ///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::resetPaintFilter() {
-    // when clearing the PaintFilter, the masks should also be cleared for simple DrawModifier
-    // comparison, see MergingDrawBatch::canMergeWith
-    mDrawModifiers.mHasDrawFilter = false;
-    mDrawModifiers.mPaintFilterClearBits = 0;
-    mDrawModifiers.mPaintFilterSetBits = 0;
-}
-
-void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
-    // TODO: don't bother with boolean, it's redundant with clear/set bits
-    mDrawModifiers.mHasDrawFilter = true;
-    mDrawModifiers.mPaintFilterClearBits = clearBits & SkPaint::kAllFlags;
-    mDrawModifiers.mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
-}
-
-const SkPaint* OpenGLRenderer::filterPaint(const SkPaint* paint) {
-    // TODO: use CompatFlagsDrawFilter here, and combine logic with android/graphics/DrawFilter.cpp
-    // to avoid clobbering 0x02 paint flag
-
-    // Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
-    static const uint32_t sFilterBitmapFlag = 0x02;
-
-    if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) {
-        return paint;
-    }
-
-    const uint32_t clearBits = mDrawModifiers.mPaintFilterClearBits;
-    const uint32_t setBits = mDrawModifiers.mPaintFilterSetBits;
-
-    const uint32_t flags = (paint->getFlags() & ~clearBits) | setBits;
-    mFilteredPaint = *paint;
-    mFilteredPaint.setFlags(flags);
-
-    // check if paint filter trying to override bitmap filter
-    if ((clearBits | setBits) & sFilterBitmapFlag) {
-        mFilteredPaint.setFilterLevel(flags & sFilterBitmapFlag
-                ? SkPaint::kLow_FilterLevel : SkPaint::kNone_FilterLevel);
-    }
-
-    return &mFilteredPaint;
+void OpenGLRenderer::setDrawFilter(SkDrawFilter* filter) {
+    // We should never get here since we apply the draw filter when stashing
+    // the paints in the DisplayList.
+    LOG_ALWAYS_FATAL("OpenGLRenderer does not directly support DrawFilters");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

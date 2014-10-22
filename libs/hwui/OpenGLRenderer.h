@@ -70,11 +70,6 @@ struct DrawModifiers {
     }
 
     float mOverrideLayerAlpha;
-
-    // Draw filters
-    bool mHasDrawFilter;
-    int mPaintFilterClearBits;
-    int mPaintFilterSetBits;
 };
 
 enum StateDeferFlags {
@@ -205,13 +200,10 @@ public:
     status_t drawShadow(float casterAlpha,
             const VertexBuffer* ambientShadowVertexBuffer, const VertexBuffer* spotShadowVertexBuffer);
 
-    virtual void resetPaintFilter();
-    virtual void setupPaintFilter(int clearBits, int setBits);
+    virtual void setDrawFilter(SkDrawFilter* filter);
 
     // If this value is set to < 1.0, it overrides alpha set on layer (see drawBitmap, drawLayer)
     void setOverrideLayerAlpha(float alpha) { mDrawModifiers.mOverrideLayerAlpha = alpha; }
-
-    const SkPaint* filterPaint(const SkPaint* paint);
 
     /**
      * Store the current display state (most importantly, the current clip and transform), and

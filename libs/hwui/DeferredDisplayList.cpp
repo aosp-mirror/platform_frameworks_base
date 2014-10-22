@@ -235,26 +235,6 @@ public:
             return false;
         }
 
-        /* Draw Modifiers compatibility check
-         *
-         * Shadows are ignored, as only text uses them, and in that case they are drawn
-         * per-DrawTextOp, before the unified text draw. Because of this, it's always safe to merge
-         * text UNLESS a later draw's shadow should overlays a previous draw's text. This is covered
-         * above with the intersection check.
-         *
-         * OverrideLayerAlpha is also ignored, as it's only used for drawing layers, which are never
-         * merged.
-         *
-         * These ignore cases prevent us from simply memcmp'ing the drawModifiers
-         */
-        const DrawModifiers& lhsMod = lhs->mDrawModifiers;
-        const DrawModifiers& rhsMod = rhs->mDrawModifiers;
-
-        // Draw filter testing expects bit fields to be clear if filter not set.
-        if (lhsMod.mHasDrawFilter != rhsMod.mHasDrawFilter) return false;
-        if (lhsMod.mPaintFilterClearBits != rhsMod.mPaintFilterClearBits) return false;
-        if (lhsMod.mPaintFilterSetBits != rhsMod.mPaintFilterSetBits) return false;
-
         return true;
     }
 

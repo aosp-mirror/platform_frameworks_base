@@ -587,16 +587,11 @@ static void android_view_GLES20Canvas_drawLines(JNIEnv* env, jobject clazz,
 // Draw filters
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_setupPaintFilter(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint clearBits, jint setBits) {
+static void android_view_GLES20Canvas_setDrawFilter(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, jlong filterPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    renderer->setupPaintFilter(clearBits, setBits);
-}
-
-static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    renderer->resetPaintFilter();
+    SkDrawFilter* filter = reinterpret_cast<SkDrawFilter*>(filterPtr);
+    renderer->setDrawFilter(filter);
 }
 
 // ----------------------------------------------------------------------------
@@ -936,8 +931,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawPath",          "(JJJ)V",          (void*) android_view_GLES20Canvas_drawPath },
     { "nDrawLines",         "(J[FIIJ)V",       (void*) android_view_GLES20Canvas_drawLines },
 
-    { "nSetupPaintFilter",  "(JII)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
-    { "nResetPaintFilter",  "(J)V",            (void*) android_view_GLES20Canvas_resetPaintFilter },
+    { "nSetDrawFilter",     "(JJ)V",           (void*) android_view_GLES20Canvas_setDrawFilter },
 
     { "nDrawText",          "(J[CIIFFIJJ)V",   (void*) android_view_GLES20Canvas_drawTextArray },
     { "nDrawText",          "(JLjava/lang/String;IIFFIJJ)V",

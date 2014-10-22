@@ -201,10 +201,6 @@ public:
     }
 
 protected:
-    const SkPaint* getPaint(OpenGLRenderer& renderer) {
-        return renderer.filterPaint(mPaint);
-    }
-
     // Helper method for determining op opaqueness. Assumes op fills its bounds in local
     // coordinates, and that paint's alpha is used
     inline bool isOpaqueOverBounds(const DeferredDisplayState& state) {
@@ -234,7 +230,7 @@ protected:
 
     }
 
-    const SkPaint* mPaint; // should be accessed via getPaint() when applying
+    const SkPaint* mPaint;
     bool mQuickRejected;
 };
 
@@ -608,39 +604,6 @@ private:
     const SkRegion* mRegion;
 };
 
-class ResetPaintFilterOp : public StateOp {
-public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.resetPaintFilter();
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOGS("ResetPaintFilter");
-    }
-
-    virtual const char* name() { return "ResetPaintFilter"; }
-};
-
-class SetupPaintFilterOp : public StateOp {
-public:
-    SetupPaintFilterOp(int clearBits, int setBits)
-            : mClearBits(clearBits), mSetBits(setBits) {}
-
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.setupPaintFilter(mClearBits, mSetBits);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("SetupPaintFilter, clear %#x, set %#x", mClearBits, mSetBits);
-    }
-
-    virtual const char* name() { return "SetupPaintFilter"; }
-
-private:
-    int mClearBits;
-    int mSetBits;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // DRAW OPERATIONS - these are operations that can draw to the canvas's device
 ///////////////////////////////////////////////////////////////////////////////
@@ -659,7 +622,7 @@ public:
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawBitmap(mBitmap, getPaint(renderer));
+        return renderer.drawBitmap(mBitmap, mPaint);
     }
 
     AssetAtlas::Entry* getAtlasEntry() {
@@ -764,7 +727,7 @@ public:
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmap(mBitmap, mSrc.left, mSrc.top, mSrc.right, mSrc.bottom,
                 mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
-                getPaint(renderer));
+                mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -790,7 +753,7 @@ public:
             : DrawBitmapOp(bitmap, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawBitmapData(mBitmap, getPaint(renderer));
+        return renderer.drawBitmapData(mBitmap, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -815,7 +778,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmapMesh(mBitmap, mMeshWidth, mMeshHeight,
-                mVertices, mColors, getPaint(renderer));
+                mVertices, mColors, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -945,7 +908,7 @@ public:
         }
 
         return renderer.drawPatches(mBitmap, getAtlasEntry(),
-                &vertices[0], indexCount, getPaint(renderer));
+                &vertices[0], indexCount, mPaint);
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
@@ -953,7 +916,7 @@ public:
         // This method won't perform the quickReject() since we've already done it at this point
         return renderer.drawPatch(mBitmap, getMesh(renderer), getAtlasEntry(),
                 mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
-                getPaint(renderer));
+                mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1037,7 +1000,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawRect(mLocalBounds.left, mLocalBounds.top,
-                mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
+                mLocalBounds.right, mLocalBounds.bottom, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1061,7 +1024,7 @@ public:
             mRects(rects), mCount(count) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawRects(mRects, mCount, getPaint(renderer));
+        return renderer.drawRects(mRects, mCount, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1088,7 +1051,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawRoundRect(mLocalBounds.left, mLocalBounds.top,
-                mLocalBounds.right, mLocalBounds.bottom, mRx, mRy, getPaint(renderer));
+                mLocalBounds.right, mLocalBounds.bottom, mRx, mRy, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1120,7 +1083,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawRoundRect(*mLeft, *mTop, *mRight, *mBottom,
-                *mRx, *mRy, getPaint(renderer));
+                *mRx, *mRy, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1146,7 +1109,7 @@ public:
             mX(x), mY(y), mRadius(radius) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawCircle(mX, mY, mRadius, getPaint(renderer));
+        return renderer.drawCircle(mX, mY, mRadius, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1167,7 +1130,7 @@ public:
             : DrawOp(paint), mX(x), mY(y), mRadius(radius) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawCircle(*mX, *mY, *mRadius, getPaint(renderer));
+        return renderer.drawCircle(*mX, *mY, *mRadius, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1189,7 +1152,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawOval(mLocalBounds.left, mLocalBounds.top,
-                mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
+                mLocalBounds.right, mLocalBounds.bottom, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1209,7 +1172,7 @@ public:
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawArc(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom,
-                mStartAngle, mSweepAngle, mUseCenter, getPaint(renderer));
+                mStartAngle, mSweepAngle, mUseCenter, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1238,13 +1201,12 @@ public:
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawPath(mPath, getPaint(renderer));
+        return renderer.drawPath(mPath, mPaint);
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
-        const SkPaint* paint = getPaint(renderer);
-        renderer.getCaches().pathCache.precache(mPath, paint);
+        renderer.getCaches().pathCache.precache(mPath, mPaint);
 
         deferInfo.batchId = DeferredDisplayList::kOpBatch_AlphaMaskTexture;
     }
@@ -1268,7 +1230,7 @@ public:
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawLines(mPoints, mCount, getPaint(renderer));
+        return renderer.drawLines(mPoints, mCount, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1295,7 +1257,7 @@ public:
             : DrawLinesOp(points, count, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawPoints(mPoints, mCount, getPaint(renderer));
+        return renderer.drawPoints(mPoints, mCount, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1320,9 +1282,8 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
-        const SkPaint* paint = getPaint(renderer);
-        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, mText, mCount, SkMatrix::I());
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(mPaint);
+        fontRenderer.precache(mPaint, mText, mCount, SkMatrix::I());
 
         deferInfo.batchId = mPaint->getColor() == SK_ColorBLACK ?
                 DeferredDisplayList::kOpBatch_Text :
@@ -1346,7 +1307,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawTextOnPath(mText, mBytesCount, mCount, mPath,
-                mHOffset, mVOffset, getPaint(renderer));
+                mHOffset, mVOffset, mPaint);
     }
 
     virtual const char* name() { return "DrawTextOnPath"; }
@@ -1366,7 +1327,7 @@ public:
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawPosText(mText, mBytesCount, mCount, mPositions, getPaint(renderer));
+        return renderer.drawPosText(mText, mBytesCount, mCount, mPositions, mPaint);
     }
 
     virtual const char* name() { return "DrawPosText"; }
@@ -1386,12 +1347,11 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
-        const SkPaint* paint = getPaint(renderer);
-        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(mPaint);
         SkMatrix transform;
         renderer.findBestFontTransform(state.mMatrix, &transform);
         if (mPrecacheTransform != transform) {
-            fontRenderer.precache(paint, mText, mCount, transform);
+            fontRenderer.precache(mPaint, mText, mCount, transform);
             mPrecacheTransform = transform;
         }
         deferInfo.batchId = mPaint->getColor() == SK_ColorBLACK ?
@@ -1413,7 +1373,7 @@ public:
         Rect bounds;
         getLocalBounds(bounds);
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
-                mPositions, getPaint(renderer), mTotalAdvance, bounds);
+                mPositions, mPaint, mTotalAdvance, bounds);
     }
 
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
@@ -1428,7 +1388,7 @@ public:
             // quickReject() will not occure in drawText() so we can use mLocalBounds
             // directly, we do not need to account for shadow by calling getLocalBounds()
             status |= renderer.drawText(op.mText, op.mBytesCount, op.mCount, op.mX, op.mY,
-                    op.mPositions, op.getPaint(renderer), op.mTotalAdvance, op.mLocalBounds,
+                    op.mPositions, op.mPaint, op.mTotalAdvance, op.mLocalBounds,
                     drawOpMode);
         }
         return status;
