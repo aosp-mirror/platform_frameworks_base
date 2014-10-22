@@ -4653,7 +4653,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mPositionScroller == null) {
             mPositionScroller = createPositionScroller();
         }
-        mPositionScroller.startWithOffset(position, offset, offset);
+        mPositionScroller.startWithOffset(position, offset);
     }
 
     /**
