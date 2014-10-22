@@ -571,6 +571,9 @@ public class UserSwitcherController {
                 cancel();
             } else {
                 dismiss();
+                if (ActivityManager.isUserAMonkey()) {
+                    return;
+                }
                 UserInfo user = mUserManager.createSecondaryUser(
                         mContext.getString(R.string.user_new_user_name), 0 /* flags */);
                 if (user == null) {
