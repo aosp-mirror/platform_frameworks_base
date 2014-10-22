@@ -11844,9 +11844,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         synchronized (mPackages) {
-            CrossProfileIntentFilter filter = new CrossProfileIntentFilter(intentFilter,
+            CrossProfileIntentFilter newFilter = new CrossProfileIntentFilter(intentFilter,
                     ownerPackage, UserHandle.getUserId(callingUid), targetUserId, flags);
-            mSettings.editCrossProfileIntentResolverLPw(sourceUserId).addFilter(filter);
+            CrossProfileIntentResolver resolver =
+                    mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
+            ArrayList<CrossProfileIntentFilter> existing = resolver.findFilters(intentFilter);
+            // We have all those whose filter is equal. Now checking if the rest is equal as well.
+            if (existing != null) {
+                int size = existing.size();
+                for (int i = 0; i < size; i++) {
+                    if (newFilter.equalsIgnoreFilter(existing.get(i))) {
+                        return;
+                    }
+                }
+            }
+            resolver.addFilter(newFilter);
             scheduleWritePackageRestrictionsLocked(sourceUserId);
         }
     }
