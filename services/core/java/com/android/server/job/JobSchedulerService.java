@@ -137,11 +137,15 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void onReceive(Context context, Intent intent) {
             Slog.d(TAG, "Receieved: " + intent.getAction());
             if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
-                int uidRemoved = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                if (DEBUG) {
-                    Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
+                // If this is an outright uninstall rather than the first half of an
+                // app update sequence, cancel the jobs associated with the app.
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    int uidRemoved = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
+                    }
+                    cancelJobsForUid(uidRemoved);
                 }
-                cancelJobsForUid(uidRemoved);
             } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (DEBUG) {
