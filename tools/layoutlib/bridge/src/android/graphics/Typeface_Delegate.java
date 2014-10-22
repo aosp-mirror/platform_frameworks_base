@@ -16,13 +16,11 @@
 
 package android.graphics;
 
-import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.layoutlib.bridge.Bridge;
+import com.android.annotations.NonNull;
 import com.android.layoutlib.bridge.impl.DelegateManager;
-import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
-import android.content.res.AssetManager;
+import android.graphics.FontFamily_Delegate.FontVariant;
 
 import java.awt.Font;
 import java.io.File;
@@ -44,136 +42,133 @@ import java.util.List;
  */
 public final class Typeface_Delegate {
 
-    private static final String SYSTEM_FONTS = "/system/fonts/";
+    public static final String SYSTEM_FONTS = "/system/fonts/";
 
     // ---- delegate manager ----
     private static final DelegateManager<Typeface_Delegate> sManager =
             new DelegateManager<Typeface_Delegate>(Typeface_Delegate.class);
 
     // ---- delegate helper data ----
-    private static final String DEFAULT_FAMILY = "sans-serif";
-
-    private static FontLoader sFontLoader;
-    private static final List<Typeface_Delegate> sPostInitDelegate =
-            new ArrayList<Typeface_Delegate>();
+    private static String sFontLocation;
 
     // ---- delegate data ----
 
-    private final String mFamily;
-    private int mStyle;
-    private List<Font> mFonts;
+    @NonNull
+    private final FontFamily_Delegate[] mFontFamilies;  // the reference to FontFamily_Delegate.
+    /** @see Font#getStyle() */
+    private final int mStyle;
+    private final int mWeight;
 
+    private static long sDefaultTypeface;
 
     // ---- Public Helper methods ----
-
-    public static synchronized void init(FontLoader fontLoader) {
-        sFontLoader = fontLoader;
-
-        for (Typeface_Delegate delegate : sPostInitDelegate) {
-            delegate.init();
-        }
-        sPostInitDelegate.clear();
+    public static synchronized void setFontLocation(String fontLocation) {
+        sFontLocation = fontLocation;
+        FontFamily_Delegate.setFontLocation(fontLocation);
     }
 
     public static Typeface_Delegate getDelegate(long nativeTypeface) {
         return sManager.getDelegate(nativeTypeface);
     }
 
-    public static List<Font> getFonts(Typeface typeface) {
-        return getFonts(typeface.native_instance);
-    }
+    /**
+     * Return a list of fonts that match the style and variant. The list is ordered according to
+     * preference of fonts.
+     *
+     * The list may contain null when the font failed to load. If null is reached when trying to
+     * render with this list of fonts, then a warning should be logged letting the user know that
+     * some font failed to load.
+     *
+     * @param variant The variant preferred. Can only be {@link FontVariant#COMPACT} or
+     *                {@link FontVariant#ELEGANT}
+     */
+    @NonNull
+    public List<Font> getFonts(FontVariant variant) {
+        assert variant != FontVariant.NONE;
 
-    public static List<Font> getFonts(long native_int) {
-        Typeface_Delegate delegate = sManager.getDelegate(native_int);
-        if (delegate == null) {
-            return null;
+        // Calculate the required weight based on style and weight of this typeface.
+        int weight = mWeight + ((mStyle & Font.BOLD) == 0 ? 0 : FontFamily_Delegate.BOLD_FONT_WEIGHT_DELTA);
+        if (weight > 900) {
+            weight = 900;
         }
-
-        return delegate.getFonts();
-    }
-
-    public List<Font> getFonts() {
-        return mFonts;
+        final boolean isItalic = (mStyle & Font.ITALIC) != 0;
+        List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
+        for (int i = 0; i < mFontFamilies.length; i++) {
+            FontFamily_Delegate ffd = mFontFamilies[i];
+            if (ffd != null && ffd.isValid()) {
+                Font font = ffd.getFont(weight, isItalic);
+                if (font != null) {
+                    FontVariant ffdVariant = ffd.getVariant();
+                    if (ffdVariant == FontVariant.NONE) {
+                        fonts.add(font);
+                        continue;
+                    }
+                    // We cannot open each font and get locales supported, etc to match the fonts.
+                    // As a workaround, we hardcode certain assumptions like Elegant and Compact
+                    // always appear in pairs.
+                    assert i < mFontFamilies.length - 1;
+                    FontFamily_Delegate ffd2 = mFontFamilies[++i];
+                    assert ffd2 != null;
+                    FontVariant ffd2Variant = ffd2.getVariant();
+                    Font font2 = ffd2.getFont(weight, isItalic);
+                    assert ffd2Variant != FontVariant.NONE && ffd2Variant != ffdVariant
+                            && font2 != null;
+                    // Add the font with the matching variant to the list.
+                    if (variant == ffd.getVariant()) {
+                        fonts.add(font);
+                    } else {
+                        fonts.add(font2);
+                    }
+                } else {
+                    // The FontFamily is valid but doesn't contain any matching font. This means
+                    // that the font failed to load. We add null to the list of fonts. Don't throw
+                    // the warning just yet. If this is a non-english font, we don't want to warn
+                    // users who are trying to render only english text.
+                    fonts.add(null);
+                }
+            }
+        }
+        return fonts;
     }
 
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static synchronized long nativeCreate(String familyName, int style) {
-        if (familyName == null) {
-            familyName = DEFAULT_FAMILY;
-        }
-        if (style < 0) {
-            style = Typeface.NORMAL;
-        }
-
-        Typeface_Delegate newDelegate = new Typeface_Delegate(familyName, style);
-        if (sFontLoader != null) {
-            newDelegate.init();
-        } else {
-            // font loader has not been initialized yet, add the delegate to a list of delegates
-            // to init when the font loader is initialized.
-            // There won't be any rendering before this happens anyway.
-            sPostInitDelegate.add(newDelegate);
-        }
-
-        return sManager.addNewDelegate(newDelegate);
-    }
-
-    @LayoutlibDelegate
     /*package*/ static synchronized long nativeCreateFromTypeface(long native_instance, int style) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
+        if (delegate == null) {
+            delegate = sManager.getDelegate(sDefaultTypeface);
+        }
         if (delegate == null) {
             return 0;
         }
 
-        Typeface_Delegate newDelegate = new Typeface_Delegate(delegate.mFamily, style);
-        if (sFontLoader != null) {
-            newDelegate.init();
-        } else {
-            // font loader has not been initialized yet, add the delegate to a list of delegates
-            // to init when the font loader is initialized.
-            // There won't be any rendering before this happens anyway.
-            sPostInitDelegate.add(newDelegate);
-        }
-
-        return sManager.addNewDelegate(newDelegate);
+        return sManager.addNewDelegate(new Typeface_Delegate(delegate.mFontFamilies, style,
+                delegate.mWeight));
     }
 
     @LayoutlibDelegate
-    /*package*/ static synchronized long nativeCreateFromAsset(AssetManager mgr, String path) {
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Typeface.createFromAsset() is not supported.", null /*throwable*/, null /*data*/);
-        return 0;
+    /*package*/ static long nativeCreateWeightAlias(long native_instance, int weight) {
+        Typeface_Delegate delegate = sManager.getDelegate(native_instance);
+        if (delegate == null) {
+            delegate = sManager.getDelegate(sDefaultTypeface);
+        }
+        if (delegate == null) {
+            return 0;
+        }
+        Typeface_Delegate weightAlias =
+                new Typeface_Delegate(delegate.mFontFamilies, delegate.mStyle, weight);
+        return sManager.addNewDelegate(weightAlias);
     }
 
     @LayoutlibDelegate
-    /*package*/ static synchronized long nativeCreateFromFile(String path) {
-        if (path.startsWith(SYSTEM_FONTS) ) {
-            String relativePath = path.substring(SYSTEM_FONTS.length());
-            File f = new File(sFontLoader.getOsFontsLocation(), relativePath);
-
-            try {
-                Font font = Font.createFont(Font.TRUETYPE_FONT, f);
-                if (font != null) {
-                    Typeface_Delegate newDelegate = new Typeface_Delegate(font);
-                    return sManager.addNewDelegate(newDelegate);
-                }
-            } catch (Exception e) {
-                Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
-                        String.format("Unable to load font %1$s", relativePath),
-                            null /*throwable*/, null /*data*/);
-            }
-        } else {
-            Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                    "Typeface.createFromFile() can only work with platform fonts located in " +
-                        SYSTEM_FONTS,
-                    null /*throwable*/, null /*data*/);
+    /*package*/ static synchronized long nativeCreateFromArray(long[] familyArray) {
+        FontFamily_Delegate[] fontFamilies = new FontFamily_Delegate[familyArray.length];
+        for (int i = 0; i < familyArray.length; i++) {
+            fontFamilies[i] = FontFamily_Delegate.getDelegate(familyArray[i]);
         }
-
-
-        // return a copy of the base font
-        return nativeCreate(null, 0);
+        Typeface_Delegate delegate = new Typeface_Delegate(fontFamilies, Typeface.NORMAL);
+        return sManager.addNewDelegate(delegate);
     }
 
     @LayoutlibDelegate
@@ -191,24 +186,25 @@ public final class Typeface_Delegate {
         return delegate.mStyle;
     }
 
+    @LayoutlibDelegate
+    /*package*/ static void nativeSetDefault(long native_instance) {
+        sDefaultTypeface = native_instance;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static File getSystemFontConfigLocation() {
+        return new File(sFontLocation);
+    }
+
     // ---- Private delegate/helper methods ----
 
-    private Typeface_Delegate(String family, int style) {
-        mFamily = family;
+    private Typeface_Delegate(@NonNull FontFamily_Delegate[] fontFamilies, int style) {
+        this(fontFamilies, style, FontFamily_Delegate.DEFAULT_FONT_WEIGHT);
+    }
+
+    public Typeface_Delegate(@NonNull FontFamily_Delegate[] fontFamilies, int style, int weight) {
+        mFontFamilies = fontFamilies;
         mStyle = style;
-    }
-
-    private Typeface_Delegate(Font font) {
-        mFamily = font.getFamily();
-        mStyle = Typeface.NORMAL;
-
-        mFonts = sFontLoader.getFallbackFonts(mStyle);
-
-        // insert the font glyph first.
-        mFonts.add(0, font);
-    }
-
-    private void init() {
-        mFonts = sFontLoader.getFont(mFamily, mStyle);
+        mWeight = weight;
     }
 }

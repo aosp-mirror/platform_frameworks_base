@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
+import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -189,14 +190,6 @@ public class MediaRouter {
 
             final int mainType = mCurAudioRoutesInfo.mMainType;
 
-            boolean a2dpEnabled;
-            try {
-                a2dpEnabled = mAudioService.isBluetoothA2dpOn();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error querying Bluetooth A2DP state", e);
-                a2dpEnabled = false;
-            }
-
             if (!TextUtils.equals(newRoutes.mBluetoothName, mCurAudioRoutesInfo.mBluetoothName)) {
                 mCurAudioRoutesInfo.mBluetoothName = newRoutes.mBluetoothName;
                 if (mCurAudioRoutesInfo.mBluetoothName != null) {
@@ -219,6 +212,7 @@ public class MediaRouter {
             }
 
             if (mBluetoothA2dpRoute != null) {
+                final boolean a2dpEnabled = isBluetoothA2dpOn();
                 if (mainType != AudioRoutesInfo.MAIN_SPEAKER &&
                         mSelectedRoute == mBluetoothA2dpRoute && !a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo, false);
@@ -226,6 +220,15 @@ public class MediaRouter {
                         a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute, false);
                 }
+            }
+        }
+
+        boolean isBluetoothA2dpOn() {
+            try {
+                return mAudioService.isBluetoothA2dpOn();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error querying Bluetooth A2DP state", e);
+                return false;
             }
         }
 
@@ -949,7 +952,7 @@ public class MediaRouter {
     static void selectDefaultRouteStatic() {
         // TODO: Be smarter about the route types here; this selects for all valid.
         if (sStatic.mSelectedRoute != sStatic.mBluetoothA2dpRoute
-                && sStatic.mBluetoothA2dpRoute != null) {
+                && sStatic.mBluetoothA2dpRoute != null && sStatic.isBluetoothA2dpOn()) {
             selectRouteStatic(ROUTE_TYPE_ANY, sStatic.mBluetoothA2dpRoute, false);
         } else {
             selectRouteStatic(ROUTE_TYPE_ANY, sStatic.mDefaultAudioVideo, false);
@@ -1141,7 +1144,7 @@ public class MediaRouter {
     public RouteCategory createRouteCategory(CharSequence name, boolean isGroupable) {
         return new RouteCategory(name, ROUTE_TYPE_USER, isGroupable);
     }
-    
+
     /**
      * Create a new route category. Each route must belong to a category.
      *
@@ -1980,6 +1983,7 @@ public class MediaRouter {
      */
     public static class UserRouteInfo extends RouteInfo {
         RemoteControlClient mRcc;
+        SessionVolumeProvider mSvp;
 
         UserRouteInfo(RouteCategory category) {
             super(category);
@@ -1996,7 +2000,7 @@ public class MediaRouter {
             mName = name;
             routeUpdated();
         }
-        
+
         /**
          * Set the user-visible name of this route.
          * <p>
@@ -2100,7 +2104,7 @@ public class MediaRouter {
         public void setPlaybackType(int type) {
             if (mPlaybackType != type) {
                 mPlaybackType = type;
-                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE, type);
+                configureSessionVolume();
             }
         }
 
@@ -2113,8 +2117,7 @@ public class MediaRouter {
         public void setVolumeHandling(int volumeHandling) {
             if (mVolumeHandling != volumeHandling) {
                 mVolumeHandling = volumeHandling;
-                setPlaybackInfoOnRcc(
-                        RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING, volumeHandling);
+                configureSessionVolume();
             }
         }
 
@@ -2127,7 +2130,9 @@ public class MediaRouter {
             volume = Math.max(0, Math.min(volume, getVolumeMax()));
             if (mVolume != volume) {
                 mVolume = volume;
-                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME, volume);
+                if (mSvp != null) {
+                    mSvp.setCurrentVolume(mVolume);
+                }
                 dispatchRouteVolumeChanged(this);
                 if (mGroup != null) {
                     mGroup.memberVolumeChanged(this);
@@ -2166,7 +2171,7 @@ public class MediaRouter {
         public void setVolumeMax(int volumeMax) {
             if (mVolumeMax != volumeMax) {
                 mVolumeMax = volumeMax;
-                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME_MAX, volumeMax);
+                configureSessionVolume();
             }
         }
 
@@ -2177,35 +2182,81 @@ public class MediaRouter {
         public void setPlaybackStream(int stream) {
             if (mPlaybackStream != stream) {
                 mPlaybackStream = stream;
-                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_USES_STREAM, stream);
+                configureSessionVolume();
             }
         }
 
         private void updatePlaybackInfoOnRcc() {
-            if ((mRcc != null) && (mRcc.getRcseId() != RemoteControlClient.RCSE_ID_UNREGISTERED)) {
-                mRcc.setPlaybackInformation(
-                        RemoteControlClient.PLAYBACKINFO_VOLUME_MAX, mVolumeMax);
-                mRcc.setPlaybackInformation(
-                        RemoteControlClient.PLAYBACKINFO_VOLUME, mVolume);
-                mRcc.setPlaybackInformation(
-                        RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING, mVolumeHandling);
-                mRcc.setPlaybackInformation(
-                        RemoteControlClient.PLAYBACKINFO_USES_STREAM, mPlaybackStream);
-                mRcc.setPlaybackInformation(
-                        RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE, mPlaybackType);
-                // let AudioService know whom to call when remote volume needs to be updated
-                try {
-                    sStatic.mAudioService.registerRemoteVolumeObserverForRcc(
-                            mRcc.getRcseId() /* rccId */, mRemoteVolObserver /* rvo */);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error registering remote volume observer", e);
+            configureSessionVolume();
+        }
+
+        private void configureSessionVolume() {
+            if (mRcc == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "No Rcc to configure volume for route " + mName);
                 }
+                return;
+            }
+            MediaSession session = mRcc.getMediaSession();
+            if (session == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Rcc has no session to configure volume");
+                }
+                return;
+            }
+            if (mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
+                int volumeControl = VolumeProvider.VOLUME_CONTROL_FIXED;
+                switch (mVolumeHandling) {
+                    case RemoteControlClient.PLAYBACK_VOLUME_VARIABLE:
+                        volumeControl = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
+                        break;
+                    case RemoteControlClient.PLAYBACK_VOLUME_FIXED:
+                    default:
+                        break;
+                }
+                // Only register a new listener if necessary
+                if (mSvp == null || mSvp.getVolumeControl() != volumeControl
+                        || mSvp.getMaxVolume() != mVolumeMax) {
+                    mSvp = new SessionVolumeProvider(volumeControl, mVolumeMax, mVolume);
+                    session.setPlaybackToRemote(mSvp);
+                }
+            } else {
+                // We only know how to handle local and remote, fall back to local if not remote.
+                AudioAttributes.Builder bob = new AudioAttributes.Builder();
+                bob.setLegacyStreamType(mPlaybackStream);
+                session.setPlaybackToLocal(bob.build());
+                mSvp = null;
             }
         }
 
-        private void setPlaybackInfoOnRcc(int what, int value) {
-            if (mRcc != null) {
-                mRcc.setPlaybackInformation(what, value);
+        class SessionVolumeProvider extends VolumeProvider {
+
+            public SessionVolumeProvider(int volumeControl, int maxVolume, int currentVolume) {
+                super(volumeControl, maxVolume, currentVolume);
+            }
+
+            @Override
+            public void onSetVolumeTo(final int volume) {
+                sStatic.mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mVcb != null) {
+                            mVcb.vcb.onVolumeSetRequest(mVcb.route, volume);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onAdjustVolume(final int direction) {
+                sStatic.mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mVcb != null) {
+                            mVcb.vcb.onVolumeUpdateRequest(mVcb.route, direction);
+                        }
+                    }
+                });
             }
         }
     }
@@ -2504,17 +2555,17 @@ public class MediaRouter {
         public CharSequence getName() {
             return getName(sStatic.mResources);
         }
-        
+
         /**
          * Return the properly localized/configuration dependent name of this RouteCategory.
-         * 
+         *
          * @param context Context to resolve name resources
          * @return the name of this route category
          */
         public CharSequence getName(Context context) {
             return getName(context.getResources());
         }
-        
+
         CharSequence getName(Resources res) {
             if (mNameResId != 0) {
                 return res.getText(mNameResId);

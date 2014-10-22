@@ -1,0 +1,92 @@
+page.title=Debugging over Bluetooth
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#SetupDevices">Set Up Devices for Debugging</a></li>
+      <li><a href="#SetupSession">Set Up a Debugging Session</a></li>
+      <li><a href="#DebugApp">Debug Your App</a></li>
+    </ol>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>You can debug your wearable over Bluetooth by routing it's debug output to the
+handheld device that's connected to your development machine.</p>
+
+<h2 id="SetupDevices">Setup Devices for Debugging</h2>
+<ol>
+  <li>Enable USB debugging on the handheld:
+    <ul>
+      <li>Open the Settings app and scroll to the bottom.</li>
+      <li>If it doesn't have a Developer Options setting, tap <b>About Phone</b>
+      (or <b>About Tablet</b>), scroll to the bottom, and tap the build number 7 times.</li>
+      <li>Go back and tap <b>Developer Options</b>.</li>
+      <li>Enable <b>USB debugging</b>.</li>
+    </ul>
+  </li>
+  <li>Enable Bluetooth debugging on the wearable:
+    <ol>
+      <li>Tap the home screen twice to bring up the Wear menu. </li>
+      <li>Scroll to the bottom and tap <b>Settings</b>.</li>
+      <li>Scroll to the bottom. If there's no <b>Developer Options</b> item, tap <b>About</b>,
+      and then tap the build number 7 times.</li>
+      <li>Tap the <b>Developer Options</b> item.</li>
+      <li>Enable <b>Debug over Bluetooth</b>.</li>
+    </ol>
+  </li>
+</ol>
+
+<h2 id="SetupSession">Set Up a Debugging Session</h2>
+<ol>
+ <li>On the handheld, open the Android Wear companion app.</li>
+ <li>Tap the menu on the top right and select <b>Settings</b>.</li>
+ <li>Enable <b>Debugging over Bluetooth</b>. You should see a tiny status summary appear under the
+ option:
+ <pre>
+Host: disconnected
+Target: connected
+</pre>
+</li>
+<li>Connect the handheld to your machine over USB and run:
+<pre>
+adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
+</pre>
+
+<p class="note"><b>Note</b>: You can use any available port that you have access to.</p>
+</li>
+</ol>
+<p>
+In the Android Wear companion app, you should see the status change to:</p>
+<pre>
+Host: connected
+Target: connected
+</pre>
+
+<h2 id="#debug">Debug Your App</h2>
+
+Your wearable should show up as <code>localhost:4444</code> when running <code>adb devices</code>.
+
+To run any <code>adb</code> command, use this format:
+
+<pre>adb -s localhost:4444 &lt;command&gt; </pre>
+
+<p>If there are no other devices connected over TCP/IP (namely emulators),  you can shorten the command
+to:</p>
+<pre>
+adb -e &lt;command&gt;
+</pre>
+<p>For example:</p>
+<pre>
+adb -e logcat
+adb -e shell
+adb -e bugreport
+</pre>

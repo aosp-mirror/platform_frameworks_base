@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
@@ -71,4 +72,19 @@ interface IWallpaperManager {
      * Returns the desired minimum height for the wallpaper.
      */
     int getHeightHint();
+
+    /**
+     * Sets extra padding that we would like the wallpaper to have outside of the display.
+     */
+    void setDisplayPadding(in Rect padding);
+
+    /**
+     * Returns the name of the wallpaper. Private API.
+     */
+    String getName();
+
+    /**
+     * Informs the service that wallpaper settings have been restored. Private API.
+     */
+    void settingsRestored();
 }

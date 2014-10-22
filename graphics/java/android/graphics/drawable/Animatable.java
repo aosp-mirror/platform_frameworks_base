@@ -17,7 +17,7 @@
 package android.graphics.drawable;
 
 /**
- * Interface that drawables suporting animations should implement.
+ * Interface that drawables supporting animations should implement.
  */
 public interface Animatable {
     /**
@@ -32,7 +32,7 @@ public interface Animatable {
 
     /**
      * Indicates whether the animation is running.
-     * 
+     *
      * @return True if the animation is running, false otherwise.
      */
     boolean isRunning();

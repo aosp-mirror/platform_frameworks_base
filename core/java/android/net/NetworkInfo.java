@@ -128,14 +128,6 @@ public class NetworkInfo implements Parcelable {
     private boolean mIsAvailable;
 
     /**
-     * @param type network type
-     * @deprecated
-     * @hide because this constructor was only meant for internal use (and
-     * has now been superseded by the package-private constructor below).
-     */
-    public NetworkInfo(int type) {}
-
-    /**
      * @hide
      */
     public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
@@ -156,18 +148,20 @@ public class NetworkInfo implements Parcelable {
     /** {@hide} */
     public NetworkInfo(NetworkInfo source) {
         if (source != null) {
-            mNetworkType = source.mNetworkType;
-            mSubtype = source.mSubtype;
-            mTypeName = source.mTypeName;
-            mSubtypeName = source.mSubtypeName;
-            mState = source.mState;
-            mDetailedState = source.mDetailedState;
-            mReason = source.mReason;
-            mExtraInfo = source.mExtraInfo;
-            mIsFailover = source.mIsFailover;
-            mIsRoaming = source.mIsRoaming;
-            mIsAvailable = source.mIsAvailable;
-            mIsConnectedToProvisioningNetwork = source.mIsConnectedToProvisioningNetwork;
+            synchronized (source) {
+                mNetworkType = source.mNetworkType;
+                mSubtype = source.mSubtype;
+                mTypeName = source.mTypeName;
+                mSubtypeName = source.mSubtypeName;
+                mState = source.mState;
+                mDetailedState = source.mDetailedState;
+                mReason = source.mReason;
+                mExtraInfo = source.mExtraInfo;
+                mIsFailover = source.mIsFailover;
+                mIsRoaming = source.mIsRoaming;
+                mIsAvailable = source.mIsAvailable;
+                mIsConnectedToProvisioningNetwork = source.mIsConnectedToProvisioningNetwork;
+            }
         }
     }
 
@@ -186,6 +180,15 @@ public class NetworkInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public void setType(int type) {
+        synchronized (this) {
+            mNetworkType = type;
+        }
+    }
+
+    /**
      * Return a network-type-specific integer describing the subtype
      * of the network.
      * @return the network subtype
@@ -196,7 +199,10 @@ public class NetworkInfo implements Parcelable {
         }
     }
 
-    void setSubtype(int subtype, String subtypeName) {
+    /**
+     * @hide
+     */
+    public void setSubtype(int subtype, String subtypeName) {
         synchronized (this) {
             mSubtype = subtype;
             mSubtypeName = subtypeName;
@@ -405,8 +411,7 @@ public class NetworkInfo implements Parcelable {
 
     /**
      * Report the extra information about the network state, if any was
-     * provided by the lower networking layers.,
-     * if one is available.
+     * provided by the lower networking layers.
      * @return the extra information, or null if not available
      */
     public String getExtraInfo() {
@@ -418,7 +423,7 @@ public class NetworkInfo implements Parcelable {
     @Override
     public String toString() {
         synchronized (this) {
-            StringBuilder builder = new StringBuilder("NetworkInfo: ");
+            StringBuilder builder = new StringBuilder("[");
             builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
             append("], state: ").append(mState).append("/").append(mDetailedState).
             append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
@@ -427,7 +432,8 @@ public class NetworkInfo implements Parcelable {
             append(", failover: ").append(mIsFailover).
             append(", isAvailable: ").append(mIsAvailable).
             append(", isConnectedToProvisioningNetwork: ").
-                    append(mIsConnectedToProvisioningNetwork);
+            append(mIsConnectedToProvisioningNetwork).
+            append("]");
             return builder.toString();
         }
     }

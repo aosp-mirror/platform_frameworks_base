@@ -16,6 +16,8 @@
 
 package android.util;
 
+import libcore.util.EmptyArray;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -222,8 +224,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * will grow once items are added to it.
      */
     public ArraySet() {
-        mHashes = ContainerHelpers.EMPTY_INTS;
-        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mHashes = EmptyArray.INT;
+        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -232,8 +234,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     public ArraySet(int capacity) {
         if (capacity == 0) {
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
         } else {
             allocArrays(capacity);
         }
@@ -258,8 +260,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     public void clear() {
         if (mSize != 0) {
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         }
     }
@@ -289,7 +291,17 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     @Override
     public boolean contains(Object key) {
-        return key == null ? (indexOfNull() >= 0) : (indexOf(key, key.hashCode()) >= 0);
+        return indexOf(key) >= 0;
+    }
+
+    /**
+     * Returns the index of a value in the set.
+     *
+     * @param key The value to search for.
+     * @return Returns the index of the value if it exists, else a negative integer.
+     */
+    public int indexOf(Object key) {
+        return key == null ? indexOfNull() : indexOf(key, key.hashCode());
     }
 
     /**
@@ -370,7 +382,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * Perform a {@link #add(Object)} of all values in <var>array</var>
      * @param array The array whose contents are to be retrieved.
      */
-    public void putAll(ArraySet<? extends E> array) {
+    public void addAll(ArraySet<? extends E> array) {
         final int N = array.mSize;
         ensureCapacity(mSize + N);
         if (mSize == 0) {
@@ -394,7 +406,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     @Override
     public boolean remove(Object object) {
-        int index = object == null ? indexOfNull() : indexOf(object, object.hashCode());
+        final int index = indexOf(object);
         if (index >= 0) {
             removeAt(index);
             return true;
@@ -413,8 +425,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         } else {
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {
@@ -584,12 +596,12 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
 
                 @Override
                 protected int colIndexOfKey(Object key) {
-                    return key == null ? indexOfNull() : indexOf(key, key.hashCode());
+                    return indexOf(key);
                 }
 
                 @Override
                 protected int colIndexOfValue(Object value) {
-                    return value == null ? indexOfNull() : indexOf(value, value.hashCode());
+                    return indexOf(value);
                 }
 
                 @Override

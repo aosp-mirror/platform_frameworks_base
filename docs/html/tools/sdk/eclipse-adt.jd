@@ -57,6 +57,183 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 23.0.4</a> <em>(October 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 7 or higher is required if you are targeting the L Developer Preview.</li>
+      <li>Java 1.6 or higher is required if you are targeting other releases.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r23.0.2</a>.
+        If you haven't already installed SDK Tools r23.0.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+        <li>Fixed duplicate devices in AVD for Wear and TV.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 23.0.3</a> <em>(August 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 7 or higher is required if you are targeting the L Developer Preview.</li>
+      <li>Java 1.6 or higher is required if you are targeting other releases.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r23.0.2</a>.
+        If you haven't already installed SDK Tools r23.0.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed an issue where ADT displayed a <code>NullPointerException</code> warning dialog
+          when a valid SDK was not configured. (<a href="http://b.android.com/73313">Issue
+          73313</a>)</li>
+      <li>Fixed a minor issue with RenderScript support.</li>
+      <li>Disabled APK compression.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 23.0.2</a> <em>(July 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 7 or higher is required if you are targeting the L Developer Preview.</li>
+      <li>Java 1.6 or higher is required if you are targeting other releases.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r23.0.2</a>.
+        If you haven't already installed SDK Tools r23.0.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>ADT Bundle shows the Java perspective by default.</li>
+      <li>ADT Bundle 23.0.0 and prior versions would not allow updating the ADT plugins
+          due to conflicting dependencies. This version fixes that bug and should allow
+          updating to future versions of the ADT plugins.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 23.0.0</a> <em>(June 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 7 or higher is required if you are targeting the L Developer Preview.</li>
+      <li>Java 1.6 or higher is required if you are targeting other releases.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r23.0.0</a>.
+        If you haven't already installed SDK Tools r23.0.0 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Added the Android Wear tools and system images.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 22.6.3</a> <em>(April 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.6.3</a>.
+        If you haven't already installed SDK Tools r22.6.3 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed a problem where the AVD manager allowed creating Android Wear virtual devices
+          with a target API Level lower than 19.</li>
+      <li>Fixed the description of Android Wear system images in the SDK Manager.</li>
+    </ul>
+  </dd>
+
+  <dt>Known Issues:</dt>
+  <dd>
+    <p>When you create an Android Wear virtual device in the AVD manager, a target API Level
+       lower than 19 may be selected by default. Make sure you select the target API Level 19
+       when creating Android Wear virtual devices.</p>
+  </dd>
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.6.2</a> <em>(March 2014)</em>
   </p>
 
@@ -78,6 +255,11 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
   <dt>General Notes:</dt>
   <dd>
     <ul>
+      <li><p>Changed the URL for the Android Developer Tools update site to require HTTPS.</p>
+          <p class="note"><strong>Note:</strong> If you are
+          <a href="{@docRoot}sdk/installing/installing-adt.html">updating ADT</a>, make sure
+          you use HTTPS in the URL for the Android Developer Tools update site.</p>
+      </li>
       <li>Fixed a problem where Eclipse was non-responsive for a few seconds after opening
           an XML file. (<a href="http://b.android.com/67084">Issue 67084</a>)</li>
       <li>Fixed a problem where the SDK Manager threw a <code>NullPointerException</code> after
@@ -88,7 +270,6 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
           <code>drawable-large-*</code> directories.</li>
       <li>Fixed a problem with Nexus 5 Android virtual devices created from the command line
           where the SD card file system was read-only.</li>
-      <li>Changed the URL for the Android Developer Tools Update Site from HTTP to HTTPS.</li>
     </ul>
   </dd>
 </dl>

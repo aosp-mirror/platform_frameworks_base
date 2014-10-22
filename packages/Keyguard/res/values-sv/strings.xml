@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ange PIN-kod"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Ange PUK-koden och en ny PIN-kod"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kod"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Ny PIN-kod"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Ange PUK-koden och en ny pinkod för SIM-kortet"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-kod för SIM-kortet"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Ny pinkod för SIM-kort"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Tryck om du vill ange lösenord"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Ange lösenord för att låsa upp"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Ange PIN-kod för att låsa upp"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 om du vill låsa upp."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Batteriet har laddats"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Laddar, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Debitering"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Anslut din laddare."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Tryck på Meny om du vill låsa upp."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Nätverk låst"</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pausknappen"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Uppspelningsknappen"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Stoppknappen"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Gillar"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Tummen ned"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Hjärta"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Lås upp om du vill fortsätta"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Lanseringen har avbrutits"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Ta bort genom att släppa <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> här."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> kommer inte att tas bort."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ange önskad PIN-kod"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekräfta önskad PIN-kod"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Låser upp SIM-kort …"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Fel PIN-kod."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Ange en PIN-kod med 4 till 8 siffror."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koden ska vara minst åtta siffror."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ange rätt PUK-kod igen. Om försöken upprepas inaktiveras SIM-kortet permanent."</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp mobilen med hjälp av ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ta bort"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Du angav fel pinkod för SIM-kortet och måste nu kontakta operatören för att låsa upp enheten."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Du angav fel pinkod för SIM-kortet. <xliff:g id="NUMBER">%d</xliff:g> försök återstår innan du måste kontakta operatören för att låsa upp enheten."</item>
+    <item quantity="other" msgid="2215723361575359486">"Du angav fel pinkod för SIM-kortet. <xliff:g id="NUMBER">%d</xliff:g> försök återstår."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-kortet är obrukbart. Kontakta operatören."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Du angav fel PUK-kod för SIM-kortet. <xliff:g id="NUMBER">%d</xliff:g> försök återstår innan SIM-kortet blir obrukbart."</item>
+    <item quantity="other" msgid="5477305226026342036">"Du angav fel PUK-kod för SIM-kortet. <xliff:g id="NUMBER">%d</xliff:g> försök återstår innan SIM-kortet blir obrukbart."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Det gick inte att låsa upp med pinkoden för SIM-kortet."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Det gick inte att låsa upp med PUK-koden för SIM-kortet."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Koden godkändes!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Knapp för föregående spår"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Knapp för nästa spår"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Pausknappen"</string>

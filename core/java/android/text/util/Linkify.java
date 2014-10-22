@@ -465,32 +465,39 @@ public class Linkify {
         String address;
         int base = 0;
 
-        while ((address = WebView.findAddress(string)) != null) {
-            int start = string.indexOf(address);
+        try {
+            while ((address = WebView.findAddress(string)) != null) {
+                int start = string.indexOf(address);
 
-            if (start < 0) {
-                break;
+                if (start < 0) {
+                    break;
+                }
+
+                LinkSpec spec = new LinkSpec();
+                int length = address.length();
+                int end = start + length;
+
+                spec.start = base + start;
+                spec.end = base + end;
+                string = string.substring(end);
+                base += end;
+
+                String encodedAddress = null;
+
+                try {
+                    encodedAddress = URLEncoder.encode(address,"UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    continue;
+                }
+
+                spec.url = "geo:0,0?q=" + encodedAddress;
+                links.add(spec);
             }
-
-            LinkSpec spec = new LinkSpec();
-            int length = address.length();
-            int end = start + length;
-            
-            spec.start = base + start;
-            spec.end = base + end;
-            string = string.substring(end);
-            base += end;
-
-            String encodedAddress = null;
-
-            try {
-                encodedAddress = URLEncoder.encode(address,"UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                continue;
-            }
-
-            spec.url = "geo:0,0?q=" + encodedAddress;
-            links.add(spec);
+        } catch (UnsupportedOperationException e) {
+            // findAddress may fail with an unsupported exception on platforms without a WebView.
+            // In this case, we will not append anything to the links variable: it would have died
+            // in WebView.findAddress.
+            return;
         }
     }
 

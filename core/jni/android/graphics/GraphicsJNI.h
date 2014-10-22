@@ -12,8 +12,11 @@
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
-class SkPaint;
-class SkPicture;
+
+namespace android {
+class Paint;
+class TypefaceImpl;
+}
 
 class GraphicsJNI {
 public:
@@ -45,25 +48,39 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static SkCanvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static SkPaint*  getNativePaint(JNIEnv*, jobject paint);
+    static android::Paint*  getNativePaint(JNIEnv*, jobject paint);
+    static android::TypefaceImpl* getNativeTypeface(JNIEnv*, jobject paint);
     static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
-    static SkPicture* getNativePicture(JNIEnv*, jobject picture);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
-    /** Return the corresponding native config from the java Config enum,
-        or kNo_Config if the java object is null.
+    // Given the 'native' long held by the Rasterizer.java object, return a
+    // ref to its SkRasterizer* (or NULL).
+    static SkRasterizer* refNativeRasterizer(jlong rasterizerHandle);
+
+    /*
+     *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values
+     *  in Bitmap.Config. Skia no longer supports this config, but has replaced it
+     *  with SkColorType. These routines convert between the two.
+     */
+    static SkColorType legacyBitmapConfigToColorType(jint legacyConfig);
+    static jint colorTypeToLegacyBitmapConfig(SkColorType colorType);
+
+    /** Return the corresponding native colorType from the java Config enum,
+        or kUnknown_SkColorType if the java object is null.
     */
-    static SkBitmap::Config getNativeBitmapConfig(JNIEnv*, jobject jconfig);
+    static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
 
     /** Create a java Bitmap object given the native bitmap (required) and optional
         storage array (may be null).
         bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
     */
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-            int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density = -1);
+            int bitmapCreateFlags, jbyteArray ninePatch, jobject ninePatchInsets, int density = -1);
 
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
-            jbyteArray ninepatch, int density = -1);
+            jbyteArray ninePatch, int density = -1) {
+        return createBitmap(env, bitmap, NULL, bitmapCreateFlags, ninePatch, NULL, density);
+    }
 
     /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
         sync with isPremultiplied
@@ -82,10 +99,11 @@ public:
 
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
+        Whether to use premultiplied pixels is determined by dstBitmap's alphaType.
     */
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
             int srcStride, int x, int y, int width, int height,
-            const SkBitmap& dstBitmap, bool isPremultiplied);
+            const SkBitmap& dstBitmap);
 
     static jbyteArray getBitmapStorageObj(SkPixelRef *pixref);
 };

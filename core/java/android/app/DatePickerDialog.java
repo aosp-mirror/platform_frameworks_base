@@ -21,10 +21,13 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.DatePicker.OnDateChangedListener;
+import android.widget.DatePicker.ValidationCallback;
 
 import com.android.internal.R;
 
@@ -44,7 +47,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     private static final String DAY = "day";
 
     private final DatePicker mDatePicker;
-    private final OnDateSetListener mCallBack;
+    private final OnDateSetListener mDateSetListener;
     private final Calendar mCalendar;
 
     private boolean mTitleNeedsUpdate = true;
@@ -79,47 +82,63 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         this(context, 0, callBack, year, monthOfYear, dayOfMonth);
     }
 
+    static int resolveDialogTheme(Context context, int resid) {
+        if (resid == 0) {
+            final TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(R.attr.datePickerDialogTheme, outValue, true);
+            return outValue.resourceId;
+        } else {
+            return resid;
+        }
+    }
+
     /**
      * @param context The context the dialog is to run in.
      * @param theme the theme to apply to this dialog
-     * @param callBack How the parent is notified that the date is set.
+     * @param listener How the parent is notified that the date is set.
      * @param year The initial year of the dialog.
      * @param monthOfYear The initial month of the dialog.
      * @param dayOfMonth The initial day of the dialog.
      */
-    public DatePickerDialog(Context context,
-            int theme,
-            OnDateSetListener callBack,
-            int year,
-            int monthOfYear,
-            int dayOfMonth) {
-        super(context, theme);
+    public DatePickerDialog(Context context, int theme, OnDateSetListener listener, int year,
+            int monthOfYear, int dayOfMonth) {
+        super(context, resolveDialogTheme(context, theme));
 
-        mCallBack = callBack;
-
+        mDateSetListener = listener;
         mCalendar = Calendar.getInstance();
 
-        Context themeContext = getContext();
-        setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
-        setIcon(0);
-
-        LayoutInflater inflater =
-                (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.date_picker_dialog, null);
+        final Context themeContext = getContext();
+        final LayoutInflater inflater = LayoutInflater.from(themeContext);
+        final View view = inflater.inflate(R.layout.date_picker_dialog, null);
         setView(view);
+        setButton(BUTTON_POSITIVE, themeContext.getString(R.string.ok), this);
+        setButton(BUTTON_NEGATIVE, themeContext.getString(R.string.cancel), this);
+        setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
+
         mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
         mDatePicker.init(year, monthOfYear, dayOfMonth, this);
-        updateTitle(year, monthOfYear, dayOfMonth);
+        mDatePicker.setValidationCallback(mValidationCallback);
     }
 
-    public void onClick(DialogInterface dialog, int which) {
-        tryNotifyDateSet();
-    }
-
-    public void onDateChanged(DatePicker view, int year,
-            int month, int day) {
+    @Override
+    public void onDateChanged(DatePicker view, int year, int month, int day) {
         mDatePicker.init(year, month, day, this);
         updateTitle(year, month, day);
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        switch (which) {
+            case BUTTON_POSITIVE:
+                if (mDateSetListener != null) {
+                    mDateSetListener.onDateSet(mDatePicker, mDatePicker.getYear(),
+                            mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+                }
+                break;
+            case BUTTON_NEGATIVE:
+                cancel();
+                break;
+        }
     }
 
     /**
@@ -140,20 +159,6 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
      */
     public void updateDate(int year, int monthOfYear, int dayOfMonth) {
         mDatePicker.updateDate(year, monthOfYear, dayOfMonth);
-    }
-
-    private void tryNotifyDateSet() {
-        if (mCallBack != null) {
-            mDatePicker.clearFocus();
-            mCallBack.onDateSet(mDatePicker, mDatePicker.getYear(),
-                    mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        tryNotifyDateSet();
-        super.onStop();
     }
 
     private void updateTitle(int year, int month, int day) {
@@ -180,7 +185,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
 
     @Override
     public Bundle onSaveInstanceState() {
-        Bundle state = super.onSaveInstanceState();
+        final Bundle state = super.onSaveInstanceState();
         state.putInt(YEAR, mDatePicker.getYear());
         state.putInt(MONTH, mDatePicker.getMonth());
         state.putInt(DAY, mDatePicker.getDayOfMonth());
@@ -190,9 +195,19 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        int year = savedInstanceState.getInt(YEAR);
-        int month = savedInstanceState.getInt(MONTH);
-        int day = savedInstanceState.getInt(DAY);
+        final int year = savedInstanceState.getInt(YEAR);
+        final int month = savedInstanceState.getInt(MONTH);
+        final int day = savedInstanceState.getInt(DAY);
         mDatePicker.init(year, month, day, this);
     }
+
+    private final ValidationCallback mValidationCallback = new ValidationCallback() {
+        @Override
+        public void onValidationChanged(boolean valid) {
+            final Button positive = getButton(BUTTON_POSITIVE);
+            if (positive != null) {
+                positive.setEnabled(valid);
+            }
+        }
+    };
 }

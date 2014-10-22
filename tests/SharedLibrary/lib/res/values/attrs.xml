@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <declare-styleable name="AddressView">
+        <attr name="name" format="string" />
+        <attr name="streetNumber" format="integer" />
+        <attr name="streetName" format="string" />
+        <attr name="city" format="string" />
+        <attr name="state" format="string" />
+        <attr name="zip" format="string" />
+        <attr name="country" format="string" />
+    </declare-styleable>
+</resources>

@@ -23,6 +23,8 @@
 
 #include <Caches.h>
 
+#include "Paint.h"
+#include "Canvas.h"
 #include "SkCanvas.h"
 #include "SkRegion.h"
 #include "GraphicsJNI.h"
@@ -97,7 +99,7 @@ public:
         } else {
             canvas->save();
 
-            SkScalar scale = SkFloatToScalar(destDensity / (float)srcDensity);
+            SkScalar scale = destDensity / (float)srcDensity;
             canvas->translate(bounds.fLeft, bounds.fTop);
             canvas->scale(scale, scale);
 
@@ -119,10 +121,10 @@ public:
     static void drawF(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRectF,
             jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
+        const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
         SkASSERT(canvas);
         SkASSERT(boundsRectF);
         SkASSERT(bitmap);
@@ -138,10 +140,10 @@ public:
     static void drawI(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRect,
             jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
+        const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
         SkASSERT(canvas);
         SkASSERT(boundsRect);
         SkASSERT(bitmap);

@@ -17,6 +17,9 @@
 package android.util;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 /**
  * SparseArray mapping longs to Objects.  Unlike a normal array of Objects,
@@ -70,12 +73,11 @@ public class LongSparseArray<E> implements Cloneable {
      */
     public LongSparseArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = ContainerHelpers.EMPTY_LONGS;
-            mValues = ContainerHelpers.EMPTY_OBJECTS;
+            mKeys = EmptyArray.LONG;
+            mValues = EmptyArray.OBJECT;
         } else {
-            initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
-            mKeys = new long[initialCapacity];
-            mValues = new Object[initialCapacity];
+            mKeys = ArrayUtils.newUnpaddedLongArray(initialCapacity);
+            mValues = ArrayUtils.newUnpaddedObjectArray(initialCapacity);
         }
         mSize = 0;
     }
@@ -202,28 +204,8 @@ public class LongSparseArray<E> implements Cloneable {
                 i = ~ContainerHelpers.binarySearch(mKeys, mSize, key);
             }
 
-            if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealLongArraySize(mSize + 1);
-
-                long[] nkeys = new long[n];
-                Object[] nvalues = new Object[n];
-
-                // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
-                System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-                System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-                mKeys = nkeys;
-                mValues = nvalues;
-            }
-
-            if (mSize - i != 0) {
-                // Log.e("SparseArray", "move " + (mSize - i));
-                System.arraycopy(mKeys, i, mKeys, i + 1, mSize - i);
-                System.arraycopy(mValues, i, mValues, i + 1, mSize - i);
-            }
-
-            mKeys[i] = key;
-            mValues[i] = value;
+            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+            mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);
             mSize++;
         }
     }
@@ -353,24 +335,9 @@ public class LongSparseArray<E> implements Cloneable {
             gc();
         }
 
-        int pos = mSize;
-        if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealLongArraySize(pos + 1);
-
-            long[] nkeys = new long[n];
-            Object[] nvalues = new Object[n];
-
-            // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
-            System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-            System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-            mKeys = nkeys;
-            mValues = nvalues;
-        }
-
-        mKeys[pos] = key;
-        mValues[pos] = value;
-        mSize = pos + 1;
+        mKeys = GrowingArrayUtils.append(mKeys, mSize, key);
+        mValues = GrowingArrayUtils.append(mValues, mSize, value);
+        mSize++;
     }
 
     /**

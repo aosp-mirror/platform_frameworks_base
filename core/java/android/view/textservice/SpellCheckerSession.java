@@ -427,8 +427,12 @@ public class SpellCheckerSession {
 
         @Override
         public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
-            mHandler.sendMessage(
-                    Message.obtain(mHandler, MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE, results));
+            synchronized (this) {
+                if (mHandler != null) {
+                    mHandler.sendMessage(Message.obtain(mHandler,
+                            MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE, results));
+                }
+            }
         }
     }
 

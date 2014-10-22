@@ -20,15 +20,25 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
+import android.widget.GridLayout.Alignment;
+import android.widget.GridLayout.LayoutParams;
 import android.widget.TextView;
 
-import static android.widget.GridLayout.*;
+import static android.widget.GridLayout.BASELINE;
+import static android.widget.GridLayout.BOTTOM;
+import static android.widget.GridLayout.CENTER;
+import static android.widget.GridLayout.FILL;
+import static android.widget.GridLayout.LEFT;
+import static android.widget.GridLayout.RIGHT;
+import static android.widget.GridLayout.TOP;
+import static android.widget.GridLayout.spec;
 
-public class AlignmentTest  extends Activity {
+public class AlignmentTest extends Activity {
 
     public static final String[] HORIZONTAL_NAMES = {"LEFT", "center", "east", "fill"};
     public static final Alignment[] HORIZONTAL_ALIGNMENTS = {LEFT, CENTER, RIGHT, FILL};

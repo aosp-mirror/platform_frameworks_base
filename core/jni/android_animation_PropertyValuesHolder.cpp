@@ -47,6 +47,32 @@ static jlong android_animation_PropertyValuesHolder_getFloatMethod(
     return reinterpret_cast<jlong>(mid);
 }
 
+static jlong getMultiparameterMethod(JNIEnv* env, jclass targetClass, jstring methodName,
+    jint parameterCount, char parameterType)
+{
+    const char *nativeString = env->GetStringUTFChars(methodName, 0);
+    char *signature = new char[parameterCount + 4];
+    signature[0] = '(';
+    memset(&(signature[1]), parameterType, parameterCount);
+    strcpy(&(signature[parameterCount + 1]), ")V");
+    jmethodID mid = env->GetMethodID(targetClass, nativeString, signature);
+    delete[] signature;
+    env->ReleaseStringUTFChars(methodName, nativeString);
+    return reinterpret_cast<jlong>(mid);
+}
+
+static jlong android_animation_PropertyValuesHolder_getMultipleFloatMethod(
+        JNIEnv* env, jclass pvhClass, jclass targetClass, jstring methodName, jint parameterCount)
+{
+    return getMultiparameterMethod(env, targetClass, methodName, parameterCount, 'F');
+}
+
+static jlong android_animation_PropertyValuesHolder_getMultipleIntMethod(
+        JNIEnv* env, jclass pvhClass, jclass targetClass, jstring methodName, jint parameterCount)
+{
+    return getMultiparameterMethod(env, targetClass, methodName, parameterCount, 'I');
+}
+
 static void android_animation_PropertyValuesHolder_callIntMethod(
         JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, jint arg)
 {
@@ -59,15 +85,85 @@ static void android_animation_PropertyValuesHolder_callFloatMethod(
     env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg);
 }
 
+static void android_animation_PropertyValuesHolder_callTwoFloatMethod(
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, float arg1, float arg2)
+{
+    env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg1, arg2);
+}
+
+static void android_animation_PropertyValuesHolder_callFourFloatMethod(
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, float arg1, float arg2,
+        float arg3, float arg4)
+{
+    env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg1, arg2, arg3, arg4);
+}
+
+static void android_animation_PropertyValuesHolder_callMultipleFloatMethod(
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, jfloatArray arg)
+{
+    jsize parameterCount = env->GetArrayLength(arg);
+    jfloat *floatValues = env->GetFloatArrayElements(arg, NULL);
+    jvalue* values = new jvalue[parameterCount];
+    for (int i = 0; i < parameterCount; i++) {
+        values[i].f = floatValues[i];
+    }
+    env->CallVoidMethodA(target, reinterpret_cast<jmethodID>(methodID), values);
+    delete[] values;
+    env->ReleaseFloatArrayElements(arg, floatValues, JNI_ABORT);
+}
+
+static void android_animation_PropertyValuesHolder_callTwoIntMethod(
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, int arg1, int arg2)
+{
+    env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg1, arg2);
+}
+
+static void android_animation_PropertyValuesHolder_callFourIntMethod(
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, int arg1, int arg2,
+        int arg3, int arg4)
+{
+    env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg1, arg2, arg3, arg4);
+}
+
+static void android_animation_PropertyValuesHolder_callMultipleIntMethod(
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, jintArray arg)
+{
+    jsize parameterCount = env->GetArrayLength(arg);
+    jint *intValues = env->GetIntArrayElements(arg, NULL);
+    jvalue* values = new jvalue[parameterCount];
+    for (int i = 0; i < parameterCount; i++) {
+        values[i].i = intValues[i];
+    }
+    env->CallVoidMethodA(target, reinterpret_cast<jmethodID>(methodID), values);
+    delete[] values;
+    env->ReleaseIntArrayElements(arg, intValues, JNI_ABORT);
+}
+
 static JNINativeMethod gMethods[] = {
     {   "nGetIntMethod", "(Ljava/lang/Class;Ljava/lang/String;)J",
             (void*)android_animation_PropertyValuesHolder_getIntMethod },
     {   "nGetFloatMethod", "(Ljava/lang/Class;Ljava/lang/String;)J",
             (void*)android_animation_PropertyValuesHolder_getFloatMethod },
+    {   "nGetMultipleFloatMethod", "(Ljava/lang/Class;Ljava/lang/String;I)J",
+            (void*)android_animation_PropertyValuesHolder_getMultipleFloatMethod },
+    {   "nGetMultipleIntMethod", "(Ljava/lang/Class;Ljava/lang/String;I)J",
+            (void*)android_animation_PropertyValuesHolder_getMultipleIntMethod },
     {   "nCallIntMethod", "(Ljava/lang/Object;JI)V",
             (void*)android_animation_PropertyValuesHolder_callIntMethod },
     {   "nCallFloatMethod", "(Ljava/lang/Object;JF)V",
-            (void*)android_animation_PropertyValuesHolder_callFloatMethod }
+            (void*)android_animation_PropertyValuesHolder_callFloatMethod },
+    {   "nCallTwoFloatMethod", "(Ljava/lang/Object;JFF)V",
+            (void*)android_animation_PropertyValuesHolder_callTwoFloatMethod },
+    {   "nCallFourFloatMethod", "(Ljava/lang/Object;JFFFF)V",
+            (void*)android_animation_PropertyValuesHolder_callFourFloatMethod },
+    {   "nCallMultipleFloatMethod", "(Ljava/lang/Object;J[F)V",
+            (void*)android_animation_PropertyValuesHolder_callMultipleFloatMethod },
+    {   "nCallTwoIntMethod", "(Ljava/lang/Object;JII)V",
+            (void*)android_animation_PropertyValuesHolder_callTwoIntMethod },
+    {   "nCallFourIntMethod", "(Ljava/lang/Object;JIIII)V",
+            (void*)android_animation_PropertyValuesHolder_callFourIntMethod },
+    {   "nCallMultipleIntMethod", "(Ljava/lang/Object;J[I)V",
+            (void*)android_animation_PropertyValuesHolder_callMultipleIntMethod },
 };
 
 int register_android_animation_PropertyValuesHolder(JNIEnv* env)

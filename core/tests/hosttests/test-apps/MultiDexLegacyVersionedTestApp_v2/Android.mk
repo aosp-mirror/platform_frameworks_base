@@ -31,6 +31,8 @@ mainDexList:= \
 
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
 
+LOCAL_DEX_PREOPT := false
+
 include $(BUILD_PACKAGE)
 
 $(mainDexList): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses

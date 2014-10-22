@@ -1,0 +1,28 @@
+<!--
+ Copyright (C) 2014 The Android Open Source Project
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at"+
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="64dp"
+        android:width="64dp"
+        android:viewportHeight="24"
+        android:viewportWidth="24" >
+
+    <group>
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M19.429,12.975998c0.042,-0.32 0.07,-0.645 0.07,-0.976s-0.029,-0.655 -0.07,-0.976l2.113,-1.654c0.188,-0.151 0.243,-0.422 0.118,-0.639l-2.0,-3.463c-0.125,-0.217 -0.386,-0.304 -0.612,-0.218l-2.49,1.004c-0.516,-0.396 -1.081,-0.731 -1.69,-0.984l-0.375,-2.648C14.456,2.1829987 14.25,2.0 14.0,2.0l-4.0,0.0C9.75,2.0 9.544,2.1829987 9.506,2.422001L9.131,5.0699997C8.521,5.322998 7.957,5.6570015 7.44,6.054001L4.952,5.0509987C4.726,4.965 4.464,5.052002 4.34,5.269001l-2.0,3.463C2.2150002,8.947998 2.27,9.219002 2.4580002,9.369999l2.112,1.653C4.528,11.344002 4.5,11.668999 4.5,12.0s0.029,0.656 0.071,0.977L2.4580002,14.630001c-0.188,0.151 -0.243,0.422 -0.118,0.639l2.0,3.463c0.125,0.217 0.386,0.304 0.612,0.218l2.489,-1.004c0.516,0.396 1.081,0.731 1.69,0.984l0.375,2.648C9.544,21.817001 9.75,22.0 10.0,22.0l4.0,0.0c0.25,0.0 0.456,-0.183 0.494,-0.422l0.375,-2.648c0.609,-0.253 1.174,-0.588 1.689,-0.984l2.49,1.004c0.226,0.086 0.487,-0.001 0.612,-0.218l2.0,-3.463c0.125,-0.217 0.07,-0.487 -0.118,-0.639L19.429,12.975998zM12.0,16.0c-2.21,0.0 -4.0,-1.791 -4.0,-4.0c0.0,-2.21 1.79,-4.0 4.0,-4.0c2.208,0.0 4.0,1.79 4.0,4.0C16.0,14.209 14.208,16.0 12.0,16.0z" />
+    </group>
+
+</vector>

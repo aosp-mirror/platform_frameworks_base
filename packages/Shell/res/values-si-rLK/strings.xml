@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"ෂෙල්"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"දෝෂ වාර්තාව ලබාගන්නා ලදි"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Swipe left to share your bug report"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට ස්පර්ශ කරන්න"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"පුද්ගලික සහ පෞද්ගලික තොරතුරු ඇතුළත්ව පද්ධතියේ විවිධ ලොග් ගොනු වල දත්ත දෝෂ වාර්තාවේ අඩංගු වේ. ඔබට විශ්වාසවන්ත යෙදුම් සහ පුද්ගලයින් සමඟ පමණක් දෝෂ වාර්තා බෙදා ගන්න."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ඊළඟ වෙලාවේ මෙම පණිවිඩය පෙන්වන්න"</string>
+</resources>

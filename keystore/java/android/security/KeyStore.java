@@ -331,6 +331,36 @@ public class KeyStore {
         }
     }
 
+    public boolean resetUid(int uid) {
+        try {
+            mError = mBinder.reset_uid(uid);
+            return mError == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    public boolean syncUid(int sourceUid, int targetUid) {
+        try {
+            mError = mBinder.sync_uid(sourceUid, targetUid);
+            return mError == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    public boolean passwordUid(String password, int uid) {
+        try {
+            mError = mBinder.password_uid(password, uid);
+            return mError == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
     public int getLastError() {
         return mError;
     }

@@ -82,11 +82,15 @@ public class RatingBar extends AbsSeekBar {
     
     private OnRatingBarChangeListener mOnRatingBarChangeListener;
     
-    public RatingBar(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RatingBar,
-                defStyle, 0);
+    public RatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public RatingBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.RatingBar, defStyleAttr, defStyleRes);
         final int numStars = a.getInt(R.styleable.RatingBar_numStars, mNumStars);
         setIsIndicator(a.getBoolean(R.styleable.RatingBar_isIndicator, !mIsUserSeekable));
         final float rating = a.getFloat(R.styleable.RatingBar_rating, -1);
@@ -308,6 +312,10 @@ public class RatingBar extends AbsSeekBar {
     void onKeyChange() {
         super.onKeyChange();
         dispatchRatingChange(true);
+    }
+
+    @Override
+    void animateSetProgress(int progress) {
     }
 
     void dispatchRatingChange(boolean fromUser) {

@@ -22,6 +22,8 @@ import android.os.Parcelable;
 import android.util.Log;
 
 public class ChooserActivity extends ResolverActivity {
+    private Bundle mReplacementExtras;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
@@ -33,9 +35,14 @@ public class ChooserActivity extends ResolverActivity {
             return;
         }
         Intent target = (Intent)targetParcelable;
+        if (target != null) {
+            modifyTargetIntent(target);
+        }
+        mReplacementExtras = intent.getBundleExtra(Intent.EXTRA_REPLACEMENT_EXTRAS);
         CharSequence title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
+        int defaultTitleRes = 0;
         if (title == null) {
-            title = getResources().getText(com.android.internal.R.string.chooseActivity);
+            defaultTitleRes = com.android.internal.R.string.chooseActivity;
         }
         Parcelable[] pa = intent.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS);
         Intent[] initialIntents = null;
@@ -43,15 +50,39 @@ public class ChooserActivity extends ResolverActivity {
             initialIntents = new Intent[pa.length];
             for (int i=0; i<pa.length; i++) {
                 if (!(pa[i] instanceof Intent)) {
-                    Log.w("ChooserActivity", "Initial intent #" + i
-                            + " not an Intent: " + pa[i]);
+                    Log.w("ChooserActivity", "Initial intent #" + i + " not an Intent: " + pa[i]);
                     finish();
                     super.onCreate(null);
                     return;
                 }
-                initialIntents[i] = (Intent)pa[i];
+                final Intent in = (Intent) pa[i];
+                modifyTargetIntent(in);
+                initialIntents[i] = in;
             }
         }
-        super.onCreate(savedInstanceState, target, title, initialIntents, null, false);
+        setSafeForwardingMode(true);
+        super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
+                null, false);
+    }
+
+    public Intent getReplacementIntent(String packageName, Intent defIntent) {
+        if (mReplacementExtras != null) {
+            final Bundle replExtras = mReplacementExtras.getBundle(packageName);
+            if (replExtras != null) {
+                final Intent result = new Intent(defIntent);
+                result.putExtras(replExtras);
+                return result;
+            }
+        }
+        return defIntent;
+    }
+
+    private void modifyTargetIntent(Intent in) {
+        final String action = in.getAction();
+        if (Intent.ACTION_SEND.equals(action) ||
+                Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        }
     }
 }

@@ -16,17 +16,9 @@
 */
 -->
 <resources>
-    <!-- The width of the notification panel window: 446 + 16 + 16 (padding in the bg drawable) -->
-    <dimen name="notification_panel_width">478dp</dimen>
-
-    <!-- Layout parameters for the notification panel -->
-    <dimen name="notification_panel_margin_bottom">192dp</dimen>
-    <dimen name="notification_panel_margin_left">16dp</dimen>
-
-    <!-- Gravity for the notification & quick settings panels -->
-    <!-- 0x800033 = start|top ; 0x800035 = end|top -->
-    <integer name="notification_panel_layout_gravity">0x800033</integer>
-    <integer name="settings_panel_layout_gravity">0x800035</integer>
+    <!-- Standard notification width + gravity -->
+    <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
+    <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">430dip</dimen>
@@ -37,13 +29,12 @@
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">280dip</dimen>
 
+    <!-- The width of the view containing the menu/ime navigation bar icons -->
+    <dimen name="navigation_extra_key_width">48dip</dimen>
+
     <!-- Size of application thumbnail -->
     <dimen name="status_bar_recents_thumbnail_width">200dp</dimen>
     <dimen name="status_bar_recents_thumbnail_height">177dp</dimen>
-
-    <!-- On tablet-sized devices, we allocate the rightmost third(ish) of the draggable status bar
-         to quick settings. -->
-    <item type="dimen" name="settings_panel_dragzone_fraction">35%</item>
 
     <!-- Minimum fraction of the screen that should be taken up by the notification panel. -->
     <item type="dimen" name="notification_panel_min_height_frac">40%</item>
@@ -51,4 +42,49 @@
     <!-- How far to slide the panel out when you touch it -->
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
+
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.075</item>
+
+    <!-- The height of the search bar space. -->
+    <dimen name="recents_search_bar_space_height">72dp</dimen>
+
+    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
+         max value is used when no notifications are displaying, and the min value is when the
+         highest possible number of notifications are showing. -->
+    <fraction name="keyguard_clock_y_fraction_max">34%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">24%</fraction>
+
+    <!-- The margin between the clock and the notifications on Keyguard. See
+         keyguard_clock_height_fraction_* for the difference between min and max.-->
+    <dimen name="keyguard_clock_notifications_margin_min">44dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">44dp</dimen>
+
+    <!-- Height of the status bar header bar when on Keyguard -->
+    <dimen name="status_bar_header_height_keyguard">60dp</dimen>
+
+    <!-- The width of user avatar when on Keyguard -->
+    <dimen name="multi_user_switch_width_keyguard">48dp</dimen>
+
+    <!-- The width of user avatar when on Keyguard -->
+    <dimen name="multi_user_avatar_keyguard_size">30dp</dimen>
+
+    <!-- end margin for multi user switch in collapsed quick settings -->
+    <dimen name="multi_user_switch_keyguard_margin">6dp</dimen>
+
+    <!-- Margin on the left side of the carrier text on Keyguard -->
+    <dimen name="keyguard_carrier_text_margin">24dp</dimen>
+
+    <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
+    <dimen name="keyguard_affordance_height">80dp</dimen>
+    <dimen name="keyguard_affordance_width">120dp</dimen>
+
+    <!-- The width of the region on the left/right edge of the screen for performing the camera/
+     phone hints. -->
+    <dimen name="edge_tap_area_width">80dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">90dp</dimen>
+
+    <!-- Margin on the right side of the system icon group on Keyguard. -->
+    <dimen name="system_icons_keyguard_padding_end">2dp</dimen>
 </resources>

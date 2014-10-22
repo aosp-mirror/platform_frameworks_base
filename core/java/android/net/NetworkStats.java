@@ -24,6 +24,8 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import libcore.util.EmptyArray;
+
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -44,6 +46,8 @@ public class NetworkStats implements Parcelable {
     public static final String IFACE_ALL = null;
     /** {@link #uid} value when UID details unavailable. */
     public static final int UID_ALL = -1;
+    /** {@link #tag} value matching any tag. */
+    public static final int TAG_ALL = -1;
     /** {@link #set} value when all sets combined. */
     public static final int SET_ALL = -1;
     /** {@link #set} value where background data is accounted. */
@@ -59,8 +63,9 @@ public class NetworkStats implements Parcelable {
      * {@link SystemClock#elapsedRealtime()} timestamp when this data was
      * generated.
      */
-    private final long elapsedRealtime;
+    private long elapsedRealtime;
     private int size;
+    private int capacity;
     private String[] iface;
     private int[] uid;
     private int[] set;
@@ -152,20 +157,36 @@ public class NetworkStats implements Parcelable {
     public NetworkStats(long elapsedRealtime, int initialSize) {
         this.elapsedRealtime = elapsedRealtime;
         this.size = 0;
-        this.iface = new String[initialSize];
-        this.uid = new int[initialSize];
-        this.set = new int[initialSize];
-        this.tag = new int[initialSize];
-        this.rxBytes = new long[initialSize];
-        this.rxPackets = new long[initialSize];
-        this.txBytes = new long[initialSize];
-        this.txPackets = new long[initialSize];
-        this.operations = new long[initialSize];
+        if (initialSize >= 0) {
+            this.capacity = initialSize;
+            this.iface = new String[initialSize];
+            this.uid = new int[initialSize];
+            this.set = new int[initialSize];
+            this.tag = new int[initialSize];
+            this.rxBytes = new long[initialSize];
+            this.rxPackets = new long[initialSize];
+            this.txBytes = new long[initialSize];
+            this.txPackets = new long[initialSize];
+            this.operations = new long[initialSize];
+        } else {
+            // Special case for use by NetworkStatsFactory to start out *really* empty.
+            this.capacity = 0;
+            this.iface = EmptyArray.STRING;
+            this.uid = EmptyArray.INT;
+            this.set = EmptyArray.INT;
+            this.tag = EmptyArray.INT;
+            this.rxBytes = EmptyArray.LONG;
+            this.rxPackets = EmptyArray.LONG;
+            this.txBytes = EmptyArray.LONG;
+            this.txPackets = EmptyArray.LONG;
+            this.operations = EmptyArray.LONG;
+        }
     }
 
     public NetworkStats(Parcel parcel) {
         elapsedRealtime = parcel.readLong();
         size = parcel.readInt();
+        capacity = parcel.readInt();
         iface = parcel.createStringArray();
         uid = parcel.createIntArray();
         set = parcel.createIntArray();
@@ -181,6 +202,7 @@ public class NetworkStats implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(elapsedRealtime);
         dest.writeInt(size);
+        dest.writeInt(capacity);
         dest.writeStringArray(iface);
         dest.writeIntArray(uid);
         dest.writeIntArray(set);
@@ -222,8 +244,8 @@ public class NetworkStats implements Parcelable {
      * object can be recycled across multiple calls.
      */
     public NetworkStats addValues(Entry entry) {
-        if (size >= this.iface.length) {
-            final int newLength = Math.max(iface.length, 10) * 3 / 2;
+        if (size >= capacity) {
+            final int newLength = Math.max(size, 10) * 3 / 2;
             iface = Arrays.copyOf(iface, newLength);
             uid = Arrays.copyOf(uid, newLength);
             set = Arrays.copyOf(set, newLength);
@@ -233,6 +255,7 @@ public class NetworkStats implements Parcelable {
             txBytes = Arrays.copyOf(txBytes, newLength);
             txPackets = Arrays.copyOf(txPackets, newLength);
             operations = Arrays.copyOf(operations, newLength);
+            capacity = newLength;
         }
 
         iface[size] = entry.iface;
@@ -270,6 +293,10 @@ public class NetworkStats implements Parcelable {
         return elapsedRealtime;
     }
 
+    public void setElapsedRealtime(long time) {
+        elapsedRealtime = time;
+    }
+
     /**
      * Return age of this {@link NetworkStats} object with respect to
      * {@link SystemClock#elapsedRealtime()}.
@@ -284,7 +311,7 @@ public class NetworkStats implements Parcelable {
 
     @VisibleForTesting
     public int internalSize() {
-        return iface.length;
+        return capacity;
     }
 
     @Deprecated
@@ -491,6 +518,17 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Fast path for battery stats.
+     */
+    public long getTotalPackets() {
+        long total = 0;
+        for (int i = size-1; i >= 0; i--) {
+            total += rxPackets[i] + txPackets[i];
+        }
+        return total;
+    }
+
+    /**
      * Subtract the given {@link NetworkStats}, effectively leaving the delta
      * between two snapshots in time. Assumes that statistics rows collect over
      * time, and that none of them have disappeared.
@@ -507,8 +545,25 @@ public class NetworkStats implements Parcelable {
      * If counters have rolled backwards, they are clamped to {@code 0} and
      * reported to the given {@link NonMonotonicObserver}.
      */
-    public static <C> NetworkStats subtract(
-            NetworkStats left, NetworkStats right, NonMonotonicObserver<C> observer, C cookie) {
+    public static <C> NetworkStats subtract(NetworkStats left, NetworkStats right,
+            NonMonotonicObserver<C> observer, C cookie) {
+        return subtract(left, right, observer, cookie, null);
+    }
+
+    /**
+     * Subtract the two given {@link NetworkStats} objects, returning the delta
+     * between two snapshots in time. Assumes that statistics rows collect over
+     * time, and that none of them have disappeared.
+     * <p>
+     * If counters have rolled backwards, they are clamped to {@code 0} and
+     * reported to the given {@link NonMonotonicObserver}.
+     * <p>
+     * If <var>recycle</var> is supplied, this NetworkStats object will be
+     * reused (and returned) as the result if it is large enough to contain
+     * the data.
+     */
+    public static <C> NetworkStats subtract(NetworkStats left, NetworkStats right,
+            NonMonotonicObserver<C> observer, C cookie, NetworkStats recycle) {
         long deltaRealtime = left.elapsedRealtime - right.elapsedRealtime;
         if (deltaRealtime < 0) {
             if (observer != null) {
@@ -519,7 +574,14 @@ public class NetworkStats implements Parcelable {
 
         // result will have our rows, and elapsed time between snapshots
         final Entry entry = new Entry();
-        final NetworkStats result = new NetworkStats(deltaRealtime, left.size);
+        final NetworkStats result;
+        if (recycle != null && recycle.capacity >= left.size) {
+            result = recycle;
+            result.size = 0;
+            result.elapsedRealtime = deltaRealtime;
+        } else {
+            result = new NetworkStats(deltaRealtime, left.size);
+        }
         for (int i = 0; i < left.size; i++) {
             entry.iface = left.iface[i];
             entry.uid = left.uid[i];

@@ -23,11 +23,11 @@ import android.text.TextUtils;
 
 public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableSpan {
 
-	private final float mProportion;
+    private final float mProportion;
 
-	public RelativeSizeSpan(float proportion) {
-		mProportion = proportion;
-	}
+    public RelativeSizeSpan(float proportion) {
+        mProportion = proportion;
+    }
 
     public RelativeSizeSpan(Parcel src) {
         mProportion = src.readFloat();
@@ -45,17 +45,17 @@ public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableS
         dest.writeFloat(mProportion);
     }
 
-	public float getSizeChange() {
-		return mProportion;
-	}
+    public float getSizeChange() {
+        return mProportion;
+    }
 
-	@Override
-	public void updateDrawState(TextPaint ds) {
-		ds.setTextSize(ds.getTextSize() * mProportion);
-	}
+    @Override
+    public void updateDrawState(TextPaint ds) {
+        ds.setTextSize(ds.getTextSize() * mProportion);
+    }
 
-	@Override
-	public void updateMeasureState(TextPaint ds) {
-		ds.setTextSize(ds.getTextSize() * mProportion);
-	}
+    @Override
+    public void updateMeasureState(TextPaint ds) {
+        ds.setTextSize(ds.getTextSize() * mProportion);
+    }
 }

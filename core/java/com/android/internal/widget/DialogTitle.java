@@ -28,10 +28,13 @@ import android.widget.TextView;
  * the text to the available space.
  */
 public class DialogTitle extends TextView {
-    
-    public DialogTitle(Context context, AttributeSet attrs,
-            int defStyle) {
-        super(context, attrs, defStyle);
+
+    public DialogTitle(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public DialogTitle(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     public DialogTitle(Context context, AttributeSet attrs) {

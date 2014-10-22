@@ -16,21 +16,25 @@
 
 package android.app;
 
+import android.annotation.SystemApi;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.ArrayMap;
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IAppOpsCallback;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserManager;
+import android.util.ArrayMap;
+
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * API for interacting with "application operation" tracking.
@@ -89,6 +93,13 @@ public class AppOpsManager {
      * cause it to have a fatal error, typically a {@link SecurityException}.
      */
     public static final int MODE_ERRORED = 2;
+
+    /**
+     * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller should
+     * use its default security check.  This mode is not normally used; it should only be used
+     * with appop permissions, and callers must explicitly check for it and deal with it.
+     */
+    public static final int MODE_DEFAULT = 3;
 
     // when adding one of these:
     //  - increment _NUM_OP
@@ -184,8 +195,18 @@ public class AppOpsManager {
     public static final int OP_MONITOR_LOCATION = 41;
     /** @hide Continually monitoring location data with a relatively high power request. */
     public static final int OP_MONITOR_HIGH_POWER_LOCATION = 42;
+    /** @hide Retrieve current usage stats via {@link UsageStatsManager}. */
+    public static final int OP_GET_USAGE_STATS = 43;
     /** @hide */
-    public static final int _NUM_OP = 43;
+    public static final int OP_MUTE_MICROPHONE = 44;
+    /** @hide */
+    public static final int OP_TOAST_WINDOW = 45;
+    /** @hide Capture the device's display contents and/or audio */
+    public static final int OP_PROJECT_MEDIA = 46;
+    /** @hide Activate a VPN connection without user intervention. */
+    public static final int OP_ACTIVATE_VPN = 47;
+    /** @hide */
+    public static final int _NUM_OP = 48;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -199,6 +220,12 @@ public class AppOpsManager {
     /** Continually monitoring location data with a relatively high power request. */
     public static final String OPSTR_MONITOR_HIGH_POWER_LOCATION
             = "android:monitor_location_high_power";
+    /** Access to {@link android.app.usage.UsageStatsManager}. */
+    public static final String OPSTR_GET_USAGE_STATS
+            = "android:get_usage_stats";
+    /** Activate a VPN connection without user intervention. @hide */
+    @SystemApi
+    public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -252,6 +279,11 @@ public class AppOpsManager {
             OP_WAKE_LOCK,
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
+            OP_GET_USAGE_STATS,
+            OP_MUTE_MICROPHONE,
+            OP_TOAST_WINDOW,
+            OP_PROJECT_MEDIA,
+            OP_ACTIVATE_VPN,
     };
 
     /**
@@ -302,6 +334,11 @@ public class AppOpsManager {
             null,
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
+            OPSTR_GET_USAGE_STATS,
+            null,
+            null,
+            null,
+            OPSTR_ACTIVATE_VPN,
     };
 
     /**
@@ -352,6 +389,11 @@ public class AppOpsManager {
             "WAKE_LOCK",
             "MONITOR_LOCATION",
             "MONITOR_HIGH_POWER_LOCATION",
+            "GET_USAGE_STATS",
+            "MUTE_MICROPHONE",
+            "TOAST_WINDOW",
+            "PROJECT_MEDIA",
+            "ACTIVATE_VPN",
     };
 
     /**
@@ -402,6 +444,122 @@ public class AppOpsManager {
             android.Manifest.permission.WAKE_LOCK,
             null, // no permission for generic location monitoring
             null, // no permission for high power location monitoring
+            android.Manifest.permission.PACKAGE_USAGE_STATS,
+            null, // no permission for muting/unmuting microphone
+            null, // no permission for displaying toasts
+            null, // no permission for projecting media
+            null, // no permission for activating vpn
+    };
+
+    /**
+     * Specifies whether an Op should be restricted by a user restriction.
+     * Each Op should be filled with a restriction string from UserManager or
+     * null to specify it is not affected by any user restriction.
+     */
+    private static String[] sOpRestrictions = new String[] {
+            UserManager.DISALLOW_SHARE_LOCATION, //COARSE_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //FINE_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //GPS
+            null, //VIBRATE
+            null, //READ_CONTACTS
+            null, //WRITE_CONTACTS
+            UserManager.DISALLOW_OUTGOING_CALLS, //READ_CALL_LOG
+            UserManager.DISALLOW_OUTGOING_CALLS, //WRITE_CALL_LOG
+            null, //READ_CALENDAR
+            null, //WRITE_CALENDAR
+            UserManager.DISALLOW_SHARE_LOCATION, //WIFI_SCAN
+            null, //POST_NOTIFICATION
+            null, //NEIGHBORING_CELLS
+            null, //CALL_PHONE
+            UserManager.DISALLOW_SMS, //READ_SMS
+            UserManager.DISALLOW_SMS, //WRITE_SMS
+            UserManager.DISALLOW_SMS, //RECEIVE_SMS
+            null, //RECEIVE_EMERGENCY_SMS
+            UserManager.DISALLOW_SMS, //RECEIVE_MMS
+            null, //RECEIVE_WAP_PUSH
+            UserManager.DISALLOW_SMS, //SEND_SMS
+            UserManager.DISALLOW_SMS, //READ_ICC_SMS
+            UserManager.DISALLOW_SMS, //WRITE_ICC_SMS
+            null, //WRITE_SETTINGS
+            UserManager.DISALLOW_CREATE_WINDOWS, //SYSTEM_ALERT_WINDOW
+            null, //ACCESS_NOTIFICATIONS
+            null, //CAMERA
+            null, //RECORD_AUDIO
+            null, //PLAY_AUDIO
+            null, //READ_CLIPBOARD
+            null, //WRITE_CLIPBOARD
+            null, //TAKE_MEDIA_BUTTONS
+            null, //TAKE_AUDIO_FOCUS
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_MASTER_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_VOICE_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_RING_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_MEDIA_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ALARM_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_NOTIFICATION_VOLUME
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_BLUETOOTH_VOLUME
+            null, //WAKE_LOCK
+            UserManager.DISALLOW_SHARE_LOCATION, //MONITOR_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //MONITOR_HIGH_POWER_LOCATION
+            null, //GET_USAGE_STATS
+            UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
+            UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
+            null, //PROJECT_MEDIA
+            UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
+    };
+
+    /**
+     * This specifies whether each option should allow the system
+     * (and system ui) to bypass the user restriction when active.
+     */
+    private static boolean[] sOpAllowSystemRestrictionBypass = new boolean[] {
+            false, //COARSE_LOCATION
+            false, //FINE_LOCATION
+            false, //GPS
+            false, //VIBRATE
+            false, //READ_CONTACTS
+            false, //WRITE_CONTACTS
+            false, //READ_CALL_LOG
+            false, //WRITE_CALL_LOG
+            false, //READ_CALENDAR
+            false, //WRITE_CALENDAR
+            true, //WIFI_SCAN
+            false, //POST_NOTIFICATION
+            false, //NEIGHBORING_CELLS
+            false, //CALL_PHONE
+            false, //READ_SMS
+            false, //WRITE_SMS
+            false, //RECEIVE_SMS
+            false, //RECEIVE_EMERGECY_SMS
+            false, //RECEIVE_MMS
+            false, //RECEIVE_WAP_PUSH
+            false, //SEND_SMS
+            false, //READ_ICC_SMS
+            false, //WRITE_ICC_SMS
+            false, //WRITE_SETTINGS
+            true, //SYSTEM_ALERT_WINDOW
+            false, //ACCESS_NOTIFICATIONS
+            false, //CAMERA
+            false, //RECORD_AUDIO
+            false, //PLAY_AUDIO
+            false, //READ_CLIPBOARD
+            false, //WRITE_CLIPBOARD
+            false, //TAKE_MEDIA_BUTTONS
+            false, //TAKE_AUDIO_FOCUS
+            false, //AUDIO_MASTER_VOLUME
+            false, //AUDIO_VOICE_VOLUME
+            false, //AUDIO_RING_VOLUME
+            false, //AUDIO_MEDIA_VOLUME
+            false, //AUDIO_ALARM_VOLUME
+            false, //AUDIO_NOTIFICATION_VOLUME
+            false, //AUDIO_BLUETOOTH_VOLUME
+            false, //WAKE_LOCK
+            false, //MONITOR_LOCATION
+            false, //MONITOR_HIGH_POWER_LOCATION
+            false, //GET_USAGE_STATS
+            false, //MUTE_MICROPHONE
+            true, //TOAST_WINDOW
+            false, //PROJECT_MEDIA
+            false, //ACTIVATE_VPN
     };
 
     /**
@@ -451,6 +609,11 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_DEFAULT, // OP_GET_USAGE_STATS
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
+            AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
     };
 
     /**
@@ -477,6 +640,11 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
+            false,
+            false,
+            false,
+            false,
             false,
             false,
             false,
@@ -533,6 +701,14 @@ public class AppOpsManager {
             throw new IllegalStateException("sOpDisableReset length " + sOpDisableReset.length
                     + " should be " + _NUM_OP);
         }
+        if (sOpRestrictions.length != _NUM_OP) {
+            throw new IllegalStateException("sOpRestrictions length " + sOpRestrictions.length
+                    + " should be " + _NUM_OP);
+        }
+        if (sOpAllowSystemRestrictionBypass.length != _NUM_OP) {
+            throw new IllegalStateException("sOpAllowSYstemRestrictionsBypass length "
+                    + sOpRestrictions.length + " should be " + _NUM_OP);
+        }
         for (int i=0; i<_NUM_OP; i++) {
             if (sOpToString[i] != null) {
                 sOpStrToOp.put(sOpToString[i], i);
@@ -563,6 +739,23 @@ public class AppOpsManager {
      */
     public static String opToPermission(int op) {
         return sOpPerms[op];
+    }
+
+    /**
+     * Retrieve the user restriction associated with an operation, or null if there is not one.
+     * @hide
+     */
+    public static String opToRestriction(int op) {
+        return sOpRestrictions[op];
+    }
+
+    /**
+     * Retrieve whether the op allows the system (and system ui) to
+     * bypass the user restriction.
+     * @hide
+     */
+    public static boolean opAllowSystemBypassRestriction(int op) {
+        return sOpAllowSystemRestrictionBypass[op];
     }
 
     /**
@@ -780,6 +973,26 @@ public class AppOpsManager {
         }
     }
 
+    /**
+     * Set a non-persisted restriction on an audio operation at a stream-level.
+     * Restrictions are temporary additional constraints imposed on top of the persisted rules
+     * defined by {@link #setMode}.
+     *
+     * @param code The operation to restrict.
+     * @param usage The {@link android.media.AudioAttributes} usage value.
+     * @param mode The restriction mode (MODE_IGNORED,MODE_ERRORED) or MODE_ALLOWED to unrestrict.
+     * @param exceptionPackages Optional list of packages to exclude from the restriction.
+     * @hide
+     */
+    public void setRestriction(int code, @AttributeUsage int usage, int mode,
+            String[] exceptionPackages) {
+        try {
+            final int uid = Binder.getCallingUid();
+            mService.setAudioRestriction(code, usage, uid, mode, exceptionPackages);
+        } catch (RemoteException e) {
+        }
+    }
+
     /** @hide */
     public void resetAllModes() {
         try {
@@ -849,7 +1062,10 @@ public class AppOpsManager {
         return packageName + " from uid " + uid + " not allowed to perform " + sOpNames[op];
     }
 
-    private int strOpToOp(String op) {
+    /**
+     * {@hide}
+     */
+    public static int strOpToOp(String op) {
         Integer val = sOpStrToOp.get(op);
         if (val == null) {
             throw new IllegalArgumentException("Unknown operation string: " + op);
@@ -1006,6 +1222,35 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw new SecurityException("Unable to verify package ownership", e);
         }
+    }
+
+    /**
+     * Like {@link #checkOp} but at a stream-level for audio operations.
+     * @hide
+     */
+    public int checkAudioOp(int op, int stream, int uid, String packageName) {
+        try {
+            final int mode = mService.checkAudioOperation(op, stream, uid, packageName);
+            if (mode == MODE_ERRORED) {
+                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
+            }
+            return mode;
+        } catch (RemoteException e) {
+        }
+        return MODE_IGNORED;
+    }
+
+    /**
+     * Like {@link #checkAudioOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     * @hide
+     */
+    public int checkAudioOpNoThrow(int op, int stream, int uid, String packageName) {
+        try {
+            return mService.checkAudioOperation(op, stream, uid, packageName);
+        } catch (RemoteException e) {
+        }
+        return MODE_IGNORED;
     }
 
     /**

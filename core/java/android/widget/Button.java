@@ -103,8 +103,12 @@ public class Button extends TextView {
         this(context, attrs, com.android.internal.R.attr.buttonStyle);
     }
 
-    public Button(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public Button(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public Button(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override

@@ -1,0 +1,256 @@
+page.title=Overview Screen
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#adding">Adding Tasks to the Overview Screen</a>
+      <ol>
+        <li><a href="#flag-new-doc">Using the Intent flag to add a task</a></li>
+        <li><a href="#attr-doclaunch">Using the Activity attribute to add a task</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">Removing Tasks</a>
+      <ol>
+        <li><a href="#apptask-remove">Using the AppTask class to remove tasks</a></li>
+        <li><a href="#retain-finished">Retaining finished tasks</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>Sample code</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">Document-centric Apps</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>The overview screen (also referred to as the recents screen, recent task list, or recent apps)
+is a system-level UI that lists recently accessed <a href="{@docRoot}guide/components/activities.html">
+activities</a> and <a href="{@docRoot}guide/components/tasks-and-back-stack.html">tasks</a>. The
+user can navigate through the list and select a task to resume, or the user can remove a task from
+the list by swiping it away. With the Android 5.0 release (API level 21), multiple instances of the
+same activity containing different documents may appear as tasks in the overview screen. For example,
+Google Drive may have a task for each of several Google documents. Each document appears as a
+task in the overview screen.</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>Figure 1.</strong> The overview screen showing three Google Drive
+documents, each represented as a separate task.</p>
+
+<p>Normally you should allow the system to define how your tasks and
+activities are represented in the overview screen, and you don't need to modify this behavior.
+However, your app can determine how and and when activities appear in the overview screen. The
+{@link android.app.ActivityManager.AppTask} class lets you manage tasks, and the activity flags of
+the {@link android.content.Intent} class let you specify when an activity is added or removed from
+the overview screen. Also, the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> attributes let you set the behavior in the manifest.</p>
+
+<h2 id="adding">Adding Tasks to the Overview Screen</h2>
+
+<p>Using the flags of the {@link android.content.Intent} class to add a task affords greater control
+over when and how a document gets opened or reopened in the overview screen. When you use the
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+attributes you can choose between always opening the document in a new task or reusing an
+existing task for the document.</p>
+
+<h3 id="flag-new-doc">Using the Intent flag to add a task</h3>
+
+<p>When you create a new document for your activity, you call the
+{@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
+method of the {@link android.app.ActivityManager.AppTask} class, passing to it the intent that
+launches the activity. To insert a logical break so that the system treats your activity as a new
+task in the overview screen, pass the {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} flag
+in the {@link android.content.Intent#addFlags(int) addFlags()} method of the {@link android.content.Intent}
+that launches the activity.</p>
+
+<p class="note"><strong>Note:</strong> The {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+flag replaces the {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET} flag,
+which is deprecated as of Android 5.0 (API level 21).</p>
+
+<p>If you set the {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flag when you create
+the new document, the system always creates a new task with the target activity as the root.
+This setting allows the same document to be opened in more than one task. The following code demonstrates
+how the main activity does this:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Activities launched with the {@code FLAG_ACTIVITY_NEW_DOCUMENT}
+flag must have the {@code android:launchMode="standard"} attribute value (the default) set in the
+manifest.</p>
+
+<p>When the main activity launches a new activity, the system searches through existing tasks for
+one whose intent matches the intent component name and the Intent data for the activity. If the task
+is not found, or the intent contained the {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+flag, a new task will be created with the activity as its root. If it finds one, it brings that task
+to the front and passes the new intent to {@link android.app.Activity#onNewIntent onNewIntent()}.
+The new activity gets the intent and creates a new document in the overview screen, as in the
+following example:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">Using the activity attribute to add a task</h3>
+
+<p>An activity can also specify in its manifest that it always launches into a new task by using
+the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+attribute, <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">
+{@code android:documentLaunchMode}</a>. This attribute has four values which produce the following
+effects when the user opens a document with the application:</p>
+
+<dl>
+  <dt>"{@code intoExisting}"</dt>
+  <dd>The activity reuses an existing task for the document. This is the same as setting the
+  {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} flag <em>without</em> setting the
+  {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flag, as described in
+  <a href="#flag-new-doc">Using the Intent flag to add a task</a>, above.</dd>
+
+  <dt>"{@code always}"</dt>
+  <dd>The activity creates a new task for the document, even if the document is already opened. Using
+  this value is the same as setting both the {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+  and {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flags.</dd>
+
+  <dt>"{@code none”}"</dt>
+  <dd>The activity does not create a new task for the document. The overview screen treats the
+  activity as it would by default: it displays a single task for the app, which
+  resumes from whatever activity the user last invoked.</dd>
+
+  <dt>"{@code never}"</dt>
+  <dd>The activity does not create a new task for the document. Setting this value overrides the
+  behavior of the {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+  and {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flags, if either of these are set
+  in the intent, and the overview screen displays a single task for the app, which resumes from
+  whatever activity the user last invoked.</dd>
+</dl>
+
+<p class="note"><strong>Note:</strong> For values other than {@code none} and {@code never} the
+activity must be defined with {@code launchMode="standard"}. If this attribute is not specified,
+{@code documentLaunchMode="none"} is used.</p>
+
+<h2 id="removing">Removing Tasks</h2>
+
+<p>By default a document task is automatically removed from the overview screen when its activity
+finishes. You can override this behavior with the {@link android.app.ActivityManager.AppTask} class,
+with an {@link android.content.Intent} flag, or with an<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> attribute.</p>
+
+<p>You can always exclude a task from the overview screen entirely by setting the
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+attribute, <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> to {@code true}.</p>
+
+<p>You can set the maximum number of tasks that your app can include in the overview screen by setting
+the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+attribute <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}
+</a> to an integer value. The default is 16. When the maximum number of tasks is reached, the least
+recently used task is removed from the overview screen. The {@code android:maxRecents} maximum value
+is 50 (25 on low memory devices); values less than 1 are not valid.</p>
+
+<h3 id="#apptask-remove">Using the AppTask class to remove tasks</h3>
+
+<p>In the activity that creates a new task in the overview screen, you can
+specify when to remove the task and finish all activities associated with it by calling
+the {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} method.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Using the
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} method
+overrides the use of the {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} tag,
+discussed below.</p>
+
+<h3 id="#retain-finished">Retaining finished tasks</h3>
+
+<p>If you want to retain a task in the overview screen, even if its activity has finished, pass
+the {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} flag in the
+{@link android.content.Intent#addFlags(int) addFlags()} method of the Intent that launches the activity.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>To achieve the same effect, set the
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+attribute <a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> to {@code false}. The default value is {@code true}
+for document activities, and {@code false} for regular activities. Using this attribute overrides
+the {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} flag, discussed previously.</p>
+
+
+
+
+
+
+

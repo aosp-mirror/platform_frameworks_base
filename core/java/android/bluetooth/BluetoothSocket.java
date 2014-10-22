@@ -16,21 +16,16 @@
 
 package android.bluetooth;
 
-import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import android.net.LocalSocket;
@@ -86,8 +81,8 @@ import java.nio.ByteBuffer;
  */
 public final class BluetoothSocket implements Closeable {
     private static final String TAG = "BluetoothSocket";
-    private static final boolean DBG = true;
-    private static final boolean VDBG = false;
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
     /** @hide */
     public static final int MAX_RFCOMM_CHANNEL = 30;
@@ -190,7 +185,7 @@ public final class BluetoothSocket implements Closeable {
         BluetoothSocket as = new BluetoothSocket(this);
         as.mSocketState = SocketState.CONNECTED;
         FileDescriptor[] fds = mSocket.getAncillaryFileDescriptors();
-        if (VDBG) Log.d(TAG, "socket fd passed by stack  fds: " + fds);
+        if (DBG) Log.d(TAG, "socket fd passed by stack  fds: " + fds);
         if(fds == null || fds.length != 1) {
             Log.e(TAG, "socket fd passed from stack failed, fds: " + fds);
             as.close();
@@ -330,6 +325,7 @@ public final class BluetoothSocket implements Closeable {
             }
         } catch (RemoteException e) {
             Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            throw new IOException("unable to send RPC: " + e.getMessage());
         }
     }
 
@@ -356,29 +352,37 @@ public final class BluetoothSocket implements Closeable {
         // read out port number
         try {
             synchronized(this) {
-                if (VDBG) Log.d(TAG, "bindListen(), SocketState: " + mSocketState + ", mPfd: " +
+                if (DBG) Log.d(TAG, "bindListen(), SocketState: " + mSocketState + ", mPfd: " +
                                 mPfd);
                 if(mSocketState != SocketState.INIT) return EBADFD;
                 if(mPfd == null) return -1;
                 FileDescriptor fd = mPfd.getFileDescriptor();
-                if (VDBG) Log.d(TAG, "bindListen(), new LocalSocket ");
+                if (DBG) Log.d(TAG, "bindListen(), new LocalSocket ");
                 mSocket = new LocalSocket(fd);
-                if (VDBG) Log.d(TAG, "bindListen(), new LocalSocket.getInputStream() ");
+                if (DBG) Log.d(TAG, "bindListen(), new LocalSocket.getInputStream() ");
                 mSocketIS = mSocket.getInputStream();
                 mSocketOS = mSocket.getOutputStream();
             }
-            if (VDBG) Log.d(TAG, "bindListen(), readInt mSocketIS: " + mSocketIS);
+            if (DBG) Log.d(TAG, "bindListen(), readInt mSocketIS: " + mSocketIS);
             int channel = readInt(mSocketIS);
             synchronized(this) {
                 if(mSocketState == SocketState.INIT)
                     mSocketState = SocketState.LISTENING;
             }
-            if (VDBG) Log.d(TAG, "channel: " + channel);
+            if (DBG) Log.d(TAG, "channel: " + channel);
             if (mPort == -1) {
                 mPort = channel;
             } // else ASSERT(mPort == channel)
             ret = 0;
         } catch (IOException e) {
+            if (mPfd != null) {
+                try {
+                    mPfd.close();
+                } catch (IOException e1) {
+                    Log.e(TAG, "bindListen, close mPfd: " + e1);
+                }
+                mPfd = null;
+            }
             Log.e(TAG, "bindListen, fail to get port number, exception: " + e);
             return -1;
         }
@@ -417,32 +421,33 @@ public final class BluetoothSocket implements Closeable {
      *             if an i/o error occurs.
      */
     /*package*/ void flush() throws IOException {
+        if (mSocketOS == null) throw new IOException("flush is called on null OutputStream");
         if (VDBG) Log.d(TAG, "flush: " + mSocketOS);
         mSocketOS.flush();
     }
 
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {
-
-            if (VDBG) Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
-            int ret = mSocketIS.read(b, offset, length);
-            if(ret < 0)
-                throw new IOException("bt socket closed, read return: " + ret);
-            if (VDBG) Log.d(TAG, "read out:  " + mSocketIS + " ret: " + ret);
-            return ret;
+        if (mSocketIS == null) throw new IOException("read is called on null InputStream");
+        if (VDBG) Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
+        int ret = mSocketIS.read(b, offset, length);
+        if(ret < 0)
+            throw new IOException("bt socket closed, read return: " + ret);
+        if (VDBG) Log.d(TAG, "read out:  " + mSocketIS + " ret: " + ret);
+        return ret;
     }
 
     /*package*/ int write(byte[] b, int offset, int length) throws IOException {
-
-            if (VDBG) Log.d(TAG, "write: " + mSocketOS + " length: " + length);
-            mSocketOS.write(b, offset, length);
-            // There is no good way to confirm since the entire process is asynchronous anyway
-            if (VDBG) Log.d(TAG, "write out: " + mSocketOS + " length: " + length);
-            return length;
+        if (mSocketOS == null) throw new IOException("write is called on null OutputStream");
+        if (VDBG) Log.d(TAG, "write: " + mSocketOS + " length: " + length);
+        mSocketOS.write(b, offset, length);
+        // There is no good way to confirm since the entire process is asynchronous anyway
+        if (VDBG) Log.d(TAG, "write out: " + mSocketOS + " length: " + length);
+        return length;
     }
 
     @Override
     public void close() throws IOException {
-        if (VDBG) Log.d(TAG, "close() in, this: " + this + ", channel: " + mPort + ", state: " + mSocketState);
+        if (DBG) Log.d(TAG, "close() in, this: " + this + ", channel: " + mPort + ", state: " + mSocketState);
         if(mSocketState == SocketState.CLOSED)
             return;
         else
@@ -452,17 +457,19 @@ public final class BluetoothSocket implements Closeable {
                  if(mSocketState == SocketState.CLOSED)
                     return;
                  mSocketState = SocketState.CLOSED;
-                 if (VDBG) Log.d(TAG, "close() this: " + this + ", channel: " + mPort + ", mSocketIS: " + mSocketIS +
+                 if (DBG) Log.d(TAG, "close() this: " + this + ", channel: " + mPort + ", mSocketIS: " + mSocketIS +
                         ", mSocketOS: " + mSocketOS + "mSocket: " + mSocket);
                  if(mSocket != null) {
-                    if (VDBG) Log.d(TAG, "Closing mSocket: " + mSocket);
+                    if (DBG) Log.d(TAG, "Closing mSocket: " + mSocket);
                     mSocket.shutdownInput();
                     mSocket.shutdownOutput();
                     mSocket.close();
                     mSocket = null;
                 }
-                if(mPfd != null)
-                    mPfd.detachFd();
+                if (mPfd != null) {
+                    mPfd.close();
+                    mPfd = null;
+                }
            }
         }
     }

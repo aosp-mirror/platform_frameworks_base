@@ -22,7 +22,7 @@
     android:layout_height="wrap_content"
     android:background="#FFFF00FF"
     >
-    <include layout="@layout/notification_template_base"
+    <include layout="@layout/notification_template_material_base"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />

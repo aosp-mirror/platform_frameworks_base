@@ -23,11 +23,12 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 
 public class KeyguardSecurityModel {
+
     /**
      * The different types of security available for {@link Mode#UnlockScreen}.
      * @see com.android.internal.policy.impl.LockPatternKeyguardView#getUnlockMode()
      */
-    enum SecurityMode {
+    public enum SecurityMode {
         Invalid, // NULL state
         None, // No security enabled
         Pattern, // Unlock by drawing a pattern.
@@ -86,6 +87,7 @@ public class KeyguardSecurityModel {
             final int security = mLockPatternUtils.getKeyguardStoredPasswordQuality();
             switch (security) {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
                     mode = mLockPatternUtils.isLockPasswordEnabled() ?
                             SecurityMode.PIN : SecurityMode.None;
                     break;
@@ -105,7 +107,7 @@ public class KeyguardSecurityModel {
                     break;
 
                 default:
-                    throw new IllegalStateException("Unknown unlock mode:" + mode);
+                    throw new IllegalStateException("Unknown security quality:" + security);
             }
         }
         return mode;

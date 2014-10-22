@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="attr1" format="integer" />
+
+    <style name="Theme">
+        <item name="com.android.test.basic:attr1">700</item>
+    </style>
+</resources>

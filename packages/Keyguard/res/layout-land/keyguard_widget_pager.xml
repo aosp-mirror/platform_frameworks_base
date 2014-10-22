@@ -19,7 +19,7 @@
 
 <!-- This is the selector widget that allows the user to select an action. -->
 <com.android.keyguard.KeyguardWidgetCarousel
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:paddingLeft="25dp"
     android:paddingRight="25dp"

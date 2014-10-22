@@ -1,0 +1,108 @@
+page.title=Convenient, Frictionless Purchasing
+page.image=/distribute/images/payment-method.jpg
+page.metaDescription=Users can purchase instantly with a choice of payment methods.
+page.tags="google play", "payments", "gift card"
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png" style="width:200px;">
+</div>
+
+<p>
+  Google Play makes it fast and easy for your customers to buy your products,
+  whether from a phone, a tablet, or a desktop computer. They can purchase
+  instantly with a streamlined, consistent purchasing process and convenient
+  payment methods.
+</p>
+
+<div class="headerLine">
+  <h2 id="dcb">
+  Direct Carrier Billing
+  </h2>
+
+
+</div>
+
+<p>
+  Users pay by charging their monthly carrier bills . The benefit of Direct
+  Carrier Billing is that it opens up markets where credit cards are less
+  common, as purchases are charged to your customers’ monthly mobile phone
+  bills. This option is available to users in key markets
+  around the world. Many more will get the option in the months ahead.
+</p>
+
+<div class="headerLine">
+  <h2 id="credit">
+  Credit Cards
+  </h2>
+
+</div>
+
+<p>
+  Users can pay using any credit card that they’ve registered in Google Play.
+  Credit Cards added to Google Play are stored in the user’s Google Wallet and
+  available for in-app purchases and instant buys too. To make it easy for
+  users to get started, registration is offered as a part of the initial device
+  setup process.
+</p>
+
+<div class="headerLine">
+  <h2 id="gift-cards">
+  Google Play Gift Cards
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-payments-1.png">
+</div>
+
+<p>
+  Gift cards enable users to add value to their Google Play balance by entering
+  a unique code printed on a card purchased online or from major retailers.
+  More information gift cards can be found <a href=
+  "http://play.google.com/intl/en-US_us/about/giftcards/" target=
+  "_android">here</a>.
+</p>
+
+<p style="clear:both">
+</p>
+<div class="headerLine">
+  <h2 id="balance">
+  Google Play Balance
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-balance.png">
+</div>
+
+<p>
+  Google Play balance, also known as stored value, is a stored account balance
+  in Google Play. Users can increase their balance by redeeming <a href=
+  "https://play.google.com/intl/en-US_us/about/giftcards/">gift cards</a> or by
+  earning rewards through the <a href=
+  "https://play.google.com/store/apps/details?id=com.google.android.apps.paidtasks&amp;hl=en">
+  Google Opinions Rewards app</a>, and they can use their balance to make
+  purchases of apps, games, or other content.
+</p>
+
+<p>
+  The payment methods available to users may vary based on location, carrier
+  network, and other factors.
+</p>
+ 
+<p style="clear:both">
+</p>
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/paymentmethods"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="8"></div>
+

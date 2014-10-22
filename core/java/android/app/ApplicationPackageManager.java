@@ -33,7 +33,11 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
+import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
@@ -41,24 +45,33 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.ManifestDigest;
+import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.UserIcons;
+
+import dalvik.system.VMRuntime;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 /*package*/
@@ -66,6 +79,25 @@ final class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
     private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
+
+    // Default flags to use with PackageManager when no flags are given.
+    private final static int sDefaultFlags = PackageManager.GET_SHARED_LIBRARY_FILES;
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private UserManager mUserManager;
+    @GuardedBy("mLock")
+    private PackageInstaller mInstaller;
+
+    UserManager getUserManager() {
+        synchronized (mLock) {
+            if (mUserManager == null) {
+                mUserManager = UserManager.get(mContext);
+            }
+            return mUserManager;
+        }
+    }
 
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
@@ -118,6 +150,24 @@ final class ApplicationPackageManager extends PackageManager {
             intentToResolve.setPackage(packageName);
             ris = queryIntentActivities(intentToResolve, 0);
         }
+        if (ris == null || ris.size() <= 0) {
+            return null;
+        }
+        Intent intent = new Intent(intentToResolve);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setClassName(ris.get(0).activityInfo.packageName,
+                ris.get(0).activityInfo.name);
+        return intent;
+    }
+
+    @Override
+    public Intent getLeanbackLaunchIntentForPackage(String packageName) {
+        // Try to find a main leanback_launcher activity.
+        Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
+        intentToResolve.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        intentToResolve.setPackage(packageName);
+        List<ResolveInfo> ris = queryIntentActivities(intentToResolve, 0);
+
         if (ris == null || ris.size() <= 0) {
             return null;
         }
@@ -218,6 +268,10 @@ final class ApplicationPackageManager extends PackageManager {
         try {
             ApplicationInfo ai = mPM.getApplicationInfo(packageName, flags, mContext.getUserId());
             if (ai != null) {
+                // This is a temporary hack. Callers must use
+                // createPackageContext(packageName).getApplicationInfo() to
+                // get the right paths.
+                maybeAdjustApplicationInfo(ai);
                 return ai;
             }
         } catch (RemoteException e) {
@@ -226,6 +280,24 @@ final class ApplicationPackageManager extends PackageManager {
 
         throw new NameNotFoundException(packageName);
     }
+
+    private static void maybeAdjustApplicationInfo(ApplicationInfo info) {
+        // If we're dealing with a multi-arch application that has both
+        // 32 and 64 bit shared libraries, we might need to choose the secondary
+        // depending on what the current runtime's instruction set is.
+        if (info.primaryCpuAbi != null && info.secondaryCpuAbi != null) {
+            final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
+            final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+
+            // If the runtimeIsa is the same as the primary isa, then we do nothing.
+            // Everything will be set up correctly because info.nativeLibraryDir will
+            // correspond to the right ISA.
+            if (runtimeIsa.equals(secondaryIsa)) {
+                info.nativeLibraryDir = info.secondaryNativeLibraryDir;
+            }
+        }
+    }
+
 
     @Override
     public ActivityInfo getActivityInfo(ComponentName className, int flags)
@@ -601,10 +673,15 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public ProviderInfo resolveContentProvider(String name,
-                                               int flags) {
+    public ProviderInfo resolveContentProvider(String name, int flags) {
+        return resolveContentProviderAsUser(name, flags, mContext.getUserId());
+    }
+
+    /** @hide **/
+    @Override
+    public ProviderInfo resolveContentProviderAsUser(String name, int flags, int userId) {
         try {
-            return mPM.resolveContentProvider(name, flags, mContext.getUserId());
+            return mPM.resolveContentProvider(name, flags, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -656,7 +733,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
         if (appInfo == null) {
             try {
-                appInfo = getApplicationInfo(packageName, 0);
+                appInfo = getApplicationInfo(packageName, sDefaultFlags);
             } catch (NameNotFoundException e) {
                 return null;
             }
@@ -679,10 +756,10 @@ final class ApplicationPackageManager extends PackageManager {
             putCachedIcon(name, dr);
             return dr;
         } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName);
         } catch (Resources.NotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName + ": " + e.getMessage());
         } catch (RuntimeException e) {
             // If an exception was thrown, fall through to return
@@ -696,7 +773,7 @@ final class ApplicationPackageManager extends PackageManager {
 
     @Override public Drawable getActivityIcon(ComponentName activityName)
             throws NameNotFoundException {
-        return getActivityInfo(activityName, 0).loadIcon(this);
+        return getActivityInfo(activityName, sDefaultFlags).loadIcon(this);
     }
 
     @Override public Drawable getActivityIcon(Intent intent)
@@ -725,13 +802,46 @@ final class ApplicationPackageManager extends PackageManager {
 
     @Override public Drawable getApplicationIcon(String packageName)
             throws NameNotFoundException {
-        return getApplicationIcon(getApplicationInfo(packageName, 0));
+        return getApplicationIcon(getApplicationInfo(packageName, sDefaultFlags));
+    }
+
+    @Override
+    public Drawable getActivityBanner(ComponentName activityName)
+            throws NameNotFoundException {
+        return getActivityInfo(activityName, sDefaultFlags).loadBanner(this);
+    }
+
+    @Override
+    public Drawable getActivityBanner(Intent intent)
+            throws NameNotFoundException {
+        if (intent.getComponent() != null) {
+            return getActivityBanner(intent.getComponent());
+        }
+
+        ResolveInfo info = resolveActivity(
+                intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (info != null) {
+            return info.activityInfo.loadBanner(this);
+        }
+
+        throw new NameNotFoundException(intent.toUri(0));
+    }
+
+    @Override
+    public Drawable getApplicationBanner(ApplicationInfo info) {
+        return info.loadBanner(this);
+    }
+
+    @Override
+    public Drawable getApplicationBanner(String packageName)
+            throws NameNotFoundException {
+        return getApplicationBanner(getApplicationInfo(packageName, sDefaultFlags));
     }
 
     @Override
     public Drawable getActivityLogo(ComponentName activityName)
             throws NameNotFoundException {
-        return getActivityInfo(activityName, 0).loadLogo(this);
+        return getActivityInfo(activityName, sDefaultFlags).loadLogo(this);
     }
 
     @Override
@@ -758,13 +868,56 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public Drawable getApplicationLogo(String packageName)
             throws NameNotFoundException {
-        return getApplicationLogo(getApplicationInfo(packageName, 0));
+        return getApplicationLogo(getApplicationInfo(packageName, sDefaultFlags));
+    }
+
+    @Override
+    public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
+        final int badgeResId = getBadgeResIdForUser(user.getIdentifier());
+        if (badgeResId == 0) {
+            return icon;
+        }
+        Drawable badgeIcon = getDrawable("system", badgeResId, null);
+        return getBadgedDrawable(icon, badgeIcon, null, true);
+    }
+
+    @Override
+    public Drawable getUserBadgedDrawableForDensity(Drawable drawable, UserHandle user,
+            Rect badgeLocation, int badgeDensity) {
+        Drawable badgeDrawable = getUserBadgeForDensity(user, badgeDensity);
+        if (badgeDrawable == null) {
+            return drawable;
+        }
+        return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
+    }
+
+    @Override
+    public Drawable getUserBadgeForDensity(UserHandle user, int density) {
+        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            if (density <= 0) {
+                density = mContext.getResources().getDisplayMetrics().densityDpi;
+            }
+            return Resources.getSystem().getDrawableForDensity(
+                    com.android.internal.R.drawable.ic_corp_badge, density);
+        }
+        return null;
+    }
+
+    @Override
+    public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
+        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return Resources.getSystem().getString(
+                    com.android.internal.R.string.managed_profile_label_badge, label);
+        }
+        return label;
     }
 
     @Override public Resources getResourcesForActivity(
         ComponentName activityName) throws NameNotFoundException {
         return getResourcesForApplication(
-            getActivityInfo(activityName, 0).applicationInfo);
+            getActivityInfo(activityName, sDefaultFlags).applicationInfo);
     }
 
     @Override public Resources getResourcesForApplication(
@@ -772,9 +925,12 @@ final class ApplicationPackageManager extends PackageManager {
         if (app.packageName.equals("system")) {
             return mContext.mMainThread.getSystemContext().getResources();
         }
+        final boolean sameUid = (app.uid == Process.myUid());
         Resources r = mContext.mMainThread.getTopLevelResources(
-                app.uid == Process.myUid() ? app.sourceDir : app.publicSourceDir,
-                app.resourceDirs, Display.DEFAULT_DISPLAY, null, mContext.mPackageInfo);
+                sameUid ? app.sourceDir : app.publicSourceDir,
+                sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
+                app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
+                null, mContext.mPackageInfo);
         if (r != null) {
             return r;
         }
@@ -784,7 +940,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override public Resources getResourcesForApplication(
         String appPackageName) throws NameNotFoundException {
         return getResourcesForApplication(
-            getApplicationInfo(appPackageName, 0));
+            getApplicationInfo(appPackageName, sDefaultFlags));
     }
 
     /** @hide */
@@ -799,7 +955,7 @@ final class ApplicationPackageManager extends PackageManager {
             return mContext.mMainThread.getSystemContext().getResources();
         }
         try {
-            ApplicationInfo ai = mPM.getApplicationInfo(appPackageName, 0, userId);
+            ApplicationInfo ai = mPM.getApplicationInfo(appPackageName, sDefaultFlags, userId);
             if (ai != null) {
                 return getResourcesForApplication(ai);
             }
@@ -984,7 +1140,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
         if (appInfo == null) {
             try {
-                appInfo = getApplicationInfo(packageName, 0);
+                appInfo = getApplicationInfo(packageName, sDefaultFlags);
             } catch (NameNotFoundException e) {
                 return null;
             }
@@ -995,7 +1151,7 @@ final class ApplicationPackageManager extends PackageManager {
             putCachedString(name, text);
             return text;
         } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName);
         } catch (RuntimeException e) {
             // If an exception was thrown, fall through to return
@@ -1012,7 +1168,7 @@ final class ApplicationPackageManager extends PackageManager {
                                     ApplicationInfo appInfo) {
         if (appInfo == null) {
             try {
-                appInfo = getApplicationInfo(packageName, 0);
+                appInfo = getApplicationInfo(packageName, sDefaultFlags);
             } catch (NameNotFoundException e) {
                 return null;
             }
@@ -1041,34 +1197,72 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
                                String installerPackageName) {
-        try {
-            mPM.installPackage(packageURI, observer, flags, installerPackageName);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        final VerificationParams verificationParams = new VerificationParams(null, null,
+                null, VerificationParams.NO_UID, null);
+        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
+                installerPackageName, verificationParams, null);
     }
 
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-        try {
-            mPM.installPackageWithVerification(packageURI, observer, flags, installerPackageName,
-                    verificationURI, manifestDigest, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
+                null, VerificationParams.NO_UID, manifestDigest);
+        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
+                installerPackageName, verificationParams, encryptionParams);
     }
 
     @Override
-	  public void installPackageWithVerificationAndEncryption(Uri packageURI,
+    public void installPackageWithVerificationAndEncryption(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
+                installerPackageName, verificationParams, encryptionParams);
+    }
+
+    @Override
+    public void installPackage(Uri packageURI, PackageInstallObserver observer,
+            int flags, String installerPackageName) {
+        final VerificationParams verificationParams = new VerificationParams(null, null,
+                null, VerificationParams.NO_UID, null);
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams, null);
+    }
+
+    @Override
+    public void installPackageWithVerification(Uri packageURI,
+            PackageInstallObserver observer, int flags, String installerPackageName,
+            Uri verificationURI, ManifestDigest manifestDigest,
+            ContainerEncryptionParams encryptionParams) {
+        final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
+                null, VerificationParams.NO_UID, manifestDigest);
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
+                encryptionParams);
+    }
+
+    @Override
+    public void installPackageWithVerificationAndEncryption(Uri packageURI,
+            PackageInstallObserver observer, int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
+                encryptionParams);
+    }
+
+    private void installCommon(Uri packageURI,
+            PackageInstallObserver observer, int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        if (!"file".equals(packageURI.getScheme())) {
+            throw new UnsupportedOperationException("Only file:// URIs are supported");
+        }
+        if (encryptionParams != null) {
+            throw new UnsupportedOperationException("ContainerEncryptionParams not supported");
+        }
+
+        final String originPath = packageURI.getPath();
         try {
-            mPM.installPackageWithVerificationAndEncryption(packageURI, observer, flags,
-                    installerPackageName, verificationParams, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
+            mPM.installPackage(originPath, observer.getBinder(), flags, installerPackageName,
+                    verificationParams, null);
+        } catch (RemoteException ignored) {
         }
     }
 
@@ -1143,6 +1337,7 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
     }
+
     @Override
     public void clearApplicationUserData(String packageName,
                                          IPackageDataObserver observer) {
@@ -1240,7 +1435,18 @@ final class ApplicationPackageManager extends PackageManager {
     public void replacePreferredActivity(IntentFilter filter,
                                          int match, ComponentName[] set, ComponentName activity) {
         try {
-            mPM.replacePreferredActivity(filter, match, set, activity);
+            mPM.replacePreferredActivity(filter, match, set, activity, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+    public void replacePreferredActivityAsUser(IntentFilter filter,
+                                         int match, ComponentName[] set, ComponentName activity,
+                                         int userId) {
+        try {
+            mPM.replacePreferredActivity(filter, match, set, activity, userId);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1318,10 +1524,10 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+    public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle user) {
         try {
-            return mPM.setApplicationBlockedSettingAsUser(packageName, blocked,
+            return mPM.setApplicationHiddenSettingAsUser(packageName, hidden,
                     user.getIdentifier());
         } catch (RemoteException re) {
             // Should never happen!
@@ -1330,13 +1536,64 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean getApplicationBlockedSettingAsUser(String packageName, UserHandle user) {
+    public boolean getApplicationHiddenSettingAsUser(String packageName, UserHandle user) {
         try {
-            return mPM.getApplicationBlockedSettingAsUser(packageName, user.getIdentifier());
+            return mPM.getApplicationHiddenSettingAsUser(packageName, user.getIdentifier());
         } catch (RemoteException re) {
             // Should never happen!
         }
         return false;
+    }
+
+    /** @hide */
+    @Override
+    public KeySet getKeySetByAlias(String packageName, String alias) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(alias);
+        KeySet ks;
+        try {
+            ks = mPM.getKeySetByAlias(packageName, alias);
+        } catch (RemoteException e) {
+            return null;
+        }
+        return ks;
+    }
+
+    /** @hide */
+    @Override
+    public KeySet getSigningKeySet(String packageName) {
+        Preconditions.checkNotNull(packageName);
+        KeySet ks;
+        try {
+            ks = mPM.getSigningKeySet(packageName);
+        } catch (RemoteException e) {
+            return null;
+        }
+        return ks;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isSignedBy(String packageName, KeySet ks) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(ks);
+        try {
+            return mPM.isPackageSignedByKeySet(packageName, ks);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /** @hide */
+    @Override
+    public boolean isSignedByExactly(String packageName, KeySet ks) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(ks);
+        try {
+            return mPM.isPackageSignedByKeySetExactly(packageName, ks);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**
@@ -1348,6 +1605,150 @@ final class ApplicationPackageManager extends PackageManager {
             return mPM.getVerifierDeviceIdentity();
         } catch (RemoteException e) {
             // Should never happen!
+        }
+        return null;
+    }
+
+    @Override
+    public PackageInstaller getPackageInstaller() {
+        synchronized (mLock) {
+            if (mInstaller == null) {
+                try {
+                    mInstaller = new PackageInstaller(mContext, this, mPM.getPackageInstaller(),
+                            mContext.getPackageName(), mContext.getUserId());
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
+                }
+            }
+            return mInstaller;
+        }
+    }
+
+    @Override
+    public boolean isPackageAvailable(String packageName) {
+        try {
+            return mPM.isPackageAvailable(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId, int targetUserId,
+            int flags) {
+        try {
+            mPM.addCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
+                    mContext.getUserId(), sourceUserId, targetUserId, flags);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void clearCrossProfileIntentFilters(int sourceUserId) {
+        try {
+            mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
+        if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
+            Bitmap bitmap = getUserManager().getUserIcon(itemInfo.showUserIcon);
+            if (bitmap == null) {
+                return UserIcons.getDefaultUserIcon(itemInfo.showUserIcon, /* light= */ false);
+            }
+            return new BitmapDrawable(bitmap);
+        }
+        Drawable dr = null;
+        if (itemInfo.packageName != null) {
+            dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+        }
+        if (dr == null) {
+            dr = itemInfo.loadDefaultIcon(this);
+        }
+        return getUserBadgedIcon(dr, new UserHandle(mContext.getUserId()));
+    }
+
+    private Drawable getBadgedDrawable(Drawable drawable, Drawable badgeDrawable,
+            Rect badgeLocation, boolean tryBadgeInPlace) {
+        final int badgedWidth = drawable.getIntrinsicWidth();
+        final int badgedHeight = drawable.getIntrinsicHeight();
+        final boolean canBadgeInPlace = tryBadgeInPlace
+                && (drawable instanceof BitmapDrawable)
+                && ((BitmapDrawable) drawable).getBitmap().isMutable();
+
+        final Bitmap bitmap;
+        if (canBadgeInPlace) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            bitmap = Bitmap.createBitmap(badgedWidth, badgedHeight, Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(bitmap);
+
+        if (!canBadgeInPlace) {
+            drawable.setBounds(0, 0, badgedWidth, badgedHeight);
+            drawable.draw(canvas);
+        }
+
+        if (badgeLocation != null) {
+            if (badgeLocation.left < 0 || badgeLocation.top < 0
+                    || badgeLocation.width() > badgedWidth || badgeLocation.height() > badgedHeight) {
+                throw new IllegalArgumentException("Badge location " + badgeLocation
+                        + " not in badged drawable bounds "
+                        + new Rect(0, 0, badgedWidth, badgedHeight));
+            }
+            badgeDrawable.setBounds(0, 0, badgeLocation.width(), badgeLocation.height());
+
+            canvas.save();
+            canvas.translate(badgeLocation.left, badgeLocation.top);
+            badgeDrawable.draw(canvas);
+            canvas.restore();
+        } else {
+            badgeDrawable.setBounds(0, 0, badgedWidth, badgedHeight);
+            badgeDrawable.draw(canvas);
+        }
+
+        if (!canBadgeInPlace) {
+            BitmapDrawable mergedDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
+
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                mergedDrawable.setTargetDensity(bitmapDrawable.getBitmap().getDensity());
+            }
+
+            return mergedDrawable;
+        }
+
+        return drawable;
+    }
+
+    private int getBadgeResIdForUser(int userHandle) {
+        // Return the framework-provided badge.
+        UserInfo userInfo = getUserIfProfile(userHandle);
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return com.android.internal.R.drawable.ic_corp_icon_badge;
+        }
+        return 0;
+    }
+
+    private UserInfo getUserIfProfile(int userHandle) {
+        List<UserInfo> userProfiles = getUserManager().getProfiles(UserHandle.myUserId());
+        for (UserInfo user : userProfiles) {
+            if (user.id == userHandle) {
+                return user;
+            }
         }
         return null;
     }

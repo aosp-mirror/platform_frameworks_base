@@ -18,6 +18,7 @@ package com.android.externalstorage;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -27,13 +28,17 @@ import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.FileObserver;
+import android.os.FileUtils;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -78,6 +83,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private static final String ROOT_ID_PRIMARY_EMULATED = "primary";
 
     private StorageManager mStorageManager;
+    private Handler mHandler;
 
     private final Object mRootsLock = new Object();
 
@@ -94,6 +100,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public boolean onCreate() {
         mStorageManager = (StorageManager) getContext().getSystemService(Context.STORAGE_SERVICE);
+        mHandler = new Handler();
 
         mRoots = Lists.newArrayList();
         mIdToRoot = Maps.newHashMap();
@@ -143,7 +150,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 final RootInfo root = new RootInfo();
                 root.rootId = rootId;
                 root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
-                        | Root.FLAG_SUPPORTS_SEARCH;
+                        | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
                 if (ROOT_ID_PRIMARY_EMULATED.equals(rootId)) {
                     root.title = getContext().getString(R.string.root_internal_storage);
                 } else {
@@ -238,10 +245,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
         if (file.canWrite()) {
             if (file.isDirectory()) {
                 flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
+                flags |= Document.FLAG_SUPPORTS_DELETE;
+                flags |= Document.FLAG_SUPPORTS_RENAME;
             } else {
                 flags |= Document.FLAG_SUPPORTS_WRITE;
+                flags |= Document.FLAG_SUPPORTS_DELETE;
+                flags |= Document.FLAG_SUPPORTS_RENAME;
             }
-            flags |= Document.FLAG_SUPPORTS_DELETE;
         }
 
         final String displayName = file.getName();
@@ -284,11 +294,26 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
+    public boolean isChildDocument(String parentDocId, String docId) {
+        try {
+            final File parent = getFileForDocId(parentDocId).getCanonicalFile();
+            final File doc = getFileForDocId(docId).getCanonicalFile();
+            return FileUtils.contains(parent, doc);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(
+                    "Failed to determine if " + docId + " is child of " + parentDocId + ": " + e);
+        }
+    }
+
+    @Override
     public String createDocument(String docId, String mimeType, String displayName)
             throws FileNotFoundException {
         final File parent = getFileForDocId(docId);
-        File file;
+        if (!parent.isDirectory()) {
+            throw new IllegalArgumentException("Parent document isn't a directory");
+        }
 
+        File file;
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             file = new File(parent, displayName);
             if (!file.mkdir()) {
@@ -316,8 +341,29 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
+    public String renameDocument(String docId, String displayName) throws FileNotFoundException {
+        final File before = getFileForDocId(docId);
+        final File after = new File(before.getParentFile(), displayName);
+        if (after.exists()) {
+            throw new IllegalStateException("Already exists " + after);
+        }
+        if (!before.renameTo(after)) {
+            throw new IllegalStateException("Failed to rename to " + after);
+        }
+        final String afterDocId = getDocIdForFile(after);
+        if (!TextUtils.equals(docId, afterDocId)) {
+            return afterDocId;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public void deleteDocument(String docId) throws FileNotFoundException {
         final File file = getFileForDocId(docId);
+        if (file.isDirectory()) {
+            FileUtils.deleteContents(file);
+        }
         if (!file.delete()) {
             throw new IllegalStateException("Failed to delete " + file);
         }
@@ -381,7 +427,25 @@ public class ExternalStorageProvider extends DocumentsProvider {
             String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
         final File file = getFileForDocId(documentId);
-        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.parseMode(mode));
+        final int pfdMode = ParcelFileDescriptor.parseMode(mode);
+        if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY) {
+            return ParcelFileDescriptor.open(file, pfdMode);
+        } else {
+            try {
+                // When finished writing, kick off media scanner
+                return ParcelFileDescriptor.open(file, pfdMode, mHandler, new OnCloseListener() {
+                    @Override
+                    public void onClose(IOException e) {
+                        final Intent intent = new Intent(
+                                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        intent.setData(Uri.fromFile(file));
+                        getContext().sendBroadcast(intent);
+                    }
+                });
+            } catch (IOException e) {
+                throw new FileNotFoundException("Failed to open for writing: " + e);
+            }
+        }
     }
 
     @Override

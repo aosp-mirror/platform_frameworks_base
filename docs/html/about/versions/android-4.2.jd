@@ -361,8 +361,7 @@ your server or use the registrations ID provided by <a
 href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a>.</p>
 
 <p>Beware that if your app requests one of the hardware device identifiers (such as the WiFi MAC
-address, the {@link android.os.Build#SERIAL} number, or the {@link
-android.provider.Settings.Secure#ANDROID_ID} number), they will provide the same value for each
+address or the {@link android.os.Build#SERIAL} number), they will provide the same value for each
 user because these identifiers are tied to the hardware and not the user. Not to mention the other
 problems these identifiers introduce as discussed in the <a
 href="http://android-developers.blogspot.com/2011/03/identifying-app-installations.html">Identifying

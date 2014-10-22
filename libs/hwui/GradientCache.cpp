@@ -115,7 +115,7 @@ void GradientCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
+void GradientCache::operator()(GradientCacheEntry&, Texture*& texture) {
     if (texture) {
         const uint32_t size = texture->width * texture->height * bytesPerPixel();
         mSize -= size;
@@ -185,7 +185,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
         mCache.removeOldest();
     }
 
-    generateTexture(colors, positions, count, texture);
+    generateTexture(colors, positions, texture);
 
     mSize += size;
     mCache.put(gradient, texture);
@@ -238,8 +238,7 @@ void GradientCache::mixFloats(GradientColor& start, GradientColor& end, float am
     dst += 4 * sizeof(float);
 }
 
-void GradientCache::generateTexture(uint32_t* colors, float* positions,
-        int count, Texture* texture) {
+void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture* texture) {
     const uint32_t width = texture->width;
     const GLsizei rowBytes = width * bytesPerPixel();
     uint8_t pixels[rowBytes * texture->height];

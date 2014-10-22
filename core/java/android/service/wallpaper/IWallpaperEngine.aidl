@@ -16,6 +16,7 @@
 
 package android.service.wallpaper;
 
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.os.Bundle;
 
@@ -24,6 +25,7 @@ import android.os.Bundle;
  */
 oneway interface IWallpaperEngine {
     void setDesiredSize(int width, int height);
+    void setDisplayPadding(in Rect padding);
     void setVisibility(boolean visible);
     void dispatchPointer(in MotionEvent event);
     void dispatchWallpaperCommand(String action, int x, int y,

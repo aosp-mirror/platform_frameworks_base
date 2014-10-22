@@ -17,13 +17,21 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
+
+import com.android.internal.R;
+import com.android.internal.view.animation.HasNativeInterpolator;
+import com.android.internal.view.animation.NativeInterpolatorFactory;
+import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the change starts backward then flings forward.
  */
-public class AnticipateInterpolator implements Interpolator {
+@HasNativeInterpolator
+public class AnticipateInterpolator implements Interpolator, NativeInterpolatorFactory {
     private final float mTension;
 
     public AnticipateInterpolator() {
@@ -40,11 +48,20 @@ public class AnticipateInterpolator implements Interpolator {
     }
 
     public AnticipateInterpolator(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.AnticipateInterpolator);
+        this(context.getResources(), context.getTheme(), attrs);
+    }
+
+    /** @hide */
+    public AnticipateInterpolator(Resources res, Theme theme, AttributeSet attrs) {
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.AnticipateInterpolator, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.AnticipateInterpolator);
+        }
 
         mTension =
-                a.getFloat(com.android.internal.R.styleable.AnticipateInterpolator_tension, 2.0f);
+                a.getFloat(R.styleable.AnticipateInterpolator_tension, 2.0f);
 
         a.recycle();
     }
@@ -52,5 +69,11 @@ public class AnticipateInterpolator implements Interpolator {
     public float getInterpolation(float t) {
         // a(t) = t * t * ((tension + 1) * t - tension)
         return t * t * ((mTension + 1) * t - mTension);
+    }
+
+    /** @hide */
+    @Override
+    public long createNativeInterpolator() {
+        return NativeInterpolatorFactoryHelper.createAnticipateInterpolator(mTension);
     }
 }

@@ -1257,4 +1257,11 @@
     <instrumentation android:name="android.test.InstrumentationTestRunner"
             android:targetPackage="com.android.frameworks.coretests"
             android:label="Frameworks Core Tests" />
+    <key-sets>
+        <key-set android:name="A" >
+          <public-key android:name="keyA"
+                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJoN1Nsgqf0V4C/bbN8wo8O2X/S5D76+5Mb9mlIsHkUTUTbHCNk+LxHIUYLm89YbP9zImrV0bUHLUAZUyoMUCiMCAwEAAQ=="/>
+        </key-set>
+        <upgrade-key-set android:name="A"/>
+    </key-sets>
 </manifest>

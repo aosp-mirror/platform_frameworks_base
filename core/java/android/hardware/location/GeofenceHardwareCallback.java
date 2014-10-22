@@ -16,11 +16,15 @@
 
 package android.hardware.location;
 
+import android.annotation.SystemApi;
 import android.location.Location;
 
 /**
  * The callback class associated with the APIs in {@link GeofenceHardware}
+ *
+ * @hide
  */
+@SystemApi
 public abstract class GeofenceHardwareCallback {
     /**
      * The callback called when there is a transition to report for the specific

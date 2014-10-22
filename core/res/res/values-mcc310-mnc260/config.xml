@@ -25,4 +25,8 @@
     -->
     <integer name="config_mobile_mtu">1440</integer>
 
+    <!-- Flag specifying whether VoLTE & VT should be available for carrier: independent of
+         carrier provisioning. If false: hard disabled. If true: then depends on carrier
+         provisioning, availability etc -->
+    <bool name="config_carrier_volte_vt_available">true</bool>
 </resources>

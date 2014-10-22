@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -30,6 +31,9 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 
 /**
@@ -57,8 +61,24 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class LinearLayout extends ViewGroup {
+    /** @hide */
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OrientationMode {}
+
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                SHOW_DIVIDER_NONE,
+                SHOW_DIVIDER_BEGINNING,
+                SHOW_DIVIDER_MIDDLE,
+                SHOW_DIVIDER_END
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DividerMode {}
 
     /**
      * Don't show any dividers.
@@ -136,7 +156,7 @@ public class LinearLayout extends ViewGroup {
                 equals = Gravity.FILL, name = "FILL"),
             @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
                 equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
-        })
+        }, formatToHexString = true)
     private int mGravity = Gravity.START | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")
@@ -165,18 +185,22 @@ public class LinearLayout extends ViewGroup {
     private int mDividerPadding;
 
     public LinearLayout(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public LinearLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
     
-    public LinearLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public LinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.LinearLayout, defStyle, 0);
+    public LinearLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.LinearLayout, defStyleAttr, defStyleRes);
 
         int index = a.getInt(com.android.internal.R.styleable.LinearLayout_orientation, -1);
         if (index >= 0) {
@@ -214,7 +238,7 @@ public class LinearLayout extends ViewGroup {
      *                     {@link #SHOW_DIVIDER_MIDDLE}, or {@link #SHOW_DIVIDER_END},
      *                     or {@link #SHOW_DIVIDER_NONE} to show no dividers.
      */
-    public void setShowDividers(int showDividers) {
+    public void setShowDividers(@DividerMode int showDividers) {
         if (showDividers != mShowDividers) {
             requestLayout();
         }
@@ -230,6 +254,7 @@ public class LinearLayout extends ViewGroup {
      * @return A flag set indicating how dividers should be shown around items.
      * @see #setShowDividers(int)
      */
+    @DividerMode
     public int getShowDividers() {
         return mShowDividers;
     }
@@ -642,6 +667,7 @@ public class LinearLayout extends ViewGroup {
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
         boolean matchWidth = false;
+        boolean skippedMeasure = false;
 
         final int baselineChildIndex = mBaselineAlignedChildIndex;        
         final boolean useLargestChild = mUseLargestChild;
@@ -676,6 +702,7 @@ public class LinearLayout extends ViewGroup {
                 // there is any leftover space.
                 final int totalLength = mTotalLength;
                 mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
+                skippedMeasure = true;
             } else {
                 int oldHeight = Integer.MIN_VALUE;
 
@@ -802,9 +829,10 @@ public class LinearLayout extends ViewGroup {
         heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
         
         // Either expand children with weight to take up available space or
-        // shrink them if they extend beyond our current bounds
+        // shrink them if they extend beyond our current bounds. If we skipped
+        // measurement on any children, we need to measure them now.
         int delta = heightSize - mTotalLength;
-        if (delta != 0 && totalWeight > 0.0f) {
+        if (skippedMeasure || delta != 0 && totalWeight > 0.0f) {
             float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
             mTotalLength = 0;
@@ -970,6 +998,7 @@ public class LinearLayout extends ViewGroup {
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
         boolean matchHeight = false;
+        boolean skippedMeasure = false;
 
         if (mMaxAscent == null || mMaxDescent == null) {
             mMaxAscent = new int[VERTICAL_GRAVITY_COUNT];
@@ -1032,6 +1061,8 @@ public class LinearLayout extends ViewGroup {
                 if (baselineAligned) {
                     final int freeSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
                     child.measure(freeSpec, freeSpec);
+                } else {
+                    skippedMeasure = true;
                 }
             } else {
                 int oldWidth = Integer.MIN_VALUE;
@@ -1180,9 +1211,10 @@ public class LinearLayout extends ViewGroup {
         widthSize = widthSizeAndState & MEASURED_SIZE_MASK;
         
         // Either expand children with weight to take up available space or
-        // shrink them if they extend beyond our current bounds
+        // shrink them if they extend beyond our current bounds. If we skipped
+        // measurement on any children, we need to measure them now.
         int delta = widthSize - mTotalLength;
-        if (delta != 0 && totalWeight > 0.0f) {
+        if (skippedMeasure || delta != 0 && totalWeight > 0.0f) {
             float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
             maxAscent[0] = maxAscent[1] = maxAscent[2] = maxAscent[3] = -1;
@@ -1673,12 +1705,12 @@ public class LinearLayout extends ViewGroup {
     
     /**
      * Should the layout be a column or a row.
-     * @param orientation Pass HORIZONTAL or VERTICAL. Default
-     * value is HORIZONTAL.
+     * @param orientation Pass {@link #HORIZONTAL} or {@link #VERTICAL}. Default
+     * value is {@link #HORIZONTAL}.
      * 
      * @attr ref android.R.styleable#LinearLayout_orientation
      */
-    public void setOrientation(int orientation) {
+    public void setOrientation(@OrientationMode int orientation) {
         if (mOrientation != orientation) {
             mOrientation = orientation;
             requestLayout();
@@ -1690,6 +1722,7 @@ public class LinearLayout extends ViewGroup {
      * 
      * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
      */
+    @OrientationMode
     public int getOrientation() {
         return mOrientation;
     }

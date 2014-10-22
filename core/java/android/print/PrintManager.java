@@ -24,6 +24,7 @@ import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -41,6 +42,7 @@ import libcore.io.IoUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +52,12 @@ import java.util.Map;
  * <p>
  * To obtain a handle to the print manager do the following:
  * </p>
- * 
+ *
  * <pre>
  * PrintManager printManager =
  *         (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
  * </pre>
- * 
+ *
  * <h3>Print mechanics</h3>
  * <p>
  * The key idea behind printing on the platform is that the content to be printed
@@ -167,7 +169,7 @@ public final class PrintManager {
 
         /**
          * Callback notifying that a print job state changed.
-         * 
+         *
          * @param printJobId The print job id.
          */
         public void onPrintJobStateChanged(PrintJobId printJobId);
@@ -175,7 +177,7 @@ public final class PrintManager {
 
     /**
      * Creates a new instance.
-     * 
+     *
      * @param context The current context in which to operate.
      * @param service The backing system service.
      * @hide
@@ -207,13 +209,17 @@ public final class PrintManager {
 
     /**
      * Creates an instance that can access all print jobs.
-     * 
+     *
      * @param userId The user id for which to get all print jobs.
      * @return An instance if the caller has the permission to access all print
      *         jobs, null otherwise.
      * @hide
      */
     public PrintManager getGlobalPrintManagerForUser(int userId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         return new PrintManager(mContext, mService, userId, APP_ID_ANY);
     }
 
@@ -228,11 +234,15 @@ public final class PrintManager {
 
     /**
      * Adds a listener for observing the state of print jobs.
-     * 
+     *
      * @param listener The listener to add.
      * @hide
      */
     public void addPrintJobStateChangeListener(PrintJobStateChangeListener listener) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         if (mPrintJobStateChangeListeners == null) {
             mPrintJobStateChangeListeners = new ArrayMap<PrintJobStateChangeListener,
                     PrintJobStateChangeListenerWrapper>();
@@ -249,11 +259,15 @@ public final class PrintManager {
 
     /**
      * Removes a listener for observing the state of print jobs.
-     * 
+     *
      * @param listener The listener to remove.
      * @hide
      */
     public void removePrintJobStateChangeListener(PrintJobStateChangeListener listener) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         if (mPrintJobStateChangeListeners == null) {
             return;
         }
@@ -275,12 +289,16 @@ public final class PrintManager {
 
     /**
      * Gets a print job given its id.
-     * 
+     *
      * @return The print job list.
      * @see PrintJob
      * @hide
      */
     public PrintJob getPrintJob(PrintJobId printJobId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         try {
             PrintJobInfo printJob = mService.getPrintJobInfo(printJobId, mAppId, mUserId);
             if (printJob != null) {
@@ -294,11 +312,15 @@ public final class PrintManager {
 
     /**
      * Gets the print jobs for this application.
-     * 
+     *
      * @return The print job list.
      * @see PrintJob
      */
     public List<PrintJob> getPrintJobs() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return Collections.emptyList();
+        }
         try {
             List<PrintJobInfo> printJobInfos = mService.getPrintJobInfos(mAppId, mUserId);
             if (printJobInfos == null) {
@@ -317,14 +339,22 @@ public final class PrintManager {
     }
 
     void cancelPrintJob(PrintJobId printJobId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         try {
             mService.cancelPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error cancleing a print job: " + printJobId, re);
+            Log.e(LOG_TAG, "Error canceling a print job: " + printJobId, re);
         }
     }
 
     void restartPrintJob(PrintJobId printJobId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
         try {
             mService.restartPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
@@ -359,6 +389,17 @@ public final class PrintManager {
      * selected the hinted options in the print dialog, given the current printer
      * supports them.
      * </p>
+     * <p>
+     * <strong>Note:</strong> Calling this method will bring the print dialog and
+     * the system will connect to the provided {@link PrintDocumentAdapter}. If a
+     * configuration change occurs that you application does not handle, for example
+     * a rotation change, the system will drop the connection to the adapter as the
+     * activity has to be recreated and the old adapter may be invalid in this context,
+     * hence a new adapter instance is required. As a consequence, if your activity
+     * does not handle configuration changes (default behavior), you have to save the
+     * state that you were printing and call this method again when your activity
+     * is recreated.
+     * </p>
      *
      * @param printJobName A name for the new print job which is shown to the user.
      * @param documentAdapter An adapter that emits the document to print.
@@ -372,6 +413,10 @@ public final class PrintManager {
      */
     public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
             PrintAttributes attributes) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         if (!(mContext instanceof Activity)) {
             throw new IllegalStateException("Can print only from an activity");
         }
@@ -407,11 +452,15 @@ public final class PrintManager {
 
     /**
      * Gets the list of enabled print services.
-     * 
+     *
      * @return The enabled service list or an empty list.
      * @hide
      */
     public List<PrintServiceInfo> getEnabledPrintServices() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return Collections.emptyList();
+        }
         try {
             List<PrintServiceInfo> enabledServices = mService.getEnabledPrintServices(mUserId);
             if (enabledServices != null) {
@@ -425,11 +474,15 @@ public final class PrintManager {
 
     /**
      * Gets the list of installed print services.
-     * 
+     *
      * @return The installed service list or an empty list.
      * @hide
      */
     public List<PrintServiceInfo> getInstalledPrintServices() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return Collections.emptyList();
+        }
         try {
             List<PrintServiceInfo> installedServices = mService.getInstalledPrintServices(mUserId);
             if (installedServices != null) {
@@ -445,35 +498,26 @@ public final class PrintManager {
      * @hide
      */
     public PrinterDiscoverySession createPrinterDiscoverySession() {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
         return new PrinterDiscoverySession(mService, mContext, mUserId);
     }
 
     private static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub
             implements ActivityLifecycleCallbacks {
-
         private final Object mLock = new Object();
 
-        private CancellationSignal mLayoutOrWriteCancellation;
+        private Activity mActivity; // Strong reference OK - cleared in destroy
 
-        private Activity mActivity; // Strong reference OK - cleared in finish()
+        private PrintDocumentAdapter mDocumentAdapter; // Strong reference OK - cleared in destroy
 
-        private PrintDocumentAdapter mDocumentAdapter; // Strong reference OK - cleared in finish
+        private Handler mHandler; // Strong reference OK - cleared in destroy
 
-        private Handler mHandler; // Strong reference OK - cleared in finish()
+        private IPrintDocumentAdapterObserver mObserver; // Strong reference OK - cleared in destroy
 
-        private IPrintDocumentAdapterObserver mObserver; // Strong reference OK - cleared in finish
-
-        private LayoutSpec mLastLayoutSpec;
-
-        private WriteSpec mLastWriteSpec;
-
-        private boolean mStartReqeusted;
-        private boolean mStarted;
-
-        private boolean mFinishRequested;
-        private boolean mFinished;
-
-        private boolean mDestroyed;
+        private DestroyableCallback mPendingCallback;
 
         public PrintDocumentAdapterDelegate(Activity activity,
                 PrintDocumentAdapter documentAdapter) {
@@ -487,12 +531,11 @@ public final class PrintManager {
         public void setObserver(IPrintDocumentAdapterObserver observer) {
             final boolean destroyed;
             synchronized (mLock) {
-                if (!mDestroyed) {
-                    mObserver = observer;
-                }
-                destroyed = mDestroyed;
+                mObserver = observer;
+                destroyed = isDestroyedLocked();
             }
-            if (destroyed) {
+
+            if (destroyed && observer != null) {
                 try {
                     observer.onDestroy();
                 } catch (RemoteException re) {
@@ -504,126 +547,89 @@ public final class PrintManager {
         @Override
         public void start() {
             synchronized (mLock) {
-                // Started called or finish called or destroyed - nothing to do.
-                if (mStartReqeusted || mFinishRequested || mDestroyed) {
-                    return;
+                // If destroyed the handler is null.
+                if (!isDestroyedLocked()) {
+                    mHandler.obtainMessage(MyHandler.MSG_ON_START,
+                            mDocumentAdapter).sendToTarget();
                 }
-
-                mStartReqeusted = true;
-
-                doPendingWorkLocked();
             }
         }
 
         @Override
         public void layout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
                 ILayoutResultCallback callback, Bundle metadata, int sequence) {
-            final boolean destroyed;
-            synchronized (mLock) {
-                destroyed = mDestroyed;
-                // If start called and not finished called and not destroyed - do some work.
-                if (mStartReqeusted && !mFinishRequested && !mDestroyed) {
-                    // Layout cancels write and overrides layout.
-                    if (mLastWriteSpec != null) {
-                        IoUtils.closeQuietly(mLastWriteSpec.fd);
-                        mLastWriteSpec = null;
-                    }
 
-                    mLastLayoutSpec = new LayoutSpec();
-                    mLastLayoutSpec.callback = callback;
-                    mLastLayoutSpec.oldAttributes = oldAttributes;
-                    mLastLayoutSpec.newAttributes = newAttributes;
-                    mLastLayoutSpec.metadata = metadata;
-                    mLastLayoutSpec.sequence = sequence;
-
-                    // Cancel the previous cancellable operation.When the
-                    // cancellation completes we will do the pending work.
-                    if (cancelPreviousCancellableOperationLocked()) {
-                        return;
-                    }
-
-                    doPendingWorkLocked();
-                }
+            ICancellationSignal cancellationTransport = CancellationSignal.createTransport();
+            try {
+                callback.onLayoutStarted(cancellationTransport, sequence);
+            } catch (RemoteException re) {
+                // The spooler is dead - can't recover.
+                Log.e(LOG_TAG, "Error notifying for layout start", re);
+                return;
             }
-            if (destroyed) {
-                try {
-                    callback.onLayoutFailed(null, sequence);
-                } catch (RemoteException re) {
-                    Log.i(LOG_TAG, "Error notifying for cancelled layout", re);
+
+            synchronized (mLock) {
+                // If destroyed the handler is null.
+                if (isDestroyedLocked()) {
+                    return;
                 }
+
+                CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
+                        cancellationTransport);
+
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = mDocumentAdapter;
+                args.arg2 = oldAttributes;
+                args.arg3 = newAttributes;
+                args.arg4 = cancellationSignal;
+                args.arg5 = new MyLayoutResultCallback(callback, sequence);
+                args.arg6 = metadata;
+
+                mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT, args).sendToTarget();
             }
         }
 
         @Override
         public void write(PageRange[] pages, ParcelFileDescriptor fd,
                 IWriteResultCallback callback, int sequence) {
-            final boolean destroyed;
-            synchronized (mLock) {
-                destroyed = mDestroyed;
-                // If start called and not finished called and not destroyed - do some work.
-                if (mStartReqeusted && !mFinishRequested && !mDestroyed) {
-                    // Write cancels previous writes.
-                    if (mLastWriteSpec != null) {
-                        IoUtils.closeQuietly(mLastWriteSpec.fd);
-                        mLastWriteSpec = null;
-                    }
 
-                    mLastWriteSpec = new WriteSpec();
-                    mLastWriteSpec.callback = callback;
-                    mLastWriteSpec.pages = pages;
-                    mLastWriteSpec.fd = fd;
-                    mLastWriteSpec.sequence = sequence;
-
-                    // Cancel the previous cancellable operation.When the
-                    // cancellation completes we will do the pending work.
-                    if (cancelPreviousCancellableOperationLocked()) {
-                        return;
-                    }
-
-                    doPendingWorkLocked();
-                }
+            ICancellationSignal cancellationTransport = CancellationSignal.createTransport();
+            try {
+                callback.onWriteStarted(cancellationTransport, sequence);
+            } catch (RemoteException re) {
+                // The spooler is dead - can't recover.
+                Log.e(LOG_TAG, "Error notifying for write start", re);
+                return;
             }
-            if (destroyed) {
-                try {
-                    callback.onWriteFailed(null, sequence);
-                } catch (RemoteException re) {
-                    Log.i(LOG_TAG, "Error notifying for cancelled write", re);
+
+            synchronized (mLock) {
+                // If destroyed the handler is null.
+                if (isDestroyedLocked()) {
+                    return;
                 }
+
+                CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
+                        cancellationTransport);
+
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = mDocumentAdapter;
+                args.arg2 = pages;
+                args.arg3 = fd;
+                args.arg4 = cancellationSignal;
+                args.arg5 = new MyWriteResultCallback(callback, fd, sequence);
+
+                mHandler.obtainMessage(MyHandler.MSG_ON_WRITE, args).sendToTarget();
             }
         }
 
         @Override
         public void finish() {
             synchronized (mLock) {
-                // Start not called or finish called or destroyed - nothing to do.
-                if (!mStartReqeusted || mFinishRequested || mDestroyed) {
-                    return;
+                // If destroyed the handler is null.
+                if (!isDestroyedLocked()) {
+                    mHandler.obtainMessage(MyHandler.MSG_ON_FINISH,
+                            mDocumentAdapter).sendToTarget();
                 }
-
-                mFinishRequested = true;
-
-                // When the current write or layout complete we
-                // will do the pending work.
-                if (mLastLayoutSpec != null || mLastWriteSpec != null) {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Waiting for current operation");
-                    }
-                    return;
-                }
-
-                doPendingWorkLocked();
-            }
-        }
-
-        @Override
-        public void cancel() {
-            // Start not called or finish called or destroyed - nothing to do.
-            if (!mStartReqeusted || mFinishRequested || mDestroyed) {
-                return;
-            }
-            // Request cancellation of pending work if needed.
-            synchronized (mLock) {
-                cancelPreviousCancellableOperationLocked();
             }
         }
 
@@ -664,20 +670,14 @@ public final class PrintManager {
             // Note the the spooler has a death recipient that observes if
             // this process gets killed so we cover the case of onDestroy not
             // being called due to this process being killed to reclaim memory.
-            final IPrintDocumentAdapterObserver observer;
+            IPrintDocumentAdapterObserver observer = null;
             synchronized (mLock) {
                 if (activity == mActivity) {
-                    mDestroyed = true;
                     observer = mObserver;
-                    clearLocked();
-                } else {
-                    observer = null;
-                    activity = null;
+                    destroyLocked();
                 }
             }
             if (observer != null) {
-                activity.getApplication().unregisterActivityLifecycleCallbacks(
-                        PrintDocumentAdapterDelegate.this);
                 try {
                     observer.onDestroy();
                 } catch (RemoteException re) {
@@ -686,67 +686,39 @@ public final class PrintManager {
             }
         }
 
-        private boolean isFinished() {
-            return mDocumentAdapter == null;
+        private boolean isDestroyedLocked() {
+            return (mActivity == null);
         }
 
-        private void clearLocked() {
+        private void destroyLocked() {
+            mActivity.getApplication().unregisterActivityLifecycleCallbacks(
+                    PrintDocumentAdapterDelegate.this);
             mActivity = null;
+
             mDocumentAdapter = null;
+
+            // This method is only called from the main thread, so
+            // clearing the messages guarantees that any time a
+            // message is handled we are not in a destroyed state.
+            mHandler.removeMessages(MyHandler.MSG_ON_START);
+            mHandler.removeMessages(MyHandler.MSG_ON_LAYOUT);
+            mHandler.removeMessages(MyHandler.MSG_ON_WRITE);
+            mHandler.removeMessages(MyHandler.MSG_ON_FINISH);
             mHandler = null;
-            mLayoutOrWriteCancellation = null;
-            mLastLayoutSpec = null;
-            if (mLastWriteSpec != null) {
-                IoUtils.closeQuietly(mLastWriteSpec.fd);
-                mLastWriteSpec = null;
+
+            mObserver = null;
+
+            if (mPendingCallback != null) {
+                mPendingCallback.destroy();
+                mPendingCallback = null;
             }
-        }
-
-        private boolean cancelPreviousCancellableOperationLocked() {
-            if (mLayoutOrWriteCancellation != null) {
-                mLayoutOrWriteCancellation.cancel();
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Cancelling previous operation");
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private void doPendingWorkLocked() {
-            if (mStartReqeusted && !mStarted) {
-                mStarted = true;
-                mHandler.sendEmptyMessage(MyHandler.MSG_START);
-            } else if (mLastLayoutSpec != null) {
-                mHandler.sendEmptyMessage(MyHandler.MSG_LAYOUT);
-            } else if (mLastWriteSpec != null) {
-                mHandler.sendEmptyMessage(MyHandler.MSG_WRITE);
-            } else if (mFinishRequested && !mFinished) {
-                mFinished = true;
-                mHandler.sendEmptyMessage(MyHandler.MSG_FINISH);
-            }
-        }
-
-        private class LayoutSpec {
-            ILayoutResultCallback callback;
-            PrintAttributes oldAttributes;
-            PrintAttributes newAttributes;
-            Bundle metadata;
-            int sequence;
-        }
-
-        private class WriteSpec {
-            IWriteResultCallback callback;
-            PageRange[] pages;
-            ParcelFileDescriptor fd;
-            int sequence;
         }
 
         private final class MyHandler extends Handler {
-            public static final int MSG_START = 1;
-            public static final int MSG_LAYOUT = 2;
-            public static final int MSG_WRITE = 3;
-            public static final int MSG_FINISH = 4;
+            public static final int MSG_ON_START = 1;
+            public static final int MSG_ON_LAYOUT = 2;
+            public static final int MSG_ON_WRITE = 3;
+            public static final int MSG_ON_FINISH = 4;
 
             public MyHandler(Looper looper) {
                 super(looper, null, true);
@@ -754,84 +726,71 @@ public final class PrintManager {
 
             @Override
             public void handleMessage(Message message) {
-                if (isFinished()) {
-                    return;
-                }
                 switch (message.what) {
-                    case MSG_START: {
-                        final PrintDocumentAdapter adapter;
-                        synchronized (mLock) {
-                            adapter = mDocumentAdapter;
-                        }
-                        if (adapter != null) {
-                            adapter.onStart();
-                        }
-                    } break;
-
-                    case MSG_LAYOUT: {
-                        final PrintDocumentAdapter adapter;
-                        final CancellationSignal cancellation;
-                        final LayoutSpec layoutSpec;
-
-                        synchronized (mLock) {
-                            adapter = mDocumentAdapter;
-                            layoutSpec = mLastLayoutSpec;
-                            mLastLayoutSpec = null;
-                            cancellation = new CancellationSignal();
-                            mLayoutOrWriteCancellation = cancellation;
-                        }
-
-                        if (layoutSpec != null && adapter != null) {
-                            if (DEBUG) {
-                                Log.i(LOG_TAG, "Performing layout");
-                            }
-                            adapter.onLayout(layoutSpec.oldAttributes,
-                                    layoutSpec.newAttributes, cancellation,
-                                    new MyLayoutResultCallback(layoutSpec.callback,
-                                            layoutSpec.sequence), layoutSpec.metadata);
-                        }
-                    } break;
-
-                    case MSG_WRITE: {
-                        final PrintDocumentAdapter adapter;
-                        final CancellationSignal cancellation;
-                        final WriteSpec writeSpec;
-
-                        synchronized (mLock) {
-                            adapter = mDocumentAdapter;
-                            writeSpec = mLastWriteSpec;
-                            mLastWriteSpec = null;
-                            cancellation = new CancellationSignal();
-                            mLayoutOrWriteCancellation = cancellation;
-                        }
-
-                        if (writeSpec != null && adapter != null) {
-                            if (DEBUG) {
-                                Log.i(LOG_TAG, "Performing write");
-                            }
-                            adapter.onWrite(writeSpec.pages, writeSpec.fd,
-                                    cancellation, new MyWriteResultCallback(writeSpec.callback,
-                                            writeSpec.fd, writeSpec.sequence));
-                        }
-                    } break;
-
-                    case MSG_FINISH: {
+                    case MSG_ON_START: {
                         if (DEBUG) {
-                            Log.i(LOG_TAG, "Performing finish");
+                            Log.i(LOG_TAG, "onStart()");
                         }
-                        final PrintDocumentAdapter adapter;
-                        final Activity activity;
+
+                        ((PrintDocumentAdapter) message.obj).onStart();
+                    } break;
+
+                    case MSG_ON_LAYOUT: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        PrintDocumentAdapter adapter = (PrintDocumentAdapter) args.arg1;
+                        PrintAttributes oldAttributes = (PrintAttributes) args.arg2;
+                        PrintAttributes newAttributes = (PrintAttributes) args.arg3;
+                        CancellationSignal cancellation = (CancellationSignal) args.arg4;
+                        LayoutResultCallback callback = (LayoutResultCallback) args.arg5;
+                        Bundle metadata = (Bundle) args.arg6;
+                        args.recycle();
+
+                        if (DEBUG) {
+                            StringBuilder builder = new StringBuilder();
+                            builder.append("PrintDocumentAdapter#onLayout() {\n");
+                            builder.append("\n  oldAttributes:").append(oldAttributes);
+                            builder.append("\n  newAttributes:").append(newAttributes);
+                            builder.append("\n  preview:").append(metadata.getBoolean(
+                                    PrintDocumentAdapter.EXTRA_PRINT_PREVIEW));
+                            builder.append("\n}");
+                            Log.i(LOG_TAG, builder.toString());
+                        }
+
+                        adapter.onLayout(oldAttributes, newAttributes, cancellation,
+                                callback, metadata);
+                    } break;
+
+                    case MSG_ON_WRITE: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        PrintDocumentAdapter adapter = (PrintDocumentAdapter) args.arg1;
+                        PageRange[] pages = (PageRange[]) args.arg2;
+                        ParcelFileDescriptor fd = (ParcelFileDescriptor) args.arg3;
+                        CancellationSignal cancellation = (CancellationSignal) args.arg4;
+                        WriteResultCallback callback = (WriteResultCallback) args.arg5;
+                        args.recycle();
+
+                        if (DEBUG) {
+                            StringBuilder builder = new StringBuilder();
+                            builder.append("PrintDocumentAdapter#onWrite() {\n");
+                            builder.append("\n  pages:").append(Arrays.toString(pages));
+                            builder.append("\n}");
+                            Log.i(LOG_TAG, builder.toString());
+                        }
+
+                        adapter.onWrite(pages, fd, cancellation, callback);
+                    } break;
+
+                    case MSG_ON_FINISH: {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "onFinish()");
+                        }
+
+                        ((PrintDocumentAdapter) message.obj).onFinish();
+
+                        // Done printing, so destroy this instance as it
+                        // should not be used anymore.
                         synchronized (mLock) {
-                            adapter = mDocumentAdapter;
-                            activity = mActivity;
-                            clearLocked();
-                        }
-                        if (adapter != null) {
-                            adapter.onFinish();
-                        }
-                        if (activity != null) {
-                            activity.getApplication().unregisterActivityLifecycleCallbacks(
-                                    PrintDocumentAdapterDelegate.this);
+                            destroyLocked();
                         }
                     } break;
 
@@ -843,7 +802,12 @@ public final class PrintManager {
             }
         }
 
-        private final class MyLayoutResultCallback extends LayoutResultCallback {
+        private interface DestroyableCallback {
+            public void destroy();
+        }
+
+        private final class MyLayoutResultCallback extends LayoutResultCallback
+                implements DestroyableCallback {
             private ILayoutResultCallback mCallback;
             private final int mSequence;
 
@@ -855,25 +819,31 @@ public final class PrintManager {
 
             @Override
             public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
-                if (info == null) {
-                    throw new NullPointerException("document info cannot be null");
-                }
                 final ILayoutResultCallback callback;
                 synchronized (mLock) {
-                    if (mDestroyed) {
-                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
-                                + "finish the printing activity before print completion?");
-                        return;
-                    }
                     callback = mCallback;
-                    clearLocked();
                 }
-                if (callback != null) {
+
+                // If the callback is null we are destroyed.
+                if (callback == null) {
+                    Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                            + "finish the printing activity before print completion "
+                            + "or did you invoke a callback after finish?");
+                    return;
+                }
+
+                try {
+                    if (info == null) {
+                        throw new NullPointerException("document info cannot be null");
+                    }
+
                     try {
                         callback.onLayoutFinished(info, changed, mSequence);
                     } catch (RemoteException re) {
                         Log.e(LOG_TAG, "Error calling onLayoutFinished", re);
                     }
+                } finally {
+                    destroy();
                 }
             }
 
@@ -881,46 +851,64 @@ public final class PrintManager {
             public void onLayoutFailed(CharSequence error) {
                 final ILayoutResultCallback callback;
                 synchronized (mLock) {
-                    if (mDestroyed) {
-                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
-                                + "finish the printing activity before print completion?");
-                        return;
-                    }
                     callback = mCallback;
-                    clearLocked();
                 }
-                if (callback != null) {
-                    try {
-                        callback.onLayoutFailed(error, mSequence);
-                    } catch (RemoteException re) {
-                        Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
-                    }
+
+                // If the callback is null we are destroyed.
+                if (callback == null) {
+                    Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                            + "finish the printing activity before print completion "
+                            + "or did you invoke a callback after finish?");
+                    return;
+                }
+
+                try {
+                    callback.onLayoutFailed(error, mSequence);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
+                } finally {
+                    destroy();
                 }
             }
 
             @Override
             public void onLayoutCancelled() {
+                final ILayoutResultCallback callback;
                 synchronized (mLock) {
-                    if (mDestroyed) {
-                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
-                                + "finish the printing activity before print completion?");
-                        return;
-                    }
-                    clearLocked();
+                    callback = mCallback;
+                }
+
+                // If the callback is null we are destroyed.
+                if (callback == null) {
+                    Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                            + "finish the printing activity before print completion "
+                            + "or did you invoke a callback after finish?");
+                    return;
+                }
+
+                try {
+                    callback.onLayoutCanceled(mSequence);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
+                } finally {
+                    destroy();
                 }
             }
 
-            private void clearLocked() {
-                mLayoutOrWriteCancellation = null;
-                mCallback = null;
-                doPendingWorkLocked();
+            @Override
+            public void destroy() {
+                synchronized (mLock) {
+                    mCallback = null;
+                    mPendingCallback = null;
+                }
             }
         }
 
-        private final class MyWriteResultCallback extends WriteResultCallback {
+        private final class MyWriteResultCallback extends WriteResultCallback
+                implements DestroyableCallback {
             private ParcelFileDescriptor mFd;
-            private int mSequence;
             private IWriteResultCallback mCallback;
+            private final int mSequence;
 
             public MyWriteResultCallback(IWriteResultCallback callback,
                     ParcelFileDescriptor fd, int sequence) {
@@ -933,26 +921,32 @@ public final class PrintManager {
             public void onWriteFinished(PageRange[] pages) {
                 final IWriteResultCallback callback;
                 synchronized (mLock) {
-                    if (mDestroyed) {
-                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
-                                + "finish the printing activity before print completion?");
-                        return;
-                    }
                     callback = mCallback;
-                    clearLocked();
                 }
-                if (pages == null) {
-                    throw new IllegalArgumentException("pages cannot be null");
+
+                // If the callback is null we are destroyed.
+                if (callback == null) {
+                    Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                            + "finish the printing activity before print completion "
+                            + "or did you invoke a callback after finish?");
+                    return;
                 }
-                if (pages.length == 0) {
-                    throw new IllegalArgumentException("pages cannot be empty");
-                }
-                if (callback != null) {
+
+                try {
+                    if (pages == null) {
+                        throw new IllegalArgumentException("pages cannot be null");
+                    }
+                    if (pages.length == 0) {
+                        throw new IllegalArgumentException("pages cannot be empty");
+                    }
+
                     try {
                         callback.onWriteFinished(pages, mSequence);
                     } catch (RemoteException re) {
                         Log.e(LOG_TAG, "Error calling onWriteFinished", re);
                     }
+                } finally {
+                    destroy();
                 }
             }
 
@@ -960,41 +954,58 @@ public final class PrintManager {
             public void onWriteFailed(CharSequence error) {
                 final IWriteResultCallback callback;
                 synchronized (mLock) {
-                    if (mDestroyed) {
-                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
-                                + "finish the printing activity before print completion?");
-                        return;
-                    }
                     callback = mCallback;
-                    clearLocked();
                 }
-                if (callback != null) {
-                    try {
-                        callback.onWriteFailed(error, mSequence);
-                    } catch (RemoteException re) {
-                        Log.e(LOG_TAG, "Error calling onWriteFailed", re);
-                    }
+
+                // If the callback is null we are destroyed.
+                if (callback == null) {
+                    Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                            + "finish the printing activity before print completion "
+                            + "or did you invoke a callback after finish?");
+                    return;
+                }
+
+                try {
+                    callback.onWriteFailed(error, mSequence);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error calling onWriteFailed", re);
+                } finally {
+                    destroy();
                 }
             }
 
             @Override
             public void onWriteCancelled() {
+                final IWriteResultCallback callback;
                 synchronized (mLock) {
-                    if (mDestroyed) {
-                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
-                                + "finish the printing activity before print completion?");
-                        return;
-                    }
-                    clearLocked();
+                    callback = mCallback;
+                }
+
+                // If the callback is null we are destroyed.
+                if (callback == null) {
+                    Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                            + "finish the printing activity before print completion "
+                            + "or did you invoke a callback after finish?");
+                    return;
+                }
+
+                try {
+                    callback.onWriteCanceled(mSequence);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error calling onWriteCanceled", re);
+                } finally {
+                    destroy();
                 }
             }
 
-            private void clearLocked() {
-                mLayoutOrWriteCancellation = null;
-                IoUtils.closeQuietly(mFd);
-                mCallback = null;
-                mFd = null;
-                doPendingWorkLocked();
+            @Override
+            public void destroy() {
+                synchronized (mLock) {
+                    IoUtils.closeQuietly(mFd);
+                    mCallback = null;
+                    mFd = null;
+                    mPendingCallback = null;
+                }
             }
         }
     }

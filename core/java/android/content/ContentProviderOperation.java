@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.ContentProvider;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
@@ -85,6 +86,31 @@ public class ContentProviderOperation implements Parcelable {
             }
         }
         mYieldAllowed = source.readInt() != 0;
+    }
+
+    /** @hide */
+    public ContentProviderOperation(ContentProviderOperation cpo, boolean removeUserIdFromUri) {
+        mType = cpo.mType;
+        if (removeUserIdFromUri) {
+            mUri = ContentProvider.getUriWithoutUserId(cpo.mUri);
+        } else {
+            mUri = cpo.mUri;
+        }
+        mValues = cpo.mValues;
+        mSelection = cpo.mSelection;
+        mSelectionArgs = cpo.mSelectionArgs;
+        mExpectedCount = cpo.mExpectedCount;
+        mSelectionArgsBackReferences = cpo.mSelectionArgsBackReferences;
+        mValuesBackReferences = cpo.mValuesBackReferences;
+        mYieldAllowed = cpo.mYieldAllowed;
+    }
+
+    /** @hide */
+    public ContentProviderOperation getWithoutUserIdInUri() {
+        if (ContentProvider.uriHasUserId(mUri)) {
+            return new ContentProviderOperation(this, true);
+        }
+        return this;
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -386,7 +412,6 @@ public class ContentProviderOperation implements Parcelable {
             return new ContentProviderOperation[size];
         }
     };
-
 
     /**
      * Used to add parameters to a {@link ContentProviderOperation}. The {@link Builder} is

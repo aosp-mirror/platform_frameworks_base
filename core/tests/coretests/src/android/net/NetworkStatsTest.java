@@ -310,6 +310,16 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(128L + 512L, clone.getTotalBytes());
     }
 
+    public void testAddWhenEmpty() throws Exception {
+        final NetworkStats red = new NetworkStats(TEST_START, -1);
+        final NetworkStats blue = new NetworkStats(TEST_START, 5)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 512L, 32L, 0L, 0L, 0L);
+
+        // We're mostly checking that we don't crash
+        red.combineAllValues(blue);
+    }
+
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
         final NetworkStats.Entry entry = stats.getValues(index, null);

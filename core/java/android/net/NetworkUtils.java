@@ -23,7 +23,10 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Locale;
 
+import android.os.Parcel;
 import android.util.Log;
+import android.util.Pair;
+
 
 /**
  * Native methods for managing network interfaces.
@@ -33,12 +36,6 @@ import android.util.Log;
 public class NetworkUtils {
 
     private static final String TAG = "NetworkUtils";
-
-    /** Bring the named network interface up. */
-    public native static int enableInterface(String interfaceName);
-
-    /** Bring the named network interface down. */
-    public native static int disableInterface(String interfaceName);
 
     /** Setting bit 0 indicates reseting of IPv4 addresses required */
     public static final int RESET_IPV4_ADDRESSES = 0x01;
@@ -104,9 +101,43 @@ public class NetworkUtils {
     public native static String getDhcpError();
 
     /**
-     * Set the SO_MARK of {@code socketfd} to {@code mark}
+     * Binds the current process to the network designated by {@code netId}.  All sockets created
+     * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
+     * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this
+     * {@code Network} ever disconnects all sockets created in this way will cease to work.  This
+     * is by design so an application doesn't accidentally use sockets it thinks are still bound to
+     * a particular {@code Network}.  Passing NETID_UNSET clears the binding.
      */
-    public native static void markSocket(int socketfd, int mark);
+    public native static boolean bindProcessToNetwork(int netId);
+
+    /**
+     * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
+     * {@link #unbindProcessToNetwork} has been called since {@link #bindProcessToNetwork}.
+     */
+    public native static int getNetworkBoundToProcess();
+
+    /**
+     * Binds host resolutions performed by this process to the network designated by {@code netId}.
+     * {@link #bindProcessToNetwork} takes precedence over this setting.  Passing NETID_UNSET clears
+     * the binding.
+     *
+     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
+     */
+    public native static boolean bindProcessToNetworkForHostResolution(int netId);
+
+    /**
+     * Explicitly binds {@code socketfd} to the network designated by {@code netId}.  This
+     * overrides any binding via {@link #bindProcessToNetwork}.
+     * @return 0 on success or negative errno on failure.
+     */
+    public native static int bindSocketToNetwork(int socketfd, int netId);
+
+    /**
+     * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public native static boolean protectFromVpn(int socketfd);
 
     /**
      * Convert a IPv4 address from an integer to an InetAddress.
@@ -174,24 +205,43 @@ public class NetworkUtils {
     }
 
     /**
-     * Get InetAddress masked with prefixLength.  Will never return null.
-     * @param IP address which will be masked with specified prefixLength
-     * @param prefixLength the prefixLength used to mask the IP
+     * Writes an InetAddress to a parcel. The address may be null. This is likely faster than
+     * calling writeSerializable.
      */
-    public static InetAddress getNetworkPart(InetAddress address, int prefixLength) {
-        if (address == null) {
-            throw new RuntimeException("getNetworkPart doesn't accept null address");
+    protected static void parcelInetAddress(Parcel parcel, InetAddress address, int flags) {
+        byte[] addressArray = (address != null) ? address.getAddress() : null;
+        parcel.writeByteArray(addressArray);
+    }
+
+    /**
+     * Reads an InetAddress from a parcel. Returns null if the address that was written was null
+     * or if the data is invalid.
+     */
+    protected static InetAddress unparcelInetAddress(Parcel in) {
+        byte[] addressArray = in.createByteArray();
+        if (addressArray == null) {
+            return null;
         }
+        try {
+            return InetAddress.getByAddress(addressArray);
+        } catch (UnknownHostException e) {
+            return null;
+        }
+    }
 
-        byte[] array = address.getAddress();
 
+    /**
+     *  Masks a raw IP address byte array with the specified prefix length.
+     */
+    public static void maskRawAddress(byte[] array, int prefixLength) {
         if (prefixLength < 0 || prefixLength > array.length * 8) {
-            throw new RuntimeException("getNetworkPart - bad prefixLength");
+            throw new RuntimeException("IP address with " + array.length +
+                    " bytes has invalid prefix length " + prefixLength);
         }
 
         int offset = prefixLength / 8;
-        int reminder = prefixLength % 8;
-        byte mask = (byte)(0xFF << (8 - reminder));
+        int remainder = prefixLength % 8;
+        byte mask = (byte)(0xFF << (8 - remainder));
 
         if (offset < array.length) array[offset] = (byte)(array[offset] & mask);
 
@@ -200,6 +250,16 @@ public class NetworkUtils {
         for (; offset < array.length; offset++) {
             array[offset] = 0;
         }
+    }
+
+    /**
+     * Get InetAddress masked with prefixLength.  Will never return null.
+     * @param address the IP address to mask with
+     * @param prefixLength the prefixLength used to mask the IP
+     */
+    public static InetAddress getNetworkPart(InetAddress address, int prefixLength) {
+        byte[] array = address.getAddress();
+        maskRawAddress(array, prefixLength);
 
         InetAddress netPart = null;
         try {
@@ -208,6 +268,30 @@ public class NetworkUtils {
             throw new RuntimeException("getNetworkPart error - " + e.toString());
         }
         return netPart;
+    }
+
+    /**
+     * Utility method to parse strings such as "192.0.2.5/24" or "2001:db8::cafe:d00d/64".
+     * @hide
+     */
+    public static Pair<InetAddress, Integer> parseIpAndMask(String ipAndMaskString) {
+        InetAddress address = null;
+        int prefixLength = -1;
+        try {
+            String[] pieces = ipAndMaskString.split("/", 2);
+            prefixLength = Integer.parseInt(pieces[1]);
+            address = InetAddress.parseNumericAddress(pieces[0]);
+        } catch (NullPointerException e) {            // Null string.
+        } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
+        } catch (NumberFormatException e) {           // Non-numeric prefix.
+        } catch (IllegalArgumentException e) {        // Invalid IP address.
+        }
+
+        if (address == null || prefixLength == -1) {
+            throw new IllegalArgumentException("Invalid IP address and mask " + ipAndMaskString);
+        }
+
+        return new Pair<InetAddress, Integer>(address, prefixLength);
     }
 
     /**

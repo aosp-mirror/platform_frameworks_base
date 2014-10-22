@@ -1,5 +1,6 @@
 page.title=Typography
 page.tags="textview","font"
+page.metaDescription=How to use typography in your Android apps.
 @jd:body
 
 <div class="layout-content-row">
@@ -11,7 +12,7 @@ page.tags="textview","font"
   <div class="layout-content-col span-5">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Roboto ZIP');"
     href="{@docRoot}downloads/design/roboto-1.2.zip">Download Roboto</a>
 </p>
 
@@ -29,7 +30,7 @@ variant in regular and bold weights, along with an italic style for each weight.
 
     <img src="{@docRoot}design/media/typography_variants@2x.png" width="220">
 
-<p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specimen Booke (@typography page)']);"
+<p><a onClick="ga('send', 'event', 'Design', 'Download', 'Roboto Specimen Book (@typography page)');"
       href="{@docRoot}downloads/design/Roboto_Specimen_Book_20131031.pdf">Specimen Book</a></p>
 
   </div>

@@ -18,7 +18,6 @@ package android.media;
 
 import java.util.List;
 import java.util.ArrayList;
-import android.util.Log;
 
 /**
  * The EncoderCapabilities class is used to retrieve the

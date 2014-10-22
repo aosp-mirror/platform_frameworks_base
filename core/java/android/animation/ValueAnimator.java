@@ -206,7 +206,7 @@ public class ValueAnimator extends Animator {
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
-    private ArrayList<AnimatorUpdateListener> mUpdateListeners = null;
+    ArrayList<AnimatorUpdateListener> mUpdateListeners = null;
 
     /**
      * The property/value sets being animated.
@@ -276,6 +276,24 @@ public class ValueAnimator extends Animator {
     public static ValueAnimator ofInt(int... values) {
         ValueAnimator anim = new ValueAnimator();
         anim.setIntValues(values);
+        return anim;
+    }
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between color values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    public static ValueAnimator ofArgb(int... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setIntValues(values);
+        anim.setEvaluator(ArgbEvaluator.getInstance());
         return anim;
     }
 
@@ -490,8 +508,12 @@ public class ValueAnimator extends Animator {
                     duration);
         }
         mUnscaledDuration = duration;
-        mDuration = (long)(duration * sDurationScale);
+        updateScaledDuration();
         return this;
+    }
+
+    private void updateScaledDuration() {
+        mDuration = (long)(mUnscaledDuration * sDurationScale);
     }
 
     /**
@@ -929,6 +951,7 @@ public class ValueAnimator extends Animator {
         mStarted = true;
         mStartedDelay = false;
         mPaused = false;
+        updateScaledDuration(); // in case the scale factor has changed since creation time
         AnimationHandler animationHandler = getOrCreateAnimationHandler();
         animationHandler.mPendingAnimations.add(this);
         if (mStartDelay == 0) {
@@ -1020,6 +1043,7 @@ public class ValueAnimator extends Animator {
      * play backwards. This behavior is only set for the current animation; future playing
      * of the animation will use the default behavior of playing forward.
      */
+    @Override
     public void reverse() {
         mPlayingBackwards = !mPlayingBackwards;
         if (mPlayingState == RUNNING) {
@@ -1035,10 +1059,19 @@ public class ValueAnimator extends Animator {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public boolean canReverse() {
+        return true;
+    }
+
+    /**
      * Called internally to end an animation by removing it from the animations list. Must be
      * called on the UI thread.
+     * @hide
      */
-    private void endAnimation(AnimationHandler handler) {
+    protected void endAnimation(AnimationHandler handler) {
         handler.mAnimations.remove(this);
         handler.mPendingAnimations.remove(this);
         handler.mDelayedAnims.remove(this);
@@ -1106,27 +1139,26 @@ public class ValueAnimator extends Animator {
         if (!mStartedDelay) {
             mStartedDelay = true;
             mDelayStartTime = currentTime;
-        } else {
-            if (mPaused) {
-                if (mPauseTime < 0) {
-                    mPauseTime = currentTime;
-                }
-                return false;
-            } else if (mResumed) {
-                mResumed = false;
-                if (mPauseTime > 0) {
-                    // Offset by the duration that the animation was paused
-                    mDelayStartTime += (currentTime - mPauseTime);
-                }
+        }
+        if (mPaused) {
+            if (mPauseTime < 0) {
+                mPauseTime = currentTime;
             }
-            long deltaTime = currentTime - mDelayStartTime;
-            if (deltaTime > mStartDelay) {
-                // startDelay ended - start the anim and record the
-                // mStartTime appropriately
-                mStartTime = currentTime - (deltaTime - mStartDelay);
-                mPlayingState = RUNNING;
-                return true;
+            return false;
+        } else if (mResumed) {
+            mResumed = false;
+            if (mPauseTime > 0) {
+                // Offset by the duration that the animation was paused
+                mDelayStartTime += (currentTime - mPauseTime);
             }
+        }
+        long deltaTime = currentTime - mDelayStartTime;
+        if (deltaTime > mStartDelay) {
+            // startDelay ended - start the anim and record the
+            // mStartTime appropriately
+            mStartTime = currentTime - (deltaTime - mStartDelay);
+            mPlayingState = RUNNING;
+            return true;
         }
         return false;
     }
@@ -1346,5 +1378,44 @@ public class ValueAnimator extends Animator {
             }
         }
         return returnVal;
+    }
+
+    /**
+     * <p>Whether or not the ValueAnimator is allowed to run asynchronously off of
+     * the UI thread. This is a hint that informs the ValueAnimator that it is
+     * OK to run the animation off-thread, however ValueAnimator may decide
+     * that it must run the animation on the UI thread anyway. For example if there
+     * is an {@link AnimatorUpdateListener} the animation will run on the UI thread,
+     * regardless of the value of this hint.</p>
+     *
+     * <p>Regardless of whether or not the animation runs asynchronously, all
+     * listener callbacks will be called on the UI thread.</p>
+     *
+     * <p>To be able to use this hint the following must be true:</p>
+     * <ol>
+     * <li>{@link #getAnimatedFraction()} is not needed (it will return undefined values).</li>
+     * <li>The animator is immutable while {@link #isStarted()} is true. Requests
+     *    to change values, duration, delay, etc... may be ignored.</li>
+     * <li>Lifecycle callback events may be asynchronous. Events such as
+     *    {@link Animator.AnimatorListener#onAnimationEnd(Animator)} or
+     *    {@link Animator.AnimatorListener#onAnimationRepeat(Animator)} may end up delayed
+     *    as they must be posted back to the UI thread, and any actions performed
+     *    by those callbacks (such as starting new animations) will not happen
+     *    in the same frame.</li>
+     * <li>State change requests ({@link #cancel()}, {@link #end()}, {@link #reverse()}, etc...)
+     *    may be asynchronous. It is guaranteed that all state changes that are
+     *    performed on the UI thread in the same frame will be applied as a single
+     *    atomic update, however that frame may be the current frame,
+     *    the next frame, or some future frame. This will also impact the observed
+     *    state of the Animator. For example, {@link #isStarted()} may still return true
+     *    after a call to {@link #end()}. Using the lifecycle callbacks is preferred over
+     *    queries to {@link #isStarted()}, {@link #isRunning()}, and {@link #isPaused()}
+     *    for this reason.</li>
+     * </ol>
+     * @hide
+     */
+    @Override
+    public void setAllowRunningAsynchronously(boolean mayRunAsync) {
+        // It is up to subclasses to support this, if they can.
     }
 }

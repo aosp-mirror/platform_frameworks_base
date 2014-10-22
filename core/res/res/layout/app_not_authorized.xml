@@ -32,7 +32,7 @@
         android:paddingBottom="16dip"
         android:paddingStart="16dip"
         android:paddingEnd="16dip"
-        android:text="@string/app_no_restricted_accounts"
+        android:text="@string/error_message_change_not_allowed"
     />
 
     <!-- Horizontal divider line -->

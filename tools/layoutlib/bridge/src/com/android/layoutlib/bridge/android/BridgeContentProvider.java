@@ -135,6 +135,7 @@ public final class BridgeContentProvider implements IContentProvider {
         return null;
     }
 
+
     @Override
     public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
         return null;

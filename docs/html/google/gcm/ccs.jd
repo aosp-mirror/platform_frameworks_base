@@ -8,7 +8,7 @@ page.title=GCM Cloud Connection Server (XMPP)
 <h2>In this document</h2>
 
 <ol class="toc">
-  <li><a href="#usage">How to Use CCS</a>
+  <li><a href="#connecting">Establishing a Connection</a>
     <ol class="toc">
       <li><a href="#auth">Authentication</a></li>
       </ol>
@@ -19,7 +19,11 @@ page.title=GCM Cloud Connection Server (XMPP)
         <li><a href="#response">Response format</a></li>
       </ol>
       </li>
-  <li><a href="#upstream">Upstream Messages</a> </li>
+  <li><a href="#upstream">Upstream Messages</a>
+    <ol>
+      <li><a href="#receipts">Receive return receipts</a></li>
+    </ol>
+  </li>
   <li><a href="#flow">Flow Control</a> </li>
   <li><a href="#implement">Implementing an XMPP-based App Server</a>
     <ol class="toc">
@@ -36,29 +40,25 @@ page.title=GCM Cloud Connection Server (XMPP)
 <li><a href="{@docRoot}google/gcm/gs.html">Getting Started</a></li>
 <li><a href="{@docRoot}google/gcm/server.html">Implementing GCM Server</a></li>
 <li><a href="{@docRoot}google/gcm/client.html">Implementing GCM Client</a></li>
-<li><a href="https://services.google.com/fb/forms/gcm/" class="external-link"
-target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
 </div>
 </div>
 
-<p class="note"><strong>Note:</strong> To try out this feature, sign up using
-<a href="https://services.google.com/fb/forms/gcm/">this form</a>.</p>
+<p>The GCM Cloud Connection Server (CCS) is an XMPP endpoint that provides a
+persistent, asynchronous, bidirectional connection to Google servers. The
+connection can be used to send and receive messages between your server and
+your users' GCM-connected devices.</p>
 
-<p>The GCM Cloud Connection Server (CCS) is a connection server based on XMPP.
-CCS allows 3rd-party app servers (which you're
-responsible for implementing) to communicate
-with Android devices by  establishing a persistent TCP connection with Google
-servers using the XMPP protocol. This communication is asynchronous and bidirectional.</p>
 <p>You can continue to use the HTTP request mechanism to send messages to GCM
 servers, side-by-side with CCS which uses XMPP. Some of the benefits of CCS include:</p>
+
 <ul>
   <li>The asynchronous nature of XMPP allows you to send more messages with fewer
 resources.</li>
-  <li>Communication is bidirectional&mdash;not only can the server send messages
-to the device, but the device can send messages back to the server.</li>
-<li>You can send messages back using the same connection used for receiving,
+  <li>Communication is bidirectional&mdash;not only can your server send messages
+to the device, but the device can send messages back to your server.</li>
+  <li>The device can send messages back using the same connection used for receiving,
 thereby improving battery life.</li>
 </ul>
 
@@ -73,22 +73,38 @@ APIs. For examples, see
 <a href="server.html#params">Implementing GCM Server</a> for a list of all the message
 parameters and which connection server(s) supports them.</p>
 
+<h2 id="connecting">Establishing a Connection</h2>
 
-<h2 id="usage">How to Use CCS</h2>
+<p>CCS just uses XMPP as an authenticated transport layer, so you can use most
+XMPP libraries to manage the connection. For an example, see <a href="#smack">
+Java sample using the Smack library</a>.</p>
 
-<p>GCM Cloud Connection Server (CCS) is an XMPP endpoint, running on
-{@code http://gcm.googleapis.com} port 5235.</p>
+<p>The CCS XMPP endpoint runs at {@code gcm.googleapis.com:5235}. When testing
+functionality (with non-production users), you should instead connect to
+{@code gcm-preprod.googleapis.com:5236} (note the different port). Regular
+testing on preprod (a smaller environment where the latest CCS builds run) is
+beneficial both for isolating real users from test code, as well as for early
+detection of unexpected behavior changes. Note that a connection receives upstream
+messages destined for its GCM sender ID, regardless of which environment (gcm or
+gcm-preprod) it is connected to. Therefore, test code connecting to
+{@code gcm-preprod.googleapis.com:5236} should use a different GCM sender ID to
+avoid upstream messages from production traffic being sent over test connections.</p>
 
-<p>CCS requires a Transport Layer Security (TLS) connection. That means the  XMPP
-client must initiate a TLS connection.
-For example in Java, you would call {@code setSocketFactory(SSLSocketFactory)}.</p>
+<p>The connection has two important requirements:</p>
 
-<p>CCS requires a SASL PLAIN authentication mechanism using
-{@code &lt;your_GCM_Sender_Id&gt;&#64;gcm.googleapis.com} (GCM sender ID) and the
-API key as the password, where the sender ID and API key are the same as described
-in <a href="gs.html">Getting Started</a>.</p>
+<ul>
+  <li>You must initiate a Transport Layer Security (TLS) connection. Note that
+  CCS doesn't currently support the <a href="http://xmpp.org/rfcs/rfc3920.html"
+  class="external-link" target="_android">STARTTLS extension</a>.</li>
+  <li>CCS requires a SASL PLAIN authentication mechanism using
+  {@code &lt;your_GCM_Sender_Id&gt;&#64;gcm.googleapis.com} (GCM sender ID)
+  and the API key as the password, where the sender ID and API key are the same
+  as described in <a href="gs.html">Getting Started</a>.</li>
+</ul>
 
-<p> You can use most XMPP libraries to interact with CCS.</p>
+<p>If at any point the connection fails, you should immediately reconnect.
+There is no need to back off after a disconnect that happens after
+authentication.</p>
 
 <h3 id="auth">Authentication</h3>
 
@@ -100,11 +116,11 @@ in <a href="gs.html">Getting Started</a>.</p>
 </pre>
 <h4>Server</h4>
 <pre>&lt;str:features xmlns:str=&quot;http://etherx.jabber.org/streams&quot;&gt;
- &lt;mechanisms xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;&gt;
-   &lt;mechanism&gt;X-OAUTH2&lt;/mechanism&gt;
-   &lt;mechanism&gt;X-GOOGLE-TOKEN&lt;/mechanism&gt;
-   &lt;mechanism&gt;PLAIN&lt;/mechanism&gt;
- &lt;/mechanisms&gt;
+ &lt;mechanisms xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;&gt;
+   &lt;mechanism&gt;X-OAUTH2&lt;/mechanism&gt;
+   &lt;mechanism&gt;X-GOOGLE-TOKEN&lt;/mechanism&gt;
+   &lt;mechanism&gt;PLAIN&lt;/mechanism&gt;
+ &lt;/mechanisms&gt;
 &lt;/str:features&gt;
 </pre>
 
@@ -118,32 +134,33 @@ mFTeUIzcmNaTmtmbnFLZEZiOW1oekNCaVlwT1JEQTJKV1d0dw==&lt;/auth&gt;
 <pre>&lt;success xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;/&gt;</pre>
 
 <h2 id="format">Message Format</h2>
-<p>CCS uses normal XMPP <code>&lt;message&gt;</code> stanzas. The body of the message must be:
-</p>
+<p>Once the XMPP connection is established, CCS and your server use normal XMPP
+<code>&lt;message&gt;</code> stanzas to send JSON-encoded messages back and
+forth. The body of the <code>&lt;message&gt;</code> must be:</p>
 <pre>
 &lt;gcm xmlns:google:mobile:data&gt;
     <em>JSON payload</em>
 &lt;/gcm&gt;
 </pre>
 
-<p>The JSON payload for server-to-device is similar to what the GCM http endpoint
-uses, with these exceptions:</p>
+<p>The JSON payload for regular GCM messages is similar to
+<a href="http.html#request">what the GCM http endpoint uses</a>, with these
+exceptions:</p>
 <ul>
   <li>There is no support for multiple recipients.</li>
   <li>{@code to} is used instead of {@code registration_ids}.</li>
   <li>CCS adds the field {@code message_id}, which is required. This ID uniquely
 identifies the message in an XMPP connection. The ACK or NACK from CCS uses the
 {@code message_id} to identify a message sent from 3rd-party app servers to CCS.
-Therefore, it's important that this {@code message_id} not only be unique, but
-always present.</li>
-
-<li>For ACK/NACK messages that are special control messages, you also need to
-include a {@code message_type} field in the JSON message. The value can be either
-'ack' or 'nack'. For example:
-
-<pre>message_type = ('ack');</pre>
-  </li>
+Therefore, it's important that this {@code message_id} not only be unique (per
+sender ID), but always present.</li>
 </ul>
+
+<p>In addition to regular GCM messages, control messages are sent, indicated by
+the {@code message_type} field in the JSON object. The value can be either
+'ack' or 'nack', or 'control' (see formats below). Any GCM message with an
+unknown {@code message_type} can be ignored by your server.</p>
+
 <p>For each device message your app server receives from CCS, it needs to send
 an ACK message.
 It never needs to send a NACK message. If you don't send an ACK for a message,
@@ -174,7 +191,8 @@ parameters and which connection server(s) supports them.</p>
           &quot;hello&quot;:&quot;world&quot;,
       }
       &quot;time_to_live&quot;:&quot;600&quot;,
-      &quot;delay_while_idle&quot;: true/false
+      &quot;delay_while_idle&quot;: true/false,
+      &quot;delivery_receipt_requested&quot;: true/false
   }
   &lt;/gcm&gt;
 &lt;/message&gt;
@@ -213,45 +231,53 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 <p>Below are some examples.</p>
 
 <p>Bad registration:</p>
+
 <pre>&lt;message&gt;
-  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
   {
-    &quot;error&quot;:&quot;BAD_REGISTRATION&quot;,  // error code
+    &quot;message_type&quot;:&quot;nack&quot;,
     &quot;message_id&quot;:&quot;msgId1&quot;,
-    &quot;from&quot;:&quot;PA91bHFOtaQGSwupt5l1og&quot;,
-    &quot;message_type&quot;:&quot;nack&quot;
+    &quot;from&quot;:&quot;SomeInvalidRegistrationId&quot;,
+    &quot;error&quot;:&quot;BAD_REGISTRATION&quot;,
+    &quot;error_description&quot;:&quot;Invalid token on 'to' field: SomeInvalidRegistrationId&quot;
   }
-  &lt;/data:gcm&gt;
+  &lt;/gcm&gt;
 &lt;/message&gt;</pre>
 
-<p>Invalid "time to live":</p>
+<p>Invalid JSON:</p>
 
 <pre>&lt;message&gt;
-  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
-  {
-     &quot;error&quot;:&quot;InvalidJson : INVALID_TTL : Invalid value (-1) for \&quot;time_to_live\&quot;: must be between 0 and \&quot;2419200\&quot;\n&quot;,
-     &quot;message_id&quot;:&quot;msgId1&quot;,
-     &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
-     &quot;message_type&quot;:&quot;nack&quot;
-  }
-  &lt;/data:gcm&gt;
-&lt;/message&gt;</pre>
+ &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+ {
+   &quot;message_type&quot;:&quot;nack&quot;,
+   &quot;message_id&quot;:&quot;msgId1&quot;,
+   &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
+   &quot;error&quot;:&quot;INVALID_JSON&quot;,
+   &quot;error_description&quot;:&quot;InvalidJson: JSON_TYPE_ERROR : Field \&quot;time_to_live\&quot; must be a JSON java.lang.Number: abc&quot;
+ }
+ &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
 
-<p>JSON type error:</p>
+<p>Quota exceeded:</p>
 
 <pre>&lt;message&gt;
-  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
-  {
-     &quot;error&quot;:&quot;InvalidJson : JSON_TYPE_ERROR : Field \&quot;delay_while_idle\&quot; must be a JSON java.lang.Boolean: not-boolean-user-supplied-value\n&quot;,
-     &quot;message_id&quot;:&quot;msgId1&quot;,
-     &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
-     &quot;message_type&quot;:&quot;nack&quot;
-  }
-  &lt;/data:gcm&gt;
-&lt;/message&gt;</pre>
+ &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+ {
+   &quot;message_type&quot;:&quot;nack&quot;,
+   &quot;message_id&quot;:&quot;msgId1&quot;,
+   &quot;from&quot;:&quot;APA91bHFOtaQGSwupt5l1og&quot;,
+   &quot;error&quot;:&quot;QUOTA_EXCEEDED&quot;,
+   &quot;error_description&quot;:&quot;Short-term downstream quota exceeded for this registration id&quot;
+ }
+ &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
 
 
-<p>The following table lists some of the more common NACK error codes.</p>
+<p>The following table lists NACK error codes. Unless otherwise
+indicated, a NACKed message should not be retried. Unexpected NACK error codes
+should be treated the same as {@code INTERNAL_SERVER_ERROR}.</p>
 
 <p class="table-caption" id="table1">
   <strong>Table 1.</strong> NACK error codes.</p>
@@ -262,8 +288,17 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 <th>Description</th>
 </tr>
 <tr>
+<td>{@code BAD_ACK}</td>
+<td>The ACK message is improperly formed.</td>
+</tr>
+<tr>
 <td>{@code BAD_REGISTRATION}</td>
-<td>The device has a registration ID, but it's invalid.</td>
+<td>The device has a registration ID, but it's invalid or expired.</td>
+</tr>
+<tr>
+<td>{@code CONNECTION_DRAINING}</td>
+<td>The message couldn't be processed because the connection is draining. The
+message should be immediately retried over another connection.</td>
 </tr>
 <tr>
 <td>{@code DEVICE_UNREGISTERED}</td>
@@ -274,25 +309,20 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 <td>The server encountered an error while trying to process the request.</td>
 </tr>
 <tr>
-<td>{@code SERVICE_UNAVAILABLE}</td>
-<td>The CCS connection server is temporarily unavailable, try again later
-(using exponential backoff, etc.).</td>
+<td>{@code INVALID_JSON}</td>
+<td>The JSON message payload is not valid.</td>
 </tr>
 <tr>
-<td>{@code BAD_ACK}</td>
-<td>The ACK message is improperly formed.</td>
+<td>{@code QUOTA_EXCEEDED}</td>
+<td>The rate of messages to a particular registration ID (in other words, to a
+sender/device pair) is too high. If you want to retry the message, try using a slower
+rate.</td>
 </tr>
 <tr>
-<td>{@code AUTHENTICATION_FAILED}</td>
-<td>This is a 401 error indicating that there was an error authenticating the sender account.</td>
-</tr>
-<tr>
-<td>{@code INVALID_TTL}</td>
-<td>There was an error in the supplied "time to live" value.</td>
-</tr>
-<tr>
-<td>{@code JSON_TYPE_ERROR}</td>
-<td>There was an error in the supplied JSON data type.</td>
+  <td>{@code SERVICE_UNAVAILABLE}</td>
+  <td>CCS is not currently able to process the message. The
+    message should be retried over the same connection using exponential backoff
+    with an initial delay of 1 second.</td>
 </tr>
 </table>
 
@@ -319,6 +349,28 @@ A stanza error contains:</p>
 &lt;/message&gt;
 </pre>
 
+<h4 id="control">Control messages</h4>
+
+<p>Periodically, CCS needs to close down a connection to perform load balancing. Before it
+closes the connection, CCS sends a {@code CONNECTION_DRAINING} message to indicate that the connection is being drained
+and will be closed soon. "Draining" refers to shutting off the flow of messages coming into a
+connection, but allowing whatever is already in the pipeline to continue. When you receive
+a {@code CONNECTION_DRAINING} message, you should immediately begin sending messages to another CCS
+connection, opening a new connection if necessary. You should, however, keep the original
+connection open and continue receiving messages that may come over the connection (and
+ACKing them)&mdash;CCS will handle initiating a connection close when it is ready.</p>
+
+<p>The {@code CONNECTION_DRAINING} message looks like this:</p>
+<pre>&lt;message&gt;
+  &lt;data:gcm xmlns:data=&quot;google:mobile:data&quot;&gt;
+  {
+    &quot;message_type&quot;:&quot;control&quot;
+    &quot;control_type&quot;:&quot;CONNECTION_DRAINING&quot;
+  }
+  &lt;/data:gcm&gt;
+&lt;/message&gt;</pre>
+
+<p>{@code CONNECTION_DRAINING} is currently the only {@code control_type} supported.</p>
 
 <h2 id="upstream">Upstream Messages</h2>
 
@@ -340,8 +392,8 @@ Bundle data = new Bundle();
 // Bundle data consists of a key-value pair
 data.putString("hello", "world");
 // "time to live" parameter
-// This is optional. It specifies a value in seconds up to 4 weeks.
-int ttl = [0 seconds, 4 weeks]
+// This is optional. It specifies a value in seconds up to 24 hours.
+int ttl = [0 seconds, 24 hours]
 
 gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, ttl, data);
 </pre>
@@ -377,11 +429,74 @@ response to the above message:</p>
   &lt;/gcm&gt;
 &lt;/message&gt;</pre>
 
+<h3 id="receipts">Receive return receipts</h3>
+
+<p>You can use upstream messaging to get receipt notifications, confirming
+that a given message was sent to a device. Your 3rd-party app server receives the receipt
+notification from CCS once the message has been sent to the device.</p>
+
+<p>To enable this feature, the message your 3rd-party app server sends to CCS must include
+a field called <code>&quot;delivery_receipt_requested&quot;</code>. When this field is set to
+<code>true</code>, CCS sends a return receipt. Here is an XMPP stanza containing a JSON
+message with <code>&quot;delivery_receipt_requested&quot;</code> set to <code>true</code>:</p>
+
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;to&quot;:&quot;REGISTRATION_ID&quot;,
+      &quot;message_id&quot;:&quot;m-1366082849205&quot;
+      &quot;data&quot;:
+      {
+          &quot;hello&quot;:&quot;world&quot;,
+      }
+      &quot;time_to_live&quot;:&quot;600&quot;,
+      &quot;delay_while_idle&quot;: true,
+      <strong>&quot;delivery_receipt_requested&quot;: true</strong>
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
+
+<p>Here is an example of a receipt notification message that CCS sends back to your 3rd-party
+app server:</p>
+
+</p>
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;category&quot;:&quot;com.example.yourapp&quot;, // to know which app sent it
+      &quot;data&quot;:
+      {
+         &#x201c;message_status&quot;:&quot;MESSAGE_SENT_TO_DEVICE&quot;,
+         &#x201c;original_message_id&#x201d;:&#x201d;m-1366082849205&#x201d;
+         &#x201c;device_registration_id&#x201d;: &#x201c;REGISTRATION_ID&#x201d;
+      },
+      &quot;message_id&quot;:&quot;dr2:m-1366082849205&quot;,
+      &quot;message_type&quot;:&quot;receipt&quot;,
+      &quot;from&quot;:&quot;gcm.googleapis.com&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;</pre>
+
+<p>Note the following:</p>
+
+<ul>
+  <li>The {@code &quot;message_type&quot;} is set to {@code &quot;receipt&quot;}.
+  <li>The {@code &quot;message_status&quot;} is set to {@code &quot;MESSAGE_SENT_TO_DEVICE&quot;},
+  indicating that the message was delivered. Notice that in this case,
+{@code &quot;message_status&quot;} is not a field but rather part of the data payload.</li>
+  <li>The receipt message ID consists of the original message ID, but with a
+<code>dr:</code> prefix. Your 3rd-party app server must send an ACK back with this ID,
+which in this example is {@code dr2:m-1366082849205}.</li>
+  <li>The original message ID and status are inside the
+{@code &quot;data&quot;} field.</li>
+</ul>
+
 <h2 id="flow">Flow Control</h2>
 
 <p>Every message sent to CCS receives either an ACK or a NACK response. Messages
 that haven't received one of these responses are considered pending. If the pending
-message count reaches 1000, the 3rd-party app server should stop sending new messages
+message count reaches 100, the 3rd-party app server should stop sending new messages
 and wait for CCS to acknowledge some of the existing pending messages as illustrated in
 figure 1:</p>
 
@@ -395,7 +510,7 @@ figure 1:</p>
 if there are too many unacknowledged messages. Therefore, the 3rd-party app server
 should "ACK" upstream messages, received from the client application via CCS, as soon as possible
 to maintain a constant flow of incoming messages. The aforementioned pending message limit doesn't
-apply to these ACKs. Even if the pending message count reaches 1000, the 3rd-party app server
+apply to these ACKs. Even if the pending message count reaches 100, the 3rd-party app server
 should continue sending ACKs for messages received from CCS to avoid blocking delivery of new
 upstream messages.</p>
 
@@ -422,6 +537,8 @@ import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.PacketInterceptor;
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
@@ -431,352 +548,378 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.util.StringUtils;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.xmlpull.v1.XmlPullParser;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSocketFactory;
+
 /**
- * Sample Smack implementation of a client for GCM Cloud Connection Server.
+ * Sample Smack implementation of a client for GCM Cloud Connection Server. This
+ * code can be run as a standalone CCS client.
  *
  * &lt;p&gt;For illustration purposes only.
  */
 public class SmackCcsClient {
 
-  Logger logger = Logger.getLogger(&quot;SmackCcsClient&quot;);
+    private static final Logger logger = Logger.getLogger(&quot;SmackCcsClient&quot;);
 
-  public static final String GCM_SERVER = &quot;gcm.googleapis.com&quot;;
-  public static final int GCM_PORT = 5235;
+    private static final String GCM_SERVER = &quot;gcm.googleapis.com&quot;;
+    private static final int GCM_PORT = 5235;
 
-  public static final String GCM_ELEMENT_NAME = &quot;gcm&quot;;
-  public static final String GCM_NAMESPACE = &quot;google:mobile:data&quot;;
+    private static final String GCM_ELEMENT_NAME = &quot;gcm&quot;;
+    private static final String GCM_NAMESPACE = &quot;google:mobile:data&quot;;
 
-  static Random random = new Random();
-  XMPPConnection connection;
-  ConnectionConfiguration config;
+    static {
 
-  /**
-   * XMPP Packet Extension for GCM Cloud Connection Server.
-   */
-  class GcmPacketExtension extends DefaultPacketExtension {
-    String json;
-
-    public GcmPacketExtension(String json) {
-      super(GCM_ELEMENT_NAME, GCM_NAMESPACE);
-      this.json = json;
+        ProviderManager.addExtensionProvider(GCM_ELEMENT_NAME, GCM_NAMESPACE,
+            new PacketExtensionProvider() {
+                &#64;Override
+                public PacketExtension parseExtension(XmlPullParser parser) throws
+                        Exception {
+                    String json = parser.nextText();
+                    return new GcmPacketExtension(json);
+                }
+            });
     }
 
-    public String getJson() {
-      return json;
+    private XMPPConnection connection;
+
+    /**
+     * Indicates whether the connection is in draining state, which means that it
+     * will not accept any new downstream messages.
+     */
+    protected volatile boolean connectionDraining = false;
+
+    /**
+     * Sends a downstream message to GCM.
+     *
+     * &#64;return true if the message has been successfully sent.
+     */
+    public boolean sendDownstreamMessage(String jsonRequest) throws
+            NotConnectedException {
+        if (!connectionDraining) {
+            send(jsonRequest);
+            return true;
+        }
+        logger.info(&quot;Dropping downstream message since the connection is draining&quot;);
+        return false;
     }
 
-    &#64;Override
-    public String toXML() {
-      return String.format(&quot;&lt;%s xmlns=\&quot;%s\&quot;&gt;%s&lt;/%s&gt;&quot;, GCM_ELEMENT_NAME,
-          GCM_NAMESPACE, json, GCM_ELEMENT_NAME);
+    /**
+     * Returns a random message id to uniquely identify a message.
+     *
+     * &lt;p&gt;Note: This is generated by a pseudo random number generator for
+     * illustration purpose, and is not guaranteed to be unique.
+     */
+    public String nextMessageId() {
+        return &quot;m-&quot; + UUID.randomUUID().toString();
     }
 
-    &#64;SuppressWarnings(&quot;unused&quot;)
-    public Packet toPacket() {
-      return new Message() {
-        // Must override toXML() because it includes a &lt;body&gt;
+    /**
+     * Sends a packet with contents provided.
+     */
+    protected void send(String jsonRequest) throws NotConnectedException {
+        Packet request = new GcmPacketExtension(jsonRequest).toPacket();
+        connection.sendPacket(request);
+    }
+
+    /**
+     * Handles an upstream data message from a device application.
+     *
+     * &lt;p&gt;This sample echo server sends an echo message back to the device.
+     * Subclasses should override this method to properly process upstream messages.
+     */
+    protected void handleUpstreamMessage(Map&lt;String, Object&gt; jsonObject) {
+        // PackageName of the application that sent this message.
+        String category = (String) jsonObject.get(&quot;category&quot;);
+        String from = (String) jsonObject.get(&quot;from&quot;);
+        &#64;SuppressWarnings(&quot;unchecked&quot;)
+        Map&lt;String, String&gt; payload = (Map&lt;String, String&gt;) jsonObject.get(&quot;data&quot;);
+        payload.put(&quot;ECHO&quot;, &quot;Application: &quot; + category);
+
+        // Send an ECHO response back
+        String echo = createJsonMessage(from, nextMessageId(), payload,
+                &quot;echo:CollapseKey&quot;, null, false);
+
+        try {
+            sendDownstreamMessage(echo);
+        } catch (NotConnectedException e) {
+            logger.log(Level.WARNING, &quot;Not connected anymore, echo message is
+                    not sent&quot;, e);
+        }
+    }
+
+    /**
+     * Handles an ACK.
+     *
+     * &lt;p&gt;Logs a {@code INFO} message, but subclasses could override it to
+     * properly handle ACKs.
+     */
+    protected void handleAckReceipt(Map&lt;String, Object&gt; jsonObject) {
+        String messageId = (String) jsonObject.get(&quot;message_id&quot;);
+        String from = (String) jsonObject.get(&quot;from&quot;);
+        logger.log(Level.INFO, &quot;handleAckReceipt() from: &quot; + from + &quot;,
+                messageId: &quot; + messageId);
+    }
+
+    /**
+     * Handles a NACK.
+     *
+     * &lt;p&gt;Logs a {@code INFO} message, but subclasses could override it to
+     * properly handle NACKs.
+     */
+    protected void handleNackReceipt(Map&lt;String, Object&gt; jsonObject) {
+        String messageId = (String) jsonObject.get(&quot;message_id&quot;);
+        String from = (String) jsonObject.get(&quot;from&quot;);
+        logger.log(Level.INFO, &quot;handleNackReceipt() from: &quot; + from + &quot;,
+                messageId: &quot; + messageId);
+    }
+
+    protected void handleControlMessage(Map&lt;String, Object&gt; jsonObject) {
+        logger.log(Level.INFO, &quot;handleControlMessage(): &quot; + jsonObject);
+        String controlType = (String) jsonObject.get(&quot;control_type&quot;);
+        if (&quot;CONNECTION_DRAINING&quot;.equals(controlType)) {
+            connectionDraining = true;
+        } else {
+            logger.log(Level.INFO, &quot;Unrecognized control type: %s. This could
+                    happen if new features are &quot; + &quot;added to the CCS protocol.&quot;,
+                    controlType);
+        }
+    }
+
+    /**
+     * Creates a JSON encoded GCM message.
+     *
+     * &#64;param to RegistrationId of the target device (Required).
+     * &#64;param messageId Unique messageId for which CCS will send an
+     *         &quot;ack/nack&quot; (Required).
+     * &#64;param payload Message content intended for the application. (Optional).
+     * &#64;param collapseKey GCM collapse_key parameter (Optional).
+     * &#64;param timeToLive GCM time_to_live parameter (Optional).
+     * &#64;param delayWhileIdle GCM delay_while_idle parameter (Optional).
+     * &#64;return JSON encoded GCM message.
+     */
+    public static String createJsonMessage(String to, String messageId,
+            Map&lt;String, String&gt; payload, String collapseKey, Long timeToLive,
+            Boolean delayWhileIdle) {
+        Map&lt;String, Object&gt; message = new HashMap&lt;String, Object&gt;();
+        message.put(&quot;to&quot;, to);
+        if (collapseKey != null) {
+            message.put(&quot;collapse_key&quot;, collapseKey);
+        }
+        if (timeToLive != null) {
+            message.put(&quot;time_to_live&quot;, timeToLive);
+        }
+        if (delayWhileIdle != null &amp;&amp; delayWhileIdle) {
+            message.put(&quot;delay_while_idle&quot;, true);
+        }
+      message.put(&quot;message_id&quot;, messageId);
+      message.put(&quot;data&quot;, payload);
+      return JSONValue.toJSONString(message);
+    }
+
+    /**
+     * Creates a JSON encoded ACK message for an upstream message received
+     * from an application.
+     *
+     * &#64;param to RegistrationId of the device who sent the upstream message.
+     * &#64;param messageId messageId of the upstream message to be acknowledged to CCS.
+     * &#64;return JSON encoded ack.
+     */
+        protected static String createJsonAck(String to, String messageId) {
+        Map&lt;String, Object&gt; message = new HashMap&lt;String, Object&gt;();
+        message.put(&quot;message_type&quot;, &quot;ack&quot;);
+        message.put(&quot;to&quot;, to);
+        message.put(&quot;message_id&quot;, messageId);
+        return JSONValue.toJSONString(message);
+    }
+
+    /**
+     * Connects to GCM Cloud Connection Server using the supplied credentials.
+     *
+     * &#64;param senderId Your GCM project number
+     * &#64;param apiKey API Key of your project
+     */
+    public void connect(long senderId, String apiKey)
+            throws XMPPException, IOException, SmackException {
+        ConnectionConfiguration config =
+                new ConnectionConfiguration(GCM_SERVER, GCM_PORT);
+        config.setSecurityMode(SecurityMode.enabled);
+        config.setReconnectionAllowed(true);
+        config.setRosterLoadedAtLogin(false);
+        config.setSendPresence(false);
+        config.setSocketFactory(SSLSocketFactory.getDefault());
+
+        connection = new XMPPTCPConnection(config);
+        connection.connect();
+
+        connection.addConnectionListener(new LoggingConnectionListener());
+
+        // Handle incoming packets
+        connection.addPacketListener(new PacketListener() {
+
+            &#64;Override
+            public void processPacket(Packet packet) {
+                logger.log(Level.INFO, &quot;Received: &quot; + packet.toXML());
+                Message incomingMessage = (Message) packet;
+                GcmPacketExtension gcmPacket =
+                        (GcmPacketExtension) incomingMessage.
+                        getExtension(GCM_NAMESPACE);
+                String json = gcmPacket.getJson();
+                try {
+                    &#64;SuppressWarnings(&quot;unchecked&quot;)
+                    Map&lt;String, Object&gt; jsonObject =
+                            (Map&lt;String, Object&gt;) JSONValue.
+                            parseWithException(json);
+
+                    // present for &quot;ack&quot;/&quot;nack&quot;, null otherwise
+                    Object messageType = jsonObject.get(&quot;message_type&quot;);
+
+                    if (messageType == null) {
+                        // Normal upstream data message
+                        handleUpstreamMessage(jsonObject);
+
+                        // Send ACK to CCS
+                        String messageId = (String) jsonObject.get(&quot;message_id&quot;);
+                        String from = (String) jsonObject.get(&quot;from&quot;);
+                        String ack = createJsonAck(from, messageId);
+                        send(ack);
+                    } else if (&quot;ack&quot;.equals(messageType.toString())) {
+                          // Process Ack
+                          handleAckReceipt(jsonObject);
+                    } else if (&quot;nack&quot;.equals(messageType.toString())) {
+                          // Process Nack
+                          handleNackReceipt(jsonObject);
+                    } else if (&quot;control&quot;.equals(messageType.toString())) {
+                          // Process control message
+                          handleControlMessage(jsonObject);
+                    } else {
+                          logger.log(Level.WARNING,
+                                  &quot;Unrecognized message type (%s)&quot;,
+                                  messageType.toString());
+                    }
+                } catch (ParseException e) {
+                    logger.log(Level.SEVERE, &quot;Error parsing JSON &quot; + json, e);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, &quot;Failed to process packet&quot;, e);
+                }
+            }
+        }, new PacketTypeFilter(Message.class));
+
+        // Log all outgoing packets
+        connection.addPacketInterceptor(new PacketInterceptor() {
+            &#64;Override
+                public void interceptPacket(Packet packet) {
+                    logger.log(Level.INFO, &quot;Sent: {0}&quot;, packet.toXML());
+                }
+            }, new PacketTypeFilter(Message.class));
+
+        connection.login(senderId + &quot;&#64;gcm.googleapis.com&quot;, apiKey);
+    }
+
+    public static void main(String[] args) throws Exception {
+        final long senderId = 1234567890L; // your GCM sender id
+        final String password = &quot;Your API key&quot;;
+
+        SmackCcsClient ccsClient = new SmackCcsClient();
+
+        ccsClient.connect(senderId, password);
+
+        // Send a sample hello downstream message to a device.
+        String toRegId = &quot;RegistrationIdOfTheTargetDevice&quot;;
+        String messageId = ccsClient.nextMessageId();
+        Map&lt;String, String&gt; payload = new HashMap&lt;String, String&gt;();
+        payload.put(&quot;Hello&quot;, &quot;World&quot;);
+        payload.put(&quot;CCS&quot;, &quot;Dummy Message&quot;);
+        payload.put(&quot;EmbeddedMessageId&quot;, messageId);
+        String collapseKey = &quot;sample&quot;;
+        Long timeToLive = 10000L;
+        String message = createJsonMessage(toRegId, messageId, payload,
+                collapseKey, timeToLive, true);
+
+        ccsClient.sendDownstreamMessage(message);
+    }
+
+    /**
+     * XMPP Packet Extension for GCM Cloud Connection Server.
+     */
+    private static final class GcmPacketExtension extends DefaultPacketExtension {
+
+        private final String json;
+
+        public GcmPacketExtension(String json) {
+            super(GCM_ELEMENT_NAME, GCM_NAMESPACE);
+            this.json = json;
+        }
+
+        public String getJson() {
+            return json;
+        }
+
         &#64;Override
         public String toXML() {
-
-          StringBuilder buf = new StringBuilder();
-          buf.append(&quot;&lt;message&quot;);
-          if (getXmlns() != null) {
-            buf.append(&quot; xmlns=\&quot;&quot;).append(getXmlns()).append(&quot;\&quot;&quot;);
-          }
-          if (getLanguage() != null) {
-            buf.append(&quot; xml:lang=\&quot;&quot;).append(getLanguage()).append(&quot;\&quot;&quot;);
-          }
-          if (getPacketID() != null) {
-            buf.append(&quot; id=\&quot;&quot;).append(getPacketID()).append(&quot;\&quot;&quot;);
-          }
-          if (getTo() != null) {
-            buf.append(&quot; to=\&quot;&quot;).append(StringUtils.escapeForXML(getTo())).append(&quot;\&quot;&quot;);
-          }
-          if (getFrom() != null) {
-            buf.append(&quot; from=\&quot;&quot;).append(StringUtils.escapeForXML(getFrom())).append(&quot;\&quot;&quot;);
-          }
-          buf.append(&quot;&gt;&quot;);
-          buf.append(GcmPacketExtension.this.toXML());
-          buf.append(&quot;&lt;/message&gt;&quot;);
-          return buf.toString();
+            return String.format(&quot;&lt;%s xmlns=\&quot;%s\&quot;&gt;%s&lt;/%s&gt;&quot;,
+                    GCM_ELEMENT_NAME, GCM_NAMESPACE,
+                    StringUtils.escapeForXML(json), GCM_ELEMENT_NAME);
         }
-      };
-    }
-  }
 
-  public SmackCcsClient() {
-    // Add GcmPacketExtension
-    ProviderManager.getInstance().addExtensionProvider(GCM_ELEMENT_NAME,
-        GCM_NAMESPACE, new PacketExtensionProvider() {
-
-      &#64;Override
-      public PacketExtension parseExtension(XmlPullParser parser)
-          throws Exception {
-        String json = parser.nextText();
-        GcmPacketExtension packet = new GcmPacketExtension(json);
-        return packet;
-      }
-    });
-  }
-
-  /**
-   * Returns a random message id to uniquely identify a message.
-   *
-   * &lt;p&gt;Note:
-   * This is generated by a pseudo random number generator for illustration purpose,
-   * and is not guaranteed to be unique.
-   *
-   */
-  public String getRandomMessageId() {
-    return &quot;m-&quot; + Long.toString(random.nextLong());
-  }
-
-  /**
-   * Sends a downstream GCM message.
-   */
-  public void send(String jsonRequest) {
-    Packet request = new GcmPacketExtension(jsonRequest).toPacket();
-    connection.sendPacket(request);
-  }
-
-  /**
-   * Handles an upstream data message from a device application.
-   *
-   * &lt;p&gt;This sample echo server sends an echo message back to the device.
-   * Subclasses should override this method to process an upstream message.
-   */
-  public void handleIncomingDataMessage(Map&lt;String, Object&gt; jsonObject) {
-    String from = jsonObject.get(&quot;from&quot;).toString();
-
-    // PackageName of the application that sent this message.
-    String category = jsonObject.get(&quot;category&quot;).toString();
-
-    // Use the packageName as the collapseKey in the echo packet
-    String collapseKey = &quot;echo:CollapseKey&quot;;
-    &#64;SuppressWarnings(&quot;unchecked&quot;)
-    Map&lt;String, String&gt; payload = (Map&lt;String, String&gt;) jsonObject.get(&quot;data&quot;);
-    payload.put(&quot;ECHO&quot;, &quot;Application: &quot; + category);
-
-    // Send an ECHO response back
-    String echo = createJsonMessage(from, getRandomMessageId(), payload, collapseKey, null, false);
-    send(echo);
-  }
-
-  /**
-   * Handles an ACK.
-   *
-   * &lt;p&gt;By default, it only logs a {@code INFO} message, but subclasses could override it to
-   * properly handle ACKS.
-   */
-  public void handleAckReceipt(Map&lt;String, Object&gt; jsonObject) {
-    String messageId = jsonObject.get(&quot;message_id&quot;).toString();
-    String from = jsonObject.get(&quot;from&quot;).toString();
-    logger.log(Level.INFO, &quot;handleAckReceipt() from: &quot; + from + &quot;, messageId: &quot; + messageId);
-  }
-
-  /**
-   * Handles a NACK.
-   *
-   * &lt;p&gt;By default, it only logs a {@code INFO} message, but subclasses could override it to
-   * properly handle NACKS.
-   */
-  public void handleNackReceipt(Map&lt;String, Object&gt; jsonObject) {
-    String messageId = jsonObject.get(&quot;message_id&quot;).toString();
-    String from = jsonObject.get(&quot;from&quot;).toString();
-    logger.log(Level.INFO, &quot;handleNackReceipt() from: &quot; + from + &quot;, messageId: &quot; + messageId);
-  }
-
-  /**
-   * Creates a JSON encoded GCM message.
-   *
-   * &#64;param to RegistrationId of the target device (Required).
-   * &#64;param messageId Unique messageId for which CCS will send an &quot;ack/nack&quot; (Required).
-   * &#64;param payload Message content intended for the application. (Optional).
-   * &#64;param collapseKey GCM collapse_key parameter (Optional).
-   * &#64;param timeToLive GCM time_to_live parameter (Optional).
-   * &#64;param delayWhileIdle GCM delay_while_idle parameter (Optional).
-   * &#64;return JSON encoded GCM message.
-   */
-  public static String createJsonMessage(String to, String messageId, Map&lt;String, String&gt; payload,
-      String collapseKey, Long timeToLive, Boolean delayWhileIdle) {
-    Map&lt;String, Object&gt; message = new HashMap&lt;String, Object&gt;();
-    message.put(&quot;to&quot;, to);
-    if (collapseKey != null) {
-      message.put(&quot;collapse_key&quot;, collapseKey);
-    }
-    if (timeToLive != null) {
-      message.put(&quot;time_to_live&quot;, timeToLive);
-    }
-    if (delayWhileIdle != null &amp;&amp; delayWhileIdle) {
-      message.put(&quot;delay_while_idle&quot;, true);
-    }
-    message.put(&quot;message_id&quot;, messageId);
-    message.put(&quot;data&quot;, payload);
-    return JSONValue.toJSONString(message);
-  }
-
-  /**
-   * Creates a JSON encoded ACK message for an upstream message received from an application.
-   *
-   * &#64;param to RegistrationId of the device who sent the upstream message.
-   * &#64;param messageId messageId of the upstream message to be acknowledged to CCS.
-   * &#64;return JSON encoded ack.
-   */
-  public static String createJsonAck(String to, String messageId) {
-    Map&lt;String, Object&gt; message = new HashMap&lt;String, Object&gt;();
-    message.put(&quot;message_type&quot;, &quot;ack&quot;);
-    message.put(&quot;to&quot;, to);
-    message.put(&quot;message_id&quot;, messageId);
-    return JSONValue.toJSONString(message);
-  }
-
-  /**
-   * Connects to GCM Cloud Connection Server using the supplied credentials.
-   *
-   * &#64;param username GCM_SENDER_ID&#64;gcm.googleapis.com
-   * &#64;param password API Key
-   * &#64;throws XMPPException
-   */
-  public void connect(String username, String password) throws XMPPException {
-    config = new ConnectionConfiguration(GCM_SERVER, GCM_PORT);
-    config.setSecurityMode(SecurityMode.enabled);
-    config.setReconnectionAllowed(true);
-    config.setRosterLoadedAtLogin(false);
-    config.setSendPresence(false);
-    config.setSocketFactory(SSLSocketFactory.getDefault());
-
-    // NOTE: Set to true to launch a window with information about packets sent and received
-    config.setDebuggerEnabled(true);
-
-    // -Dsmack.debugEnabled=true
-    XMPPConnection.DEBUG_ENABLED = true;
-
-    connection = new XMPPConnection(config);
-    connection.connect();
-
-    connection.addConnectionListener(new ConnectionListener() {
-
-      &#64;Override
-      public void reconnectionSuccessful() {
-        logger.info(&quot;Reconnecting..&quot;);
-      }
-
-      &#64;Override
-      public void reconnectionFailed(Exception e) {
-        logger.log(Level.INFO, &quot;Reconnection failed.. &quot;, e);
-      }
-
-      &#64;Override
-      public void reconnectingIn(int seconds) {
-        logger.log(Level.INFO, &quot;Reconnecting in %d secs&quot;, seconds);
-      }
-
-      &#64;Override
-      public void connectionClosedOnError(Exception e) {
-        logger.log(Level.INFO, &quot;Connection closed on error.&quot;);
-      }
-
-      &#64;Override
-      public void connectionClosed() {
-        logger.info(&quot;Connection closed.&quot;);
-      }
-    });
-
-    // Handle incoming packets
-    connection.addPacketListener(new PacketListener() {
-
-      &#64;Override
-      public void processPacket(Packet packet) {
-        logger.log(Level.INFO, &quot;Received: &quot; + packet.toXML());
-        Message incomingMessage = (Message) packet;
-        GcmPacketExtension gcmPacket =
-            (GcmPacketExtension) incomingMessage.getExtension(GCM_NAMESPACE);
-        String json = gcmPacket.getJson();
-        try {
-          &#64;SuppressWarnings(&quot;unchecked&quot;)
-          Map&lt;String, Object&gt; jsonObject =
-              (Map&lt;String, Object&gt;) JSONValue.parseWithException(json);
-
-          // present for &quot;ack&quot;/&quot;nack&quot;, null otherwise
-          Object messageType = jsonObject.get(&quot;message_type&quot;);
-
-          if (messageType == null) {
-            // Normal upstream data message
-            handleIncomingDataMessage(jsonObject);
-
-            // Send ACK to CCS
-            String messageId = jsonObject.get(&quot;message_id&quot;).toString();
-            String from = jsonObject.get(&quot;from&quot;).toString();
-            String ack = createJsonAck(from, messageId);
-            send(ack);
-          } else if (&quot;ack&quot;.equals(messageType.toString())) {
-            // Process Ack
-            handleAckReceipt(jsonObject);
-          } else if (&quot;nack&quot;.equals(messageType.toString())) {
-            // Process Nack
-            handleNackReceipt(jsonObject);
-          } else {
-            logger.log(Level.WARNING, &quot;Unrecognized message type (%s)&quot;,
-                messageType.toString());
-          }
-        } catch (ParseException e) {
-          logger.log(Level.SEVERE, &quot;Error parsing JSON &quot; + json, e);
-        } catch (Exception e) {
-          logger.log(Level.SEVERE, &quot;Couldn't send echo.&quot;, e);
+        public Packet toPacket() {
+            Message message = new Message();
+            message.addExtension(this);
+            return message;
         }
-      }
-    }, new PacketTypeFilter(Message.class));
-
-
-    // Log all outgoing packets
-    connection.addPacketInterceptor(new PacketInterceptor() {
-      &#64;Override
-      public void interceptPacket(Packet packet) {
-        logger.log(Level.INFO, &quot;Sent: {0}&quot;,  packet.toXML());
-      }
-    }, new PacketTypeFilter(Message.class));
-
-    connection.login(username, password);
-  }
-
-  public static void main(String [] args) {
-    final String userName = &quot;Your GCM Sender Id&quot; + &quot;&#64;gcm.googleapis.com&quot;;
-    final String password = &quot;API Key&quot;;
-
-    SmackCcsClient ccsClient = new SmackCcsClient();
-
-    try {
-      ccsClient.connect(userName, password);
-    } catch (XMPPException e) {
-      e.printStackTrace();
     }
 
-    // Send a sample hello downstream message to a device.
-    String toRegId = &quot;RegistrationIdOfTheTargetDevice&quot;;
-    String messageId = ccsClient.getRandomMessageId();
-    Map&lt;String, String&gt; payload = new HashMap&lt;String, String&gt;();
-    payload.put(&quot;Hello&quot;, &quot;World&quot;);
-    payload.put(&quot;CCS&quot;, &quot;Dummy Message&quot;);
-    payload.put(&quot;EmbeddedMessageId&quot;, messageId);
-    String collapseKey = &quot;sample&quot;;
-    Long timeToLive = 10000L;
-    Boolean delayWhileIdle = true;
-    ccsClient.send(createJsonMessage(toRegId, messageId, payload, collapseKey,
-        timeToLive, delayWhileIdle));
-  }
+    private static final class LoggingConnectionListener
+            implements ConnectionListener {
+
+        &#64;Override
+        public void connected(XMPPConnection xmppConnection) {
+            logger.info(&quot;Connected.&quot;);
+        }
+
+        &#64;Override
+        public void authenticated(XMPPConnection xmppConnection) {
+            logger.info(&quot;Authenticated.&quot;);
+        }
+
+        &#64;Override
+        public void reconnectionSuccessful() {
+            logger.info(&quot;Reconnecting..&quot;);
+        }
+
+        &#64;Override
+        public void reconnectionFailed(Exception e) {
+            logger.log(Level.INFO, &quot;Reconnection failed.. &quot;, e);
+        }
+
+        &#64;Override
+        public void reconnectingIn(int seconds) {
+            logger.log(Level.INFO, &quot;Reconnecting in %d secs&quot;, seconds);
+        }
+
+        &#64;Override
+        public void connectionClosedOnError(Exception e) {
+            logger.info(&quot;Connection closed on error.&quot;);
+        }
+
+        &#64;Override
+        public void connectionClosed() {
+            logger.info(&quot;Connection closed.&quot;);
+        }
+    }
 }</pre>
+
 <h3 id="python">Python sample</h3>
 
 <p>Here is an example of a CCS app server written in Python. This sample echo
@@ -795,7 +938,7 @@ USERNAME = "Your GCM Sender Id"
 PASSWORD = "API Key"
 REGISTRATION_ID = "Registration Id of the target device"
 
-unacked_messages_quota = 1000
+unacked_messages_quota = 100
 send_queue = []
 
 # Return a random alphanumerical id

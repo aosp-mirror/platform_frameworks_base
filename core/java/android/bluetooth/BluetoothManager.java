@@ -194,6 +194,26 @@ public final class BluetoothManager {
      */
     public BluetoothGattServer openGattServer(Context context,
                                               BluetoothGattServerCallback callback) {
+
+        return (openGattServer (context, callback, BluetoothDevice.TRANSPORT_AUTO));
+    }
+
+    /**
+     * Open a GATT Server
+     * The callback is used to deliver results to Caller, such as connection status as well
+     * as the results of any other GATT server operations.
+     * The method returns a BluetoothGattServer instance. You can use BluetoothGattServer
+     * to conduct GATT server operations.
+     * @param context App context
+     * @param callback GATT server callback handler that will receive asynchronous callbacks.
+     * @param transport preferred transport for GATT connections to remote dual-mode devices
+     *             {@link BluetoothDevice#TRANSPORT_AUTO} or
+     *             {@link BluetoothDevice#TRANSPORT_BREDR} or {@link BluetoothDevice#TRANSPORT_LE}
+     * @return BluetoothGattServer instance
+     * @hide
+     */
+    public BluetoothGattServer openGattServer(Context context,
+                                              BluetoothGattServerCallback callback,int transport) {
         if (context == null || callback == null) {
             throw new IllegalArgumentException("null parameter: " + context + " " + callback);
         }
@@ -208,7 +228,7 @@ public final class BluetoothManager {
                 Log.e(TAG, "Fail to get GATT Server connection");
                 return null;
             }
-            BluetoothGattServer mGattServer = new BluetoothGattServer(context, iGatt);
+            BluetoothGattServer mGattServer = new BluetoothGattServer(context, iGatt,transport);
             Boolean regStatus = mGattServer.registerCallback(callback);
             return regStatus? mGattServer : null;
         } catch (RemoteException e) {

@@ -17,7 +17,6 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
@@ -36,7 +35,7 @@ import java.lang.Math;
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {
 
     private static final String TAG = "FULKeyguardFaceUnlockView";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
     private BiometricSensorUnlock mBiometricUnlock;
@@ -46,8 +45,8 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     private View mEcaView;
     private Drawable mBouncerFrame;
 
-    private boolean mIsShowing = false;
-    private final Object mIsShowingLock = new Object();
+    private boolean mIsBouncerVisibleToUser = false;
+    private final Object mIsBouncerVisibleToUserLock = new Object();
 
     private int mLastRotation;
     private boolean mWatchingRotation;
@@ -149,9 +148,8 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     @Override
     public void onResume(int reason) {
         if (DEBUG) Log.d(TAG, "onResume()");
-        mIsShowing = KeyguardUpdateMonitor.getInstance(mContext).isKeyguardVisible();
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
-          maybeStartBiometricUnlock();
+        synchronized (mIsBouncerVisibleToUserLock) {
+            mIsBouncerVisibleToUser = isBouncerVisibleToUser();
         }
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
 
@@ -213,18 +211,15 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             final boolean backupIsTimedOut = (
                     monitor.getFailedUnlockAttempts() >=
                     LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
-            PowerManager powerManager = (PowerManager) mContext.getSystemService(
-                    Context.POWER_SERVICE);
 
-            boolean isShowing;
-            synchronized(mIsShowingLock) {
-                isShowing = mIsShowing;
+            boolean isBouncerVisibleToUser;
+            synchronized(mIsBouncerVisibleToUserLock) {
+                isBouncerVisibleToUser = mIsBouncerVisibleToUser;
             }
 
-            // Don't start it if the screen is off or if it's not showing, but keep this view up
-            // because we want it here and ready for when the screen turns on or when it does start
-            // showing.
-            if (!powerManager.isScreenOn() || !isShowing) {
+            // Don't start it if the bouncer is not showing, but keep this view up because we want
+            // it here and ready for when the bouncer does show.
+            if (!isBouncerVisibleToUser) {
                 mBiometricUnlock.stop(); // It shouldn't be running but calling this can't hurt.
                 return;
             }
@@ -243,6 +238,34 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                 mBiometricUnlock.start();
             } else {
                 mBiometricUnlock.stopAndShowBackup();
+            }
+        }
+    }
+
+    // Returns true if the device is currently in a state where the user is seeing the bouncer.
+    // This requires isKeyguardBouncer() to be true, but that doesn't imply that the screen is on or
+    // the keyguard visibility is set to true, so we must check those conditions as well.
+    private boolean isBouncerVisibleToUser() {
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        return updateMonitor.isKeyguardBouncer() && updateMonitor.isKeyguardVisible() &&
+                updateMonitor.isScreenOn();
+    }
+
+    // Starts the biometric unlock if the bouncer was not previously visible to the user, but is now
+    // visibile to the user.  Stops the biometric unlock if the bouncer was previously visible to
+    // the user, but is no longer visible to the user.
+    private void handleBouncerUserVisibilityChanged() {
+        boolean wasBouncerVisibleToUser;
+        synchronized(mIsBouncerVisibleToUserLock) {
+            wasBouncerVisibleToUser = mIsBouncerVisibleToUser;
+            mIsBouncerVisibleToUser = isBouncerVisibleToUser();
+        }
+
+        if (mBiometricUnlock != null) {
+            if (wasBouncerVisibleToUser && !mIsBouncerVisibleToUser) {
+                mBiometricUnlock.stop();
+            } else if (!wasBouncerVisibleToUser && mIsBouncerVisibleToUser) {
+                maybeStartBiometricUnlock();
             }
         }
     }
@@ -280,20 +303,25 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
-            boolean wasShowing = false;
-            synchronized(mIsShowingLock) {
-                wasShowing = mIsShowing;
-                mIsShowing = showing;
-            }
-            PowerManager powerManager = (PowerManager) mContext.getSystemService(
-                    Context.POWER_SERVICE);
-            if (mBiometricUnlock != null) {
-                if (!showing && wasShowing) {
-                    mBiometricUnlock.stop();
-                } else if (showing && powerManager.isScreenOn() && !wasShowing) {
-                    maybeStartBiometricUnlock();
-                }
-            }
+            handleBouncerUserVisibilityChanged();
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean bouncer) {
+            if (DEBUG) Log.d(TAG, "onKeyguardBouncerChanged(" + bouncer + ")");
+            handleBouncerUserVisibilityChanged();
+        }
+
+        @Override
+        public void onScreenTurnedOn() {
+            if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
+            handleBouncerUserVisibilityChanged();
+        }
+
+        @Override
+        public void onScreenTurnedOff(int why) {
+            if (DEBUG) Log.d(TAG, "onScreenTurnedOff()");
+            handleBouncerUserVisibilityChanged();
         }
 
         @Override
@@ -320,4 +348,13 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                 hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
     }
 
+    @Override
+    public void startAppearAnimation() {
+        // TODO.
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
+    }
 }

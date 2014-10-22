@@ -18,6 +18,7 @@ package android.nfc.cardemulation;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.nfc.NfcAdapter;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -168,6 +170,10 @@ public final class CardEmulation {
         if (manager == null) {
             // Get card emu service
             INfcCardEmulation service = adapter.getCardEmulationService();
+            if (service == null) {
+                Log.e(TAG, "This device does not implement the INfcCardEmulation interface.");
+                throw new UnsupportedOperationException();
+            }
             manager = new CardEmulation(context, service);
             sCardEmus.put(context, manager);
         }
@@ -244,6 +250,33 @@ public final class CardEmulation {
     }
 
     /**
+     * Returns whether the user has allowed AIDs registered in the
+     * specified category to be handled by a service that is preferred
+     * by the foreground application, instead of by a pre-configured default.
+     *
+     * Foreground applications can set such preferences using the
+     * {@link #setPreferredService(Activity, ComponentName)} method.
+     *
+     * @param category The category, e.g. {@link #CATEGORY_PAYMENT}
+     * @return whether AIDs in the category can be handled by a service
+     *         specified by the foreground app.
+     */
+    public boolean categoryAllowsForegroundPreference(String category) {
+        if (CATEGORY_PAYMENT.equals(category)) {
+            boolean preferForeground = false;
+            try {
+                preferForeground = Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.NFC_PAYMENT_FOREGROUND) != 0;
+            } catch (SettingNotFoundException e) {
+            }
+            return preferForeground;
+        } else {
+            // Allowed for all other categories
+            return true;
+        }
+    }
+
+    /**
      * Returns the service selection mode for the passed in category.
      * Valid return values are:
      * <p>{@link #SELECTION_MODE_PREFER_DEFAULT} the user has requested a default
@@ -265,8 +298,237 @@ public final class CardEmulation {
                 return SELECTION_MODE_ALWAYS_ASK;
             }
         } else {
-            // All other categories are in "only ask if conflict" mode
             return SELECTION_MODE_ASK_IF_CONFLICT;
+        }
+    }
+
+    /**
+     * Registers a list of AIDs for a specific category for the
+     * specified service.
+     *
+     * <p>If a list of AIDs for that category was previously
+     * registered for this service (either statically
+     * through the manifest, or dynamically by using this API),
+     * that list of AIDs will be replaced with this one.
+     *
+     * <p>Note that you can only register AIDs for a service that
+     * is running under the same UID as the caller of this API. Typically
+     * this means you need to call this from the same
+     * package as the service itself, though UIDs can also
+     * be shared between packages using shared UIDs.
+     *
+     * @param service The component name of the service
+     * @param category The category of AIDs to be registered
+     * @param aids A list containing the AIDs to be registered
+     * @return whether the registration was successful.
+     */
+    public boolean registerAidsForService(ComponentName service, String category,
+            List<String> aids) {
+        AidGroup aidGroup = new AidGroup(aids, category);
+        try {
+            return sService.registerAidGroupForService(UserHandle.myUserId(), service, aidGroup);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.registerAidGroupForService(UserHandle.myUserId(), service,
+                        aidGroup);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Retrieves the currently registered AIDs for the specified
+     * category for a service.
+     *
+     * <p>Note that this will only return AIDs that were dynamically
+     * registered using {@link #registerAidsForService(ComponentName, String, List)}
+     * method. It will *not* return AIDs that were statically registered
+     * in the manifest.
+     *
+     * @param service The component name of the service
+     * @param category The category for which the AIDs were registered,
+     *                 e.g. {@link #CATEGORY_PAYMENT}
+     * @return The list of AIDs registered for this category, or null if it couldn't be found.
+     */
+    public List<String> getAidsForService(ComponentName service, String category) {
+        try {
+            AidGroup group =  sService.getAidGroupForService(UserHandle.myUserId(), service,
+                    category);
+            return (group != null ? group.getAids() : null);
+        } catch (RemoteException e) {
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return null;
+            }
+            try {
+                AidGroup group = sService.getAidGroupForService(UserHandle.myUserId(), service,
+                        category);
+                return (group != null ? group.getAids() : null);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Removes a previously registered list of AIDs for the specified category for the
+     * service provided.
+     *
+     * <p>Note that this will only remove AIDs that were dynamically
+     * registered using the {@link #registerAidsForService(ComponentName, String, List)}
+     * method. It will *not* remove AIDs that were statically registered in
+     * the manifest. If dynamically registered AIDs are removed using
+     * this method, and a statically registered AID group for the same category
+     * exists in the manifest, the static AID group will become active again.
+     *
+     * @param service The component name of the service
+     * @param category The category of the AIDs to be removed, e.g. {@link #CATEGORY_PAYMENT}
+     * @return whether the group was successfully removed.
+     */
+    public boolean removeAidsForService(ComponentName service, String category) {
+        try {
+            return sService.removeAidGroupForService(UserHandle.myUserId(), service, category);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.removeAidGroupForService(UserHandle.myUserId(), service, category);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Allows a foreground application to specify which card emulation service
+     * should be preferred while a specific Activity is in the foreground.
+     *
+     * <p>The specified Activity must currently be in resumed state. A good
+     * paradigm is to call this method in your {@link Activity#onResume}, and to call
+     * {@link #unsetPreferredService(Activity)} in your {@link Activity#onPause}.
+     *
+     * <p>This method call will fail in two specific scenarios:
+     * <ul>
+     * <li> If the service registers one or more AIDs in the {@link #CATEGORY_PAYMENT}
+     * category, but the user has indicated that foreground apps are not allowed
+     * to override the default payment service.
+     * <li> If the service registers one or more AIDs in the {@link #CATEGORY_OTHER}
+     * category that are also handled by the default payment service, and the
+     * user has indicated that foreground apps are not allowed to override the
+     * default payment service.
+     * </ul>
+     *
+     * <p> Use {@link #categoryAllowsForegroundPreference(String)} to determine
+     * whether foreground apps can override the default payment service.
+     *
+     * <p>Note that this preference is not persisted by the OS, and hence must be
+     * called every time the Activity is resumed.
+     *
+     * @param activity The activity which prefers this service to be invoked
+     * @param service The service to be preferred while this activity is in the foreground
+     * @return whether the registration was successful
+     */
+    public boolean setPreferredService(Activity activity, ComponentName service) {
+        // Verify the activity is in the foreground before calling into NfcService
+        if (activity == null || service == null) {
+            throw new NullPointerException("activity or service or category is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
+        try {
+            return sService.setPreferredService(service);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.setPreferredService(service);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Unsets the preferred service for the specified Activity.
+     *
+     * <p>Note that the specified Activity must still be in resumed
+     * state at the time of this call. A good place to call this method
+     * is in your {@link Activity#onPause} implementation.
+     *
+     * @param activity The activity which the service was registered for
+     * @return true when successful
+     */
+    public boolean unsetPreferredService(Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
+        try {
+            return sService.unsetPreferredService();
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.unsetPreferredService();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Some devices may allow an application to register all
+     * AIDs that starts with a certain prefix, e.g.
+     * "A000000004*" to register all MasterCard AIDs.
+     *
+     * Use this method to determine whether this device
+     * supports registering AID prefixes.
+     *
+     * @return whether AID prefix registering is supported on this device.
+     */
+    public boolean supportsAidPrefixRegistration() {
+        try {
+            return sService.supportsAidPrefixRegistration();
+        } catch (RemoteException e) {
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.supportsAidPrefixRegistration();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
         }
     }
 
@@ -337,8 +599,45 @@ public final class CardEmulation {
         }
     }
 
+    /**
+     * A valid AID according to ISO/IEC 7816-4:
+     * <ul>
+     * <li>Has >= 5 bytes and <=16 bytes (>=10 hex chars and <= 32 hex chars)
+     * <li>Consist of only hex characters
+     * <li>Additionally, we allow an asterisk at the end, to indicate
+     *     a prefix
+     * </ul>
+     *
+     * @hide
+     */
+    public static boolean isValidAid(String aid) {
+        if (aid == null)
+            return false;
+
+        // If a prefix AID, the total length must be odd (even # of AID chars + '*')
+        if (aid.endsWith("*") && ((aid.length() % 2) == 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        // If not a prefix AID, the total length must be even (even # of AID chars)
+        if (!aid.endsWith("*") && ((aid.length() % 2) != 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        // Verify hex characters
+        if (!aid.matches("[0-9A-Fa-f]{10,32}\\*?")) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        return true;
+    }
+
     void recoverService() {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         sService = adapter.getCardEmulationService();
     }
+
 }

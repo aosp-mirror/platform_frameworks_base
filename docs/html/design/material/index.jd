@@ -1,0 +1,152 @@
+page.title=Material Design
+page.tags=Material,design
+page.type=design
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<p itemprop="description">Material design is a comprehensive guide for visual, motion, and
+interaction design across platforms and devices. Android now includes support for
+material design apps. To use material design in your Android apps, follow the guidelines defined
+in the <a href="http://www.google.com/design/spec">material design specification</a> and use the
+new components and functionality available in Android 5.0 (API level 21) and above.</p>
+
+<p>Android provides the following elements for you to build material design apps:</p>
+
+<ul>
+  <li>A new theme</li>
+  <li>New widgets for complex views</li>
+  <li>New APIs for custom shadows and animations</li>
+</ul>
+
+<p>For more information about implementing material design on Android, see
+<a href="{@docRoot}training/material/index.html">Creating Apps with Material Design</a>.</p>
+
+
+<h3>Material Theme</h3>
+
+<p>The material theme provides a new style for your app, system widgets that let you set
+their color palette, and default animations for touch feedback and activity transitions.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238"/>
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Dark material theme</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238"/>
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Light material theme</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>For more information, see <a href="{@docRoot}training/material/theme.html">Using the Material
+Theme</a>.</p>
+
+
+<h3>Lists and Cards</h3>
+
+<p>Android provides two new widgets for displaying cards and lists with material design styles
+and animations:</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426"/>
+  <p>The new <code>RecyclerView</code> widget is a more pluggable version of <code>ListView</code>
+  that supports different layout types and provides performance improvements.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426"/>
+  <p>The new <code>CardView</code> widget lets you display important pieces of information inside
+  cards that have a consistent look and feel.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>For more information, see <a href="{@docRoot}training/material/lists-cards.html">Creating Lists
+and Cards</a>.</p>
+
+
+<h3>View Shadows</h3>
+
+<p>In addition to the X and Y properties, views in Android now have a Z
+property. This new property represents the elevation of a view, which determines:</p>
+
+<ul>
+<li>The size of the shadow: views with higher Z values cast bigger shadows.</li>
+<li>The drawing order: views with higher Z values appear on top of other views.</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>To replay the movie, click on the device screen</em>
+  </div>
+</div>
+
+<p>For more information, see <a href="{@docRoot}training/material/shadows-clipping.html">Defining
+Shadows and Clipping Views</a>.</p>
+
+
+<h3>Animations</h3>
+
+<p>The new animation APIs let you create custom animations for touch feedback in UI controls,
+changes in view state, and activity transitions.</p>
+
+<p>These APIs let you:</p>
+
+<ul>
+<li style="margin-bottom:15px">
+Respond to touch events in your views with <strong>touch feedback</strong> animations.
+</li>
+<li style="margin-bottom:15px">
+Hide and show views with <strong>circular reveal</strong> animations.
+</li>
+<li style="margin-bottom:15px">
+Switch between activities with custom <strong>activity transition</strong> animations.
+</li>
+<li style="margin-bottom:15px">
+Create more natural animations with <strong>curved motion</strong>.
+</li>
+<li style="margin-bottom:15px">
+Animate changes in one or more view properties with <strong>view state change</strong> animations.
+</li>
+<li style="margin-bottom:15px">
+Show animations in <strong>state list drawables</strong> between view state changes.
+</li>
+</ul>
+
+<p>Touch feedback animations are built into several standard views, such as buttons. The new APIs
+let you customize these animations and add them to your custom views.</p>
+
+<p>For more information, see <a href="{@docRoot}training/material/animations.html">Defining Custom
+Animations</a>.</p>
+
+
+<h3>Drawables</h3>
+
+<p>These new capabilities for drawables help you implement material design apps:</p>
+
+<ul>
+<li><strong>Vector drawables</strong> are scalable without losing definition and are perfect
+for single-color in-app icons.</li>
+<li><strong>Drawable tinting</strong> lets you define bitmaps as an alpha mask and tint them with
+a color at runtime.</li>
+<li><strong>Color extraction</strong> lets you automatically extract prominent colors from a
+bitmap image.</li>
+</ul>
+
+<p>For more information, see <a href="{@docRoot}training/material/drawables.html">Working with
+Drawables</a>.</p>

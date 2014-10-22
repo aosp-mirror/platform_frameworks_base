@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
@@ -33,12 +34,18 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.view.WindowAnimationFrameStats;
+import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
+import libcore.io.IoUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -269,10 +276,10 @@ public final class UiAutomation {
      * @param action The action to perform.
      * @return Whether the action was successfully performed.
      *
-     * @see AccessibilityService#GLOBAL_ACTION_BACK
-     * @see AccessibilityService#GLOBAL_ACTION_HOME
-     * @see AccessibilityService#GLOBAL_ACTION_NOTIFICATIONS
-     * @see AccessibilityService#GLOBAL_ACTION_RECENTS
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_HOME
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_NOTIFICATIONS
+     * @see android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_RECENTS
      */
     public final boolean performGlobalAction(int action) {
         final IAccessibilityServiceConnection connection;
@@ -290,6 +297,28 @@ public final class UiAutomation {
             }
         }
         return false;
+    }
+
+    /**
+     * Find the view that has the specified focus type. The search is performed
+     * across all windows.
+     * <p>
+     * <strong>Note:</strong> In order to access the windows you have to opt-in
+     * to retrieve the interactive windows by setting the
+     * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+     * Otherwise, the search will be performed only in the active window.
+     * </p>
+     *
+     * @param focus The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or
+     *         {@link AccessibilityNodeInfo#FOCUS_ACCESSIBILITY}.
+     * @return The node info of the focused view or null.
+     *
+     * @see AccessibilityNodeInfo#FOCUS_INPUT
+     * @see AccessibilityNodeInfo#FOCUS_ACCESSIBILITY
+     */
+    public AccessibilityNodeInfo findFocus(int focus) {
+        return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId,
+                AccessibilityNodeInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID, focus);
     }
 
     /**
@@ -343,6 +372,33 @@ public final class UiAutomation {
                 Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
             }
         }
+    }
+
+    /**
+     * Gets the windows on the screen. This method returns only the windows
+     * that a sighted user can interact with, as opposed to all windows.
+     * For example, if there is a modal dialog shown and the user cannot touch
+     * anything behind it, then only the modal window will be reported
+     * (assuming it is the top one). For convenience the returned windows
+     * are ordered in a descending layer order, which is the windows that
+     * are higher in the Z-order are reported first.
+     * <p>
+     * <strong>Note:</strong> In order to access the windows you have to opt-in
+     * to retrieve the interactive windows by setting the
+     * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+     * </p>
+     *
+     * @return The windows if there are windows such, otherwise an empty list.
+     */
+    public List<AccessibilityWindowInfo> getWindows() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        // Calling out without a lock held.
+        return AccessibilityInteractionClient.getInstance()
+                .getWindows(connectionId);
     }
 
     /**
@@ -617,6 +673,7 @@ public final class UiAutomation {
             canvas.translate(- screenshotWidth / 2, - screenshotHeight / 2);
             canvas.drawBitmap(screenShot, 0, 0, null);
             canvas.setBitmap(null);
+            screenShot.recycle();
             screenShot = unrotatedScreenShot;
         }
 
@@ -632,7 +689,7 @@ public final class UiAutomation {
      * potentially undesirable actions such as calling 911 or posting on public forums etc.
      *
      * @param enable whether to run in a "monkey" mode or not. Default is not.
-     * @see {@link ActivityManager#isUserAMonkey()}
+     * @see {@link android.app.ActivityManager#isUserAMonkey()}
      */
     public void setRunAsMonkey(boolean enable) {
         synchronized (mLock) {
@@ -643,6 +700,186 @@ public final class UiAutomation {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while setting run as monkey!", re);
         }
+    }
+
+    /**
+     * Clears the frame statistics for the content of a given window. These
+     * statistics contain information about the most recently rendered content
+     * frames.
+     *
+     * @param windowId The window id.
+     * @return Whether the window is present and its frame statistics
+     *         were cleared.
+     *
+     * @see android.view.WindowContentFrameStats
+     * @see #getWindowContentFrameStats(int)
+     * @see #getWindows()
+     * @see AccessibilityWindowInfo#getId() AccessibilityWindowInfo.getId()
+     */
+    public boolean clearWindowContentFrameStats(int windowId) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Clearing content frame stats for window: " + windowId);
+            }
+            // Calling out without a lock held.
+            return mUiAutomationConnection.clearWindowContentFrameStats(windowId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error clearing window content frame stats!", re);
+        }
+        return false;
+    }
+
+    /**
+     * Gets the frame statistics for a given window. These statistics contain
+     * information about the most recently rendered content frames.
+     * <p>
+     * A typical usage requires clearing the window frame statistics via {@link
+     * #clearWindowContentFrameStats(int)} followed by an interaction with the UI and
+     * finally getting the window frame statistics via calling this method.
+     * </p>
+     * <pre>
+     * // Assume we have at least one window.
+     * final int windowId = getWindows().get(0).getId();
+     *
+     * // Start with a clean slate.
+     * uiAutimation.clearWindowContentFrameStats(windowId);
+     *
+     * // Do stuff with the UI.
+     *
+     * // Get the frame statistics.
+     * WindowContentFrameStats stats = uiAutomation.getWindowContentFrameStats(windowId);
+     * </pre>
+     *
+     * @param windowId The window id.
+     * @return The window frame statistics, or null if the window is not present.
+     *
+     * @see android.view.WindowContentFrameStats
+     * @see #clearWindowContentFrameStats(int)
+     * @see #getWindows()
+     * @see AccessibilityWindowInfo#getId() AccessibilityWindowInfo.getId()
+     */
+    public WindowContentFrameStats getWindowContentFrameStats(int windowId) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Getting content frame stats for window: " + windowId);
+            }
+            // Calling out without a lock held.
+            return mUiAutomationConnection.getWindowContentFrameStats(windowId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting window content frame stats!", re);
+        }
+        return null;
+    }
+
+    /**
+     * Clears the window animation rendering statistics. These statistics contain
+     * information about the most recently rendered window animation frames, i.e.
+     * for window transition animations.
+     *
+     * @see android.view.WindowAnimationFrameStats
+     * @see #getWindowAnimationFrameStats()
+     * @see android.R.styleable#WindowAnimation
+     */
+    public void clearWindowAnimationFrameStats() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Clearing window animation frame stats");
+            }
+            // Calling out without a lock held.
+            mUiAutomationConnection.clearWindowAnimationFrameStats();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error clearing window animation frame stats!", re);
+        }
+    }
+
+    /**
+     * Gets the window animation frame statistics. These statistics contain
+     * information about the most recently rendered window animation frames, i.e.
+     * for window transition animations.
+     *
+     * <p>
+     * A typical usage requires clearing the window animation frame statistics via
+     * {@link #clearWindowAnimationFrameStats()} followed by an interaction that causes
+     * a window transition which uses a window animation and finally getting the window
+     * animation frame statistics by calling this method.
+     * </p>
+     * <pre>
+     * // Start with a clean slate.
+     * uiAutimation.clearWindowAnimationFrameStats();
+     *
+     * // Do stuff to trigger a window transition.
+     *
+     * // Get the frame statistics.
+     * WindowAnimationFrameStats stats = uiAutomation.getWindowAnimationFrameStats();
+     * </pre>
+     *
+     * @return The window animation frame statistics.
+     *
+     * @see android.view.WindowAnimationFrameStats
+     * @see #clearWindowAnimationFrameStats()
+     * @see android.R.styleable#WindowAnimation
+     */
+    public WindowAnimationFrameStats getWindowAnimationFrameStats() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Getting window animation frame stats");
+            }
+            // Calling out without a lock held.
+            return mUiAutomationConnection.getWindowAnimationFrameStats();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting window animation frame stats!", re);
+        }
+        return null;
+    }
+
+    /**
+     * Executes a shell command. This method returs a file descriptor that points
+     * to the standard output stream. The command execution is similar to running
+     * "adb shell <command>" from a host connected to the device.
+     * <p>
+     * <strong>Note:</strong> It is your responsibility to close the retunred file
+     * descriptor once you are done reading.
+     * </p>
+     *
+     * @param command The command to execute.
+     * @return A file descriptor to the standard output stream.
+     */
+    public ParcelFileDescriptor executeShellCommand(String command) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+
+        ParcelFileDescriptor source = null;
+        ParcelFileDescriptor sink = null;
+
+        try {
+            ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+            source = pipe[0];
+            sink = pipe[1];
+
+            // Calling out without a lock held.
+            mUiAutomationConnection.executeShellCommand(command, sink);
+        } catch (IOException ioe) {
+            Log.e(LOG_TAG, "Error executing shell command!", ioe);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } finally {
+            IoUtils.closeQuietly(sink);
+        }
+
+        return source;
     }
 
     private static float getDegreesForRotation(int value) {

@@ -97,10 +97,10 @@ uint32_t ResourceIdCache::store(const android::String16& package,
 
 void ResourceIdCache::dump() {
     printf("ResourceIdCache dump:\n");
-    printf("Size: %zu\n", mIdMap.size());
-    printf("Hits:   %zu\n", mHits);
-    printf("Misses: %zu\n", mMisses);
-    printf("(Collisions: %zu)\n", mCollisions);
+    printf("Size: %zd\n", mIdMap.size());
+    printf("Hits:   %zd\n", mHits);
+    printf("Misses: %zd\n", mMisses);
+    printf("(Collisions: %zd)\n", mCollisions);
 }
 
 }

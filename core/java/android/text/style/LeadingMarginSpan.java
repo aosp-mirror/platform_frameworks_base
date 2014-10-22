@@ -28,6 +28,9 @@ import android.text.TextUtils;
  * margin spans on a single paragraph; they will be rendered in order, each
  * adding its margin to the ones before it. The leading margin is on the right
  * for lines in a right-to-left paragraph.
+ * <p>
+ * LeadingMarginSpans should be attached from the first character to the last
+ * character of a single paragraph.
  */
 public interface LeadingMarginSpan
 extends ParagraphStyle
@@ -69,18 +72,22 @@ extends ParagraphStyle
 
 
     /**
-     * An extended version of {@link LeadingMarginSpan}, which allows
-     * the implementor to specify the number of lines of text to which
-     * this object is attached that the "first line of paragraph" margin
-     * width will be applied to.
+     * An extended version of {@link LeadingMarginSpan}, which allows the
+     * implementor to specify the number of lines of the paragraph to which
+     * this object is attached that the "first line of paragraph" margin width
+     * will be applied to.
+     * <p>
+     * There should only be one LeadingMarginSpan2 per paragraph. The leading
+     * margin line count affects all LeadingMarginSpans in the paragraph,
+     * adjusting the number of lines to which the first line margin is applied.
+     * <p>
+     * As with LeadingMarginSpans, LeadingMarginSpan2s should be attached from
+     * the beginning to the end of a paragraph.
      */
     public interface LeadingMarginSpan2 extends LeadingMarginSpan, WrapTogetherSpan {
         /**
-         * Returns the number of lines of text to which this object is
+         * Returns the number of lines of the paragraph to which this object is
          * attached that the "first line" margin will apply to.
-         * Note that if this returns N, the first N lines of the region,
-         * not the first N lines of each paragraph, will be given the
-         * special margin width.
          */
         public int getLeadingMarginLineCount();
     };

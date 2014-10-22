@@ -29,9 +29,6 @@ public abstract class CurrentUserTracker extends BroadcastReceiver {
     private int mCurrentUserId;
 
     public CurrentUserTracker(Context context) {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        context.registerReceiver(this, filter);
-        mCurrentUserId = ActivityManager.getCurrentUser();
         mContext = context;
     }
 
@@ -48,6 +45,12 @@ public abstract class CurrentUserTracker extends BroadcastReceiver {
                 onUserSwitched(mCurrentUserId);
             }
         }
+    }
+
+    public void startTracking() {
+        mCurrentUserId = ActivityManager.getCurrentUser();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(this, filter);
     }
 
     public void stopTracking() {

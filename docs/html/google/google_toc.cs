@@ -3,11 +3,11 @@
      ########            ATTENTION             ###############
      ########                                  ###############
      #########################################################
-     
+
      IF YOU MAKE CHANGES TO THIS FILE, YOU MUST GENERATE THE
      GMS REFERENCE DOCS, BECAUSE THEY ARE NOT INCLUDED IN THE
      DOCS BUILD RULE.
-     
+
      #########################################################
      #########################################################
 ?>
@@ -73,11 +73,11 @@
     </div>
     <ul>
       <li><a href="<?cs var:toroot?>google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
@@ -138,9 +138,6 @@
       <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="<?cs var:toroot?>google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="<?cs var:toroot?>google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -192,6 +189,12 @@
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="<?cs var:toroot ?>google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
@@ -199,7 +202,9 @@
       <li><a href="<?cs var:toroot ?>google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="<?cs var:toroot?>google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="<?cs var:toroot ?>google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>

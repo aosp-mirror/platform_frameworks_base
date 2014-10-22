@@ -20,11 +20,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
 
-import com.android.keyguard.R;
-
-public class EmergencyCarrierArea extends LinearLayout {
+public class EmergencyCarrierArea extends AlphaOptimizedLinearLayout {
 
     private CarrierText mCarrierText;
     private EmergencyButton mEmergencyButton;
@@ -48,6 +45,7 @@ public class EmergencyCarrierArea extends LinearLayout {
         mEmergencyButton.setOnTouchListener(new OnTouchListener(){
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if (mCarrierText.getVisibility() != View.VISIBLE) return false;
                 switch(event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         mCarrierText.animate().alpha(0);
@@ -58,5 +56,9 @@ public class EmergencyCarrierArea extends LinearLayout {
                 }
                 return false;
             }});
+    }
+
+    public void setCarrierTextVisible(boolean visible) {
+        mCarrierText.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }

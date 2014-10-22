@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 
@@ -43,7 +44,7 @@ import java.util.List;
 
 public abstract class KeyguardActivityLauncher {
     private static final String TAG = KeyguardActivityLauncher.class.getSimpleName();
-    private static final boolean DEBUG = KeyguardHostView.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String META_DATA_KEYGUARD_LAYOUT = "com.android.keyguard.layout";
     private static final Intent SECURE_CAMERA_INTENT =
             new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)
@@ -53,9 +54,11 @@ public abstract class KeyguardActivityLauncher {
 
     abstract Context getContext();
 
-    abstract KeyguardSecurityCallback getCallback();
-
     abstract LockPatternUtils getLockPatternUtils();
+
+    abstract void setOnDismissAction(OnDismissAction action);
+
+    abstract void requestDismissKeyguard();
 
     public static class CameraWidgetInfo {
         public String contextPackage;
@@ -102,9 +105,10 @@ public abstract class KeyguardActivityLauncher {
 
         // Workaround to avoid camera release/acquisition race when resuming face unlock
         // after showing lockscreen camera (bug 11063890).
-        KeyguardUpdateMonitor.getInstance(getContext()).setAlternateUnlockEnabled(false);
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
+        updateMonitor.setAlternateUnlockEnabled(false);
 
-        if (lockPatternUtils.isSecure()) {
+        if (mustLaunchSecurely()) {
             // Launch the secure version of the camera
             if (wouldLaunchResolverActivity(SECURE_CAMERA_INTENT)) {
                 // TODO: Show disambiguation dialog instead.
@@ -119,6 +123,13 @@ public abstract class KeyguardActivityLauncher {
             // Launch the normal camera
             launchActivity(INSECURE_CAMERA_INTENT, false, false, null, null);
         }
+    }
+
+    private boolean mustLaunchSecurely() {
+        LockPatternUtils lockPatternUtils = getLockPatternUtils();
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
+        int currentUser = lockPatternUtils.getCurrentUser();
+        return lockPatternUtils.isSecure() && !updateMonitor.getUserHasTrust(currentUser);
     }
 
     public void launchWidgetPicker(int appWidgetId) {
@@ -175,9 +186,9 @@ public abstract class KeyguardActivityLauncher {
                 Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        boolean isSecure = lockPatternUtils.isSecure();
-        if (!isSecure || showsWhileLocked) {
-            if (!isSecure) {
+        boolean mustLaunchSecurely = mustLaunchSecurely();
+        if (!mustLaunchSecurely || showsWhileLocked) {
+            if (!mustLaunchSecurely) {
                 dismissKeyguardOnNextActivity();
             }
             try {
@@ -190,8 +201,7 @@ public abstract class KeyguardActivityLauncher {
         } else {
             // Create a runnable to start the activity and ask the user to enter their
             // credentials.
-            KeyguardSecurityCallback callback = getCallback();
-            callback.setOnDismissAction(new OnDismissAction() {
+            setOnDismissAction(new OnDismissAction() {
                 @Override
                 public boolean onDismiss() {
                     dismissKeyguardOnNextActivity();
@@ -199,15 +209,15 @@ public abstract class KeyguardActivityLauncher {
                     return true;
                 }
             });
-            callback.dismiss(false);
+            requestDismissKeyguard();
         }
     }
 
     private void dismissKeyguardOnNextActivity() {
         try {
-            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
         } catch (RemoteException e) {
-            Log.w(TAG, "can't dismiss keyguard on launch");
+            Log.w(TAG, "Error dismissing keyguard", e);
         }
     }
 
@@ -232,8 +242,7 @@ public abstract class KeyguardActivityLauncher {
                             null /*resultWho*/,
                             0 /*requestCode*/,
                             Intent.FLAG_ACTIVITY_NEW_TASK,
-                            null /*profileFile*/,
-                            null /*profileFd*/,
+                            null /*profilerInfo*/,
                             options,
                             user.getIdentifier());
                     if (DEBUG) Log.d(TAG, String.format("waitResult[%s,%s,%s,%s] at %s",
@@ -252,7 +261,7 @@ public abstract class KeyguardActivityLauncher {
     }
 
     private Intent getCameraIntent() {
-        return getLockPatternUtils().isSecure() ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+        return mustLaunchSecurely() ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
     }
 
     private boolean wouldLaunchResolverActivity(Intent intent) {

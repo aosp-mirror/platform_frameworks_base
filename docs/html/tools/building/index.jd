@@ -79,3 +79,14 @@ page.title=Building and Running
     running on a device.</li>
   </ul>
 
+<p class="note"><b>Note:</b> Apps are limited to a 64K method reference limit. If your app reaches
+this limit, the build process outputs the following error message:
+
+<pre>Unable to execute dex: method ID not in [0, 0xffff]: 65536.</pre>
+
+To avoid this, you can
+<a href="http://android-developers.blogspot.com.es/2011/07/custom-class-loading-in-dalvik.html">load
+secondary dex files at runtime</a> and use
+<a href="http://developer.android.com/tools/help/proguard.html">ProGuard</a> to strip out unnecessary
+class references (Proguard only works when building in release mode).
+</p>

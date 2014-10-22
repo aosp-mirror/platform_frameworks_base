@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar.tv;
 
 import android.os.IBinder;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 /*
@@ -45,19 +47,19 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void addNotification(IBinder key, StatusBarNotification notification) {
+    public void addNotification(StatusBarNotification notification, RankingMap ranking) {
     }
 
     @Override
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
+    protected void updateNotificationRanking(RankingMap ranking) {
     }
 
     @Override
-    public void removeNotification(IBinder key) {
+    public void removeNotification(String key, RankingMap ranking) {
     }
 
     @Override
-    public void disable(int state) {
+    public void disable(int state, boolean animate) {
     }
 
     @Override
@@ -77,11 +79,8 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
-    }
-
-    @Override
-    public void setHardKeyboardStatus(boolean available, boolean enabled) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
     }
 
     @Override
@@ -92,8 +91,16 @@ public class TvStatusBar extends BaseStatusBar {
     public void setWindowState(int window, int state) {
     }
 
-    @Override
-    protected void createAndAddWindows() {
+    @Override // CommandQueue
+    public void buzzBeepBlinked() {
+    }
+
+    @Override // CommandQueue
+    public void notificationLightOff() {
+    }
+
+    @Override // CommandQueue
+    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
     }
 
     @Override
@@ -111,20 +118,15 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void updateNotificationIcons() {
+    protected void updateNotifications() {
     }
 
     @Override
-    protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
+    protected void tick(StatusBarNotification n, boolean firstTime) {
     }
 
     @Override
     protected void updateExpandedViewPos(int expandedPosition) {
-    }
-
-    @Override
-    protected int getExpandedViewMaxHeight() {
-        return 0;
     }
 
     @Override
@@ -141,11 +143,39 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public void scheduleHeadsUpOpen() {
+    }
+
+    @Override
+    public void scheduleHeadsUpEscalation() {
+    }
+
+    @Override
+    public void scheduleHeadsUpClose() {
+    }
+
+    @Override
+    protected int getMaxKeyguardNotifications() {
+        return 0;
+    }
+
+    @Override
     public void animateExpandSettingsPanel() {
+    }
+
+    @Override
+    protected void createAndAddWindows() {
     }
 
     @Override
     protected void refreshLayout(int layoutDirection) {
     }
 
+    @Override
+    public void onActivated(ActivatableNotificationView view) {
+    }
+
+    @Override
+    public void onActivationReset(ActivatableNotificationView view) {
+    }
 }

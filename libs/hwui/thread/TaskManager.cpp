@@ -15,10 +15,14 @@
  */
 
 #include <sys/sysinfo.h>
+#if defined(HAVE_PTHREADS)
+#include <sys/resource.h>
+#endif
 
+#include "TaskManager.h"
 #include "Task.h"
 #include "TaskProcessor.h"
-#include "TaskManager.h"
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -31,7 +35,8 @@ TaskManager::TaskManager() {
     // Get the number of available CPUs. This value does not change over time.
     int cpuCount = sysconf(_SC_NPROCESSORS_CONF);
 
-    for (int i = 0; i < cpuCount / 2; i++) {
+    int workerCount = MathUtils::max(1, cpuCount / 2);
+    for (int i = 0; i < workerCount; i++) {
         String8 name;
         name.appendFormat("hwuiTask%d", i + 1);
         mThreads.add(new WorkerThread(name));
@@ -76,6 +81,13 @@ bool TaskManager::addTaskBase(const sp<TaskBase>& task, const sp<TaskProcessorBa
 ///////////////////////////////////////////////////////////////////////////////
 // Thread
 ///////////////////////////////////////////////////////////////////////////////
+
+status_t TaskManager::WorkerThread::readyToRun() {
+#if defined(HAVE_PTHREADS)
+    setpriority(PRIO_PROCESS, 0, PRIORITY_FOREGROUND);
+#endif
+    return NO_ERROR;
+}
 
 bool TaskManager::WorkerThread::threadLoop() {
     mSignal.wait();

@@ -35,7 +35,7 @@ public class PaintDrawable extends ShapeDrawable {
     public PaintDrawable(int color) {
         getPaint().setColor(color);
     }
-    
+
     /**
      * Specify radius for the corners of the rectangle. If this is > 0, then the
      * drawable is drawn in a round-rectangle, rather than a rectangle.
@@ -51,7 +51,7 @@ public class PaintDrawable extends ShapeDrawable {
         }
         setCornerRadii(radii);
     }
-    
+
     /**
      * Specify radii for each of the 4 corners. For each corner, the array
      * contains 2 values, [X_radius, Y_radius]. The corners are ordered
@@ -78,9 +78,9 @@ public class PaintDrawable extends ShapeDrawable {
             int radius = a.getDimensionPixelSize(
                                 com.android.internal.R.styleable.DrawableCorners_radius, 0);
             setCornerRadius(radius);
-            
+
             // now check of they have any per-corner radii
-            
+
             int topLeftRadius = a.getDimensionPixelSize(
                     com.android.internal.R.styleable.DrawableCorners_topLeftRadius, radius);
             int topRightRadius = a.getDimensionPixelSize(

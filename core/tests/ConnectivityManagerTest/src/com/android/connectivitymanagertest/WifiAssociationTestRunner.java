@@ -16,17 +16,12 @@
 
 package com.android.connectivitymanagertest;
 
-import android.content.Context;
-import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import android.util.Log;
 
 import com.android.connectivitymanagertest.functional.WifiAssociationTest;
 
 import junit.framework.TestSuite;
-import junit.framework.Assert;
 
 /**
  * Instrumentation Test Runner for wifi association test.
@@ -39,8 +34,6 @@ import junit.framework.Assert;
  * -w com.android.connectivitymanagertest/.WifiAssociationTestRunner"
  */
 public class WifiAssociationTestRunner extends InstrumentationTestRunner {
-    private static final String TAG = "WifiAssociationTestRunner";
-    public int mBand;
 
     @Override
     public TestSuite getAllTests() {
@@ -52,37 +45,5 @@ public class WifiAssociationTestRunner extends InstrumentationTestRunner {
     @Override
     public ClassLoader getLoader() {
         return WifiAssociationTestRunner.class.getClassLoader();
-    }
-
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        Bundle arguments = icicle;
-        String mFrequencyBand = arguments.getString("frequency-band");
-        if (mFrequencyBand != null) {
-            setFrequencyBand(mFrequencyBand);
-        }
-    }
-
-    private void setFrequencyBand(String band) {
-        WifiManager mWifiManager = (WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
-        if (band.equals("2.4")) {
-            Log.v(TAG, "set frequency band to 2.4");
-            mBand = WifiManager.WIFI_FREQUENCY_BAND_2GHZ;
-        } else if (band.equals("5.0")) {
-            Log.v(TAG, "set frequency band to 5.0");
-            mBand = WifiManager.WIFI_FREQUENCY_BAND_5GHZ;
-        } else if (band.equals("auto")) {
-            Log.v(TAG, "set frequency band to auto");
-            mBand = WifiManager.WIFI_FREQUENCY_BAND_AUTO;
-        } else {
-            Assert.fail("invalid frequency band");
-        }
-        int currentFreq = mWifiManager.getFrequencyBand();
-        if (mBand == currentFreq) {
-            Log.v(TAG, "frequency band has been set");
-            return;
-        }
-        mWifiManager.setFrequencyBand(mBand, true);
     }
 }

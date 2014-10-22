@@ -99,7 +99,7 @@ public class SystemSensorManager extends SensorManager {
             return false;
         }
         // Trigger Sensors should use the requestTriggerSensor call.
-        if (Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT) {
+        if (sensor.getReportingMode() == Sensor.REPORTING_MODE_ONE_SHOT) {
             Log.e(TAG, "Trigger Sensors should use the requestTriggerSensor.");
             return false;
         }
@@ -133,7 +133,7 @@ public class SystemSensorManager extends SensorManager {
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener, Sensor sensor) {
         // Trigger Sensors should use the cancelTriggerSensor call.
-        if (sensor != null && Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT) {
+        if (sensor != null && sensor.getReportingMode() == Sensor.REPORTING_MODE_ONE_SHOT) {
             return;
         }
 
@@ -159,7 +159,7 @@ public class SystemSensorManager extends SensorManager {
     protected boolean requestTriggerSensorImpl(TriggerEventListener listener, Sensor sensor) {
         if (sensor == null) throw new IllegalArgumentException("sensor cannot be null");
 
-        if (Sensor.getReportingMode(sensor) != Sensor.REPORTING_MODE_ONE_SHOT) return false;
+        if (sensor.getReportingMode() != Sensor.REPORTING_MODE_ONE_SHOT) return false;
 
         synchronized (mTriggerListeners) {
             TriggerEventQueue queue = mTriggerListeners.get(listener);
@@ -181,7 +181,7 @@ public class SystemSensorManager extends SensorManager {
     @Override
     protected boolean cancelTriggerSensorImpl(TriggerEventListener listener, Sensor sensor,
             boolean disable) {
-        if (sensor != null && Sensor.getReportingMode(sensor) != Sensor.REPORTING_MODE_ONE_SHOT) {
+        if (sensor != null && sensor.getReportingMode() != Sensor.REPORTING_MODE_ONE_SHOT) {
             return false;
         }
         synchronized (mTriggerListeners) {
@@ -395,25 +395,12 @@ public class SystemSensorManager extends SensorManager {
             t.timestamp = timestamp;
             t.accuracy = inAccuracy;
             t.sensor = sensor;
-            switch (t.sensor.getType()) {
-                // Only report accuracy for sensors that support it.
-                case Sensor.TYPE_MAGNETIC_FIELD:
-                case Sensor.TYPE_ORIENTATION:
-                    // call onAccuracyChanged() only if the value changes
-                    final int accuracy = mSensorAccuracies.get(handle);
-                    if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
-                        mSensorAccuracies.put(handle, t.accuracy);
-                        mListener.onAccuracyChanged(t.sensor, t.accuracy);
-                    }
-                    break;
-                default:
-                    // For other sensors, just report the accuracy once
-                    if (mFirstEvent.get(handle) == false) {
-                        mFirstEvent.put(handle, true);
-                        mListener.onAccuracyChanged(
-                                t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
-                    }
-                    break;
+
+            // call onAccuracyChanged() only if the value changes
+            final int accuracy = mSensorAccuracies.get(handle);
+            if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
+                mSensorAccuracies.put(handle, t.accuracy);
+                mListener.onAccuracyChanged(t.sensor, t.accuracy);
             }
             mListener.onSensorChanged(t);
         }

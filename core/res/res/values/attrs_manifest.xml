@@ -62,6 +62,21 @@
          a reference to a Drawable resource containing the image definition. -->
     <attr name="icon" format="reference" />
 
+    <!-- A Drawable resource providing an extended graphical banner for its
+         associated item. Use with the application tag (to supply a default
+         banner for all application activities), or with the activity, tag to
+         supply a banner for a specific activity.
+
+         <p>The given banner will be used to display to the user a graphical
+         representation of an activity in the Leanback application launcher.
+         Since banners are displayed only in the Leanback launcher, they should
+         only be used with activities (and applications) that support Leanback
+         mode. These are activities that handle Intents of category
+         {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER
+         Intent.CATEGORY_LEANBACK_LAUNCHER}.
+         <p>This must be a reference to a Drawable resource containing the image definition. -->
+    <attr name="banner" format="reference" />
+
     <!-- A Drawable resource providing an extended graphical logo for its
          associated item. Use with the application tag (to supply a default
          logo for all application components), or with the activity, receiver,
@@ -197,6 +212,9 @@
         <!-- Additional flag from base permission type: this permission can also
              (optionally) be granted to development applications. -->
         <flag name="development" value="0x20" />
+        <!-- Additional flag from base permission type: this permission is closely
+             associated with an app op for controlling access. -->
+        <flag name="appop" value="0x40" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -297,6 +315,12 @@
          content providers. -->
     <attr name="exported" format="boolean" />
 
+    <!-- A boolean flag used to indicate if an application is a Game or not.
+         <p>This information can be used by the system to group together
+         applications that are classified as games, and display them separately
+         from the other applications. -->
+    <attr name="isGame" format="boolean" />
+
     <!-- If set to true, a single instance of this component will run for
          all users.  That instance will run as user 0, the default/primary
          user.  When the app running is in processes for other users and interacts
@@ -355,6 +379,17 @@
          with that application.  The activity is re-parented to the task
          with the same {@link android.R.attr#taskAffinity} as it has. -->
     <attr name="allowTaskReparenting" format="boolean" />
+
+    <!-- Declare that code from this application will need to be loaded into other
+         applications' processes. On devices that support multiple instruction sets,
+         this implies the code might be loaded into a process that's using any of the devices
+         supported instruction sets.
+         
+         <p> The system might treat such applications specially, for eg., by
+         extracting the application's native libraries for all supported instruction
+         sets or by compiling the application's dex code for all supported instruction
+         sets. -->
+    <attr name="multiArch" format ="boolean" />
     
     <!-- Specify whether a component is allowed to have multiple instances
          of itself running in different processes.  Use with the activity
@@ -714,7 +749,14 @@
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
     </attr>
-    
+
+    <!-- Indicate that the activity can be launched as the embedded child of another
+         activity. Particularly in the case where the child lives in a container
+         such as a Display owned by another activity.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="allowEmbedded" format="boolean" />
+
     <!-- Descriptive text for the associated data. -->
     <attr name="description" format="reference" />
     
@@ -775,6 +817,14 @@
          via adb.  The default value of this attribute is <code>true</code>. -->
     <attr name="allowBackup" format="boolean" />
 
+    <!-- Indicates that even though the application provides a <code>BackupAgent</code>,
+         only full-data streaming backup operations are to be performed to save the app's
+         data.  This lets the app rely on full-data backups while still participating in
+         the backup and restore process via the BackupAgent's full-data backup APIs.
+         When this attribute is <code>true</code> the app's BackupAgent overrides of
+         the onBackup() and onRestore() callbacks can be empty stubs. -->
+    <attr name="fullBackupOnly" format="boolean" />
+
     <!-- Whether the application in question should be terminated after its
          settings have been restored during a full-system restore operation.
          Single-package restore operations will never cause the application to
@@ -834,6 +884,125 @@
     <!-- The name of the logical parent of the activity as it appears in the manifest. -->
     <attr name="parentActivityName" format="string" />
 
+    <!-- Define how an activity persist across reboots. Activities defined as "never" will not
+         be persisted. Those defined as "always" will be persisted. Those defined as "taskOnly"
+         will persist the root activity of the task only. See below for more detail as to
+         what gets persisted. -->
+    <attr name="persistableMode">
+        <!-- The default. If this activity forms the root of a task then that task will be
+             persisted across reboots but only the launching intent will be used. All
+             activities above this activity in the task will not be persisted. In addition
+             this activity will not be passed a PersistableBundle into which it could have
+             stored its state. -->
+        <enum name="persistRootOnly" value="0" />
+        <!-- If this activity forms the root of a task then that task will not be persisted
+             across reboots -->
+        <enum name="persistNever" value="1" />
+        <!-- If this activity forms the root of a task then the task and this activity will
+             be persisted across reboots. If the activity above this activity is also
+             tagged with the attribute <code>"persist"</code> then it will be persisted as well.
+             And so on up the task stack until either an activity without the
+             <code>persistableMode="persistAcrossReboots"</code> attribute or one that was launched
+             with the flag Intent.FLAG_CLEAR_TASK_WHEN_RESET is encountered.
+
+             <p>Activities that are declared with the persistAcrossReboots attribute will be
+             provided with a PersistableBundle in onSavedInstanceState(), These activities may
+             use this PeristableBundle to save their state. Then, following a reboot, that
+             PersistableBundle will be provided back to the activity in its onCreate() method. -->
+        <enum name="persistAcrossReboots" value="2" />
+    </attr>
+
+    <!-- This attribute specifies that an activity shall become the root activity of a
+         new task each time it is launched. Using this attribute permits the user to
+         have multiple documents from the same applications appear in the recent tasks list.
+
+         <p>Such a document is any kind of item for which an application may want to
+         maintain multiple simultaneous instances. Examples might be text files, web
+         pages, spreadsheets, or emails. Each such document will be in a separate
+         task in the recent taskss list.
+
+         <p>This attribute is equivalent to adding the flag {@link
+         android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} to every Intent used to launch
+         the activity.
+
+         <p>The documentLaunchMode attribute may be assigned one of four values, "none",
+         "intoExisting", "always" and "never", described in detail below. For values other than
+         <code>none</code> and <code>never</code> the activity must be defined with
+         {@link android.R.attr#launchMode} <code>standard</code>.
+         If this attribute is not specified, <code>none</code> will be used.
+         Note that <code>none</code> can be overridden at run time if the Intent used
+         to launch it contains the flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
+         Intent.FLAG_ACTIVITY_NEW_DOCUMENT}.
+         Similarly <code>intoExisting</code> will be overridden by the flag
+         {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
+         Intent.FLAG_ACTIVITY_NEW_DOCUMENT} combined with
+         {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
+         Intent.FLAG_ACTIVITY_MULTIPLE_TASK}. If the value of
+         documentLaunchModes is <code>never</code> then any use of
+         {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
+         Intent.FLAG_ACTIVITY_NEW_DOCUMENT} to launch this activity will be ignored. -->
+    <attr name="documentLaunchMode">
+        <!-- The default mode, which will create a new task only when
+             {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+             Intent.FLAG_ACTIVITY_NEW_TASK} is set. -->
+        <enum name="none" value="0" />
+        <!-- All tasks will be searched for one whose base Intent's ComponentName and
+             data URI match those of the launching Intent. If such a task is found
+             that task will be cleared and restarted with the root activity receiving a call
+             to {@link android.app.Activity#onNewIntent Activity.onNewIntent}. If no
+             such task is found a new task will be created.
+             <p>This is the equivalent of launching an activity with {@link
+             android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT Intent.FLAG_ACTIVITY_NEW_DOCUMENT}
+             set and without {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
+             Intent.FLAG_ACTIVITY_MULTIPLE_TASK} set. -->
+        <enum name="intoExisting" value="1" />
+        <!-- A new task rooted at this activity will be created. This will happen whether or
+             not there is an existing task whose ComponentName and data URI match
+             that of the launcing intent This is the equivalent of launching an activity
+             with {@link
+             android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT Intent.FLAG_ACTIVITY_NEW_DOCUMENT}
+             and {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
+             Intent.FLAG_ACTIVITY_MULTIPLE_TASK} both set. -->
+        <enum name="always" value="2" />
+        <!-- This activity will not be launched into a new document even if the Intent contains
+             {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
+             Intent.FLAG_ACTIVITY_NEW_DOCUMENT}. This gives the activity writer ultimate
+             control over how their activity is used. Note that applications prior to api
+             21 will default to documentLaunchMode="none" so only activities that explicitly
+             opt out with <code>"never"</code> may do so. -->
+        <enum name="never" value="3" />
+    </attr>
+
+    <!-- The maximum number of entries of tasks rooted at this activity in the recent task list.
+         When this number of entries is reached the least recently used instance of this activity
+         will be removed from recents. The value will be clamped between 1 and 100 inclusive.
+         The default value for this if it is not specified is 15. -->
+    <attr name="maxRecents" format="integer" />
+
+    <!-- Tasks launched by activities with this attribute will remain in the recent tasks
+         list until the last activity in the task is completed.  When that happens the task
+         will be automatically removed from the recent tasks list.  This overrides the caller's
+         use of {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS
+         Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS} -->
+    <attr name="autoRemoveFromRecents" format="boolean" />
+
+    <!-- Tasks whose root has this attribute set to true will replace baseIntent with that of the
+         next activity in the task. If the next activity also has this attribute set to true then
+         it will yield the baseIntent to any activity that it launches in the same task. This
+         continues until an activity is encountered which has this attribute set to false. False
+         is the default. This attribute set to true also permits activity's use of the
+         TaskDescription to change labels, colors and icons in the recent task list. -->
+    <attr name="relinquishTaskIdentity" format="boolean" />
+
+    <!-- Indicate that it is okay for this activity be resumed while the previous
+         activity is in the process of pausing, without waiting for the previous pause
+         to complete.  Use this with caution: your activity can not acquire any exclusive
+         resources (such as opening the camera or recording audio) when it launches, or it
+         may conflict with the previous activity and fail.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="resumeWhilePausing" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -888,6 +1057,7 @@
         <attr name="theme" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
         <attr name="permission" />
@@ -915,6 +1085,7 @@
         <attr name="testOnly" />
         <attr name="backupAgent" />
         <attr name="allowBackup" />
+        <attr name="fullBackupOnly" />
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
@@ -951,6 +1122,8 @@
              any accounts. The type should correspond to the account authenticator type, such as
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
+        <attr name="isGame" />
+        <attr name="multiArch" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -970,6 +1143,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permissionGroup" />
         <attr name="description" />
@@ -996,6 +1170,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
         <attr name="permissionGroupFlags" />
@@ -1028,6 +1203,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
     </declare-styleable>
     
@@ -1071,7 +1247,9 @@
          application.
 
          <p>This appears as a child tag of the root
-         {@link #AndroidManifest manifest} tag. -->
+         {@link #AndroidManifest manifest} tag.
+
+         @deprecated Use <code>feature-group</code> instead.-->
     <declare-styleable name="AndroidManifestUsesConfiguration" parent="AndroidManifest">
         <!-- The type of touch screen used by an application. -->
         <attr name="reqTouchScreen" />
@@ -1104,6 +1282,19 @@
               not impose a restriction on where the application can be
               installed. -->
         <attr name="required" format="boolean" />
+    </declare-styleable>
+
+    <!-- The <code>feature-group</code> tag specifies
+         a set of one or more <code>uses-feature</code> elements that
+         the application can utilize. An application uses multiple
+         <code>feature-group</code> sets to indicate that it can support
+         different combinations of features.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestFeatureGroup">
+        <!-- The human-readable name of the feature group. -->
+        <attr name="label" />
     </declare-styleable>
 
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
@@ -1294,6 +1485,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="process" />
         <attr name="authorities" />
@@ -1375,6 +1567,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
@@ -1417,6 +1610,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
@@ -1451,6 +1645,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="launchMode" />
         <attr name="screenOrientation" />
@@ -1486,6 +1681,13 @@
         <!-- @hide This broacast receiver will only receive broadcasts for the
              primary user.  Can only be used with receivers. -->
         <attr name="primaryUserOnly" format="boolean" />
+        <attr name="persistableMode" />
+        <attr name="allowEmbedded" />
+        <attr name="documentLaunchMode" />
+        <attr name="maxRecents" />
+        <attr name="autoRemoveFromRecents" />
+        <attr name="relinquishTaskIdentity" />
+        <attr name="resumeWhilePausing" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
@@ -1514,6 +1716,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
         <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).
@@ -1585,6 +1788,7 @@
          parent="AndroidManifestActivity AndroidManifestReceiver AndroidManifestService">
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="priority" />
     </declare-styleable>
@@ -1713,6 +1917,7 @@
         <attr name="targetPackage" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="banner" />
         <attr name="logo" />
         <attr name="handleProfiling" />
         <attr name="functionalTest" />
@@ -1834,10 +2039,17 @@
     <!-- Groups signing keys into a {@code KeySet} for easier reference in
             other APIs. However, currently no APIs use this. -->
     <attr name="keySet" />
-    <declare-styleable name="PublicKey">
+    <declare-styleable name="AndroidManifestPublicKey">
+        <attr name="name" />
         <attr name="value" />
     </declare-styleable>
-    <declare-styleable name="KeySet">
+    <declare-styleable name="AndroidManifestKeySet">
         <attr name="name" />
     </declare-styleable>
+
+    <!-- Associate declared KeySets with upgrading capability -->
+    <declare-styleable name="AndroidManifestUpgradeKeySet" parent="AndroidManifest">
+      <attr name="name" />
+    </declare-styleable>
+
 </resources>

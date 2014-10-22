@@ -43,7 +43,8 @@ import java.util.Map;
  * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
  *         for encoders, readable in the output format of decoders</b></td></tr>
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
- * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_CAPTURE_RATE}</td><td>Integer</td><td></td></tr>
+* <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
@@ -65,6 +66,13 @@ import java.util.Map;
  * <tr><td>{@link #KEY_SAMPLE_RATE}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_IS_ADTS}</td><td>Integer</td><td>optional, if <em>decoding</em> AAC audio content, setting this key to 1 indicates that each audio frame is prefixed by the ADTS header.</td></tr>
  * <tr><td>{@link #KEY_AAC_PROFILE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired profile.</td></tr>
+ * <tr><td>{@link #KEY_AAC_SBR_MODE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired SBR mode.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_TARGET_REFERENCE_LEVEL}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the target reference level.</td></tr>
+ * <tr><td>{@link #KEY_AAC_ENCODED_TARGET_LEVEL}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the target reference level used at encoder.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_BOOST_FACTOR}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC boost factor.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_ATTENUATION_FACTOR}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC attenuation factor.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_HEAVY_COMPRESSION}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies whether to use heavy compression.</td></tr>
+ * <tr><td>{@link #KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the maximum number of channels the decoder outputs.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>optional, a mask of audio channel assignments</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
@@ -76,6 +84,39 @@ import java.util.Map;
  * </table>
  */
 public final class MediaFormat {
+    public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
+    public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    public static final String MIMETYPE_VIDEO_AVC = "video/avc";
+    public static final String MIMETYPE_VIDEO_HEVC = "video/hevc";
+    public static final String MIMETYPE_VIDEO_MPEG4 = "video/mp4v-es";
+    public static final String MIMETYPE_VIDEO_H263 = "video/3gpp";
+    public static final String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
+    public static final String MIMETYPE_VIDEO_RAW = "video/raw";
+
+    public static final String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
+    public static final String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
+    public static final String MIMETYPE_AUDIO_MPEG = "audio/mpeg";
+    public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
+    public static final String MIMETYPE_AUDIO_QCELP = "audio/qcelp";
+    public static final String MIMETYPE_AUDIO_VORBIS = "audio/vorbis";
+    public static final String MIMETYPE_AUDIO_OPUS = "audio/opus";
+    public static final String MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
+    public static final String MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
+    public static final String MIMETYPE_AUDIO_RAW = "audio/raw";
+    public static final String MIMETYPE_AUDIO_FLAC = "audio/flac";
+    public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
+    public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
+
+    /**
+     * MIME type for WebVTT subtitle data.
+     */
+    public static final String MIMETYPE_TEXT_VTT = "text/vtt";
+
+    /**
+     * MIME type for CEA-608 closed caption data.
+     */
+    public static final String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
+
     private Map<String, Object> mMap;
 
     /**
@@ -153,11 +194,38 @@ public final class MediaFormat {
     public static final String KEY_FRAME_RATE = "frame-rate";
 
     /**
+     * A key describing the capture rate of a video format in frames/sec.
+     * <p>
+     * When capture rate is different than the frame rate, it means that the
+     * video is acquired at a different rate than the playback, which produces
+     * slow motion or timelapse effect during playback. Application can use the
+     * value of this key to tell the relative speed ratio between capture and
+     * playback rates when the video was recorded.
+     * </p>
+     * <p>
+     * The associated value is an integer or a float.
+     * </p>
+     */
+    public static final String KEY_CAPTURE_RATE = "capture-rate";
+
+    /**
      * A key describing the frequency of I frames expressed in secs
      * between I frames.
      * The associated value is an integer.
      */
     public static final String KEY_I_FRAME_INTERVAL = "i-frame-interval";
+
+    /**
+     * A key describing the temporal layering schema.  This is an optional parameter
+     * that applies only to video encoders.  Use {@link MediaCodec#getInputFormat}
+     * after {@link MediaCodec#configure configure} to query if the encoder supports
+     * the desired schema. Supported values are {@code webrtc.vp8.1-layer},
+     * {@code webrtc.vp8.2-layer}, {@code webrtc.vp8.3-layer}, and {@code none}.
+     * If the encoder does not support temporal layering, the input format will
+     * not have an entry with this key.
+     * The associated value is a string.
+     */
+    public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
 
     /**
      * @hide
@@ -215,11 +283,163 @@ public final class MediaFormat {
     public static final String KEY_AAC_PROFILE = "aac-profile";
 
     /**
+     * A key describing the AAC SBR mode to be used (AAC audio formats only).
+     * The associated value is an integer and can be set to following values:
+     * <ul>
+     * <li>0 - no SBR should be applied</li>
+     * <li>1 - single rate SBR</li>
+     * <li>2 - double rate SBR</li>
+     * </ul>
+     * Note: If this key is not defined the default SRB mode for the desired AAC profile will
+     * be used.
+     * <p>This key is only used during encoding.
+     */
+    public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode";
+
+    /**
+     * A key describing the maximum number of channels that can be output by the AAC decoder.
+     * By default, the decoder will output the same number of channels as present in the encoded
+     * stream, if supported. Set this value to limit the number of output channels, and use
+     * the downmix information in the stream, if available.
+     * <p>Values larger than the number of channels in the content to decode are ignored.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
+
+    /**
+     * A key describing a gain to be applied so that the output loudness matches the
+     * Target Reference Level. This is typically used to normalize loudness across program items.
+     * The gain is derived as the difference between the Target Reference Level and the
+     * Program Reference Level. The latter can be given in the bitstream and indicates the actual
+     * loudness value of the program item.
+     * <p>The value is given as an integer value between
+     * 0 and 127, and is calculated as -0.25 * Target Reference Level in dBFS.
+     * Therefore, it represents the range of Full Scale (0 dBFS) to -31.75 dBFS.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level";
+
+    /**
+     * A key describing the target reference level that was assumed at the encoder for
+     * calculation of attenuation gains for clipping prevention. This information can be provided
+     * if it is known, otherwise a worst-case assumption is used.
+     * <p>The value is given as an integer value between
+     * 0 and 127, and is calculated as -0.25 * Target Reference Level in dBFS.
+     * Therefore, it represents the range of Full Scale (0 dBFS) to -31.75 dBFS.
+     * The default value is the worst-case assumption of 127.
+     * <p>The value is ignored when heavy compression is used (see
+     * {@link #KEY_AAC_DRC_HEAVY_COMPRESSION}).
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_ENCODED_TARGET_LEVEL = "aac-encoded-target-level";
+
+    /**
+     * A key describing the boost factor allowing to adapt the dynamics of the output to the
+     * actual listening requirements. This relies on DRC gain sequences that can be transmitted in
+     * the encoded bitstream to be able to reduce the dynamics of the output signal upon request.
+     * This factor enables the user to select how much of the gains are applied.
+     * <p>Positive gains (boost) and negative gains (attenuation, see
+     * {@link #KEY_AAC_DRC_ATTENUATION_FACTOR}) can be controlled separately for a better match
+     * to different use-cases.
+     * <p>Typically, attenuation gains are sent for loud signal segments, and boost gains are sent
+     * for soft signal segments. If the output is listened to in a noisy environment, for example,
+     * the boost factor is used to enable the positive gains, i.e. to amplify soft signal segments
+     * beyond the noise floor. But for listening late at night, the attenuation
+     * factor is used to enable the negative gains, to prevent loud signal from surprising
+     * the listener. In applications which generally need a low dynamic range, both the boost factor
+     * and the attenuation factor are used in order to enable all DRC gains.
+     * <p>In order to prevent clipping, it is also recommended to apply the attenuation factors
+     * in case of a downmix and/or loudness normalization to high target reference levels.
+     * <p>Both the boost and the attenuation factor parameters are given as integer values
+     * between 0 and 127, representing the range of the factor of 0 (i.e. don't apply)
+     * to 1 (i.e. fully apply boost/attenuation factors respectively).
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_BOOST_FACTOR = "aac-drc-boost-level";
+
+    /**
+     * A key describing the attenuation factor allowing to adapt the dynamics of the output to the
+     * actual listening requirements.
+     * See {@link #KEY_AAC_DRC_BOOST_FACTOR} for a description of the role of this attenuation
+     * factor and the value range.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level";
+
+    /**
+     * A key describing the selection of the heavy compression profile for DRC.
+     * Two separate DRC gain sequences can be transmitted in one bitstream: MPEG-4 DRC light
+     * compression, and DVB-specific heavy compression. When selecting the application of the heavy
+     * compression, one of the sequences is selected:
+     * <ul>
+     * <li>0 enables light compression,</li>
+     * <li>1 enables heavy compression instead.
+     * </ul>
+     * Note that only light compression offers the features of scaling of DRC gains
+     * (see {@link #KEY_AAC_DRC_BOOST_FACTOR} and {@link #KEY_AAC_DRC_ATTENUATION_FACTOR} for the
+     * boost and attenuation factors, and frequency-selective (multiband) DRC.
+     * Light compression usually contains clipping prevention for stereo downmixing while heavy
+     * compression, if additionally provided in the bitstream, is usually stronger, and contains
+     * clipping prevention for stereo and mono downmixing.
+     * <p>The default is light compression.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression";
+
+    /**
      * A key describing the FLAC compression level to be used (FLAC audio format only).
      * The associated value is an integer ranging from 0 (fastest, least compression)
      * to 8 (slowest, most compression).
      */
     public static final String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
+
+    /**
+     * A key describing the encoding complexity.
+     * The associated value is an integer.  These values are device and codec specific,
+     * but lower values generally result in faster and/or less power-hungry encoding.
+     *
+     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getComplexityRange
+     */
+    public static final String KEY_COMPLEXITY = "complexity";
+
+    /**
+     * A key describing the desired encoding quality.
+     * The associated value is an integer.  This key is only supported for encoders
+     * that are configured in constant-quality mode.  These values are device and
+     * codec specific, but lower values generally result in more efficient
+     * (smaller-sized) encoding.
+     *
+     * @hide
+     *
+     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getQualityRange
+     */
+    public static final String KEY_QUALITY = "quality";
+
+    /**
+     * A key describing the desired profile to be used by an encoder.
+     * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * This key is only supported for codecs that specify a profile.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#profileLevels
+     */
+    public static final String KEY_PROFILE = "profile";
+
+    /**
+     * A key describing the desired bitrate mode to be used by an encoder.
+     * Constants are declared in {@link MediaCodecInfo.CodecCapabilities}.
+     *
+     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#isBitrateModeSupported
+     */
+    public static final String KEY_BITRATE_MODE = "bitrate-mode";
+
+    /**
+     * A key describing the audio session ID of the AudioTrack associated
+     * to a tunneled video codec.
+     * The associated value is an integer.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
+     */
+    public static final String KEY_AUDIO_SESSION_ID = "audio-session-id";
 
     /**
      * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true
@@ -253,6 +473,9 @@ public final class MediaFormat {
      */
     public static final String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
 
+    /** @hide */
+    public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
+
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
     }
@@ -274,6 +497,21 @@ public final class MediaFormat {
     public final boolean containsKey(String name) {
         return mMap.containsKey(name);
     }
+
+    /**
+     * A key prefix used together with a {@link MediaCodecInfo.CodecCapabilities}
+     * feature name describing a required or optional feature for a codec capabilities
+     * query.
+     * The associated value is an integer, where non-0 value means the feature is
+     * requested to be present, while 0 value means the feature is requested to be not
+     * present.
+     * @see MediaCodecList#findDecoderForFormat
+     * @see MediaCodecList#findEncoderForFormat
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
+     *
+     * @hide
+     */
+    public static final String KEY_FEATURE_ = "feature-";
 
     /**
      * Returns the value of an integer key.
@@ -325,6 +563,23 @@ public final class MediaFormat {
     }
 
     /**
+     * Returns whether a feature is to be enabled ({@code true}) or disabled
+     * ({@code false}).
+     *
+     * @param feature the name of a {@link MediaCodecInfo.CodecCapabilities} feature.
+     *
+     * @throws IllegalArgumentException if the feature was neither set to be enabled
+     *        nor to be disabled.
+     */
+    public boolean getFeatureEnabled(String feature) {
+        Integer enabled = (Integer)mMap.get(KEY_FEATURE_ + feature);
+        if (enabled == null) {
+            throw new IllegalArgumentException("feature is not specified");
+        }
+        return enabled != 0;
+    }
+
+    /**
      * Sets the value of an integer key.
      */
     public final void setInteger(String name, int value) {
@@ -357,6 +612,23 @@ public final class MediaFormat {
      */
     public final void setByteBuffer(String name, ByteBuffer bytes) {
         mMap.put(name, bytes);
+    }
+
+    /**
+     * Sets whether a feature is to be enabled ({@code true}) or disabled
+     * ({@code false}).
+     *
+     * If {@code enabled} is {@code true}, the feature is requested to be present.
+     * Otherwise, the feature is requested to be not present.
+     *
+     * @param feature the name of a {@link MediaCodecInfo.CodecCapabilities} feature.
+     *
+     * @see MediaCodecList#findDecoderForFormat
+     * @see MediaCodecList#findEncoderForFormat
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
+     */
+    public void setFeatureEnabled(String feature, boolean enabled) {
+        setInteger(KEY_FEATURE_ + feature, enabled ? 1 : 0);
     }
 
     /**

@@ -35,6 +35,20 @@ package android.animation;
  */
 public abstract class Keyframe implements Cloneable {
     /**
+     * Flag to indicate whether this keyframe has a valid value. This flag is used when an
+     * animation first starts, to populate placeholder keyframes with real values derived
+     * from the target object.
+     */
+    boolean mHasValue;
+
+    /**
+     * Flag to indicate whether the value in the keyframe was read from the target object or not.
+     * If so, its value will be recalculated if target changes.
+     */
+    boolean mValueWasSetOnStart;
+
+
+    /**
      * The time at which mValue will hold true.
      */
     float mFraction;
@@ -51,12 +65,7 @@ public abstract class Keyframe implements Cloneable {
      */
     private TimeInterpolator mInterpolator = null;
 
-    /**
-     * Flag to indicate whether this keyframe has a valid value. This flag is used when an
-     * animation first starts, to populate placeholder keyframes with real values derived
-     * from the target object.
-     */
-    boolean mHasValue = false;
+
 
     /**
      * Constructs a Keyframe object with the given time and value. The time defines the
@@ -166,6 +175,20 @@ public abstract class Keyframe implements Cloneable {
     }
 
     /**
+     * If the Keyframe's value was acquired from the target object, this flag should be set so that,
+     * if target changes, value will be reset.
+     *
+     * @return boolean Whether this Keyframe's value was retieved from the target object or not.
+     */
+    boolean valueWasSetOnStart() {
+        return mValueWasSetOnStart;
+    }
+
+    void setValueWasSetOnStart(boolean valueWasSetOnStart) {
+        mValueWasSetOnStart = valueWasSetOnStart;
+    }
+
+    /**
      * Gets the value for this Keyframe.
      *
      * @return The value for this Keyframe.
@@ -261,7 +284,8 @@ public abstract class Keyframe implements Cloneable {
 
         @Override
         public ObjectKeyframe clone() {
-            ObjectKeyframe kfClone = new ObjectKeyframe(getFraction(), mHasValue ? mValue : null);
+            ObjectKeyframe kfClone = new ObjectKeyframe(getFraction(), hasValue() ? mValue : null);
+            kfClone.mValueWasSetOnStart = mValueWasSetOnStart;
             kfClone.setInterpolator(getInterpolator());
             return kfClone;
         }
@@ -310,6 +334,7 @@ public abstract class Keyframe implements Cloneable {
                     new IntKeyframe(getFraction(), mValue) :
                     new IntKeyframe(getFraction());
             kfClone.setInterpolator(getInterpolator());
+            kfClone.mValueWasSetOnStart = mValueWasSetOnStart;
             return kfClone;
         }
     }
@@ -356,6 +381,7 @@ public abstract class Keyframe implements Cloneable {
                     new FloatKeyframe(getFraction(), mValue) :
                     new FloatKeyframe(getFraction());
             kfClone.setInterpolator(getInterpolator());
+            kfClone.mValueWasSetOnStart = mValueWasSetOnStart;
             return kfClone;
         }
     }

@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"キーガード"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PINコードを入力"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUKと新しいPINコードを入力"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUKコード"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"新しいPINコード"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"PUKと新しいPINコードを入力"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUKコード"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"新しいSIM PINコード"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"タップしてパスワードを入力"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"ロックを解除するにはパスワードを入力"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"ロックを解除するにはPINを入力"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"MENU、0キーでロック解除"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"フェイスアンロックの最大試行回数を超えました"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"充電完了"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"充電中: <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"充電中"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"充電してください。"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"メニューからロックを解除できます。"</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ネットワークがロックされました"</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"一時停止ボタン"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"再生ボタン"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"停止ボタン"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"グッド"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"イマイチ"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"ハート"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"続行するにはロックを解除してください"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"起動をキャンセルしました"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"削除するには<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>をドロップしてください。"</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>は削除されません。"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"希望のPINコードを入力してください"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"希望のPINコードを確認してください"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIMカードのロック解除中…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PINコードが正しくありません。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"PINは4～8桁の数字で入力してください。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUKコードは8桁以上の番号です。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"正しいPUKコードを再入力してください。誤入力を繰り返すと、SIMが永久に無効になるおそれがあります。"</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えると、お使いの端末をロック解除するのに携帯通信会社にお問い合わせいただく必要があります。"</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIMは使用できません。携帯通信会社にお問い合わせください。"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM PUKコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。"</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM PUKコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN操作に失敗しました。"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK操作に失敗しました。"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"コードが承認されました。"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"前のトラックボタン"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"次のトラックボタン"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"一時停止ボタン"</string>

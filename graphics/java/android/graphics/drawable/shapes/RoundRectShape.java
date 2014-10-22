@@ -17,6 +17,7 @@
 package android.graphics.drawable.shapes;
 
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -77,11 +78,33 @@ public class RoundRectShape extends RectShape {
     public void draw(Canvas canvas, Paint paint) {
         canvas.drawPath(mPath, paint);
     }
-    
+
+    @Override
+    public void getOutline(Outline outline) {
+        if (mInnerRect != null) return; // have a hole, can't produce valid outline
+
+        float radius = 0;
+        if (mOuterRadii != null) {
+            radius = mOuterRadii[0];
+            for (int i = 1; i < 8; i++) {
+                if (mOuterRadii[i] != radius) {
+                    // can't call simple constructors, use path
+                    outline.setConvexPath(mPath);
+                    return;
+                }
+            }
+        }
+
+        final RectF rect = rect();
+        outline.setRoundRect((int) Math.ceil(rect.left), (int) Math.ceil(rect.top),
+                (int) Math.floor(rect.right), (int) Math.floor(rect.bottom),
+                radius);
+    }
+
     @Override
     protected void onResize(float w, float h) {
         super.onResize(w, h);
-        
+
         RectF r = rect();
         mPath.reset();
 

@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -583,7 +584,8 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Get the altitude if available, in meters above sea level.
+     * Get the altitude if available, in meters above the WGS 84 reference
+     * ellipsoid.
      *
      * <p>If this location does not have an altitude then 0.0 is returned.
      */
@@ -592,7 +594,7 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Set the altitude, in meters above sea level.
+     * Set the altitude, in meters above the WGS 84 reference ellipsoid.
      *
      * <p>Following this call {@link #hasAltitude} will return true.
      */
@@ -770,6 +772,7 @@ public class Location implements Parcelable {
      * @see #makeComplete
      * @hide
      */
+    @SystemApi
     public boolean isComplete() {
         if (mProvider == null) return false;
         if (!mHasAccuracy) return false;
@@ -787,6 +790,7 @@ public class Location implements Parcelable {
      * @see #isComplete
      * @hide
      */
+    @SystemApi
     public void makeComplete() {
         if (mProvider == null) mProvider = "?";
         if (!mHasAccuracy) {
@@ -956,6 +960,7 @@ public class Location implements Parcelable {
      * @param isFromMockProvider true if this Location came from a mock provider, false otherwise
      * @hide
      */
+    @SystemApi
     public void setIsFromMockProvider(boolean isFromMockProvider) {
         mIsFromMockProvider = isFromMockProvider;
     }

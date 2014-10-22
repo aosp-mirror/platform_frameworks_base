@@ -1,0 +1,118 @@
+page.title=Transmitting Network Data Using Volley
+page.tags=""
+
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+
+<ul>
+  <li>Android 1.6 (API Level 4) or higher</li>
+</ul>
+
+</div>
+</div>
+
+<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<div>
+    <h3>Video</h3>
+    <p>Volley: Easy, Fast Networking for Android</p>
+</div>
+</a>
+
+
+<p>Volley is an HTTP library that makes networking for Android apps easier and most importantly,
+faster. Volley is available through the open
+<a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> repository.</p>
+
+<p>Volley offers the following benefits:</p>
+
+<ul>
+
+<li>Automatic scheduling of network requests.</li>
+<li>Multiple concurrent network connections.</li>
+<li>Transparent disk and memory response caching with standard HTTP
+<a href=http://en.wikipedia.org/wiki/Cache_coherence">cache coherence</a>.</li>
+<li>Support for request prioritization.</li>
+<li>Cancellation request API. You can cancel a single request, or you can set blocks or
+scopes of requests to cancel.</li>
+<li>Ease of customization, for example, for retry and backoff.</li>
+<li>Strong ordering that makes it easy to correctly populate your UI with data fetched
+asynchronously from the network.</li>
+<li>Debugging and tracing tools.</li>
+
+</ul>
+
+<p>Volley excels at RPC-type operations used to populate a UI, such as fetching a page of
+search results as structured data. It integrates easily with any protocol and comes out of
+the box with support for raw strings, images, and JSON. By providing built-in support for
+the features you need, Volley frees you from writing boilerplate code and allows you to
+concentrate on the logic that is specific to your app.</p>
+<p>Volley is not suitable for large download or streaming operations, since Volley holds
+all responses in memory during parsing. For large download operations, consider using an
+alternative like {@link android.app.DownloadManager}.</p>
+
+<p>The core Volley library is developed in the open
+<a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a>
+repository at {@code frameworks/volley} and contains the main request dispatch pipeline
+as well as a set of commonly applicable utilities, available in the Volley "toolbox." The
+easiest way to add Volley to your project is to clone the Volley repository and set it as
+a library project:</p>
+
+<ol>
+<li>Git clone the repository by typing the following at the command line:
+
+<pre>
+git clone https://android.googlesource.com/platform/frameworks/volley
+</pre>
+</li>
+
+<li>Import the downloaded source into your app project as an Android library project
+(as described in <a href="{@docRoot}tools/projects/projects-eclipse.html">
+Managing Projects from Eclipse with ADT</a>, if you're using Eclipse) or make a
+<a href="{@docRoot}guide/faq/commontasks.html#addexternallibrary"><code>.jar</code> file</a>.</li>
+</ol>
+
+<h2>Lessons</h2>
+
+<dl>
+ <dt>
+        <strong><a href="simple.html">Sending a Simple Request</a></strong>
+    </dt>
+    <dd>
+        Learn how to send a simple request using the default behaviors of Volley, and how
+        to cancel a request.
+
+    </dd>
+    <dt>
+        <strong><a href="requestqueue.html">Setting Up a RequestQueue</a></strong>
+    </dt>
+    <dd>
+        Learn how to set up a {@code RequestQueue}, and how to implement a singleton
+        pattern to create a {@code RequestQueue} that lasts the lifetime of your app.
+    </dd>
+    <dt>
+        <strong><a href="request.html">Making a Standard Request</a></strong>
+    </dt>
+    <dd>
+        Learn how to send a request using one of Volley's out-of-the-box request types
+        (raw strings, images, and JSON).
+    </dd>
+    <dt>
+        <strong><a href="request-custom.html">Implementing a Custom Request</a></strong>
+    </dt>
+    <dd>
+        Learn how to implement a custom request.
+    </dd>
+
+</dl>

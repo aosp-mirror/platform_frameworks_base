@@ -23,6 +23,13 @@ import com.android.internal.os.IResultReceiver;
  * by creating a subclass and implement {@link #onReceiveResult}, which you can
  * then pass to others and send through IPC, and receive results they
  * supply with {@link #send}.
+ *
+ * <p>Note: the implementation underneath is just a simple wrapper around
+ * a {@link Binder} that is used to perform the communication.  This means
+ * semantically you should treat it as such: this class does not impact process
+ * lifecycle management (you must be using some higher-level component to tell
+ * the system that your process needs to continue running), the connection will
+ * break if your process goes away for any reason, etc.</p>
  */
 public class ResultReceiver implements Parcelable {
     final boolean mLocal;

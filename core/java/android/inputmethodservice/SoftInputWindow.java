@@ -30,11 +30,22 @@ import android.view.WindowManager;
  * method window.  It will be displayed along the edge of the screen, moving
  * the application user interface away from it so that the focused item is
  * always visible.
+ * @hide
  */
-class SoftInputWindow extends Dialog {
+public class SoftInputWindow extends Dialog {
+    final String mName;
+    final Callback mCallback;
+    final KeyEvent.Callback mKeyEventCallback;
     final KeyEvent.DispatcherState mDispatcherState;
+    final int mWindowType;
+    final int mGravity;
+    final boolean mTakesFocus;
     private final Rect mBounds = new Rect();
-    
+
+    public interface Callback {
+        public void onBackPressed();
+    }
+
     public void setToken(IBinder token) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.token = token;
@@ -53,10 +64,17 @@ class SoftInputWindow extends Dialog {
      *        using styles. This theme is applied on top of the current theme in
      *        <var>context</var>. If 0, the default dialog theme will be used.
      */
-    public SoftInputWindow(Context context, int theme,
-            KeyEvent.DispatcherState dispatcherState) {
+    public SoftInputWindow(Context context, String name, int theme, Callback callback,
+            KeyEvent.Callback keyEventCallback, KeyEvent.DispatcherState dispatcherState,
+            int windowType, int gravity, boolean takesFocus) {
         super(context, theme);
+        mName = name;
+        mCallback = callback;
+        mKeyEventCallback = keyEventCallback;
         mDispatcherState = dispatcherState;
+        mWindowType = windowType;
+        mGravity = gravity;
+        mTakesFocus = takesFocus;
         initDockWindow();
     }
 
@@ -83,47 +101,6 @@ class SoftInputWindow extends Dialog {
     }
 
     /**
-     * Get the size of the DockWindow.
-     * 
-     * @return If the DockWindow sticks to the top or bottom of the screen, the
-     *         return value is the height of the DockWindow, and its width is
-     *         equal to the width of the screen; If the DockWindow sticks to the
-     *         left or right of the screen, the return value is the width of the
-     *         DockWindow, and its height is equal to the height of the screen.
-     */
-    public int getSize() {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
-            return lp.height;
-        } else {
-            return lp.width;
-        }
-    }
-
-    /**
-     * Set the size of the DockWindow.
-     * 
-     * @param size If the DockWindow sticks to the top or bottom of the screen,
-     *        <var>size</var> is the height of the DockWindow, and its width is
-     *        equal to the width of the screen; If the DockWindow sticks to the
-     *        left or right of the screen, <var>size</var> is the width of the
-     *        DockWindow, and its height is equal to the height of the screen.
-     */
-    public void setSize(int size) {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
-            lp.width = -1;
-            lp.height = size;
-        } else {
-            lp.width = size;
-            lp.height = -1;
-        }
-        getWindow().setAttributes(lp);
-    }
-
-    /**
      * Set which boundary of the screen the DockWindow sticks to.
      * 
      * @param gravity The boundary of the screen to stick. See {#link
@@ -133,39 +110,84 @@ class SoftInputWindow extends Dialog {
      */
     public void setGravity(int gravity) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        boolean oldIsVertical = (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM);
-
         lp.gravity = gravity;
+        updateWidthHeight(lp);
+        getWindow().setAttributes(lp);
+    }
 
-        boolean newIsVertical = (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM);
+    public int getGravity() {
+        return getWindow().getAttributes().gravity;
+    }
 
-        if (oldIsVertical != newIsVertical) {
-            int tmp = lp.width;
-            lp.width = lp.height;
-            lp.height = tmp;
-            getWindow().setAttributes(lp);
+    private void updateWidthHeight(WindowManager.LayoutParams lp) {
+        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        } else {
+            lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        }
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyDown(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyLongPress(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
+    }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyUp(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+        if (mKeyEventCallback != null && mKeyEventCallback.onKeyMultiple(keyCode, count, event)) {
+            return true;
+        }
+        return super.onKeyMultiple(keyCode, count, event);
+    }
+
+    public void onBackPressed() {
+        if (mCallback != null) {
+            mCallback.onBackPressed();
+        } else {
+            super.onBackPressed();
         }
     }
 
     private void initDockWindow() {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
 
-        lp.type = WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-        lp.setTitle("InputMethod");
+        lp.type = mWindowType;
+        lp.setTitle(mName);
 
-        lp.gravity = Gravity.BOTTOM;
-        lp.width = -1;
-        // Let the input method window's orientation follow sensor based rotation
-        // Turn this off for now, it is very problematic.
-        //lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
+        lp.gravity = mGravity;
+        updateWidthHeight(lp);
 
         getWindow().setAttributes(lp);
-        getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+
+        int windowSetFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+
+        if (!mTakesFocus) {
+            windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        } else {
+            windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            windowModFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        }
+
+        getWindow().setFlags(windowSetFlags, windowModFlags);
     }
 }

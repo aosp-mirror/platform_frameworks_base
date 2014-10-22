@@ -16,11 +16,14 @@
 
 package com.android.systemui.settings;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -28,84 +31,47 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 
 /** A dialog that provides controls for adjusting the screen brightness. */
-public class BrightnessDialog extends Dialog implements
-        BrightnessController.BrightnessStateChangeCallback {
-
-    private static final String TAG = "BrightnessDialog";
-    private static final boolean DEBUG = false;
-
-    protected Handler mHandler = new Handler();
+public class BrightnessDialog extends Activity {
 
     private BrightnessController mBrightnessController;
-    private final int mBrightnessDialogLongTimeout;
-    private final int mBrightnessDialogShortTimeout;
 
-    private final Runnable mDismissDialogRunnable = new Runnable() {
-        public void run() {
-            if (BrightnessDialog.this.isShowing()) {
-                BrightnessDialog.this.dismiss();
-            }
-        };
-    };
-
-
-    public BrightnessDialog(Context ctx) {
-        super(ctx);
-        Resources r = ctx.getResources();
-        mBrightnessDialogLongTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_long_timeout);
-        mBrightnessDialogShortTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_short_timeout);
-    }
-
-
-    /**
-     * Create the brightness dialog and any resources that are used for the
-     * entire lifetime of the dialog.
-     */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Window window = getWindow();
-        window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-        window.getAttributes().privateFlags |=
-                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+
+        final Window window = getWindow();
+
+        window.setGravity(Gravity.TOP);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.quick_settings_brightness_dialog);
-        setCanceledOnTouchOutside(true);
-    }
 
+        final ImageView icon = (ImageView) findViewById(R.id.brightness_icon);
+        final ToggleSlider slider = (ToggleSlider) findViewById(R.id.brightness_slider);
+        mBrightnessController = new BrightnessController(this, icon, slider);
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mBrightnessController = new BrightnessController(getContext(),
-                (ImageView) findViewById(R.id.brightness_icon),
-                (ToggleSlider) findViewById(R.id.brightness_slider));
-        dismissBrightnessDialog(mBrightnessDialogLongTimeout);
-        mBrightnessController.addStateChangedCallback(this);
+        mBrightnessController.registerCallbacks();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         mBrightnessController.unregisterCallbacks();
-        removeAllBrightnessDialogCallbacks();
     }
 
-    public void onBrightnessLevelChanged() {
-        dismissBrightnessDialog(mBrightnessDialogShortTimeout);
-    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+                || keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            finish();
+        }
 
-    private void dismissBrightnessDialog(int timeout) {
-        removeAllBrightnessDialogCallbacks();
-        mHandler.postDelayed(mDismissDialogRunnable, timeout);
+        return super.onKeyDown(keyCode, event);
     }
-
-    private void removeAllBrightnessDialogCallbacks() {
-        mHandler.removeCallbacks(mDismissDialogRunnable);
-    }
-
 }

@@ -1,5 +1,5 @@
 page.title=Sending Operations to Multiple Threads
-page.tags="threadpool","runnable"
+page.tags=threadpool,runnable
 
 trainingnavtop=true
 startpage=true

@@ -16,7 +16,9 @@
 
 package android.graphics.drawable.shapes;
 
+import android.annotation.NonNull;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 
 /**
@@ -43,7 +45,6 @@ public abstract class Shape implements Cloneable {
         return mHeight;
     }
 
-
     /**
      * Draw this shape into the provided Canvas, with the provided Paint.
      * Before calling this, you must call {@link #resize(float,float)}.
@@ -52,7 +53,6 @@ public abstract class Shape implements Cloneable {
      * @param paint  the Paint object that defines this shape's characteristics
      */
     public abstract void draw(Canvas canvas, Paint paint);
-    
 
     /**
      * Resizes the dimensions of this shape.
@@ -93,8 +93,17 @@ public abstract class Shape implements Cloneable {
      */
     protected void onResize(float width, float height) {}
 
+    /**
+     * Compute the Outline of the shape and return it in the supplied Outline
+     * parameter. The default implementation does nothing and {@code outline} is not changed.
+     *
+     * @param outline The Outline to be populated with the result. Should not be null.
+     */
+    public void getOutline(@NonNull Outline outline) {}
+
     @Override
     public Shape clone() throws CloneNotSupportedException {
         return (Shape) super.clone();
     }
+
 }

@@ -20,8 +20,6 @@
 #include <cutils/compiler.h>
 
 #include <SkBitmap.h>
-#include <SkiaColorFilter.h>
-#include <SkiaShader.h>
 
 #include <utils/KeyedVector.h>
 
@@ -37,8 +35,6 @@ namespace uirenderer {
  */
 enum ResourceType {
     kBitmap,
-    kShader,
-    kColorFilter,
     kNinePatch,
     kPath,
     kLayer
@@ -70,51 +66,39 @@ public:
     void lock();
     void unlock();
 
-    void incrementRefcount(SkPath* resource);
-    void incrementRefcount(SkBitmap* resource);
-    void incrementRefcount(SkiaShader* resource);
-    void incrementRefcount(SkiaColorFilter* resource);
-    void incrementRefcount(Res_png_9patch* resource);
+    void incrementRefcount(const SkPath* resource);
+    void incrementRefcount(const SkBitmap* resource);
+    void incrementRefcount(const Res_png_9patch* resource);
     void incrementRefcount(Layer* resource);
 
-    void incrementRefcountLocked(SkPath* resource);
-    void incrementRefcountLocked(SkBitmap* resource);
-    void incrementRefcountLocked(SkiaShader* resource);
-    void incrementRefcountLocked(SkiaColorFilter* resource);
-    void incrementRefcountLocked(Res_png_9patch* resource);
+    void incrementRefcountLocked(const SkPath* resource);
+    void incrementRefcountLocked(const SkBitmap* resource);
+    void incrementRefcountLocked(const Res_png_9patch* resource);
     void incrementRefcountLocked(Layer* resource);
 
-    void decrementRefcount(SkBitmap* resource);
-    void decrementRefcount(SkPath* resource);
-    void decrementRefcount(SkiaShader* resource);
-    void decrementRefcount(SkiaColorFilter* resource);
-    void decrementRefcount(Res_png_9patch* resource);
+    void decrementRefcount(const SkBitmap* resource);
+    void decrementRefcount(const SkPath* resource);
+    void decrementRefcount(const Res_png_9patch* resource);
     void decrementRefcount(Layer* resource);
 
-    void decrementRefcountLocked(SkBitmap* resource);
-    void decrementRefcountLocked(SkPath* resource);
-    void decrementRefcountLocked(SkiaShader* resource);
-    void decrementRefcountLocked(SkiaColorFilter* resource);
-    void decrementRefcountLocked(Res_png_9patch* resource);
+    void decrementRefcountLocked(const SkBitmap* resource);
+    void decrementRefcountLocked(const SkPath* resource);
+    void decrementRefcountLocked(const Res_png_9patch* resource);
     void decrementRefcountLocked(Layer* resource);
 
     void destructor(SkPath* resource);
-    void destructor(SkBitmap* resource);
-    void destructor(SkiaShader* resource);
-    void destructor(SkiaColorFilter* resource);
+    void destructor(const SkBitmap* resource);
     void destructor(Res_png_9patch* resource);
 
     void destructorLocked(SkPath* resource);
-    void destructorLocked(SkBitmap* resource);
-    void destructorLocked(SkiaShader* resource);
-    void destructorLocked(SkiaColorFilter* resource);
+    void destructorLocked(const SkBitmap* resource);
     void destructorLocked(Res_png_9patch* resource);
 
     bool recycle(SkBitmap* resource);
     bool recycleLocked(SkBitmap* resource);
 
 private:
-    void deleteResourceReferenceLocked(void* resource, ResourceReference* ref);
+    void deleteResourceReferenceLocked(const void* resource, ResourceReference* ref);
 
     void incrementRefcount(void* resource, ResourceType resourceType);
     void incrementRefcountLocked(void* resource, ResourceType resourceType);
@@ -131,7 +115,7 @@ private:
      */
     mutable Mutex mLock;
 
-    KeyedVector<void*, ResourceReference*>* mCache;
+    KeyedVector<const void*, ResourceReference*>* mCache;
 };
 
 }; // namespace uirenderer

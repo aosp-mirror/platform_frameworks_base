@@ -25,7 +25,7 @@ parent.link=index.html
 
 <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization Checklist</a></li>
+    <li><a href="{@docRoot}distribute/tools/localization-checklist.html">Localization Checklist</a></li>
     <li><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></li>
     <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a></li>
     <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">Activity Lifecycle</a></li>
@@ -307,7 +307,7 @@ href="{@docRoot}guide/topics/resources/accessing-resources.html">Accessing Resou
 <h2 id="checklist">Localization Checklist</h2>
 
 <p>For a complete overview of the process of localizing and distributing an Android application,
-see the <a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization
+see the <a href="{@docRoot}distribute/tools/localization-checklist.html">Localization
 Checklist</a> document.</p>
 
 <h2 id="strategies">Localization Tips</h2>
@@ -402,8 +402,7 @@ that Android makes available:</p>
 	resolution and density of the device screen may differ, which could affect 
 	the display of strings and drawables in your UI.</p>
 
-<p>To change the locale on a device, use  the Settings application  (Home &gt;
-Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
+<p>To change the locale or language on a device, use the Settings application.</p>
 
 <h3 id="emulator">Testing on an Emulator</h3>
 

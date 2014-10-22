@@ -16,9 +16,6 @@
 
 package android.renderscript;
 
-import java.util.Vector;
-import android.util.Log;
-
 /**
  * @hide
  *

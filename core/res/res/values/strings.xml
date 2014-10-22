@@ -36,6 +36,45 @@
          the placeholders. -->
     <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g><xliff:g id="unit" example="KB">%2$s</xliff:g></string>
 
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in days -->
+    <string name="durationDays"><xliff:g id="days">%1$d</xliff:g> days</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one day with hours -->
+    <string name="durationDayHours"><xliff:g id="days">%1$d</xliff:g> day
+            <xliff:g id="hours">%2$d</xliff:g> hrs</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one day with one hours -->
+    <string name="durationDayHour"><xliff:g id="days">%1$d</xliff:g> day
+            <xliff:g id="hours">%2$d</xliff:g> hr</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in hours -->
+    <string name="durationHours"><xliff:g id="hours">%1$d</xliff:g> hrs</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one hour with minutes -->
+    <string name="durationHourMinutes"><xliff:g id="hours">%1$d</xliff:g> hr
+            <xliff:g id="minutes">%2$d</xliff:g> mins</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one hour with one minute -->
+    <string name="durationHourMinute"><xliff:g id="hours">%1$d</xliff:g> hr
+            <xliff:g id="minutes">%2$d</xliff:g> min</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in minutes -->
+    <string name="durationMinutes"><xliff:g id="minutes">%1$d</xliff:g> mins</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute with seconds -->
+    <string name="durationMinuteSeconds"><xliff:g id="minutes">%1$d</xliff:g> min
+            <xliff:g id="seconds">%2$d</xliff:g> secs</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute with one second -->
+    <string name="durationMinuteSecond"><xliff:g id="minutes">%1$d</xliff:g> min
+            <xliff:g id="seconds">%2$d</xliff:g> sec</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in seconds -->
+    <string name="durationSeconds"><xliff:g id="seconds">%1$d</xliff:g> secs</string>
+
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one second -->
+    <string name="durationSecond"><xliff:g id="seconds">%1$d</xliff:g> sec</string>
+
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
     <string name="untitled">&lt;Untitled&gt;</string>
@@ -107,6 +146,10 @@
     <string name="ClipMmi">Incoming Caller ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
     <string name="ClirMmi">Outgoing Caller ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID. -->
+    <string name="ColpMmi">Connected Line ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction. -->
+    <string name="ColrMmi">Connected Line ID Restriction</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling call forwarding. -->
     <string name="CfMmi">Call forwarding</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling call waiting. -->
@@ -270,6 +313,8 @@
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
     <string name="low_memory" product="tablet">Tablet storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <string name="low_memory" product="watch">Watch storage is full. Delete some files to free space.</string>
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
     <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
     <!-- SSL CA cert notification --> <skip />
@@ -316,6 +361,9 @@
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
          be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm" product="tablet">Your tablet will shut down.</string>
+    <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the watch, there will
+         be a confirmation dialog.  This is the message. -->
+    <string name="shutdown_confirm" product="watch">Your watch will shut down.</string>
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
          be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm" product="default">Your phone will shut down.</string>
@@ -367,6 +415,8 @@
         current device state, to send as an e-mail message.  It will take a little
         time from starting the bug report until it is ready to be sent; please be
         patient.</string>
+    <!-- Format for build summary info [CHAR LIMIT=NONE] -->
+    <string name="bugreport_status" translatable="false">%s (%s)</string>
 
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
@@ -386,6 +436,12 @@
     <!-- status message in phone options dialog for when airplane mode is off -->
     <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
 
+    <!-- label for item that launches settings in phone options dialog [CHAR LIMIT=15]-->
+    <string name="global_action_settings">Settings</string>
+
+    <!-- label for item that locks the phone and enforces that it can't be unlocked without entering a credential. [CHAR LIMIT=15] -->
+    <string name="global_action_lockdown">Lock now</string>
+
     <!-- Text to use when the number in a notification info is too large
          (greater than status_bar_notification_info_maxnum, defined in
          values/config.xml) and must be truncated. May need to be localized
@@ -398,6 +454,12 @@
 
     <!-- Label for the Android system components when they are shown to the user. -->
     <string name="android_system_label">Android System</string>
+
+    <!-- Label for the user owner in the intent forwarding app. -->
+    <string name="user_owner_label">Personal apps</string>
+
+    <!-- Label for a corporate profile in the intent forwarding app. -->
+    <string name="managed_profile_label">Work</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_costMoney">Services that cost you money</string>
@@ -695,11 +757,24 @@
      messages sent to you without showing them to you.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_receiveBluetoothMap">receive Bluetooth messages (MAP)</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_receiveBluetoothMap">Allows the app to receive and process Bluetooth MAP
+      messages. This means the app could monitor or delete messages sent to your
+      device without showing them to you.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getTasks">retrieve running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getTasks">Allows the app to retrieve information
        about currently and recently running tasks.  This may allow the app to
        discover information about which applications are used on the device.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_startTasksFromRecents">start a task from recents</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_startTasksFromRecents">Allows the app to use an ActivityManager.RecentTaskInfo
+        object to launch a defunct task that was returned from ActivityManager.getRecentTaskList().</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permlab_interactAcrossUsers">interact across users</string>
@@ -822,11 +897,18 @@
          user consent.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_retrieve_window_info">retrieve window info</string>
+    <string name="permlab_retrieveWindowToken">retrieve window token</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_retrieve_window_info">Allows an application to retrieve
-         information about the the windows from the window manager. Malicious apps may
-         retrieve information that is intended for internal system usage.</string>
+    <string name="permdesc_retrieveWindowToken">Allows an application to retrieve
+        the window token. Malicious apps may perfrom unauthorized interaction with
+        the application window impersonating the system.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_frameStats">retrieve frame statistics</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_frameStats">Allows an application to collect
+        frame statistics. Malicious apps may observe the frame statistics
+        of windows from other apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_filter_events">filter events</string>
@@ -834,13 +916,6 @@
     <string name="permdesc_filter_events">Allows an application to register an input filter
             which filters the stream of all user events before they are dispatched. Malicious app
             may control the system UI whtout user intervention.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_magnify_display">magnify display</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_magnify_display">Allows an application to magnify the content of a
-        display. Malicious apps may transform the display content in a way that renders the
-        device unusable.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>
@@ -891,6 +966,15 @@
         broadcast a notification that a WAP PUSH message has been received.
         Malicious apps may use this to forge MMS message receipt or to
         silently replace the content of any webpage with malicious variants.</string>
+
+    <!-- TODO: Mark these as translatable when API is finalized. -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_broadcastScoreNetworks" translatable="false">send score networks broadcast</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_broadcastScoreNetworks" translatable="false">Allows the app
+        to broadcast a notification that networks need to be scored.
+        Never needed for normal apps.
+    </string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setProcessLimit">limit number of running processes</string>
@@ -1044,6 +1128,18 @@
         interface of a wallpaper. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindVoiceInteraction">bind to a voice interactor</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindVoiceInteraction">Allows the holder to bind to the top-level
+        interface of a voice interaction service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageVoiceKeyphrases">manage voice keyphrases</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_manageVoiceKeyphrases">Allows the holder to manage the keyphrases for voice hotword detection.
+        Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindRemoteDisplay">bind to a remote display</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindRemoteDisplay">Allows the holder to bind to the top-level
@@ -1060,6 +1156,18 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindDeviceAdmin">Allows the holder to send intents to
         a device administrator. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindTvInput">bind to a TV input</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindTvInput">Allows the holder to bind to the top-level
+        interface of a TV input. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_modifyParentalControls">modify parental controls</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_modifyParentalControls">Allows the holder to modify the system\'s
+        parental controls data. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_manageDeviceAdmins">add or remove a device admin</string>
@@ -1166,6 +1274,15 @@
     <string name="permlab_manageCaCertificates">manage trusted credentials</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
     <string name="permdesc_manageCaCertificates">Allows the app to install and uninstall CA certificates as trusted credentials.</string>
+
+    <!-- Title of a permission that is never presented to the user.  This is not a
+         permission that an application must be granted by the user.  Instead, it
+         is part of a mechanism that applications use to indicate to the system
+         that they want to do scheduled background work.  -->
+    <string name="permlab_bindJobService">run the application\'s scheduled background work</string>
+    <!-- Description of an application permission, so that the user can understand
+         what is being done if they are curious. -->
+    <string name="permdesc_bindJobService">This permission allows the Android system to run the application in the background when requested.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
@@ -1320,6 +1437,14 @@
       as your name and contact information.  This means the app can identify you
       and may send your profile information to others.</string>
 
+    <!-- Title of the body sensors permission, listed so the user can decide whether to allow the application to access body sensor data. [CHAR LIMIT=30] -->
+    <string name="permlab_bodySensors">body sensors (like heart rate monitors)
+    </string>
+    <!-- Description of the body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bodySensors" product="default">Allows the app to
+      access data from sensors you use to measure what’s happening inside your
+      body, such as heart rate.</string>
+
     <!-- Title of the read social stream permission, listed so the user can decide whether to allow the application to read information from the user's social stream. [CHAR LIMIT=30] -->
     <string name="permlab_readSocialStream" product="default">read your social stream</string>
     <string name="permdesc_readSocialStream" product="default">Allows the app
@@ -1423,6 +1548,11 @@
     <string name="permdesc_readFrameBuffer">Allows the app to read the content of the frame buffer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessInputFlinger">access InputFlinger</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessInputFlinger">Allows the app to use InputFlinger low-level features.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_configureWifiDisplay">configure Wifi displays</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_configureWifiDisplay">Allows the app to configure and connect to Wifi displays.</string>
@@ -1442,6 +1572,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_captureAudioHotword">Allows the app to capture audio for Hotword detection. The capture can
       happen in the background but does not prevent other audio capture (e.g. Camcorder).</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_modifyAudioRouting">Audio Routing</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_modifyAudioRouting">Allows the app to directly control audio routing and
+      override audio policy decisions.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_captureVideoOutput">capture video output</string>
@@ -1469,6 +1605,11 @@
     <string name="permdesc_recordAudio">Allows the app to record audio with the
       microphone.  This permission allows the app to record audio at any time
       without your confirmation.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_sim_communication">sim communication</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_sim_communication">Allows the app to send commands to the SIM. This is very dangerous.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_camera">take pictures and videos</string>
@@ -1666,6 +1807,11 @@
     <string name="permdesc_devicePower" product="default">Allows the app to turn the phone on or off.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_userActivity">reset display timeout</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_userActivity">Allows the app to reset the display timeout.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_factoryTest">run in factory test mode</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_factoryTest" product="tablet">Run as a low-level manufacturer test,
@@ -1823,6 +1969,13 @@
     <string name="permdesc_bluetoothPriv" product="default">Allows the app to
       pair with remote devices without user interaction.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bluetoothMap">access Bluetooth MAP data</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothMap" product="tablet">Allows the app to access Bluetooth MAP data.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothMap" product="default">Allows the app to access Bluetooth MAP data.</string>
+
     <string name="permlab_accessWimaxState">connect and disconnect from WiMAX</string>
     <string name="permdesc_accessWimaxState">Allows the app to determine whether
      WiMAX is enabled and information about any WiMAX networks that are
@@ -1833,6 +1986,15 @@
       connect the tablet to and disconnect the tablet from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="default">Allows the app to
       connect the phone to and disconnect the phone from WiMAX networks.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_scoreNetworks">score networks</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_scoreNetworks" product="tablet">Allows the app to
+      rank networks and influence which networks the tablet should prefer.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_scoreNetworks" product="default">Allows the app to
+        rank networks and influence which networks the phone should prefer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetooth">pair with Bluetooth devices</string>
@@ -1936,14 +2098,24 @@
     <string name="permdesc_cache_filesystem">Allows the app to read and write the cache filesystem.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_use_sip">make/receive Internet calls</string>
+    <string name="permlab_use_sip">make/receive SIP calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_use_sip">Allows the app to use the SIP service to make/receive Internet calls.</string>
+    <string name="permdesc_use_sip">Allows the app to make and receive SIP calls.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bind_call_service">interact with in-call screen</string>
+    <string name="permlab_bind_incall_service">interact with in-call screen</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bind_call_service">Allows the app to control when and how the user sees the in-call screen.</string>
+    <string name="permdesc_bind_incall_service">Allows the app to control when and how the user sees the in-call screen.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bind_connection_service">interact with telephony services</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bind_connection_service">Allows the app to interact with telephony services to make/receive calls.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_control_incall_experience">provide an in-call user experience</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_control_incall_experience">Allows the app to provide an in-call user experience.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readNetworkUsageHistory">read historical network usage</string>
@@ -1961,11 +2133,6 @@
     <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_markNetworkSocket">modify socket marks</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_markNetworkSocket">Allows the app to modify socket marks for routing</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNotifications">access notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessNotifications">Allows the app to retrieve, examine, and clear notifications, including those posted by other apps.</string>
@@ -1976,6 +2143,16 @@
     <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindConditionProviderService">bind to a condition provider service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindConditionProviderService">Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindDreamService">bind to a dream service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindDreamService">Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_invokeCarrierSetup">invoke the carrier-provided configuration app</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_invokeCarrierSetup">Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps.</string>
@@ -1984,6 +2161,23 @@
     <string name="permlab_accessNetworkConditions">listen for observations on network conditions</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessNetworkConditions">Allows an application to listen for observations on network conditions. Should never be needed for normal apps.</string>
+
+    <string name="permlab_setInputCalibration">change input device calibration</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_setInputCalibration">Allows the app to modify the calibration parameters of the touch screen. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessDrmCertificates">access DRM certificates</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessDrmCertificates">Allows an application to provision and use DRM certficates. Should never be needed for normal apps.</string>
+
+    <string name="permlab_handoverStatus">Receive Android Beam transfer status</string>
+    <string name="permdesc_handoverStatus">Allows this application to receive information about current Android Beam transfers</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_removeDrmCertificates">remove DRM certificates</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_removeDrmCertificates">Allows an application to remove DRM certficates. Should never be needed for normal apps.</string>
 
     <!-- Policy administration -->
 
@@ -2346,15 +2540,19 @@
     Contact your wireless service provider for another SIM card.</string>
 
     <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
-    <string name="lockscreen_transport_prev_description">Previous track button</string>
+    <string name="lockscreen_transport_prev_description">Previous track</string>
     <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
-    <string name="lockscreen_transport_next_description">Next track button</string>
+    <string name="lockscreen_transport_next_description">Next track</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="lockscreen_transport_pause_description">Pause button</string>
+    <string name="lockscreen_transport_pause_description">Pause</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="lockscreen_transport_play_description">Play button</string>
+    <string name="lockscreen_transport_play_description">Play</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="lockscreen_transport_stop_description">Stop button</string>
+    <string name="lockscreen_transport_stop_description">Stop</string>
+    <!-- Shown on transport control screens. Pressing button rewinds playback [CHAR LIMIT=NONE]-->
+    <string name="lockscreen_transport_rew_description">Rewind</string>
+    <!-- Shown on transport control screens. Pressing button fast forwards playback [CHAR LIMIT=NONE]-->
+    <string name="lockscreen_transport_ffw_description">Fast forward</string>
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
@@ -2811,12 +3009,28 @@
       not implement this feature.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to modify and remove voicemails in the user's voicemail
+        inbox. [CHAR LIMIT=NONE] -->
+    <string name="permlab_writeVoicemail">write voicemails</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to modify and remove voicemails in the user's voicemail
+        inbox. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_writeVoicemail">Allows the app to modify and remove messages from your voicemail inbox.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permlab_addVoicemail">add voicemail</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permdesc_addVoicemail">Allows the app to add messages
       to your voicemail inbox.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_readVoicemail">read voicemail</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_readVoicemail">Allows the app to read your voicemails.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
@@ -3166,6 +3380,8 @@
     <string name="low_internal_storage_view_title">Storage space running out</string>
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
     <string name="low_internal_storage_view_text">Some system functions may not work</string>
+    <!-- If the device does not have storage for the main system classes, a notification is shown to the user.  This is the message of that notification. -->
+    <string name="low_internal_storage_view_text_no_boot">Not enough storage for the system. Make sure you have 250MB of free space and restart.</string>
 
     <!-- [CHAR LIMIT=NONE] Stub notification title for an app running a service that has provided
          a bad bad notification for itself. -->
@@ -3199,10 +3415,34 @@
 
     <!-- Title of intent resolver dialog when selecting an application to run. -->
     <string name="whichApplication">Complete action using</string>
+    <!-- Title of intent resolver dialog when selecting an application to run
+         and a previously used application is known. -->
+    <string name="whichApplicationNamed">Complete action using %1$s</string>
+    <!-- Title of intent resolver dialog when selecting a viewer application to run. -->
+    <string name="whichViewApplication">Open with</string>
+    <!-- Title of intent resolver dialog when selecting a viewer application to run
+         and a previously used application is known. -->
+    <string name="whichViewApplicationNamed">Open with %1$s</string>
+    <!-- Title of intent resolver dialog when selecting an editor application to run. -->
+    <string name="whichEditApplication">Edit with</string>
+    <!-- Title of intent resolver dialog when selecting an editor application to run
+         and a previously used application is known. -->
+    <string name="whichEditApplicationNamed">Edit with %1$s</string>
+    <!-- Title of intent resolver dialog when selecting a sharing application to run. -->
+    <string name="whichSendApplication">Share with</string>
+    <!-- Title of intent resolver dialog when selecting a sharing application to run
+         and a previously used application is known. -->
+    <string name="whichSendApplicationNamed">Share with %1$s</string>
     <!-- Title of intent resolver dialog when selecting a HOME application to run. -->
-    <string name="whichHomeApplication">Select a home app</string>
+    <string name="whichHomeApplication">Select a Home app</string>
+    <!-- Title of intent resolver dialog when selecting a HOME application to run
+         and a previously used application is known. -->
+    <string name="whichHomeApplicationNamed">Use %1$s as Home</string>
     <!-- Option to always use the selected application resolution in the future. See the "Complete action using" dialog title-->
     <string name="alwaysUse">Use by default for this action.</string>
+    <!-- Title of the list of alternate options to complete an action shown when the
+         last used option is being displayed separately. -->
+    <string name="use_a_different_app">Use a different app</string>
     <!-- Text displayed when the user selects the check box for setting default application.  See the "Use by default for this action" check box. -->
     <string name="clearDefaultHintMsg">Clear default in System settings &gt; Apps &gt; Downloaded.</string>
     <!-- Default title for the activity chooser, when one is not given. Android allows multiple activities to perform an action.  for example, there may be many ringtone pickers installed.  A dialog is shown to the user allowing him to pick which activity should be used.  This is the title. -->
@@ -3402,9 +3642,9 @@
     <!-- The message text for the SMS short code confirmation dialog. [CHAR LIMIT=NONE] -->
     <string name="sms_short_code_confirm_message">&lt;b><xliff:g id="app_name">%1$s</xliff:g>&lt;/b> would like to send a message to &lt;b><xliff:g id="dest_address">%2$s</xliff:g>&lt;/b>.</string>
     <!-- Message details for the SMS short code confirmation dialog (possible premium short code). [CHAR LIMIT=NONE] -->
-    <string name="sms_short_code_details">This <font fgcolor="#ffffb060">may cause charges</font> on your mobile account.</string>
+    <string name="sms_short_code_details">This <b>may cause charges</b> on your mobile account.</string>
     <!-- Message details for the SMS short code confirmation dialog (premium short code). [CHAR LIMIT=NONE] -->
-    <string name="sms_premium_short_code_details"><font fgcolor="#ffffb060">This will cause charges on your mobile account.</font></string>
+    <string name="sms_premium_short_code_details"><b>This will cause charges on your mobile account.</b></string>
     <!-- Text of the approval button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
     <string name="sms_short_code_confirm_allow">Send</string>
     <!-- Text of the cancel button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
@@ -3423,13 +3663,13 @@
     <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
     <string name="sim_removed_title">SIM card removed</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the message of that dialog. -->
-    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM card inserted.</string>
+    <string name="sim_removed_message">The cellular network will be unavailable until you restart with a valid SIM card inserted.</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_done_button">Done</string>
     <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
     <string name="sim_added_title">SIM card added</string>
     <!-- See SIM_ADDED_DIALOG.  This is the message of that dialog. -->
-    <string name="sim_added_message">Restart your device to access the mobile network.</string>
+    <string name="sim_added_message">Restart your device to access the cellular network.</string>
     <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_restart_button">Restart</string>
 
@@ -3538,12 +3778,13 @@
     <!-- DO NOT TRANSLATE -->
     <string name="locale_replacement">""</string>
 
-    <!-- Title of the pop-up dialog in which the user switches input method components. -->
-    <string name="select_input_method">Choose input method</string>
-    <!-- Title of a button to open the settings for input methods [CHAR LIMIT=30] -->
-    <string name="configure_input_methods">Set up input methods</string>
-    <!-- Summary text of a toggle switch to enable/disable use of the physical keyboard in the input method selector [CHAR LIMIT=25] -->
-    <string name="use_physical_keyboard">Physical keyboard</string>
+    <!-- Title of the pop-up dialog in which the user switches keyboard, also known as input method. -->
+    <string name="select_input_method">Change keyboard</string>
+    <!-- Title of a button to open the settings to enable or disable keyboards, also known as input methods [CHAR LIMIT=30] -->
+    <string name="configure_input_methods">Choose keyboards</string>
+    <!-- Summary text of a toggle switch to enable/disable use of the IME while a physical
+         keyboard is connected[CHAR LIMIT=25] -->
+    <string name="show_ime">Show input method</string>
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=10] -->
     <string name="hardware">Hardware</string>
 
@@ -3634,6 +3875,39 @@
     <!-- Description of an application permission that lets it control keyguard. -->
     <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
 
+    <!-- Title of an application permission that lets it listen to trust state changes. -->
+    <string name="permlab_trust_listener">Listen to trust state changes.</string>
+    <!-- Description of an application permission that lets it listen to trust state changes. -->
+    <string name="permdesc_trust_listener">Allows an application to listen for changes in trust state.</string>
+
+    <!-- Title of an application permission that lets it provide a trust agent. -->
+    <string name="permlab_provide_trust_agent">Provide a trust agent.</string>
+    <!-- Description of an application permission that lets it provide a trust agent. -->
+    <string name="permdesc_provide_trust_agent">Allows an application to provide a trust agent.</string>
+    <!-- Title of an application permission that lets it launch the trust agent settings menu -->
+    <string name="permlab_launch_trust_agent_settings">Launch trust agent settings menu.</string>
+    <!-- Description of an application permission that lets it launch the trust agent settings menu -->
+    <string name="permdesc_launch_trust_agent_settings">Allows an application to launch an activity that changes the trust agent behavior.</string>
+    <!-- Title of an application permission that lets it bind to a trust agent service. -->
+    <string name="permlab_bind_trust_agent_service">Bind to a trust agent service</string>
+    <!-- Description of an application permission that lets it bind to a trust agent service. -->
+    <string name="permdesc_bind_trust_agent_service">Allows an application to bind to a trust agent service.</string>
+
+    <!-- Title of an application permission that lets it interact with recovery. -->
+    <string name="permlab_recovery">Interact with update and recovery system</string>
+    <!-- Description of an application permission that lets it control keyguard. -->
+    <string name="permdesc_recovery">Allows an application to interact with the recovery system and system updates.</string>
+
+    <!-- Title of an application permission that lets it manage media projection sessions. -->
+    <string name="permlab_manageMediaProjection">Manage media projection sessions</string>
+    <!-- Description of an application permission that lets it manage media projection sessions. -->
+    <string name="permdesc_manageMediaProjection">Allows an application to manage media projection sessions. These sessions can provide applications the ability to capture display and audio contents. Should never be needed by normal apps.</string>
+
+    <!-- Title of an application permission that lets it read install sessions. -->
+    <string name="permlab_readInstallSessions">Read install sessions</string>
+    <!-- Description of an application permission that lets it read install sessions. -->
+    <string name="permdesc_readInstallSessions">Allows an application to read install sessions. This allows it to see details about active package installations.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 
@@ -3688,6 +3962,11 @@
     <string name="permission_request_notification_title">Permission requested</string>
     <string name="permission_request_notification_with_subtitle">Permission requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g>.</string>
 
+    <!-- Message to show when an intent automatically switches users into the personal profile. -->
+    <string name="forward_intent_to_owner">You\'re using this app outside of your work profile</string>
+    <!-- Message to show when an intent automatically switches users into a work profile. -->
+    <string name="forward_intent_to_work">You\'re using this app in your work profile</string>
+
     <!-- Label to show for a service that is running because it is an input method. -->
     <string name="input_method_binding_label">Input method</string>
     <!-- Label to show for a service that is running because it is a sync adapter. -->
@@ -3701,6 +3980,8 @@
     <!-- Label to show for a service that is running because it is observing
          the user's notifications. -->
     <string name="notification_listener_binding_label">Notification listener</string>
+    <!-- Label to show for a service that is running because it is providing conditions. -->
+    <string name="condition_provider_service_binding_label">Condition provider</string>
 
     <!-- Do Not Translate: Alternate eri.xml -->
     <string name="alternate_eri_file">/data/eri.xml</string>
@@ -3749,16 +4030,6 @@
 
     <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
     <string name="skip_button_label">Skip</string>
-
-    <!-- Strings for throttling notification -->
-    <!-- Shown when the user is in danger of being throttled -->
-    <string name="throttle_warning_notification_title">High mobile data use</string>
-    <string name="throttle_warning_notification_message">Touch to learn more about mobile data use.</string>
-
-    <!-- Strings for throttling notification -->
-    <!-- Shown when the users bandwidth is reduced because of excessive data use -->
-    <string name="throttled_notification_title">Mobile data limit exceeded</string>
-    <string name="throttled_notification_message">Touch to learn more about mobile data use.</string>
 
     <!-- Displayed on the Find dialog when there are no matches [CHAR LIMIT=NONE]-->
     <string name="no_matches">No matches</string>
@@ -3925,26 +4196,6 @@
     <!-- Description of the sliding handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="content_description_sliding_handle">"Sliding handle. Touch &amp; hold."</string>
 
-    <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_up">Slide up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_down">Slide down for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the right direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_right">Slide right for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_unlock">Unlock</string>
-    <!-- Description of the camera target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_camera">Camera</string>
-    <!-- Description of the silent target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_silent">Silent</string>
-    <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_soundon">Sound on</string>
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_search">Search</string>
-
     <!-- Description of the unlock handle in the Slide unlock screen for tablets. [CHAR LIMIT=NONE] -->
     <string name="description_target_unlock_tablet">Swipe to unlock.</string>
 
@@ -3989,22 +4240,22 @@
     <string name="data_usage_warning_body">Touch to view usage and settings.</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_3g_limit_title">2G-3G data disabled</string>
+    <string name="data_usage_3g_limit_title">2G-3G data limit reached</string>
     <!-- Notification title when 4G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_4g_limit_title">4G data disabled</string>
+    <string name="data_usage_4g_limit_title">4G data limit reached</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_mobile_limit_title">Mobile data disabled</string>
+    <string name="data_usage_mobile_limit_title">Cellular data limit reached</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_wifi_limit_title">Wi-Fi data disabled</string>
+    <string name="data_usage_wifi_limit_title">Wi-Fi data limit reached</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_limit_body">Touch to enable.</string>
+    <string name="data_usage_limit_body">Data paused for rest of cycle</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_snoozed_title">2G-3G data limit exceeded</string>
     <!-- Notification title when 4G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_4g_limit_snoozed_title">4G data limit exceeded</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_mobile_limit_snoozed_title">Mobile data limit exceeded</string>
+    <string name="data_usage_mobile_limit_snoozed_title">Cellular data limit exceeded</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_snoozed_title">Wi-Fi data limit exceeded</string>
     <!-- Notification body when data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
@@ -4073,6 +4324,10 @@
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_once">Just once</string>
 
+    <!-- Text for the toast that is shown when the user clicks on a launcher that
+         doesn't support the work profile. [CHAR LIMIT=100] -->
+    <string name="activity_resolver_work_profiles_support">%1$s doesn\'t support work profile</string>
+
     <!-- Name of the default audio route for tablets when nothing
          is connected to a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name" product="tablet">Tablet</string>
@@ -4100,8 +4355,9 @@
     <!-- Description of a wireless display route. [CHAR LIMIT=50] -->
     <string name="wireless_display_route_description">Wireless display</string>
 
-    <!-- Content description of a MediaRouteButton for accessibility support -->
-    <string name="media_route_button_content_description">Media output</string>
+    <!-- Content description of a MediaRouteButton for accessibility support.
+        Cast is the standard android verb for sending content to a remote device. [CHAR LIMIT=50] -->
+    <string name="media_route_button_content_description">Cast</string>
 
     <!-- Title of the media route chooser dialog. [CHAR LIMIT=40] -->
     <string name="media_route_chooser_title">Connect to device</string>
@@ -4149,17 +4405,6 @@
 
     <!-- Title text to append when the display is secure.  [CHAR LIMIT=30] -->
     <string name="display_manager_overlay_display_secure_suffix">, secure</string>
-
-    <!-- Title of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=50] -->
-    <string name="wifi_display_notification_connecting_title">Casting screen</string>
-    <!-- Message of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=80] -->
-    <string name="wifi_display_notification_connecting_message">Connecting to <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Title of the notification to indicate an active wifi display connection.  [CHAR LIMIT=50] -->
-    <string name="wifi_display_notification_connected_title">Casting screen</string>
-    <!-- Message of the notification to indicate an active wifi display connection.  [CHAR LIMIT=80] -->
-    <string name="wifi_display_notification_connected_message">Connected to <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Label of a button to disconnect an active wifi display connection.  [CHAR LIMIT=25] -->
-    <string name="wifi_display_notification_disconnect">Disconnect</string>
 
     <!-- Keyguard strings -->
     <!-- Label shown on emergency call button in keyguard -->
@@ -4277,7 +4522,7 @@
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->
     <string name="safe_media_volume_warning" product="default">
-       "Raise volume above recommended level?\nListening at high volume for long periods may damage your hearing."
+       "Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."
     </string>
 
     <!-- Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none] -->
@@ -4288,12 +4533,14 @@
     <string name="enable_accessibility_canceled">Accessibility canceled.</string>
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
+    <!-- Message shown when switching to a user [CHAR LIMIT=none] -->
+    <string name="user_switching_message">Switching to <xliff:g id="name" example="Bob">%1$s</xliff:g>\u2026</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
-    <!-- Message informing user that app is not permitted to access accounts. [CHAR LIMIT=none] -->
-    <string name="app_no_restricted_accounts">This app doesn\'t support accounts for restricted profiles</string>
+    <!-- Message informing user that the change was disallowed by an administrator. [CHAR LIMIT=none] -->
+    <string name="error_message_change_not_allowed">This change isn\'t allowed by your administrator</string>
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
@@ -4525,4 +4772,110 @@
     <!-- Cling help message when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_mode_confirmation" msgid="8554991488096662508">Swipe down from the top to exit full screen.</string>
 
+    <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
+    <string name="done_label">Done</string>
+    <!--
+         Content description for the hour selector in the time picker, which displays
+         selectable hours of the day along the inside edge of a circle, as in an analog clock.
+         [CHAR LIMIT=50]
+    -->
+    <string name="hour_picker_description">Hours circular slider</string>
+    <!--
+         Content description for the minute selector in the time picker, which displays
+         selectable five-minute intervals along the inside edge of a circle, as in an analog clock.
+         [CHAR LIMIT=50]
+    -->
+    <string name="minute_picker_description">Minutes circular slider</string>
+    <!-- Accessibility announcement for hour circular picker [CHAR LIMIT=NONE] -->
+    <string name="select_hours">Select hours</string>
+    <!-- Accessibility announcement for minute circular picker [CHAR LIMIT=NONE] -->
+    <string name="select_minutes">Select minutes</string>
+
+    <!--
+        Content description for the month and day selector in the date picker, which displays
+        a selectable grid of days laid out by month.
+        [CHAR LIMIT=50]
+     -->
+    <string name="day_picker_description">Month grid of days</string>
+    <!--
+        Content description for the year selector in the date picker, which displays
+        a scrolling, vertical list of years.
+        [CHAR LIMIT=50]
+     -->
+    <string name="year_picker_description">Year list</string>
+    <!-- Accessibility announcement for the day picker [CHAR LIMIT=NONE] -->
+    <string name="select_day">Select month and day</string>
+    <!-- Accessibility announcement for the year picker [CHAR LIMIT=NONE] -->
+    <string name="select_year">Select year</string>
+    <!-- Accessibility description for the item that is currently selected. -->
+    <string name="item_is_selected"><xliff:g id="item" example="2013">%1$s</xliff:g> selected</string>
+    <!-- Accessibility announcement when a number that had been typed in is deleted [CHAR_LIMIT=NONE] -->
+    <string name="deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g> deleted</string>
+
+    <!--
+        Used to wrap a label for content description for a work profile, e.g. "Work Email" instead
+        of email when there are two email apps.
+        [CHAR LIMIT=20]
+     -->
+    <string name="managed_profile_label_badge">Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+
+    <!-- DO NOT TRANSLATE -->
+    <string name="time_placeholder">--</string>
+
+    <!-- DO NOT TRANSLATE -->
+    <string name="radial_numbers_typeface">sans-serif</string>
+    <!-- DO NOT TRANSLATE -->
+    <string name="sans_serif">sans-serif</string>
+
+    <!-- DO NOT TRANSLATE -->
+    <string name="day_of_week_label_typeface">sans-serif</string>
+
+    <!-- Notify use that they are in Lock-to-app -->
+    <string name="lock_to_app_toast">To unpin this screen, touch and hold Back and Overview at the same time.</string>
+    <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+    <string name="lock_to_app_toast_accessible">To unpin this screen, touch and hold Overview.</string>
+    <!-- Notify user that they are locked in lock-to-app mode -->
+    <string name="lock_to_app_toast_locked">Screen is pinned. Unpinning isn\'t allowed by your organization.</string>
+    <!-- Lock-to-app dialog title. -->
+    <string name="lock_to_app_title">Use screen pinning?</string>
+    <!-- Lock-to-app dialog description. -->
+    <string name="lock_to_app_description">Screen pinning locks the display in a single view.\n\nTo unpin, touch and hold Back and Overview at the same time.</string>
+    <!-- Lock-to-app dialog description when in accessibility mode. -->
+    <string name="lock_to_app_description_accessible">Screen pinning locks the display in a single view.\n\nTo unpin, touch and hold Overview.</string>
+    <!-- Lock-to-app negative response. -->
+    <string name="lock_to_app_negative">NO, THANKS</string>
+    <!-- Lock-to-app positive response. -->
+    <string name="lock_to_app_positive">START</string>
+    <!-- Starting lock-to-app indication. -->
+    <string name="lock_to_app_start">Screen pinned</string>
+    <!-- Exting lock-to-app indication. -->
+    <string name="lock_to_app_exit">Screen unpinned</string>
+
+    <!-- Lock-to-app unlock pin string -->
+    <string name="lock_to_app_unlock_pin">Ask for PIN before unpinning</string>
+    <!-- Lock-to-app unlock pattern string -->
+    <string name="lock_to_app_unlock_pattern">Ask for unlock pattern before unpinning</string>
+    <!-- Lock-to-app unlock password string -->
+    <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
+
+    <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
+    <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
+
+    <!-- [CHAR_LIMIT=NONE] Zen mode: Condition summary for built-in downtime condition, if active -->
+    <string name="downtime_condition_summary">Until your downtime ends at <xliff:g id="formattedTime" example="10.00 PM">%1$s</xliff:g></string>
+
+    <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
+    <plurals name="zen_mode_duration_minutes">
+        <item quantity="one">For one minute</item>
+        <item quantity="other">For %d minutes</item>
+    </plurals>
+
+    <!-- Zen mode condition: time duration in hours. [CHAR LIMIT=NONE] -->
+    <plurals name="zen_mode_duration_hours">
+        <item quantity="one">For one hour</item>
+        <item quantity="other">For %d hours</item>
+    </plurals>
+
+    <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_forever">Indefinitely</string>
 </resources>

@@ -68,8 +68,7 @@ declaration to your manifest:</p>
 </pre>
 
 <p>If your application uses texture compression, you must also declare which compression formats
-you support so that devices that do not support theses formats do not try to run your
-application:</p>
+your app supports, so that it is only installed on compatible devices.</p>
 
 <pre>
 &lt;supports-gl-texture android:name="GL_OES_compressed_ETC1_RGB8_texture" /&gt;

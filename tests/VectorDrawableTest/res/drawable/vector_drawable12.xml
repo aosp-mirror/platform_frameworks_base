@@ -1,0 +1,97 @@
+<!--
+ Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:name="rootGroup"
+        android:height="64dp"
+        android:width="64dp"
+        android:viewportHeight="600"
+        android:viewportWidth="600"
+        android:alpha="0.5" >
+
+    <group
+        android:name="rotationGroup"
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        <path
+            android:name="pie1"
+            android:fillColor="#00000000"
+            android:pathData="M300,70 a230,230 0 1,0 1,0 z"
+            android:strokeColor="#FF777777"
+            android:strokeWidth="70"
+            android:trimPathEnd=".75"
+            android:trimPathOffset="0"
+            android:trimPathStart="0" />
+        <path
+            android:name="v"
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+
+        <group
+            android:name="translateToCenterGroup"
+            android:rotation="0.0"
+            android:translateX="200.0"
+            android:translateY="200.0" >
+            <group
+                android:name="rotationGroup2"
+                android:pivotX="0.0"
+                android:pivotY="0.0"
+                android:rotation="-45.0" >
+                <path
+                    android:name="twoLines1"
+                    android:pathData="@string/twoLinePathData"
+                    android:strokeColor="#FFFF0000"
+                    android:strokeWidth="20" />
+
+                <group
+                    android:name="translateGroupHalf"
+                    android:translateX="65.0"
+                    android:translateY="80.0" >
+                    <group
+                        android:name="rotationGroup3"
+                        android:pivotX="-65.0"
+                        android:pivotY="-80.0"
+                        android:rotation="-45.0" >
+                        <path
+                            android:name="twoLines2"
+                            android:fillColor="#FF00FF00"
+                            android:pathData="@string/twoLinePathData"
+                            android:strokeColor="#FF00FF00"
+                            android:strokeWidth="20" />
+
+                        <group
+                            android:name="translateGroup"
+                            android:translateX="65.0"
+                            android:translateY="80.0" >
+                            <group
+                                android:name="rotationGroupBlue"
+                                android:pivotX="-65.0"
+                                android:pivotY="-80.0"
+                                android:rotation="-45.0" >
+                                <path
+                                    android:name="twoLines3"
+                                    android:pathData="@string/twoLinePathData"
+                                    android:strokeColor="#FF0000FF"
+                                    android:strokeWidth="20" />
+                            </group>
+                        </group>
+                    </group>
+                </group>
+            </group>
+        </group>
+    </group>
+
+</vector>

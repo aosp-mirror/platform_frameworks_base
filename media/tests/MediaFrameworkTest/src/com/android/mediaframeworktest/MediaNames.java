@@ -25,6 +25,9 @@ package com.android.mediaframeworktest;
 public class MediaNames {
     // A directory to hold all kinds of media files
     public static final String MEDIA_SAMPLE_POOL = "/sdcard/media_api/samples/";
+    // A file to hold all streaming URLs
+    public static final String MEDIA_STREAMING_SRC = "/sdcard/media_api/streaming.txt";
+
     // Audio files
     public static final String MP3CBR = "/sdcard/media_api/music/MP3_48KHz_128kbps_s_1_17_CBR.mp3";
     public static final String MP3VBR = "/sdcard/media_api/music/MP3_48KHz_128kbps_s_1_17_VBR.mp3";
@@ -56,6 +59,7 @@ public class MediaNames {
     public static final String VIDEO_H263_AMR = "/sdcard/media_api/video/H263_56_AMRNB_6.3gp";
     public static final String VIDEO_H264_AAC = "/sdcard/media_api/video/H264_320_AAC_64.3gp";
     public static final String VIDEO_H264_AMR = "/sdcard/media_api/video/H264_320_AMRNB_6.3gp";
+    public static final String VIDEO_HEVC_AAC = "/sdcard/media_api/video/HEVC_320_AAC_128.mp4";
     public static final String VIDEO_HIGHRES_H263 = "/sdcard/media_api/video/H263_500_AMRNB_12.3gp";
     public static final String VIDEO_HIGHRES_MP4 = "/sdcard/media_api/video/H264_500_AAC_128.3gp";
     public static final String VIDEO_WEBM = "/sdcard/media_api/video/big-buck-bunny_trailer.webm";
@@ -136,6 +140,8 @@ public class MediaNames {
 
     public static final String INVALD_VIDEO_PATH =
             "/sdcard/media_api/filepathdoesnotexist" + "/filepathdoesnotexist/temp.3gp";
+
+    public static final String RECORDED_SURFACE_3GP = "/sdcard/surface.3gp";
 
     public static final long RECORDED_TIME = 5000;
     public static final long VALID_VIDEO_DURATION = 2000;

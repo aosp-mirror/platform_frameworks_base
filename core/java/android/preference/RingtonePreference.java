@@ -50,11 +50,11 @@ public class RingtonePreference extends Preference implements
     
     private int mRequestCode;
 
-    public RingtonePreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.RingtonePreference, defStyle, 0);
+    public RingtonePreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.RingtonePreference, defStyleAttr, defStyleRes);
         mRingtoneType = a.getInt(com.android.internal.R.styleable.RingtonePreference_ringtoneType,
                 RingtoneManager.TYPE_RINGTONE);
         mShowDefault = a.getBoolean(com.android.internal.R.styleable.RingtonePreference_showDefault,
@@ -62,6 +62,10 @@ public class RingtonePreference extends Preference implements
         mShowSilent = a.getBoolean(com.android.internal.R.styleable.RingtonePreference_showSilent,
                 true);
         a.recycle();
+    }
+
+    public RingtonePreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public RingtonePreference(Context context, AttributeSet attrs) {

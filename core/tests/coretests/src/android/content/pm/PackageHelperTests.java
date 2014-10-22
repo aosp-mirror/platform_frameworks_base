@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import com.android.internal.content.PackageHelper;
+import static android.net.TrafficStats.MB_IN_BYTES;
 
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -24,6 +24,8 @@ import android.os.ServiceManager;
 import android.os.storage.IMountService;
 import android.test.AndroidTestCase;
 import android.util.Log;
+
+import com.android.internal.content.PackageHelper;
 
 public class PackageHelperTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -81,8 +83,8 @@ public class PackageHelperTests extends AndroidTestCase {
     public void testMountAndPullSdCard() {
         try {
             fullId = PREFIX;
-            fullId2 = PackageHelper.createSdDir(1024, fullId, "none", android.os.Process.myUid(),
-                    true);
+            fullId2 = PackageHelper.createSdDir(1024 * MB_IN_BYTES, fullId, "none",
+                    android.os.Process.myUid(), true);
 
             Log.d(TAG,PackageHelper.getSdDir(fullId));
             PackageHelper.unMountSdDir(fullId);

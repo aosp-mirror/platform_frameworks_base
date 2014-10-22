@@ -16,9 +16,8 @@
 
 package android.webkit;
 
-import android.net.http.Headers;
-
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Encapsulates a resource response. Applications can return an instance of this
@@ -26,9 +25,11 @@ import java.io.InputStream;
  * response when the WebView requests a particular resource.
  */
 public class WebResourceResponse {
-    // Accessed by jni, do not rename without modifying the jni code.
     private String mMimeType;
     private String mEncoding;
+    private int mStatusCode;
+    private String mReasonPhrase;
+    private Map<String, String> mResponseHeaders;
     private InputStream mInputStream;
 
     /**
@@ -46,6 +47,28 @@ public class WebResourceResponse {
         mMimeType = mimeType;
         mEncoding = encoding;
         mInputStream = data;
+    }
+
+    /**
+     * Constructs a resource response with the given parameters. Callers must
+     * implement {@link InputStream#read(byte[]) InputStream.read(byte[])} for
+     * the input stream.
+     *
+     * @param mimeType the resource response's MIME type, for example text/html
+     * @param encoding the resource response's encoding
+     * @param statusCode the status code needs to be in the ranges [100, 299], [400, 599].
+     *                   Causing a redirect by specifying a 3xx code is not supported.
+     * @param reasonPhrase the phrase describing the status code, for example "OK". Must be non-null
+     *                     and not empty.
+     * @param responseHeaders the resource response's headers represented as a mapping of header
+     *                        name -> header value.
+     * @param data the input stream that provides the resource response's data
+     */
+    public WebResourceResponse(String mimeType, String encoding, int statusCode,
+            String reasonPhrase, Map<String, String> responseHeaders, InputStream data) {
+        this(mimeType, encoding, data);
+        setStatusCodeAndReasonPhrase(statusCode, reasonPhrase);
+        setResponseHeaders(responseHeaders);
     }
 
     /**
@@ -86,7 +109,73 @@ public class WebResourceResponse {
     }
 
     /**
-     * Sets the input stream that provides the resource respone's data. Callers
+     * Sets the resource response's status code and reason phrase.
+     *
+     * @param statusCode the status code needs to be in the ranges [100, 299], [400, 599].
+     *                   Causing a redirect by specifying a 3xx code is not supported.
+     * @param reasonPhrase the phrase describing the status code, for example "OK". Must be non-null
+     *                     and not empty.
+     */
+    public void setStatusCodeAndReasonPhrase(int statusCode, String reasonPhrase) {
+        if (statusCode < 100)
+            throw new IllegalArgumentException("statusCode can't be less than 100.");
+        if (statusCode > 599)
+            throw new IllegalArgumentException("statusCode can't be greater than 599.");
+        if (statusCode > 299 && statusCode < 400)
+            throw new IllegalArgumentException("statusCode can't be in the [300, 399] range.");
+        if (reasonPhrase == null)
+            throw new IllegalArgumentException("reasonPhrase can't be null.");
+        if (reasonPhrase.trim().isEmpty())
+            throw new IllegalArgumentException("reasonPhrase can't be empty.");
+        for (int i = 0; i < reasonPhrase.length(); i++) {
+            int c = reasonPhrase.charAt(i);
+            if (c > 0x7F) {
+                throw new IllegalArgumentException(
+                        "reasonPhrase can't contain non-ASCII characters.");
+            }
+        }
+        mStatusCode = statusCode;
+        mReasonPhrase = reasonPhrase;
+    }
+
+    /**
+     * Gets the resource response's status code.
+     *
+     * @return the resource response's status code.
+     */
+    public int getStatusCode() {
+        return mStatusCode;
+    }
+
+    /**
+     * Gets the description of the resource response's status code.
+     *
+     * @return the description of the resource response's status code.
+     */
+    public String getReasonPhrase() {
+        return mReasonPhrase;
+    }
+
+    /**
+     * Sets the headers for the resource response.
+     *
+     * @param headers mapping of header name -> header value.
+     */
+    public void setResponseHeaders(Map<String, String> headers) {
+        mResponseHeaders = headers;
+    }
+
+    /**
+     * Gets the headers for the resource response.
+     *
+     * @return the headers for the resource response.
+     */
+    public Map<String, String> getResponseHeaders() {
+        return mResponseHeaders;
+    }
+
+    /**
+     * Sets the input stream that provides the resource response's data. Callers
      * must implement {@link InputStream#read(byte[]) InputStream.read(byte[])}.
      *
      * @param data the input stream that provides the resource response's data
@@ -96,7 +185,7 @@ public class WebResourceResponse {
     }
 
     /**
-     * Gets the input stream that provides the resource respone's data.
+     * Gets the input stream that provides the resource response's data.
      *
      * @return the input stream that provides the resource response's data
      */

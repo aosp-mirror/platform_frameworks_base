@@ -145,7 +145,7 @@ public class ImageSpan extends DynamicDrawableSpan {
             }
         } else {
             try {
-                drawable = mContext.getResources().getDrawable(mResourceId);
+                drawable = mContext.getDrawable(mResourceId);
                 drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
                         drawable.getIntrinsicHeight());
             } catch (Exception e) {

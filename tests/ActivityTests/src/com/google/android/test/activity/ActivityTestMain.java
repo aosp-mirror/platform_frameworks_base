@@ -21,6 +21,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -28,8 +29,11 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -58,6 +62,28 @@ public class ActivityTestMain extends Activity {
 
     ArrayList<ServiceConnection> mConnections = new ArrayList<ServiceConnection>();
 
+    static final int MSG_SPAM = 1;
+
+    final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SPAM: {
+                    boolean fg = msg.arg1 != 0;
+                    Intent intent = new Intent(ActivityTestMain.this, SpamActivity.class);
+                    Bundle options = null;
+                    if (fg) {
+                        ActivityOptions opts = ActivityOptions.makeTaskLaunchBehind();
+                        options = opts.toBundle();
+                    }
+                    startActivity(intent, options);
+                    scheduleSpam(!fg);
+                } break;
+            }
+            super.handleMessage(msg);
+        }
+    };
+
     class BroadcastResultReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -72,7 +98,7 @@ public class ActivityTestMain extends Activity {
 
     private void addThumbnail(LinearLayout container, Bitmap bm,
             final ActivityManager.RecentTaskInfo task,
-            final ActivityManager.TaskThumbnails thumbs, final int subIndex) {
+            final ActivityManager.TaskThumbnail thumbs) {
         ImageView iv = new ImageView(this);
         if (bm != null) {
             iv.setImageBitmap(bm);
@@ -86,9 +112,6 @@ public class ActivityTestMain extends Activity {
             @Override
             public void onClick(View v) {
                 if (task.id >= 0 && thumbs != null) {
-                    if (subIndex < (thumbs.numSubThumbbails-1)) {
-                        mAm.removeSubTask(task.id, subIndex+1);
-                    }
                     mAm.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME);
                 } else {
                     try {
@@ -104,11 +127,7 @@ public class ActivityTestMain extends Activity {
             @Override
             public boolean onLongClick(View v) {
                 if (task.id >= 0 && thumbs != null) {
-                    if (subIndex < 0) {
-                        mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
-                    } else {
-                        mAm.removeSubTask(task.id, subIndex);
-                    }
+                    mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
                     buildUi();
                     return true;
                 }
@@ -137,12 +156,19 @@ public class ActivityTestMain extends Activity {
                 mSecondUser = ui.id;
             }
         }
+
+        /*
+        AlertDialog ad = new AlertDialog.Builder(this).setTitle("title").setMessage("message").create();
+        ad.getWindow().getAttributes().type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        ad.show();
+        */
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add("Animate!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override public boolean onMenuItemClick(MenuItem item) {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(ActivityTestMain.this,
                         R.style.SlowDialog);
                 builder.setTitle("This is a title");
@@ -219,7 +245,7 @@ public class ActivityTestMain extends Activity {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, UserTarget.class);
                 sendOrderedBroadcastAsUser(intent, new UserHandle(mSecondUser), null,
-                        new BroadcastResultReceiver(), 
+                        new BroadcastResultReceiver(),
                         null, Activity.RESULT_OK, null, null);
                 return true;
             }
@@ -291,6 +317,69 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Add App Recent").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                addAppRecents(1);
+                return true;
+            }
+        });
+        menu.add("Add App 10x Recent").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                addAppRecents(10);
+                return true;
+            }
+        });
+        menu.add("Exclude!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                setExclude(true);
+                return true;
+            }
+        });
+        menu.add("Include!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                setExclude(false);
+                return true;
+            }
+        });
+        menu.add("Open Doc").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                ActivityManager.AppTask task = findDocTask();
+                if (task == null) {
+                    Intent intent = new Intent(ActivityTestMain.this, DocActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                            | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                            | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+                    startActivity(intent);
+                } else {
+                    task.moveToFront();
+                }
+                return true;
+            }
+        });
+        menu.add("Stack Doc").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                ActivityManager.AppTask task = findDocTask();
+                if (task != null) {
+                    ActivityManager.RecentTaskInfo recent = task.getTaskInfo();
+                    Intent intent = new Intent(ActivityTestMain.this, DocActivity.class);
+                    if (recent.id >= 0) {
+                        // Stack on top.
+                        intent.putExtra(DocActivity.LABEL, "Stacked");
+                    } else {
+                        // Start root activity.
+                        intent.putExtra(DocActivity.LABEL, "New Root");
+                    }
+                    task.startActivity(ActivityTestMain.this, intent, null);
+                }
+                return true;
+            }
+        });
+        menu.add("Spam!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                scheduleSpam(false);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -298,6 +387,17 @@ public class ActivityTestMain extends Activity {
     protected void onStart() {
         super.onStart();
         buildUi();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "I'm such a slooow poor loser");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
+        Log.i(TAG, "See?");
     }
 
     @Override
@@ -317,6 +417,65 @@ public class ActivityTestMain extends Activity {
         mConnections.clear();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeMessages(MSG_SPAM);
+    }
+
+    void addAppRecents(int count) {
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        intent.setComponent(new ComponentName(this, ActivityTestMain.class));
+        for (int i=0; i<count; i++) {
+            ActivityManager.TaskDescription desc = new ActivityManager.TaskDescription();
+            desc.setLabel("Added #" + i);
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
+            if ((i&1) == 0) {
+                desc.setIcon(bitmap);
+            }
+            int taskId = am.addAppTask(this, intent, desc, bitmap);
+            Log.i(TAG, "Added new task id #" + taskId);
+        }
+    }
+
+    void setExclude(boolean exclude) {
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.AppTask> tasks = am.getAppTasks();
+        int taskId = getTaskId();
+        for (int i=0; i<tasks.size(); i++) {
+            ActivityManager.AppTask task = tasks.get(i);
+            if (task.getTaskInfo().id == taskId) {
+                task.setExcludeFromRecents(exclude);
+            }
+        }
+    }
+
+    ActivityManager.AppTask findDocTask() {
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.AppTask> tasks = am.getAppTasks();
+        if (tasks != null) {
+            for (int i=0; i<tasks.size(); i++) {
+                ActivityManager.AppTask task = tasks.get(i);
+                ActivityManager.RecentTaskInfo recent = task.getTaskInfo();
+                if (recent.baseIntent != null
+                        && recent.baseIntent.getComponent().getClassName().equals(
+                                DocActivity.class.getCanonicalName())) {
+                    return task;
+                }
+            }
+        }
+        return null;
+    }
+
+    void scheduleSpam(boolean fg) {
+        mHandler.removeMessages(MSG_SPAM);
+        Message msg = mHandler.obtainMessage(MSG_SPAM, fg ? 1 : 0, 0);
+        mHandler.sendMessageDelayed(msg, 500);
+    }
+
     private View scrollWrap(View view) {
         ScrollView scroller = new ScrollView(this);
         scroller.addView(view, new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT,
@@ -333,7 +492,7 @@ public class ActivityTestMain extends Activity {
         if (recents != null) {
             for (int i=0; i<recents.size(); i++) {
                 ActivityManager.RecentTaskInfo r = recents.get(i);
-                ActivityManager.TaskThumbnails tt = mAm.getTaskThumbnails(r.persistentId);
+                ActivityManager.TaskThumbnail tt = mAm.getTaskThumbnail(r.persistentId);
                 TextView tv = new TextView(this);
                 tv.setText(r.baseIntent.getComponent().flattenToShortString());
                 top.addView(tv, new LinearLayout.LayoutParams(
@@ -341,10 +500,7 @@ public class ActivityTestMain extends Activity {
                         LinearLayout.LayoutParams.WRAP_CONTENT));
                 LinearLayout item = new LinearLayout(this);
                 item.setOrientation(LinearLayout.HORIZONTAL);
-                addThumbnail(item, tt != null ? tt.mainThumbnail : null, r, tt, -1);
-                for (int j=0; j<tt.numSubThumbbails; j++) {
-                    addThumbnail(item, tt.getSubThumbnail(j), r, tt, j);
-                }
+                addThumbnail(item, tt != null ? tt.mainThumbnail : null, r, tt);
                 top.addView(item, new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT));

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"ஷெல்"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"பிழை அறிக்கைகள் படமெடுக்கப்பட்டன"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"பிழை அறிக்கையைப் பகிர இடது புறமாகத் தேய்க்கவும்"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"உங்கள் பிழை அறிக்கையைப் பகிர, தொடவும்"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"பிழை அறிக்கைகளில், சொந்த வாழ்க்கை மற்றும் தனிப்பட்ட தகவல் உள்பட கணினியின் பல்வேறு பதிவுகளில் உள்ள தரவு இருக்கும். நீங்கள் நம்பும் பயன்பாடுகள் மற்றும் நபர்களுடன் மட்டும் பிழை அறிக்கைகளைப் பகிரவும்."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"இந்தச் செய்தியை அடுத்த முறைக் காட்டு"</string>
+</resources>

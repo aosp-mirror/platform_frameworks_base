@@ -19,8 +19,8 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:background="#ff000000" android:zAdjustment="normal">
-    <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+    <alpha android:fromAlpha="1.0" android:toAlpha="0.7"
             android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:duration="300"/>
+            android:interpolator="@interpolator/fast_out_slow_in"
+            android:duration="217"/>
 </set>

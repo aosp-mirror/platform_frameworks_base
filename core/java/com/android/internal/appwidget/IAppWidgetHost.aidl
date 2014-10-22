@@ -16,15 +16,16 @@
 
 package com.android.internal.appwidget;
 
+import android.content.pm.ApplicationInfo;
 import android.content.ComponentName;
 import android.appwidget.AppWidgetProviderInfo;
 import android.widget.RemoteViews;
 
 /** {@hide} */
 oneway interface IAppWidgetHost {
-    void updateAppWidget(int appWidgetId, in RemoteViews views, int userId);
-    void providerChanged(int appWidgetId, in AppWidgetProviderInfo info, int userId);
-    void providersChanged(int userId);
-    void viewDataChanged(int appWidgetId, int viewId, int userId);
+    void updateAppWidget(int appWidgetId, in RemoteViews views);
+    void providerChanged(int appWidgetId, in AppWidgetProviderInfo info);
+    void providersChanged();
+    void viewDataChanged(int appWidgetId, int viewId);
 }
 

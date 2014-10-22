@@ -1,8 +1,5 @@
 package android.net.dhcp;
 
-import android.util.Log;
-
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;

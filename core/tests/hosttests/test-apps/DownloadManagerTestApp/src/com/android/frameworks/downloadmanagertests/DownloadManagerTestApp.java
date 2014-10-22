@@ -38,14 +38,11 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     protected static String LOG_TAG =
             "com.android.frameworks.downloadmanagertests.DownloadManagerTestApp";
 
-    protected static String DOWNLOAD_500K_FILENAME = "External541kb.apk";
-    protected static long DOWNLOAD_500K_FILESIZE = 570927;
-    protected static String DOWNLOAD_1MB_FILENAME = "External1mb.apk";
-    protected static long DOWNLOAD_1MB_FILESIZE = 1041262;
-    protected static String DOWNLOAD_5MB_FILENAME = "External5mb.apk";
-    protected static long DOWNLOAD_5MB_FILESIZE = 5138700;
-    protected static String DOWNLOAD_10MB_FILENAME = "External10mb.apk";
-    protected static long DOWNLOAD_10MB_FILESIZE = 10258741;
+    protected static final String DOWNLOAD_FILENAME = "External93mb.apk";
+    protected static final long DOWNLOAD_FILESIZE = 95251708;
+    // Wait until download manager actually start downloading something
+    // Will wait for 1 MB to be downloaded.
+    private static final long EXPECTED_PROGRESS = 1024 * 1024;
 
     private static final String FILE_CONCURRENT_DOWNLOAD_FILE_PREFIX = "file";
     private static final String FILE_CONCURRENT_DOWNLOAD_FILE_EXTENSION = ".bin";
@@ -63,10 +60,10 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
         super.setUp();
         DownloadManagerTestRunner mRunner = (DownloadManagerTestRunner)getInstrumentation();
         externalDownloadUriValue = normalizeUri(mRunner.externalDownloadUriValue);
-        assertNotNull(externalDownloadUriValue);
+        assertNotNull("download url is null", externalDownloadUriValue);
 
         externalLargeDownloadUriValue = normalizeUri(mRunner.externalDownloadUriValue);
-        assertNotNull(externalLargeDownloadUriValue);
+        assertNotNull("large download url is null", externalLargeDownloadUriValue);
     }
 
     /**
@@ -126,7 +123,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void initiateDownload() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
+        String filename = DOWNLOAD_FILENAME;
         mContext.deleteFile(DOWNLOAD_STARTED_FLAG);
         FileOutputStream fileOutput = mContext.openFileOutput(DOWNLOAD_STARTED_FLAG, 0);
         DataOutputStream outputFile = null;
@@ -143,7 +140,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
 
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
-            assertTrue(dlRequest != -1);
+            assertTrue("request id is -1 from download manager", dlRequest != -1);
 
             // Store ID of download for later retrieval
             outputFile = new DataOutputStream(fileOutput);
@@ -162,8 +159,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void verifyFileDownloadSucceeded() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         long dlRequest = -1;
         boolean rebootMarkerValid = false;
         DataInputStream dataInputFile = null;
@@ -186,7 +183,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             mContext.deleteFile(DOWNLOAD_STARTED_FLAG);
         }
 
-        assertTrue(dlRequest != -1);
+        assertTrue("request id is -1 from download manager", dlRequest != -1);
         Cursor cursor = getCursor(dlRequest);
         ParcelFileDescriptor pfd = null;
         try {
@@ -196,9 +193,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             int status = cursor.getInt(columnIndex);
             int currentWaitTime = 0;
 
-            // Wait until the download finishes; don't wait for a notification b/c
-            // the download may well have been completed before the last reboot.
-            waitForDownloadOrTimeout_skipNotification(dlRequest);
+            assertTrue("download not finished", waitForDownload(dlRequest, 15 * 60 * 1000));
 
             Log.i(LOG_TAG, "Verifying download information...");
             // Verify specific info about the file (size, name, etc)...
@@ -223,8 +218,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runLargeDownloadOverWiFi() throws Exception {
-        String filename = DOWNLOAD_10MB_FILENAME;
-        long filesize = DOWNLOAD_10MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         long dlRequest = -1;
         doCommonDownloadSetup();
 
@@ -238,7 +233,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
         dlRequest = mDownloadManager.enqueue(request);
 
         // Rather large file, so wait up to 15 mins...
-        waitForDownloadOrTimeout(dlRequest, WAIT_FOR_DOWNLOAD_POLL_TIME, 15 * 60 * 1000);
+        assertTrue("download not finished", waitForDownload(dlRequest, 15 * 60 * 1000));
 
         Cursor cursor = getCursor(dlRequest);
         ParcelFileDescriptor pfd = null;
@@ -265,8 +260,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleSwitching() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         doCommonDownloadSetup();
 
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
@@ -292,7 +287,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // make sure we're starting to download some data...
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             setWiFiStateOn(false);
@@ -300,27 +295,29 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             // download disable
             Log.i(LOG_TAG, "Turning on airplane mode...");
             setAirplaneModeOn(true);
-            Thread.sleep(30 * 1000);  // wait 30 secs
+            Thread.sleep(5 * 1000);  // wait 5 secs
 
             // download disable
             setWiFiStateOn(true);
-            Thread.sleep(30 * 1000);  // wait 30 secs
+            Thread.sleep(5 * 1000);  // wait 5 secs
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download enable
             Log.i(LOG_TAG, "Turning off airplane mode...");
             setAirplaneModeOn(false);
             Thread.sleep(5 * 1000);  // wait 5 seconds
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
             setWiFiStateOn(false);
-            Thread.sleep(30 * 1000);  // wait 30 secs
+            Thread.sleep(5 * 1000);  // wait 5 secs
 
             // finally, turn WiFi back on and finish up the download
             Log.i(LOG_TAG, "Turning on WiFi...");
             setWiFiStateOn(true);
-            Log.i(LOG_TAG, "Waiting up to 3 minutes for download to complete...");
-            waitForDownloadsOrTimeout(dlRequest, 3 * 60 * 1000);
+            Log.i(LOG_TAG, "Waiting up to 10 minutes for download to complete...");
+            assertTrue("download not finished", waitForDownload(dlRequest, 10 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -340,8 +337,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleWiFiEnableDisable() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         doCommonDownloadSetup();
 
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
@@ -366,7 +363,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // are we making any progress?
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
@@ -376,7 +373,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             // enable download...
             Log.i(LOG_TAG, "Turning on WiFi again...");
             setWiFiStateOn(true);
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning off WiFi...");
@@ -387,8 +384,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning on WiFi again...");
             setWiFiStateOn(true);
 
-            Log.i(LOG_TAG, "Waiting up to 3 minutes for download to complete...");
-            waitForDownloadsOrTimeout(dlRequest, 3 * 60 * 1000);
+            Log.i(LOG_TAG, "Waiting up to 10 minutes for download to complete...");
+            assertTrue("download not finished", waitForDownload(dlRequest, 10 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -409,8 +406,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleAirplaneModeEnableDisable() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         // make sure WiFi is enabled, and airplane mode is not on
         doCommonDownloadSetup();
 
@@ -436,7 +433,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
             // are we making any progress?
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // download disable
             Log.i(LOG_TAG, "Turning on Airplane mode...");
@@ -447,7 +444,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning off Airplane mode...");
             setAirplaneModeOn(false);
             // make sure we're starting to download some data...
-            waitForFileToGrow(downloadedFile);
+            waitToReceiveData(dlRequest, EXPECTED_PROGRESS);
 
             // reenable the connection to start up the download again
             Log.i(LOG_TAG, "Turning on Airplane mode again...");
@@ -458,8 +455,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning off Airplane mode again...");
             setAirplaneModeOn(false);
 
-            Log.i(LOG_TAG, "Waiting up to 3 minutes for donwload to complete...");
-            waitForDownloadsOrTimeout(dlRequest, 180 * 1000);  // wait up to 3 mins before timeout
+            Log.i(LOG_TAG, "Waiting up to 10 minutes for donwload to complete...");
+            assertTrue("download not finished", waitForDownload(dlRequest, 10 * 60 * 1000)); // wait up to 10 mins
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -479,7 +476,6 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     public void runDownloadMultipleSimultaneously() throws Exception {
         final int TOTAL_DOWNLOADS = 15;
         HashSet<Long> downloadIds = new HashSet<Long>(TOTAL_DOWNLOADS);
-        MultipleDownloadsCompletedReceiver receiver = registerNewMultipleDownloadsReceiver();
 
         // Make sure there are no pending downloads currently going on
         removeAllCurrentDownloads();
@@ -493,12 +489,11 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
                 Request request = new Request(remoteUri);
                 request.setTitle(filename);
                 dlRequest = mDownloadManager.enqueue(request);
-                assertTrue(dlRequest != -1);
+                assertTrue("request id is -1 from download manager", dlRequest != -1);
                 downloadIds.add(dlRequest);
             }
 
-            waitForDownloadsOrTimeout(DEFAULT_WAIT_POLL_TIME, 15 * 60 * 2000);  // wait 15 mins max
-            assertEquals(TOTAL_DOWNLOADS, receiver.numDownloadsCompleted());
+            assertTrue("download not finished", waitForMultipleDownloads(downloadIds, 15 * 60 * 2000));  // wait 15 mins max
         } finally {
             removeAllCurrentDownloads();
         }

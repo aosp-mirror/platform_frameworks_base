@@ -17,60 +17,42 @@
 ** limitations under the License.
 */
 -->
-
+<!-- extends LinearLayout -->
 <com.android.systemui.statusbar.SignalClusterView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
-    android:gravity="center"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     >
+    <ImageView
+        android:id="@+id/vpn"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:paddingEnd="6dp"
+        android:src="@drawable/stat_sys_vpn_ic"
+        />
     <FrameLayout
         android:id="@+id/wifi_combo"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginEnd="-6dp"
         >
         <ImageView
             android:id="@+id/wifi_signal"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:scaleType="center"
             />
     </FrameLayout>
     <View
-        android:layout_height="6dp"
-        android:layout_width="6dp"
+        android:id="@+id/wifi_signal_spacer"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
         android:visibility="gone"
-        android:id="@+id/spacer"
         />
-    <!--<FrameLayout
-        android:id="@+id/wimax_combo"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginEnd="-6dp"
-        >
-        <ImageView
-            android:id="@+id/wimax_signal"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:scaleType="center"
-            />
-    </FrameLayout>
-    -->
     <FrameLayout
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         >
-        <View
-            android:layout_height="6dp"
-            android:layout_width="6dp"
-            android:visibility="invisible"
-            />
         <FrameLayout
             android:id="@+id/mobile_combo"
             android:layout_width="wrap_content"
@@ -88,6 +70,12 @@
                 />
         </FrameLayout>
     </FrameLayout>
+    <View
+        android:id="@+id/wifi_airplane_spacer"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        />
     <ImageView
         android:id="@+id/airplane"
         android:layout_height="wrap_content"

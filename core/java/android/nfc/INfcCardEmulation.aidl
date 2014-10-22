@@ -17,6 +17,7 @@
 package android.nfc;
 
 import android.content.ComponentName;
+import android.nfc.cardemulation.AidGroup;
 import android.nfc.cardemulation.ApduServiceInfo;
 import android.os.RemoteCallback;
 
@@ -29,5 +30,11 @@ interface INfcCardEmulation
     boolean isDefaultServiceForAid(int userHandle, in ComponentName service, String aid);
     boolean setDefaultServiceForCategory(int userHandle, in ComponentName service, String category);
     boolean setDefaultForNextTap(int userHandle, in ComponentName service);
+    boolean registerAidGroupForService(int userHandle, in ComponentName service, in AidGroup aidGroup);
+    AidGroup getAidGroupForService(int userHandle, in ComponentName service, String category);
+    boolean removeAidGroupForService(int userHandle, in ComponentName service, String category);
     List<ApduServiceInfo> getServices(int userHandle, in String category);
+    boolean setPreferredService(in ComponentName service);
+    boolean unsetPreferredService();
+    boolean supportsAidPrefixRegistration();
 }

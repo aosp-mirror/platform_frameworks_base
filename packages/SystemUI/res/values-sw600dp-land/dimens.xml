@@ -16,7 +16,17 @@
 */
 -->
 <resources>
-    <!-- Layout parameters for the notification panel -->
-	<dimen name="notification_panel_margin_bottom">0dp</dimen>
-    <dimen name="notification_panel_margin_left">32dp</dimen>
+    <!-- Recent Applications parameters -->
+    <dimen name="status_bar_recents_app_label_width">190dip</dimen>
+
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.25</item>
+
+    <fraction name="keyguard_clock_y_fraction_max">37%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">20%</fraction>
+
+    <dimen name="keyguard_clock_notifications_margin_min">36dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">80dp</dimen>
 </resources>

@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ไม่มีการแจ้งเตือน"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"เสียบที่ชาร์จ"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"แบตเตอรี่เหลือน้อย"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"แบตเตอรี่เหลือน้อย"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"เหลืออีก <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"แบตเตอรี่เหลือ <xliff:g id="NUMBER">%d%%</xliff:g> เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"ไม่สนับสนุนการชาร์จแบบ USB\nใช้เฉพาะที่ชาร์จที่ให้มาเท่านั้น"</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"การใช้แบตเตอรี่"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"ไม่รองรับการชาร์จผ่าน USB"</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"ใช้เฉพาะที่ชาร์จที่ให้มา"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"การตั้งค่า"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"เริ่มใช้โหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"เริ่ม"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"เริ่มโหมดประหยัดแบตเตอรี่"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"เพื่อช่วยให้ใช้งานแบตเตอรี่ได้ยาวนานขึ้น โหมดประหยัดแบตเตอรี่จะลดประสิทธิภาพการทำงานของอุปกรณ์ลง\n\nโหมดประหยัดแบตเตอรี่จะปิดเมื่อคุณเสียบปลั๊กไฟกับอุปกรณ์"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"การตั้งค่า"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"โหมดใช้งานบนเครื่องบิน"</string>
@@ -61,23 +67,25 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"อนุญาตจากคอมพิวเตอร์เครื่องนี้เสมอ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"ความเข้ากันได้ของการย่อ/ขยาย"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"สำหรับแอปพลิเคชันที่ออกแบบมาสำหรับหน้าจอขนาดเล็ก ตัวควบคุมการย่อ/ขยายจะปรากฏขึ้นข้างนาฬิกา"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"กำลังบันทึกภาพหน้าจอ"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"จับภาพหน้าจอแล้ว"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"แตะเพื่อดูภาพหน้าจอของคุณ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ไม่สามารถจับภาพหน้าจอ"</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"ไม่สามารถบันทึกภาพหน้าจอ ที่จัดเก็บข้อมูลอาจมีการใช้งานอยู่"</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ต่อเชื่อมเป็นโปรแกรมเล่นสื่อ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ต่อเชื่อมเป็นกล้องถ่ายรูป (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"ติดตั้งแอปพลิเคชัน Android File Transfer ของ Mac"</string>
-    <string name="accessibility_back" msgid="567011538994429120">"ย้อนกลับ"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"กลับ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"หน้าแรก"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"เมนู"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"แอปพลิเคชันล่าสุด"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"ค้นหา"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"กล้องถ่ายรูป"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"โทรศัพท์"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
@@ -119,6 +127,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"เปิดอยู่"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"ปิดอยู่"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"เชื่อมต่อแล้ว"</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"กำลังเชื่อมต่อ"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -142,7 +151,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"เปิดใช้งาน TeleTypewriter อยู่"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"เสียงเรียกเข้าแบบปิดเสียง"</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ถูกนำออกไปแล้ว"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ถูกลบไปแล้ว"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ปิดการแจ้งเตือนแล้ว"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"หน้าต่างแจ้งเตือน"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"การตั้งค่าด่วน"</string>
@@ -151,36 +160,44 @@
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"มือถือ <xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"แบตเตอรี่ <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"โหมดใช้งานบนเครื่องบิน <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"โหมดใช้บนเครื่องบิน <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"บลูทูธ <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"สถานที่ <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"ตั้งเวลาปลุกไว้ที่ <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"ปิดใช้งานข้อมูล 2G-3G แล้ว"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"ปิดใช้งานข้อมูล 4G แล้ว"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"ปิดใช้งานข้อมูลมือถือแล้ว"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ข้อมูลถูกปิดใช้งาน"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"คุณได้มาถึงขีดจำกัดการใช้ข้อมูลที่ระบุไว้แล้ว\n\nหากคุณเปิดใช้งานข้อมูลอีกครั้ง ผู้ให้บริการของคุณอาจเรียกเก็บค่าบริการ"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"เปิดใช้งานข้อมูลอีกครั้ง"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"ปิดแผงควบคุม"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"เวลามากขึ้น"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"เวลาน้อยลง"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ข้อมูล 2G-3G ปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ข้อมูล 4G ปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ข้อมูลมือถือปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ข้อมูลปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"อุปกรณ์ของคุณปิดการใช้ข้อมูลเนื่องจากถึงขีดจำกัดที่คุณตั้งค่าไว้\n\nผู้ให้บริการอาจเรียกเก็บเงินหากเปิดใช้อีกครั้ง"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"เปิดใช้ข้อมูล"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ WiFi แล้ว"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"กำลังค้นหา GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ตำแหน่งที่กำหนดโดย GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"คำขอตำแหน่งที่มีการใช้งาน"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ล้างการแจ้งเตือนทั้งหมด"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ข้อมูลแอป"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"หน้าจอจะหมุนโดยอัตโนมัติ"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวตั้ง"</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"ชั้นแสดงของหวาน"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"อีเทอร์เน็ต"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"โหมดใช้งานบนเครื่องบิน"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"โหมดใช้บนเครื่องบิน"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"กำลังชาร์จ, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"ชาร์จแล้ว"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"บลูทูธ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"บลูทูธ (<xliff:g id="NUMBER">%d</xliff:g> อุปกรณ์)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ปิดบลูทูธ"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ไม่มีอุปกรณ์ที่จับคู่ที่สามารถใช้ได้"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ความสว่าง"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"หมุนอัตโนมัติ"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"ล็อกการหมุนแล้ว"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"หมุนอัตโนมัติ"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ล็อกการหมุน"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"บุคคล"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"แนวนอน"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"วิธีป้อนข้อมูล"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"ตำแหน่ง"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ปิดตำแหน่ง"</string>
@@ -190,16 +207,95 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"การตั้งค่า"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"เวลา"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ฉัน"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"ผู้ใช้"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ผู้ใช้ใหม่"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WiFi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ไม่ได้เชื่อมต่อ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ไม่มีเครือข่าย"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ปิด WiFi"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"การแสดงผล WiFi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"จอแสดงผลไร้สาย"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"เครือข่ายที่บันทึกไว้ทั้งหมดไม่พร้อมใช้งาน"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"ส่งหน้าจอ"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"กำลังส่ง"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"อุปกรณ์ที่ไม่มีชื่อ"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"พร้อมที่จะส่ง"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"ไม่มีอุปกรณ์ที่สามารถใช้ได้"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ความสว่าง"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"อัตโนมัติ"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"การแจ้งเตือนจะแสดงขึ้นที่นี่"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"เข้าถึงได้ทุกเมื่อด้วยการกวาดนิ้วลง\nกวาดนิ้วลงอีกครั้งสำหรับการควบคุมระบบ"</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"กวาดขอบของหน้าจอเพื่อแสดงแถบ"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"กวาดจากขอบของหน้าจอเพื่อแสดงแถบระบบ"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"สลับสี"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"โหมดการแก้ไขสี"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"การตั้งค่าเพิ่มเติม"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"เสร็จสิ้น"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"เชื่อมต่อ"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"กำลังเชื่อมต่อ..."</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"การปล่อยสัญญาณ"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ฮอตสปอต"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"การแจ้งเตือน"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ไฟฉาย"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"ข้อมูลมือถือ"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"การใช้ข้อมูล"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ข้อมูลที่เหลืออยู่"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"เกินขีดจำกัด"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"ใช้ไปแล้ว <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ขีดจำกัด <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"คำเตือน <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"ไม่มีแอปล่าสุด"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"ข้อมูลแอปพลิเคชัน"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"การล็อกแอป"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"ค้นหา"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ชาร์จแล้ว"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"กำลังชาร์จ"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จึงจะเต็ม"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"ไม่ได้ชาร์จ"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"เครือข่ายอาจ\nถูกตรวจสอบ"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"เลื่อนขึ้นเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"ไม่มีการรบกวนรวมถึงเสียงปลุก"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"ไม่มีการรบกวน"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"เฉพาะเรื่องสำคัญเท่านั้น"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"การปลุกครั้งถัดไปของคุณคือเวลา <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"การปลุกครั้งถัดไปของคุณคือ <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"คุณจะไม่ได้ยินเสียงปลุกในเวลา <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยด้านล่าง"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"แตะอีกครั้งเพื่อเปิด"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"กวาดขึ้นเพื่อปลดล็อก"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"กวาดไปทางขวาเพื่อใช้โทรศัพท์"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"กวาดไปทางซ้ายเพื่อใช้กล้องถ่ายรูป"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ไม่มีกำหนด"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"ไม่มี"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"สำคัญ"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"ทั้งหมด"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"กำลังชาร์จ (อีก <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> เต็ม)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"ผู้เข้าร่วม"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ ผู้เข้าร่วม"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"ออกจากโหมดผู้เยี่ยมชม"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1 นาที"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d นาที"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1 ชั่วโมง"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d ชั่วโมง"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"ประสิทธิภาพการทำงานของอุปกรณ์ลดลง"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"เปิดการตั้งค่าโหมดประหยัดแบตเตอรี่"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"เนื้อหาที่ซ่อน"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"เริ่มเลย"</string>
 </resources>

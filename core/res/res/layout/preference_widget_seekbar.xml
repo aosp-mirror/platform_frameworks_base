@@ -14,9 +14,7 @@
      limitations under the License.
 -->
 
-<!-- Layout for a Preference in a PreferenceActivity. The
-     Preference is able to place a specific widget for its particular
-     type in the "widget_frame" layout. -->
+<!-- Layout used by SeekBarPreference for the seekbar widget style. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

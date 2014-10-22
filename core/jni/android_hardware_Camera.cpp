@@ -27,6 +27,7 @@
 
 #include <cutils/properties.h>
 #include <utils/Vector.h>
+#include <utils/Errors.h>
 
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
@@ -34,6 +35,11 @@
 #include <binder/IMemory.h>
 
 using namespace android;
+
+enum {
+    // Keep up to date with Camera.java
+    CAMERA_HAL_API_VERSION_NORMAL_CONNECT = -2,
+};
 
 struct fields_t {
     jfieldID    context;
@@ -230,7 +236,7 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
         ssize_t offset;
         size_t size;
         sp<IMemoryHeap> heap = dataPtr->getMemory(&offset, &size);
-        ALOGV("copyAndPost: off=%ld, size=%d", offset, size);
+        ALOGV("copyAndPost: off=%zd, size=%zu", offset, size);
         uint8_t *heapBase = (uint8_t*)heap->base();
 
         if (heapBase != NULL) {
@@ -464,8 +470,8 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
 }
 
 // connect to camera service
-static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
-    jobject weak_this, jint cameraId, jstring clientPackageName)
+static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
+    jobject weak_this, jint cameraId, jint halVersion, jstring clientPackageName)
 {
     // Convert jstring to String16
     const char16_t *rawClientName = env->GetStringChars(clientPackageName, NULL);
@@ -473,24 +479,33 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     String16 clientName(rawClientName, rawClientNameLen);
     env->ReleaseStringChars(clientPackageName, rawClientName);
 
-    sp<Camera> camera = Camera::connect(cameraId, clientName,
-            Camera::USE_CALLING_UID);
+    sp<Camera> camera;
+    if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
+        // Default path: hal version is don't care, do normal camera connect.
+        camera = Camera::connect(cameraId, clientName,
+                Camera::USE_CALLING_UID);
+    } else {
+        jint status = Camera::connectLegacy(cameraId, halVersion, clientName,
+                Camera::USE_CALLING_UID, camera);
+        if (status != NO_ERROR) {
+            return status;
+        }
+    }
 
     if (camera == NULL) {
-        jniThrowRuntimeException(env, "Fail to connect to camera service");
-        return;
+        return -EACCES;
     }
 
     // make sure camera hardware is alive
     if (camera->getStatus() != NO_ERROR) {
-        jniThrowRuntimeException(env, "Camera initialization failed");
-        return;
+        return NO_INIT;
     }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
+        // This should never happen
         jniThrowRuntimeException(env, "Can't find android/hardware/Camera");
-        return;
+        return INVALID_OPERATION;
     }
 
     // We use a weak reference so the Camera object can be garbage collected.
@@ -501,6 +516,7 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
 
     // save context in opaque field
     env->SetLongField(thiz, fields.context, (jlong)context.get());
+    return NO_ERROR;
 }
 
 // disconnect from camera service
@@ -509,7 +525,6 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
 // finalizer is invoked later.
 static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 {
-    // TODO: Change to ALOGV
     ALOGV("release camera");
     JNICameraContext* context = NULL;
     sp<Camera> camera;
@@ -538,9 +553,9 @@ static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
     }
 }
 
-static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz, jobject jSurface)
+static void android_hardware_Camera_setPreviewSurface(JNIEnv *env, jobject thiz, jobject jSurface)
 {
-    ALOGV("setPreviewDisplay");
+    ALOGV("setPreviewSurface");
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
@@ -890,14 +905,14 @@ static JNINativeMethod camMethods[] = {
     "(ILandroid/hardware/Camera$CameraInfo;)V",
     (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
-    "(Ljava/lang/Object;ILjava/lang/String;)V",
+    "(Ljava/lang/Object;IILjava/lang/String;)I",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",
     (void*)android_hardware_Camera_release },
-  { "setPreviewDisplay",
+  { "setPreviewSurface",
     "(Landroid/view/Surface;)V",
-    (void *)android_hardware_Camera_setPreviewDisplay },
+    (void *)android_hardware_Camera_setPreviewSurface },
   { "setPreviewTexture",
     "(Landroid/graphics/SurfaceTexture;)V",
     (void *)android_hardware_Camera_setPreviewTexture },

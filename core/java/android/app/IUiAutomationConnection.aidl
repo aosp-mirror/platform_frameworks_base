@@ -19,6 +19,8 @@ package android.app;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.graphics.Bitmap;
 import android.view.InputEvent;
+import android.view.WindowContentFrameStats;
+import android.view.WindowAnimationFrameStats;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -26,7 +28,7 @@ import android.os.ParcelFileDescriptor;
  * on behalf of an instrumentation that it runs. These operations require
  * special permissions which the shell user has but the instrumentation does
  * not. Running privileged operations by the shell user on behalf of an
- * instrumentation is needed for running UiTestCases. 
+ * instrumentation is needed for running UiTestCases.
  *
  * {@hide}
  */
@@ -37,4 +39,9 @@ interface IUiAutomationConnection {
     boolean setRotation(int rotation);
     Bitmap takeScreenshot(int width, int height);
     void shutdown();
+    boolean clearWindowContentFrameStats(int windowId);
+    WindowContentFrameStats getWindowContentFrameStats(int windowId);
+    void clearWindowAnimationFrameStats();
+    WindowAnimationFrameStats getWindowAnimationFrameStats();
+    void executeShellCommand(String command, in ParcelFileDescriptor fd);
 }

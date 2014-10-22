@@ -24,7 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -35,7 +35,9 @@ import android.view.View;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
+
 import static android.view.animation.AnimationUtils.currentAnimationTimeMillis;
+
 import com.android.internal.R;
 
 
@@ -51,6 +53,11 @@ public class RotarySelector extends View {
     private static final String LOG_TAG = "RotarySelector";
     private static final boolean DBG = false;
     private static final boolean VISUAL_DEBUG = false;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     // Listener for onDialTrigger() callbacks.
     private OnDialTriggerListener mOnDialTriggerListener;
@@ -677,7 +684,7 @@ public class RotarySelector extends View {
                 mVibrator = (android.os.Vibrator) getContext()
                         .getSystemService(Context.VIBRATOR_SERVICE);
             }
-            mVibrator.vibrate(duration);
+            mVibrator.vibrate(duration, VIBRATION_ATTRIBUTES);
         }
     }
 

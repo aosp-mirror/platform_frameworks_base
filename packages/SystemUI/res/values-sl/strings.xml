@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ni obvestil"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Trenutno"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obvestila"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Priključite polnilnik"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Baterija je skoraj prazna."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Akumulator je skoraj izpraznjen"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> preostalo"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Še <xliff:g id="NUMBER">%d%%</xliff:g>. Varčevanje z energijo akumulatorja je vklopljeno."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Polnjenje po povezavi USB ni podprto.\nUporabite priloženi polnilnik."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Uporaba baterije"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Polnjenje prek USB-ja ni podprto."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Uporabljajte samo priloženi polnilnik."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Nastavitve"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Želite zagnati varčevanje z energijo akumulatorja?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Začni"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Zaženi varčevanje z energijo akumulatorja"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Zaradi podaljšanja delovanja akumulatorja funkcija Varčevanje z energijo akumulatorja zmanjša zmogljivost delovanja naprave.\n\nVarčevanje z energijo akumulatorja se onemogoči, ko je naprava priklopljena na zunanje napajanje."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavitve"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Način za letalo"</string>
@@ -61,15 +67,14 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Vedno dovoli iz tega računalnika"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Razširitev združljivosti"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Če je program izdelan za manjše zaslone, se ob uri pokaže kontrolnik za povečavo."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Shranjev. posnetka zaslona ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Shranjevanje posnetka zaslona ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Shranjevanje posnetka zaslona."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Posnetek zaslona je shranjen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dotaknite se, če si želite ogledati posnetek zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Posnetka zaslona ni bilo mogoče shraniti."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Posnetka zaslona ni bilo mogoče shraniti. Shramba je morda v uporabi."</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosa datotek prek USB-ja"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Vpni kot predvajalnik (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Vpni kot fotoaparat (PTP)"</string>
@@ -78,6 +83,9 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Začetni zaslon"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meni"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Nedavni programi"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Iskanje"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Fotoaparat"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za preklop načina vnosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb povečave za združljivost."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Povečava manjšega na večji zaslon."</string>
@@ -119,6 +127,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Vklopljen."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Izklopljen."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Povezan."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Povezovanje."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -153,23 +162,28 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Baterija: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Letalski način: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Lokacija: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarm je nastavljen na <xliff:g id="TIME">%s</xliff:g>."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Podatki 2G-3G so onemogočeni"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Podatki 4G so onemogočeni"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilni podatki so onemogočeni"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podatki onemogočeni"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosegli ste omejitev količine prenesenih podatkov.\n\nČe prenos podatkov znova omogočite, vam ga lahko operater zaračuna."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova omogoči podatke"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Zapri podokno"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Daljši čas"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Krajši čas"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Prenos podatkov v omrežjih 2G/3G je izklopljen"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Prenos podatkov v omrežjih 4G je izklopljen"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Prenos podatkov v mobilnih omrežjih je izklopljen"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Prenos podatkov je izklopljen"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Naprava je izklopila prenos podatkov, ker je bila dosežena omejitev, ki ste jo nastavili.\n\nČe prenos spet vklopite, vam bo operater morda zaračunal stroške."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Vklopi prenos podatkov"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ni internetne povez."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Iskanje GPS-a"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija nastavljena z GPS-om"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivne zahteve za lokacijo"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Izbriši vsa obvestila."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Podatki o aplikaciji"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Zaslon se bo samodejno zasukal."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Zaslon je zaklenjen v ležeči usmerjenosti."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Zaslon je zaklenjen v pokončni usmerjenosti."</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Vitrina za sladice"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Sanjarjenje"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Način za letalo"</string>
@@ -178,9 +192,12 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (št. naprav: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth izklopljen"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Na voljo ni nobene seznanjene naprave"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Svetlost"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Samodejno vrtenje"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Zaklenjeno vrtenje"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Samodejno sukanje"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Sukanje je zaklenjeno"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Pokončno"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Ležeče"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Način vnosa"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Lokacija"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Lokacija izklopljena"</string>
@@ -190,16 +207,95 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Nastavitve"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Čas"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Jaz"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Uporabnik"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Nov uporabnik"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Povezava ni vzpostavljena"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ni omrežja"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi izklopljen"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Zaslon Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Prikaz brezžičnih naprav"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Na voljo ni nobeno shranjeno omrežje"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Zaslon za predvajanje"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Predvajanje"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Neimenovana naprava"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Pripravljeno za predvajanje"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Na voljo ni nobene naprave"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Svetlost"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SAMODEJNO"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Obvestila so prikazana tukaj"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Do njih lahko kadar koli dostopate tako, da povlečete navzdol.\nZa prikaz sistemskih kontrolnikov znova povlecite navzdol."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Vrstico prikažete tako, da povlečete z roba zaslona"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Sistemsko vrstico prikažete tako, da povlečete z roba zaslona"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Obrni barve"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Način popravljanja barv"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Več nastavitev"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"Končano"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"Povezava je vzpostavljena"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Vzpostavljanje povezave ..."</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Internet prek mobilne naprave"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Dostopna točka"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Obvestila"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Svetilka"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Prenos podatkov v mobilnih omrežjih"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Poraba podatkov"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Preostala količina podatkov"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Omejitev prekoračena"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Porabljeno: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Omejitev: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Opozorilo – <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"Ni nedavnih aplikacij"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Podatki o aplikaciji"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"zakleni v aplikacijo"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"iskanje"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Akumulator napolnjen"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Polnjenje"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do napolnjenosti"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Se ne polni"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Omrežje je\nlahko spremljano"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Iskanje"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Povlecite navzgor za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Povlecite v levo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"Brez prekinitev, vključno z alarmi"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Brez prekinitev"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Samo prednostne prekinitve"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"Vaš naslednji alarm je ob <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Vaš naslednji alarm: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"Alarma ob <xliff:g id="ALARM_TIME">%s</xliff:g> ne boste slišali"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Manj nujna obvestila spodaj"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Znova se dotaknite, da odprete"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Povlecite, da odklenete"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Povlecite v desno za telefon"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Povlecite v levo za fotoaparat"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Za nedoločen čas"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Nič"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Prednost"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Vse"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do napolnjenosti)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"Gost"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"Dodajanje gosta"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"Izhod iz načina za goste"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Za eno minuto"</item>
+    <item quantity="other" msgid="6924190729213550991">"Za %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Za eno uro"</item>
+    <item quantity="other" msgid="5408537517529822157">"Za %d h"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Varčevanje z energijo akumulatorja je vklopljeno"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Zmogljivost delovanja naprave je zmanjšana."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Odpri nastavitve varčevanja z energijo akumulatorja"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Vsebina je skrita"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bo začela zajemati vse, kar je prikazano na zaslonu."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Tega ne prikaži več"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Začni zdaj"</string>
 </resources>

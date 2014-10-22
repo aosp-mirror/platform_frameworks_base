@@ -25,9 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
@@ -36,37 +33,48 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class BatteryMeterView extends View implements DemoMode {
+import com.android.systemui.statusbar.policy.BatteryController;
+
+public class BatteryMeterView extends View implements DemoMode,
+        BatteryController.BatteryStateChangeCallback {
     public static final String TAG = BatteryMeterView.class.getSimpleName();
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
 
-    public static final boolean ENABLE_PERCENT = true;
-    public static final boolean SINGLE_DIGIT_PERCENT = false;
-    public static final boolean SHOW_100_PERCENT = false;
+    private static final boolean ENABLE_PERCENT = true;
+    private static final boolean SINGLE_DIGIT_PERCENT = false;
+    private static final boolean SHOW_100_PERCENT = false;
 
-    public static final int FULL = 96;
-    public static final int EMPTY = 4;
+    private static final int FULL = 96;
 
-    public static final float SUBPIXEL = 0.4f;  // inset rects for softer edges
+    private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
-    int[] mColors;
+    private final int[] mColors;
 
     boolean mShowPercent = true;
-    Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
-    int mButtonHeight;
+    private float mButtonHeightFraction;
+    private float mSubpixelSmoothingLeft;
+    private float mSubpixelSmoothingRight;
+    private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     private float mTextHeight, mWarningTextHeight;
 
     private int mHeight;
     private int mWidth;
     private String mWarningString;
+    private final int mCriticalLevel;
     private final int mChargeColor;
     private final float[] mBoltPoints;
     private final Path mBoltPath = new Path();
 
     private final RectF mFrame = new RectF();
     private final RectF mButtonFrame = new RectF();
-    private final RectF mClipFrame = new RectF();
     private final RectF mBoltFrame = new RectF();
+
+    private final Path mShapePath = new Path();
+    private final Path mClipPath = new Path();
+    private final Path mTextPath = new Path();
+
+    private BatteryController mBatteryController;
+    private boolean mPowerSaveEnabled;
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -155,6 +163,7 @@ public class BatteryMeterView extends View implements DemoMode {
             // preload the battery level
             mTracker.onReceive(getContext(), sticky);
         }
+        mBatteryController.addStateChangedCallback(this);
     }
 
     @Override
@@ -162,6 +171,7 @@ public class BatteryMeterView extends View implements DemoMode {
         super.onDetachedFromWindow();
 
         getContext().unregisterReceiver(mTracker);
+        mBatteryController.removeStateChangedCallback(this);
     }
 
     public BatteryMeterView(Context context) {
@@ -176,6 +186,10 @@ public class BatteryMeterView extends View implements DemoMode {
         super(context, attrs, defStyle);
 
         final Resources res = context.getResources();
+        TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
+                defStyle, 0);
+        final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
+                res.getColor(R.color.batterymeter_frame_color));
         TypedArray levels = res.obtainTypedArray(R.array.batterymeter_color_levels);
         TypedArray colors = res.obtainTypedArray(R.array.batterymeter_color_values);
 
@@ -187,17 +201,24 @@ public class BatteryMeterView extends View implements DemoMode {
         }
         levels.recycle();
         colors.recycle();
+        atts.recycle();
         mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
                 context.getContentResolver(), "status_bar_show_battery_percent", 0);
-
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
+        mCriticalLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+        mButtonHeightFraction = context.getResources().getFraction(
+                R.fraction.battery_button_height_fraction, 1, 1);
+        mSubpixelSmoothingLeft = context.getResources().getFraction(
+                R.fraction.battery_subpixel_smoothing_left, 1, 1);
+        mSubpixelSmoothingRight = context.getResources().getFraction(
+                R.fraction.battery_subpixel_smoothing_right, 1, 1);
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mFramePaint.setColor(res.getColor(R.color.batterymeter_frame_color));
+        mFramePaint.setColor(frameColor);
         mFramePaint.setDither(true);
         mFramePaint.setStrokeWidth(0);
         mFramePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mFramePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
 
         mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBatteryPaint.setDither(true);
@@ -205,8 +226,7 @@ public class BatteryMeterView extends View implements DemoMode {
         mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setColor(0xFFFFFFFF);
-        Typeface font = Typeface.create("sans-serif-condensed", Typeface.NORMAL);
+        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
         mTextPaint.setTypeface(font);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
 
@@ -218,11 +238,25 @@ public class BatteryMeterView extends View implements DemoMode {
 
         mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
 
-        mBoltPaint = new Paint();
-        mBoltPaint.setAntiAlias(true);
+        mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBoltPaint.setColor(res.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
-        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+    }
+
+    public void setBatteryController(BatteryController batteryController) {
+        mBatteryController = batteryController;
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+    }
+
+    @Override
+    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        // TODO: Use this callback instead of own broadcast receiver.
+    }
+
+    @Override
+    public void onPowerSaveChanged() {
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+        invalidate();
     }
 
     private static float[] loadBoltPoints(Resources res) {
@@ -249,6 +283,11 @@ public class BatteryMeterView extends View implements DemoMode {
     }
 
     private int getColorForLevel(int percent) {
+
+        // If we are in power save mode, always use the normal color.
+        if (mPowerSaveEnabled) {
+            return mColors[mColors.length-1];
+        }
         int thresh, color = 0;
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
@@ -270,55 +309,58 @@ public class BatteryMeterView extends View implements DemoMode {
         final int pl = getPaddingLeft();
         final int pr = getPaddingRight();
         final int pb = getPaddingBottom();
-        int height = mHeight - pt - pb;
-        int width = mWidth - pl - pr;
+        final int height = mHeight - pt - pb;
+        final int width = mWidth - pl - pr;
 
-        mButtonHeight = (int) (height * 0.12f);
+        final int buttonHeight = (int) (height * mButtonHeightFraction);
 
         mFrame.set(0, 0, width, height);
         mFrame.offset(pl, pt);
 
+        // button-frame: area above the battery body
         mButtonFrame.set(
-                mFrame.left + width * 0.25f,
+                mFrame.left + Math.round(width * 0.25f),
                 mFrame.top,
-                mFrame.right - width * 0.25f,
-                mFrame.top + mButtonHeight + 5 /*cover frame border of intersecting area*/);
+                mFrame.right - Math.round(width * 0.25f),
+                mFrame.top + buttonHeight);
 
-        mButtonFrame.top += SUBPIXEL;
-        mButtonFrame.left += SUBPIXEL;
-        mButtonFrame.right -= SUBPIXEL;
+        mButtonFrame.top += mSubpixelSmoothingLeft;
+        mButtonFrame.left += mSubpixelSmoothingLeft;
+        mButtonFrame.right -= mSubpixelSmoothingRight;
 
-        mFrame.top += mButtonHeight;
-        mFrame.left += SUBPIXEL;
-        mFrame.top += SUBPIXEL;
-        mFrame.right -= SUBPIXEL;
-        mFrame.bottom -= SUBPIXEL;
+        // frame: battery body area
+        mFrame.top += buttonHeight;
+        mFrame.left += mSubpixelSmoothingLeft;
+        mFrame.top += mSubpixelSmoothingLeft;
+        mFrame.right -= mSubpixelSmoothingRight;
+        mFrame.bottom -= mSubpixelSmoothingRight;
 
-        // first, draw the battery shape
-        c.drawRect(mFrame, mFramePaint);
-
-        // fill 'er up
-        final int color = tracker.plugged ? mChargeColor : getColorForLevel(level);
-        mBatteryPaint.setColor(color);
+        // set the battery charging color
+        mBatteryPaint.setColor(tracker.plugged ? mChargeColor : getColorForLevel(level));
 
         if (level >= FULL) {
             drawFrac = 1f;
-        } else if (level <= EMPTY) {
+        } else if (level <= mCriticalLevel) {
             drawFrac = 0f;
         }
 
-        c.drawRect(mButtonFrame, drawFrac == 1f ? mBatteryPaint : mFramePaint);
+        final float levelTop = drawFrac == 1f ? mButtonFrame.top
+                : (mFrame.top + (mFrame.height() * (1f - drawFrac)));
 
-        mClipFrame.set(mFrame);
-        mClipFrame.top += (mFrame.height() * (1f - drawFrac));
-
-        c.save(Canvas.CLIP_SAVE_FLAG);
-        c.clipRect(mClipFrame);
-        c.drawRect(mFrame, mBatteryPaint);
-        c.restore();
+        // define the battery shape
+        mShapePath.reset();
+        mShapePath.moveTo(mButtonFrame.left, mButtonFrame.top);
+        mShapePath.lineTo(mButtonFrame.right, mButtonFrame.top);
+        mShapePath.lineTo(mButtonFrame.right, mFrame.top);
+        mShapePath.lineTo(mFrame.right, mFrame.top);
+        mShapePath.lineTo(mFrame.right, mFrame.bottom);
+        mShapePath.lineTo(mFrame.left, mFrame.bottom);
+        mShapePath.lineTo(mFrame.left, mFrame.top);
+        mShapePath.lineTo(mButtonFrame.left, mFrame.top);
+        mShapePath.lineTo(mButtonFrame.left, mButtonFrame.top);
 
         if (tracker.plugged) {
-            // draw the bolt
+            // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 4.5f;
             final float bt = mFrame.top + mFrame.height() / 6f;
             final float br = mFrame.right - mFrame.width() / 7f;
@@ -339,25 +381,67 @@ public class BatteryMeterView extends View implements DemoMode {
                         mBoltFrame.left + mBoltPoints[0] * mBoltFrame.width(),
                         mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
             }
-            c.drawPath(mBoltPath, mBoltPaint);
-        } else if (level <= EMPTY) {
-            final float x = mWidth * 0.5f;
-            final float y = (mHeight + mWarningTextHeight) * 0.48f;
-            c.drawText(mWarningString, x, y, mWarningTextPaint);
-        } else if (mShowPercent && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
+
+            float boltPct = (mBoltFrame.bottom - levelTop) / (mBoltFrame.bottom - mBoltFrame.top);
+            boltPct = Math.min(Math.max(boltPct, 0), 1);
+            if (boltPct <= BOLT_LEVEL_THRESHOLD) {
+                // draw the bolt if opaque
+                c.drawPath(mBoltPath, mBoltPaint);
+            } else {
+                // otherwise cut the bolt out of the overall shape
+                mShapePath.op(mBoltPath, Path.Op.DIFFERENCE);
+            }
+        }
+
+        // compute percentage text
+        boolean pctOpaque = false;
+        float pctX = 0, pctY = 0;
+        String pctText = null;
+        if (!tracker.plugged && level > mCriticalLevel && mShowPercent
+                && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
+            mTextPaint.setColor(getColorForLevel(level));
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
                             : (tracker.level == 100 ? 0.38f : 0.5f)));
             mTextHeight = -mTextPaint.getFontMetrics().ascent;
-
-            final String str = String.valueOf(SINGLE_DIGIT_PERCENT ? (level/10) : level);
-            final float x = mWidth * 0.5f;
-            final float y = (mHeight + mTextHeight) * 0.47f;
-            c.drawText(str,
-                    x,
-                    y,
-                    mTextPaint);
+            pctText = String.valueOf(SINGLE_DIGIT_PERCENT ? (level/10) : level);
+            pctX = mWidth * 0.5f;
+            pctY = (mHeight + mTextHeight) * 0.47f;
+            pctOpaque = levelTop > pctY;
+            if (!pctOpaque) {
+                mTextPath.reset();
+                mTextPaint.getTextPath(pctText, 0, pctText.length(), pctX, pctY, mTextPath);
+                // cut the percentage text out of the overall shape
+                mShapePath.op(mTextPath, Path.Op.DIFFERENCE);
+            }
         }
+
+        // draw the battery shape background
+        c.drawPath(mShapePath, mFramePaint);
+
+        // draw the battery shape, clipped to charging level
+        mFrame.top = levelTop;
+        mClipPath.reset();
+        mClipPath.addRect(mFrame,  Path.Direction.CCW);
+        mShapePath.op(mClipPath, Path.Op.INTERSECT);
+        c.drawPath(mShapePath, mBatteryPaint);
+
+        if (!tracker.plugged) {
+            if (level <= mCriticalLevel) {
+                // draw the warning text
+                final float x = mWidth * 0.5f;
+                final float y = (mHeight + mWarningTextHeight) * 0.48f;
+                c.drawText(mWarningString, x, y, mWarningTextPaint);
+            } else if (pctOpaque) {
+                // draw the percentage text
+                c.drawText(pctText, pctX, pctY, mTextPaint);
+            }
+        }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 
     private boolean mDemoMode;

@@ -19,7 +19,6 @@ package android.content;
 import android.accounts.Account;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 /**
  * Information about the sync operation that is currently underway.
@@ -46,8 +45,7 @@ public class SyncInfo implements Parcelable {
     public final long startTime;
 
     /** @hide */
-    public SyncInfo(int authorityId, Account account, String authority,
-            long startTime) {
+    public SyncInfo(int authorityId, Account account, String authority, long startTime) {
         this.authorityId = authorityId;
         this.account = account;
         this.authority = authority;
@@ -70,7 +68,7 @@ public class SyncInfo implements Parcelable {
     /** @hide */
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(authorityId);
-        account.writeToParcel(parcel, 0);
+        parcel.writeParcelable(account, flags);
         parcel.writeString(authority);
         parcel.writeLong(startTime);
     }
@@ -78,7 +76,7 @@ public class SyncInfo implements Parcelable {
     /** @hide */
     SyncInfo(Parcel parcel) {
         authorityId = parcel.readInt();
-        account = new Account(parcel);
+        account = parcel.readParcelable(Account.class.getClassLoader());
         authority = parcel.readString();
         startTime = parcel.readLong();
     }

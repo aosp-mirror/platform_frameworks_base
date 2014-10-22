@@ -1,0 +1,191 @@
+page.title=Creating and Running a Wearable App
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#SetupEmulator">Set Up an Android Wear Emulator</a></li>
+  <li><a href="#SetupDevice">Set Up an Android Wear Device</a></li>
+  <li><a href="#CreateProject">Create a Project</a></li>
+  <li><a href="#Libraries">Include the Correct Libraries</a></li>
+</ol>
+<h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android Studio 0.8 or later and Gradle 0.12 or later</li>
+  </ul>
+</div>
+</div>
+
+<p>Wearable apps run directly on the wearable device, giving you access to low-level
+hardware such as sensors, activities, services, and more, right
+on the wearable.</p>
+
+<p>A companion handheld app that contains the
+wearable app is also required when you want to publish to the Google Play store.
+Wearables don't support the Google Play store, so users download the companion handheld app,
+which automatically pushes the wearable app to the wearable. The handheld app is also
+useful for doing heavy processing, network actions, or other work and
+sending the results to the wearable.
+</p>
+
+<p>This lesson goes over how to set up a device or emulator and create one project to contain
+both your wearable and handheld apps.
+</p>
+
+
+<h2 id="SetupEmulator">Set Up an Android Wear Emulator or Device</h2>
+<p>We recommend that you develop on real hardware so you can better
+gauge the user experience. However, the emulator lets you test out different
+types of screen shapes, which is useful for testing.</p>
+
+<h3>Set up an Android Wear Virtual Device</h3>
+
+<p>To set up an Android Wear virtual device:</p>
+<ol>
+  <li>Click <b>Tools > Android > AVD Manager</b>.</li>
+  <li>Click <b>Create...</b>.</li>
+  <li>Fill in the following details for the AVD you want to specify and leave the rest
+  of the fields with their default values:
+    <ul>
+      <li><b>AVD Name</b> - A name for your AVD</li>
+      <li><b>Device</b> - Android Wear Round or Square device types</li>
+      <li><b>Target</b> - Android 4.4W - API Level 20</li>
+      <li><b>CPU/ABI</b> - Android Wear ARM (armeabi-v7a)</li>
+      <li><b>Keyboard</b> - Select <b>Hardware keyboard present</b></li>
+      <li><b>Skin</b> - AndroidWearRound or AndroidWearSquare depending on the selected device type</li>
+      <li><b>Snapshot</b> - Not selected</li>
+      <li><b>Use Host GPU</b> - Selected, to support custom activities for wearable notifications</li>
+    </ul>
+  </li>
+  <li>Click <b>OK</b>.</li>
+<li>Start the emulator:
+<ol>
+  <li>Select the virtual device you just created.</li>
+  <li>Click <b>Start...</b>, then click <b>Launch</b>.</li>
+  <li>Wait until the emulator initializes and shows the Android Wear home screen.</li>
+</ol>
+</li>
+<li>Pair Your handheld with the emulator:
+<ol>
+  <li>On your handheld, install the Android Wear app from Google Play.</li>
+  <li>Connect the handheld to your machine through USB.</li>
+  <li>Forward the AVD's communication port to the connected handheld device (you must
+  do this every time the handheld is connected):
+  <pre>adb -d forward tcp:5601 tcp:5601</pre>
+  </li>
+  <li>Start the Android Wear app on your handheld device and connect to the emulator.</li>
+  <li>Tap the menu on the top right corner of the Android Wear app and select
+  <b>Demo Cards</b>.</li>
+  <li>The cards you select appear as notifications on the home screen of the emulator.</li>
+</ol>
+</li>
+</ol>
+
+<h3 id="SetupDevice">Set Up an Android Wear Device</h3>
+<p>To set up an Android Wear device:</p>
+<ol>
+  <li>Install the Android Wear app, available on Google Play, on your handheld.</li>
+  <li>Follow the app's instructions to pair your handheld with your wearable.
+  This allows you to test out synced handheld notifications, if you're building them.</li>
+  <li>Leave the Android Wear app open on your phone.</li>
+  <li>Connect the wearable to your machine through USB, so you can install apps directly to it
+  as you develop. A message appears on both the wearable and the Android Wear app prompting you to allow debugging.</li>
+  <li>On the Android Wear app, check <strong>Always allow from this computer</strong> and tap
+  <strong>OK</strong>.</li>
+</ol>
+
+<p>The <strong>Android</strong> tool window on Android Studio shows the system log from the wearable.
+The wearable should also be listed when you run the <code>adb devices</code> command.</p>
+
+<h2 id="CreateProject">Create a Project</h2>
+
+<p>To begin development, create an app project that contains
+ wearable and handheld app modules. In Android Studio, click <b>File</b> >
+ <b>New Project</b> and follow the Project Wizard instructions, as described in
+ <a href="{@docRoot}sdk/installing/create-project.html">Creating a
+Project</a>. As you follow the wizard, enter the following information:</p>
+
+<ol>
+  <li>In the <b>Configure your Project</b> window, enter a name for your app and a package
+  name.</li>
+  <li>In the <b>Form Factors</b> window:
+    <ul>
+      <li>Select <b>Phone and Tablet</b> and select <b>API 9: Android 2.3 (Gingerbread)</b>
+      under <b>Minimum SDK</b>.</li>
+      <li>Select <b>Wear</b> and select <b>API 20: Android 4.4 (KitKat Wear)</b>
+      under <b>Minimum SDK</b>.</li>
+    </ul>
+  </li>
+  <li>In the first <b>Add an Activity</b> window, add a blank activity for mobile.</li>
+  <li>In the second <b>Add an Activity</b> window, add a blank activity for Wear.</li>
+</ol>
+  <p>When the wizard completes, Android Studio creates a new project with two modules, <b>mobile</b> and
+  <b>wear</b>. You now have a project for both your handheld and wearable apps that you can create activities,
+  services, custom layouts, and much more in. On the handheld app, you do most of the heavy lifting,
+  such as network communications, intensive processing, or tasks that require long
+  amounts of user interaction. When these are done,
+  you usually notify the wearable of the results through notifications or by syncing and sending
+  data to the wearable.</p>
+
+  <p class="note"><b>Note:</b> The <b>wear</b> module also contains a "Hello World" activity that uses a
+  <code>WatchViewStub</code> that inflates a layout based on whether the device's screen
+  is round or square. The <code>WatchViewStub</code> class is one of the UI widgets that's provided
+  by the <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">wearable support library</a>.</p>
+</li>
+
+<h2 id="Install">Install the Wearable App</h2>
+
+<p>When developing, you install apps directly to the wearable like with handheld apps. Use
+either <code>adb install</code> or the <b>Play</b> button on Android Studio.</p>
+
+<p>When you're ready to publish your app to users, you embed the wearable app inside of the
+handheld app. When users install the handheld app from Google Play, a connected wearable automatically
+receives the wearable app.</p>
+
+<p class="note"><b>Note:</b> The automatic installation of wearable apps
+does not work when you are signing apps with a debug key and only works with release keys. See
+<a href="{@docRoot}training/wearables/apps/packaging.html">Packaging Wearable Apps</a> for
+complete information on how to properly package wearable apps.</p>
+
+<li>
+To install the "Hello World" app to the wearable, select <b>wear</b> from the <b>Run/Debug
+configuration</b> drop-down menu and click the <b>Play</b> button. The activity shows up on the
+wearable and prints out "Hello world!"
+</li></ol>
+<h2 id="Libraries">Include the Correct Libraries</h2>
+
+<p>As part of the Project Wizard, the correct
+dependencies are imported for you in the appropriate module's <code>build.gradle</code> file.
+However, these dependencies are not required, so read the following descriptions to find out if you need them or not:</p>
+
+<b>Notifications</b>
+<p>The <a href="{@docRoot}tools/support-library/features.html#v4">Android
+v4 support library</a> (or v13, which includes v4)
+contains the APIs to extend your existing notifications on handhelds to support wearables.</p>
+
+<p>For notifications that appear only on
+the wearable (meaning, they are issued by an app that runs on the wearable), you can just use the
+standard framework APIs (API Level 20) on the wearable and remove the support library
+dependency in the <b>mobile</b> module of your project.
+</p>
+
+<b>Wearable Data Layer</b>
+<p>To sync and send data between wearables and handhelds with the Wearable Data Layer APIs,
+you need the latest version of
+<a href="{@docRoot}google/play-services/setup.html">Google Play services</a>.
+If you're not using these APIs, remove the dependency from both modules.</p>
+
+<b>Wearable UI support library</b>
+<p>This is an unofficial library that includes
+<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">UI widgets designed for
+wearables</a>. We encourage you to use them in your apps, because they exemplify best practices,
+but they can still change at any time. However, if the libraries are updated, your apps won't
+break since they are compiled into your app. To get new features from an updated library, you just
+need to statically link the new version and update your app accordingly. This library is only
+applicable if you create wearable apps.
+</p>
+
+<p>In the next lessons, you'll learn how to create layouts designed for wearables as well as how
+to use the various voice actions that are supported by the platform.</p>

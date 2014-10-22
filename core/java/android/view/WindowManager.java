@@ -19,7 +19,9 @@ package android.view;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -49,7 +51,7 @@ import android.util.Log;
 public interface WindowManager extends ViewManager {
     /**
      * Exception that is thrown when trying to add view whose
-     * {@link WindowManager.LayoutParams} {@link WindowManager.LayoutParams#token}
+     * {@link LayoutParams} {@link LayoutParams#token}
      * is invalid.
      */
     public static class BadTokenException extends RuntimeException {
@@ -173,7 +175,6 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_SEARCH_BAR
          * @see #TYPE_PHONE
          * @see #TYPE_SYSTEM_ALERT
-         * @see #TYPE_KEYGUARD
          * @see #TYPE_TOAST
          * @see #TYPE_SYSTEM_OVERLAY
          * @see #TYPE_PRIORITY_PHONE
@@ -197,7 +198,6 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_SEARCH_BAR, to = "TYPE_SEARCH_BAR"),
             @ViewDebug.IntToString(from = TYPE_PHONE, to = "TYPE_PHONE"),
             @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT, to = "TYPE_SYSTEM_ALERT"),
-            @ViewDebug.IntToString(from = TYPE_KEYGUARD, to = "TYPE_KEYGUARD"),
             @ViewDebug.IntToString(from = TYPE_TOAST, to = "TYPE_TOAST"),
             @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY, to = "TYPE_SYSTEM_OVERLAY"),
             @ViewDebug.IntToString(from = TYPE_PRIORITY_PHONE, to = "TYPE_PRIORITY_PHONE"),
@@ -220,7 +220,8 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL, to = "TYPE_NAVIGATION_BAR_PANEL"),
             @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY, to = "TYPE_DISPLAY_OVERLAY"),
             @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY, to = "TYPE_MAGNIFICATION_OVERLAY"),
-            @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION, to = "TYPE_PRIVATE_PRESENTATION")
+            @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION, to = "TYPE_PRIVATE_PRESENTATION"),
+            @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION, to = "TYPE_VOICE_INTERACTION"),
         })
         public int type;
     
@@ -341,13 +342,14 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3;
-        
+
         /**
          * Window type: keyguard window.
          * In multiuser systems shows on all users' windows.
+         * @removed
          */
         public static final int TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4;
-        
+
         /**
          * Window type: transient notifications.
          * In multiuser systems shows only on the owning user's window.
@@ -543,6 +545,12 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_PRIVATE_PRESENTATION = FIRST_SYSTEM_WINDOW+30;
 
         /**
+         * Window type: Windows in the voice interaction layer.
+         * @hide
+         */
+        public static final int TYPE_VOICE_INTERACTION = FIRST_SYSTEM_WINDOW+31;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
@@ -610,7 +618,10 @@ public interface WindowManager extends ViewManager {
          * screen is pressed, you will receive this first touch event.  Usually
          * the first touch event is consumed by the system since the user can
          * not see what they are pressing on.
+         *
+         * @deprecated This flag has no effect.
          */
+        @Deprecated
         public static final int FLAG_TOUCHABLE_WHEN_WAKING = 0x00000040;
         
         /** Window flag: as long as this window is visible to the user, keep
@@ -913,6 +924,13 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_NEEDS_MENU_KEY = 0x40000000;
 
+        /**
+         * Flag indicating that this Window is responsible for drawing the background for the
+         * system bars. If set, the system bars are drawn with a transparent background and the
+         * corresponding areas in this window are filled with the colors specified in
+         * {@link Window#getStatusBarColor()} and {@link Window#getNavigationBarColor()}.
+         */
+        public static final int FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS = 0x80000000;
 
         /**
          * Various behavioral options/flags.  Default is none.
@@ -941,6 +959,7 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_SPLIT_TOUCH
          * @see #FLAG_HARDWARE_ACCELERATED
          * @see #FLAG_LOCAL_FOCUS_MODE
+         * @see #FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
@@ -998,8 +1017,10 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_STATUS, equals = FLAG_TRANSLUCENT_STATUS,
                     name = "FLAG_TRANSLUCENT_STATUS"),
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_NAVIGATION, equals = FLAG_TRANSLUCENT_NAVIGATION,
-                    name = "FLAG_TRANSLUCENT_NAVIGATION")
-        })
+                    name = "FLAG_TRANSLUCENT_NAVIGATION"),
+            @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+                    name = "FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS")
+        }, formatToHexString = true)
         public int flags;
 
         /**
@@ -1085,6 +1106,14 @@ public interface WindowManager extends ViewManager {
          * becomes top-most.
          * {@hide} */
         public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
+
+        /**
+         * Flag whether the current window is a keyguard window, meaning that it will hide all other
+         * windows behind it except for windows with flag {@link #FLAG_SHOW_WHEN_LOCKED} set.
+         * Further, this can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_KEYGUARD = 0x00000400;
 
         /**
          * Control flags that are private to the platform.
@@ -1264,6 +1293,13 @@ public interface WindowManager extends ViewManager {
          * field is added with {@link #y} to supply the <var>yAdj</var> parameter.
          */
         public float verticalMargin;
+
+        /**
+         * Positive insets between the drawing surface and window content.
+         *
+         * @hide
+         */
+        public Rect surfaceInsets = new Rect();
     
         /**
          * The desired bitmap format.  May be one of the constants in
@@ -1380,6 +1416,16 @@ public interface WindowManager extends ViewManager {
          * will be used.
          */
         public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+        /**
+         * The preferred refresh rate for the window.
+         *
+         * This must be one of the supported refresh rates obtained for the display(s) the window
+         * is on.
+         *
+         * @see Display#getSupportedRefreshRates()
+         */
+        public float preferredRefreshRate;
 
         /**
          * Control the visibility of the status bar.
@@ -1540,11 +1586,16 @@ public interface WindowManager extends ViewManager {
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
+            out.writeFloat(preferredRefreshRate);
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
             out.writeInt(hasSystemUiListeners ? 1 : 0);
             out.writeInt(inputFeatures);
             out.writeLong(userActivityTimeout);
+            out.writeInt(surfaceInsets.left);
+            out.writeInt(surfaceInsets.top);
+            out.writeInt(surfaceInsets.right);
+            out.writeInt(surfaceInsets.bottom);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1582,11 +1633,16 @@ public interface WindowManager extends ViewManager {
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
+            preferredRefreshRate = in.readFloat();
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readInt() != 0;
             inputFeatures = in.readInt();
             userActivityTimeout = in.readLong();
+            surfaceInsets.left = in.readInt();
+            surfaceInsets.top = in.readInt();
+            surfaceInsets.right = in.readInt();
+            surfaceInsets.bottom = in.readInt();
         }
     
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1617,6 +1673,10 @@ public interface WindowManager extends ViewManager {
         public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<18;
         /** {@hide} */
         public static final int TRANSLUCENT_FLAGS_CHANGED = 1<<19;
+        /** {@hide} */
+        public static final int SURFACE_INSETS_CHANGED = 1<<20;
+        /** {@hide} */
+        public static final int PREFERRED_REFRESH_RATE_CHANGED = 1 << 21;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -1730,6 +1790,11 @@ public interface WindowManager extends ViewManager {
                 changes |= SCREEN_ORIENTATION_CHANGED;
             }
 
+            if (preferredRefreshRate != o.preferredRefreshRate) {
+                preferredRefreshRate = o.preferredRefreshRate;
+                changes |= PREFERRED_REFRESH_RATE_CHANGED;
+            }
+
             if (systemUiVisibility != o.systemUiVisibility
                     || subtreeSystemUiVisibility != o.subtreeSystemUiVisibility) {
                 systemUiVisibility = o.systemUiVisibility;
@@ -1750,6 +1815,11 @@ public interface WindowManager extends ViewManager {
             if (userActivityTimeout != o.userActivityTimeout) {
                 userActivityTimeout = o.userActivityTimeout;
                 changes |= USER_ACTIVITY_TIMEOUT_CHANGED;
+            }
+
+            if (!surfaceInsets.equals(o.surfaceInsets)) {
+                surfaceInsets.set(o.surfaceInsets);
+                changes |= SURFACE_INSETS_CHANGED;
             }
 
             return changes;
@@ -1833,6 +1903,10 @@ public interface WindowManager extends ViewManager {
                 sb.append(" rotAnim=");
                 sb.append(rotationAnimation);
             }
+            if (preferredRefreshRate != 0) {
+                sb.append(" preferredRefreshRate=");
+                sb.append(preferredRefreshRate);
+            }
             if (systemUiVisibility != 0) {
                 sb.append(" sysui=0x");
                 sb.append(Integer.toHexString(systemUiVisibility));
@@ -1850,6 +1924,9 @@ public interface WindowManager extends ViewManager {
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
+            }
+            if (!surfaceInsets.equals(Insets.NONE)) {
+                sb.append(" surfaceInsets=").append(surfaceInsets);
             }
             sb.append('}');
             return sb.toString();

@@ -25,6 +25,20 @@ package android.os;
  * {@hide}
  */
 public final class FactoryTest {
+    public static final int FACTORY_TEST_OFF = 0;
+    public static final int FACTORY_TEST_LOW_LEVEL = 1;
+    public static final int FACTORY_TEST_HIGH_LEVEL = 2;
+
+    /**
+     * Gets the current factory test mode.
+     *
+     * @return One of: {@link #FACTORY_TEST_OFF}, {@link #FACTORY_TEST_LOW_LEVEL},
+     * or {@link #FACTORY_TEST_HIGH_LEVEL}.
+     */
+    public static int getMode() {
+        return SystemProperties.getInt("ro.factorytest", FACTORY_TEST_OFF);
+    }
+
     /**
      * When true, long-press on power should immediately cause the device to
      * shut down, without prompting the user.

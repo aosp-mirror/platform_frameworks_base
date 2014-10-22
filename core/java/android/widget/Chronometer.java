@@ -18,14 +18,12 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
@@ -96,12 +94,15 @@ public class Chronometer extends TextView {
      * Initialize with standard view layout information and style.
      * Sets the base to the current time.
      */
-    public Chronometer(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public Chronometer(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(
-                attrs,
-                com.android.internal.R.styleable.Chronometer, defStyle, 0);
+    public Chronometer(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.Chronometer, defStyleAttr, defStyleRes);
         setFormat(a.getString(com.android.internal.R.styleable.Chronometer_format));
         a.recycle();
 

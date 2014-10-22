@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -63,7 +64,8 @@ public class AsmAnalyzer {
     private final Set<String> mExcludedClasses;
     /** Glob patterns of files to keep as is. */
     private final String[] mIncludeFileGlobs;
-    /** Copy these files into the output as is. */
+    /** Internal names of classes that contain method calls that need to be rewritten. */
+    private final Set<String> mReplaceMethodCallClasses = new HashSet<String>();
 
     /**
      * Creates a new analyzer.
@@ -109,6 +111,7 @@ public class AsmAnalyzer {
             mGen.setKeep(found);
             mGen.setDeps(deps);
             mGen.setCopyFiles(filesFound);
+            mGen.setRewriteMethodCallClasses(mReplaceMethodCallClasses);
         }
     }
 
@@ -118,7 +121,7 @@ public class AsmAnalyzer {
      *
      * @param classes The map of class name => ASM ClassReader. Class names are
      *                in the form "android.view.View".
-     * @param fileFound The map of file name => InputStream. The file name is
+     * @param filesFound The map of file name => InputStream. The file name is
      *                  in the form "android/data/dataFile".
      */
     void parseZip(List<String> jarPathList, Map<String, ClassReader> classes,
@@ -143,8 +146,8 @@ public class AsmAnalyzer {
                     String className = classReaderToClassName(cr);
                     classes.put(className, cr);
                 } else {
-                    for (int i = 0; i < includeFilePatterns.length; ++i) {
-                        if (includeFilePatterns[i].matcher(entry.getName()).matches()) {
+                    for (Pattern includeFilePattern : includeFilePatterns) {
+                        if (includeFilePattern.matcher(entry.getName()).matches()) {
                             filesFound.put(entry.getName(), zip.getInputStream(entry));
                             break;
                         }
@@ -239,7 +242,8 @@ public class AsmAnalyzer {
 
         for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
             String class_name = entry.getKey();
-            if (regexp.matcher(class_name).matches()) {
+            if (regexp.matcher(class_name).matches() &&
+                    !mExcludedClasses.contains(getOuterClassName(class_name))) {
                 findClass(class_name, zipClasses, inOutFound);
             }
         }
@@ -270,6 +274,9 @@ public class AsmAnalyzer {
      */
     void findClassesDerivingFrom(String super_name, Map<String, ClassReader> zipClasses,
             Map<String, ClassReader> inOutFound) throws LogAbortException {
+        if (mExcludedClasses.contains(getOuterClassName(super_name))) {
+            return;
+        }
         findClass(super_name, zipClasses, inOutFound);
 
         for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
@@ -321,6 +328,7 @@ public class AsmAnalyzer {
                 deps, new_deps);
 
         for (ClassReader cr : inOutKeepClasses.values()) {
+            visitor.setClassName(cr.getClassName());
             cr.accept(visitor, 0 /* flags */);
         }
 
@@ -337,6 +345,7 @@ public class AsmAnalyzer {
                     inOutKeepClasses.size(), deps.size());
 
             for (ClassReader cr : temp.values()) {
+                visitor.setClassName(cr.getClassName());
                 cr.accept(visitor, 0 /* flags */);
             }
         }
@@ -347,7 +356,13 @@ public class AsmAnalyzer {
         return deps;
     }
 
-
+    private String getOuterClassName(String className) {
+        int pos = className.indexOf('$');
+        if (pos > 0) {
+            return className.substring(0, pos);
+        }
+        return className;
+    }
 
     // ----------------------------------
 
@@ -366,6 +381,8 @@ public class AsmAnalyzer {
         private final Map<String, ClassReader> mOutDeps;
         /** New classes to keep as-is found by this visitor. */
         private final Map<String, ClassReader> mOutKeep;
+
+        private String mClassName;
 
         /**
          * Creates a new visitor that will find all the dependencies for the visited class.
@@ -390,6 +407,10 @@ public class AsmAnalyzer {
             mOutDeps = outDeps;
         }
 
+        private void setClassName(String className) {
+            mClassName = className;
+        }
+
         /**
          * Considers the given class name as a dependency.
          * If it does, add to the mOutDeps map.
@@ -406,7 +427,7 @@ public class AsmAnalyzer {
                     mOutKeep.containsKey(className) ||
                     mInDeps.containsKey(className) ||
                     mOutDeps.containsKey(className) ||
-                    mExcludedClasses.contains(getBaseName(className))) {
+                    mExcludedClasses.contains(getOuterClassName(className))) {
                 return;
             }
 
@@ -429,7 +450,7 @@ public class AsmAnalyzer {
             // - android classes are added to dependencies
             // - non-android classes are added to the list of classes to keep as-is (they don't need
             //   to be stubbed).
-            if (className.indexOf("android") >= 0) {  // TODO make configurable
+            if (className.contains("android")) {  // TODO make configurable
                 mOutDeps.put(className, cr);
             } else {
                 mOutKeep.put(className, cr);
@@ -488,14 +509,6 @@ public class AsmAnalyzer {
                     // ignore, not a valid type.
                 }
             }
-        }
-
-        private String getBaseName(String className) {
-            int pos = className.indexOf('$');
-            if (pos > 0) {
-                return className.substring(0, pos);
-            }
-            return className;
         }
 
         // ---------------------------------------------------
@@ -594,7 +607,7 @@ public class AsmAnalyzer {
             // type and exceptions do not use generic types.
             considerSignature(signature);
 
-            return new MyMethodVisitor();
+            return new MyMethodVisitor(mClassName);
         }
 
         @Override
@@ -614,8 +627,11 @@ public class AsmAnalyzer {
 
         private class MyMethodVisitor extends MethodVisitor {
 
-            public MyMethodVisitor() {
+            private String mOwnerClass;
+
+            public MyMethodVisitor(String ownerClass) {
                 super(Opcodes.ASM4);
+                mOwnerClass = ownerClass;
             }
 
 
@@ -632,8 +648,8 @@ public class AsmAnalyzer {
             // field instruction
             @Override
             public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                // name is the field's name.
-                considerName(name);
+                // owner is the class that declares the field.
+                considerName(owner);
                 // desc is the field's descriptor (see Type).
                 considerDesc(desc);
             }
@@ -709,6 +725,12 @@ public class AsmAnalyzer {
                 considerName(owner);
                 // desc is the method's descriptor (see Type).
                 considerDesc(desc);
+
+
+                // Check if method needs to replaced by a call to a different method.
+                if (ReplaceMethodCallsAdapter.isReplacementNeeded(owner, name, desc)) {
+                    mReplaceMethodCallClasses.add(mOwnerClass);
+                }
             }
 
             // instruction multianewarray, whatever that is

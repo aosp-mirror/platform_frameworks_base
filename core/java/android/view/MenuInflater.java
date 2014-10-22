@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
@@ -74,7 +75,6 @@ public class MenuInflater {
      */
     public MenuInflater(Context context) {
         mContext = context;
-        mRealOwner = context;
         mActionViewConstructorArguments = new Object[] {context};
         mActionProviderConstructorArguments = mActionViewConstructorArguments;
     }
@@ -161,6 +161,7 @@ public class MenuInflater {
                     } else if (tagName.equals(XML_MENU)) {
                         // A menu start tag denotes a submenu for an item
                         SubMenu subMenu = menuState.addSubMenuItem();
+                        registerMenu(subMenu, attrs);
 
                         // Parse the submenu into returned SubMenu
                         parseMenu(parser, attrs, subMenu);
@@ -183,9 +184,9 @@ public class MenuInflater {
                         if (!menuState.hasAddedItem()) {
                             if (menuState.itemActionProvider != null &&
                                     menuState.itemActionProvider.hasSubMenu()) {
-                                menuState.addSubMenuItem();
+                                registerMenu(menuState.addSubMenuItem(), attrs);
                             } else {
-                                menuState.addItem();
+                                registerMenu(menuState.addItem(), attrs);
                             }
                         }
                     } else if (tagName.equals(XML_MENU)) {
@@ -200,7 +201,30 @@ public class MenuInflater {
             eventType = parser.next();
         }
     }
-    
+
+    /**
+     * The method is a hook for layoutlib to do its magic.
+     * Nothing is needed outside of LayoutLib. However, it should not be deleted because it
+     * appears to do nothing.
+     */
+    private void registerMenu(@SuppressWarnings("unused") MenuItem item,
+            @SuppressWarnings("unused") AttributeSet set) {
+    }
+
+    /**
+     * The method is a hook for layoutlib to do its magic.
+     * Nothing is needed outside of LayoutLib. However, it should not be deleted because it
+     * appears to do nothing.
+     */
+    private void registerMenu(@SuppressWarnings("unused") SubMenu subMenu,
+            @SuppressWarnings("unused") AttributeSet set) {
+    }
+
+    // Needed by layoutlib.
+    /*package*/ Context getContext() {
+        return mContext;
+    }
+
     private static class InflatedOnMenuItemClickListener
             implements MenuItem.OnMenuItemClickListener {
         private static final Class<?>[] PARAM_TYPES = new Class[] { MenuItem.class };
@@ -234,6 +258,23 @@ public class MenuInflater {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private Object getRealOwner() {
+        if (mRealOwner == null) {
+            mRealOwner = findRealOwner(mContext);
+        }
+        return mRealOwner;
+    }
+
+    private Object findRealOwner(Object owner) {
+        if (owner instanceof Activity) {
+            return owner;
+        }
+        if (owner instanceof ContextWrapper) {
+            return findRealOwner(((ContextWrapper) owner).getBaseContext());
+        }
+        return owner;
     }
     
     /**
@@ -415,7 +456,7 @@ public class MenuInflater {
                             + "be used within a restricted context");
                 }
                 item.setOnMenuItemClickListener(
-                        new InflatedOnMenuItemClickListener(mRealOwner, itemListenerMethodName));
+                        new InflatedOnMenuItemClickListener(getRealOwner(), itemListenerMethodName));
             }
 
             if (item instanceof MenuItemImpl) {
@@ -446,9 +487,11 @@ public class MenuInflater {
             }
         }
 
-        public void addItem() {
+        public MenuItem addItem() {
             itemAdded = true;
-            setItem(menu.add(groupId, itemId, itemCategoryOrder, itemTitle));
+            MenuItem item = menu.add(groupId, itemId, itemCategoryOrder, itemTitle);
+            setItem(item);
+            return item;
         }
         
         public SubMenu addSubMenuItem() {

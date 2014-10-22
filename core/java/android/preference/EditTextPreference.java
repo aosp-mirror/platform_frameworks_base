@@ -49,9 +49,9 @@ public class EditTextPreference extends DialogPreference {
     private EditText mEditText;
     
     private String mText;
-    
-    public EditTextPreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+
+    public EditTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         
         mEditText = new EditText(context, attrs);
         
@@ -65,6 +65,10 @@ public class EditTextPreference extends DialogPreference {
          * We reset the enabled state.
          */
         mEditText.setEnabled(true);
+    }
+
+    public EditTextPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public EditTextPreference(Context context, AttributeSet attrs) {

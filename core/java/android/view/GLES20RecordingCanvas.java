@@ -16,7 +16,8 @@
 
 package android.view;
 
-import android.graphics.Rect;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Pools.SynchronizedPool;
 
 /**
@@ -33,39 +34,33 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     private static final SynchronizedPool<GLES20RecordingCanvas> sPool =
             new SynchronizedPool<GLES20RecordingCanvas>(POOL_LIMIT);
 
-    private GLES20DisplayList mDisplayList;
+    RenderNode mNode;
 
     private GLES20RecordingCanvas() {
-        super(true, true);
+        super();
     }
 
-    static GLES20RecordingCanvas obtain(GLES20DisplayList displayList) {
+    static GLES20RecordingCanvas obtain(@NonNull RenderNode node) {
+        if (node == null) throw new IllegalArgumentException("node cannot be null");
         GLES20RecordingCanvas canvas = sPool.acquire();
         if (canvas == null) {
             canvas = new GLES20RecordingCanvas();
         }
-        canvas.mDisplayList = displayList;
+        canvas.mNode = node;
         return canvas;
     }
 
     void recycle() {
-        mDisplayList = null;
-        resetDisplayListRenderer();
+        mNode = null;
         sPool.release(this);
     }
 
-    void start() {
-        mDisplayList.clearReferences();
-    }
-
-    long end(long nativeDisplayList) {
-        return getDisplayList(nativeDisplayList);
+    long finishRecording() {
+        return nFinishRecording(mRenderer);
     }
 
     @Override
-    public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {
-        int status = super.drawDisplayList(displayList, dirty, flags);
-        mDisplayList.getChildDisplayLists().add(displayList);
-        return status;
+    public boolean isRecordingFor(Object o) {
+        return o == mNode;
     }
 }

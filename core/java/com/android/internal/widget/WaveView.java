@@ -25,10 +25,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioAttributes;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -80,6 +80,11 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
      * in which it can be grabbed when accessibility is enabled (more generous).
      */
     private static final float GRAB_HANDLE_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.0f;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     private Vibrator mVibrator;
     private OnTriggerListener mOnTriggerListener;
@@ -583,7 +588,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 mVibrator = (android.os.Vibrator) getContext()
                         .getSystemService(Context.VIBRATOR_SERVICE);
             }
-            mVibrator.vibrate(duration);
+            mVibrator.vibrate(duration, VIBRATION_ATTRIBUTES);
         }
     }
 

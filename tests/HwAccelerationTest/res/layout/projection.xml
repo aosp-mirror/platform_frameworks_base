@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#66ff0000"
+    tools:context="com.example.projection.ProjectionActivity"
+    tools:ignore="MergeRootFrame">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:textSize="50sp"
+        android:text="TextView"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:clipChildren="false">
+        <view class="com.android.test.hwui.ProjectionActivity$ProjectedView"
+            android:id="@+id/projection"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="50sp"
+            android:text="TextView"/>
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:textSize="50sp"
+        android:text="TextView"/>
+</LinearLayout>

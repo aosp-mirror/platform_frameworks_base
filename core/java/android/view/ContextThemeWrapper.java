@@ -20,14 +20,12 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 
 /**
  * A ContextWrapper that allows you to modify the theme from what is in the 
  * wrapped context. 
  */
 public class ContextThemeWrapper extends ContextWrapper {
-    private Context mBase;
     private int mThemeResource;
     private Resources.Theme mTheme;
     private LayoutInflater mInflater;
@@ -40,13 +38,11 @@ public class ContextThemeWrapper extends ContextWrapper {
     
     public ContextThemeWrapper(Context base, int themeres) {
         super(base);
-        mBase = base;
         mThemeResource = themeres;
     }
 
     @Override protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        mBase = newBase;
     }
 
     /**
@@ -110,11 +106,11 @@ public class ContextThemeWrapper extends ContextWrapper {
     @Override public Object getSystemService(String name) {
         if (LAYOUT_INFLATER_SERVICE.equals(name)) {
             if (mInflater == null) {
-                mInflater = LayoutInflater.from(mBase).cloneInContext(this);
+                mInflater = LayoutInflater.from(getBaseContext()).cloneInContext(this);
             }
             return mInflater;
         }
-        return mBase.getSystemService(name);
+        return getBaseContext().getSystemService(name);
     }
     
     /**
@@ -136,7 +132,7 @@ public class ContextThemeWrapper extends ContextWrapper {
         final boolean first = mTheme == null;
         if (first) {
             mTheme = getResources().newTheme();
-            Resources.Theme theme = mBase.getTheme();
+            Resources.Theme theme = getBaseContext().getTheme();
             if (theme != null) {
                 mTheme.setTo(theme);
             }

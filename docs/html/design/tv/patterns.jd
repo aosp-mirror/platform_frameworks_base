@@ -1,0 +1,91 @@
+page.title=UI Patterns for TV
+@jd:body
+
+
+<p>As a developer of apps for TV, you should follow certain patterns to enable users to
+  quickly understand and operate your app. This section describes recommended design patterns
+  for TV apps.</p>
+
+<h2>Navigation, Focus and Selection</h2>
+
+<p>Users typically navigate TV devices using a directional pad (D-Pad). This type of controller
+  limits movement to up, down, left, and right. As you design your app for TV, make sure your
+  user interface has clear paths for two-axis navigation by aligning objects in lists and
+  grids.</p>
+
+<img src="{@docRoot}design/tv/images/focus.png" alt="TV navigation and focus diagram" />
+
+<p>A key aspect of making your application work well with a D-Pad controller is to make sure
+  that there is always an object that is obviously in focus. Your app must clearly indicate
+  what object is focused, so users can easily see what action they can take. Use scale, shadow
+  brightness, opacity, animation or a combination of these attributes to help users see a focused
+  object.</p>
+
+
+<h2>Icons</h2>
+
+<p>Apps on TV devices require some additional icon images for presentation in the system
+  user interface, including home screen launcher images (banners) and recommendation icons.
+  The visual specifications for these icons are shown below.</p>
+
+
+<h3 id="banner">Banners</h3>
+
+<p>App Banners represent your app on the home screen of TV devices and serve and as a way for
+  users to launch your app. Here are specific requirements for a banner image:
+</p>
+
+<ul>
+  <li>Size: 320 x 180 px, xhdpi resource</li>
+  <li>Text should be included in the image. If your app is available in more than one
+      language, you must provide versions of the banner image for each supported language.</li>
+</ul>
+
+
+<h3>Recommendation Icons</h3>
+
+<p>Recommendation cards include a small icon that is imposed over a colored background.
+  An example and specifications for this icon are shown below:</p>
+
+<img src="{@docRoot}design/tv/images/icon.png" alt="Recommendation icon examples" />
+
+<p>Here are the requirements for recommendation icons:</p>
+
+<ul>
+  <li>Monocolor: size 16x16dp, white (#fff) icon with transparent background, PNG format</li>
+  <li>Graphics should be centered within the icon image</li>
+</ul>
+
+<p class="note">
+  <strong>Note:</strong> Your app icon image may be desaturated and blended for some card
+  displays.
+</p>
+
+
+<h2>Background Images</h2>
+
+<p>Background images are displayed in the background of your app to provide additional visual
+  interest, information, or branding. The user interface widgets provided in the <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support
+  library</a> provide specific support for background images and for updating them as items gain
+  and lose focus. The specific requirements for background images on TV devices is that they
+  should be full color and a size of 1920 x 1080 pixels.
+</p>
+
+<p class="note" id="solid-background">
+  <strong>Important:</strong> Background images must not be transparent. Your must not allow any
+  portion of another app to be seen through your app.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If you background image does not meet the size requirements, it is scaled
+  to fit.
+</p>
+
+<h2>Audio Feedback</h2>
+
+<p>Sounds on Android TV bring a cinematic quality to the interaction experience. You should
+  consider adding sounds for user actions or to provide feedback when a user is only partially
+  visually engaged with the screen (e.g., because they are distracted or multitasking).
+  You should also consider using sounds as alternatives to visual messages. For example, use sounds
+  to indicate that a user has reached the end of a list or is trying to navigate to an undefined
+  location.</p>

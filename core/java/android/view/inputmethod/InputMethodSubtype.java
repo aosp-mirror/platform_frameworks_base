@@ -211,18 +211,6 @@ public final class InputMethodSubtype implements Parcelable {
      }
 
     /**
-     * Constructor with no subtype ID specified, overridesImplicitlyEnabledSubtype not specified.
-     * Arguments for this constructor have the same meanings as
-     * {@link InputMethodSubtype#InputMethodSubtype(int, int, String, String, String, boolean,
-     * boolean, int)} except "id" and "overridesImplicitlyEnabledSubtype".
-     * @hide
-     */
-    public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
-            boolean isAuxiliary) {
-        this(nameId, iconId, locale, mode, extraValue, isAuxiliary, false);
-    }
-
-    /**
      * Constructor with no subtype ID specified.
      * @deprecated use {@link InputMethodSubtypeBuilder} instead.
      * Arguments for this constructor have the same meanings as
@@ -472,12 +460,12 @@ public final class InputMethodSubtype implements Parcelable {
                 return (subtype.hashCode() == hashCode());
             }
             return (subtype.hashCode() == hashCode())
-                && (subtype.getNameResId() == getNameResId())
-                && (subtype.getMode().equals(getMode()))
-                && (subtype.getIconResId() == getIconResId())
                 && (subtype.getLocale().equals(getLocale()))
+                && (subtype.getMode().equals(getMode()))
                 && (subtype.getExtraValue().equals(getExtraValue()))
                 && (subtype.isAuxiliary() == isAuxiliary())
+                && (subtype.overridesImplicitlyEnabledSubtype()
+                        == overridesImplicitlyEnabledSubtype())
                 && (subtype.isAsciiCapable() == isAsciiCapable());
         }
         return false;

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"শেল"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"ত্রুটির প্রতিবেদন নেওয়া হয়েছে"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"আপনার বাগ রিপোর্ট শেয়ার করতে বামে সোয়াইপ করুন"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"আপনার ত্রুটির প্রতিবেদন ভাগ করতে স্পর্শ করুন"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"ত্রুটির প্রতিবেদনগুলিতে থাকা ডেটা, সিস্টেমের বিভিন্ন লগ ফাইলগুলি থেকে আসে, যাতে ব্যক্তিগত এবং গোপনীয় তথ্য অন্তর্ভুক্ত থাকে৷ আপনি বিশ্বাস করেন শুধুমাত্র এমন অ্যাপ্লিকেশান এবং ব্যক্তিদের সাথে ত্রুটির প্রতিবেদনগুলি ভাগ করুন৷"</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"এই বার্তাটি পরের বার দেখান"</string>
+</resources>

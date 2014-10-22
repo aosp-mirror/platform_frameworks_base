@@ -308,7 +308,7 @@ public final class PrintDocumentInfo implements Parcelable {
         public Builder setPageCount(int pageCount) {
             if (pageCount < 0 && pageCount != PAGE_COUNT_UNKNOWN) {
                 throw new IllegalArgumentException("pageCount"
-                        + " must be greater than or euqal to zero or"
+                        + " must be greater than or equal to zero or"
                         + " DocumentInfo#PAGE_COUNT_UNKNOWN");
             }
             mPrototype.mPageCount = pageCount;
@@ -338,6 +338,12 @@ public final class PrintDocumentInfo implements Parcelable {
          * @return The new instance.
          */
         public PrintDocumentInfo build() {
+            // Zero pages is the same as unknown as in this case
+            // we will have to ask for all pages and look a the
+            // wiritten PDF file for the page count.
+            if (mPrototype.mPageCount == 0) {
+                mPrototype.mPageCount = PAGE_COUNT_UNKNOWN;
+            }
             return new PrintDocumentInfo(mPrototype);
         }
     }

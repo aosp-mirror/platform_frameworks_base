@@ -1,0 +1,257 @@
+page.title=Android TV
+page.viewport_width=970
+fullpage=true
+no_footer_links=true
+page.type=about
+
+@jd:body
+
+<style>
+.fullpage>#footer,
+#jd-content>.content-footer.wrap {
+  display:none;
+}
+</style>
+
+
+<div class="landing-body-content">
+
+  <div class="landing-hero-container">
+
+    <div class="landing-section tv-hero">
+      <div class="landing-hero-scrim"></div>
+      <div class="landing-hero-wrap">
+        <div class="vertical-center-outer">
+          <div class="vertical-center-inner">
+
+            <div class="col-10">
+              <div class="landing-section-header">
+                <div class="landing-h1 hero">Android TV</div>
+                <div class="landing-subhead hero">Big screen apps, games, and content</div>
+                <div class="landing-hero-description">
+                  <p>Recommend great content to users right on the home screen.
+                    Enable users to find movies through voice search.
+                    Engage users with fluid, immersive games.</p>
+                </div>
+              </div>
+
+              <div class="landing-body">
+                <a href="{@docRoot}training/tv/index.html" class="landing-button
+                  landing-primary" style="margin-top: 40px;">
+                  Get Started
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- end .wrap -->
+      <div class="landing-scroll-down-affordance">
+        <a class="landing-down-arrow" href="#reimagine-your-app">
+          <img src="{@docRoot}wear/images/carrot.png" alt="Scroll down to read more">
+        </a>
+      </div>
+    </div> <!-- end .landing-section .landing-hero -->
+
+    <div class="landing-rest-of-page">
+
+      <div class="landing-section" style="background-color:#f5f5f5" id="reimagine-your-app">
+        <div class="wrap">
+
+          <div class="landing-section-header">
+            <div class="landing-h1">Reimagine Your App</div>
+            <div class="landing-subhead">
+              Design your app to shine on the biggest screen in the house.
+            </div>
+          </div>
+
+          <div class="landing-body landing-align-center">
+            <img src="{@docRoot}tv/images/atv-framed.png" alt="Android TV" >
+            <p>Simple. Cinematic. Beautiful.</p>
+            <p class="landing-small">
+              Smooth, fast interactions are key to a successful TV app. Keep navigation simple
+              and light. <br>Bring your content forward to let users enjoy it with a minimum of
+              effort.
+            </p>
+            <p class="landing-small">
+              <a href="{@docRoot}design/tv/index.html">Learn about design for TV</a>
+            </p>
+          </div>
+
+        </div>  <!-- end .wrap -->
+      </div>  <!-- end .landing-section -->
+
+      <div class="landing-section landing-gray-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Build to Entertain</div>
+            <div class="landing-subhead">
+              Android TV lets you engage your users in a new, shared environment.<br>
+              Find out how to get your app ready for its big-screen debut.
+            </div>
+          </div>
+
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/components.png" alt="TV layout components"
+                  style="margin-left: 23px;">
+
+                <p>Made for TV</p>
+                <p class="landing-small">
+                  Take advantage of pre-built fragments for browsing and interacting with media
+                  catalogs.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/tv/playback/index.html">Learn pre-built fragments</a>
+                </p>
+              </div>
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/search.png" alt="Search"
+                  style="margin-left: 23px;">
+
+                <p>Get Found</p>
+                <p class="landing-small">
+                  Help users find your content quickly with in-app searching.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/tv/discovery/in-app-search.html">Learn about app search</a>
+                </p>
+              </div>
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/recommendations.png" alt="Recommendations"
+                  style="margin-left: 23px;">
+
+                <p>Recommend</p>
+                <p class="landing-small">
+                  Suggest content from your app to keep your users coming back.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/tv/discovery/recommendations.html">Learn about
+                    recommendations</a>
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>  <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+
+      <div class="landing-section landing-red-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1 landing-align-left">Get Started with Android TV</div>
+
+            <div class="landing-subhead landing-subhead-red">
+              <p>
+                 Set up your development environment to build apps for TV.
+                 Start creating your big-screen experience!
+              </p>
+            </div>
+          </div>
+          <div class="landing-body">
+            <a href="{@docRoot}training/tv/start/index.html" class="landing-button landing-primary"
+              style="margin-top: 20px;">
+              Get Started
+            </a>
+          </div>
+        </div>  <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+      <div class="landing-section">
+        <div class="wrap">
+          <div class="cols">
+            <div class="landing-body">
+
+              <div class="col-3-wide">
+                <a target="_blank" href="http://android-developers.blogspot.com/2014/06/android-tv-and-google-cast.html">
+                  <img class="landing-social-image" src="{@docRoot}wear/images/blogger.png" alt="">
+                </a>
+                <div class="landing-social-copy">
+                  <p>Blog Post</p>
+                  <p class="landing-small">
+                    Read more about Android TV development
+                    on our blog. Just search for "Android TV".
+                  </p>
+                    <p class="landing-small">
+                    <a target="_blank" href="http://android-developers.blogspot.com">Android
+                      Developers Blog</a>
+                    </p>
+                  <p></p>
+                </div>
+              </div>
+
+              <div class="col-3-wide">
+                <a target="_blank" href="http://g.co/androidtvdev">
+                  <img class="landing-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Wear Developers">
+                </a>
+                <div class="landing-social-copy">
+                  <p>G+ Community</p>
+                  <p class="landing-small">
+                    Follow us on Google+ to stay up-to-date with Android TV development and to
+                    join the discussion!
+                  </p>
+                  <p class="landing-small">
+                    <a target="_blank" href="http://g.co/androidtvdev">+Android TV Developers</a>
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-3-wide">
+                  <a target="_blank" href="{@docRoot}tv/adt-1/index.html">
+                  <img class="landing-social-image" src="{@docRoot}wear/images/blogger.png" alt="">
+                  </a>
+                <div class="landing-social-copy">
+                  <p>ADT-1 Kit</p>
+                    <p class="landing-small">
+                    Get information about the streaming media player
+                    for developing and testing apps for TV.
+                    </p>
+                    <p class="landing-small">
+                      <a target="_blank" href="{@docRoot}tv/adt-1/index.html">ADT-1 Development
+                        Kit</a>
+                    </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+    </div> <!-- end .landing-rest-of-page -->
+
+    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
+      <div class="layout-content-col col-16" style="padding-top:4px">
+        <style>#___plusone_0 {float:right !important;}</style>
+        <div class="g-plusone" data-size="medium"></div>
+      </div>
+    </div>
+    <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
+      <div id="copyright">
+        Except as noted, this content is
+        licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
+        Creative Commons Attribution 2.5</a>. For details and
+        restrictions, see the <a href="/license.html">Content
+        License</a>.
+      </div>
+    </div>
+
+  </div> <!-- end .landing-hero-container -->
+
+  <script>
+  $("a.landing-down-arrow").on("click", function(e) {
+    $("body").animate({
+      scrollTop: $(".tv-hero").height() + 120
+    }, 1000, "easeOutQuint");
+    e.preventDefault();
+  });
+  </script>
+
+</div> <!-- end landing-body-content -->
+

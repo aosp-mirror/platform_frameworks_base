@@ -1,0 +1,56 @@
+page.title=Creative Vision for Android Wear
+@jd:body
+
+<style>
+div.span-13 {
+  margin:10px 0;
+}
+div.span-13 img {
+  float:left;
+  margin:2px 20px 40px 0;
+}
+div.span-13 p {
+  margin-left:167px;
+}
+div.span-13 h2 {
+  margin-top:0;
+  }
+</style>
+
+<p>Android Wear devices provide just the right information at just the right time,
+allowing users to be more connected to both the virtual world and the real world. Great Android
+Wear experiences are:</p>
+
+
+  <div class="layout-content-col span-13">
+    <img src="{@docRoot}design/media/wear/vision_traffic.png" width="147" height="147" />
+
+    <h2 id="Launched">Launched automatically</h2>
+    <p>Most people are used to launching apps by clicking an icon. Android Wear is different. Wearable apps are aware of the user’s context - time, location, physical activity, and so on. The apps use this information to insert cards into the stream when they become relevant. This makes Android Wear timely, relevant and very specific.</p>
+  </div>
+
+  <div class="layout-content-col span-13">
+    <img src="{@docRoot}design/media/wear/vision_navigation.png" width="147" height="147" />
+
+    <h2 id="Glanceable">Glanceable</h2>
+    <p>A classic wrist watch is designed to let you see the time in a split second and get on with what you were doing. Designing for Android Wear is no different. The less time it takes to use your software, the more time the user can be present in whatever they are doing. Android wear is fast, sharp, and immediate.</p>
+  </div>
+
+  <div class="layout-content-col span-13">
+    <img src="{@docRoot}design/media/wear/vision_voice.png" width="147" height="147" style="border: 1px solid #ddd;" />
+
+    <h2 id="SuggestDemand">All about suggest and demand</h2>
+    <p>Android Wear is like a great personal assistant: it knows you and your preferences, it only interrupts you when absolutely necessary, and it’s always on hand to provide a ready answer. Android Wear is helpful, respectful, and responsive.</p>
+  </div>
+
+  <div class="layout-content-col span-13">
+    <img src="{@docRoot}design/media/wear/vision_music.png" width="147" height="147" />
+
+    <h2 id="Interaction">Zero or low interaction</h2>
+    <p>Staying true to the strengths afforded by a smaller form factor, Android Wear focuses on simple interactions, only requiring input by the user when absolutely necessary. Most inputs are based around touch swipes or voice, and inputs requiring fine-grained finger movements are avoided. Android Wear is gestural, simple, and fast.</p>
+  </div>
+
+<p>By providing a smart connection to the rest of the world while respecting the user’s attention, Android Wear feels personal and global, simple and smart, unobtrusive and ever-ready. Applications that represent these principles will feel most at home in the overall Android Wear experience.</p>
+
+<p>Third party apps extend Android Wear to be more specialized and helpful throughout the day. Installing apps are a way for the user to tell the Android Wear how to do that.</p>
+

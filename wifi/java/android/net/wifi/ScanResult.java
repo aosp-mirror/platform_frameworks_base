@@ -16,8 +16,8 @@
 
 package android.net.wifi;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Describes information about a detected access point. In addition
@@ -26,13 +26,19 @@ import android.os.Parcel;
  * but does not currently report them to external clients.
  */
 public class ScanResult implements Parcelable {
-    /** The network name. */
+    /**
+     * The network name.
+     */
     public String SSID;
 
-    /** Ascii encoded SSID. This will replace SSID when we deprecate it. @hide */
+    /**
+     * Ascii encoded SSID. This will replace SSID when we deprecate it. @hide
+     */
     public WifiSsid wifiSsid;
 
-    /** The address of the access point. */
+    /**
+     * The address of the access point.
+     */
     public String BSSID;
     /**
      * Describes the authentication, key management, and encryption schemes
@@ -40,8 +46,10 @@ public class ScanResult implements Parcelable {
      */
     public String capabilities;
     /**
-     * The detected signal level in dBm. At least those are the units used by
-     * the TI driver.
+     * The detected signal level in dBm, also known as the RSSI.
+     *
+     * <p>Use {@link android.net.wifi.WifiManager#calculateSignalLevel} to convert this number into
+     * an absolute signal level which can be displayed to a user.
      */
     public int level;
     /**
@@ -51,10 +59,100 @@ public class ScanResult implements Parcelable {
     public int frequency;
 
     /**
-     * Time Synchronization Function (tsf) timestamp in microseconds when
+     * timestamp in microseconds (since boot) when
      * this result was last seen.
      */
     public long timestamp;
+
+    /**
+     * Timestamp representing date when this result was last seen, in milliseconds from 1970
+     * {@hide}
+     */
+    public long seen;
+
+    /**
+     * If the scan result is a valid autojoin candidate
+     * {@hide}
+     */
+    public int isAutoJoinCandidate;
+
+    /**
+     * @hide
+     * Update RSSI of the scan result
+     * @param previousRSSI
+     * @param previousSeen
+     * @param maxAge
+     */
+    public void averageRssi(int previousRssi, long previousSeen, int maxAge) {
+
+        if (seen == 0) {
+            seen = System.currentTimeMillis();
+        }
+        long age = seen - previousSeen;
+
+        if (previousSeen > 0 && age > 0 && age < maxAge/2) {
+            // Average the RSSI with previously seen instances of this scan result
+            double alpha = 0.5 - (double) age / (double) maxAge;
+            level = (int) ((double) level * (1 - alpha) + (double) previousRssi * alpha);
+        }
+    }
+
+    /** @hide */
+    public static final int ENABLED                                          = 0;
+    /** @hide */
+    public static final int AUTO_ROAM_DISABLED                               = 16;
+    /** @hide */
+    public static final int AUTO_JOIN_DISABLED                               = 32;
+    /** @hide */
+    public static final int AUTHENTICATION_ERROR                              = 128;
+
+    /**
+     * Status: indicating join status
+     * @hide
+     */
+    public int autoJoinStatus;
+
+    /**
+     * num IP configuration failures
+     * @hide
+     */
+    public int numIpConfigFailures;
+
+    /**
+     * @hide
+     * Last time we blacklisted the ScanResult
+     */
+    public long blackListTimestamp;
+
+    /** @hide **/
+    public void setAutoJoinStatus(int status) {
+        if (status < 0) status = 0;
+        if (status == 0) {
+            blackListTimestamp = 0;
+        }  else if (status > autoJoinStatus) {
+            blackListTimestamp = System.currentTimeMillis();
+        }
+        autoJoinStatus = status;
+    }
+
+    /**
+     * Status: indicating the scan result is not a result
+     * that is part of user's saved configurations
+     * @hide
+     */
+    public boolean untrusted;
+
+    /**
+     * Number of time we connected to it
+     * @hide
+     */
+    public int numConnection;
+
+    /**
+     * Number of time autojoin used it
+     * @hide
+     */
+    public int numUsage;
 
     /**
      * The approximate distance to the AP in centimeter, if available.  Else
@@ -74,6 +172,56 @@ public class ScanResult implements Parcelable {
      * {@hide}
      */
     public final static int UNSPECIFIED = -1;
+    /**
+     * @hide
+     */
+    public boolean is24GHz() {
+        return ScanResult.is24GHz(frequency);
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public static boolean is24GHz(int freq) {
+        return freq > 2400 && freq < 2500;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean is5GHz() {
+        return ScanResult.is5GHz(frequency);
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public static boolean is5GHz(int freq) {
+        return freq > 4900 && freq < 5900;
+    }
+
+    /** information element from beacon
+     * @hide
+     */
+    public static class InformationElement {
+        public int id;
+        public byte[] bytes;
+
+        public InformationElement() {
+        }
+
+        public InformationElement(InformationElement rhs) {
+            this.id = rhs.id;
+            this.bytes = rhs.bytes.clone();
+        }
+    }
+
+    /** information elements found in the beacon
+     * @hide
+     */
+    public InformationElement informationElements[];
 
     /** {@hide} */
     public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
@@ -115,7 +263,21 @@ public class ScanResult implements Parcelable {
             timestamp = source.timestamp;
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
+            seen = source.seen;
+            autoJoinStatus = source.autoJoinStatus;
+            untrusted = source.untrusted;
+            numConnection = source.numConnection;
+            numUsage = source.numUsage;
+            numIpConfigFailures = source.numIpConfigFailures;
+            isAutoJoinCandidate = source.isAutoJoinCandidate;
         }
+    }
+
+    /** empty scan result
+     *
+     * {@hide}
+     * */
+    public ScanResult() {
     }
 
     @Override
@@ -141,6 +303,9 @@ public class ScanResult implements Parcelable {
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
                 append("(cm)");
 
+        if (autoJoinStatus != 0) {
+            sb.append(", status: ").append(autoJoinStatus);
+        }
         return sb.toString();
     }
 
@@ -164,6 +329,23 @@ public class ScanResult implements Parcelable {
         dest.writeLong(timestamp);
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
+        dest.writeLong(seen);
+        dest.writeInt(autoJoinStatus);
+        dest.writeInt(untrusted ? 1 : 0);
+        dest.writeInt(numConnection);
+        dest.writeInt(numUsage);
+        dest.writeInt(numIpConfigFailures);
+        dest.writeInt(isAutoJoinCandidate);
+        if (informationElements != null) {
+            dest.writeInt(informationElements.length);
+            for (int i = 0; i < informationElements.length; i++) {
+                dest.writeInt(informationElements[i].id);
+                dest.writeInt(informationElements[i].bytes.length);
+                dest.writeByteArray(informationElements[i].bytes);
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -174,7 +356,7 @@ public class ScanResult implements Parcelable {
                 if (in.readInt() == 1) {
                     wifiSsid = WifiSsid.CREATOR.createFromParcel(in);
                 }
-                return new ScanResult(
+                ScanResult sr = new ScanResult(
                     wifiSsid,
                     in.readString(),
                     in.readString(),
@@ -184,11 +366,29 @@ public class ScanResult implements Parcelable {
                     in.readInt(),
                     in.readInt()
                 );
+                sr.seen = in.readLong();
+                sr.autoJoinStatus = in.readInt();
+                sr.untrusted = in.readInt() != 0;
+                sr.numConnection = in.readInt();
+                sr.numUsage = in.readInt();
+                sr.numIpConfigFailures = in.readInt();
+                sr.isAutoJoinCandidate = in.readInt();
+                int n = in.readInt();
+                if (n != 0) {
+                    sr.informationElements = new InformationElement[n];
+                    for (int i = 0; i < n; i++) {
+                        sr.informationElements[i] = new InformationElement();
+                        sr.informationElements[i].id = in.readInt();
+                        int len = in.readInt();
+                        sr.informationElements[i].bytes = new byte[len];
+                        in.readByteArray(sr.informationElements[i].bytes);
+                    }
+                }
+                return sr;
             }
 
             public ScanResult[] newArray(int size) {
                 return new ScanResult[size];
             }
         };
-
 }

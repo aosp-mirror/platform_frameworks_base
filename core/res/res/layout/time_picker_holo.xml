@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2011, The Android Open Source Project
+** Copyright 2013, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -17,70 +17,18 @@
 */
 -->
 
-<!-- Layout of time picker -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/timePickerLayout"
-    android:orientation="horizontal"
-    android:layout_gravity="center_horizontal"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingStart="8dip"
-    android:paddingEnd="8dip">
-
-    <LinearLayout android:orientation="horizontal"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <include
+        layout="@layout/time_header_label"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/timepicker_header_height"
+        android:layout_gravity="center" />
+    <android.widget.RadialTimePickerView
+        android:id="@+id/radial_picker"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dip"
-        android:paddingEnd="8dip"
-        android:layoutDirection="ltr">
-
-        <!-- hour -->
-        <NumberPicker
-            android:id="@+id/hour"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dip"
-            android:layout_marginBottom="16dip"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            />
-
-        <!-- divider -->
-        <TextView
-            android:id="@+id/divider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dip"
-            android:layout_marginEnd="6dip"
-            android:layout_gravity="center_vertical"
-            android:importantForAccessibility="no"
-            />
-
-        <!-- minute -->
-        <NumberPicker
-            android:id="@+id/minute"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dip"
-            android:layout_marginBottom="16dip"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            />
-
-    </LinearLayout>
-
-    <!-- AM / PM -->
-    <NumberPicker
-        android:id="@+id/amPm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dip"
-        android:layout_marginBottom="16dip"
-        android:layout_marginStart="8dip"
-        android:layout_marginEnd="8dip"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        />
-
+        android:layout_height="@dimen/timepicker_radial_picker_dimen"
+        android:layout_gravity="center" />
 </LinearLayout>

@@ -28,6 +28,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+
 import static android.provider.Settings.Secure.getString;
 
 import android.provider.Settings;
@@ -42,8 +43,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 
 /**
@@ -53,15 +56,51 @@ import java.util.MissingResourceException;
  * Comments in this class the use the shorthand "system engines" for engines that
  * are a part of the system image.
  *
+ * This class is thread-safe/
+ *
  * @hide
  */
 public class TtsEngines {
     private static final String TAG = "TtsEngines";
     private static final boolean DBG = false;
 
-    private static final String LOCALE_DELIMITER = "-";
+    /** Locale delimiter used by the old-style 3 char locale string format (like "eng-usa") */
+    private static final String LOCALE_DELIMITER_OLD = "-";
+
+    /** Locale delimiter used by the new-style locale string format (Locale.toString() results,
+     * like "en_US") */
+    private static final String LOCALE_DELIMITER_NEW = "_";
 
     private final Context mContext;
+
+    /** Mapping of various language strings to the normalized Locale form */
+    private static final Map<String, String> sNormalizeLanguage;
+
+    /** Mapping of various country strings to the normalized Locale form */
+    private static final Map<String, String> sNormalizeCountry;
+
+    // Populate the sNormalize* maps
+    static {
+        HashMap<String, String> normalizeLanguage = new HashMap<String, String>();
+        for (String language : Locale.getISOLanguages()) {
+            try {
+                normalizeLanguage.put(new Locale(language).getISO3Language(), language);
+            } catch (MissingResourceException e) {
+                continue;
+            }
+        }
+        sNormalizeLanguage = Collections.unmodifiableMap(normalizeLanguage);
+
+        HashMap<String, String> normalizeCountry = new HashMap<String, String>();
+        for (String country : Locale.getISOCountries()) {
+            try {
+                normalizeCountry.put(new Locale("", country).getISO3Country(), country);
+            } catch (MissingResourceException e) {
+                continue;
+            }
+        }
+        sNormalizeCountry = Collections.unmodifiableMap(normalizeCountry);
+    }
 
     public TtsEngines(Context ctx) {
         mContext = ctx;
@@ -282,121 +321,169 @@ public class TtsEngines {
     }
 
     /**
-     * Returns the locale string for a given TTS engine. Attempts to read the
+     * Returns the default locale for a given TTS engine. Attempts to read the
      * value from {@link Settings.Secure#TTS_DEFAULT_LOCALE}, failing which the
-     * old style value from {@link Settings.Secure#TTS_DEFAULT_LANG} is read. If
-     * both these values are empty, the default phone locale is returned.
+     * default phone locale is returned.
      *
      * @param engineName the engine to return the locale for.
-     * @return the locale string preference for this engine. Will be non null
-     *         and non empty.
+     * @return the locale preference for this engine. Will be non null.
      */
-    public String getLocalePrefForEngine(String engineName) {
-        String locale = parseEnginePrefFromList(
-                getString(mContext.getContentResolver(), Settings.Secure.TTS_DEFAULT_LOCALE),
+    public Locale getLocalePrefForEngine(String engineName) {
+        return getLocalePrefForEngine(engineName,
+                getString(mContext.getContentResolver(), Settings.Secure.TTS_DEFAULT_LOCALE));
+    }
+
+    /**
+     * Returns the default locale for a given TTS engine from given settings string. */
+    public Locale getLocalePrefForEngine(String engineName, String prefValue) {
+        String localeString = parseEnginePrefFromList(
+                prefValue,
                 engineName);
 
-        if (TextUtils.isEmpty(locale)) {
+        if (TextUtils.isEmpty(localeString)) {
             // The new style setting is unset, attempt to return the old style setting.
-            locale = getV1Locale();
+            return Locale.getDefault();
         }
 
-        if (DBG) Log.d(TAG, "getLocalePrefForEngine(" + engineName + ")= " + locale);
+        Locale result = parseLocaleString(localeString);
+        if (result == null) {
+            Log.w(TAG, "Failed to parse locale " + localeString + ", returning en_US instead");
+            result = Locale.US;
+        }
 
-        return locale;
+        if (DBG) Log.d(TAG, "getLocalePrefForEngine(" + engineName + ")= " + result);
+
+        return result;
+    }
+
+
+    /**
+     * True if a given TTS engine uses the default phone locale as a default locale. Attempts to
+     * read the value from {@link Settings.Secure#TTS_DEFAULT_LOCALE}. If
+     * its  value is empty, this methods returns true.
+     *
+     * @param engineName the engine to return the locale for.
+     */
+    public boolean isLocaleSetToDefaultForEngine(String engineName) {
+        return TextUtils.isEmpty(parseEnginePrefFromList(
+                    getString(mContext.getContentResolver(), Settings.Secure.TTS_DEFAULT_LOCALE),
+                    engineName));
     }
 
     /**
-     * Parses a locale preference value delimited by {@link #LOCALE_DELIMITER}.
-     * Varies from {@link String#split} in that it will always return an array
-     * of length 3 with non null values.
+     * Parses a locale encoded as a string, and tries its best to return a valid {@link Locale}
+     * object, even if the input string is encoded using the old-style 3 character format e.g.
+     * "deu-deu". At the end, we test if the resulting locale can return ISO3 language and
+     * country codes ({@link Locale#getISO3Language()} and {@link Locale#getISO3Country()}),
+     * if it fails to do so, we return null.
      */
-    public static String[] parseLocalePref(String pref) {
-        String[] returnVal = new String[] { "", "", ""};
-        if (!TextUtils.isEmpty(pref)) {
-            String[] split = pref.split(LOCALE_DELIMITER);
-            System.arraycopy(split, 0, returnVal, 0, split.length);
+    public Locale parseLocaleString(String localeString) {
+        String language = "", country = "", variant = "";
+        if (!TextUtils.isEmpty(localeString)) {
+            String[] split = localeString.split(
+                    "[" + LOCALE_DELIMITER_OLD + LOCALE_DELIMITER_NEW + "]");
+            language = split[0].toLowerCase();
+            if (split.length == 0) {
+                Log.w(TAG, "Failed to convert " + localeString + " to a valid Locale object. Only" +
+                            " separators");
+                return null;
+            }
+            if (split.length > 3) {
+                Log.w(TAG, "Failed to convert " + localeString + " to a valid Locale object. Too" +
+                        " many separators");
+                return null;
+            }
+            if (split.length >= 2) {
+                country = split[1].toUpperCase();
+            }
+            if (split.length >= 3) {
+                variant = split[2];
+            }
+
         }
 
-        if (DBG) Log.d(TAG, "parseLocalePref(" + returnVal[0] + "," + returnVal[1] +
-                "," + returnVal[2] +")");
+        String normalizedLanguage = sNormalizeLanguage.get(language);
+        if (normalizedLanguage != null) {
+            language = normalizedLanguage;
+        }
 
-        return returnVal;
+        String normalizedCountry= sNormalizeCountry.get(country);
+        if (normalizedCountry != null) {
+            country = normalizedCountry;
+        }
+
+        if (DBG) Log.d(TAG, "parseLocalePref(" + language + "," + country +
+                "," + variant +")");
+
+        Locale result = new Locale(language, country, variant);
+        try {
+            result.getISO3Language();
+            result.getISO3Country();
+            return result;
+        } catch(MissingResourceException e) {
+            Log.w(TAG, "Failed to convert " + localeString + " to a valid Locale object.");
+            return null;
+        }
     }
 
     /**
-     * @return the old style locale string constructed from
-     *         {@link Settings.Secure#TTS_DEFAULT_LANG},
-     *         {@link Settings.Secure#TTS_DEFAULT_COUNTRY} and
-     *         {@link Settings.Secure#TTS_DEFAULT_VARIANT}. If no such locale is set,
-     *         then return the default phone locale.
+     * This method tries its best to return a valid {@link Locale} object from the TTS-specific
+     * Locale input (returned by {@link TextToSpeech#getLanguage}
+     * and {@link TextToSpeech#getDefaultLanguage}). A TTS Locale language field contains
+     * a three-letter ISO 639-2/T code (where a proper Locale would use a two-letter ISO 639-1
+     * code), and the country field contains a three-letter ISO 3166 country code (where a proper
+     * Locale would use a two-letter ISO 3166-1 code).
+     *
+     * This method tries to convert three-letter language and country codes into their two-letter
+     * equivalents. If it fails to do so, it keeps the value from the TTS locale.
      */
-    private String getV1Locale() {
-        final ContentResolver cr = mContext.getContentResolver();
-
-        final String lang = Settings.Secure.getString(cr, Settings.Secure.TTS_DEFAULT_LANG);
-        final String country = Settings.Secure.getString(cr, Settings.Secure.TTS_DEFAULT_COUNTRY);
-        final String variant = Settings.Secure.getString(cr, Settings.Secure.TTS_DEFAULT_VARIANT);
-
-        if (TextUtils.isEmpty(lang)) {
-            return getDefaultLocale();
+    public static Locale normalizeTTSLocale(Locale ttsLocale) {
+        String language = ttsLocale.getLanguage();
+        if (!TextUtils.isEmpty(language)) {
+            String normalizedLanguage = sNormalizeLanguage.get(language);
+            if (normalizedLanguage != null) {
+                language = normalizedLanguage;
+            }
         }
 
-        String v1Locale = lang;
+        String country = ttsLocale.getCountry();
         if (!TextUtils.isEmpty(country)) {
-            v1Locale += LOCALE_DELIMITER + country;
-        } else {
-            return v1Locale;
+            String normalizedCountry= sNormalizeCountry.get(country);
+            if (normalizedCountry != null) {
+                country = normalizedCountry;
+            }
         }
-
-        if (!TextUtils.isEmpty(variant)) {
-            v1Locale += LOCALE_DELIMITER + variant;
-        }
-
-        return v1Locale;
+        return new Locale(language, country, ttsLocale.getVariant());
     }
 
     /**
-     * Return the default device locale in form of 3 letter codes delimited by
-     * {@link #LOCALE_DELIMITER}:
+     * Return the old-style string form of the locale. It consists of 3 letter codes:
      * <ul>
-     *   <li> "ISO 639-2/T language code" if locale have no country entry</li>
-     *   <li> "ISO 639-2/T language code{@link #LOCALE_DELIMITER}ISO 3166 country code "
-     *     if locale have no variant entry</li>
-     *   <li> "ISO 639-2/T language code{@link #LOCALE_DELIMITER}ISO 3166 country code
-     *     {@link #LOCALE_DELIMITER} variant" if locale have variant entry</li>
+     *   <li>"ISO 639-2/T language code" if the locale has no country entry</li>
+     *   <li> "ISO 639-2/T language code{@link #LOCALE_DELIMITER}ISO 3166 country code"
+     *     if the locale has no variant entry</li>
+     *   <li> "ISO 639-2/T language code{@link #LOCALE_DELIMITER}ISO 3166 country
+     *     code{@link #LOCALE_DELIMITER}variant" if the locale has a variant entry</li>
      * </ul>
+     * If we fail to generate those codes using {@link Locale#getISO3Country()} and
+     * {@link Locale#getISO3Language()}, then we return new String[]{"eng","USA",""};
      */
-    public String getDefaultLocale() {
-        final Locale locale = Locale.getDefault();
-
+    static public String[] toOldLocaleStringFormat(Locale locale) {
+        String[] ret = new String[]{"","",""};
         try {
             // Note that the default locale might have an empty variant
             // or language, and we take care that the construction is
             // the same as {@link #getV1Locale} i.e no trailing delimiters
             // or spaces.
-            String defaultLocale = locale.getISO3Language();
-            if (TextUtils.isEmpty(defaultLocale)) {
-                Log.w(TAG, "Default locale is empty.");
-                return "";
-            }
+            ret[0] = locale.getISO3Language();
+            ret[1] = locale.getISO3Country();
+            ret[2] = locale.getVariant();
 
-            if (!TextUtils.isEmpty(locale.getISO3Country())) {
-                defaultLocale += LOCALE_DELIMITER + locale.getISO3Country();
-            } else {
-                // Do not allow locales of the form lang--variant with
-                // an empty country.
-                return defaultLocale;
-            }
-            if (!TextUtils.isEmpty(locale.getVariant())) {
-                defaultLocale += LOCALE_DELIMITER + locale.getVariant();
-            }
-
-            return defaultLocale;
+            return ret;
         } catch (MissingResourceException e) {
             // Default locale does not have a ISO 3166 and/or ISO 639-2/T codes. Return the
             // default "eng-usa" (that would be the result of Locale.getDefault() == Locale.US).
-            return "eng-usa";
+            return new String[]{"eng","USA",""};
         }
     }
 
@@ -425,16 +512,21 @@ public class TtsEngines {
         return null;
     }
 
-    public synchronized void updateLocalePrefForEngine(String name, String newLocale) {
+    /**
+     * Serialize the locale to a string and store it as a default locale for the given engine. If
+     * the passed locale is null, an empty string will be serialized; that empty string, when
+     * read back, will evaluate to {@link Locale#getDefault()}.
+     */
+    public synchronized void updateLocalePrefForEngine(String engineName, Locale newLocale) {
         final String prefList = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.TTS_DEFAULT_LOCALE);
         if (DBG) {
-            Log.d(TAG, "updateLocalePrefForEngine(" + name + ", " + newLocale +
+            Log.d(TAG, "updateLocalePrefForEngine(" + engineName + ", " + newLocale +
                     "), originally: " + prefList);
         }
 
         final String newPrefList = updateValueInCommaSeparatedList(prefList,
-                name, newLocale);
+                engineName, (newLocale != null) ? newLocale.toString() : "");
 
         if (DBG) Log.d(TAG, "updateLocalePrefForEngine(), writing: " + newPrefList.toString());
 

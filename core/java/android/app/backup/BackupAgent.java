@@ -127,6 +127,13 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
+    Handler getHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        return mHandler;
+    }
+
     class SharedPrefsSynchronizer implements Runnable {
         public final CountDownLatch mLatch = new CountDownLatch(1);
 
@@ -139,12 +146,9 @@ public abstract class BackupAgent extends ContextWrapper {
 
     // Syncing shared preferences deferred writes needs to happen on the main looper thread
     private void waitForSharedPrefs() {
-        if (mHandler == null) {
-            mHandler = new Handler(Looper.getMainLooper());
-        }
-
+        Handler h = getHandler();
         final SharedPrefsSynchronizer s = new SharedPrefsSynchronizer();
-        mHandler.postAtFrontOfQueue(s);
+        h.postAtFrontOfQueue(s);
         try {
             s.mLatch.await();
         } catch (InterruptedException e) { /* ignored */ }
@@ -205,7 +209,7 @@ public abstract class BackupAgent extends ContextWrapper {
      *            output stream.
      */
     public abstract void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-             ParcelFileDescriptor newState) throws IOException;
+            ParcelFileDescriptor newState) throws IOException;
 
     /**
      * The application is being restored from backup and should replace any
@@ -239,16 +243,43 @@ public abstract class BackupAgent extends ContextWrapper {
      *            When a full-backup dataset is being restored, this will be <code>null</code>.
      */
     public abstract void onRestore(BackupDataInput data, int appVersionCode,
-            ParcelFileDescriptor newState)
-            throws IOException;
+            ParcelFileDescriptor newState) throws IOException;
 
     /**
-     * The default implementation backs up the entirety of the application's "owned"
-     * file system trees to the output.
+     * The application is having its entire file system contents backed up.  {@code data}
+     * points to the backup destination, and the app has the opportunity to choose which
+     * files are to be stored.  To commit a file as part of the backup, call the
+     * {@link #fullBackupFile(File, FullBackupDataOutput)} helper method.  After all file
+     * data is written to the output, the agent returns from this method and the backup
+     * operation concludes.
+     *
+     * <p>Certain parts of the app's data are never backed up even if the app explicitly
+     * sends them to the output:
+     *
+     * <ul>
+     * <li>The contents of the {@link #getCacheDir()} directory</li>
+     * <li>The contents of the {@link #getNoBackupFilesDir()} directory</li>
+     * <li>The contents of the app's shared library directory</li>
+     * </ul>
+     *
+     * <p>The default implementation of this method backs up the entirety of the
+     * application's "owned" file system trees to the output other than the few exceptions
+     * listed above.  Apps only need to override this method if they need to impose special
+     * limitations on which files are being stored beyond the control that
+     * {@link #getNoBackupFilesDir()} offers.
+     *
+     * @param data A structured wrapper pointing to the backup destination.
+     * @throws IOException
+     *
+     * @see Context#getNoBackupFilesDir()
+     * @see #fullBackupFile(File, FullBackupDataOutput)
+     * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
      */
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
         ApplicationInfo appInfo = getApplicationInfo();
 
+        // Note that we don't need to think about the no_backup dir because it's outside
+        // all of the ones we will be traversing
         String rootDir = new File(appInfo.dataDir).getCanonicalPath();
         String filesDir = getFilesDir().getCanonicalPath();
         String databaseDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
@@ -307,6 +338,10 @@ public abstract class BackupAgent extends ContextWrapper {
      * to place it with the proper location and permissions on the device where the
      * data is restored.
      *
+     * <p class="note">It is safe to explicitly back up files underneath your application's
+     * {@link #getNoBackupFilesDir()} directory, and they will be restored to that
+     * location correctly.
+     *
      * @param file The file to be backed up.  The file must exist and be readable by
      *     the caller.
      * @param output The destination to which the backed-up file data will be sent.
@@ -315,6 +350,7 @@ public abstract class BackupAgent extends ContextWrapper {
         // Look up where all of our various well-defined dir trees live on this device
         String mainDir;
         String filesDir;
+        String nbFilesDir;
         String dbDir;
         String spDir;
         String cacheDir;
@@ -327,6 +363,7 @@ public abstract class BackupAgent extends ContextWrapper {
         try {
             mainDir = new File(appInfo.dataDir).getCanonicalPath();
             filesDir = getFilesDir().getCanonicalPath();
+            nbFilesDir = getNoBackupFilesDir().getCanonicalPath();
             dbDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
             spDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
             cacheDir = getCacheDir().getCanonicalPath();
@@ -350,8 +387,10 @@ public abstract class BackupAgent extends ContextWrapper {
             return;
         }
 
-        if (filePath.startsWith(cacheDir) || filePath.startsWith(libDir)) {
-            Log.w(TAG, "lib and cache files are not backed up");
+        if (filePath.startsWith(cacheDir)
+                || filePath.startsWith(libDir)
+                || filePath.startsWith(nbFilesDir)) {
+            Log.w(TAG, "lib, cache, and no_backup files are not backed up");
             return;
         }
 
@@ -504,6 +543,8 @@ public abstract class BackupAgent extends ContextWrapper {
                     mode = -1;  // < 0 is a token to skip attempting a chmod()
                 }
             }
+        } else if (domain.equals(FullBackup.NO_BACKUP_TREE_TOKEN)) {
+            basePath = getNoBackupFilesDir().getCanonicalPath();
         } else {
             // Not a supported location
             Log.i(TAG, "Unrecognized domain " + domain);
@@ -531,6 +572,20 @@ public abstract class BackupAgent extends ContextWrapper {
         // with a null destination.
         if (DEBUG) Log.i(TAG, "[ skipping file " + path + "]");
         FullBackup.restoreFile(data, size, type, mode, mtime, null);
+    }
+
+    /**
+     * The application's restore operation has completed.  This method is called after
+     * all available data has been delivered to the application for restore (via either
+     * the {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} or
+     * {@link #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long) onRestoreFile()}
+     * callbacks).  This provides the app with a stable end-of-restore opportunity to
+     * perform any appropriate post-processing on the data that was just delivered.
+     *
+     * @see #onRestore(BackupDataInput, int, ParcelFileDescriptor)
+     * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
+     */
+    public void onRestoreFinished() {
     }
 
     // ----- Core implementation -----
@@ -678,6 +733,42 @@ public abstract class BackupAgent extends ContextWrapper {
                     // we'll time out anyway, so we're safe
                 }
             }
+        }
+
+        @Override
+        public void doRestoreFinished(int token, IBackupManager callbackBinder) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                BackupAgent.this.onRestoreFinished();
+            } finally {
+                // Ensure that any side-effect SharedPreferences writes have landed
+                waitForSharedPrefs();
+
+                Binder.restoreCallingIdentity(ident);
+                try {
+                    callbackBinder.opComplete(token);
+                } catch (RemoteException e) {
+                    // we'll time out anyway, so we're safe
+                }
+            }
+        }
+
+        @Override
+        public void fail(String message) {
+            getHandler().post(new FailRunnable(message));
+        }
+    }
+
+    static class FailRunnable implements Runnable {
+        private String mMessage;
+
+        FailRunnable(String message) {
+            mMessage = message;
+        }
+
+        @Override
+        public void run() {
+            throw new IllegalStateException(mMessage);
         }
     }
 }

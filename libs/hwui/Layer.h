@@ -17,7 +17,9 @@
 #ifndef ANDROID_HWUI_LAYER_H
 #define ANDROID_HWUI_LAYER_H
 
+#include <cutils/compiler.h>
 #include <sys/types.h>
+#include <utils/StrongPointer.h>
 
 #include <GLES2/gl2.h>
 
@@ -26,9 +28,9 @@
 #include <SkPaint.h>
 #include <SkXfermode.h>
 
+#include "Matrix.h"
 #include "Rect.h"
 #include "RenderBuffer.h"
-#include "SkiaColorFilter.h"
 #include "Texture.h"
 #include "Vertex.h"
 
@@ -41,16 +43,34 @@ namespace uirenderer {
 
 // Forward declarations
 class Caches;
+class RenderState;
 class OpenGLRenderer;
-class DisplayList;
+class RenderNode;
 class DeferredDisplayList;
 class DeferStateStruct;
 
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
-struct Layer {
-    Layer(const uint32_t layerWidth, const uint32_t layerHeight);
+class Layer {
+public:
+    enum Type {
+        kType_Texture,
+        kType_DisplayList,
+    };
+
+    // layer lifecycle, controlled from outside
+    enum State {
+        kState_Uncached = 0,
+        kState_InCache = 1,
+        kState_FailedToCache = 2,
+        kState_RemovedFromCache = 3,
+        kState_DeletedFromCache = 4,
+        kState_InGarbageList = 5,
+    };
+    State state; // public for logging/debugging purposes
+
+    Layer(Type type, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
     static uint32_t computeIdealWidth(uint32_t layerWidth);
@@ -82,14 +102,12 @@ struct Layer {
         regionRect.translate(layer.left, layer.top);
     }
 
-    void updateDeferred(OpenGLRenderer* renderer, DisplayList* displayList,
-            int left, int top, int right, int bottom) {
-        this->renderer = renderer;
-        this->displayList = displayList;
-        const Rect r(left, top, right, bottom);
-        dirtyRect.unionWith(r);
-        deferredUpdateScheduled = true;
+    void setWindowTransform(Matrix4& windowTransform) {
+        cachedInvTransformInWindow.loadInverse(windowTransform);
+        rendererLightPosDirty = true;
     }
+
+    void updateDeferred(RenderNode* renderNode, int left, int top, int right, int bottom);
 
     inline uint32_t getWidth() const {
         return texture.width;
@@ -115,7 +133,7 @@ struct Layer {
         texture.height = height;
     }
 
-    ANDROID_API void setPaint(SkPaint* paint);
+    ANDROID_API void setPaint(const SkPaint* paint);
 
     inline void setBlend(bool blend) {
         texture.blend = blend;
@@ -123,6 +141,14 @@ struct Layer {
 
     inline bool isBlend() const {
         return texture.blend;
+    }
+
+    inline void setForceFilter(bool forceFilter) {
+        this->forceFilter = forceFilter;
+    }
+
+    inline bool getForceFilter() const {
+        return forceFilter;
     }
 
     inline void setAlpha(int alpha) {
@@ -209,18 +235,22 @@ struct Layer {
     }
 
     inline bool isTextureLayer() const {
-        return textureLayer;
+        return type == kType_Texture;
     }
 
-    inline void setTextureLayer(bool textureLayer) {
-        this->textureLayer = textureLayer;
-    }
-
-    inline SkiaColorFilter* getColorFilter() const {
+    inline SkColorFilter* getColorFilter() const {
         return colorFilter;
     }
 
-    ANDROID_API void setColorFilter(SkiaColorFilter* filter);
+    ANDROID_API void setColorFilter(SkColorFilter* filter);
+
+    inline void setConvexMask(const SkPath* convexMask) {
+        this->convexMask = convexMask;
+    }
+
+    inline const SkPath* getConvexMask() {
+        return convexMask;
+    }
 
     void bindStencilRenderBuffer() const;
 
@@ -244,10 +274,10 @@ struct Layer {
         return transform;
     }
 
-    void defer();
+    void defer(const OpenGLRenderer& rootRenderer);
     void cancelDefer();
     void flush();
-    void render();
+    void render(const OpenGLRenderer& rootRenderer);
 
     /**
      * Bounds of the layer.
@@ -284,13 +314,19 @@ struct Layer {
      */
     bool deferredUpdateScheduled;
     OpenGLRenderer* renderer;
-    DisplayList* displayList;
+    sp<RenderNode> renderNode;
     Rect dirtyRect;
     bool debugDrawUpdate;
     bool hasDrawnSinceUpdate;
+    bool wasBuildLayered;
 
 private:
+    void requireRenderer();
+    void updateLightPosFromRenderer(const OpenGLRenderer& rootRenderer);
+
     Caches& caches;
+
+    RenderState& renderState;
 
     /**
      * Name of the FBO used to render the layer. If the name is 0
@@ -319,10 +355,9 @@ private:
     bool cacheable;
 
     /**
-     * When set to true, this layer must be treated as a texture
-     * layer.
+     * Denotes whether the layer is a DisplayList, or Texture layer.
      */
-    bool textureLayer;
+    const Type type;
 
     /**
      * When set to true, this layer is dirty and should be cleared
@@ -338,12 +373,18 @@ private:
     /**
      * Color filter used to draw this layer. Optional.
      */
-    SkiaColorFilter* colorFilter;
+    SkColorFilter* colorFilter;
+
+    /**
+     * Indicates raster data backing the layer is scaled, requiring filtration.
+     */
+    bool forceFilter;
 
     /**
      * Opacity of the layer.
      */
     int alpha;
+
     /**
      * Blending mode of the layer.
      */
@@ -360,10 +401,23 @@ private:
     mat4 transform;
 
     /**
+     * Cached transform of layer in window, updated only on creation / resize
+     */
+    mat4 cachedInvTransformInWindow;
+    bool rendererLightPosDirty;
+
+    /**
      * Used to defer display lists when the layer is updated with a
      * display list.
      */
     DeferredDisplayList* deferredList;
+
+    /**
+     * This convex path should be used to mask the layer's draw to the screen.
+     *
+     * Data not owned/managed by layer object.
+     */
+    const SkPath* convexMask;
 
 }; // struct Layer
 

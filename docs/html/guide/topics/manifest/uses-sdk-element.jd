@@ -1,5 +1,5 @@
 page.title=&lt;uses-sdk&gt;
-page.tags="api levels","sdk version","minsdkversion","targetsdkversion","maxsdkversion"
+page.tags=api levels,sdk version,minsdkversion,targetsdkversion,maxsdkversion
 @jd:body
 
 
@@ -226,6 +226,17 @@ Versions dashboards page</a>.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
+
+    <tr><td><a href="{@docRoot}about/versions/android-5.0.html">Android 5.0</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/21/changes.html" title="Diff Report">21</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</td>
+    <td><a href="{@docRoot}about/versions/lollipop.html">Platform
+Highlights</a></td></tr>
+
+    <tr><td style="color:#bbb">Android 4.4W</td>
+    <td><a href="{@docRoot}sdk/api_diff/20/changes.html" title="Diff Report">20</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#KITKAT_WATCH}</td>
+    <td style="color:#bbb">KitKat for Wearables Only</td></tr>
 
     <tr><td><a href="{@docRoot}about/versions/android-4.4.html">Android 4.4</a></td>
     <td><a href="{@docRoot}sdk/api_diff/19/changes.html" title="Diff Report">19</a></td>

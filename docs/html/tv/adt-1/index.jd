@@ -1,0 +1,322 @@
+page.title=ADT-1 Developer Kit
+page.tags="emote","e-mote","adt"
+fullpage=1
+
+@jd:body
+
+
+<div class="wrap" style="width:940px;">
+
+<h1>ADT-1 Developer Kit</h1>
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#faq">Frequently Asked Questions</a>
+      <ol>
+        <li><a href="#setup">Device Setup</a></li>
+        <li><a href="#input">User Input</a></li>
+        <li><a href="#cast">Google Cast</a></li>
+        <li><a href="#trouble">Troubleshooting</a></li>
+      </ol>
+    </li>
+    <li><a href="#emote">Android TV Remote Control App</a></li>
+    <li><a href="#reg-safety">Regulatory Disclosures and Safety</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The ADT-1 Developer Kit is a streaming media player and game controller designed for running
+and testing apps built for Android TV. Supplies of ADT-1 are limited and it is intended for
+developers who are interested in building new apps or extending their existing apps to run on the
+Android TV platform.</p>
+
+<p class="note">
+  <strong>Note:</strong> The ADT-1 kit <em>is not required</em> for building and testing apps
+  for Android TV. You can build apps for TV and test them using an emulator for TV devices. The
+  Android SDK includes all the software needed to build TV apps and an emulator for running
+  and testing them. For more information, see the
+  <a href="{@docRoot}training/tv/start/index.html">Get Started</a> guide for TV apps.
+</p>
+
+<h2 id="faq">ADT-1 Frequently Asked Questions</h2>
+
+<p>The following information is provided to help set up and use the ADT-1 device.</p>
+
+
+<h3 id="setup">Device Setup</h3>
+
+<p>
+  <strong>How do I turn my device on?</strong>
+</p>
+<p>Plug the included power cable into the back of ADT-1. The device does not have an on/off
+  switch.</p>
+
+<p>
+  <strong>How do I completely turn my device off? </strong>
+</p>
+<p>Unplug the included power cable from the back of ADT-1. The device does not have an on/off
+  switch. However, ADT-1 will begin sleeping (daydream) based on user settings in
+  <strong>Settings &gt; Device &gt; Display &gt; Daydream</strong>.
+  </p>
+
+<p>
+  <strong>How do I connect to the network?</strong>
+</p>
+<p>ADT-1 has both wireless and Ethernet for connecting to your network. To change your wireless
+  network, go to <strong>Settings &gt; Device &gt; Wi-Fi</strong>. To use an Ethernet network
+  connection, simply plug an Ethernet cable (that is connected to your network) into the port on
+  the back of ADT-1.</p>
+
+<p>
+  <strong>How do I use the developer cable?</strong>
+</p>
+<p>The developer cable has three connectors: a small, male power connector that plugs into the
+  power port on the back of ADT-1, a standard male USB-A connector that connects your PC, and a
+  small, female power connector that the included power supply plugs into.</p>
+
+<p class="note">
+  <strong>Note:</strong> Make sure you have enabled USB debugging in <strong>Settings &gt;
+  Preferences &gt; Developer options &gt; Debugging &gt; USB debugging</strong>, so that you can
+  use the Android Debug Bridge (adb) to connect with the ADT-1 device.
+</p>
+
+<p id="adb-tcp">
+  <strong>Can I connect without a developer cable?</strong>
+</p>
+<p>
+  Yes. The ADT-1 device is enabled for Android Debug Bridge (adb) connections over TCP/IP. To
+  connect to the ADT-1 device using this method:
+</p>
+<ol>
+  <li>Make sure that your development computer and the ADT-1 device are on the same network.</li>
+  <li>Determine the IP address of the ADT-1 device by navigating to <strong>Settings &gt;
+    Device &gt; Wi-Fi &gt; your-network-name &gt; Status info</strong>.</li>
+  <li>Connect to the ADT-1 device using the following adb command:
+<pre>
+$ adb connect &lt;ip-address-for-adt-1&gt;:4321
+</pre>
+  </li>
+</ol>
+
+<p class="note">
+  <strong>Note:</strong> Make sure you have enabled USB debugging in <strong>Settings &gt;
+  Preferences &gt; Developer options &gt; Debugging &gt; USB debugging</strong>, so that you can
+  use the Android Debug Bridge (adb) to connect with the ADT-1 device.
+</p>
+
+
+<h3 id="input">User Input</h3>
+
+<p>
+  <strong>How do I put the gamepad that came with my ADT-1 into pairing mode?</strong>
+</p>
+<p>Press and hold the Back and Home buttons together for about three seconds, until all four
+  blue LEDs flash together. When the LEDs are flashing, the gamepad is in pairing mode.</p>
+
+<p>
+  <strong>How do I use the gamepad with the on-screen keyboard?</strong>
+</p>
+<p>Use the D-pad or left joystick to move the cursor, and press A to select. Press X to delete a
+  character, and press Y to insert a space. Also, you can press the right joystick to toggle caps
+  lock, and press the left joystick to show additional symbols.</p>
+
+<p>
+  <strong>Can I control ADT-1 with my phone or tablet?</strong>
+</p>
+<p>Yes. In order to control the ADT-1 with Android phones or tablets, you can download a remote
+  control app from the Google Play store. For more information, see <a href="#emote">Android TV
+  Remote Control App</a>.
+  </p>
+
+<p>
+  <strong>Can I connect a USB keyboard or mouse to ADT-1?</strong>
+</p>
+<p>Yes, you can connect a USB keyboard or mouse to the USB port on the back of ADT-1.
+
+<p class="note">
+  <strong>Note:</strong> The ADT-1 device is not compatible with all manufacturers and models of
+  these devices. If a particular keyboard or mouse does not work, try a different model.
+</p>
+
+<p>
+  <strong>How do I connect a Bluetooth device without an input device already attached?</strong>
+</p>
+<p>You can put ADT-1 into Bluetooth pairing mode using a hardware button. Press the small, round
+  button on the back of ADT-1 to make it search for Bluetooth devices in pairing mode. If multiple
+  accessories are found, press the small, round button to select the device you want to pair.
+  Pairing will happen automatically after a few seconds.
+</p>
+
+<p>
+  <strong>How do I connect additional Bluetooth accessories?</strong>
+<p>
+<p>To pair Bluetooth devices to ADT-1 from the user interface, go to <strong>Settings &gt;
+  Remote &amp; Accessories &gt; Add accessory</strong>
+
+
+<h3 id="cast">Google Cast</h3>
+
+<p>
+  <strong>Can I cast to an ADT-1 device?</strong>
+<p>
+<p>Yes. The ADT-1 includes Google Cast receiver functionality, similar to Chromecast. Since the
+  ADT-1 is a developer device running a development software release, the Google Cast receiver is
+  open only to a limited number of apps.</p>
+
+<p>
+  <strong>Which Cast apps are supported on ADT-1?</strong>
+<p>
+<p>As a developer device, the ADT-1 supports casting from only the following apps/websites:</p>
+
+<ul>
+  <li>YouTube</li>
+  <li>Netflix</li>
+  <li>Google+ Photos</li>
+  <li>Google Play Movies and TV (Android and iOS only)</li>
+  <li>Google Play Music</li>
+  <li>Mirror your Android device screen to ADT-1</li>
+</ul>
+
+<p>Coming soon:</p>
+
+<ul>
+  <li>Google Play Movies and TV (Chrome)</li>
+</ul>
+
+<p class="note">
+  <strong>Note:</strong> When casting from a Chrome browser, you must use Chrome V.36 or higher.
+  Chrome V.36 is available in beta-channel and is planned to be released soon.
+</p>
+
+<p>
+  <strong>How do I cast to ADT-1?</strong>
+<p>
+<p>You cast to an ADT-1 device the same way you do with a Chromecast device. Open the supported
+  Cast apps or webpages, press the <strong>Cast</strong> button and you should see the ADT-1 as a
+  Cast target. For more information about on how to cast, see
+  <a href="http://www.google.com/intl/en/chrome/devices/chromecast/learn.html">Learn How to
+  Cast</a>.
+  </p>
+
+<p>
+  <strong>Will my Google Cast sender apps work on ADT-1 just like Chromecast?</strong>
+<p>
+<p>Yes. Your Cast app works on ADT-1 and Android TV products without additional work.<p>
+
+<p class="note">
+  <strong>Note:</strong> Your iOS sender app requires the Google Cast iOS API version 2.2.1
+  or later to work with the ADT-1 device.
+</p>
+
+<p>
+  <strong>How do I register my ADT-1 in order to run my apps?</strong>
+</p>
+<ol>
+  <li>Go to <strong>Settings &gt; Device &gt; Google Cast</strong> and turn on developer support,
+    allowing the ADT-1 device to send its serial number to Google.</li>
+  <li>Register your ADT-1 device in the Google Cast Developer Console, using the 12 character
+    serial number engraved on the back of the ADT-1.</li>
+</ol>
+
+<p>For more Google Cast developer information, see the
+  <a href="https://developers.google.com/cast/">Cast developer site</a>. Please use the Google Cast
+  SDK <a href="https://code.google.com/p/google-cast-sdk/issues/list">issue tracker</a> for filing
+  issues related to Cast. Make sure you mention the ADT-1 device when filing an issue.
+</p>
+
+<p>
+  <strong>How do I debug my Cast app on ADT-1?</strong>
+</p>
+<p>Connect your development platform using the power/USB cable, and using a Chrome browser,
+  navigate to <code>chrome://inspect/#devices</code> to debug the webview.</p>
+
+
+<h3 id="trouble">Troubleshooting</h3>
+
+<p>
+  <strong>Why doesn't the on-screen keyboard come up?</strong>
+</p>
+<p>Enable the keyboard in the device Settings. Go to <strong>Settings &gt; Preferences &gt;
+  Keyboard &gt; Current keyboard</strong> and choose <strong>Leanback keyboard</strong>.
+
+<p>
+  <strong>How do I perform a hardware reboot?</strong>
+</p>
+<p>Locked it up, huh? No worries. We've done that a few times ourselves. Unplug and replug the
+  included power cable from the back of ADT-1 to reboot it.
+</p>
+
+<p>
+  <strong>How do I perform a factory reset?</strong>
+</p>
+<p class="warning">
+  <strong>Warning:</strong> This procedure removes all data from the device, including system
+  data, downloaded apps, app data, and account settings.
+</p>
+
+<p>From the home screen, go to <strong>Settings &gt; Device &gt; Storage &amp; Reset</strong>, and
+  select <strong>Factory data reset</strong>.
+</p>
+
+<p>
+  <strong>How do I perform a hardware reset?</strong>
+</p>
+<p class="warning">
+  <strong>Warning:</strong> This procedure performs a factory data reset, removing all data from
+  the device, including system data, downloaded apps, app data, and account settings.
+</p>
+
+<p>Unplug the power cable from the back of ADT-1. Press and hold the small, round button on the
+  back of ADT-1 as you re-insert the power cable, and continue to hold the small round button. The
+  LED will begin flashing red for a few seconds, then change to multi-color cycle. When the LED
+  starts the multi-color cycle, release the small, round button, and ADT-1 boots up. If you release
+  the button while the LED is flashing red, the device will be in Fastboot mode.</p>
+
+<p>
+  <strong>There is a hardware problem with my ADT-1. How do I return it?</strong>
+</p>
+<p>You can request a return of the device using the
+  <a href="https://support.google.com/googleplay/android-developer/contact/adt_rma">return
+  merchandise authorization form</a>.
+</p>
+
+
+<h2 id="emote">Android TV Remote Control App</h2>
+
+<div class="figure" style="width:250px;margin-top:0">
+<img src="{@docRoot}tv/images/android-tv-remote.png" alt="Android TV Remote Screenshots">
+</div>
+
+<p>A remote control app is available for Android phones and tablets that allows you to interact
+  with the ADT-1 device. This app allows you to switch between D-pad input mode or touchpad mode
+  to navigate content and play games on a Android TV device. You can also tap the mic button to
+  start a voice search, or use the keyboard to input text using this app.</p>
+
+<p>You download the remote control app from the Google Play store using
+  <a href="https://play.google.com/store/apps/details?id=com.google.android.tv.remote">this
+  link</a>.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> your Android ​phone or tablet must be connected to the same local network
+  as ADT-1.
+</p>
+
+
+<h2 id="reg-safety">Regulatory Disclosures and Safety Information</h2>
+
+<p>The ADT-1 device comes with important regulatory disclosures and safety information. Please
+read this information before using the device:</p>
+
+<ul>
+  <li><a href="regulatory.html">Regulatory Disclosures</a></li>
+  <li><a href="safety.html">Important Safety Information</a></li>
+</ul>
+
+</div> <!-- end.class.wrap -->
+
+<div class="layout-content-col col-16" style="padding-top:1px">
+  <!-- layout div, so auto-gen footer sits correctly; do not remove -->
+</div>

@@ -167,6 +167,7 @@ import android.util.SparseArray;
  */
 public final class MotionEvent extends InputEvent implements Parcelable {
     private static final long NS_PER_MS = 1000000;
+    private static final String LABEL_PREFIX = "AXIS_";
 
     /**
      * An invalid pointer id.
@@ -1368,6 +1369,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     private static native long nativeReadFromParcel(long nativePtr, Parcel parcel);
     private static native void nativeWriteToParcel(long nativePtr, Parcel parcel);
+
+    private static native String nativeAxisToString(int axis);
+    private static native int nativeAxisFromString(String label);
 
     private MotionEvent() {
     }
@@ -3051,8 +3055,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @return The symbolic name of the specified axis.
      */
     public static String axisToString(int axis) {
-        String symbolicName = AXIS_SYMBOLIC_NAMES.get(axis);
-        return symbolicName != null ? symbolicName : Integer.toString(axis);
+        String symbolicName = nativeAxisToString(axis);
+        return symbolicName != null ? LABEL_PREFIX + symbolicName : Integer.toString(axis);
     }
 
     /**
@@ -3064,17 +3068,13 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see KeyEvent#keyCodeToString(int)
      */
     public static int axisFromString(String symbolicName) {
-        if (symbolicName == null) {
-            throw new IllegalArgumentException("symbolicName must not be null");
-        }
-
-        final int count = AXIS_SYMBOLIC_NAMES.size();
-        for (int i = 0; i < count; i++) {
-            if (symbolicName.equals(AXIS_SYMBOLIC_NAMES.valueAt(i))) {
-                return i;
+        if (symbolicName.startsWith(LABEL_PREFIX)) {
+            symbolicName = symbolicName.substring(LABEL_PREFIX.length());
+            int axis = nativeAxisFromString(symbolicName);
+            if (axis >= 0) {
+                return axis;
             }
         }
-
         try {
             return Integer.parseInt(symbolicName, 10);
         } catch (NumberFormatException ex) {
@@ -3129,6 +3129,24 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static String toolTypeToString(int toolType) {
         String symbolicName = TOOL_TYPE_SYMBOLIC_NAMES.get(toolType);
         return symbolicName != null ? symbolicName : Integer.toString(toolType);
+    }
+
+    /**
+     * Checks if a mouse or stylus button (or combination of buttons) is pressed.
+     * @param button Button (or combination of buttons).
+     * @return True if specified buttons are pressed.
+     *
+     * @see #BUTTON_PRIMARY
+     * @see #BUTTON_SECONDARY
+     * @see #BUTTON_TERTIARY
+     * @see #BUTTON_FORWARD
+     * @see #BUTTON_BACK
+     */
+    public final boolean isButtonPressed(int button) {
+        if (button == 0) {
+            return false;
+        }
+        return (getButtonState() & button) == button;
     }
 
     public static final Parcelable.Creator<MotionEvent> CREATOR
@@ -3372,11 +3390,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                         throw new IllegalArgumentException("Axis out of range.");
                     }
                     final long bits = mPackedAxisBits;
-                    final long axisBit = 1L << axis;
+                    final long axisBit = 0x8000000000000000L >>> axis;
                     if ((bits & axisBit) == 0) {
                         return 0;
                     }
-                    final int index = Long.bitCount(bits & (axisBit - 1L));
+                    final int index = Long.bitCount(bits & ~(0xFFFFFFFFFFFFFFFFL >>> axis));
                     return mPackedAxisValues[index];
                 }
             }
@@ -3425,8 +3443,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                         throw new IllegalArgumentException("Axis out of range.");
                     }
                     final long bits = mPackedAxisBits;
-                    final long axisBit = 1L << axis;
-                    final int index = Long.bitCount(bits & (axisBit - 1L));
+                    final long axisBit = 0x8000000000000000L >>> axis;
+                    final int index = Long.bitCount(bits & ~(0xFFFFFFFFFFFFFFFFL >>> axis));
                     float[] values = mPackedAxisValues;
                     if ((bits & axisBit) == 0) {
                         if (values == null) {

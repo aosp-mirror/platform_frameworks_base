@@ -27,6 +27,7 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.InputConnection;
 import android.widget.TextView;
 
 public class EditableInputConnection extends BaseInputConnection {
@@ -184,5 +185,48 @@ public class EditableInputConnection extends BaseInputConnection {
         mTextView.hideErrorIfUnchanged();
 
         return success;
+    }
+
+    @Override
+    public boolean requestCursorUpdates(int cursorUpdateMode) {
+        if (DEBUG) Log.v(TAG, "requestUpdateCursorAnchorInfo " + cursorUpdateMode);
+
+        // It is possible that any other bit is used as a valid flag in a future release.
+        // We should reject the entire request in such a case.
+        final int KNOWN_FLAGS_MASK = InputConnection.CURSOR_UPDATE_IMMEDIATE |
+                InputConnection.CURSOR_UPDATE_MONITOR;
+        final int unknownFlags = cursorUpdateMode & ~KNOWN_FLAGS_MASK;
+        if (unknownFlags != 0) {
+            if (DEBUG) {
+                Log.d(TAG, "Rejecting requestUpdateCursorAnchorInfo due to unknown flags." +
+                        " cursorUpdateMode=" + cursorUpdateMode +
+                        " unknownFlags=" + unknownFlags);
+            }
+            return false;
+        }
+
+        if (mIMM == null) {
+            // In this case, TYPE_CURSOR_ANCHOR_INFO is not handled.
+            // TODO: Return some notification code rather than false to indicate method that
+            // CursorAnchorInfo is temporarily unavailable.
+            return false;
+        }
+        mIMM.setUpdateCursorAnchorInfoMode(cursorUpdateMode);
+        if ((cursorUpdateMode & InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0) {
+            if (mTextView == null) {
+                // In this case, FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is silently ignored.
+                // TODO: Return some notification code for the input method that indicates
+                // FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is ignored.
+            } else if (mTextView.isInLayout()) {
+                // In this case, the view hierarchy is currently undergoing a layout pass.
+                // IMM#updateCursorAnchorInfo is supposed to be called soon after the layout
+                // pass is finished.
+            } else {
+                // This will schedule a layout pass of the view tree, and the layout event
+                // eventually triggers IMM#updateCursorAnchorInfo.
+                mTextView.requestLayout();
+            }
+        }
+        return true;
     }
 }

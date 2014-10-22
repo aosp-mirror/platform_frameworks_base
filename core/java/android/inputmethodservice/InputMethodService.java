@@ -39,6 +39,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,6 +52,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -533,6 +535,17 @@ public class InputMethodService extends AbstractInputMethodService {
         public void toggleSoftInput(int showFlags, int hideFlags) {
             InputMethodService.this.onToggleSoftInput(showFlags, hideFlags);
         }
+
+        /**
+         * Call {@link InputMethodService#onUpdateCursorAnchorInfo
+         * InputMethodService.onUpdateCursorAnchorInfo()}.
+         */
+        public void updateCursorAnchorInfo(CursorAnchorInfo info) {
+            if (!isEnabled()) {
+                return;
+            }
+            InputMethodService.this.onUpdateCursorAnchorInfo(info);
+        }
     }
     
     /**
@@ -626,10 +639,13 @@ public class InputMethodService extends AbstractInputMethodService {
      * You can call this to try to enable hardware accelerated drawing for
      * your IME. This must be set before {@link #onCreate}, so you
      * will typically call it in your constructor.  It is not always possible
-     * to use hardware acclerated drawing in an IME (for example on low-end
+     * to use hardware accelerated drawing in an IME (for example on low-end
      * devices that do not have the resources to support this), so the call
      * returns true if it succeeds otherwise false if you will need to draw
      * in software.  You must be able to handle either case.
+     *
+     * @deprecated Starting in API 21, hardware acceleration is always enabled
+     *             on capable devices.
      */
     public boolean enableHardwareAcceleration() {
         if (mWindow != null) {
@@ -647,13 +663,15 @@ public class InputMethodService extends AbstractInputMethodService {
                 getApplicationInfo().targetSdkVersion,
                 android.R.style.Theme_InputMethod,
                 android.R.style.Theme_Holo_InputMethod,
+                android.R.style.Theme_DeviceDefault_InputMethod,
                 android.R.style.Theme_DeviceDefault_InputMethod);
         super.setTheme(mTheme);
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mWindow = new SoftInputWindow(this, mTheme, mDispatcherState);
+        mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
+                WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
         if (mHardwareAccelerated) {
             mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
@@ -1695,8 +1713,21 @@ public class InputMethodService extends AbstractInputMethodService {
      * Called when the application has reported a new location of its text
      * cursor.  This is only called if explicitly requested by the input method.
      * The default implementation does nothing.
+     * @deprecated Use {#link onUpdateCursorAnchorInfo(CursorAnchorInfo)} instead.
      */
+    @Deprecated
     public void onUpdateCursor(Rect newCursor) {
+        // Intentionally empty
+    }
+
+    /**
+     * Called when the application has reported a new location of its text insertion point and
+     * characters in the composition string.  This is only called if explicitly requested by the
+     * input method. The default implementation does nothing.
+     * @param cursorAnchorInfo The positional information of the text insertion point and the
+     * composition string.
+     */
+    public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
         // Intentionally empty
     }
 
@@ -2319,6 +2350,21 @@ public class InputMethodService extends AbstractInputMethodService {
                 + newSubtype.getLocale() + "," + newSubtype.getExtraValue();
             Log.v(TAG, "--- " + output);
         }
+    }
+
+    /**
+     * @return The recommended height of the input method window.
+     * An IME author can get the last input method's height as the recommended height
+     * by calling this in
+     * {@link android.inputmethodservice.InputMethodService#onStartInputView(EditorInfo, boolean)}.
+     * If you don't need to use a predefined fixed height, you can avoid the window-resizing of IME
+     * switching by using this value as a visible inset height. It's efficient for the smooth
+     * transition between different IMEs. However, note that this may return 0 (or possibly
+     * unexpectedly low height). You should thus avoid relying on the return value of this method
+     * all the time. Please make sure to use a reasonable height for the IME.
+     */
+    public int getInputMethodWindowRecommendedHeight() {
+        return mImm.getInputMethodWindowVisibleHeight();
     }
 
     /**

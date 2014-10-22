@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    NOTE: this is the newer (L) version of the system font configuration,
+    supporting richer weight selection. Some apps will expect the older
+    version, so please keep system_fonts.xml and fallback_fonts.xml in sync
+    with any changes, even though framework will only read this file.
+
+    All fonts withohut names are added to the default list. Fonts are chosen
+    based on a match: full BCP-47 language tag including script, then just
+    language, and finally order (the first font containing the glyph).
+
+    Order of appearance is also the tiebreaker for weight matching. This is
+    the reason why the 900 weights of Roboto precede the 700 weights - we
+    prefer the former when an 800 weight is requested. Since bold spans
+    effectively add 300 to the weight, this ensures that 900 is the bold
+    paired with the 500 weight, ensuring adequate contrast.
+-->
+<familyset version="22">
+    <!-- first font is default -->
+    <family name="sans-serif">
+        <font weight="100" style="normal">Roboto-Thin.ttf</font>
+        <font weight="100" style="italic">Roboto-ThinItalic.ttf</font>
+        <font weight="300" style="normal">Roboto-Light.ttf</font>
+        <font weight="300" style="italic">Roboto-LightItalic.ttf</font>
+        <font weight="400" style="normal">Roboto-Regular.ttf</font>
+        <font weight="400" style="italic">Roboto-Italic.ttf</font>
+        <font weight="500" style="normal">Roboto-Medium.ttf</font>
+        <font weight="500" style="italic">Roboto-MediumItalic.ttf</font>
+        <font weight="900" style="normal">Roboto-Black.ttf</font>
+        <font weight="900" style="italic">Roboto-BlackItalic.ttf</font>
+        <font weight="700" style="normal">Roboto-Bold.ttf</font>
+        <font weight="700" style="italic">Roboto-BoldItalic.ttf</font>
+    </family>
+
+    <!-- Note that aliases must come after the fonts they reference. -->
+    <alias name="sans-serif-thin" to="sans-serif" weight="100" />
+    <alias name="sans-serif-light" to="sans-serif" weight="300" />
+    <alias name="sans-serif-medium" to="sans-serif" weight="500" />
+    <alias name="sans-serif-black" to="sans-serif" weight="900" />
+    <alias name="arial" to="sans-serif" />
+    <alias name="helvetica" to="sans-serif" />
+    <alias name="tahoma" to="sans-serif" />
+    <alias name="verdana" to="sans-serif" />
+
+    <family name="sans-serif-condensed">
+        <font weight="300" style="normal">RobotoCondensed-Light.ttf</font>
+        <font weight="300" style="italic">RobotoCondensed-LightItalic.ttf</font>
+        <font weight="400" style="normal">RobotoCondensed-Regular.ttf</font>
+        <font weight="400" style="italic">RobotoCondensed-Italic.ttf</font>
+        <font weight="700" style="normal">RobotoCondensed-Bold.ttf</font>
+        <font weight="700" style="italic">RobotoCondensed-BoldItalic.ttf</font>
+    </family>
+    <alias name="sans-serif-condensed-light" to="sans-serif-condensed" weight="300" />
+
+    <family name="serif">
+        <font weight="400" style="normal">NotoSerif-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSerif-Bold.ttf</font>
+        <font weight="400" style="italic">NotoSerif-Italic.ttf</font>
+        <font weight="700" style="italic">NotoSerif-BoldItalic.ttf</font>
+    </family>
+    <alias name="times" to="serif" />
+    <alias name="times new roman" to="serif" />
+    <alias name="palatino" to="serif" />
+    <alias name="georgia" to="serif" />
+    <alias name="baskerville" to="serif" />
+    <alias name="goudy" to="serif" />
+    <alias name="fantasy" to="serif" />
+    <alias name="ITC Stone Serif" to="serif" />
+
+    <family name="monospace">
+        <font weight="400" style="normal">DroidSansMono.ttf</font>
+    </family>
+    <alias name="sans-serif-monospace" to="monospace" />
+    <alias name="monaco" to="monospace" />
+
+    <family name="serif-monospace">
+        <font weight="400" style="normal">CutiveMono.ttf</font>
+    </family>
+    <alias name="courier" to="serif-monospace" />
+    <alias name="courier new" to="serif-monospace" />
+
+    <family name="casual">
+        <font weight="400" style="normal">ComingSoon.ttf</font>
+    </family>
+
+    <family name="cursive">
+        <font weight="400" style="normal">DancingScript-Regular.ttf</font>
+        <font weight="700" style="normal">DancingScript-Bold.ttf</font>
+    </family>
+
+    <family name="sans-serif-smallcaps">
+        <font weight="400" style="normal">CarroisGothicSC-Regular.ttf</font>
+    </family>
+
+    <!-- fallback fonts -->
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoNaskh-Regular.ttf</font>
+        <font weight="700" style="normal">NotoNaskh-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoNaskhUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoNaskhUI-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansEthiopic-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansEthiopic-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansHebrew-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansHebrew-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansThai-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansThai-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansThaiUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansThaiUI-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansArmenian-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansArmenian-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansGeorgian-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansGeorgian-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansDevanagari-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansDevanagari-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansDevanagariUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansDevanagariUI-Bold.ttf</font>
+    </family>
+    <!-- Gujarati should come after Devanagari -->
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansGujarati-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansGujarati-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansGujaratiUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansGujaratiUI-Bold.ttf</font>
+    </family>
+    <!-- Gurmukhi should come after Devanagari -->
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansGurmukhi-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansGurmukhi-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansGurmukhiUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansGurmukhiUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansTamil-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansTamil-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansTamilUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansTamilUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansMalayalam-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansMalayalam-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansMalayalamUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansMalayalamUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansBengali-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansBengali-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansBengaliUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansBengaliUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansTelugu-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansTelugu-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansTeluguUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansTeluguUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansKannada-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansKannada-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansKannadaUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansKannadaUI-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansSinhala-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansSinhala-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansKhmer-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansKhmer-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansKhmerUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansKhmerUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansLao-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansLao-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansLaoUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansLaoUI-Bold.ttf</font>
+    </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansMyanmar-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansMyanmar-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansMyanmarUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansMyanmarUI-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansCherokee-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansCanadianAboriginal-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansYi-Regular.ttf</font>
+    </family>
+    <family lang="zh-Hans">
+        <font weight="400" style="normal">NotoSansHans-Regular.otf</font>
+    </family>
+    <family lang="zh-Hant">
+        <font weight="400" style="normal">NotoSansHant-Regular.otf</font>
+    </family>
+    <family lang="ja">
+        <font weight="400" style="normal">NotoSansJP-Regular.otf</font>
+    </family>
+    <family lang="ko">
+        <font weight="400" style="normal">NotoSansKR-Regular.otf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NanumGothic.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoColorEmoji.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">DroidSansFallback.ttf</font>
+    </family>
+    <family lang="ja">
+        <font weight="400" style="normal">MTLmr3m.ttf</font>
+    </family>
+</familyset>

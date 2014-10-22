@@ -1,0 +1,372 @@
+page.title=The Google Play Opportunity
+meta.tags="visibility, growth, distributing"
+page.tags="play, apps, distributing, publishing"
+page.metaDescription=Billons of downloads a month and growing. Get your apps in front of users at Google's scale.
+page.image=/distribute/images/about-play.jpg
+
+@jd:body
+
+    <div id="qv-wrapper">           
+  <div id="qv">
+  <h2>About Google Play</h2>
+    <ol style="list-style-type:none;">
+      <li><a href="#reach">Worldwide Reach, Rapid Growth</a></li>
+      <li><a href="#ratings-reviews">User Ratings and Reviews</a></li>
+      <li><a href="#category-browsing">Category Browsing</a></li>
+      <li><a href="#search">Search</a></li>
+      <li><a href="#top-charts-and-lists">Top Charts and Lists</a></li>
+      <li><a href="#featured-staff-picks">Featured, Staff Picks, Collections, and Badges</a></li>
+      <li><a href="#product-detail-pages">Store Listing Pages</a></li>
+      <li><a href="#related-resources">Related Resources</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Google Play is the premier store for distributing Android apps. When you
+  publish on Google Play, you put your apps in front of Android's huge base of
+  active customers, in more than 190 countries and territories across the
+  world.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-about-0.jpg" alt="Google Play on an Android Tablet"
+  style="width:480px;position:relative" />
+</div>
+
+<p>
+  Google Play is a central part of the Android experience. New users
+  personalize their devices with apps, games, and other Google Play content.
+  Existing users return regularly to see what's trending and new. Downloading
+  new apps is extremely convenient and fast&mdash; Google Play pushes apps to
+  the user's devices instantly, over the air.
+</p>
+
+<p>
+  Google Play is also a top destination for web users. Anyone with a browser
+  can explore Google Play on the web. Android users can even buy and install
+  the apps they want and Google Play pushes them automatically to their devices
+  with no cables required.
+</p>
+
+<p>
+  The accessibility and convenience of the Google Play web site give you new
+  ways to drive traffic to your products from many sources, such as online ads,
+  web search and cross-linking. Google Play is designed to connect users with
+  great apps and games. It provides key channels to get your app noticed and
+  gain traction in the marketplace.
+</p>
+
+<div class="headerLine">
+  <h2 id="ratings-reviews">
+    User Ratings and Reviews
+  </h2>
+
+
+</div>
+
+<p>
+  Prospective users look at ratings and reviews as key benchmarks of app
+  quality. By rating apps from one to five stars and posting reviews, Android
+  users show their appreciation for the apps they have downloaded.
+</p>
+
+<p>
+  <strong>Your app's rating is one of the most important factors influencing
+  its ranking</strong> in the Google Play lists and search results. It's also
+  one of the key metrics that the editorial staff looks for when curating apps
+  and games for promotion in the store.
+</p>
+
+<div class="img" style="padding: 1em auto;width:96%;">
+  <img src="{@docRoot}images/gp-rating-web.png" style="border:1px solid #ddd;">
+</div>
+
+<div class="headerLine">
+  <h2 id="category-browsing">
+    Category Browsing
+  </h2>
+
+
+</div>
+
+<p>
+  When you publish an app in Google Play, you pick the category where you want
+  users to find your app. More than 30 categories are available. Inside each
+  category, apps are ranked based on a combination of ratings, reviews,
+  downloads, country, and other factors.
+</p>
+
+<div class="headerLine">
+  <h2 id="search">
+    Search
+  </h2>
+
+
+</div>
+
+<p>
+  Search on Google Play lets users pinpoint an app or game quickly. Search uses
+  powerful heuristics to suggest terms as the user types, and it offers direct
+  links to apps as suggestions. In results, users find the most relevant, most
+  popular apps at the top.
+</p>
+
+<div class="headerLine">
+  <h2 id="top-charts-and-lists">
+    Top Charts and Lists
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-top.jpg">
+</div>
+
+<p>
+  Top charts keep users in touch with what’s popular and trending with Android
+  users, right from the Apps and Games home pages. The charts stay fresh,
+  updating several times each day based on recent download activity. As an
+  app's ratings and download activity grow, it can move up in the charts.
+</p>
+
+<p>
+  To make the charts as relevant as possible for users across the world, they
+  are also country-specific in Google Play's most popular countries. As your
+  apps get traction and build momentum in downloads and ratings, they’ll climb
+  one or more of the top charts and gain even more exposure.
+</p>
+
+<table style="width:50%;">
+  <tr>
+    <td>
+      Top Free
+    </td>
+    <td>
+      Free apps and free games lists
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Top Paid
+    </td>
+    <td>
+      Paid apps and paid games lists
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Top Grossing
+    </td>
+    <td>
+      Gross proceeds, free or paid
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Top New Free
+    </td>
+    <td>
+      Less than 30 days old
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Top New Paid
+    </td>
+    <td>
+      Less than 30 days old
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Trending
+    </td>
+    <td>
+      New arrivals growing quickly in installs
+    </td>
+  </tr>
+</table>
+
+<div class="headerLine">
+  <h2 id="featured-staff-picks">
+    Featured, Staff Picks, Collections, and Badges
+  </h2>
+
+
+</div>
+
+<p>
+  The Google Play editorial team is dedicated to bringing the best apps to the
+  attention of users and setting the tone for app quality throughout the store.
+  It constantly reviews apps from across Google Play to find not only the
+  best-known apps and games, but also the "diamonds in the rough" that they
+  want more people to see. The team promotes great apps in the
+  <em>Featured</em>, <em>Staff Picks</em>, and other collections.
+</p>
+
+<p>
+  You can't nominate your app for featuring, but the team is always monitoring
+  Google Play for great apps. If you build an app that users love and that
+  looks great on Android devices, the editorial team will notice.
+</p>
+
+<h3 id="featured-staff-picks2">
+  Featured and Staff Picks
+</h3>
+
+<p>
+  Each week the Google Play editorial staff selects a new set of apps to
+  promote in its popular <em>Featured</em> and <em>Staff Picks</em>
+  collections.
+</p>
+
+<p>
+  The <em>Featured</em> collections highlight the latest and greatest app and
+  game titles available for Android. The list also includes the best and most
+  popular apps in the top categories are also featured. <em>Staff Picks</em>
+  collects all recently featured apps and games on Google Play. To focus on
+  tablet users, A special <em>Staff Picks</em> collection highlights the best
+  apps for Android tablets.
+</p>
+
+<table style="text-align:center;margin:1.5em 0;">
+  <tr>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks1.jpg">
+      <p>
+        Featured
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks2.jpg">
+      <p>
+        Collection
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks3.jpg">
+      <p>
+        Editors' Choice
+      </p>
+    </td>
+  </tr>
+</table>
+
+<h3 id="collections">
+  App collections
+</h3>
+
+<p>
+  From time to time the editorial staff puts together a collection of apps and
+  games based on a theme or seasonal event. Users frequently use these lists to
+  select apps, attracted by the timeliness of the collection.
+</p>
+
+<p>
+  The editorial staff chooses apps for collection promotions &mdash;
+  high-quality apps that show the best of Android on phones and tablets. The
+  staff also looks for apps that can make an interesting or unique contribution
+  to the collection as a whole.
+</p>
+
+<h3 id="editors-choice">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src=
+  "{@docRoot}images/editorschoice_ann.png"> Editors' Choice
+</h3>
+
+<p>
+  <em>Editors’ Choice</em> is a curated collection of apps that highlights some
+  of the very best apps available on Android. Editors choose these apps for
+  quality and great user interface, long-term popularity and innovative use of
+  Android features.
+</p>
+
+<p>
+  Apps chosen for <em>Editors’ Choice</em> also receive a badge that is
+  displayed wherever the app name is seen in Google Play.
+</p>
+
+<h3 id="top-developer">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src=
+  "{@docRoot}images/topdev_ann.png"> Top Developer
+</h3>
+
+<p>
+  Top Developer is a badge recognizing established, respected developers for
+  their commitment to launching high-quality and innovative apps on Android.
+  The Google Play editorial staff awards a Top Developer badge from
+  time-to-time based on the cumulative work of the developer.
+</p>
+
+<p>
+  The Top Developer badge appears next to the developer name wherever it is
+  displayed in Google Play. The badge means long-term recognition of all of the
+  developer’s apps. It signifies an additional level of trust and confidence
+  users have in a developer’s products.
+</p>
+
+<div class="headerLine">
+  <h2 id="product-detail-pages">
+    Store Listing Pages
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-listing.jpg">
+</div>
+
+<p>
+  Your app’s Google Play storefront is its <em>store listing page</em>: a rich
+  and colorful page that lets you promote your app, highlight its ratings and
+  reviews, and show what your app can do.
+</p>
+
+<p>
+  Your store listing is where your users come to find out everything about your
+  app. When they see your app listed in search results, top charts, category
+  listings, and collections, one tap takes them directly to your store listing.
+</p>
+
+<p>
+  Manage your product details page through the <a href=
+  "https://play.google.com/apps/publish/">Google Play Developer Console</a>
+  from any web browser. Sign in to upload or update your brand assets, and
+  enter your product details in the languages of your markets.
+</p>
+
+<p>
+  When you publish, Google Play adds your app’s ratings, reviews, links to your
+  other products, and more. It also makes sure your store listing page looks
+  great on phones, tablets, and in a web browser.
+</p>
+
+<p>
+  You can link web users directly to your product details page from outside
+  Google Play, such as from your web site, an ad campaign, reviews, social
+  media posts, and more. See <a href=
+  "{@docRoot}distribute/tools/promote/linking.html">Linking to Your
+  Products</a> to find out how.
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
+    </div>

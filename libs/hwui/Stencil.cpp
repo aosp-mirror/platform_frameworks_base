@@ -35,7 +35,7 @@ namespace uirenderer {
 Stencil::Stencil(): mState(kDisabled) {
 }
 
-uint32_t Stencil::getStencilSize() {
+uint8_t Stencil::getStencilSize() {
     return STENCIL_BUFFER_SIZE;
 }
 

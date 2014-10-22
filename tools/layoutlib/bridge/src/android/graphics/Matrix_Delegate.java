@@ -203,6 +203,16 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static boolean native_isAffine(long native_object) {
+        Matrix_Delegate d = sManager.getDelegate(native_object);
+        if (d == null) {
+            return true;
+        }
+
+        return (d.computeTypeMask() & kPerspective_Mask) == 0;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static boolean native_rectStaysRect(long native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -355,227 +365,162 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_setConcat(long native_object, long a, long b) {
+    /*package*/ static void native_setConcat(long native_object, long a, long b) {
         if (a == native_object) {
-            return native_preConcat(native_object, b);
+            native_preConcat(native_object, b);
+            return;
         } else if (b == native_object) {
-            return native_postConcat(native_object, a);
+            native_postConcat(native_object, a);
+            return;
         }
 
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
-        }
-
         Matrix_Delegate a_mtx = sManager.getDelegate(a);
-        if (a_mtx == null) {
-            return false;
-        }
-
         Matrix_Delegate b_mtx = sManager.getDelegate(b);
-        if (b_mtx == null) {
-            return false;
+        if (d != null && a_mtx != null && b_mtx != null) {
+            multiply(d.mValues, a_mtx.mValues, b_mtx.mValues);
         }
-
-        multiply(d.mValues, a_mtx.mValues, b_mtx.mValues);
-
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preTranslate(long native_object, float dx, float dy) {
+    /*package*/ static void native_preTranslate(long native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.preTransform(getTranslate(dx, dy));
         }
-
-        d.preTransform(getTranslate(dx, dy));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preScale(long native_object, float sx, float sy,
+    /*package*/ static void native_preScale(long native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.preTransform(getScale(sx, sy, px, py));
         }
-
-        d.preTransform(getScale(sx, sy, px, py));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preScale(long native_object, float sx, float sy) {
+    /*package*/ static void native_preScale(long native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.preTransform(getScale(sx, sy));
         }
-
-        d.preTransform(getScale(sx, sy));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preRotate(long native_object, float degrees,
+    /*package*/ static void native_preRotate(long native_object, float degrees,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.preTransform(getRotate(degrees, px, py));
         }
-
-        d.preTransform(getRotate(degrees, px, py));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preRotate(long native_object, float degrees) {
+    /*package*/ static void native_preRotate(long native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+
+            double rad = Math.toRadians(degrees);
+            float sin = (float) Math.sin(rad);
+            float cos = (float) Math.cos(rad);
+
+            d.preTransform(getRotate(sin, cos));
         }
-
-        double rad = Math.toRadians(degrees);
-        float sin = (float)Math.sin(rad);
-        float cos = (float)Math.cos(rad);
-
-        d.preTransform(getRotate(sin, cos));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preSkew(long native_object, float kx, float ky,
+    /*package*/ static void native_preSkew(long native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.preTransform(getSkew(kx, ky, px, py));
         }
-
-        d.preTransform(getSkew(kx, ky, px, py));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preSkew(long native_object, float kx, float ky) {
+    /*package*/ static void native_preSkew(long native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.preTransform(getSkew(kx, ky));
         }
-
-        d.preTransform(getSkew(kx, ky));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preConcat(long native_object, long other_matrix) {
+    /*package*/ static void native_preConcat(long native_object, long other_matrix) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
-        }
-
         Matrix_Delegate other = sManager.getDelegate(other_matrix);
-        if (other == null) {
-            return false;
+        if (d != null && other != null) {
+            d.preTransform(other.mValues);
         }
-
-        d.preTransform(other.mValues);
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postTranslate(long native_object, float dx, float dy) {
+    /*package*/ static void native_postTranslate(long native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getTranslate(dx, dy));
         }
-
-        d.postTransform(getTranslate(dx, dy));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postScale(long native_object, float sx, float sy,
+    /*package*/ static void native_postScale(long native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getScale(sx, sy, px, py));
         }
-
-        d.postTransform(getScale(sx, sy, px, py));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postScale(long native_object, float sx, float sy) {
+    /*package*/ static void native_postScale(long native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getScale(sx, sy));
         }
-
-        d.postTransform(getScale(sx, sy));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postRotate(long native_object, float degrees,
+    /*package*/ static void native_postRotate(long native_object, float degrees,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getRotate(degrees, px, py));
         }
-
-        d.postTransform(getRotate(degrees, px, py));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postRotate(long native_object, float degrees) {
+    /*package*/ static void native_postRotate(long native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getRotate(degrees));
         }
-
-        d.postTransform(getRotate(degrees));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postSkew(long native_object, float kx, float ky,
+    /*package*/ static void native_postSkew(long native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getSkew(kx, ky, px, py));
         }
-
-        d.postTransform(getSkew(kx, ky, px, py));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postSkew(long native_object, float kx, float ky) {
+    /*package*/ static void native_postSkew(long native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
+        if (d != null) {
+            d.postTransform(getSkew(kx, ky));
         }
-
-        d.postTransform(getSkew(kx, ky));
-        return true;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postConcat(long native_object, long other_matrix) {
+    /*package*/ static void native_postConcat(long native_object, long other_matrix) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
-        if (d == null) {
-            return false;
-        }
-
         Matrix_Delegate other = sManager.getDelegate(other_matrix);
-        if (other == null) {
-            return false;
+        if (d != null && other != null) {
+            d.postTransform(other.mValues);
         }
-
-        d.postTransform(other.mValues);
-        return true;
     }
 
     @LayoutlibDelegate

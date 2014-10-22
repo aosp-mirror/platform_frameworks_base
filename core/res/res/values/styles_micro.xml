@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <style name="Animation.Micro"/>
+
+    <style name="Animation.Micro.Activity" parent="Animation.Holo.Activity">
+        <item name="activityOpenEnterAnimation">@anim/slide_in_micro</item>
+        <item name="activityOpenExitAnimation">@null</item>
+        <item name="activityCloseEnterAnimation">@null</item>
+        <item name="activityCloseExitAnimation">@anim/slide_out_micro</item>
+        <item name="taskOpenEnterAnimation">@anim/slide_in_micro</item>
+        <item name="taskOpenExitAnimation">@null</item>
+        <item name="taskCloseEnterAnimation">@null</item>
+        <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
+    </style>
+
+    <style name="AlertDialog.Micro" parent="AlertDialog.Holo.Light">
+        <item name="fullDark">@null</item>
+        <item name="topDark">@null</item>
+        <item name="centerDark">@null</item>
+        <item name="bottomDark">@null</item>
+        <item name="fullBright">@null</item>
+        <item name="topBright">@null</item>
+        <item name="centerBright">@null</item>
+        <item name="bottomBright">@null</item>
+        <item name="bottomMedium">@null</item>
+        <item name="centerMedium">@null</item>
+        <item name="layout">@layout/alert_dialog_micro</item>
+    </style>
+
+    <style name="DialogWindowTitle.Micro">
+        <item name="maxLines">1</item>
+        <item name="scrollHorizontally">true</item>
+        <item name="textAppearance">@style/TextAppearance.Micro.DialogWindowTitle</item>
+    </style>
+
+    <style name="TextAppearance.Micro" parent="TextAppearance.Holo">
+        <item name="textSize">20sp</item>
+        <item name="fontFamily">sans-serif-condensed-light</item>
+        <item name="textColor">@color/micro_text_light</item>
+    </style>
+
+    <style name="TextAppearance.Micro.DialogWindowTitle" parent="TextAppearance.Holo.DialogWindowTitle">
+        <item name="textSize">20sp</item>
+        <item name="fontFamily">sans-serif-condensed-light</item>
+        <item name="textColor">@color/micro_text_light</item>
+    </style>
+
+    <style name="Widget.Micro" parent="Widget.Holo" />
+
+    <style name="Widget.Micro.TextView">
+        <item name="fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="Widget.Micro.NumberPicker">
+        <item name="internalLayout">@layout/number_picker_with_selector_wheel_micro</item>
+        <item name="solidColor">@color/transparent</item>
+        <item name="selectionDivider">@drawable/numberpicker_selection_divider</item>
+        <item name="selectionDividerHeight">0dip</item>
+        <item name="selectionDividersDistance">104dip</item>
+        <item name="internalMinWidth">64dip</item>
+        <item name="internalMaxHeight">180dip</item>
+        <item name="virtualButtonPressedDrawable">?attr/selectableItemBackground</item>
+        <item name="descendantFocusability">blocksDescendants</item>
+    </style>
+
+</resources>

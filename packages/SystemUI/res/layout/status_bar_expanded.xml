@@ -22,20 +22,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_panel"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:background="@drawable/notification_panel_bg"
-    android:paddingTop="@dimen/notification_panel_padding_top"
-    android:layout_marginStart="@dimen/notification_panel_margin_left"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
     >
-
-    <View
-        android:id="@+id/handle"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/close_handle_height"
-        android:background="@drawable/status_bar_close"
-        android:visibility="invisible"
-        />
 
     <include
         layout="@layout/carrier_label"
@@ -45,53 +35,96 @@
         android:layout_gravity="bottom"
         />
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <include
+        layout="@layout/keyguard_status_view"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/close_handle_underlap"
-        android:orientation="vertical"
-        android:animateLayoutChanges="false"
-        >
+        android:visibility="gone" />
 
-        <include layout="@layout/status_bar_expanded_header"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_panel_header_height"
-            />
+    <TextView
+        android:id="@+id/emergency_calls_only"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="4dp"
+        android:gravity="center"
+        android:visibility="gone"
+        />
 
-        <TextView
-            android:id="@+id/emergency_calls_only"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:padding="4dp"
-            android:gravity="center"
-            android:visibility="gone"
-            />
+    <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="@integer/notification_panel_layout_gravity"
+        android:id="@+id/notification_container_parent"
+        android:clipToPadding="false"
+        android:clipChildren="false">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <ViewStub android:id="@+id/flip_settings_stub"
-                android:layout="@layout/flip_settings"
+        <com.android.systemui.statusbar.phone.ObservableScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="@dimen/notification_panel_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="@integer/notification_panel_layout_gravity"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:fillViewport="true">
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-    
-            <ScrollView
-                android:id="@+id/scroll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fadingEdge="none"
-                android:overScrollMode="ifContentScrolls"
-                >
-                <com.android.systemui.statusbar.policy.NotificationRowLayout
-                    android:id="@+id/latestItems"
+                android:orientation="vertical">
+                <include
+                    layout="@layout/qs_panel"
+                    android:layout_marginTop="@dimen/status_bar_header_height_expanded"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    systemui:rowHeight="@dimen/notification_row_min_height"
-                    />
-            </ScrollView>
-        </FrameLayout>
-    </LinearLayout>
+                    android:layout_marginLeft="@dimen/notification_side_padding"
+                    android:layout_marginRight="@dimen/notification_side_padding"/>
+
+                <!-- A view to reserve space for the collapsed stack -->
+                <!-- Layout height: notification_min_height + bottom_stack_peek_amount -->
+                <View
+                    android:id="@+id/reserve_notification_space"
+                    android:layout_height="@dimen/min_stack_height"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="@dimen/notifications_top_padding" />
+
+                <View
+                    android:layout_height="@dimen/notification_side_padding"
+                    android:layout_width="match_parent" />
+            </LinearLayout>
+        </com.android.systemui.statusbar.phone.ObservableScrollView>
+
+        <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
+            android:id="@+id/notification_stack_scroller"
+            android:layout_width="@dimen/notification_panel_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="@integer/notification_panel_layout_gravity"
+            android:layout_marginBottom="@dimen/close_handle_underlap" />
+
+        <ViewStub
+            android:id="@+id/keyguard_user_switcher"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
+            android:layout_gravity="end"
+            android:layout="@layout/keyguard_user_switcher" />
+
+        <include
+            layout="@layout/keyguard_status_bar"
+            android:visibility="invisible" />
+
+    </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
+
+    <include
+            layout="@layout/keyguard_bottom_area"
+            android:visibility="gone" />
+
+    <include layout="@layout/status_bar_expanded_header" />
+
+    <com.android.systemui.statusbar.AlphaOptimizedView
+        android:id="@+id/qs_navbar_scrim"
+        android:layout_height="96dp"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        android:background="@drawable/qs_navbar_scrim" />
+
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->

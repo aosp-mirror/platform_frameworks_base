@@ -16,24 +16,31 @@
 
 package android.graphics;
 
+/**
+ * A color filter that transforms colors through a 4x5 color matrix. This filter
+ * can be used to change the saturation of pixels, convert from YUV to RGB, etc.
+ *
+ * @see ColorMatrix
+ */
 public class ColorMatrixColorFilter extends ColorFilter {
+    private final ColorMatrix mMatrix = new ColorMatrix();
+
     /**
-     * Create a colorfilter that transforms colors through a 4x5 color matrix.
+     * Create a color filter that transforms colors through a 4x5 color matrix.
      *
      * @param matrix 4x5 matrix used to transform colors. It is copied into
      *               the filter, so changes made to the matrix after the filter
      *               is constructed will not be reflected in the filter.
      */
     public ColorMatrixColorFilter(ColorMatrix matrix) {
-        final float[] colorMatrix = matrix.getArray();
-        native_instance = nativeColorMatrixFilter(colorMatrix);
-        nativeColorFilter = nColorMatrixFilter(native_instance, colorMatrix);
+        mMatrix.set(matrix);
+        update();
     }
 
     /**
-    * Create a colorfilter that transforms colors through a 4x5 color matrix.
+     * Create a color filter that transforms colors through a 4x5 color matrix.
      *
-     * @param array array of floats used to transform colors, treated as a 4x5
+     * @param array Array of floats used to transform colors, treated as a 4x5
      *              matrix. The first 20 entries of the array are copied into
      *              the filter. See ColorMatrix.
      */
@@ -41,10 +48,81 @@ public class ColorMatrixColorFilter extends ColorFilter {
         if (array.length < 20) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        native_instance = nativeColorMatrixFilter(array);
-        nativeColorFilter = nColorMatrixFilter(native_instance, array);
+        mMatrix.set(array);
+        update();
+    }
+
+    /**
+     * Returns the {@link ColorMatrix} used by this filter. The returned
+     * value is never null. Modifying the returned matrix does not have
+     * any effect until you call {@link #setColorMatrix(ColorMatrix)}.
+     *
+     * @see #setColorMatrix(ColorMatrix)
+     *
+     * @hide
+     */
+    public ColorMatrix getColorMatrix() {
+        return mMatrix;
+    }
+
+    /**
+     * Specifies the color matrix used by this filter. If the specified
+     * color matrix is null, this filter's color matrix will be reset to
+     * the identity matrix.
+     *
+     * @param matrix A {@link ColorMatrix} or null
+     *
+     * @see #getColorMatrix()
+     * @see android.graphics.ColorMatrix#reset()
+     * @see #setColorMatrix(float[])
+     *
+     * @hide
+     */
+    public void setColorMatrix(ColorMatrix matrix) {
+        if (matrix == null) {
+            mMatrix.reset();
+        } else if (matrix != mMatrix) {
+            mMatrix.set(matrix);
+        }
+        update();
+    }
+
+    /**
+     * Specifies the color matrix used by this filter. If the specified
+     * color matrix is null, this filter's color matrix will be reset to
+     * the identity matrix.
+     *
+     * @param array Array of floats used to transform colors, treated as a 4x5
+     *              matrix. The first 20 entries of the array are copied into
+     *              the filter. See {@link ColorMatrix}.
+     *
+     * @see #getColorMatrix()
+     * @see android.graphics.ColorMatrix#reset()
+     * @see #setColorMatrix(ColorMatrix)
+     *
+     * @throws ArrayIndexOutOfBoundsException if the specified array's
+     *         length is < 20
+     *
+     * @hide
+     */
+    public void setColorMatrix(float[] array) {
+        if (array == null) {
+            mMatrix.reset();
+        } else {
+            if (array.length < 20) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+
+            mMatrix.set(array);
+        }
+        update();
+    }
+
+    private void update() {
+        final float[] colorMatrix = mMatrix.getArray();
+        destroyFilter(native_instance);
+        native_instance = nativeColorMatrixFilter(colorMatrix);
     }
 
     private static native long nativeColorMatrixFilter(float[] array);
-    private static native long nColorMatrixFilter(long nativeFilter, float[] array);
 }

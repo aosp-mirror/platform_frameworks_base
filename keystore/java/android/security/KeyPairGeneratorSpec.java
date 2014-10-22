@@ -35,7 +35,7 @@ import javax.security.auth.x500.X500Principal;
 /**
  * This provides the required parameters needed for initializing the
  * {@code KeyPairGenerator} that works with
- * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
+ * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
  * facility</a>. The Android KeyStore facility is accessed through a
  * {@link java.security.KeyPairGenerator} API using the {@code AndroidKeyStore}
  * provider. The {@code context} passed in may be used to pop up some UI to ask
@@ -306,7 +306,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Builder class for {@link KeyPairGeneratorSpec} objects.
      * <p>
      * This will build a parameter spec for use with the <a href="{@docRoot}
-     * guide/topics/security/keystore.html">Android KeyStore facility</a>.
+     * training/articles/keystore.html">Android KeyStore facility</a>.
      * <p>
      * The required fields must be filled in with the builder.
      * <p>

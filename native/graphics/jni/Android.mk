@@ -23,7 +23,6 @@ LOCAL_SHARED_LIBRARIES := \
     libskia
 
 LOCAL_C_INCLUDES += \
-	external/skia/include/core \
 	frameworks/base/native/include \
 	frameworks/base/core/jni/android/graphics
 

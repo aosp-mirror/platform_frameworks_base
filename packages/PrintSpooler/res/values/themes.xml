@@ -16,21 +16,16 @@
 
 <resources>
 
-    <style name="PrintJobConfigActivityTheme" parent="@android:style/Theme.Holo.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowSoftInputMode">stateAlwaysHidden|adjustResize</item>
+    <style name="PrintActivity" parent="@android:style/Theme.Material">
+        <item name="android:colorPrimary">@*android:color/material_blue_grey_900</item>
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_950</item>
+        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:colorBackgroundCacheHint">@android:color/transparent</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
-
-    <style name="SelectPrinterActivityTheme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarStyle">@style/SelectPrinterActivityActionBarStyle</item>
-    </style>
-
-    <style name="SelectPrinterActivityActionBarStyle" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:displayOptions">showTitle</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
 </resources>

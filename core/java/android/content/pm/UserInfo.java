@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 
 /**
@@ -26,8 +27,8 @@ import android.os.UserHandle;
  */
 public class UserInfo implements Parcelable {
 
-    /** 6 bits for user type */
-    public static final int FLAG_MASK_USER_TYPE = 0x0000003F;
+    /** 8 bits for user type */
+    public static final int FLAG_MASK_USER_TYPE = 0x000000FF;
 
     /**
      * *************************** NOTE ***************************
@@ -63,6 +64,20 @@ public class UserInfo implements Parcelable {
      */
     public static final int FLAG_INITIALIZED = 0x00000010;
 
+    /**
+     * Indicates that this user is a profile of another user, for example holding a users
+     * corporate data.
+     */
+    public static final int FLAG_MANAGED_PROFILE = 0x00000020;
+
+    /**
+     * Indicates that this user is disabled.
+     */
+    public static final int FLAG_DISABLED = 0x00000040;
+
+
+    public static final int NO_PROFILE_GROUP_ID = -1;
+
     public int id;
     public int serialNumber;
     public String name;
@@ -70,9 +85,11 @@ public class UserInfo implements Parcelable {
     public int flags;
     public long creationTime;
     public long lastLoggedInTime;
+    public int profileGroupId;
 
     /** User is only partially created. */
     public boolean partial;
+    public boolean guestToRemove;
 
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
@@ -83,6 +100,7 @@ public class UserInfo implements Parcelable {
         this.name = name;
         this.flags = flags;
         this.iconPath = iconPath;
+        this.profileGroupId = NO_PROFILE_GROUP_ID;
     }
 
     public boolean isPrimary() {
@@ -101,6 +119,22 @@ public class UserInfo implements Parcelable {
         return (flags & FLAG_RESTRICTED) == FLAG_RESTRICTED;
     }
 
+    public boolean isManagedProfile() {
+        return (flags & FLAG_MANAGED_PROFILE) == FLAG_MANAGED_PROFILE;
+    }
+
+    public boolean isEnabled() {
+        return (flags & FLAG_DISABLED) != FLAG_DISABLED;
+    }
+
+    /**
+     * @return true if this user can be switched to.
+     **/
+    public boolean supportsSwitchTo() {
+        // TODO remove fw.show_hidden_users when we have finished developing managed profiles.
+        return !isManagedProfile() || SystemProperties.getBoolean("fw.show_hidden_users", false);
+    }
+
     public UserInfo() {
     }
 
@@ -113,6 +147,8 @@ public class UserInfo implements Parcelable {
         creationTime = orig.creationTime;
         lastLoggedInTime = orig.lastLoggedInTime;
         partial = orig.partial;
+        profileGroupId = orig.profileGroupId;
+        guestToRemove = orig.guestToRemove;
     }
 
     public UserHandle getUserHandle() {
@@ -137,6 +173,8 @@ public class UserInfo implements Parcelable {
         dest.writeLong(creationTime);
         dest.writeLong(lastLoggedInTime);
         dest.writeInt(partial ? 1 : 0);
+        dest.writeInt(profileGroupId);
+        dest.writeInt(guestToRemove ? 1 : 0);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -158,5 +196,7 @@ public class UserInfo implements Parcelable {
         creationTime = source.readLong();
         lastLoggedInTime = source.readLong();
         partial = source.readInt() != 0;
+        profileGroupId = source.readInt();
+        guestToRemove = source.readInt() != 0;
     }
 }

@@ -438,17 +438,6 @@ public class SizeAdaptiveLayoutTest extends AndroidTestCase {
         assertEquals("ModestyPanel color should match the SizeAdaptiveLayout",
                      panelColor.getColor(), Color.RED);
     }
-
-    @SmallTest
-    public void testModestyPanelHasDefault() {
-        inflate(R.layout.size_adaptive);
-        View panel = mSizeAdaptiveLayout.getModestyPanel();
-        assertNull("SizeAdaptiveLayout should have no background for this test",
-                     mSizeAdaptiveLayout.getBackground());
-        assertTrue("ModestyPanel should have a ColorDrawable background",
-                   panel.getBackground() instanceof ColorDrawable);
-    }
-
     @SmallTest
     public void testOpenSmallEvenWhenLargeIsActuallySmall() {
         inflate(R.layout.size_adaptive_lies);

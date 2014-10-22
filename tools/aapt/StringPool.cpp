@@ -38,6 +38,14 @@ void strcpy16_htod(char16_t* dst, const char16_t* src)
 
 void printStringPool(const ResStringPool* pool)
 {
+    if (pool->getError() == NO_INIT) {
+        printf("String pool is unitialized.\n");
+        return;
+    } else if (pool->getError() != NO_ERROR) {
+        printf("String pool is corrupt/invalid.\n");
+        return;
+    }
+
     SortedVector<const void*> uniqueStrings;
     const size_t N = pool->size();
     for (size_t i=0; i<N; i++) {

@@ -22,6 +22,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <input/Input.h>
+#include <ScopedUtfChars.h>
 #include "android_view_KeyEvent.h"
 
 namespace android {
@@ -102,20 +103,25 @@ status_t android_view_KeyEvent_recycle(JNIEnv* env, jobject eventObj) {
     return OK;
 }
 
-static jboolean native_isSystemKey(JNIEnv* env, jobject clazz, jint keyCode) {
-    return KeyEvent::isSystemKey(keyCode);
+static jstring android_view_KeyEvent_nativeKeyCodeToString(JNIEnv* env, jobject clazz,
+        jint keyCode) {
+    return env->NewStringUTF(KeyEvent::getLabel(keyCode));
 }
 
-static jboolean native_hasDefaultAction(JNIEnv* env, jobject clazz, jint keyCode) {
-    return KeyEvent::hasDefaultAction(keyCode);
+static jint android_view_KeyEvent_nativeKeyCodeFromString(JNIEnv* env, jobject clazz,
+        jstring label) {
+    ScopedUtfChars keyLabel(env, label);
+    return KeyEvent::getKeyCodeFromLabel(keyLabel.c_str());
 }
 
 
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod g_methods[] = {
-    { "native_isSystemKey", "(I)Z", (void*)native_isSystemKey },
-    { "native_hasDefaultAction", "(I)Z", (void*)native_hasDefaultAction },
+    { "nativeKeyCodeToString", "(I)Ljava/lang/String;",
+        (void*)android_view_KeyEvent_nativeKeyCodeToString},
+    { "nativeKeyCodeFromString", "(Ljava/lang/String;)I",
+        (void*)android_view_KeyEvent_nativeKeyCodeFromString},
 };
 
 #define FIND_CLASS(var, className) \

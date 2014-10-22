@@ -34,6 +34,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class BluetoothTestUtils extends Assert {
 
@@ -890,6 +891,17 @@ public class BluetoothTestUtils extends Assert {
         removeReceiver(receiver);
         fail(String.format("%s timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
                 methodName, state, BluetoothDevice.BOND_BONDED, firedFlags, mask));
+    }
+
+    /**
+     * Deletes all pairings of remote devices
+     * @param adapter the BT adapter
+     */
+    public void unpairAll(BluetoothAdapter adapter) {
+        Set<BluetoothDevice> devices = adapter.getBondedDevices();
+        for (BluetoothDevice device : devices) {
+            unpair(adapter, device);
+        }
     }
 
     /**

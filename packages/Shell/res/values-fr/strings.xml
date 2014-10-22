@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Rapport de bug enregistré"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Appuyer ici pour partager votre rapport de bug"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Faites glisser le doigt vers la gauche pour partager votre rapport d\'erreur."</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Appuyez ici pour partager le rapport de bug"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Les rapports de bug contiennent des données des fichiers journaux du système, y compris des informations personnelles et privées. Ne partagez les rapports de bug qu\'avec les applications et les personnes que vous estimez fiables."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Afficher ce message la prochaine fois"</string>
 </resources>

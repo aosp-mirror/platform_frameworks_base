@@ -34,7 +34,6 @@
 #include <SkMallocPixelRef.h>
 
 #include "omx_jpeg_decoder.h"
-#include "SkOmxPixelRef.h"
 #include "StreamSource.h"
 
 using namespace android;
@@ -105,7 +104,9 @@ bool OmxJpegImageDecoder::onDecode(SkStream* stream,
     int height;
     meta->findInt32(kKeyWidth, &width);
     meta->findInt32(kKeyHeight, &height);
-    configBitmapSize(bm, getPrefConfig(k32Bit_SrcDepth, false), width, height);
+    configBitmapSize(
+            bm, getPrefColorType(k32Bit_SrcDepth, false),
+            width, height);
 
     // mode == DecodeBounds
     if (mode == SkImageDecoder::kDecodeBounds_Mode) {
@@ -158,10 +159,6 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
     printf("Duration in decoder->read(): %.1f (msecs). \n",
                 duration / 1E3 );
 
-    /* Mark the code for now, since we attend to copy buffer to SkBitmap.
-    // Install pixelRef to Bitmap.
-    installPixelRef(buffer, decoder, bm);*/
-
     // Copy pixels from buffer to bm.
     // May need to check buffer->rawBytes() == bm->rawBytes().
     CHECK_EQ(buffer->size(), bm->getSize());
@@ -172,26 +169,9 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
     return true;
 }
 
-void OmxJpegImageDecoder::installPixelRef(MediaBuffer *buffer, sp<MediaSource> decoder,
-        SkBitmap* bm) {
-
-    // set bm's pixelref based on the data in buffer.
-    SkAutoLockPixels alp(*bm);
-    SkPixelRef* pr = new SkOmxPixelRef(NULL, buffer, decoder);
-    bm->setPixelRef(pr)->unref();
-    bm->lockPixels();
-    return;
-}
-
-void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkBitmap::Config pref,
+void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkColorType pref,
         int width, int height) {
-    bm->setConfig(getColorSpaceConfig(pref), width, height, 0, kOpaque_SkAlphaType);
-}
-
-SkBitmap::Config OmxJpegImageDecoder::getColorSpaceConfig(
-        SkBitmap::Config pref) {
-
-    // Set the color space to ARGB_8888 for now
+    // Set the color space to ARGB_8888 for now (ignoring pref)
     // because of limitation in hardware support.
-    return SkBitmap::kARGB_8888_Config;
+    bm->setInfo(SkImageInfo::MakeN32(width, height, kOpaque_SkAlphaType));
 }

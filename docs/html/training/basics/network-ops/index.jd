@@ -1,5 +1,5 @@
 page.title=Performing Network Operations
-page.tags="network","wireless"
+page.tags=network,wireless
 
 trainingnavtop=true
 startpage=true
@@ -24,6 +24,7 @@ next.link=connecting.html
   <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
   <li><a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
   <li><a href="{@docRoot}guide/webapps/index.html">Web Apps Overview</a></li>
+  <li><a href="{@docRoot}training/volley/index.html">Transmitting Network Data Using Volley</a></li>
 </ul>
 
 
@@ -50,6 +51,14 @@ as a source of reusable code for your own application.</p>
 <p>By going through these lessons, you'll have the
 fundamental building blocks for creating Android applications that download
 content and parse data efficiently, while minimizing network traffic.</p>
+
+<p class="note"><strong>Note:</strong> See the class <a href="{@docRoot}
+training/volley/index.html">Transmitting Network Data Using Volley</a>
+for information on Volley, an HTTP library that makes networking for Android apps
+easier and faster. Volley is available through the open
+<a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a>
+repository. Volley may be able to help you streamline and improve the performance
+of your app's network operations.</p>
 
 
 

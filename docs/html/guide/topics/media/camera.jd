@@ -1,5 +1,5 @@
 page.title=Camera
-page.tags="photo","video","picture","mediarecorder"
+page.tags=photo,video,picture,mediarecorder
 @jd:body
 
 <div id="qv-wrapper">
@@ -86,13 +86,16 @@ see how to implement these options.</li>
 
 <h2 id="basics">The Basics</h2>
 <p>The Android framework supports capturing images and video through the
-{@link android.hardware.Camera} API or camera {@link android.content.Intent}. Here are the relevant
+{@link android.hardware.camera2} API or camera {@link android.content.Intent}. Here are the relevant
 classes:</p>
 
 <dl>
-  <dt>{@link android.hardware.Camera}</dt>
-  <dd>This class is the primary API for controlling device cameras. This class is used to take
+  <dt>{@link android.hardware.camera2}</dt>
+  <dd>This package is the primary API for controlling device cameras. It can be used to take
 pictures or videos when you are building a camera application.</dd>
+
+  <dt>{@link android.hardware.Camera}</dt>
+  <dd>This class is the older deprecated API for controlling device cameras.</dd>
 
   <dt>{@link android.view.SurfaceView}</dt>
   <dd>This class is used to present a live camera preview to the user.</dd>
@@ -353,6 +356,10 @@ specified location for your application to access.</p>
 application or provides special features. Creating a customized camera activity requires more
 code than <a href="#intents">using an intent</a>, but it can provide a more compelling experience
 for your users.</p>
+
+<p><strong> Note: The following guide is for the older, deprecated {@link android.hardware.Camera}
+API. For new or advanced camera applications, the newer {@link android.hardware.camera2} API is
+recommended.</strong></p>
 
 <p>The general steps for creating a custom camera interface for your application are as follows:</p>
 

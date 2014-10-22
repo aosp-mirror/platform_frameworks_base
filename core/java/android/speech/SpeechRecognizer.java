@@ -396,6 +396,14 @@ public class SpeechRecognizer {
      * Destroys the {@code SpeechRecognizer} object.
      */
     public void destroy() {
+        if (mService != null) {
+            try {
+                mService.cancel(mListener);
+            } catch (final RemoteException e) {
+                // Not important
+            }
+        }
+
         if (mConnection != null) {
             mContext.unbindService(mConnection);
         }
@@ -409,7 +417,7 @@ public class SpeechRecognizer {
      * Internal wrapper of IRecognitionListener which will propagate the results to
      * RecognitionListener
      */
-    private class InternalListener extends IRecognitionListener.Stub {
+    private static class InternalListener extends IRecognitionListener.Stub {
         private RecognitionListener mInternalListener;
 
         private final static int MSG_BEGINNING_OF_SPEECH = 1;

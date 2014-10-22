@@ -16,6 +16,9 @@
 
 package android.transition;
 
+import android.content.Context;
+import android.graphics.PointF;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -23,8 +26,13 @@ import android.animation.PropertyValuesHolder;
 import android.animation.RectEvaluator;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.util.IntProperty;
+import android.util.Property;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,12 +59,36 @@ public class ChangeBounds extends Transition {
             PROPNAME_WINDOW_Y
     };
 
+    private static final Property<Drawable, PointF> DRAWABLE_ORIGIN_PROPERTY =
+            new Property<Drawable, PointF>(PointF.class, "boundsOrigin") {
+                private Rect mBounds = new Rect();
+
+                @Override
+                public void set(Drawable object, PointF value) {
+                    object.copyBounds(mBounds);
+                    mBounds.offsetTo(Math.round(value.x), Math.round(value.y));
+                    object.setBounds(mBounds);
+                }
+
+                @Override
+                public PointF get(Drawable object) {
+                    object.copyBounds(mBounds);
+                    return new PointF(mBounds.left, mBounds.top);
+                }
+    };
+
     int[] tempLocation = new int[2];
     boolean mResizeClip = false;
     boolean mReparent = false;
     private static final String LOG_TAG = "ChangeBounds";
 
     private static RectEvaluator sRectEvaluator = new RectEvaluator();
+
+    public ChangeBounds() {}
+
+    public ChangeBounds(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     @Override
     public String[] getTransitionProperties() {
@@ -76,6 +108,8 @@ public class ChangeBounds extends Transition {
      *
      * @param reparent true if the transition should track the parent
      * container of target views and animate parent changes.
+     * @deprecated Use {@link android.transition.ChangeTransform} to handle
+     * transitions between different parents.
      */
     public void setReparent(boolean reparent) {
         mReparent = reparent;
@@ -83,12 +117,17 @@ public class ChangeBounds extends Transition {
 
     private void captureValues(TransitionValues values) {
         View view = values.view;
-        values.values.put(PROPNAME_BOUNDS, new Rect(view.getLeft(), view.getTop(),
-                view.getRight(), view.getBottom()));
-        values.values.put(PROPNAME_PARENT, values.view.getParent());
-        values.view.getLocationInWindow(tempLocation);
-        values.values.put(PROPNAME_WINDOW_X, tempLocation[0]);
-        values.values.put(PROPNAME_WINDOW_Y, tempLocation[1]);
+
+        if (view.isLaidOut() || view.getWidth() != 0 || view.getHeight() != 0) {
+            values.values.put(PROPNAME_BOUNDS, new Rect(view.getLeft(), view.getTop(),
+                    view.getRight(), view.getBottom()));
+            values.values.put(PROPNAME_PARENT, values.view.getParent());
+            if (mReparent) {
+                values.view.getLocationInWindow(tempLocation);
+                values.values.put(PROPNAME_WINDOW_X, tempLocation[0]);
+                values.values.put(PROPNAME_WINDOW_Y, tempLocation[1]);
+            }
+        }
     }
 
     @Override
@@ -99,6 +138,19 @@ public class ChangeBounds extends Transition {
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
         captureValues(transitionValues);
+    }
+
+    private boolean parentMatches(View startParent, View endParent) {
+        boolean parentMatches = true;
+        if (mReparent) {
+            TransitionValues endValues = getMatchedTransitionValues(startParent, true);
+            if (endValues == null) {
+                parentMatches = startParent == endParent;
+            } else {
+                parentMatches = endParent == endValues.view;
+            }
+        }
+        return parentMatches;
     }
 
     @Override
@@ -115,13 +167,7 @@ public class ChangeBounds extends Transition {
             return null;
         }
         final View view = endValues.view;
-        boolean parentsEqual = (startParent == endParent) ||
-                (startParent.getId() == endParent.getId());
-        // TODO: Might want reparenting to be separate/subclass transition, or at least
-        // triggered by a property on ChangeBounds. Otherwise, we're forcing the requirement that
-        // all parents in layouts have IDs to avoid layout-inflation resulting in a side-effect
-        // of reparenting the views.
-        if (!mReparent || parentsEqual) {
+        if (parentMatches(startParent, endParent)) {
             Rect startBounds = (Rect) startValues.values.get(PROPNAME_BOUNDS);
             Rect endBounds = (Rect) endValues.values.get(PROPNAME_BOUNDS);
             int startLeft = startBounds.left;
@@ -137,35 +183,42 @@ public class ChangeBounds extends Transition {
             int endWidth = endRight - endLeft;
             int endHeight = endBottom - endTop;
             int numChanges = 0;
-            if (startWidth != 0 && startHeight != 0 && endWidth != 0 && endHeight != 0) {
-                if (startLeft != endLeft) ++numChanges;
-                if (startTop != endTop) ++numChanges;
-                if (startRight != endRight) ++numChanges;
-                if (startBottom != endBottom) ++numChanges;
+            if ((startWidth != 0 && startHeight != 0) || (endWidth != 0 && endHeight != 0)) {
+                if (startLeft != endLeft || startTop != endTop) ++numChanges;
+                if (startRight != endRight || startBottom != endBottom) ++numChanges;
             }
             if (numChanges > 0) {
                 if (!mResizeClip) {
-                    PropertyValuesHolder pvh[] = new PropertyValuesHolder[numChanges];
-                    int pvhIndex = 0;
-                    if (startLeft != endLeft) view.setLeft(startLeft);
-                    if (startTop != endTop) view.setTop(startTop);
-                    if (startRight != endRight) view.setRight(startRight);
-                    if (startBottom != endBottom) view.setBottom(startBottom);
-                    if (startLeft != endLeft) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("left", startLeft, endLeft);
+                    Animator anim;
+                    if (startWidth == endWidth && startHeight == endHeight) {
+                        view.offsetLeftAndRight(startLeft - view.getLeft());
+                        view.offsetTopAndBottom(startTop - view.getTop());
+                        Path positionPath = getPathMotion().getPath(0, 0, endLeft - startLeft,
+                                endTop - startTop);
+                        anim = ObjectAnimator.ofInt(view, new HorizontalOffsetProperty(),
+                                new VerticalOffsetProperty(), positionPath);
+                    } else {
+                        if (startLeft != endLeft) view.setLeft(startLeft);
+                        if (startTop != endTop) view.setTop(startTop);
+                        if (startRight != endRight) view.setRight(startRight);
+                        if (startBottom != endBottom) view.setBottom(startBottom);
+                        ObjectAnimator topLeftAnimator = null;
+                        if (startLeft != endLeft || startTop != endTop) {
+                            Path topLeftPath = getPathMotion().getPath(startLeft, startTop,
+                                    endLeft, endTop);
+                            topLeftAnimator = ObjectAnimator
+                                    .ofInt(view, "left", "top", topLeftPath);
+                        }
+                        ObjectAnimator bottomRightAnimator = null;
+                        if (startRight != endRight || startBottom != endBottom) {
+                            Path bottomRightPath = getPathMotion().getPath(startRight, startBottom,
+                                    endRight, endBottom);
+                            bottomRightAnimator = ObjectAnimator.ofInt(view, "right", "bottom",
+                                    bottomRightPath);
+                        }
+                        anim = TransitionUtils.mergeAnimators(topLeftAnimator,
+                                bottomRightAnimator);
                     }
-                    if (startTop != endTop) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("top", startTop, endTop);
-                    }
-                    if (startRight != endRight) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("right",
-                                startRight, endRight);
-                    }
-                    if (startBottom != endBottom) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("bottom",
-                                startBottom, endBottom);
-                    }
-                    ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(view, pvh);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -215,23 +268,21 @@ public class ChangeBounds extends Transition {
                     if (transXDelta != 0) numChanges++;
                     if (transYDelta != 0) numChanges++;
                     if (widthDelta != 0 || heightDelta != 0) numChanges++;
-                    PropertyValuesHolder pvh[] = new PropertyValuesHolder[numChanges];
-                    int pvhIndex = 0;
-                    if (transXDelta != 0) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofFloat("translationX",
-                                view.getTranslationX(), 0);
+                    ObjectAnimator translationAnimator = null;
+                    if (transXDelta != 0 || transYDelta != 0) {
+                        Path topLeftPath = getPathMotion().getPath(0, 0, transXDelta, transYDelta);
+                        translationAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_X,
+                                View.TRANSLATION_Y, topLeftPath);
                     }
-                    if (transYDelta != 0) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofFloat("translationY",
-                                view.getTranslationY(), 0);
-                    }
+                    ObjectAnimator clipAnimator = null;
                     if (widthDelta != 0 || heightDelta != 0) {
                         Rect tempStartBounds = new Rect(0, 0, startWidth, startHeight);
                         Rect tempEndBounds = new Rect(0, 0, endWidth, endHeight);
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofObject("clipBounds",
-                                sRectEvaluator, tempStartBounds, tempEndBounds);
+                        clipAnimator = ObjectAnimator.ofObject(view, "clipBounds", sRectEvaluator,
+                                tempStartBounds, tempEndBounds);
                     }
-                    ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(view, pvh);
+                    Animator anim = TransitionUtils.mergeAnimators(translationAnimator,
+                            clipAnimator);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -285,26 +336,68 @@ public class ChangeBounds extends Transition {
                 Canvas canvas = new Canvas(bitmap);
                 view.draw(canvas);
                 final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-                view.setVisibility(View.INVISIBLE);
+                final float transitionAlpha = view.getTransitionAlpha();
+                view.setTransitionAlpha(0);
                 sceneRoot.getOverlay().add(drawable);
-                Rect startBounds1 = new Rect(startX - tempLocation[0], startY - tempLocation[1],
-                        startX - tempLocation[0] + view.getWidth(),
-                        startY - tempLocation[1] + view.getHeight());
-                Rect endBounds1 = new Rect(endX - tempLocation[0], endY - tempLocation[1],
-                        endX - tempLocation[0] + view.getWidth(),
-                        endY - tempLocation[1] + view.getHeight());
-                ObjectAnimator anim = ObjectAnimator.ofObject(drawable, "bounds",
-                        sRectEvaluator, startBounds1, endBounds1);
+                Path topLeftPath = getPathMotion().getPath(startX - tempLocation[0],
+                        startY - tempLocation[1], endX - tempLocation[0], endY - tempLocation[1]);
+                PropertyValuesHolder origin = PropertyValuesHolder.ofObject(
+                        DRAWABLE_ORIGIN_PROPERTY, null, topLeftPath);
+                ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(drawable, origin);
                 anim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         sceneRoot.getOverlay().remove(drawable);
-                        view.setVisibility(View.VISIBLE);
+                        view.setTransitionAlpha(transitionAlpha);
                     }
                 });
                 return anim;
             }
         }
         return null;
+    }
+
+    private abstract static class OffsetProperty extends IntProperty<View> {
+        int mPreviousValue;
+
+        public OffsetProperty(String name) {
+            super(name);
+        }
+
+        @Override
+        public void setValue(View view, int value) {
+            int offset = value - mPreviousValue;
+            offsetBy(view, offset);
+            mPreviousValue = value;
+        }
+
+        @Override
+        public Integer get(View object) {
+            return null;
+        }
+
+        protected abstract void offsetBy(View view, int by);
+    }
+
+    private static class HorizontalOffsetProperty extends OffsetProperty {
+        public HorizontalOffsetProperty() {
+            super("offsetLeftAndRight");
+        }
+
+        @Override
+        protected void offsetBy(View view, int by) {
+            view.offsetLeftAndRight(by);
+        }
+    }
+
+    private static class VerticalOffsetProperty extends OffsetProperty {
+        public VerticalOffsetProperty() {
+            super("offsetTopAndBottom");
+        }
+
+        @Override
+        protected void offsetBy(View view, int by) {
+            view.offsetTopAndBottom(by);
+        }
     }
 }

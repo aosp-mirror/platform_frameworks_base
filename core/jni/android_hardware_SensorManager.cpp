@@ -49,6 +49,10 @@ struct SensorOffsets
     jfieldID    minDelay;
     jfieldID    fifoReservedEventCount;
     jfieldID    fifoMaxEventCount;
+    jfieldID    stringType;
+    jfieldID    requiredPermission;
+    jfieldID    maxDelay;
+    jfieldID    flags;
 } gSensorOffsets;
 
 
@@ -73,6 +77,11 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.fifoReservedEventCount =
             _env->GetFieldID(sensorClass, "mFifoReservedEventCount",  "I");
     sensorOffsets.fifoMaxEventCount = _env->GetFieldID(sensorClass, "mFifoMaxEventCount",  "I");
+    sensorOffsets.stringType = _env->GetFieldID(sensorClass, "mStringType", "Ljava/lang/String;");
+    sensorOffsets.requiredPermission = _env->GetFieldID(sensorClass, "mRequiredPermission",
+                                                        "Ljava/lang/String;");
+    sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
+    sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
 }
 
 static jint
@@ -89,6 +98,8 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     const SensorOffsets& sensorOffsets(gSensorOffsets);
     jstring name = env->NewStringUTF(list->getName().string());
     jstring vendor = env->NewStringUTF(list->getVendor().string());
+    jstring stringType = env->NewStringUTF(list->getStringType().string());
+    jstring requiredPermission = env->NewStringUTF(list->getRequiredPermission().string());
     env->SetObjectField(sensor, sensorOffsets.name,      name);
     env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
     env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
@@ -100,7 +111,13 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
     env->SetIntField(sensor, sensorOffsets.fifoReservedEventCount,
                      list->getFifoReservedEventCount());
-    env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount, list->getFifoMaxEventCount());
+    env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
+                     list->getFifoMaxEventCount());
+    env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
+    env->SetObjectField(sensor, sensorOffsets.requiredPermission,
+                        requiredPermission);
+    env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
+    env->SetIntField(sensor, sensorOffsets.flags, list->getFlags());
     next++;
     return size_t(next) < count ? next : 0;
 }
@@ -149,7 +166,6 @@ private:
         ASensorEvent buffer[16];
         while ((n = q->read(buffer, 16)) > 0) {
             for (int i=0 ; i<n ; i++) {
-
                 if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
                     // step-counter returns a uint64, but the java API only deals with floats
                     float value = float(buffer[i].u64.step_counter);
@@ -165,24 +181,39 @@ private:
                                         gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
                                         buffer[i].meta_data.sensor);
                 } else {
+                    int8_t status;
+                    switch (buffer[i].type) {
+                    case SENSOR_TYPE_ORIENTATION:
+                    case SENSOR_TYPE_MAGNETIC_FIELD:
+                    case SENSOR_TYPE_ACCELEROMETER:
+                    case SENSOR_TYPE_GYROSCOPE:
+                        status = buffer[i].vector.status;
+                        break;
+                    case SENSOR_TYPE_HEART_RATE:
+                        status = buffer[i].heart_rate.status;
+                        break;
+                    default:
+                        status = SENSOR_STATUS_ACCURACY_HIGH;
+                        break;
+                    }
                     env->CallVoidMethod(mReceiverObject,
                                         gBaseEventQueueClassInfo.dispatchSensorEvent,
                                         buffer[i].sensor,
                                         mScratch,
-                                        buffer[i].vector.status,
+                                        status,
                                         buffer[i].timestamp);
                 }
-
                 if (env->ExceptionCheck()) {
+                    mSensorQueue->sendAck(buffer, n);
                     ALOGE("Exception dispatching input event.");
                     return 1;
                 }
             }
+            mSensorQueue->sendAck(buffer, n);
         }
         if (n<0 && n != -EAGAIN) {
             // FIXME: error receiving events, what to do in this case?
         }
-
         return 1;
     }
 };

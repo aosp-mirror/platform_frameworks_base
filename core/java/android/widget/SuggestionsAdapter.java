@@ -64,11 +64,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     static final int REFINE_BY_ENTRY = 1;
     static final int REFINE_ALL = 2;
 
-    private SearchManager mSearchManager;
-    private SearchView mSearchView;
-    private SearchableInfo mSearchable;
-    private Context mProviderContext;
-    private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
+    private final SearchManager mSearchManager;
+    private final SearchView mSearchView;
+    private final SearchableInfo mSearchable;
+    private final Context mProviderContext;
+    private final WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
+    private final int mCommitIconResId;
+
     private boolean mClosed = false;
     private int mQueryRefinement = REFINE_BY_ENTRY;
 
@@ -94,18 +96,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
      */
     private static final long DELETE_KEY_POST_DELAY = 500L;
 
-    public SuggestionsAdapter(Context context, SearchView searchView,
-            SearchableInfo searchable,
+    public SuggestionsAdapter(Context context, SearchView searchView, SearchableInfo searchable,
             WeakHashMap<String, Drawable.ConstantState> outsideDrawablesCache) {
-        super(context,
-                com.android.internal.R.layout.search_dropdown_item_icons_2line,
-                null,   // no initial cursor
-                true);  // auto-requery
+        super(context, searchView.getSuggestionRowLayout(), null /* no initial cursor */,
+                true /* auto-requery */);
+
         mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         mSearchView = searchView;
         mSearchable = searchable;
+        mCommitIconResId = searchView.getSuggestionCommitIconResId();
+
         // set up provider resources (gives us icons, etc.)
-        Context activityContext = mSearchable.getActivityContext(mContext);
+        final Context activityContext = mSearchable.getActivityContext(mContext);
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
@@ -279,8 +281,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View v = super.newView(context, cursor, parent);
+        final View v = super.newView(context, cursor, parent);
         v.setTag(new ChildViewCache(v));
+
+        // Set up icon.
+        final ImageView iconRefine = (ImageView) v.findViewById(R.id.edit_query);
+        iconRefine.setImageResource(mCommitIconResId);
+
         return v;
     }
 
@@ -529,7 +536,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
                 return drawable;
             }
             // Not cached, find it by resource ID
-            drawable = mProviderContext.getResources().getDrawable(resourceId);
+            drawable = mProviderContext.getDrawable(resourceId);
             // Stick it in the cache, using the URI as key
             storeInIconCache(drawableUri, drawable);
             return drawable;
@@ -563,7 +570,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
                 OpenResourceIdResult r =
                     mProviderContext.getContentResolver().getResourceId(uri);
                 try {
-                    return r.r.getDrawable(r.id);
+                    return r.r.getDrawable(r.id, mContext.getTheme());
                 } catch (Resources.NotFoundException ex) {
                     throw new FileNotFoundException("Resource does not exist: " + uri);
                 }

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.IAudioService;
+import android.media.session.MediaSessionLegacyHelper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -70,19 +71,19 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             return onKeyUp(keyCode, event);
         }
     }
-    
+
     boolean onKeyDown(int keyCode, KeyEvent event) {
         /* ****************************************************************************
          * HOW TO DECIDE WHERE YOUR KEY HANDLING GOES.
          * See the comment in PhoneWindow.onKeyDown
          * ****************************************************************************/
         final KeyEvent.DispatcherState dispatcher = mView.getKeyDispatcherState();
-        
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                getAudioManager().handleKeyDown(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
+                MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
                 return true;
             }
 
@@ -156,7 +157,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
                 if (event.getRepeatCount() == 0) {
                     dispatcher.startTracking(event, this);
                 } else if (event.isLongPress() && dispatcher.isTracking(event)) {
-                    Configuration config = mContext.getResources().getConfiguration(); 
+                    Configuration config = mContext.getResources().getConfiguration();
                     if (config.keyboard == Configuration.KEYBOARD_NOKEYS
                             || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
                         // launch the search activity
@@ -191,17 +192,13 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
         if (dispatcher != null) {
             dispatcher.handleUpEvent(event);
         }
-        
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (!event.isCanceled()) {
-                    AudioManager audioManager = (AudioManager)mContext.getSystemService(
-                            Context.AUDIO_SERVICE);
-                    if (audioManager != null) {
-                        getAudioManager().handleKeyUp(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
-                    }
+                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
                 }
                 return true;
             }
@@ -277,30 +274,20 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
         }
         return mKeyguardManager;
     }
-    
+
     AudioManager getAudioManager() {
         if (mAudioManager == null) {
             mAudioManager = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
         }
         return mAudioManager;
     }
-    
+
     void sendCloseSystemWindows() {
         PhoneWindowManager.sendCloseSystemWindows(mContext, null);
     }
 
     private void handleMediaKeyEvent(KeyEvent keyEvent) {
-        IAudioService audioService = IAudioService.Stub.asInterface(
-                ServiceManager.checkService(Context.AUDIO_SERVICE));
-        if (audioService != null) {
-            try {
-                audioService.dispatchMediaKeyEvent(keyEvent);
-            } catch (RemoteException e) {
-                Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
-            }
-        } else {
-            Slog.w(TAG, "Unable to find IAudioService for media key event.");
-        }
+        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
     }
 }
 

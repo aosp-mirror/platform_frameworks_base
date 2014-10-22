@@ -5,13 +5,17 @@ parent.link=manifest-intro.html
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;activity android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+<dd><pre class="stx">&lt;activity android:<a href="#embedded">allowEmbedded</a>=["true" | "false"]
+          android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
           android:<a href="#always">alwaysRetainTaskState</a>=["true" | "false"]
+          android:<a href="#autoremrecents">autoRemoveFromRecents</a>=["true" | "false"]
           android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
           android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
                                  "touchscreen", "keyboard", "keyboardHidden",
                                  "navigation", "screenLayout", "fontScale", "uiMode",
                                  "orientation", "screenSize", "smallestScreenSize"]
+          android:<a href="#dlmode">documentLaunchMode</a>=["intoExisting", "always",
+                                  "none", "never"]
           android:<a href="#enabled">enabled</a>=["true" | "false"]
           android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
@@ -21,12 +25,14 @@ parent.link=manifest-intro.html
           android:<a href="#label">label</a>="<i>string resource</i>"
           android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" |
                               "singleTask" | "singleInstance"]
+          android:<a href="#maxRecents">maxRecents</a>="<i>integer</i>"
           android:<a href="#multi">multiprocess</a>=["true" | "false"]
           android:<a href="#nm">name</a>="<i>string</i>"
           android:<a href="#nohist">noHistory</a>=["true" | "false"]  <!-- ##api level 3## -->
           android:<a href="#parent">parentActivityName</a>="<i>string</i>" <!-- api level 16 -->
           android:<a href="#prmsn">permission</a>="<i>string</i>"
           android:<a href="#proc">process</a>="<i>string</i>"
+          android:<a href="#relinquish">relinquishTaskIdentity</a>=["true" | "false"]
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "behind" |
                                      "landscape" | "portrait" |
                                      "reverseLandscape" | "reversePortrait" |
@@ -62,6 +68,17 @@ by the system and will never be run.
 
 <dt>attributes:</dt>
 <dd><dl class="attr">
+<dt><a name="embedded"></a>{@code android:allowEmbedded}</dt>
+<dd>
+    Indicate that the activity can be launched as the embedded child of another
+    activity. Particularly in the case where the child lives in a container
+    such as a Display owned by another activity. For example, activities
+    that are used for Wear custom notifications must declare this so
+    Wear can display the activity in it's context stream, which resides
+    in another process.
+
+    <p>The default value of this attribute is <code>false</code>.
+</dd>
 <dt><a name="reparent"></a>{@code android:allowTaskReparenting}</dt>
 <dd>Whether or not the activity can move from the task that started it to
 the task it has an affinity for when that task is next brought to the
@@ -127,6 +144,15 @@ useful, for example, in an application like the web browser where there is
 a lot of state (such as multiple open tabs) that users would not like to lose.
 </p></dd>
 
+<dt><a name="autoremrecents"></a>{@code android:autoRemoveFromRecents}</dt>
+<dd>Whether or not tasks launched by activities with this attribute remains in the
+<a href="{@docRoot}guide/components/recents.html">overview screen</a> until the last activity in the
+task is completed. If {@code true}, the task is
+automatically removed from the overview screen. This overrides the caller's use of
+{@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}. It must be a boolean value, either
+"{@code true}" or "{@code false}".</dd>
+
+
 <dt><a name="clear"></a>{@code android:clearTaskOnLaunch}</dt>
 <dd>Whether or not all activities will be removed from the task, except for
 the root activity, whenever it is re-launched from the home screen &mdash;
@@ -165,7 +191,7 @@ as described above.
 <dd>Lists configuration changes that the activity will handle itself.  When a configuration
 change occurs at runtime, the activity is shut down and restarted by default, but declaring a
 configuration with this attribute will prevent the activity from being restarted. Instead, the
-activity remains running and its <code>{@link android.app.Activity#onConfigurationChanged
+activity remains running and its <code>{@link android.app.Activity#onConfigurationChanged(android.content.res.Configuration)
 onConfigurationChanged()}</code> method is called.
 
 <p class="note"><strong>Note:</strong> Using this attribute should be
@@ -259,20 +285,67 @@ restart your activity, even when running on an Android 3.2 or higher device).
 
 <p>
 All of these configuration changes can impact the resource values seen by the
-application.  Therefore, when <code>{@link android.app.Activity#onConfigurationChanged
+application.  Therefore, when <code>{@link android.app.Activity#onConfigurationChanged(android.content.res.Configuration)
 onConfigurationChanged()}</code> is called, it will generally be necessary to again
 retrieve all resources (including view layouts, drawables, and so on) to correctly
 handle the change.
 </p></dd>
 
+<dt><a name="dlmode"></a>{@code android:documentLaunchMode}</dt>
+<dd>Specifies how a new instance of an activity should be added to a task each time it is
+launched. This attribute permits the user to have multiple documents from the same application
+appear in the <a href="{@docRoot}guide/components/recents.html">overview screen</a>.
+
+<p>This attribute has four values which produce the following effects when the user opens a document
+with the application:</p>
+
+<table>
+<tr>
+  <th>Value</th>
+  <th>Description</th>
+</tr><tr>
+  <td>"{@code intoExisting}"</td>
+  <td>The activity reuses the existing task for the document. Using this value is the same as setting
+  the {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} flag, <em>without</em> setting the
+  {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flag, as described in
+  <a href="{@docRoot}guide/components/recents.html#flag-new-doc">Using the Intent flag to add a task
+  </a>.</td>
+</tr><tr>
+    <td>"{@code always}"</td>
+    <td>The activity creates a new task for the document, even if the document is already opened.
+    This is the same as setting both the {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+    and {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flags.</td>
+</tr><tr>
+    <td>"{@code none}"</td>
+    <td>The activity does not create a new task for the activity. This is the default value, which
+    creates a new task only when {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} is set.
+    The overview screen treats the activity as it would by default: it displays a single task for
+    the app, which resumes from whatever activity the user last invoked.</td>
+</tr><tr>
+    <td>"{@code never}"</td>
+    <td>This activity is not launched into a new document even if the Intent contains
+    {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}. Setting this overrides the behavior
+    of the {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} and
+    {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} flags, if either of these are set in
+    the activity, and the overview screen displays a single task for the app, which resumes from
+    whatever activity the user last invoked.</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> For values other than "{@code none}" and "{@code never}" the
+activity must be defined with {@code launchMode="standard"}. If this attribute is not specified,
+{@code documentLaunchMode="none"} is used.</p>
+</dd>
+
 <dt><a name="enabled"></a>{@code android:enabled}</dt>
 <dd>Whether or not the activity can be instantiated by the system &mdash;
-"{@code true}" if it can be, and "{@code false}" if not.  The default value
+{@code "true"} if it can be, and "{@code false}" if not.  The default value
 is "{@code true}".
 
 <p>
-The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code>
+The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+</code> element has its own<code>
+<a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code>
 attribute that applies to all application components, including activities.  The
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
 and {@code &lt;activity&gt;} attributes must both be "{@code true}" (as they both
@@ -282,10 +355,11 @@ is "{@code false}", it cannot be instantiated.
 
 <dt><a name="exclude"></a>{@code android:excludeFromRecents}</dt>
 <dd>Whether or not the task initiated by this activity should be excluded from the list of recently
-used applications ("recent apps"). That is, when this activity is the root activity of a new task,
-this attribute determines whether the task should not appear in the list of recent apps. Set "{@code
-true}" if the task should be <em>excluded</em> from the list; set "{@code false}" if it should be
-<em>included</em>. The default value is "{@code false}".
+used applications, the <a href="{@docRoot}guide/components/recents.html">
+overview screen</a>. That is, when this activity is the root activity of a new
+task, this attribute determines whether the task should not appear in the list of recent apps. Set
+"{@code true}" if the task should be <em>excluded</em> from the list; set "{@code false}" if it
+should be <em>included</em>. The default value is "{@code false}".
 </p></dd>
 
 <dt><a name="exported"></a>{@code android:exported}</dt>
@@ -441,13 +515,29 @@ Similarly, a new instance of a "{@code singleTop}" activity may also be
 created to handle a new intent.  However, if the target task already has an
 existing instance of the activity at the top of its stack, that instance
 will receive the new intent (in an
-<code>{@link android.app.Activity#onNewIntent onNewIntent()}</code> call);
+{@link android.app.Activity#onNewIntent onNewIntent()} call);
 a new instance is not created.
 In other circumstances &mdash; for example, if an existing instance of the
 "{@code singleTop}" activity is in the target task, but not at the top of
 the stack, or if it's at the top of a stack, but not in the target task
 &mdash; a new instance would be created and pushed on the stack.
 </p>
+
+<p>Similarly, if you
+<a href="{@docRoot}training/implementing-navigation/ancestral.html">navigate
+up</a> to an activity on the current stack, the behavior is determined by the
+parent activity's launch mode. If the parent activity has launch mode {@code
+singleTop} (or the <code>up</code> intent contains {@link
+android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}), the parent is brought to the
+top of the stack, and its state is preserved. The navigation intent is received
+by the parent activity's {@link android.app.Activity#onNewIntent onNewIntent()}
+method.  If the parent activity has launch mode {@code standard} (and the
+<code>up</code> intent does not contain {@link
+android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}), the current activity and its
+parent are both popped off the stack, and a new instance of the parent activity
+is created to receive the navigation intent.
+</p>
+
 
 <p>
 The "{@code singleTask}" and "{@code singleInstance}" modes also differ from
@@ -520,6 +610,13 @@ flags, see the
 <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>
 document.
 </p>
+</dd>
+
+<dt><a name="maxrecents"></a>{@code android:maxRecents}</dt>
+<dd>The maximum number of tasks rooted at this activity in the <a href="{@docRoot}guide/components/recents.html">
+overview screen</a>. When this number of entries is reached, the system removes the least-recently
+used instance from the overview screen. Valid values are 1 through 50 (25 on low memory devices);
+zero is invalid. This must be an integer value, such as 50. The default value is 16.
 </dd>
 
 <dt><a name="multi"></a>{@code android:multiprocess}</dt>
@@ -656,6 +753,20 @@ resource usage.
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code>
 attribute can set a different default process name for all components.
 </dd>
+
+<dt><a name="relinquish"></a>{@code android:relinquishTaskIdentity}</dt>
+<dd>Whether or not the activity relinquishes its task identifiers to an activity above it in the
+task stack. A task whose root activity has this attribute set to "{@code true}" replaces the base
+Intent with that of the next activity in the task. If the next activity also has this attribute set
+to "{@code true}" then it will yield the base Intent to any activity that it launches in the same
+task. This continues for each activity until an activity is encountered which has this attribute set
+to "{@code false}". The default value is "{@code false}".
+
+<p>This attribute set to "{@code true}" also permits the activity's use of the
+{@link android.app.ActivityManager.TaskDescription} to change labels, colors
+and icons in the <a href="{@docRoot}guide/components/recents.html">overview screen</a>.</p>
+</dd>
+
 
 <dt><a name="screen"></a>{@code android:screenOrientation}</dt>
 <dd>The orientation of the activity's display on the device.

@@ -25,7 +25,9 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,13 +43,13 @@ import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -55,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -317,8 +320,42 @@ public final class InputMethodManager {
     int mCursorCandStart;
     int mCursorCandEnd;
 
+    /**
+     * Represents an invalid action notification sequence number. {@link InputMethodManagerService}
+     * always issues a positive integer for action notification sequence numbers. Thus -1 is
+     * guaranteed to be different from any valid sequence number.
+     */
+    private static final int NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER = -1;
+    /**
+     * The next sequence number that is to be sent to {@link InputMethodManagerService} via
+     * {@link IInputMethodManager#notifyUserAction(int)} at once when a user action is observed.
+     */
+    private int mNextUserActionNotificationSequenceNumber =
+            NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
+
+    /**
+     * The last sequence number that is already sent to {@link InputMethodManagerService}.
+     */
+    private int mLastSentUserActionNotificationSequenceNumber =
+            NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
+
+    /**
+     * The instance that has previously been sent to the input method.
+     */
+    private CursorAnchorInfo mCursorAnchorInfo = null;
+
+    /**
+     * The buffer to retrieve the view location in screen coordinates in {@link #updateCursor}.
+     */
+    private final int[] mViewTopLeft = new int[2];
+
+    /**
+     * The matrix to convert the view location into screen coordinates in {@link #updateCursor}.
+     */
+    private final Matrix mViewToScreenMatrix = new Matrix();
+
     // -----------------------------------------------------------
-    
+
     /**
      * Sequence number of this binding, as returned by the server.
      */
@@ -334,6 +371,13 @@ public final class InputMethodManager {
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
 
+    private static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE = 0x0;
+
+    /**
+     * The monitor mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
+     */
+    private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
+
     final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
     final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
 
@@ -346,6 +390,7 @@ public final class InputMethodManager {
     static final int MSG_SEND_INPUT_EVENT = 5;
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
+    static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 9;
 
     class H extends Handler {
         H(Looper looper) {
@@ -383,6 +428,9 @@ public final class InputMethodManager {
                             }
                             return;
                         }
+
+                        mRequestUpdateCursorAnchorInfoMonitorMode =
+                                REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
                         setInputChannelLocked(res.channel);
                         mCurMethod = res.method;
@@ -476,6 +524,11 @@ public final class InputMethodManager {
                     finishedInputEvent(msg.arg1, false, false);
                     return;
                 }
+                case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
+                    synchronized (mH) {
+                        mNextUserActionNotificationSequenceNumber = msg.arg1;
+                    }
+                }
             }
         }
     }
@@ -539,6 +592,12 @@ public final class InputMethodManager {
         @Override
         public void setActive(boolean active) {
             mH.sendMessage(mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, 0));
+        }
+
+        @Override
+        public void setUserActionNotificationSequenceNumber(int sequenceNumber) {
+            mH.sendMessage(mH.obtainMessage(MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
+                    sequenceNumber, 0));
         }
     };
 
@@ -714,6 +773,7 @@ public final class InputMethodManager {
      * Reset all of the state associated with being bound to an input method.
      */
     void clearBindingLocked() {
+        if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
         setInputChannelLocked(null);
         mBindSequence = -1;
@@ -1151,6 +1211,7 @@ public final class InputMethodManager {
                 mCursorCandStart = -1;
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
+                mCursorAnchorInfo = null;
                 servedContext = new ControlledInputConnectionWrapper(vh.getLooper(), ic, this);
             } else {
                 servedContext = null;
@@ -1180,6 +1241,8 @@ public final class InputMethodManager {
                         mBindSequence = res.sequence;
                         mCurMethod = res.method;
                         mCurId = res.id;
+                        mNextUserActionNotificationSequenceNumber =
+                                res.userActionNotificationSequenceNumber;
                     } else {
                         if (res.channel != null && res.channel != mCurChannel) {
                             res.channel.dispose();
@@ -1394,6 +1457,14 @@ public final class InputMethodManager {
     
     /**
      * Report the current selection range.
+     *
+     * <p><strong>Editor authors</strong>, you need to call this method whenever
+     * the cursor moves in your editor. Remember that in addition to doing this, your
+     * editor needs to always supply current cursor values in
+     * {@link EditorInfo#initialSelStart} and {@link EditorInfo#initialSelEnd} every
+     * time {@link android.view.View#onCreateInputConnection(EditorInfo)} is
+     * called, which happens whenever the keyboard shows up or the focus changes
+     * to a text field, among other cases.</p>
      */
     public void updateSelection(View view, int selStart, int selEnd,
             int candidatesStart, int candidatesEnd) {
@@ -1404,7 +1475,7 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            
+
             if (mCursorSelStart != selStart || mCursorSelEnd != selEnd
                     || mCursorCandStart != candidatesStart
                     || mCursorCandEnd != candidatesEnd) {
@@ -1452,16 +1523,49 @@ public final class InputMethodManager {
     }
 
     /**
-     * Returns true if the current input method wants to watch the location
+     * Return true if the current input method wants to watch the location
      * of the input editor's cursor in its window.
+     *
+     * @deprecated Use {@link InputConnection#requestCursorUpdates(int)} instead.
      */
+    @Deprecated
     public boolean isWatchingCursor(View view) {
         return false;
     }
-    
+
+    /**
+     * Return true if the current input method wants to be notified when cursor/anchor location
+     * is changed.
+     *
+     * @hide
+     */
+    public boolean isCursorAnchorInfoEnabled() {
+        synchronized (mH) {
+            final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
+                    InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
+            final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode &
+                    InputConnection.CURSOR_UPDATE_MONITOR) != 0;
+            return isImmediate || isMonitoring;
+        }
+    }
+
+    /**
+     * Set the requested mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
+     *
+     * @hide
+     */
+    public void setUpdateCursorAnchorInfoMode(int flags) {
+        synchronized (mH) {
+            mRequestUpdateCursorAnchorInfoMonitorMode = flags;
+        }
+    }
+
     /**
      * Report the current cursor location in its window.
+     *
+     * @deprecated Use {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)} instead.
      */
+    @Deprecated
     public void updateCursor(View view, int left, int top, int right, int bottom) {
         checkFocus();
         synchronized (mH) {
@@ -1470,7 +1574,7 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            
+
             mTmpCursorRect.set(left, top, right, bottom);
             if (!mCursorRect.equals(mTmpCursorRect)) {
                 if (DEBUG) Log.d(TAG, "updateCursor");
@@ -1482,6 +1586,47 @@ public final class InputMethodManager {
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
+            }
+        }
+    }
+
+    /**
+     * Report positional change of the text insertion point and/or characters in the composition
+     * string.
+     */
+    public void updateCursorAnchorInfo(View view, final CursorAnchorInfo cursorAnchorInfo) {
+        if (view == null || cursorAnchorInfo == null) {
+            return;
+        }
+        checkFocus();
+        synchronized (mH) {
+            if ((mServedView != view &&
+                    (mServedView == null || !mServedView.checkInputConnectionProxy(view)))
+                    || mCurrentTextBoxAttribute == null || mCurMethod == null) {
+                return;
+            }
+            // If immediate bit is set, we will call updateCursorAnchorInfo() even when the data has
+            // not been changed from the previous call.
+            final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
+                    InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
+            if (!isImmediate && Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
+                // TODO: Consider always emitting this message once we have addressed redundant
+                // calls of this method from android.widget.Editor.
+                if (DEBUG) {
+                    Log.w(TAG, "Ignoring redundant updateCursorAnchorInfo: info="
+                            + cursorAnchorInfo);
+                }
+                return;
+            }
+            if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
+            try {
+                mCurMethod.updateCursorAnchorInfo(cursorAnchorInfo);
+                mCursorAnchorInfo = cursorAnchorInfo;
+                // Clear immediate bit (if any).
+                mRequestUpdateCursorAnchorInfoMonitorMode &=
+                        ~InputConnection.CURSOR_UPDATE_IMMEDIATE;
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
             }
         }
     }
@@ -1805,6 +1950,40 @@ public final class InputMethodManager {
     }
 
     /**
+     * Notify that a user took some action with this input method.
+     * @hide
+     */
+    public void notifyUserAction() {
+        synchronized (mH) {
+            if (mLastSentUserActionNotificationSequenceNumber ==
+                    mNextUserActionNotificationSequenceNumber) {
+                if (DEBUG) {
+                    Log.w(TAG, "Ignoring notifyUserAction as it has already been sent."
+                            + " mLastSentUserActionNotificationSequenceNumber: "
+                            + mLastSentUserActionNotificationSequenceNumber
+                            + " mNextUserActionNotificationSequenceNumber: "
+                            + mNextUserActionNotificationSequenceNumber);
+                }
+                return;
+            }
+            try {
+                if (DEBUG) {
+                    Log.w(TAG, "notifyUserAction: "
+                            + " mLastSentUserActionNotificationSequenceNumber: "
+                            + mLastSentUserActionNotificationSequenceNumber
+                            + " mNextUserActionNotificationSequenceNumber: "
+                            + mNextUserActionNotificationSequenceNumber);
+                }
+                mService.notifyUserAction(mNextUserActionNotificationSequenceNumber);
+                mLastSentUserActionNotificationSequenceNumber =
+                        mNextUserActionNotificationSequenceNumber;
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+            }
+        }
+    }
+
+    /**
      * Returns a map of all shortcut input method info and their subtypes.
      */
     public Map<InputMethodInfo, List<InputMethodSubtype>> getShortcutInputMethodsAndSubtypes() {
@@ -1836,6 +2015,21 @@ public final class InputMethodManager {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
             return ret;
+        }
+    }
+
+    /**
+     * @return The current height of the input method window.
+     * @hide
+     */
+    public int getInputMethodWindowVisibleHeight() {
+        synchronized (mH) {
+            try {
+                return mService.getInputMethodWindowVisibleHeight();
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return 0;
+            }
         }
     }
 
@@ -1966,6 +2160,10 @@ public final class InputMethodManager {
                 + " mCursorSelEnd=" + mCursorSelEnd
                 + " mCursorCandStart=" + mCursorCandStart
                 + " mCursorCandEnd=" + mCursorCandEnd);
+        p.println("  mNextUserActionNotificationSequenceNumber="
+                + mNextUserActionNotificationSequenceNumber
+                + " mLastSentUserActionNotificationSequenceNumber="
+                + mLastSentUserActionNotificationSequenceNumber);
     }
 
     /**

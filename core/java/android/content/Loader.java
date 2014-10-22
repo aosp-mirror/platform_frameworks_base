@@ -413,7 +413,7 @@ public class Loader<D> {
      * {@link #onReset()} happens.  You can retrieve the current abandoned
      * state with {@link #isAbandoned}.
      */
-    protected void onAbandon() {        
+    protected void onAbandon() {
     }
     
     /**

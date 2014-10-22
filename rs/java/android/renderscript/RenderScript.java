@@ -17,16 +17,12 @@
 package android.renderscript;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.os.Process;
 import android.util.Log;
@@ -66,6 +62,25 @@ public class RenderScript {
     static Object sRuntime;
     static Method registerNativeAllocation;
     static Method registerNativeFree;
+
+    /*
+     * Context creation flag that specifies a normal context.
+    */
+    public static final int CREATE_FLAG_NONE = 0x0000;
+
+    /*
+     * Context creation flag which specifies a context optimized for low
+     * latency over peak performance. This is a hint and may have no effect
+     * on some implementations.
+    */
+    public static final int CREATE_FLAG_LOW_LATENCY = 0x0002;
+
+    /*
+     * Context creation flag which specifies a context optimized for long
+     * battery life over peak performance. This is a hint and may have no effect
+     * on some implementations.
+    */
+    public static final int CREATE_FLAG_LOW_POWER = 0x0004;
 
     /*
      * Detect the bitness of the VM to allow FieldPacker to do the right thing.
@@ -1103,7 +1118,12 @@ public class RenderScript {
                 }
 
                 if (msg == RS_MESSAGE_TO_CLIENT_NEW_BUFFER) {
-                    Allocation.sendBufferNotification(subID);
+                    if (mRS.nContextGetUserMessage(mRS.mContext, rbuf) !=
+                        RS_MESSAGE_TO_CLIENT_NEW_BUFFER) {
+                        throw new RSDriverException("Error processing message from RenderScript.");
+                    }
+                    long bufferID = ((long)rbuf[1] << 32L) + ((long)rbuf[0] & 0xffffffffL);
+                    Allocation.sendBufferNotification(bufferID);
                     continue;
                 }
 
@@ -1141,7 +1161,7 @@ public class RenderScript {
      * @hide
      */
     public static RenderScript create(Context ctx, int sdkVersion) {
-        return create(ctx, sdkVersion, ContextType.NORMAL);
+        return create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE);
     }
 
     /**
@@ -1151,16 +1171,20 @@ public class RenderScript {
      * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct) {
+    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
         if (!sInitialized) {
             Log.e(LOG_TAG, "RenderScript.create() called when disabled; someone is likely to crash");
             return null;
         }
 
+        if ((flags & ~(CREATE_FLAG_LOW_LATENCY | CREATE_FLAG_LOW_POWER)) != 0) {
+            throw new RSIllegalArgumentException("Invalid flags passed.");
+        }
+
         RenderScript rs = new RenderScript(ctx);
 
         rs.mDev = rs.nDeviceCreate();
-        rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion, ct.mID);
+        rs.mContext = rs.nContextCreate(rs.mDev, flags, sdkVersion, ct.mID);
         rs.mContextType = ct;
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
@@ -1190,7 +1214,21 @@ public class RenderScript {
      */
     public static RenderScript create(Context ctx, ContextType ct) {
         int v = ctx.getApplicationInfo().targetSdkVersion;
-        return create(ctx, v, ct);
+        return create(ctx, v, ct, CREATE_FLAG_NONE);
+    }
+
+     /**
+     * Create a RenderScript context.
+     *
+     *
+     * @param ctx The context.
+     * @param ct The type of context to be created.
+     * @param flags The OR of the CREATE_FLAG_* options desired
+     * @return RenderScript
+     */
+    public static RenderScript create(Context ctx, ContextType ct, int flags) {
+        int v = ctx.getApplicationInfo().targetSdkVersion;
+        return create(ctx, v, ct, flags);
     }
 
     /**

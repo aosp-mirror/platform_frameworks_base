@@ -16,6 +16,7 @@
                   android:multiprocess="false"
                   android:exported="true"
                   android:writePermission="android.permission.WRITE_SETTINGS"
+                  android:singleUser="true"
                   android:initOrder="100" />
     </application>
 </manifest>

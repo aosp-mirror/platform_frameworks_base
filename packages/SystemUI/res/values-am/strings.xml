@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"የስርዓት UI"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"አጥራ"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"አጽዳ"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ከዝርዝር አስወግድ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"የትግበራ መረጃ"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ምንም የቅርብ ጊዜ ትግበራዎች የሉም"</string>
@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ምንም ማሳወቂያዎች የሉም"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"በመካሄድ ላይ ያለ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ማሳወቂያዎች"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"የኃይል መሙያ አገናኝ።"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"ባትሪው እያነሰ ነው።"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"የባትሪ ኃይል አነስተኛ ነው"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> ቀሪ"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> ይቀራል። የባትሪ ኃይል ቆጣቢ በርቷል።"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ኃይል መሙያ አይታገዝም።\n የቀረበውን ኃይል መሙያ ብቻ ተጠቀም።"</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"የባትሪ ጥቅም"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"የUSB ኃይል መሙላት አይደገፍም።"</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"የቀረበውን ኃይል መሙያ ብቻ ይጠቀሙ።"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"ቅንብሮች"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"የባህሪ ኃይል ቆጣቢው ይጀመር?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"ጀምር"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"የባህሪ ኃይል ቆጣቢው ይጀመር"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"የባትሪ በህይወት የመቆየት ጊዜን ለማሻሻል እንዲያግዝ፣ የባትሪ ኃይል ቆጣቢው የመሳሪያዎን የመስራት አቅም ይቀንሰዋል።\n\nየባትሪ ኃይል ቆጣቢው መሳሪያዎ የተሰካ ሲሆን ይሰናከላል።"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ቅንብሮች"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"የአውሮፕላን ሁነታ"</string>
@@ -61,15 +67,14 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"ሁልጊዜ ከዚህ ኮምፒውተር ፍቀድ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"የተኳኋኝነት አጉላ"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"ትግበራ ለትንሽ ማያ ሲነደፍ፣ የአጉላ መቆመጣጠሪያ በሰዓት በኩል ብቅ ይላል።"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው::"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"የአንተን ቅጽበታዊ ገጽ እይታ ለማየት ንካ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"የማያ ፎቶማስቀመጥ አልተቻለም። ማከማቻም አገልግሎት ላይ ሊሆን ይችላል።"</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"እንደ ማህደረ አጫዋች (MTP) ሰካ"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"እንደ ካሜራ (PTP) ሰካ"</string>
@@ -78,6 +83,9 @@
     <string name="accessibility_home" msgid="8217216074895377641">"መነሻ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ምናሌ"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"የቅርብ ጊዜ  መተግበሪያዎች"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"ፈልግ"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"ካሜራ"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"ስልክ"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"የግቤት ስልት አዝራር ቀይር"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"የተኳኋኝአጉላ አዝራር።"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"አነስተኛውን ማያ ወደ ትልቅ አጉላ።"</string>
@@ -119,6 +127,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"በርቷል።"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"ጠፍቷል።"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"ተገናኝቷል።"</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"በማገናኘት ላይ።"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -136,7 +145,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"የስርዓት ቅንብሮች"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ማሳወቂያዎች"</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"ማሳወቂያ አጥራ"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"ማሳወቂያ አጽዳ"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ነቅቷል።"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS በማግኘት ላይ።"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter ነቅቷል።"</string>
@@ -153,23 +162,28 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ባትሪ <xliff:g id="STATE">%s</xliff:g>።"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"የአውሮፕላን ሁነታ <xliff:g id="STATE">%s</xliff:g>።"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ብሉቱዝ <xliff:g id="STATE">%s</xliff:g>።"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"አካባቢ <xliff:g id="STATE">%s</xliff:g>።"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"ማንቂያ ለ<xliff:g id="TIME">%s</xliff:g> ተዋቅሯል።"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G ውሂብ ቦዝኗል"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G ውሂብ ቦዝኗል"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"የተንቀሳቃሽ ውሂብ ቦዝኗል"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ውሂብ ቦዝኗል"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"የተቀመጠውን የውሂብ አጠቃቀም ገደብ ላይ ደርሰሃል:: \n\nውሂብን እንደገና መልሰህ ዳግም-ካነቃህ በከዋኙ ክፍያ ልትጠየቅበት ትችል ይሆናል::"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"ውሂብ ድጋሚ አንቃ"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"ፓነል ዝጋ"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"ተጨማሪ ጊዜ"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"ያነሰ ጊዜ"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2ጂ-3ጂ ውሂብ ጠፍቷል"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4ጂ ውሂብ ጠፍቷል"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ውሂብ ጠፍቷል"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"መሳሪያዎ እርስዎ ያዘጋጁት ገደብ ላይ ስለደረሰ ውሂብን አጥፍቷል።\n\nመልሰው ማብራት ከአገልግሎት አቅራቢዎ ክፍያዎችን ሊያስከትል ይችላል።"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"ውሂብ ያብሩ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ምንም በይነመረብ ተያያዥ የለም።"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ተያይዟል"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"ለGPS በመፈለግ ላይ"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"በ GPS የተዘጋጀ ሥፍራ"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"የአካባቢ ጥያቄዎች ነቅተዋል"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ሁሉንም ማሳወቂያዎች አጽዳ"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"የመተግበሪያ መረጃ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ማያ ገጽ በራስ ሰር ይዞራል።"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ማያ ገጽ በወርድ ገፅ አቀማመጥ ተቆልፏል።"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ማያ ገጽ በቁም ገፅ አቀማመጥ ተቆልፏል።"</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"የማወራረጃ ምግቦች መያዣ"</string>
     <string name="start_dreams" msgid="7219575858348719790">"የቀን ህልም"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ኤተርኔት"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"የአውሮፕላን ሁነታ"</string>
@@ -178,9 +192,12 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ብሉቱዝ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ብሉቱዝ (<xliff:g id="NUMBER">%d</xliff:g> መሣሪያዎች)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ብሉቱዝ ጠፍቷል"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ምንም የተጣመሩ መሣሪያዎች አይገኝም"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ብሩህነት"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"ራስ-አዙር"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"አዙሪት ተቆልፏል"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"በራስ ሰር አሽከርክር"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"አዙሪት ተቆልፏል"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ምስል ገላጭ"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"በወርድ"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"የግቤት ስልት"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"አካባቢ"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"አካባቢ ጠፍቷል"</string>
@@ -190,16 +207,95 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"ቅንብሮች"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"ሰዓት"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"እኔ"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"ተጠቃሚ"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"አዲስ ተጠቃሚ"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"አልተገናኘም"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ምንም አውታረ መረብ የለም"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ጠፍቷል"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"የWi-Fi ማሳያ"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"ገመድ አልባ ማሳያ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"ምንም የተቀመጡ አውታረ መረቦች አይገኙም"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"ማያ ገጽ ውሰድ"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"በመውሰድ ላይ"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ያልተሰየመ መሳሪያ"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ለመውሰድ ዝግጁ"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"ምንም መሣሪያዎች አይገኙም"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ብሩህነት"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ራስ-ሰር"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"ማሳወቂያዎች እዚህ ላይ ይታያሉ"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"ወደ ታች በማንሸራተት በማንኛውም ጊዜ ይድረሱባቸው።\nSwipe የስርዓት መቆጣጠሪያዎችን ለማምጣት እንደገና ወደ ታች ያንሸራትቱ።"</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"አሞሌውን ለማሳየት የማያ ገጹን ጠርዝ ላይ ያንሸራትቱ"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"አሞሌውን ለማሳየት ከማያ ገጹ ጠርዝ ጀምረው ያንሸራትቱ"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"ቀለማትን ግልብጥ"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"የቀለም እርማት ሁነታ"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"ተጨማሪ ቅንብሮች"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"ተከናውኗል"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"ተገናኝቷል"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"በማገናኘት ላይ..."</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"በማገናኘት ላይ"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"መገናኛ ነጥብ"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ማሳወቂያዎች"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"የባትሪ ብርሃን"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"የውሂብ አጠቃቀም"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ቀሪ ውሂብ"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"ከገደብ በላይ"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ጥቅም ላይ ውሏል"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ገደብ"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"የ<xliff:g id="DATA_LIMIT">%s</xliff:g> ማስጠንቀቂያ"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"ምንም የቅርብ ጊዜ መተግበሪያዎች የሉም"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"የመተግበሪያ መረጃ"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"መተግበሪያ-ጋር-ቆልፍ"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"ፈልግ"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ባትሪ ሞልቷል"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"ኃይል በመሙላት ላይ"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> እስኪሞላ ድረስ"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"ባትሪ እየሞላ አይደለም"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"አውታረ መረብ\nክትትል ሊደረግበት ይችላል"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"ፍለጋ"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"ለ<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ወደ ላይ አንሸራትት።"</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"ለ<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ወደ ግራ አንሸራትት።"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"ምንም ማቋረጦች የሉም፣ ማንቂያዎችን ጨምሮ"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"ምንም ማቋረጦች የሉም"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"ቅድሚያ የሚሰጣቸው ማቋረጦች ብቻ"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"ቀጣዩ ማንቂያ ደውልዎ በ<xliff:g id="ALARM_TIME">%s</xliff:g> ነው"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"ቀጣዩ ማንቂያ ደውልዎ <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g> ነው"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"በ<xliff:g id="ALARM_TIME">%s</xliff:g> ያለውን ማንቂያ ደውልዎን አይሰሙትም"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"በጣም አስቸካይ ያልሆኑ ማሳወቂያዎች ከታች"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"ለመክፈት ዳግም መታ ያድርጉ"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"ለማስከፈት ወደ ላይ ያንሸራትቱ"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"ለስልክ ወደቀኝ ያንሸራትቱ"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"ለካሜራ ወደግራ ያንሸራትቱ"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ያለገደብ"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"ምንም"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"ቅድሚያ"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"ሁሉም"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ሃይል በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> እስከሚሞላ ድረስ)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"እንግዳ"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ እንግዳ"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"እንግዳ ያስወጡ"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"ለአንድ ደቂቃ"</item>
+    <item quantity="other" msgid="6924190729213550991">"ለ%d ደቂቃዎች"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"ለአንድ ሰዓት"</item>
+    <item quantity="other" msgid="5408537517529822157">"ለ%d ሰዓቶች"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"የባትሪ ኃይል ቆጣቢ በርቷል"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"የመሳሪያው የአሰራር ብቃት ተቀንሷል።"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"የባትሪ ኃይል ቆጣቢ ቅንብሮች"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"ይዘቶች ተደብቀዋል"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> በማያ ገጽዎ ላይ የታየውን ነገር በሙሉ ማንሳት ይጀምራል።"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"ዳግመኛ አታሳይ"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"አሁን ጀምር"</string>
 </resources>

@@ -97,7 +97,7 @@ public abstract class AbstractClassAdapter extends ClassVisitor {
         if (type.getSort() == Type.OBJECT) {
             String in = type.getInternalName();
             String newIn = renameInternalType(in);
-            if (newIn != in) {
+            if (!newIn.equals(in)) {
                 return Type.getType("L" + newIn + ";");
             }
         } else if (type.getSort() == Type.ARRAY) {
@@ -175,6 +175,17 @@ public abstract class AbstractClassAdapter extends ClassVisitor {
             for (int i = 0; i < interfaces.length; ++i) {
                 interfaces[i] = renameInternalType(interfaces[i]);
             }
+        }
+
+        /* Java 7 verifies the StackMapTable of a class if its version number is greater than 50.0.
+         * However, the check is disabled if the class version number is 50.0 or less. Generation
+         * of the StackMapTable requires a rewrite using the tree API of ASM. As a workaround,
+         * we rewrite the version number of the class to be 50.0
+         *
+         * http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6693236
+         */
+        if (version > 50) {
+            version = 50;
         }
 
         super.visit(version, access, name, signature, superName, interfaces);

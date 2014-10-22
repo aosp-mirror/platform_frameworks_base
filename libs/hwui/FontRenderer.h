@@ -44,8 +44,6 @@ namespace RSC {
 }
 #endif
 
-class Functor;
-
 namespace android {
 namespace uirenderer {
 
@@ -64,7 +62,7 @@ public:
     };
 
     TextSetupFunctor(OpenGLRenderer* renderer, float x, float y, bool pureTranslate,
-            int alpha, SkXfermode::Mode mode, SkPaint* paint): Functor(),
+            int alpha, SkXfermode::Mode mode, const SkPaint* paint): Functor(),
             renderer(renderer), x(x), y(y), pureTranslate(pureTranslate),
             alpha(alpha), mode(mode), paint(paint) {
     }
@@ -78,7 +76,7 @@ public:
     bool pureTranslate;
     int alpha;
     SkXfermode::Mode mode;
-    SkPaint* paint;
+    const SkPaint* paint;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,20 +95,20 @@ public:
         mGammaTable = gammaTable;
     }
 
-    void setFont(SkPaint* paint, const mat4& matrix);
+    void setFont(const SkPaint* paint, const SkMatrix& matrix);
 
-    void precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix);
+    void precache(const SkPaint* paint, const char* text, int numGlyphs, const SkMatrix& matrix);
     void endPrecaching();
 
     // bounds is an out parameter
-    bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds,
-            Functor* functor, bool forceFinish = true);
+    bool renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
+            uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, const float* positions,
+            Rect* bounds, Functor* functor, bool forceFinish = true);
 
     // bounds is an out parameter
-    bool renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, SkPath* path, float hOffset, float vOffset, Rect* bounds,
-            Functor* functor);
+    bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
+            uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
+            float hOffset, float vOffset, Rect* bounds, Functor* functor);
 
     struct DropShadow {
         DropShadow() { };
@@ -130,8 +128,8 @@ public:
 
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
-    DropShadow renderDropShadow(SkPaint* paint, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, uint32_t radius, const float* positions);
+    DropShadow renderDropShadow(const SkPaint* paint, const char *text, uint32_t startIndex,
+            uint32_t len, int numGlyphs, float radius, const float* positions);
 
     void setTextureFiltering(bool linearFiltering) {
         mLinearFiltering = linearFiltering;
@@ -220,7 +218,7 @@ private:
             int32_t width, int32_t height);
 
     // the input image handle may have its pointer replaced (to avoid copies)
-    void blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius);
+    void blurImage(uint8_t** image, int32_t width, int32_t height, float radius);
 };
 
 }; // namespace uirenderer

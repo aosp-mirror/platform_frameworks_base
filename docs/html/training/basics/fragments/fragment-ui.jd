@@ -66,9 +66,9 @@ and perform other fragment transactions.</p>
 initial fragment(s) to the activity during the activity's
 {@link android.app.Activity#onCreate onCreate()} method.</p>
 
-<p>An important rule when dealing with fragments&mdash;especially those that you add at
-runtime&mdash;is that the fragment must have a container {@link android.view.View} in the layout in
-which the fragment's layout will reside.</p>
+<p>An important rule when dealing with fragments&mdash;especially when adding fragments at
+runtime&mdash;is that your activity layout must include a container {@link android.view.View}
+in which you can insert the fragment.</p>
 
 <p>The following layout is an alternative to the layout shown in the <a
 href="creating.html">previous lesson</a> that shows only one fragment at a time. In order to replace

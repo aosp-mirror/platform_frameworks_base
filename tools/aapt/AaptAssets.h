@@ -6,21 +6,23 @@
 #ifndef __AAPT_ASSETS_H
 #define __AAPT_ASSETS_H
 
-#include <stdlib.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <stdlib.h>
+#include <set>
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
+
+#include "AaptConfig.h"
+#include "Bundle.h"
+#include "ConfigDescription.h"
+#include "SourcePos.h"
 #include "ZipFile.h"
 
-#include "Bundle.h"
-#include "SourcePos.h"
-
 using namespace android;
-
 
 extern const char * const gDefaultIgnoreAssets;
 extern const char * gUserIgnoreAssets;
@@ -82,9 +84,6 @@ struct AaptLocaleValue {
          return memcmp(this, &other, sizeof(AaptLocaleValue));
      }
 
-     static void splitAndLowerCase(const char* const chars, Vector<String8>* parts,
-             const char separator);
-
      inline bool operator<(const AaptLocaleValue& o) const { return compare(o) < 0; }
      inline bool operator<=(const AaptLocaleValue& o) const { return compare(o) <= 0; }
      inline bool operator==(const AaptLocaleValue& o) const { return compare(o) == 0; }
@@ -98,31 +97,6 @@ private:
      void setVariant(const char* variant);
 };
 
-struct AxisValue {
-    // Used for all axes except AXIS_LOCALE, which is represented
-    // as a AaptLocaleValue value.
-    int intValue;
-    AaptLocaleValue localeValue;
-
-    AxisValue() : intValue(0) {
-    }
-
-    inline int compare(const AxisValue &other) const  {
-        if (intValue != other.intValue) {
-            return intValue - other.intValue;
-        }
-
-        return localeValue.compare(other.localeValue);
-    }
-
-    inline bool operator<(const AxisValue& o) const { return compare(o) < 0; }
-    inline bool operator<=(const AxisValue& o) const { return compare(o) <= 0; }
-    inline bool operator==(const AxisValue& o) const { return compare(o) == 0; }
-    inline bool operator!=(const AxisValue& o) const { return compare(o) != 0; }
-    inline bool operator>=(const AxisValue& o) const { return compare(o) >= 0; }
-    inline bool operator>(const AxisValue& o) const { return compare(o) > 0; }
-};
-
 /**
  * This structure contains a specific variation of a single file out
  * of all the variations it can have that we can have.
@@ -130,23 +104,14 @@ struct AxisValue {
 struct AaptGroupEntry
 {
 public:
-    AaptGroupEntry() : mParamsChanged(true) {
-        memset(&mParams, 0, sizeof(ResTable_config));
-    }
+    AaptGroupEntry() {}
+    AaptGroupEntry(const ConfigDescription& config) : mParams(config) {}
 
     bool initFromDirName(const char* dir, String8* resType);
 
-    static bool parseFilterNamePart(const String8& part, int* axis, AxisValue* value);
+    inline const ConfigDescription& toParams() const { return mParams; }
 
-    static AxisValue getConfigValueForAxis(const ResTable_config& config, int axis);
-
-    static bool configSameExcept(const ResTable_config& config,
-            const ResTable_config& otherConfig, int axis);
-
-    int compare(const AaptGroupEntry& o) const;
-
-    const ResTable_config toParams() const;
-
+    inline int compare(const AaptGroupEntry& o) const { return mParams.compareLogical(o.mParams); }
     inline bool operator<(const AaptGroupEntry& o) const { return compare(o) < 0; }
     inline bool operator<=(const AaptGroupEntry& o) const { return compare(o) <= 0; }
     inline bool operator==(const AaptGroupEntry& o) const { return compare(o) == 0; }
@@ -154,56 +119,13 @@ public:
     inline bool operator>=(const AaptGroupEntry& o) const { return compare(o) >= 0; }
     inline bool operator>(const AaptGroupEntry& o) const { return compare(o) > 0; }
 
-    String8 toString() const;
+    String8 toString() const { return mParams.toString(); }
     String8 toDirName(const String8& resType) const;
 
-    const String8& getVersionString() const { return version; }
+    const String8 getVersionString() const { return AaptConfig::getVersion(mParams); }
 
 private:
-    static bool getMccName(const char* name, ResTable_config* out = NULL);
-    static bool getMncName(const char* name, ResTable_config* out = NULL);
-    static bool getScreenLayoutSizeName(const char* name, ResTable_config* out = NULL);
-    static bool getScreenLayoutLongName(const char* name, ResTable_config* out = NULL);
-    static bool getOrientationName(const char* name, ResTable_config* out = NULL);
-    static bool getUiModeTypeName(const char* name, ResTable_config* out = NULL);
-    static bool getUiModeNightName(const char* name, ResTable_config* out = NULL);
-    static bool getDensityName(const char* name, ResTable_config* out = NULL);
-    static bool getTouchscreenName(const char* name, ResTable_config* out = NULL);
-    static bool getKeysHiddenName(const char* name, ResTable_config* out = NULL);
-    static bool getKeyboardName(const char* name, ResTable_config* out = NULL);
-    static bool getNavigationName(const char* name, ResTable_config* out = NULL);
-    static bool getNavHiddenName(const char* name, ResTable_config* out = NULL);
-    static bool getScreenSizeName(const char* name, ResTable_config* out = NULL);
-    static bool getSmallestScreenWidthDpName(const char* name, ResTable_config* out = NULL);
-    static bool getScreenWidthDpName(const char* name, ResTable_config* out = NULL);
-    static bool getScreenHeightDpName(const char* name, ResTable_config* out = NULL);
-    static bool getLayoutDirectionName(const char* name, ResTable_config* out = NULL);
-    static bool getVersionName(const char* name, ResTable_config* out = NULL);
-
-    String8 mcc;
-    String8 mnc;
-    AaptLocaleValue locale;
-    String8 vendor;
-    String8 smallestScreenWidthDp;
-    String8 screenWidthDp;
-    String8 screenHeightDp;
-    String8 screenLayoutSize;
-    String8 screenLayoutLong;
-    String8 orientation;
-    String8 uiModeType;
-    String8 uiModeNight;
-    String8 density;
-    String8 touchscreen;
-    String8 keysHidden;
-    String8 keyboard;
-    String8 navHidden;
-    String8 navigation;
-    String8 screenSize;
-    String8 layoutDirection;
-    String8 version;
-
-    mutable bool mParamsChanged;
-    mutable ResTable_config mParams;
+    ConfigDescription mParams;
 };
 
 inline int compare_type(const AaptGroupEntry& lhs, const AaptGroupEntry& rhs)
@@ -251,6 +173,7 @@ public:
     size_t getSize() const { return mDataSize; }
     void* editData(size_t size);
     void* editData(size_t* outSize = NULL);
+    void* editDataInRange(size_t offset, size_t size);
     void* padData(size_t wordSize);
     status_t writeData(const void* data, size_t size);
     void clearData();
@@ -299,7 +222,7 @@ public:
     const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& getFiles() const
         { return mFiles; }
 
-    status_t addFile(const sp<AaptFile>& file);
+    status_t addFile(const sp<AaptFile>& file, const bool overwriteDuplicate=false);
     void removeFile(size_t index);
 
     void print(const String8& prefix) const;
@@ -365,12 +288,14 @@ private:
     status_t addDir(const String8& name, const sp<AaptDir>& dir);
     sp<AaptDir> makeDir(const String8& name);
     status_t addLeafFile(const String8& leafName,
-                         const sp<AaptFile>& file);
+                         const sp<AaptFile>& file,
+                         const bool overwrite=false);
     virtual ssize_t slurpFullTree(Bundle* bundle,
                                   const String8& srcDir,
                                   const AaptGroupEntry& kind,
                                   const String8& resType,
-                                  sp<FilePathStore>& fullResPaths);
+                                  sp<FilePathStore>& fullResPaths,
+                                  const bool overwrite=false);
 
     String8 mLeaf;
     String8 mPath;
@@ -639,6 +564,7 @@ public:
     status_t buildIncludedResources(Bundle* bundle);
     status_t addIncludedResources(const sp<AaptFile>& file);
     const ResTable& getIncludedResources() const;
+    AssetManager& getAssetManager();
 
     void print(const String8& prefix) const;
 

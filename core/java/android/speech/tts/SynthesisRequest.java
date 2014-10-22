@@ -18,12 +18,15 @@ package android.speech.tts;
 import android.os.Bundle;
 
 /**
- * Contains data required by engines to synthesize speech. This data is :
+ * Contains data required by engines to synthesize speech. This data is:
  * <ul>
  *   <li>The text to synthesize</li>
  *   <li>The synthesis locale, represented as a language, country and a variant.
  *   The language is an ISO 639-3 letter language code, and the country is an
  *   ISO 3166 alpha 3 code. The variant is not specified.</li>
+ *   <li>The name of the voice requested for this synthesis. May be empty if
+ *   the client uses {@link TextToSpeech#setLanguage} instead of
+ *   {@link TextToSpeech#setVoice}</li>
  *   <li>The synthesis speech rate, with 100 being the normal, and
  *   higher values representing higher speech rates.</li>
  *   <li>The voice pitch, with 100 being the default pitch.</li>
@@ -34,8 +37,9 @@ import android.os.Bundle;
  * and {@link TextToSpeech#synthesizeToFile}.
  */
 public final class SynthesisRequest {
-    private final String mText;
+    private final CharSequence mText;
     private final Bundle mParams;
+    private String mVoiceName;
     private String mLanguage;
     private String mCountry;
     private String mVariant;
@@ -49,11 +53,33 @@ public final class SynthesisRequest {
         mParams = new Bundle(params);
     }
 
+    public SynthesisRequest(CharSequence text, Bundle params) {
+        mText = text;
+        // Makes a copy of params.
+        mParams = new Bundle(params);
+    }
+
+    /**
+     * Gets the text which should be synthesized.
+     * @deprecated As of API level 21, replaced by {@link #getCharSequenceText}.
+     */
+    @Deprecated
+    public String getText() {
+        return mText.toString();
+    }
+
     /**
      * Gets the text which should be synthesized.
      */
-    public String getText() {
+    public CharSequence getCharSequenceText() {
         return mText;
+    }
+
+    /**
+     * Gets the name of the voice to use.
+     */
+    public String getVoiceName() {
+        return mVoiceName;
     }
 
     /**
@@ -112,6 +138,13 @@ public final class SynthesisRequest {
         mLanguage = language;
         mCountry = country;
         mVariant = variant;
+    }
+
+    /**
+     * Sets the voice name for the request.
+     */
+    void setVoiceName(String voiceName) {
+        mVoiceName = voiceName;
     }
 
     /**

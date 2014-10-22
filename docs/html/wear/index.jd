@@ -1,0 +1,344 @@
+page.title=Android Wear
+page.viewport_width=970
+fullpage=true
+no_footer_links=true
+page.type=about
+
+@jd:body
+
+<style>
+.fullpage>#footer,
+#jd-content>.content-footer.wrap {
+  display:none;
+}
+</style>
+
+
+<div id="video-container">
+  <div id="video-frame">
+    <div class="video-close">
+      <span id="icon-video-close">&nbsp;</span>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+    <div id="ytapiplayer">
+      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width="940" src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
+    </div>
+  </div>
+</div>
+
+
+
+<div class="landing-body-content">
+  <div class="landing-hero-container">
+    <div class="landing-section wear-hero">
+      <div class="landing-hero-scrim"></div>
+      <div class="landing-hero-wrap">
+        <div class="vertical-center-outer">
+          <div class="vertical-center-inner">
+
+            <div class="col-10">
+              <div class="landing-section-header">
+                <div class="landing-h1 hero">Android Wear</div>
+                <div class="landing-subhead hero">Information that moves with you</div>
+              </div>
+              <div class="landing-hero-description">
+
+                <p>Small, powerful devices, worn on the body.
+                Useful information when you need it most.
+                Intelligent answers to spoken questions.
+                Tools to help reach fitness goals.
+                Your key to a multiscreen world.</p>
+              </div>
+
+              <div class="landing-body">
+                <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-primary" style="margin-top: 40px;">
+                  Get Started
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div> <!-- end .wrap -->
+      <div class="landing-scroll-down-affordance">
+        <a class="landing-down-arrow" href="#extending-android-to-wearables">
+          <img src="{@docRoot}wear/images/carrot.png" alt="Scroll down to read more">
+        </a>
+      </div>
+    </div> <!-- end .landing-section .landing-hero -->
+
+
+    <div class="landing-rest-of-page" style="margin-top:80px">
+      <div class="landing-section" id="extending-android-to-wearables">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Extending Android to Wearables</div>
+            <div class="landing-subhead">
+              Android Wear extends the Android platform to a new generation of devices, <br>
+              with a user experience that's designed specifically for wearables.
+
+            </div>
+          </div>
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+              <div class="col-3-wide">
+              <div class="framed-wear-square">
+                <img src="{@docRoot}wear/images/notifications.png" itemprop="image" alt="">
+                </div>
+                <br />
+                <p class="landing-small">
+                  Get glanceable, actionable information at just the right time with notifications
+                  that are synced from your handheld device.
+                </p>
+              </div>
+              <div class="col-3-wide">
+                <div class="framed-wear-square">
+                  <img src="{@docRoot}wear/images/voicecommands.png">
+                </div>
+                <br />
+                <p class="landing-small">
+                  Say “Ok Google” to send messages, ask questions, and get stuff done.
+                </p>
+              </div>
+              <div class="col-3-wide">
+              <div class="framed-wear-square">
+                <img src="{@docRoot}wear/images/steps.png" alt="">
+                </div>
+                <br />
+                <p class="landing-small">
+                  Design apps that can access a wide range of sensors and other hardware
+                   directly on the wearable.
+                </p>
+              </div>
+            </div>
+            <p>
+              Before you start building, check out the
+              <a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a>
+              to understand how to create great experiences for this exciting, new form factor.</p>
+
+          </div>
+        </div>  <!-- end .wrap -->
+      </div>  <!-- end .landing-section -->
+
+      <div class="landing-section landing-gray-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Developing for Android Wear</div>
+            <div class="landing-subhead">
+             The Android Wear APIs are delivered in the Android Support Library and Google Play
+             services. When using these libraries, handheld devices running Android 4.3
+             or later can communicate with wearables.</div>
+          </div>
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+              <div class="col-4">
+                <img src="{@docRoot}wear/images/features/notifications.png" alt="">
+                <p>Synced Notifications</p>
+                <p class="landing-small">
+                  Notifications on handhelds can automatically sync to wearables, so design them
+                  with both devices in mind.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/wearables/notifications/index.html">Build notifications</a>
+                </p>
+              </div>
+              <div class="col-4">
+                <img src="{@docRoot}wear/images/features/voice.png" alt="">
+                <p>Voice Actions</p>
+                <p class="landing-small">
+                  Register your app to handle voice actions, like "Ok Google, take a&nbsp;note,"
+                  for a hands-free experience.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/wearables/apps/voice.html">Integrate voice actions</a>
+                </p>
+              </div>
+              <div class="col-4">
+                <img src="{@docRoot}wear/images/features/apps.png" alt="">
+                <p>Build Wearable Apps</p>
+                <p class="landing-small">
+                  Create custom experiences with activities, services, sensors, and much
+                  more with the Android SDK.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/wearables/apps/index.html">Create wearable apps</a>
+                </p>
+              </div>
+              <div class="col-4">
+                <img src="{@docRoot}wear/images/features/send-data.png" alt="">
+                <p>Send Data</p>
+                <p class="landing-small">
+                  Send data and actions between handhelds and wearables with
+                  data replication APIs and RPCs.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/wearables/data-layer/index.html">Work with the Data Layer</a>
+
+                </p>
+              </div>
+            </div>
+          </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+      <div class="landing-section landing-white-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Building an Ecosystem</div>
+            <div class="landing-body landing-align-center">
+              <p class="landing-small">
+                We’re working with partners around the world to build watches powered by Android Wear!
+              </p>
+            </div>
+          </div>
+
+          <div class="landing-partners cols">
+            <div class="col-4">
+              <img src="/wear/images/partners/asus.png" alt="Asus">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/broadcom.png" alt="Broadcom">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/fossil.png" alt="Fossil">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/htc.png" alt="HTC">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/intel.png" alt="Intel">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/lg.png" alt="LG">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/mediatek.png" alt="Mediatek">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/mips.png" alt="MIPS">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/motorola.png" alt="Motorola">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/qualcomm.png" alt="Qualcomm">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/samsung.png" alt="Samsung">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/sony.png" alt="Sony">
+            </div>
+          </div>
+        </div> <!-- end .wrap -->
+      </div>
+
+
+      <div class="landing-section landing-red-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1 landing-align-left">Get Started with Android Wear</div>
+
+            <div class="landing-subhead landing-subhead-red">
+              <p>
+                Set up your development environment and start working with the APIs.
+                We’re excited about the experiences you'll create and can't
+                wait to see what you do next.</p>
+            </div>
+          </div>
+          <div class="landing-body">
+            <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-primary" style="margin-top: 20px;">
+              Get Started
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="landing-section">
+        <div class="wrap">
+          <div class="cols">
+            <div class="landing-body">
+              <div class="col-3-wide">
+                  <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">
+                    <img class="landing-social-image" src="//www.google.com/images/icons/product/youtube-128.png" alt="">
+                  </a>
+                <div class="landing-social-copy">
+                  <p>DevBytes</p>
+                    <p class="landing-small">
+                    Learn the basic concepts of Android Wear
+                    development with videos from the product team.
+                    </p>
+                    <br>
+                    <p class="landing-small">
+                      <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">DevBytes videos</a>
+                    </p>
+                </div>
+              </div>
+              <div class="col-3-wide">
+                <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-landing-developer-preview.html">
+                  <img class="landing-social-image" src="{@docRoot}wear/images/blogger.png" alt="">
+                </a>
+                <div class="landing-social-copy">
+                  <p>Blog Post</p>
+                  <p class="landing-small">
+                    Read more about Android Wear development
+                    on our blog. Just search for "Android Wear".
+
+                  </p>
+                  <br>
+                    <p class="landing-small">
+                    <a target="_blank" href="http://android-developers.blogspot.com">Android Developers Blog</a>
+                    </p>
+                  <p></p>
+                </div>
+              </div>
+              <div class="col-3-wide">
+                <a target="_blank" href="http://g.co/androidweardev">
+                  <img class="landing-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Wear Developers">
+                </a>
+                <div class="landing-social-copy">
+                  <p>G+ Community</p>
+                  <p class="landing-small">
+                    Follow us on Google+ to stay up-to-date with Android Wear development and to join the discussion!
+
+                  </p>
+                  <p class="landing-small">
+                    <a target="_blank" href="http://g.co/androidweardev">+Android Wear Developers</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+    </div> <!-- end .landing-rest-of-page -->
+    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
+      <div class="layout-content-col col-16" style="padding-top:4px">
+        <style>#___plusone_0 {float:right !important;}</style>
+        <div class="g-plusone" data-size="medium"></div>
+      </div>
+    </div>
+    <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
+      <div id="copyright">
+        Except as noted, this content is
+        licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
+        Creative Commons Attribution 2.5</a>. For details and
+        restrictions, see the <a href="{@docRoot}license.html">Content
+        License</a>.
+      </div>
+    </div>
+  </div> <!-- end .landing-hero-container -->
+
+  <script>
+  $("a.landing-down-arrow").on("click", function(e) {
+    $("body").animate({
+      scrollTop: $(".wear-hero").height() + 120
+    }, 1000, "easeOutQuint");
+    e.preventDefault();
+  });
+  </script>
+
+</div> <!-- end landing-body-content -->
+

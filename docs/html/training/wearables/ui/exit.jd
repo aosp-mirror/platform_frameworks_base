@@ -1,0 +1,110 @@
+page.title=Exiting Full-Screen Activities
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#disable-swipe">Disable the Swipe-To-Dismiss Gesture</a></li>
+  <li><a href="#long-press">Implement the Long Press to Dismiss Pattern</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>By default, users exit Android Wear activities by swiping from left to right. If the app
+contains horizontally scrollable content, users first have to navigate to the edge of the
+content and then swipe again from left to right to exit the app.</p>
+
+<p>For more immersive experiences, like an app that can scroll a map in any direction, you can
+disable the swipe to exit gesture in your app. However, if you disable it, you must implement
+the long-press-to-dismiss UI pattern to let users exit your app using the
+<code>DismissOverlayView</code> class from the Wearable UI Library.
+You must also inform your users the first time they run your app that they can exit using
+a long press.</p>
+
+<p>For design guidelines about exiting Android Wear activities, see
+<a href="{@docRoot}design/wear/structure.html#Custom">Breaking out of the card</a>.</p>
+
+
+<h2 id="disable-swipe">Disable the Swipe-To-Dismiss Gesture</h2>
+
+<p>If the user interaction model of your app interferes with the swipe-to-dismiss gesture,
+you can disable it for your app. To disable the swipe-to-dismiss gesture in your app, extend
+the default theme and set the <code>android:windowSwipeToDismiss</code> attribute to
+<code>false</code>:</p>
+
+<pre>
+&lt;style name="AppTheme" parent="Theme.DeviceDefault">
+    &lt;item name="android:windowSwipeToDismiss">false&lt;/item>
+&lt;/style>
+</pre>
+
+<p>If you disable this gesture, you must implement the long-press-to-dismiss UI pattern to let users
+exit your app, as described in the next section.</p>
+
+
+<h2 id="long-press">Implement the Long Press to Dismiss Pattern</h2>
+
+<p>To use the <code>DissmissOverlayView</code> class in your activity, add this element to
+your layout definition such that it covers the whole screen and is placed above all other views.
+For example:</p>
+
+<pre>
+&lt;FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    &lt;!-- other views go here -->
+
+    &lt;android.support.wearable.view.DismissOverlayView
+        android:id="@+id/dismiss_overlay"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+&lt;FrameLayout>
+</pre>
+
+<p>In your activity, obtain the <code>DismissOverlayView</code> element and set some introductory
+text. This text is shown to users the first time they run your app to inform them that they
+can exit the app using a long press gesture. Then use a <code>GestureDetector</code> to detect
+a long press:</p>
+
+<pre>
+public class WearActivity extends Activity {
+
+    private DismissOverlayView mDismissOverlay;
+    private GestureDetector mDetector;
+
+    public void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
+        setContentView(R.layout.wear_activity);
+
+        // Obtain the DismissOverlayView element
+        mDismissOverlay = (DismissOverlayView) findViewById(R.id.dismiss_overlay);
+        mDismissOverlay.setIntroText(R.string.long_press_intro);
+        mDismissOverlay.showIntroIfNecessary();
+
+        // Configure a gesture detector
+        mDetector = new GestureDetector(this, new SimpleOnGestureListener() {
+            public void onLongPress(MotionEvent ev) {
+                mDismissOverlay.show();
+            }
+        });
+    }
+
+    // Capture long presses
+    &#64;Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return mDetector.onTouchEvent(ev) || super.onTouchEvent(ev);
+    }
+}
+</pre>
+
+<p>When the system detects a long press gesture, <code>DismissOverlayView</code> shows an
+<strong>Exit</strong> button, which terminates your activity if the user presses it.</p>

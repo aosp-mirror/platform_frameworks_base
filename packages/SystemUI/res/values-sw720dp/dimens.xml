@@ -22,14 +22,8 @@
          be situations where they don't sync up perfectly with PhoneStatusBar. -->
     <!-- ======================================== -->
 
-    <!-- The width of the ticker, including the icon -->
-    <dimen name="notification_ticker_width">360dp</dimen>
-    <!-- Status bar panel bottom offset (height of status bar - overlap) -->
-    <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">1dp</dimen>
-    <!-- The width of the notification panel window -->
-    <dimen name="notification_panel_width">512dp</dimen>
     <!-- The minimum height of the notification panel window -->
     <dimen name="notification_panel_min_height">770dp</dimen>
     <!-- Bottom margin (from display edge) for status bar panels -->
@@ -64,8 +58,17 @@
     <!-- Size of fading edge for scrolling -->
     <dimen name="status_bar_recents_scroll_fading_edge_length">10dip</dimen>
 
+    <!-- The radius of the rounded corners on a task view. -->
+    <dimen name="recents_task_view_rounded_corners_radius">3dp</dimen>
+
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">0dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
+
+    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
+     max value is used when no notifications are displaying, and the min value is when the
+     highest possible number of notifications are showing. -->
+    <fraction name="keyguard_clock_y_fraction_max">35%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">25%</fraction>
 </resources>
 

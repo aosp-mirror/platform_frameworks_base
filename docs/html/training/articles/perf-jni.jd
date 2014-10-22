@@ -1,5 +1,5 @@
 page.title=JNI Tips
-page.tags="ndk","native"
+page.tags=ndk,native
 
 page.article=true
 @jd:body
@@ -444,7 +444,9 @@ adb shell start</pre>
 
 <pre>D Late-enabling CheckJNI</pre>
 
-
+<p>You can also set the <code>android:debuggable</code> attribute in your application's manifest to
+turn on CheckJNI just for your app. Note that the Android build tools will do this automatically for
+certain build types.
 
 
 <a name="native_libraries" id="native_libraries"></a>

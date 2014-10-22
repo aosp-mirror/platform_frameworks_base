@@ -1,0 +1,78 @@
+page.title=Android Wear
+@jd:body
+
+
+
+<p>Designing apps for wearable devices powered by Android Wear
+is substantially different than designing for phones or
+tablets: different strengths and weaknesses, different use cases, different ergonomics.
+To get started, you should understand the overall vision for the Android Wear experience,
+and how apps fit into and enhance this experience. We've also provided source files for UI resources
+that you can use in your own apps in the
+<a href="{@docRoot}design/downloads/index.html#Wear">Downloads</a> section.</p>
+
+<a class="notice-designers" style="clear:none" href="{@docRoot}design/downloads/index.html#Wear">
+  <div>
+    <h3>Downloads</h3>
+    <p>UI Toolkit, Flows, and Mocks</p>
+  </div>
+</a>
+
+<p>A new form factor deserves a new UI model. At a high level, the Android Wear UI consists of two
+main spaces centered around the core functions of <strong>Suggest</strong> and
+<strong>Demand</strong>. Your app will have an important role to play in both of these
+spaces.</p>
+
+
+
+<h2 id="Stream">Suggest: The Context Stream</h2>
+
+<div class="framed-wear-square" style="float:right;margin:0 -22px 60px 40px">
+  <img src="{@docRoot}wear/images/screens/stream.gif">
+</div>
+
+<p>The context stream is a vertical list of cards, each showing a useful or timely piece of information. Much like the Google Now feature on Android phones and tablets, users swipe vertically to navigate from card to card. Only one card is displayed at a time, and background photos are used to provide additional visual information. Your application can create cards and inject them into the stream when they are most likely to be useful.</p>
+
+<p>This UI model ensures that users don’t have to launch many different applications to check for updates; they can simply glance at their stream for a brief update on what’s important to them.</p>
+
+<p>Cards in the stream are more than simple notifications. They can be swiped horizontally to reveal additional
+<a href="{@docRoot}design/wear/patterns.html#Pages">pages</a>. Further horizontal swiping may reveal
+<a href="{@docRoot}design/wear/patterns.html#Actions">buttons</a>, allowing the user to take action on the notification. Cards can also be dismissed by swiping left to right, removing them from the stream until the next time the app has useful information to display.</p>
+
+
+
+
+<h2 id="CueCard">Demand: The Cue Card</h2>
+
+<div class="framed-wear-square" style="float:right;margin:0 -22px 60px 40px">
+  <img src="{@docRoot}wear/images/screens/cuecard.gif">
+</div>
+
+<p>For cases where Android Wear does not suggest an answer proactively through the context stream, the cue card allows users to speak to Google. The cue card is opened by saying, “OK Google” or by tapping on the background of the home screen. Swiping up on the cue card shows a list of suggested voice commands, which can also be tapped.</p>
+
+<p>At a technical level, each suggested voice command activates a specific type of intent. As a developer, you can match your applications to some of these intents so that users can complete tasks using these voice commands. Multiple applications may register for a single voice intent, and the user will have the opportunity to choose which application they prefer to use.</p>
+
+<p>Applications can respond to a voice command in the same way as they can respond to a tap on a regular in-stream action button: by adding or updating a stream card, or by launching a full screen application. Voice input often takes the form of a command, such as "remind me to get milk," in which case a simple confirmation animation is sufficient to display before automatically returning to the Context Stream.</p>
+
+
+<h2 id="Other">Other UI Features</h2>
+
+<ul>
+<li>The <strong>Home screen</strong> is the default state of the device and features:
+  <ul>
+  <li>The background, showing either content relating to the first card or a custom watch face design, depending on the watch face the user has chosen. Tapping anywhere on the background or saying "Ok Google" starts a voice query.
+  <li>Status indicators, showing connectivity, charging status, airplane mode, and in some watch faces a count of unread items.
+  <li>The top ranked card in the Context Stream, peeking up at the bottom of the screen. The amount of the peek card that appears is determined by the current watch face.
+  </ul>
+</li>
+
+<li><strong>Watch faces</strong> may be chosen by the user to appear in the background of the Home screen. Watch faces display the time and accommodate the top ranked peek card. The user can choose a different watch face by long pressing on the current one.</li>
+
+<li>Some devices may enter a low-power <strong>Ambient Mode</strong> when not being used. This usually involves dimming the screen in some way. The contents of a peek card will automatically be optimized for display in this state. Users can exit ambient mode by tapping on the screen, by tilting the screen towards them, or by pressing a hardware button if one exists.</li>
+
+<li>Swiping down on the Home screen reveals the <strong>Date and Battery</strong> display. Dragging further down toggles <strong>Mute mode</strong>, preventing interruptive notifications from vibrating and illuminating the screen.</li>
+
+<li>The <strong>Settings screen</strong> can be invoked from the cue card or on some devices using a hardware button. From here the user may shut down or restart their device, adjust screen brightness, toggle airplane mode, and access device information.</li>
+
+<li><strong>Full screen apps</strong> can be launched on top of the main stream where a wider range of interaction is called for. Although not stylistically limited to the context stream pattern, apps should respect the same design principles as the rest of the system. For more information, see the <a href="{@docRoot}design/wear/structure.html">App Structure</a> guide.</li>
+</ul>

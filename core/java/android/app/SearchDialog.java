@@ -188,8 +188,7 @@ public class SearchDialog extends Dialog {
                 mSearchView.findViewById(com.android.internal.R.id.search_src_text);
         mAppIcon = (ImageView) findViewById(com.android.internal.R.id.search_app_icon);
         mSearchPlate = mSearchView.findViewById(com.android.internal.R.id.search_plate);
-        mWorkingSpinner = getContext().getResources().
-                getDrawable(com.android.internal.R.drawable.search_spinner);
+        mWorkingSpinner = getContext().getDrawable(com.android.internal.R.drawable.search_spinner);
         // TODO: Restore the spinner for slow suggestion lookups
         // mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
         //        null, null, mWorkingSpinner, null);
@@ -458,7 +457,7 @@ public class SearchDialog extends Dialog {
 
         // optionally show one or the other.
         if (mSearchable.useBadgeIcon()) {
-            icon = mActivityContext.getResources().getDrawable(mSearchable.getIconId());
+            icon = mActivityContext.getDrawable(mSearchable.getIconId());
             visibility = View.VISIBLE;
             if (DBG) Log.d(LOG_TAG, "Using badge icon: " + mSearchable.getIconId());
         } else if (mSearchable.useBadgeLabel()) {

@@ -16,8 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
-
 /**
  * Intrinsic for applying a 3x3 convolve to an allocation.
  *
@@ -109,6 +107,18 @@ public final class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
      */
     public void forEach(Allocation aout) {
         forEach(0, (Allocation) null, aout, null);
+    }
+
+    /**
+     * Apply the filter to the input and save to the specified
+     * allocation.
+     *
+     * @param aout Output allocation. Must match creation element
+     *             type.
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEach(Allocation aout, Script.LaunchOptions opt) {
+        forEach(0, (Allocation) null, aout, null, opt);
     }
 
     /**

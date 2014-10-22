@@ -1,5 +1,5 @@
 page.title=Investigating Your RAM Usage
-page.tags="memory","OutOfMemoryError"
+page.tags=memory,OutOfMemoryError
 @jd:body
 
  <div id="qv-wrapper">

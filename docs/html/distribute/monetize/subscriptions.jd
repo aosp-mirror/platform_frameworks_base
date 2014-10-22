@@ -1,0 +1,73 @@
+page.title=Monetize with Subscriptions
+page.image=/distribute/images/subscription.jpg
+page.metaDescription=Sell subscriptions to your products to create continuing revenue streams.
+page.tags="in-app", "iap", "monetizing", "free", "trials"
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-subscription-0.jpg">
+  <p class="img-caption" style="width:300px;">
+  In-App Subscriptions
+  </p>
+</div>
+
+<p>
+  Subscriptions provide an excellent opportunity to create continuing revenue
+  streams. Subscriptions are similar to digital goods offered through <a href=
+  "{@docRoot}google/play/billing/index.html">In-app Billing</a> but made
+  available on a recurring monthly or annual basis.
+</p>
+
+<p>
+  When users purchase subscriptions in your apps, Google Play handles all
+  checkout details so your apps never have to directly process any financial
+  transactions. Google Play processes all payments for subscriptions through
+  Google Wallet, just as it does for standard in-app products and app
+  purchases. This ensures a consistent and familiar purchase flow for your
+  users and reduces cart abandonment rates.
+</p>
+
+<p>
+  At a basic level you can offer use of your apps or access to their content on
+  a subscription basis, using a <a href=
+  "{@docRoot}google/play/billing/billing_subscriptions.html#trials">free trial
+  subscription</a> to allow users to explore the apps or content.
+</p>
+
+<p>
+  A more advanced approach is to offer specific features or content items as
+  subscriptions within your apps. This way you can offer users basic or core
+  features or content for free or part of the initial purchase and extended
+  features or content as subscriptions. You can have multiple subscriptions
+  active in an app at any one time.
+</p>
+
+<p>
+  To get started with subscriptions you need to set-up a Google Wallet <a href=
+  "{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant
+  Account</a> from the Developer Console. You then define subscriptions for
+  published or draft apps in the <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#in-app-billing">In-app
+  Products</a> section of the Developer Console, integrate the In-app Billing
+  API into your apps, and add the mechanisms to unlock subscribed features or
+  deliver content.
+</p>
+
+<div class="sidebox" style="width:400px;float:left;margin-left:0">
+  <p>
+  <strong>Tip:</strong> Due to some direct carrier billing limits, we
+  recommend monthly subscriptions. Annual subscriptions may exceed limits,
+  causing the purchase to be blocked and you to lose that revenue.
+  </p>
+</div>
+
+<p style="clear:both">
+</p>
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/subscriptions"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+

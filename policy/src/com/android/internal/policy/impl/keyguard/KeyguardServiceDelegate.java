@@ -12,7 +12,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -30,8 +29,8 @@ import com.android.internal.widget.LockPatternUtils;
  */
 public class KeyguardServiceDelegate {
     // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
-    public static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    public static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+    public static final String KEYGUARD_PACKAGE = "com.android.systemui";
+    public static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
 
     private static final String TAG = "KeyguardServiceDelegate";
     private static final boolean DEBUG = true;
@@ -45,13 +44,13 @@ public class KeyguardServiceDelegate {
             // the event something checks before the service is actually started.
             // KeyguardService itself should default to this state until the real state is known.
             showing = true;
-            showingAndNotHidden = true;
+            showingAndNotOccluded = true;
             secure = true;
         }
         boolean showing;
-        boolean showingAndNotHidden;
+        boolean showingAndNotOccluded;
         boolean inputRestricted;
-        boolean hidden;
+        boolean occluded;
         boolean secure;
         boolean dreaming;
         boolean systemIsReady;
@@ -103,12 +102,18 @@ public class KeyguardServiceDelegate {
     };
 
     public KeyguardServiceDelegate(Context context, LockPatternUtils lockPatternUtils) {
+        mScrim = createScrim(context);
+    }
+
+    public void bindService(Context context) {
         Intent intent = new Intent();
         intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
-        mScrim = createScrim(context);
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
             if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
+            mKeyguardState.showing = false;
+            mKeyguardState.showingAndNotOccluded = false;
+            mKeyguardState.secure = false;
         } else {
             if (DEBUG) Log.v(TAG, "*** Keyguard started");
         }
@@ -146,11 +151,11 @@ public class KeyguardServiceDelegate {
         return mKeyguardState.showing;
     }
 
-    public boolean isShowingAndNotHidden() {
+    public boolean isShowingAndNotOccluded() {
         if (mKeyguardService != null) {
-            mKeyguardState.showingAndNotHidden = mKeyguardService.isShowingAndNotHidden();
+            mKeyguardState.showingAndNotOccluded = mKeyguardService.isShowingAndNotOccluded();
         }
-        return mKeyguardState.showingAndNotHidden;
+        return mKeyguardState.showingAndNotOccluded;
     }
 
     public boolean isInputRestricted() {
@@ -172,11 +177,13 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void setHidden(boolean isHidden) {
+    public int setOccluded(boolean isOccluded) {
+        int result = 0;
         if (mKeyguardService != null) {
-            mKeyguardService.setHidden(isHidden);
+            result = mKeyguardService.setOccluded(isOccluded);
         }
-        mKeyguardState.hidden = isHidden;
+        mKeyguardState.occluded = isOccluded;
+        return result;
     }
 
     public void dismiss() {
@@ -246,7 +253,6 @@ public class KeyguardServiceDelegate {
         if (mKeyguardService != null) {
             mKeyguardService.onSystemReady();
         } else {
-            if (DEBUG) Log.v(TAG, "onSystemReady() called before keyguard service was ready");
             mKeyguardState.systemIsReady = true;
         }
     }
@@ -270,6 +276,12 @@ public class KeyguardServiceDelegate {
         mKeyguardState.currentUser = newUserId;
     }
 
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+        if (mKeyguardService != null) {
+            mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
+        }
+    }
+
     private static final View createScrim(Context context) {
         View view = new View(context);
 
@@ -285,6 +297,7 @@ public class KeyguardServiceDelegate {
                 stretch, stretch, type, flags, PixelFormat.TRANSLUCENT);
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
         lp.setTitle("KeyguardScrim");
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.addView(view, lp);
@@ -324,4 +337,9 @@ public class KeyguardServiceDelegate {
         mKeyguardState.bootCompleted = true;
     }
 
+    public void onActivityDrawn() {
+        if (mKeyguardService != null) {
+            mKeyguardService.onActivityDrawn();
+        }
+    }
 }

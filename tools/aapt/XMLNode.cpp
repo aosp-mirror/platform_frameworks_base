@@ -646,6 +646,12 @@ sp<XMLNode> XMLNode::parse(const sp<AaptFile>& file)
     return state.root;
 }
 
+XMLNode::XMLNode()
+    : mNextAttributeIndex(0x80000000)
+    , mStartLineNumber(0)
+    , mEndLineNumber(0)
+    , mUTF8(false) {}
+
 XMLNode::XMLNode(const String8& filename, const String16& s1, const String16& s2, bool isNamespace)
     : mNextAttributeIndex(0x80000000)
     , mFilename(filename)
@@ -831,6 +837,32 @@ status_t XMLNode::addAttribute(const String16& ns, const String16& name,
         e.string = value;
         mAttributes.add(e);
         mAttributeOrder.add(e.index, mAttributes.size()-1);
+    }
+    return NO_ERROR;
+}
+
+status_t XMLNode::removeAttribute(size_t index)
+{
+    if (getType() == TYPE_CDATA) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (index >= mAttributes.size()) {
+        return UNKNOWN_ERROR;
+    }
+
+    const attribute_entry& e = mAttributes[index];
+    const uint32_t key = e.nameResId ? e.nameResId : e.index;
+    mAttributeOrder.removeItem(key);
+    mAttributes.removeAt(index);
+
+    // Shift all the indices.
+    const size_t attrCount = mAttributeOrder.size();
+    for (size_t i = 0; i < attrCount; i++) {
+        size_t attrIdx = mAttributeOrder[i];
+        if (attrIdx > index) {
+            mAttributeOrder.replaceValueAt(i, attrIdx - 1);
+        }
     }
     return NO_ERROR;
 }
@@ -1030,6 +1062,30 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
     }
 
     return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
+}
+
+sp<XMLNode> XMLNode::clone() const {
+    sp<XMLNode> copy = new XMLNode();
+    copy->mNamespacePrefix = mNamespacePrefix;
+    copy->mNamespaceUri = mNamespaceUri;
+    copy->mElementName = mElementName;
+
+    const size_t childCount = mChildren.size();
+    for (size_t i = 0; i < childCount; i++) {
+        copy->mChildren.add(mChildren[i]->clone());
+    }
+
+    copy->mAttributes = mAttributes;
+    copy->mAttributeOrder = mAttributeOrder;
+    copy->mNextAttributeIndex = mNextAttributeIndex;
+    copy->mChars = mChars;
+    memcpy(&copy->mCharsValue, &mCharsValue, sizeof(mCharsValue));
+    copy->mComment = mComment;
+    copy->mFilename = mFilename;
+    copy->mStartLineNumber = mStartLineNumber;
+    copy->mEndLineNumber = mEndLineNumber;
+    copy->mUTF8 = mUTF8;
+    return copy;
 }
 
 status_t XMLNode::flatten(const sp<AaptFile>& dest,

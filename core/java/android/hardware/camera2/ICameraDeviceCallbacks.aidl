@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.CaptureResultExtras;
 
 /** @hide */
 interface ICameraDeviceCallbacks
@@ -25,8 +26,9 @@ interface ICameraDeviceCallbacks
      * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
      */
 
-    oneway void onCameraError(int errorCode);
-    oneway void onCameraIdle();
-    oneway void onCaptureStarted(int requestId, long timestamp);
-    oneway void onResultReceived(int requestId, in CameraMetadataNative result);
+    oneway void onDeviceError(int errorCode, in CaptureResultExtras resultExtras);
+    oneway void onDeviceIdle();
+    oneway void onCaptureStarted(in CaptureResultExtras resultExtras, long timestamp);
+    oneway void onResultReceived(in CameraMetadataNative result,
+                                 in CaptureResultExtras resultExtras);
 }

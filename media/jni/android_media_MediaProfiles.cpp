@@ -166,7 +166,9 @@ static bool isCamcorderQualityKnown(int quality)
     return ((quality >= CAMCORDER_QUALITY_LIST_START &&
              quality <= CAMCORDER_QUALITY_LIST_END) ||
             (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LIST_START &&
-             quality <= CAMCORDER_QUALITY_TIME_LAPSE_LIST_END));
+             quality <= CAMCORDER_QUALITY_TIME_LAPSE_LIST_END) ||
+             (quality >= CAMCORDER_QUALITY_HIGH_SPEED_LIST_START &&
+              quality <= CAMCORDER_QUALITY_HIGH_SPEED_LIST_END));
 }
 
 static jobject
@@ -290,75 +292,6 @@ android_media_MediaProfiles_native_get_image_encoding_quality_level(JNIEnv *env,
     }
     return static_cast<jint>(levels[index]);
 }
-static jobject
-android_media_MediaProfiles_native_get_videoeditor_profile(JNIEnv *env, jobject thiz)
-{
-    ALOGV("native_get_videoeditor_profile");
-
-    int maxInputFrameWidth =
-            sProfiles->getVideoEditorCapParamByName("videoeditor.input.width.max");
-    int maxInputFrameHeight =
-            sProfiles->getVideoEditorCapParamByName("videoeditor.input.height.max");
-    int maxOutputFrameWidth =
-            sProfiles->getVideoEditorCapParamByName("videoeditor.output.width.max");
-    int maxOutputFrameHeight =
-            sProfiles->getVideoEditorCapParamByName("videoeditor.output.height.max");
-
-    // Check on the values retrieved
-    if (maxInputFrameWidth == -1 || maxInputFrameHeight == -1 ||
-        maxOutputFrameWidth == -1 || maxOutputFrameHeight == -1) {
-
-        jniThrowException(env, "java/lang/RuntimeException",\
-            "Error retrieving videoeditor profile params");
-        return NULL;
-    }
-    ALOGV("native_get_videoeditor_profile \
-        inWidth:%d inHeight:%d,outWidth:%d, outHeight:%d",\
-        maxInputFrameWidth,maxInputFrameHeight,\
-        maxOutputFrameWidth,maxOutputFrameHeight);
-
-    jclass VideoEditorProfileClazz =
-        env->FindClass("android/media/videoeditor/VideoEditorProfile");
-    jmethodID VideoEditorProfileConstructorMethodID =
-        env->GetMethodID(VideoEditorProfileClazz, "<init>", "(IIII)V");
-    return env->NewObject(VideoEditorProfileClazz,
-                          VideoEditorProfileConstructorMethodID,
-                          maxInputFrameWidth,
-                          maxInputFrameHeight,
-                          maxOutputFrameWidth,
-                          maxOutputFrameHeight);
-}
-static jint
-android_media_MediaProfiles_native_get_videoeditor_export_profile(
-    JNIEnv *env, jobject thiz, jint codec)
-{
-    ALOGV("android_media_MediaProfiles_native_get_export_profile index ");
-    int profile =0;
-    profile = sProfiles->getVideoEditorExportParamByName("videoeditor.export.profile", codec);
-    // Check the values retrieved
-    if (profile == -1) {
-        jniThrowException(env, "java/lang/RuntimeException",\
-            "Error retrieving videoeditor export profile params");
-        return -1;
-    }
-    return static_cast<jint>(profile);
-}
-
-static jint
-android_media_MediaProfiles_native_get_videoeditor_export_level(
-    JNIEnv *env, jobject thiz, jint codec)
-{
-    ALOGV("android_media_MediaProfiles_native_get_export_level");
-    int level =0;
-    level = sProfiles->getVideoEditorExportParamByName("videoeditor.export.level", codec);
-    // Check the values retrieved
-    if (level == -1) {
-        jniThrowException(env, "java/lang/RuntimeException",\
-            "Error retrieving videoeditor export level params");
-        return -1;
-    }
-    return static_cast<jint>(level);
-}
 static JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_file_formats",            "()I",                    (void *)android_media_MediaProfiles_native_get_num_file_formats},
@@ -396,19 +329,10 @@ static JNINativeMethod gMethodsForCameraProfileClass[] = {
     {"native_get_image_encoding_quality_level","(II)I",                   (void *)android_media_MediaProfiles_native_get_image_encoding_quality_level},
 };
 
-static JNINativeMethod gMethodsForVideoEditorProfileClass[] = {
-    {"native_init",                            "()V",         (void *)android_media_MediaProfiles_native_init},
-    {"native_get_videoeditor_profile", "()Landroid/media/videoeditor/VideoEditorProfile;", (void *)android_media_MediaProfiles_native_get_videoeditor_profile},
-    {"native_get_videoeditor_export_profile", "(I)I", (void *)android_media_MediaProfiles_native_get_videoeditor_export_profile},
-    {"native_get_videoeditor_export_level", "(I)I", (void *)android_media_MediaProfiles_native_get_videoeditor_export_level},
-};
-
 static const char* const kEncoderCapabilitiesClassPathName = "android/media/EncoderCapabilities";
 static const char* const kDecoderCapabilitiesClassPathName = "android/media/DecoderCapabilities";
 static const char* const kCamcorderProfileClassPathName = "android/media/CamcorderProfile";
 static const char* const kCameraProfileClassPathName = "android/media/CameraProfile";
-static const char* const kVideoEditorProfileClassPathName =
-    "android/media/videoeditor/VideoEditorProfile";
 
 // This function only registers the native methods, and is called from
 // JNI_OnLoad in android_media_MediaPlayer.cpp
@@ -434,11 +358,6 @@ int register_android_media_MediaProfiles(JNIEnv *env)
                gMethodsForCameraProfileClass,
                NELEM(gMethodsForCameraProfileClass));
 
-    int ret5 = AndroidRuntime::registerNativeMethods(env,
-               kVideoEditorProfileClassPathName,
-               gMethodsForVideoEditorProfileClass,
-               NELEM(gMethodsForVideoEditorProfileClass));
-
     // Success if all return values from above are 0
-    return (ret1 || ret2 || ret3 || ret4 || ret5);
+    return (ret1 || ret2 || ret3 || ret4);
 }

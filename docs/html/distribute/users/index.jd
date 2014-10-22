@@ -1,0 +1,30 @@
+page.title=Get Users
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+<p>
+  You’ve published your app, now how do you acquire users? Every app and game
+  is different, but there are some common themes from successful Google Play
+  developers. These best practices are critical to your app or game’s success.
+</p>
+
+<div class="dynamic-grid">
+
+<div class="resource-widget resource-flow-layout landing col-16"
+  data-query="collection:distribute/users"
+  data-cardSizes="6x6"
+  data-maxResults="6">
+</div>
+
+<h3>Related resources</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:youtube+tag:users,tag:global,type:blog+tag:users"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x3"
+    data-maxResults="6">
+  </div>
+  
+</div>

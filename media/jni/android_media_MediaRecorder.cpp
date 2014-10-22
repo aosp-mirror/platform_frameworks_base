@@ -157,6 +157,10 @@ static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, job
         return;
     }
     sp<Camera> c = get_native_camera(env, camera, NULL);
+    if (c == NULL) {
+        // get_native_camera will throw an exception in this case
+        return;
+    }
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setCamera(c->remote(), c->getRecordingProxy()),
             "java/lang/RuntimeException", "setCamera failed.");
@@ -346,6 +350,26 @@ android_media_MediaRecorder_native_getMaxAmplitude(JNIEnv *env, jobject thiz)
     return (jint) result;
 }
 
+static jobject
+android_media_MediaRecorder_getSurface(JNIEnv *env, jobject thiz)
+{
+    ALOGV("getSurface");
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+
+    sp<IGraphicBufferProducer> bufferProducer = mr->querySurfaceMediaSourceFromMediaServer();
+    if (bufferProducer == NULL) {
+        jniThrowException(
+                env,
+                "java/lang/IllegalStateException",
+                "failed to get surface");
+        return NULL;
+    }
+
+    // Wrap the IGBP in a Java-language Surface.
+    return android_view_Surface_createFromIGraphicBufferProducer(env,
+            bufferProducer);
+}
+
 static void
 android_media_MediaRecorder_start(JNIEnv *env, jobject thiz)
 {
@@ -472,6 +496,7 @@ static JNINativeMethod gMethods[] = {
     {"setMaxDuration",       "(I)V",                            (void *)android_media_MediaRecorder_setMaxDuration},
     {"setMaxFileSize",       "(J)V",                            (void *)android_media_MediaRecorder_setMaxFileSize},
     {"_prepare",             "()V",                             (void *)android_media_MediaRecorder_prepare},
+    {"getSurface",           "()Landroid/view/Surface;",        (void *)android_media_MediaRecorder_getSurface},
     {"getMaxAmplitude",      "()I",                             (void *)android_media_MediaRecorder_native_getMaxAmplitude},
     {"start",                "()V",                             (void *)android_media_MediaRecorder_start},
     {"stop",                 "()V",                             (void *)android_media_MediaRecorder_stop},

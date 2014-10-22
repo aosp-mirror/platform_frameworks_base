@@ -23,7 +23,7 @@
     <application android:label="@string/app_name" android:icon="@drawable/app_icon">
         <activity android:name=".KeyguardTestActivity"
                 android:label="@string/app_name"
-                android:theme="@android:style/Theme.Holo">
+                android:theme="@android:style/Theme.DeviceDefault.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

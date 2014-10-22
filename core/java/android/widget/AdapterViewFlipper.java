@@ -59,10 +59,19 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     }
 
     public AdapterViewFlipper(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.AdapterViewFlipper);
+    public AdapterViewFlipper(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public AdapterViewFlipper(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.AdapterViewFlipper, defStyleAttr, defStyleRes);
         mFlipInterval = a.getInt(
                 com.android.internal.R.styleable.AdapterViewFlipper_flipInterval, DEFAULT_INTERVAL);
         mAutoStart = a.getBoolean(
@@ -96,7 +105,17 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT);
-        getContext().registerReceiver(mReceiver, filter);
+
+        // OK, this is gross but needed. This class is supported by the
+        // remote views machanism and as a part of that the remote views
+        // can be inflated by a context for another user without the app
+        // having interact users permission - just for loading resources.
+        // For exmaple, when adding widgets from a user profile to the
+        // home screen. Therefore, we register the receiver as the current
+        // user not the one the context is for.
+        getContext().registerReceiverAsUser(mReceiver, android.os.Process.myUserHandle(),
+                filter, null, mHandler);
+
 
         if (mAutoStart) {
             // Automatically start when requested

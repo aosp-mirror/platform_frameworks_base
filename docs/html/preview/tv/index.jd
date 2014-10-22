@@ -1,0 +1,22 @@
+page.title=Android TV Apps
+
+@jd:body
+
+<p>Android offers a rich user experience that's optimized for apps running on large screen
+  devices, such as high-definition televisions. Apps on TV offer new opportunities to
+  delight your users from the comfort of their couch.</p>
+
+<p>This guide helps you build apps for TV devices, including:</p>
+
+<ul>
+  <li>How to set up your development environment</li>
+  <li>How to build user interfaces for TV</li>
+  <li>Guidelines for building games for TV</li>
+</ul>
+
+<p>Prepare your app for its big screen debut!</p>
+
+<p>
+  <strong><a href="{@docRoot}preview/tv/start/index.html">Get Started &gt;</a></strong>
+</p>
+

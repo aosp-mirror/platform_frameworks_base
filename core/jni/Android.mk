@@ -6,6 +6,7 @@ LOCAL_CFLAGS += -DHAVE_CONFIG_H -DKHTML_NO_EXCEPTIONS -DGKWQ_NO_JAVA
 LOCAL_CFLAGS += -DNO_SUPPORT_JS_BINDING -DQT_NO_WHEELEVENT -DKHTML_NO_XBL
 LOCAL_CFLAGS += -U__APPLE__
 LOCAL_CFLAGS += -Wno-unused-parameter -Wno-int-to-pointer-cast
+LOCAL_CFLAGS += -Wno-non-virtual-dtor
 LOCAL_CFLAGS += -Wno-maybe-uninitialized -Wno-parentheses
 LOCAL_CPPFLAGS += -Wno-conversion-null
 
@@ -35,6 +36,8 @@ LOCAL_SRC_FILES:= \
 	android_opengl_GLES11Ext.cpp \
 	android_opengl_GLES20.cpp \
 	android_opengl_GLES30.cpp \
+	android_opengl_GLES31.cpp \
+	android_opengl_GLES31Ext.cpp \
 	android_database_CursorWindow.cpp \
 	android_database_SQLiteCommon.cpp \
 	android_database_SQLiteConnection.cpp \
@@ -53,15 +56,18 @@ LOCAL_SRC_FILES:= \
 	android_view_InputQueue.cpp \
 	android_view_KeyEvent.cpp \
 	android_view_KeyCharacterMap.cpp \
-	android_view_HardwareRenderer.cpp \
 	android_view_GraphicBuffer.cpp \
-	android_view_GLES20DisplayList.cpp \
 	android_view_GLES20Canvas.cpp \
+	android_view_HardwareLayer.cpp \
+	android_view_ThreadedRenderer.cpp \
 	android_view_MotionEvent.cpp \
 	android_view_PointerIcon.cpp \
+	android_view_RenderNode.cpp \
+	android_view_RenderNodeAnimator.cpp \
 	android_view_VelocityTracker.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
+	android_text_StaticLayout.cpp \
 	android_os_Debug.cpp \
 	android_os_MemoryFile.cpp \
 	android_os_MessageQueue.cpp \
@@ -74,7 +80,6 @@ LOCAL_SRC_FILES:= \
 	android_net_LocalSocketImpl.cpp \
 	android_net_NetUtils.cpp \
 	android_net_TrafficStats.cpp \
-	android_net_wifi_WifiNative.cpp \
 	android_nio_utils.cpp \
 	android_util_AssetManager.cpp \
 	android_util_Binder.cpp \
@@ -83,25 +88,30 @@ LOCAL_SRC_FILES:= \
 	android_util_Process.cpp \
 	android_util_StringBlock.cpp \
 	android_util_XmlBlock.cpp \
+	android_graphics_Canvas.cpp \
+	android_graphics_Picture.cpp \
 	android/graphics/AutoDecodeCancel.cpp \
 	android/graphics/Bitmap.cpp \
 	android/graphics/BitmapFactory.cpp \
 	android/graphics/Camera.cpp \
-	android/graphics/Canvas.cpp \
+	android/graphics/CanvasProperty.cpp \
 	android/graphics/ColorFilter.cpp \
 	android/graphics/DrawFilter.cpp \
+	android/graphics/FontFamily.cpp \
 	android/graphics/CreateJavaOutputStreamAdaptor.cpp \
 	android/graphics/Graphics.cpp \
 	android/graphics/HarfBuzzNGFaceSkia.cpp \
 	android/graphics/Interpolator.cpp \
-	android/graphics/LayerRasterizer.cpp \
 	android/graphics/MaskFilter.cpp \
 	android/graphics/Matrix.cpp \
+	android/graphics/MinikinSkia.cpp \
+	android/graphics/MinikinUtils.cpp \
 	android/graphics/Movie.cpp \
 	android/graphics/NinePatch.cpp \
 	android/graphics/NinePatchImpl.cpp \
 	android/graphics/NinePatchPeeker.cpp \
 	android/graphics/Paint.cpp \
+	android/graphics/PaintImpl.cpp \
 	android/graphics/Path.cpp \
 	android/graphics/PathMeasure.cpp \
 	android/graphics/PathEffect.cpp \
@@ -111,14 +121,16 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Rasterizer.cpp \
 	android/graphics/Region.cpp \
 	android/graphics/Shader.cpp \
+	android/graphics/SkiaCanvas.cpp \
 	android/graphics/SurfaceTexture.cpp \
-	android/graphics/TextLayout.cpp \
-	android/graphics/TextLayoutCache.cpp \
 	android/graphics/Typeface.cpp \
+	android/graphics/TypefaceImpl.cpp \
 	android/graphics/Utils.cpp \
 	android/graphics/Xfermode.cpp \
 	android/graphics/YuvToJpegEncoder.cpp \
 	android/graphics/pdf/PdfDocument.cpp \
+	android/graphics/pdf/PdfEditor.cpp \
+	android/graphics/pdf/PdfRenderer.cpp \
 	android_media_AudioRecord.cpp \
 	android_media_AudioSystem.cpp \
 	android_media_AudioTrack.cpp \
@@ -127,14 +139,20 @@ LOCAL_SRC_FILES:= \
 	android_media_ToneGenerator.cpp \
 	android_hardware_Camera.cpp \
 	android_hardware_camera2_CameraMetadata.cpp \
+	android_hardware_camera2_legacy_LegacyCameraDevice.cpp \
+	android_hardware_camera2_legacy_PerfMeasurement.cpp \
+	android_hardware_camera2_DngCreator.cpp \
 	android_hardware_SensorManager.cpp \
 	android_hardware_SerialPort.cpp \
+	android_hardware_SoundTrigger.cpp \
 	android_hardware_UsbDevice.cpp \
 	android_hardware_UsbDeviceConnection.cpp \
 	android_hardware_UsbRequest.cpp \
+	android_hardware_location_ActivityRecognitionHardware.cpp \
 	android_util_FileObserver.cpp \
 	android/opengl/poly_clip.cpp.arm \
 	android/opengl/util.cpp.arm \
+	android_server_FingerprintManager.cpp \
 	android_server_NetworkManagementSocketTagger.cpp \
 	android_server_Watchdog.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
@@ -148,7 +166,9 @@ LOCAL_SRC_FILES:= \
 	android_content_res_Configuration.cpp \
 	android_animation_PropertyValuesHolder.cpp \
 	com_android_internal_net_NetworkStatsFactory.cpp \
-	com_android_internal_os_Zygote.cpp
+	com_android_internal_os_Zygote.cpp \
+	com_android_internal_util_VirtualRefBasePtr.cpp \
+	com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
@@ -158,13 +178,17 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
+	$(TOP)/bionic/libc/dns/include \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
+	$(TOP)/system/netd/include \
 	external/icu/icu4c/source/common \
+	external/pdfium/core/include/fpdfapi \
+	external/pdfium/core/include/fpdfdoc \
+	external/pdfium/fpdfsdk/include \
 	external/skia/src/core \
-	external/skia/src/pdf \
+	external/skia/src/effects \
 	external/skia/src/images \
-	external/skia/include/utils \
 	external/sqlite/dist \
 	external/sqlite/android \
 	external/expat/lib \
@@ -174,7 +198,11 @@ LOCAL_C_INCLUDES += \
 	external/harfbuzz_ng/src \
 	external/zlib \
 	frameworks/opt/emoji \
-	libcore/include
+	libcore/include \
+	$(call include-path-for, audio-utils) \
+	frameworks/minikin/include \
+	external/freetype/include
+# TODO: clean up Minikin so it doesn't need the freetype include
 
 LOCAL_SHARED_LIBRARIES := \
 	libmemtrack \
@@ -189,6 +217,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libui \
 	libgui \
 	libinput \
+	libinputflinger \
 	libcamera_client \
 	libcamera_metadata \
 	libskia \
@@ -210,7 +239,15 @@ LOCAL_SHARED_LIBRARIES := \
 	libusbhost \
 	libharfbuzz_ng \
 	libz \
-	libnativebridge
+	libaudioutils \
+	libpdfium \
+	libimg_utils \
+	libnetd_client \
+	libsoundtrigger \
+	libminikin \
+	libstlport \
+	libprocessgroup \
+	libnativebridge \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

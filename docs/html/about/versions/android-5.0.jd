@@ -1,0 +1,1176 @@
+page.title=Android 5.0 APIs
+excludeFromSuggestions=true
+sdk.platform.version=5.0
+sdk.platform.apiLevel=21
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document
+    <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">show more</span>
+        <span class="less" style="display:none">show less</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#ApiLevel">Update your target API level</a></li>
+  <li><a href="#Behaviors">Important Behavior Changes</a>
+    <ol>
+      <li><a href="#ART">If you haven't tested your app against the new Android Runtime (ART)...</a></li>
+      <li><a href="#BehaviorNotifications">If your app implements notifications...</a></li>
+      <li><a href="#BehaviorMediaControl">If your app uses RemoteControlClient...</a></li>
+<li><a href="#BehaviorGetRecentTasks">If your app uses getRecentTasks()...</a></li>
+<li><a href="#64BitSupport">If you are using the Android Native Development Kit (NDK)...</a></li>
+<li><a href="#BindService">If your app binds to a Service...</a></li>
+    </ol>
+  </li>
+  <li><a href="#UI">User Interface</a>
+    <ol>
+      <li><a href="#MaterialDesign">Material design support</a></li>
+      <li><a href="#Recents">Concurrent documents and activities in the recents screen</a></li>
+      <li><a href="#WebView">WebView updates</a></li>
+      <li><a href="#ScreenCapture">Screen capturing and sharing</a></li>
+    </ol>
+  </li>
+  <li><a href="#Notifications">Notifications</a>
+    <ol>
+      <li><a href="#LockscreenNotifications">Lock screen notifications</a></li>
+      <li><a href="#NotificationsMetadata">Notifications metadata</a></li>
+    </ol>
+  </li>
+  <li><a href="#Graphics">Graphics</a>
+    <ol>
+      <li><a href="#OpenGLES-3-1">Support for OpenGL ES 3.1</a></li>
+      <li><a href="#AndroidExtensionPack">Android Extension Pack</a></li>
+    </ol>
+  </li>
+  <li><a href="#Media">Media</a>
+    <ol>
+      <li><a href="#Camera-v2">Camera API for advanced camera capabilities</a></li>
+      <li><a href="#AudioPlayback">Audio playback</a></li>
+      <li><a href="#MediaPlaybackControl">Media playback control</a></li>
+      <li><a href="#MediaBrowsing">Media browsing</a></li>
+    </ol>
+  </li>
+  <li><a href="#Storage">Storage</a>
+    <ol>
+      <li><a href="#DirectorySelection">Directory selection</a></li>
+    </ol>
+  </li>
+  <li><a href="#Wireless">Wireless and Connectivity</a>
+    <ol>
+      <li><a href="#Multinetwork">Multiple network connections</a></li>
+      <li><a href="#BluetoothBroadcasting">Bluetooth broadcasting</a></li>
+      <li><a href="#NFCEnhancements">NFC enhancements</a></li>
+    </ol>
+  </li>
+  <li><a href="#Power">Project Volta</a>
+    <ol>
+      <li><a href="#JobScheduler">Scheduling jobs</a></li>
+      <li><a href="#PowerMeasurementTools">Developer tools for battery usage</a>
+    </ol>
+  </li>
+  <li><a href="#Enterprise">Android in the Workplace and in Education</a>
+    <ol>
+      <li><a href="#ManagedProvisioning">Managed provisioning</a></li>
+      <li><a href="#DeviceOwner">Device owner</a></li>
+      <li><a href="#ScreenPinning">Screen pinning</a></li>
+    </ol>
+  </li>
+  <li><a href="#System">System</a>
+    <ol>
+      <li><a href="#AppUsageStatistics">App usage statistics</a></li>
+    </ol>
+  </li>
+  <li><a href="#Printing">Printing Framework</a>
+    <ol>
+      <li><a href="#PDFRender">Render PDF as bitmap</a></li>
+    </ol>
+  </li>
+  <li><a href="#TestingA11y">Testing &amp; Accessibility</a>
+    <ol>
+      <li><a href="#TestingA11yImprovements">Testing and accessibility improvements</a></li>
+    </ol>
+  </li>
+  <li><a href="#IME">IME</a>
+    <ol>
+      <li><a href="#Switching">Easier switching between input languages</a></li>
+    </ol>
+  </li>
+  <li><a href="#Manifest">Manifest Declarations</a>
+    <ol>
+      <li><a href="#ManifestFeatures">Declarable required features</a></li>
+      <li><a href="#Permissions">User permissions</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>API Level: {@sdkPlatformApiLevel}</p>
+
+<p>Android 5.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#LOLLIPOP">LOLLIPOP</a>)
+  offers new features for users and app developers. This document provides an
+  introduction to the most notable new APIs.</p>
+
+<p>For a high-level look at the new platform features, instead
+see the
+<a href="{@docRoot}about/versions/lollipop.html">Android Lollipop
+highlights</a>.</p>
+
+
+<h3 id="Start">Start developing</h3>
+
+<p>To start building apps for Android 5.0, you must first <a href="{@docRoot}sdk/index.html">get
+the Android SDK</a>. Then use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
+to download the Android 5.0 SDK Platform and System Images.</p>
+
+<p style="
+    padding: 10px;
+    background: #eee;
+    width: 445px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+">To test your apps on a real device, flash a Nexus 5 or Nexus 7 with the <br>
+<a href="/preview/index.html#Start"><b>ANDROID PREVIEW SYSTEM IMAGE</b></a>.</p>
+
+
+
+<h3 id="ApiLevel">Update your target API level</h3>
+
+<p>To better optimize your app for devices running Android {@sdkPlatformVersion},
+  set your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+<code>"{@sdkPlatformApiLevel}"</code>, install your app on an Android
+{@sdkPlatformVersion} system image, test it, then publish the updated app with
+this change.</p>
+
+<p>You can use Android {@sdkPlatformVersion} APIs while also supporting older
+versions by adding conditions to your code that check for the system API level
+before executing APIs not supported by your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>.
+To learn more about maintaining backward compatibility, read <a
+href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting
+Different Platform Versions</a>.</p>
+
+<p>For more information about how API levels work, read <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
+Level?</a></p>
+
+<h2 id="Behaviors">Important Behavior Changes</h2>
+
+<p>If you have previously published an app for Android, be aware that your app
+  might be affected by changes in Android 5.0.</p>
+
+<h3 id="ART">If you haven't tested your app against the new Android Runtime (ART)...</h3>
+
+<p>The 4.4 release introduced a new, experimental Android runtime, ART. Under
+4.4, ART was optional, and the default runtime remained Dalvik. With Android
+5.0, ART is now the default runtime.</p>
+
+<p>For an overview of ART's new features, see
+<a href="https://source.android.com/devices/tech/dalvik/art.html">Introducing
+ART</a>. Some of the major new features are:</p>
+
+<ul>
+  <li>Ahead-of-time (AOT) compilation</li>
+  <li>Improved garbage collection (GC)</li>
+  <li>Improved debugging support</li>
+</ul>
+
+<p>Most Android apps should just work without any changes under ART. However, some
+techniques that work on Dalvik do not work on ART. For information about the
+most important issues, see
+<a href="{@docRoot}guide/practices/verifying-apps-art.html">Verifying App
+Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
+
+<ul>
+  <li>Your app uses Java Native Interface (JNI) to run C/C++ code.</li>
+  <li>You use development tools that generate non-standard code (such as some
+      obfuscators).</li>
+  <li>You use techniques that are incompatible with compacting garbage
+      collection. (ART does not currently implement compacting GC, but
+      compacting GC is under development in the Android Open Source
+      Project.)</li>
+</ul>
+
+<h3 id="BehaviorNotifications">If your app implements notifications...</h3>
+
+<p>Make sure your notifications take these Android 5.0 changes into account.
+ To learn more about designing your notifications for Android 5.0 and higher,
+ see the <a href="{@docRoot}design/patterns/notifications.html">notifications design guide</a>.
+</p>
+
+<h4 id="NotificationsMaterialDesignStyle">Material design style</h4>
+<p>Notifications are drawn with dark text atop white (or very light) backgrounds
+  to match the new material design widgets. Make sure that all your
+  notifications look right with the new color scheme. If your notifications
+look wrong, fix them:</p>
+
+<ul>
+  <li>Use {@link android.app.Notification.Builder#setColor(int) setColor()}
+    to set an accent color in a circle behind your icon image. </li>
+  <li>Update or remove assets that involve color. The system ignores all
+    non-alpha channels in action icons and in the main notification icon. You
+    should assume that these icons will be alpha-only. The system draws
+    notification icons in white and action icons in dark gray.</li>
+</ul>
+
+<h4 id="NotificationsSoundVibration">Sound and vibration</h4>
+<p>If you are currently adding sounds and vibrations to your notifications by
+using the {@link android.media.Ringtone}, {@link android.media.MediaPlayer},
+or {@link android.os.Vibrator} classes, remove this code so that
+the system can present notifications correctly in
+<em>priority</em> mode. Instead, use
+{@link android.app.Notification.Builder} methods to add sounds and
+vibration.</p>
+
+<p>Setting the device to
+{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} now
+causes the device to enter the new priority mode. The device leaves priority
+mode if you set it to
+{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} or
+{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}.</p>
+
+<p>Previously, Android used {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC}
+as the master stream to control volume on tablet devices. In Android 5.0, the
+master volume stream for both phone and tablet devices is now unified, and
+is controlled by {@link android.media.AudioManager#STREAM_RING STREAM_RING} or
+{@link android.media.AudioManager#STREAM_NOTIFICATION STREAM_NOTIFICATION}.</p>
+
+<h4 id="NotificationsLockscreenVisibility">Lock screen visibility</h4>
+<p>By default, notifications now appear on the user's lock screen in Android 5.0.
+Users can choose to protect sensitive information from being exposed, in which
+case the system automatically redacts the text displayed by the notification. To
+customize this redacted notification, use
+{@link android.app.Notification.Builder#setPublicVersion(android.app.Notification)
+  setPublicVersion()}.</p>
+<p>If the notification does not contain personal information, or if you want to
+allow media playback control on the notification, call the
+{@link android.app.Notification.Builder#setVisibility(int) setVisibility()}
+method and set the notification's visibility level to
+{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}.
+</p>
+
+<h4 id="NotificationsMediaPlayback">Media playback</h4>
+<p>If you are implementing notifications that present media playback
+status or transport controls, consider using the new
+{@link android.app.Notification.MediaStyle} template instead of a custom
+{@link android.widget.RemoteViews.RemoteView} object. Whichever approach you
+choose, make sure to set the notification's visibility to
+{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC} so that
+your controls are accessible from the lock screen. Note that beginning in
+Android 5.0, the system no longer shows
+{@link android.media.RemoteControlClient} objects on the lock screen. For more
+information, see
+<a href="#BehaviorMediaControl">If your app uses RemoteControlClient</a>.</p>
+
+<h4 id="NotificationsHeadsup">Heads-up notification</h4>
+<p>Notifications may now appear in a small floating window (also called a
+  heads-up notification) when the device is active (that is, the device is
+  unlocked and its screen is on). These notifications appear similar to the
+  compact form of your notification, except that the heads-up notification also
+  shows action buttons. Users can act on, or dismiss, a heads-up notification
+  without leaving the current app.</p>
+
+<p>Examples of conditions that may trigger heads-up notifications include:</p>
+
+<ul>
+  <li>The user's activity is in fullscreen mode (the app uses
+{@link android.app.Notification#fullScreenIntent})</li>
+  <li>The notification has high priority and uses ringtones or vibrations</li>
+</ul>
+
+<p>If your app implements notifications under any of those scenarios, make sure
+that heads-up notifications are presented correctly.</p>
+
+<h3 id="BehaviorMediaControl">If your app uses RemoteControlClient...</h3>
+<p>The {@link android.media.RemoteControlClient} class is now deprecated. Switch
+  to the new {@link android.media.session.MediaSession} API as
+  soon as possible.</p>
+
+<p>Lock screens in Android 5.0 do not show transport controls for
+your {@link android.media.session.MediaSession} or
+{@link android.media.RemoteControlClient}. Instead, your app can provide
+media playback control from the lock screen through a notification. This
+gives your app more control over the presentation of media buttons, while
+providing a consistent experience for users across locked and
+unlocked devices.</p>
+
+<p>Android 5.0 introduces a new
+{@link android.app.Notification.MediaStyle} template for this purpose.
+{@link android.app.Notification.MediaStyle} converts notification
+actions that you added with
+{@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence,
+  android.app.PendingIntent)
+Notification.Builder.addAction()} into compact buttons embedded in your app's
+media playback notifications. Pass your session token to the
+{@link android.app.Notification.MediaStyle#setMediaSession(android.media.session.MediaSession.Token)
+  setSession()} method to inform the system that this notification controls an
+  ongoing media session.</p>
+
+<p>Make sure to set the notification's visibility to
+  {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}
+  to mark the notification as safe to show on any lock screen (secure or
+  otherwise). For more information, see
+  <a href="#LockscreenNotifications">Lock screen notifications</a>.</p>
+
+<p>To display media playback controls if your app is running on the
+Android <a href="{@docRoot}tv/index.html">TV</a> or
+<a href="{@docRoot}wear/index.html">Wear</a> platform, implement the
+{@link android.media.session.MediaSession} class. You should also implement
+{@link android.media.session.MediaSession} if your app needs to receive media
+button events on Android devices.</p>
+
+<h3 id="BehaviorGetRecentTasks">If your app uses getRecentTasks()...</h3>
+
+<p>With the introduction of the new <em>concurrent documents and activities
+tasks</em> feature in Android 5.0 (see <a href="#Recents">Concurrent
+documents and activities in the recents screen</a> below),
+the {@link android.app.ActivityManager#getRecentTasks
+ActivityManager.getRecentTasks()} method is now deprecated to improve user
+privacy. For backward compatibility, this method still returns a small subset of
+its data, including the calling application’s own tasks and possibly some other
+non-sensitive tasks (such as Home). If your app is using this method to retrieve
+its own tasks, use {@link android.app.ActivityManager#getAppTasks() getAppTasks()}
+instead to retrieve that information.</p>
+
+<h3 id="64BitSupport">If you are using the Android Native Development Kit (NDK)...</h3>
+
+<p>Android 5.0 introduces support for 64-bit systems. The 64-bit enhancement
+  increases address space and improves performance, while still supporting
+  existing 32-bit apps fully. The 64-bit support also improves the performance of
+  OpenSSL for cryptography. In addition, this release introduces new native
+  media NDK APIs, as well as native OpenGL ES (GLES) 3.1 support.</p>
+
+<p>To use the 64-bit support provided in Android 5.0, download and install NDK
+  Revision 10c from the
+<a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK page</a>. Refer to the
+Revision 10c <a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">release notes</a>
+for more information about important changes and bug fixes to the NDK.</p>
+
+<h3 id="BindService">If your app binds to a Service...</h3>
+
+<p>The
+  {@link android.content.Context#bindService(android.content.Intent, android.content.ServiceConnection, int) Context.bindService()}
+  method now requires an explicit {@link android.content.Intent},
+and throws an exception if given an implicit intent.
+To ensure your app is secure, use an explicit intent when starting or binding
+your {@link android.app.Service}, and do not declare intent filters for the service.</p>
+
+<h2 id="UI">User Interface</h2>
+
+<h3 id="MaterialDesign">Material design support</h3>
+
+<p>The upcoming release adds support for Android's new <em>material design</em>
+style. You can create apps with material design that are visually dynamic and
+have UI element transitions that feel natural to users. This support includes:</p>
+
+<ul>
+
+  <li>The material theme</li>
+  <li>View shadows</li>
+  <li>The {@link android.support.v7.widget.RecyclerView} widget</li>
+  <li>Drawable animation and styling effects</li>
+  <li>Material design animation and activity transition effects</li>
+  <li>Animators for view properties based on the state of the view</li>
+  <li>Customizable UI widgets and app bars with color palettes that you control</li>
+  <li>Animated and non-animated drawables based on XML vector graphics</li>
+</ul>
+
+<p>To learn more about adding material design functionality to your app, see
+<a href="{@docRoot}training/material/index.html">Material Design</a>.</p>
+
+<h3 id="Recents">Concurrent documents and activities in the recents screen</h3>
+
+<p>In previous releases, the
+<a href="{@docRoot}guide/components/recents.html">recents screen</a>
+could only display only one task for each app that the user interacted with
+most recently. Now your app can open more tasks as needed for additional
+concurrent activities for documents. This feature facilitates multitasking by
+letting users quickly switch between individual activities and documents from
+the recents screen, with a consistent switching experience across all apps.
+Examples of such concurrent tasks might include open tabs in a web
+browser app, documents in a productivity app, concurrent matches in
+a game, or chats in a messaging app. Your app can manage its tasks
+through the {@link android.app.ActivityManager.AppTask} class.</p>
+
+<p>To insert a logical break so that the system treats your activity as a new
+task, use {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} when
+launching the activity with {@link android.app.Activity#startActivity(android.content.Intent)
+startActivity()}. You can also get this behavior by setting the
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+element's {@code documentLaunchMode} attribute to {@code "intoExisting"} or
+{@code "always"} in your manifest.</p>
+
+<p>To avoid cluttering the recents screen, you can set the maximum number of
+tasks from your app that can appear in that screen. To do this, set the
+<a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+attribute {@link android.R.attr#maxRecents android:maxRecents}. The current
+maximum that can be specified is 50 tasks per user (25 for low RAM devices).</a></p>
+
+<p>Tasks in the recents screen can be set to persist across reboots. To control
+the persistence behavior, use the
+<a href="{@docRoot}reference/android/R.attr.html#persistableMode">android:persistableMode</a>
+attribute. You can also change
+the visual properties of an activity in the recents screen, such as the
+activity’s color, label, and icon, by calling the
+{@link android.app.Activity#setTaskDescription(android.app.ActivityManager.TaskDescription) setTaskDescription()}
+method.</p>
+
+<h3 id="WebView">WebView updates</h3>
+<p>Android 5.0 updates the {@link android.webkit.WebView}
+implementation to Chromium M37, bringing security and stability enhancements,
+as well as bug fixes. The default user-agent string for a
+{@link android.webkit.WebView} running on Android 5.0 has
+been updated to incorporate 37.0.0.0 as the version number.</p>
+
+<p>This release introduces the {@link android.webkit.PermissionRequest} class,
+which allows your app to grant the {@link android.webkit.WebView} permission
+to access protected resources like the camera and microphone, through web APIs
+such as <a href="https://developer.mozilla.org/en-US/docs/NavigatorUserMedia.getUserMedia"
+class="external-link">getUserMedia()</a>. Your app must have the appropriate
+Android permissions for these resources in order to grant the permissions to the
+{@link android.webkit.WebView}.</p>
+
+<p>With the new <code><a href="{@docRoot}reference/android/webkit/WebChromeClient.html#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams)">onShowFileChooser()</a></code> method,
+you can now use an input form field in the {@link android.webkit.WebView},
+and launch a file chooser to select images and files from the Android device.</p>
+
+<p>Additionally, this release brings support for the
+<a href="http://webaudio.github.io/web-audio-api/" class="external-link">WebAudio</a>,
+<a href="https://www.khronos.org/webgl/" class="external-link">WebGL</a>, and
+<a href="http://www.webrtc.org/" class="external-link">WebRTC</a> open standards.
+To learn more about the new features included in this release, see
+<a href="https://developer.chrome.com/multidevice/webview/overview"
+class="external-link">WebView for Android</a>.</p>
+
+<h3 id="ScreenCapture">Screen capturing and sharing</h3>
+<p>Android 5.0 lets you add screen capturing and screen sharing capabilities to
+your app with the new {@link android.media.projection} APIs. This functionality
+is useful, for example, if you want to enable screen sharing in a video
+conferencing app.</p>
+
+<p>The new {@link android.media.projection.MediaProjection#createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler) createVirtualDisplay()} method
+allows your app to capture the contents of the main screen (the default
+display) into a {@link android.view.Surface} object, which your app can then
+send across the network. The API only allows capturing non-secure screen
+content, and not system audio. To begin screen capturing, your app must first
+request the user’s permission by launching a screen capture dialog using an
+{@link android.content.Intent} obtained through the
+{@link android.media.projection.MediaProjectionManager#createScreenCaptureIntent()}
+method.</p>
+
+<p>For an example of how to use the new APIs, see the {@code MediaProjectionDemo}
+class in the {@code ApiDemos} sample project.</p>
+
+<h2 id="Notifications">Notifications</h2>
+
+<h3 id="LockscreenNotifications">Lock screen notifications</h3>
+<p>Lock screens in Android 5.0 have the ability to present
+notifications. Users can choose via <em>Settings</em> whether to allow
+sensitive notification content to be shown over a secure lock screen.</p>
+
+<p>Your app can control the level of detail visible when its notifications are
+displayed over the secure lock screen. To control the visibility level, call
+{@link android.app.Notification.Builder#setVisibility(int) setVisibility()} and
+specify one of these values:</p>
+
+<ul>
+<li>{@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}:
+Shows basic information, such as the notification’s icon, but hides the
+notification’s full content.</li>
+<li>{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}:
+Shows the notification’s full content.</li>
+<li>{@link android.app.Notification#VISIBILITY_SECRET VISIBILITY_SECRET}:
+Shows nothing, excluding even the notification’s icon.</li>
+</ul>
+
+<p>When the visibility level is {@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE},
+  you can also provide a redacted version of the notification
+content that hides personal details. For example, an SMS app might display a
+notification that shows "You have 3 new text messages" but hides the message
+content and senders. To provide this alternative notification, first create the
+replacement notification using {@link android.app.Notification.Builder}. When
+you create the private notification object, attach the replacement notification
+to it through the
+{@link android.app.Notification.Builder#setPublicVersion(android.app.Notification)
+  setPublicVersion()} method.</p>
+
+<h3 id="NotificationsMetadata">Notifications metadata</h3>
+<p>Android 5.0 uses metadata associated with your app notifications
+to sort the notifications more intelligently. To set the metadata, call the
+following methods in {@link android.app.Notification.Builder} when you
+construct the notification:</p>
+
+<ul>
+<li>{@link android.app.Notification.Builder#setCategory(java.lang.String)
+  setCategory()}: Tells the system how to handle your app notifications when the
+  device is in <em>priority</em> mode (for example, if a notification represents an
+incoming call, instant message, or alarm).
+<li>{@link android.app.Notification.Builder#setPriority(int) setPriority()}:
+  Marks the notification as more or less important than normal notifications.
+  Notifications with the priority field set to
+  {@link android.app.Notification#PRIORITY_MAX PRIORITY_MAX} or
+{@link android.app.Notification#PRIORITY_HIGH PRIORITY_HIGH} appear in a
+small floating window if the notification also has sound or vibration.</li>
+<li>{@link android.app.Notification.Builder#addPerson(java.lang.String)
+addPerson()}: Enables you to add one or more people who are relevant to a notification.
+Your app can use this to signal to the system that it should group together
+notifications from the specified people, or rank notifications from these people
+as being more important.</li>
+</ul>
+
+<h2 id="Graphics">Graphics</h2>
+
+<h3 id="OpenGLES-3-1">Support for OpenGL ES 3.1</h3>
+<p>Android 5.0 adds Java interfaces and native support for OpenGL
+ES 3.1. Key new functionality provided in OpenGL ES 3.1 includes:</p>
+
+<ul>
+<li>Compute shaders
+<li>Separate shader objects
+<li>Indirect draw commands
+<li>Multisample and stencil textures
+<li>Shading language improvements
+<li>Extensions for advanced blend modes and debugging
+<li>Backward compatibility with OpenGL ES 2.0 and 3.0
+</ul>
+
+<p>The Java interface for OpenGL ES 3.1 on Android is provided with
+  {@link android.opengl.GLES31}. When using OpenGL ES 3.1, be sure that you
+  declare it in your manifest file with the
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> tag and the {@code android:glEsVersion} attribute. For example:</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:glEsVersion="0x00030001" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>For more information about using OpenGL ES, including how to check the
+device’s supported OpenGL ES version at runtime, see the
+<a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
+
+<h3 id="AndroidExtensionPack">Android Extension Pack</h3>
+
+<p>In addition to OpenGL ES 3.1, this release provides an extension pack with
+Java interfaces and native support for advanced graphics functionality. These
+extensions are treated as a single package by Android. (If the
+{@code ANDROID_extension_pack_es31a} extension is present, your app can
+assume all extensions in the package are present and enable the shading language
+features with a single {@code #extension} statement.)</p>
+
+<p>The extension pack supports:</p>
+
+<ul>
+<li>Guaranteed fragment shader support for shader storage buffers, images, and
+  atomics (Fragment shader support is optional in OpenGL ES 3.1.)</li>
+<li>Tessellation and geometry shaders</li>
+<li>ASTC (LDR) texture compression format</li>
+<li>Per-sample interpolation and shading</li>
+<li>Different blend modes for each color attachment in a frame buffer</li>
+</ul>
+
+<p>The Java interface for the extension pack is provided with
+  {@link android.opengl.GLES31Ext}. In your app manifest, you can declare that
+  your app must be installed only on devices that support the extension pack.
+  For example:</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:name=“android.hardware.opengles.aep”
+        android:required="true" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="Media">Media</h2>
+
+<h3 id="Camera-v2">Camera API for advanced camera capabilities</h3>
+
+<p>Android 5.0 introduces the new
+<a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">android.hardware.camera2</a>
+API to facilitate fine-grain photo capture and image processing. You can now
+programmatically access the camera devices available to the system with
+{@link android.hardware.camera2.CameraManager#getCameraIdList() getCameraIdList()}
+and connect to a specific device with
+{@link android.hardware.camera2.CameraManager#openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateCallback, android.os.Handler) openCamera()}.
+To start capturing images, create a {@link android.hardware.camera2.CameraCaptureSession}
+and specify the {@link android.view.Surface} objects to send captured images.
+The {@link android.hardware.camera2.CameraCaptureSession} can be configured to
+take single shots or multiple images in a burst.</p>
+
+<p>To be notified when new images are captured, implement the
+{@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} listener
+and set it in your capture request. Now when the system completes the image
+capture request, your {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback}
+listener receives a call to
+{@link android.hardware.camera2.CameraCaptureSession.CaptureCallback#onCaptureCompleted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult) onCaptureCompleted()},
+providing you with the image capture metadata in a
+{@link android.hardware.camera2.CaptureResult}.</p>
+
+<p>The {@link android.hardware.camera2.CameraCharacteristics} class lets your
+app detect what camera features are available on a device. The object's
+{@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+INFO_SUPPORTED_HARDWARE_LEVEL} property represents the camera's level of functionality.</p>
+
+<ul>
+  <li>All devices support at least the
+{@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
+  INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY} hardware level, which has capabilities
+  roughly equivalent to that of the deprecated {@link android.hardware.Camera}
+  API.</li>
+  <li>Devices that support the {@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL
+    INFO_SUPPORTED_HARDWARE_LEVEL_FULL} hardware level are capable of manual
+    control of capture and post-processing, and capturing high-resolution images
+    at high frame rates.</li>
+</ul>
+
+<p>To see how to use the updated
+<a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">Camera</a>
+API, refer to the {@code Camera2Basic} and {@code Camera2Video} implementation
+samples in this release.</p>
+
+<h3 id="AudioPlayback">Audio playback</h3>
+<p>This release includes the following changes to
+  {@link android.media.AudioTrack}:</p>
+<ul>
+  <li>Your app can now supply audio data in floating-point format
+({@link android.media.AudioFormat#ENCODING_PCM_FLOAT ENCODING_PCM_FLOAT}). This
+permits greater dynamic range, more consistent precision, and greater headroom.
+Floating-point arithmetic is especially useful during intermediate calculations.
+Playback endpoints use integer format for audio data, and with lower bit depth.
+(In Android 5.0, portions of the internal pipeline are not yet
+floating point.)
+  <li>Your app can now supply audio data as a {@link java.nio.ByteBuffer}, in
+the same format as provided by {@link android.media.MediaCodec}.
+  <li>The {@link android.media.AudioTrack#WRITE_NON_BLOCKING WRITE_NON_BLOCKING}
+option can simplify buffering and multithreading for some apps.
+</ul>
+
+<h3 id="MediaPlaybackControl">Media playback control</h3>
+<p>Use the new notification and media APIs to ensure that the
+system UI knows about your media playback and can extract and show album art.
+Controlling media playback across a UI and a service is now easier with the new
+{@link android.media.session.MediaSession} and
+{@link android.media.session.MediaController} classes.</p>
+
+<p>The new {@link android.media.session.MediaSession} class replaces
+the deprecated {@link android.media.RemoteControlClient} class and provides a
+single set of callback methods for handling transport controls and media buttons.
+If your app provides media playback and runs on the Android
+<a href="{@docRoot}tv/index.html">TV</a> or
+<a href="{@docRoot}wear/index.html">Wear</a> platform, use the
+{@link android.media.session.MediaSession} class to handle your transport
+controls using the same callback methods.</p>
+
+<p>You can now build your own media controller app with the new
+{@link android.media.session.MediaController} class. This class provides
+a thread-safe way to monitor and control media playback from your app's UI process.
+When creating a controller, specify a {@link android.media.session.MediaSession.Token}
+object so that your app can interact with the given {@link android.media.session.MediaSession}.
+By using the {@link android.media.session.MediaController.TransportControls} methods,
+you can send commands such as {@link android.media.session.MediaController.TransportControls#play() play()},
+{@link android.media.session.MediaController.TransportControls#stop() stop()},
+{@link android.media.session.MediaController.TransportControls#skipToNext() skipToNext()},
+and {@link android.media.session.MediaController.TransportControls#setRating(android.media.Rating) setRating()}
+to control media playback on that session. With the controller, you can also
+register a {@link android.media.session.MediaController.Callback} object to
+listen for metadata and state changes on the session.</p>
+
+<p>In addition, you can create rich notifications that allow playback control
+tied to a media session with the new {@link android.app.Notification.MediaStyle}
+class.</p>
+
+<h3 id="MediaBrowsing">Media browsing</h3>
+<p>Android 5.0 introduces the ability for apps to browse the media content
+  library of another app, through the new
+  <a href="{@docRoot}reference/android/media/browse/package-summary.html">android.media.browse</a>
+  API. To expose the media content in your app, extend the
+{@link android.service.media.MediaBrowserService} class. Your implementation of
+{@link android.service.media.MediaBrowserService} should provide access to a
+{@link android.media.session.MediaSession.Token} so that apps can play media content
+provided through your service.</p>
+<p>To interact with a media browser service, use the
+  {@link android.media.browse.MediaBrowser} class. Specify the component
+  name for a {@link android.media.session.MediaSession} when you create an
+  {@link android.media.browse.MediaBrowser} instance. Using that browser instance,
+  your app can then connect to the associated service and obtain a
+  {@link android.media.session.MediaSession.Token} object to play content exposed
+  through that service.</p>
+
+<h2 id="Storage">Storage</h2>
+
+<h3 id="DirectorySelection">Directory selection</h3>
+
+<p>Android 5.0 extends the
+  <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage Access Framework</a>
+to let users select an entire directory subtree, giving apps read/write access
+to all contained documents without requiring user confirmation for each item.</p>
+
+<p>To select a directory subtree, build and send an
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT_TREE OPEN_DOCUMENT_TREE}
+intent. The system displays all
+{@link android.provider.DocumentsProvider} instances that support subtree selection,
+letting the user browse and select a directory. The returned URI represents
+access to the selected subtree. You can then use {@link
+android.provider.DocumentsContract#buildChildDocumentsUriUsingTree(android.net.Uri, java.lang.String) buildChildDocumentsUriUsingTree()}
+and {@link android.provider.DocumentsContract#buildDocumentUriUsingTree(android.net.Uri, java.lang.String) buildDocumentUriUsingTree()}
+along with
+{@link android.content.ContentResolver#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) query()}
+to explore the subtree.</p>
+
+<p>The new {@link android.provider.DocumentsContract#createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String)
+createDocument()} method lets you create new documents or directories anywhere
+under the subtree. To manage existing documents, use
+{@link android.provider.DocumentsContract#renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String) renameDocument()} and
+{@link android.provider.DocumentsProvider#deleteDocument(java.lang.String) deleteDocument()}.
+Check {@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS}
+to verify provider support for these calls before issuing them.</p>
+
+<p>If you're implementing a {@link android.provider.DocumentsProvider} and want
+to support subtree selection, implement {@link android.provider.DocumentsProvider#isChildDocument(java.lang.String, java.lang.String) isChildDocument()} and include {@link
+android.provider.DocumentsContract.Root#FLAG_SUPPORTS_IS_CHILD FLAG_SUPPORTS_IS_CHILD}
+in your {@link android.provider.DocumentsContract.Root#COLUMN_FLAGS COLUMN_FLAGS}.</p>
+
+<p>Android 5.0 also introduces new package-specific directories on
+shared storage where your app can place media files for inclusion in
+{@link android.provider.MediaStore}. The new
+{@link android.content.Context#getExternalMediaDirs()} returns paths to these
+directories on all shared storage devices. Similarly to
+{@link android.content.Context#getExternalFilesDir(java.lang.String) getExternalFilesDir()},
+no additional permissions are needed by your app to access the returned paths. The
+platform periodically scans for new media in these directories, but you can also
+use {@link android.media.MediaScannerConnection} to explicitly scan for new
+content.</p>
+
+<h2 id="Wireless">Wireless &amp; Connectivity</h2>
+
+<h3 id="Multinetwork">Multiple network connections</h3>
+<p>Android 5.0 provides new multi-networking APIs that let your app
+dynamically scan for available networks with specific capabilities, and
+establish a connection to them. This functionality is useful when your app
+requires a specialized network, such as an SUPL, MMS, or carrier-billing network,
+or if you want to send data using a particular type of transport protocol.</p>
+
+<p>To select and connect to a network dynamically from your app, follow these
+steps:</p>
+
+<ol>
+ <li>Create a {@link android.net.ConnectivityManager}.</li>
+ <li>Use the {@link android.net.NetworkRequest.Builder} class to create an
+  {@link android.net.NetworkRequest} object and specify the network features
+  and transport type your app is interested in.</li>
+<li>To scan for suitable networks, call {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()}
+or {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}, and pass in the
+{@link android.net.NetworkRequest} object and an implementation of
+{@link android.net.ConnectivityManager.NetworkCallback}. Use the
+{@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} method if you want to actively switch to a suitable network once it’s detected; to receive
+only notifications for scanned networks without actively switching, use the
+{@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()} method instead.</li>
+</ol>
+
+<p>When the system detects a suitable network, it connects to the network and
+invokes the
+{@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()}
+callback. You can use the {@link android.net.Network} object from the callback to
+get additional information about the network, or to direct traffic to use the
+selected network.</p>
+
+<h3 id="BluetoothBroadcasting">Bluetooth Low Energy</h3>
+<p>Android 4.3 introduced platform support for
+  <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">Bluetooth Low Energy</a>
+(<em>Bluetooth LE</em>) in the central role. In Android 5.0, an Android device can now
+act as a Bluetooth LE <em>peripheral device</em>. Apps can use this capability
+to make their presence known to nearby devices. For instance, you can build apps
+that allow a device to function as a pedometer or health monitor and communicate
+its data with another Bluetooth LE device.</p>
+
+<p>The new {@link android.bluetooth.le} APIs enable your apps to broadcast
+advertisements, scan for responses, and form connections with nearby Bluetooth
+LE devices. To use the new advertising and scanning features, add the
+{@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN}
+permission in your manifest. When users update or download your app from the Play Store,
+they are asked to grant the following permission to your app:
+"Bluetooth connection information: Allows the app to control Bluetooth,
+including broadcasting to or getting information about nearby Bluetooth devices."</p>
+
+<p>To begin Bluetooth LE advertising so that other devices can discover
+your app, call
+{@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()}
+and pass in an implementation of the
+{@link android.bluetooth.le.AdvertiseCallback} class. The callback object
+receives a report of the success or failure of the advertising operation.</p>
+
+<p> Android 5.0 introduces the {@link android.bluetooth.le.ScanFilter} class so
+  that your app can scan for only the
+specific types of devices it is interested in. To begin scanning for Bluetooth
+LE devices, call {@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback) startScan()}
+and pass in a list of filters. In the method call, you must also provide an
+implementation of {@link android.bluetooth.le.ScanCallback} to report when a
+Bluetooth LE advertisement is found. </p>
+
+<h3 id="NFCEnhancements">NFC enhancements</h3>
+<p>Android 5.0 adds these enhancements to enable wider and more
+flexible use of NFC:</p>
+
+<ul>
+<li>Android Beam is now available in the <em>share</em> menu.</li>
+<li>Your app can invoke the Android Beam on the user’s device to share data by
+calling {@link android.nfc.NfcAdapter#invokeBeam(android.app.Activity) invokeBeam()}.
+This avoids the need for the user to manually tap the device against another
+NFC-capable device to complete the data transfer.</li>
+<li>You can use the new {@link android.nfc.NdefRecord#createTextRecord(java.lang.String, java.lang.String)
+  createTextRecord()} method to create an NDEF record containing UTF-8 text data.</li>
+<li>If you are developing a payment app, you now have the ability to
+register an NFC application ID (AID) dynamically by calling
+<code><a href="{@docRoot}reference/android/nfc/cardemulation/CardEmulation.html#registerAidsForService(android.content.ComponentName, java.lang.String, java.util.List<java.lang.String>)">registerAidsForService()</a></code>.
+You can also use {@link android.nfc.cardemulation.CardEmulation#setPreferredService(android.app.Activity, android.content.ComponentName) setPreferredService()} to set the preferred card emulation service that should
+be used when a specific activity is in the foreground.</li>
+</ul>
+
+<h2 id="Power">Project Volta</h2>
+
+<p>In addition to new features, Android 5.0 emphasizes improvements in battery
+  life. Use the new APIs and tool to understand and optimize your app’s power
+  consumption.</p>
+
+<h3 id="JobScheduler">Scheduling jobs</h3>
+<p>Android 5.0 provides a new {@link android.app.job.JobScheduler}
+API that lets you optimize battery life by defining jobs for the system to run
+asynchronously at a later time or under specified conditions (such as when the
+device is charging). Job scheduling is useful in such situations as:</p>
+<ul>
+  <li>The app has non-user-facing work that you can defer.</li>
+  <li>The app has work you'd prefer to do when the unit is plugged in.</li>
+  <li>The app has a task that requires network access or a Wi-Fi
+    connection.</li>
+  <li>The app has a number of tasks that you want to run as a batch on a regular
+   schedule.</li>
+
+</ul>
+
+<p>A unit of work is encapsulated by a {@link android.app.job.JobInfo} object.
+This object specifies the scheduling criteria.</p>
+
+<p>Use the {@link android.app.job.JobInfo.Builder} class to configure how the
+scheduled task should run. You can schedule the task to run under specific
+conditions, such as:</p>
+
+<ul>
+  <li>Start when the device is charging</li>
+  <li>Start when the device is connected to an unmetered network</li>
+  <li>Start when the device is idle</li>
+  <li>Finish before a certain deadline or with a minimum delay</li>
+</ul>
+
+<p>For example, you can add code like this to run your task on an
+unmetered network:</p>
+
+<pre>
+JobInfo uploadTask = new JobInfo.Builder(mJobId,
+                                         mServiceComponent /* JobService component */)
+        .setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED)
+        .build();
+JobScheduler jobScheduler =
+        (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+jobScheduler.schedule(uploadTask);
+</pre>
+
+<p>If the device has stable power (that is, it has been plugged in for more
+  than 2 minutes and the battery is at a
+<a href="{@docRoot}reference/android/content/Intent.html#ACTION_BATTERY_OKAY">healthy level</a>),
+the system will run any scheduled job that is ready to run, even if the job’s
+deadline has not expired.</p>
+
+<p>To see an example of how to use the {@link android.app.job.JobScheduler} API,
+refer to the {@code JobSchedulerSample} implementation sample in this release.</p>
+
+<h3 id="PowerMeasurementTools">Developer tools for battery usage</h3>
+
+<p>The new {@code dumpsys batterystats} command generates interesting
+statistical data about battery usage on a device, organized by unique user ID
+(UID). The statistics include:</p>
+
+<ul>
+<li>History of battery related events
+<li>Global statistics for the device
+<li>Approximate power use per UID and system component
+<li>Per-app mobile ms per packet
+<li>System UID aggregated statistics
+<li>App UID aggregated statistics
+</ul>
+
+<p>Use the {@code --help} option to learn about the various options for
+tailoring the output. For example, to print battery usage
+statistics for a given app package since the device was last charged, run this
+command:
+<pre>
+$ adb shell dumpsys batterystats --charged &lt;package-name&gt;
+</pre>
+
+<p>You can use the
+  <a href="https://github.com/google/battery-historian" class="external-link">Battery Historian</a>
+  tool on the output of the {@code dumpsys} command to
+generate an HTML visualization of power-related events from the logs. This
+information makes it easier for you to understand and diagnose any battery
+related issues.</p>
+
+<h2 id="Enterprise">Android in the Workplace and in Education</h2>
+<h3 id="ManagedProvisioning">Managed provisioning</h3>
+
+<p>Android 5.0 provides new functionality for running apps within
+an enterprise environment. A
+<a href="{@docRoot}guide/topics/admin/device-admin.html">device administrator</a> can
+initiate a managed provisioning process to add a copresent but separate
+<em>managed profile</em> to a device, if the user has an existing personal account.
+Apps that are associated with managed profiles appear alongside
+non-managed apps in the user’s Launcher, recents screen, and notifications.</p>
+
+<p>To start the managed provisioning process, send
+{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE
+ACTION_PROVISION_MANAGED_PROFILE} in an {@link android.content.Intent}. If the
+call is successful, the system triggers the
+{@link android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete(android.content.Context, android.content.Intent) onProfileProvisioningComplete()} callback.
+You can then call {@link android.app.admin.DevicePolicyManager#setProfileEnabled(android.content.ComponentName) setProfileEnabled()} to
+enable this managed profile.</p>
+
+<p>By default, only a small subset of apps are enabled in the managed profile.
+  You can install additional apps in the managed profile by calling
+  {@link android.app.admin.DevicePolicyManager#enableSystemApp(android.content.ComponentName, android.content.Intent) enableSystemApp()}.</p>
+
+<p>If you are developing a Launcher app, you can use the new {@link
+android.content.pm.LauncherApps} class to get a list of launchable activities
+for the current user and any associated managed profiles. Your Launcher can make
+the managed apps visually prominent by appending a work badge to the icon
+drawable. To retrieve the badged icon, call
+{@link android.content.pm.PackageManager#getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle)
+getUserBadgedIcon()}.</p>
+
+<p>To see how to use the new functionality, refer to the
+{@code BasicManagedProfile} implementation sample in this release.</p>
+
+<h3 id="DeviceOwner">Device owner</h3>
+<p>Android 5.0 introduces the ability to deploy a device owner app. A <em>device
+  owner</em> is a specialized type of
+  <a href="{@docRoot}guide/topics/admin/device-admin.html">device administrator</a>
+  that has the additional ability to create and remove secondary users and to
+  configure global settings on the device. Your device owner app can use the
+  methods in the {@link android.app.admin.DevicePolicyManager} class to take
+  fine-grain control of the configuration, security, and apps on managed devices.
+  A device can have only one active device owner at a time.</p>
+
+<p>To deploy and activate a device owner, you must perform an NFC data transfer
+  from a programming app to the device while the device is in its unprovisioned
+  state. This data transfer sends the same information as in the provisioning intent
+  described in <a href="#ManagedProvisioning">Managed provisioning</a>.</p>
+
+<h3 id="ScreenPinning">Screen pinning</h3>
+
+<p>Android 5.0 introduces a new screen pinning API that lets you temporarily
+  restrict users from leaving your task or being interrupted by notifications.
+  This could be used, for example, if you are developing an education app to
+  support high stakes assessment requirements on Android, or a single-purpose or
+  kiosk application. Once your app activates screen pinning, users cannot see
+  notifications, access other apps, or return to the home screen,
+  until your app exits the mode.</p>
+
+<p>There are two ways to activate screen pinning:</p>
+
+<ul>
+<li><strong>Manually:</strong> Users can enable screen pinning in
+<em>Settings > Security > Screen Pinning</em>, and select the tasks they want to
+pin by touching the green pin icon in the recents screen.</li>
+<li><strong>Programmatically:</strong> To activate screen pinning
+programmatically, call {@link android.app.Activity#startLockTask() startLockTask()}
+from your app. If the requesting app is not a device owner, the user is prompted
+for confirmation. A device owner app can call the
+{@link android.app.admin.DevicePolicyManager#setLockTaskPackages(android.content.ComponentName, java.lang.String[]) setLockTaskPackages()}
+method to enable apps to be pinnable without the user confirmation step.</li>
+</ul>
+
+<p>When task locking is active, the following behavior happens:</p>
+
+<ul>
+<li>The status bar is blank, and user notifications and status information are
+hidden.</li>
+<li>The Home and Recent Apps buttons are hidden.</li>
+<li>Other apps cannot launch new activities.</li>
+<li>The current app can start new activities, as long as doing so does not
+create new tasks.</li>
+<li>When screen pinning is invoked by a device owner, the user remains locked
+  to your app until the app calls
+  {@link android.app.Activity#stopLockTask() stopLockTask()}.</li>
+<li>If screen pinning is activity by another app that is not a device owner or
+by the user directly, the user can exit by holding both the Back and Recent buttons.</li>
+
+</ul>
+
+<h2 id="Printing">Printing Framework</h2>
+
+<h3 id="PDFRender">Render PDF as bitmap</h3>
+<p>You can now render PDF document pages into bitmap images for printing by
+using the new {@link android.graphics.pdf.PdfRenderer} class. You must specify a
+{@link android.os.ParcelFileDescriptor} that is seekable (that is, the content
+can be randomly accessed) on which the system writes the the printable content.
+Your app can obtain a page for rendering with
+{@link android.graphics.pdf.PdfRenderer#openPage(int) openPage()}, then call
+{@link android.graphics.pdf.PdfRenderer.Page#render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int) render()}
+to turn the opened {@link android.graphics.pdf.PdfRenderer.Page} into a bitmap. You
+can also set additional parameters if you only want to convert a portion of the
+document into a bitmap image (for example, to implement
+<a href="http://en.wikipedia.org/wiki/Tiled_rendering" class="external-link">tiled rendering</a>
+to zoom in on the document).</p>
+
+<p>For an example of how to use the new APIs, see the {@code PdfRendererBasic}
+  sample.</p>
+
+<h2 id="System">System</h2>
+<h3 id="AppUsageStatistics">App usage statistics</h3>
+<p>You can now access app usage history on an Android device with the
+  new {@link android.app.usage} API. This API provides more detailed usage
+  information than the deprecated
+  {@link android.app.ActivityManager#getRecentTasks(int, int) getRecentTasks()} method.
+  To use this API, you must first declare the
+  {@code "android.permission.PACKAGE_USAGE_STATS"} permission in your manifest.
+  The user must also enable access for this app through <em>Settings > Security > Apps</em>
+  with usage access.</p>
+
+<p>The system collects the usage data on a per-app basis, aggregating the
+  data over daily, weekly, monthly, and yearly intervals. The maximum duration
+  that the system keeps this data is as follows:</p>
+
+<ul>
+  <li>Daily data: 7 days</li>
+  <li>Weekly data: 4 weeks</li>
+  <li>Monthly data: 6 months</li>
+  <li>Yearly data: 2 years</li>
+</ul>
+
+<p>For each app, the system records the following data:</p>
+<ul>
+<li>The last time the app was used</li>
+<li>The total length of time the app was in the foreground for that time interval
+  (by day, week, month, or year)</li>
+<li>Timestamp capturing when a component (identified by a package and activity name)
+  moved to the foreground or background during a day</li>
+<li>Timestamp capturing when a device configuration changed (such as when the
+  device orientation changed because of rotation)</li>
+</ul>
+
+<h2 id="TestingA11y">Testing &amp; Accessibility </h2>
+
+<h3 id="TestingA11yImprovements">Testing and accessibility improvements</h3>
+<p>Android 5.0 adds the following support for testing and
+accessibility:</p>
+
+<ul>
+<li>The new {@link android.app.UiAutomation#getWindowAnimationFrameStats() getWindowAnimationFrameStats()}
+and {@link android.app.UiAutomation#getWindowContentFrameStats(int) getWindowContentFrameStats()}
+methods capture frame statistics for window animations and content. These methods
+let you write instrumentation tests to evaluate whether an app is rendering
+frames at a sufficient refresh frequency to provide a smooth user experience.</li>
+
+<li>The new
+{@link android.app.UiAutomation#executeShellCommand(java.lang.String) executeShellCommand()}
+method lets you execute shell commands from your instrumentation test. The
+command execution is similar to running {@code adb shell} from a host
+connected to the device, allowing you to use shell-based tools such as
+{@code dumpsys}, {@code am}, {@code content}, and {@code pm}.</li>
+
+<li>Accessibility services and test tools that use the accessibility APIs
+(such as <a href="{@docRoot}tools/help/uiautomator/index.html">{@code UiAutomator}</a>)
+can now retrieve detailed information about the properties of windows on the
+screen that sighted users can interact with. To retrieve a list of
+{@link android.view.accessibility.AccessibilityWindowInfo} objects, call the new
+{@link android.accessibilityservice.AccessibilityService#getWindows() getWindows()}
+method.</li>
+
+<li>The new {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction}
+  class lets you define standard or customized actions to perform on an
+  {@link android.view.accessibility.AccessibilityNodeInfo}.
+The new {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction}
+class replaces the actions-related APIs previously found in
+{@link android.view.accessibility.AccessibilityNodeInfo}.</li>
+
+<li>Android 5.0 provides finer-grain control over text-to-speech synthesis in
+  your app. The new {@link android.speech.tts.Voice} class allows your app to
+  use voice profiles associated with specific locales, quality and latency
+  rating, and text-to-speech engine-specific parameters.</li>
+</ul>
+
+<h2 id="IME">IME</h2>
+
+<h3 id="Switching">Easier switching between input languages</h3>
+
+<p>Beginning in Android 5.0, users can more easily switch between
+all <a href="{@docRoot}guide/topics/text/creating-input-method.html">input
+method editors (IME)</a> supported by the platform. Performing the designated
+switching action (usually touching a Globe icon on the soft keyboard) cycles
+through all such IMEs. This change in behavior is implemented by the
+{@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod(android.os.IBinder) shouldOfferSwitchingToNextInputMethod()}
+method.</p>
+
+<p>In addition, the framework now checks whether the next IME includes a
+switching mechanism at all (and, thus, whether that IME supports switching to
+the IME after it). An
+IME with a switching mechanism will not cycle to an IME without one. This
+change in behavior is implemented by the
+{@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod(android.os.IBinder, boolean) switchToNextInputMethod()}
+method.
+
+<p>To see an example of how to use the updated IME-switching APIs, refer to the
+updated soft-keyboard implementation sample in this release. To learn more about
+how to implement switching between IMEs, see
+<a href="{@docRoot}guide/topics/text/creating-input-method.html">Creating an Input Method</a>.
+</p>
+
+<h2 id="Manifest">Manifest Declarations</h2>
+
+<h3 id="ManifestFeatures">Declarable required features</h3>
+<p>The following values are now supported in the
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element, so you can ensure that your app is installed only on devices that
+provide the features your app needs.</p>
+
+<ul>
+<li>{@link android.content.pm.PackageManager#FEATURE_AUDIO_OUTPUT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_POST_PROCESSING}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_SENSOR}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_RAW}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_LEVEL_FULL}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_GAMEPAD}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LIVE_TV}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_MANAGED_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LEANBACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_OPENGLES_EXTENSION_PACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SECURELY_REMOVES_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_AMBIENT_TEMPERATURE}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_HEART_RATE_ECG}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_RELATIVE_HUMIDITY}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_VERIFIED_BOOT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_WEBVIEW}</li>
+</ul>
+
+<h3 id="Permissions">User permissions</h3>
+
+<p>The following permission is now supported in the
+<a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code &lt;uses-permission&gt;}</a>
+element to declare the permissions your app requires to access certain APIs.</p>
+
+<ul>
+<li>{@link android.Manifest.permission#BIND_DREAM_SERVICE}: When targeting API
+  level 21 and higher, this permission is required by a
+  <a href="{@docRoot}about/versions/android-4.2.html#Daydream">Daydream</a> service,
+  to ensure that only the system can bind to it.</li>
+</ul>

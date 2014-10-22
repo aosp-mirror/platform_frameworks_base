@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -31,8 +32,11 @@ import javax.crypto.spec.IvParameterSpec;
 /**
  * Represents encryption parameters used to read a container.
  *
+ * @deprecated encrypted containers are legacy.
  * @hide
  */
+@SystemApi
+@Deprecated
 public class ContainerEncryptionParams implements Parcelable {
     protected static final String TAG = "ContainerEncryptionParams";
 

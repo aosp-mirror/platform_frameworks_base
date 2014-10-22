@@ -1,7 +1,9 @@
 page.title=Multi-pane Layouts
 page.tags="tablet","navigation","layout","fragment"
-page.metaDescription=Android devices come in many different screen sizes and types. Multi-pane layouts help you provide a balanced and aesthetically pleasing layout across the range of Android devices.
+page.metaDescription=Design guide with examples of how to flatten navigation and provide improved layout across the range of Android devices.
+
 @jd:body
+
 
 <a class="notice-developers" href="{@docRoot}training/basics/fragments/index.html">
   <div>

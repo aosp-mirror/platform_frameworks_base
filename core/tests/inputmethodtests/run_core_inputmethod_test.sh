@@ -15,10 +15,10 @@ fi
 
 if [[ $rebuild == true ]]; then
   make -j4 FrameworksCoreInputMethodTests
-  TESTAPP=${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreInputMethodTests.apk
+  TESTAPP=${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreInputMethodTests/FrameworksCoreInputMethodTests.apk
   COMMAND="adb install -r $TESTAPP"
   echo $COMMAND
   $COMMAND
 fi
 
-adb shell am instrument -w -e class android.os.InputMethodTest com.android.frameworks.coretests.inputmethod/android.test.InstrumentationTestRunner
+adb shell am instrument -w -e class android.os.InputMethodTest,android.os.InputMethodSubtypeTest,android.os.InputMethodSubtypeArrayTest,android.os.InputMethodSubtypeSwitchingControllerTest,android.os.CursorAnchorInfoTest,android.os.SparseRectFArrayTest com.android.frameworks.coretests.inputmethod/android.test.InstrumentationTestRunner

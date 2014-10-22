@@ -1,0 +1,45 @@
+page.title=Engage Your Community
+page.metaDescription=Building a community has many benefits, including improving your app and bringing users back to it.
+page.image=/images/gp-engage-9.jpg
+
+
+@jd:body
+
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-engage-9.jpg" style="width:300px;">
+</div>
+
+<p>
+  Building a community has many benefits, including improving your apps and
+  bringing users back to them. Using social media, groups, and forum tools will
+  help you build a rapport with your audience that will drive loyalty and
+  engagement.
+</p>
+
+<p>
+  There are many tactics to bring users back to your apps. In addition to app
+  updates that users want to check out, you can also use communities to
+  announce game tournaments, new content, promotions, and other great content.
+  Any reason to go back to your app is a great post to share with your
+  community.
+</p>
+
+<p>
+  Learn more about how to <a href="{@docRoot}distribute/users/build-community.html">build and manage a community</a>.
+</p>
+
+<p style="clear:both">
+</p>
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/engage/community" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>

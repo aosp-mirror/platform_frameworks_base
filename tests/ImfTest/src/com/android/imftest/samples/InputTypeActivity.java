@@ -81,11 +81,11 @@ public class InputTypeActivity extends Activity {
         
         /* Uri Edit Text */
         mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_URI, 
-        		R.string.uri_edit_text_label));
+                R.string.uri_edit_text_label));
         
         /* Email Address Edit Text */
         mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, 
-        		R.string.email_address_edit_text_label));
+                R.string.email_address_edit_text_label));
         
         /* Email Subject Text */
         mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT, 
@@ -142,7 +142,7 @@ public class InputTypeActivity extends Activity {
     private View buildEntryView(int inputType, int label) {
 
         
-    	View view = mInflater.inflate(R.layout.sample_edit_text, mParent, false);
+        View view = mInflater.inflate(R.layout.sample_edit_text, mParent, false);
         
         EditText editText = (EditText) view.findViewById(R.id.data);
         editText.setInputType(inputType);

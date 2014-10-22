@@ -16,11 +16,17 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.os.BatteryStats;
 import android.os.IBinder;
-import com.android.internal.app.IUsageStats;
+import android.os.ParcelFileDescriptor;
+
 import com.android.internal.app.ProcessStats;
-import com.android.internal.os.PkgUsageStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 
@@ -34,6 +40,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
@@ -47,15 +54,16 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import android.util.Size;
 import android.util.Slog;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Interact with the overall activities running in the system.
@@ -63,6 +71,8 @@ import java.util.Map;
 public class ActivityManager {
     private static String TAG = "ActivityManager";
     private static boolean localLOGV = false;
+
+    private static int gMaxRecentTasks = -1;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -74,6 +84,13 @@ public class ActivityManager {
      * signed with the same certificate as the one declaring the {@code &lt;meta-data>}.
      */
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
+
+    /**
+     * Result for IActivityManager.startActivity: trying to start an activity under voice
+     * control when that activity does not support the VOICE category.
+     * @hide
+     */
+    public static final int START_NOT_VOICE_COMPATIBLE = -7;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
@@ -155,6 +172,13 @@ public class ActivityManager {
     public static final int START_SWITCHES_CANCELED = 4;
 
     /**
+     * Result for IActivityManaqer.startActivity: a new activity was attempted to be started
+     * while in Lock Task Mode.
+     * @hide
+     */
+    public static final int START_RETURN_LOCK_TASK_MODE_VIOLATION = 5;
+
+    /**
      * Flag for IActivityManaqer.startActivity: do special start mode where
      * a new activity is launched only if it is needed.
      * @hide
@@ -174,13 +198,6 @@ public class ActivityManager {
      * @hide
      */
     public static final int START_FLAG_OPENGL_TRACES = 1<<2;
-
-    /**
-     * Flag for IActivityManaqer.startActivity: if the app is being
-     * launched for profiling, automatically stop the profiler once done.
-     * @hide
-     */
-    public static final int START_FLAG_AUTO_STOP_PROFILER = 1<<3;
 
     /**
      * Result for IActivityManaqer.broadcastIntent: success!
@@ -281,6 +298,8 @@ public class ActivityManager {
 
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 13;
+
+    Point mAppTaskThumbnailSize;
 
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
@@ -430,7 +449,7 @@ public class ActivityManager {
         // Really brain dead right now -- just take this from the configured
         // vm heap size, and assume it is in megabytes and thus ends with "m".
         String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
-        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length() - 1));
     }
 
     /**
@@ -458,6 +477,274 @@ public class ActivityManager {
     static public boolean isHighEndGfx() {
         return !isLowRamDeviceStatic() &&
                 !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
+    }
+
+    /**
+     * Return the maximum number of recents entries that we will maintain and show.
+     * @hide
+     */
+    static public int getMaxRecentTasksStatic() {
+        if (gMaxRecentTasks < 0) {
+            return gMaxRecentTasks = isLowRamDeviceStatic() ? 50 : 100;
+        }
+        return gMaxRecentTasks;
+    }
+
+    /**
+     * Return the default limit on the number of recents that an app can make.
+     * @hide
+     */
+    static public int getDefaultAppRecentsLimitStatic() {
+        return getMaxRecentTasksStatic() / 6;
+    }
+
+    /**
+     * Return the maximum limit on the number of recents that an app can make.
+     * @hide
+     */
+    static public int getMaxAppRecentsLimitStatic() {
+        return getMaxRecentTasksStatic() / 2;
+    }
+
+    /**
+     * Information you can set and retrieve about the current activity within the recent task list.
+     */
+    public static class TaskDescription implements Parcelable {
+        /** @hide */
+        public static final String ATTR_TASKDESCRIPTION_PREFIX = "task_description_";
+        private static final String ATTR_TASKDESCRIPTIONLABEL =
+                ATTR_TASKDESCRIPTION_PREFIX + "label";
+        private static final String ATTR_TASKDESCRIPTIONCOLOR =
+                ATTR_TASKDESCRIPTION_PREFIX + "color";
+        private static final String ATTR_TASKDESCRIPTIONICONFILENAME =
+                ATTR_TASKDESCRIPTION_PREFIX + "icon_filename";
+
+        private String mLabel;
+        private Bitmap mIcon;
+        private String mIconFilename;
+        private int mColorPrimary;
+
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this task.
+         * @param icon An icon that represents the current state of this task.
+         * @param colorPrimary A color to override the theme's primary color.  This color must be opaque.
+         */
+        public TaskDescription(String label, Bitmap icon, int colorPrimary) {
+            if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
+                throw new RuntimeException("A TaskDescription's primary color should be opaque");
+            }
+
+            mLabel = label;
+            mIcon = icon;
+            mColorPrimary = colorPrimary;
+        }
+
+        /** @hide */
+        public TaskDescription(String label, int colorPrimary, String iconFilename) {
+            this(label, null, colorPrimary);
+            mIconFilename = iconFilename;
+        }
+
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         * @param icon An icon that represents the current state of this activity.
+         */
+        public TaskDescription(String label, Bitmap icon) {
+            this(label, icon, 0);
+        }
+
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         */
+        public TaskDescription(String label) {
+            this(label, null, 0);
+        }
+
+        /**
+         * Creates an empty TaskDescription.
+         */
+        public TaskDescription() {
+            this(null, null, 0);
+        }
+
+        /**
+         * Creates a copy of another TaskDescription.
+         */
+        public TaskDescription(TaskDescription td) {
+            mLabel = td.mLabel;
+            mIcon = td.mIcon;
+            mColorPrimary = td.mColorPrimary;
+            mIconFilename = td.mIconFilename;
+        }
+
+        private TaskDescription(Parcel source) {
+            readFromParcel(source);
+        }
+
+        /**
+         * Sets the label for this task description.
+         * @hide
+         */
+        public void setLabel(String label) {
+            mLabel = label;
+        }
+
+        /**
+         * Sets the primary color for this task description.
+         * @hide
+         */
+        public void setPrimaryColor(int primaryColor) {
+            // Ensure that the given color is valid
+            if ((primaryColor != 0) && (Color.alpha(primaryColor) != 255)) {
+                throw new RuntimeException("A TaskDescription's primary color should be opaque");
+            }
+            mColorPrimary = primaryColor;
+        }
+
+        /**
+         * Sets the icon for this task description.
+         * @hide
+         */
+        public void setIcon(Bitmap icon) {
+            mIcon = icon;
+        }
+
+        /**
+         * Moves the icon bitmap reference from an actual Bitmap to a file containing the
+         * bitmap.
+         * @hide
+         */
+        public void setIconFilename(String iconFilename) {
+            mIconFilename = iconFilename;
+            mIcon = null;
+        }
+
+        /**
+         * @return The label and description of the current state of this task.
+         */
+        public String getLabel() {
+            return mLabel;
+        }
+
+        /**
+         * @return The icon that represents the current state of this task.
+         */
+        public Bitmap getIcon() {
+            if (mIcon != null) {
+                return mIcon;
+            }
+            return loadTaskDescriptionIcon(mIconFilename);
+        }
+
+        /** @hide */
+        public String getIconFilename() {
+            return mIconFilename;
+        }
+
+        /** @hide */
+        public Bitmap getInMemoryIcon() {
+            return mIcon;
+        }
+
+        /** @hide */
+        public static Bitmap loadTaskDescriptionIcon(String iconFilename) {
+            if (iconFilename != null) {
+                try {
+                    return ActivityManagerNative.getDefault().
+                            getTaskDescriptionIcon(iconFilename);
+                } catch (RemoteException e) {
+                }
+            }
+            return null;
+        }
+
+        /**
+         * @return The color override on the theme's primary color.
+         */
+        public int getPrimaryColor() {
+            return mColorPrimary;
+        }
+
+        /** @hide */
+        public void saveToXml(XmlSerializer out) throws IOException {
+            if (mLabel != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, mLabel);
+            }
+            if (mColorPrimary != 0) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(mColorPrimary));
+            }
+            if (mIconFilename != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONICONFILENAME, mIconFilename);
+            }
+        }
+
+        /** @hide */
+        public void restoreFromXml(String attrName, String attrValue) {
+            if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
+                setLabel(attrValue);
+            } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
+                setPrimaryColor((int) Long.parseLong(attrValue, 16));
+            } else if (ATTR_TASKDESCRIPTIONICONFILENAME.equals(attrName)) {
+                setIconFilename(attrValue);
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            if (mLabel == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                dest.writeString(mLabel);
+            }
+            if (mIcon == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                mIcon.writeToParcel(dest, 0);
+            }
+            dest.writeInt(mColorPrimary);
+            if (mIconFilename == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                dest.writeString(mIconFilename);
+            }
+        }
+
+        public void readFromParcel(Parcel source) {
+            mLabel = source.readInt() > 0 ? source.readString() : null;
+            mIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
+            mColorPrimary = source.readInt();
+            mIconFilename = source.readInt() > 0 ? source.readString() : null;
+        }
+
+        public static final Creator<TaskDescription> CREATOR
+                = new Creator<TaskDescription>() {
+            public TaskDescription createFromParcel(Parcel source) {
+                return new TaskDescription(source);
+            }
+            public TaskDescription[] newArray(int size) {
+                return new TaskDescription[size];
+            }
+        };
+
+        @Override
+        public String toString() {
+            return "TaskDescription Label: " + mLabel + " Icon: " + mIcon +
+                    " colorPrimary: " + mColorPrimary;
+        }
     }
 
     /**
@@ -502,6 +789,42 @@ public class ActivityManager {
          */
         public int stackId;
 
+        /**
+         * The id of the user the task was running as.
+         * @hide
+         */
+        public int userId;
+
+        /**
+         * The first time this task was active.
+         * @hide
+         */
+        public long firstActiveTime;
+
+        /**
+         * The last time this task was active.
+         * @hide
+         */
+        public long lastActiveTime;
+
+        /**
+         * The recent activity values for the highest activity in the stack to have set the values.
+         * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
+         */
+        public TaskDescription taskDescription;
+
+        /**
+         * Task affiliation for grouping with other tasks.
+         */
+        public int affiliatedTaskId;
+
+        /**
+         * Task affiliation color of the source task with the affiliated task id.
+         *
+         * @hide
+         */
+        public int affiliatedTaskColor;
+
         public RecentTaskInfo() {
         }
 
@@ -523,20 +846,34 @@ public class ActivityManager {
             ComponentName.writeToParcel(origActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            if (taskDescription != null) {
+                dest.writeInt(1);
+                taskDescription.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
             dest.writeInt(stackId);
+            dest.writeInt(userId);
+            dest.writeLong(firstActiveTime);
+            dest.writeLong(lastActiveTime);
+            dest.writeInt(affiliatedTaskId);
+            dest.writeInt(affiliatedTaskColor);
         }
 
         public void readFromParcel(Parcel source) {
             id = source.readInt();
             persistentId = source.readInt();
-            if (source.readInt() != 0) {
-                baseIntent = Intent.CREATOR.createFromParcel(source);
-            } else {
-                baseIntent = null;
-            }
+            baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            taskDescription = source.readInt() > 0 ?
+                    TaskDescription.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
+            userId = source.readInt();
+            firstActiveTime = source.readLong();
+            lastActiveTime = source.readLong();
+            affiliatedTaskId = source.readInt();
+            affiliatedTaskColor = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -560,7 +897,7 @@ public class ActivityManager {
      * {@link android.content.Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag.
      */
     public static final int RECENT_WITH_EXCLUDED = 0x0001;
-    
+
     /**
      * Provides a list that does not contain any
      * recent tasks that currently are not available to the user.
@@ -568,7 +905,20 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
-     * Return a list of the tasks that the user has recently launched, with
+     * Provides a list that contains recent tasks for all
+     * profiles of a user.
+     * @hide
+     */
+    public static final int RECENT_INCLUDE_PROFILES = 0x0004;
+
+    /**
+     * Ignores all tasks that are on the home stack.
+     * @hide
+     */
+    public static final int RECENT_IGNORE_HOME_STACK_TASKS = 0x0008;
+
+    /**
+     * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *
      * <p><b>Note: this method is only intended for debugging and presenting
@@ -580,6 +930,15 @@ public class ActivityManager {
      * same time, assumptions made about the meaning of the data here for
      * purposes of control flow will be incorrect.</p>
      *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method is
+     * no longer available to third party applications: the introduction of
+     * document-centric recents means
+     * it can leak personal information to the caller.  For backwards compatibility,
+     * it will still return a small subset of its data: at least the caller's
+     * own tasks (though see {@link #getAppTasks()} for the correct supported
+     * way to retrieve that information), and possibly some other tasks
+     * such as home that are known to not be sensitive.
+     *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
      * user has started and the maximum number the system can remember.
@@ -588,10 +947,8 @@ public class ActivityManager {
      * 
      * @return Returns a list of RecentTaskInfo records describing each of
      * the recent tasks.
-     * 
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
      */
+    @Deprecated
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {
@@ -616,9 +973,6 @@ public class ActivityManager {
      * @return Returns a list of RecentTaskInfo records describing each of
      * the recent tasks.
      *
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} or the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permissions.
      * @hide
      */
     public List<RecentTaskInfo> getRecentTasksForUser(int maxNum, int flags, int userId)
@@ -736,40 +1090,112 @@ public class ActivityManager {
             readFromParcel(source);
         }
     }
-    
+
     /**
-     * Return a list of the tasks that are currently running, with
-     * the most recent being first and older ones after in order.  Note that
-     * "running" does not mean any of the task's code is currently loaded or
-     * activity -- the task may have been frozen by the system, so that it
-     * can be restarted in its previous state when next brought to the
-     * foreground.
-     * 
-     * @param maxNum The maximum number of entries to return in the list.  The
-     * actual number returned may be smaller, depending on how many tasks the
-     * user has started.
+     * Get the list of tasks associated with the calling application.
      *
-     * @param flags Optional flags
-     * @param receiver Optional receiver for delayed thumbnails
-     *
-     * @return Returns a list of RunningTaskInfo records describing each of
-     * the running tasks.
-     * 
-     * Some thumbnails may not be available at the time of this call. The optional
-     * receiver may be used to receive those thumbnails.
-     *
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
-     *
-     * @hide
+     * @return The list of tasks associated with the application making this call.
+     * @throws SecurityException
      */
-    public List<RunningTaskInfo> getRunningTasks(int maxNum, int flags, IThumbnailReceiver receiver)
-            throws SecurityException {
+    public List<ActivityManager.AppTask> getAppTasks() {
+        ArrayList<AppTask> tasks = new ArrayList<AppTask>();
+        List<IAppTask> appTasks;
         try {
-            return ActivityManagerNative.getDefault().getTasks(maxNum, flags, receiver);
+            appTasks = ActivityManagerNative.getDefault().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
+        }
+        int numAppTasks = appTasks.size();
+        for (int i = 0; i < numAppTasks; i++) {
+            tasks.add(new AppTask(appTasks.get(i)));
+        }
+        return tasks;
+    }
+
+    /**
+     * Return the current design dimensions for {@link AppTask} thumbnails, for use
+     * with {@link #addAppTask}.
+     */
+    public Size getAppTaskThumbnailSize() {
+        synchronized (this) {
+            ensureAppTaskThumbnailSizeLocked();
+            return new Size(mAppTaskThumbnailSize.x, mAppTaskThumbnailSize.y);
+        }
+    }
+
+    private void ensureAppTaskThumbnailSizeLocked() {
+        if (mAppTaskThumbnailSize == null) {
+            try {
+                mAppTaskThumbnailSize = ActivityManagerNative.getDefault().getAppTaskThumbnailSize();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("System dead?", e);
+            }
+        }
+    }
+
+    /**
+     * Add a new {@link AppTask} for the calling application.  This will create a new
+     * recents entry that is added to the <b>end</b> of all existing recents.
+     *
+     * @param activity The activity that is adding the entry.   This is used to help determine
+     * the context that the new recents entry will be in.
+     * @param intent The Intent that describes the recents entry.  This is the same Intent that
+     * you would have used to launch the activity for it.  In generally you will want to set
+     * both {@link Intent#FLAG_ACTIVITY_NEW_DOCUMENT} and
+     * {@link Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}; the latter is required since this recents
+     * entry will exist without an activity, so it doesn't make sense to not retain it when
+     * its activity disappears.  The given Intent here also must have an explicit ComponentName
+     * set on it.
+     * @param description Optional additional description information.
+     * @param thumbnail Thumbnail to use for the recents entry.  Should be the size given by
+     * {@link #getAppTaskThumbnailSize()}.  If the bitmap is not that exact size, it will be
+     * recreated in your process, probably in a way you don't like, before the recents entry
+     * is added.
+     *
+     * @return Returns the task id of the newly added app task, or -1 if the add failed.  The
+     * most likely cause of failure is that there is no more room for more tasks for your app.
+     */
+    public int addAppTask(@NonNull Activity activity, @NonNull Intent intent,
+            @Nullable TaskDescription description, @NonNull Bitmap thumbnail) {
+        Point size;
+        synchronized (this) {
+            ensureAppTaskThumbnailSizeLocked();
+            size = mAppTaskThumbnailSize;
+        }
+        final int tw = thumbnail.getWidth();
+        final int th = thumbnail.getHeight();
+        if (tw != size.x || th != size.y) {
+            Bitmap bm = Bitmap.createBitmap(size.x, size.y, thumbnail.getConfig());
+
+            // Use ScaleType.CENTER_CROP, except we leave the top edge at the top.
+            float scale;
+            float dx = 0, dy = 0;
+            if (tw * size.x > size.y * th) {
+                scale = (float) size.x / (float) th;
+                dx = (size.y - tw * scale) * 0.5f;
+            } else {
+                scale = (float) size.y / (float) tw;
+                dy = (size.x - th * scale) * 0.5f;
+            }
+            Matrix matrix = new Matrix();
+            matrix.setScale(scale, scale);
+            matrix.postTranslate((int) (dx + 0.5f), 0);
+
+            Canvas canvas = new Canvas(bm);
+            canvas.drawBitmap(thumbnail, matrix, null);
+            canvas.setBitmap(null);
+
+            thumbnail = bm;
+        }
+        if (description == null) {
+            description = new TaskDescription();
+        }
+        try {
+            return ActivityManagerNative.getDefault().addAppTask(activity.getActivityToken(),
+                    intent, description, thumbnail);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("System dead?", e);
         }
     }
 
@@ -790,40 +1216,29 @@ public class ActivityManager {
      * same time, assumptions made about the meaning of the data here for
      * purposes of control flow will be incorrect.</p>
      *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method
+     * is no longer available to third party
+     * applications: the introduction of document-centric recents means
+     * it can leak person information to the caller.  For backwards compatibility,
+     * it will still retu rn a small subset of its data: at least the caller's
+     * own tasks, and possibly some other tasks
+     * such as home that are known to not be sensitive.
+     *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
      * user has started.
      *
      * @return Returns a list of RunningTaskInfo records describing each of
      * the running tasks.
-     *
-     * @throws SecurityException Throws SecurityException if the caller does
-     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
      */
+    @Deprecated
     public List<RunningTaskInfo> getRunningTasks(int maxNum)
             throws SecurityException {
-        return getRunningTasks(maxNum, 0, null);
-    }
-
-    /**
-     * Remove some end of a task's activity stack that is not part of
-     * the main application.  The selected activities will be finished, so
-     * they are no longer part of the main task.
-     *
-     * @param taskId The identifier of the task.
-     * @param subTaskIndex The number of the sub-task; this corresponds
-     * to the index of the thumbnail returned by {@link #getTaskThumbnails(int)}.
-     * @return Returns true if the sub-task was found and was removed.
-     *
-     * @hide
-     */
-    public boolean removeSubTask(int taskId, int subTaskIndex)
-            throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().removeSubTask(taskId, subTaskIndex);
+            return ActivityManagerNative.getDefault().getTasks(maxNum, 0);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
-            return false;
+            return null;
         }
     }
 
@@ -855,38 +1270,33 @@ public class ActivityManager {
     }
 
     /** @hide */
-    public static class TaskThumbnails implements Parcelable {
+    public static class TaskThumbnail implements Parcelable {
         public Bitmap mainThumbnail;
+        public ParcelFileDescriptor thumbnailFileDescriptor;
 
-        public int numSubThumbbails;
-
-        /** @hide */
-        public IThumbnailRetriever retriever;
-
-        public TaskThumbnails() {
-        }
-
-        public Bitmap getSubThumbnail(int index) {
-            try {
-                return retriever.getThumbnail(index);
-            } catch (RemoteException e) {
-                return null;
-            }
+        public TaskThumbnail() {
         }
 
         public int describeContents() {
+            if (thumbnailFileDescriptor != null) {
+                return thumbnailFileDescriptor.describeContents();
+            }
             return 0;
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             if (mainThumbnail != null) {
                 dest.writeInt(1);
-                mainThumbnail.writeToParcel(dest, 0);
+                mainThumbnail.writeToParcel(dest, flags);
             } else {
                 dest.writeInt(0);
             }
-            dest.writeInt(numSubThumbbails);
-            dest.writeStrongInterface(retriever);
+            if (thumbnailFileDescriptor != null) {
+                dest.writeInt(1);
+                thumbnailFileDescriptor.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -895,28 +1305,31 @@ public class ActivityManager {
             } else {
                 mainThumbnail = null;
             }
-            numSubThumbbails = source.readInt();
-            retriever = IThumbnailRetriever.Stub.asInterface(source.readStrongBinder());
+            if (source.readInt() != 0) {
+                thumbnailFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(source);
+            } else {
+                thumbnailFileDescriptor = null;
+            }
         }
 
-        public static final Creator<TaskThumbnails> CREATOR = new Creator<TaskThumbnails>() {
-            public TaskThumbnails createFromParcel(Parcel source) {
-                return new TaskThumbnails(source);
+        public static final Creator<TaskThumbnail> CREATOR = new Creator<TaskThumbnail>() {
+            public TaskThumbnail createFromParcel(Parcel source) {
+                return new TaskThumbnail(source);
             }
-            public TaskThumbnails[] newArray(int size) {
-                return new TaskThumbnails[size];
+            public TaskThumbnail[] newArray(int size) {
+                return new TaskThumbnail[size];
             }
         };
 
-        private TaskThumbnails(Parcel source) {
+        private TaskThumbnail(Parcel source) {
             readFromParcel(source);
         }
     }
 
     /** @hide */
-    public TaskThumbnails getTaskThumbnails(int id) throws SecurityException {
+    public TaskThumbnail getTaskThumbnail(int id) throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().getTaskThumbnails(id);
+            return ActivityManagerNative.getDefault().getTaskThumbnail(id);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
@@ -924,12 +1337,12 @@ public class ActivityManager {
     }
 
     /** @hide */
-    public Bitmap getTaskTopThumbnail(int id) throws SecurityException {
+    public boolean isInHomeStack(int taskId) {
         try {
-            return ActivityManagerNative.getDefault().getTaskTopThumbnail(id);
+            return ActivityManagerNative.getDefault().isInHomeStack(taskId);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
-            return null;
+            return false;
         }
     }
 
@@ -1289,106 +1702,15 @@ public class ActivityManager {
     }
 
     /**
-     * Information you can retrieve about the WindowManager StackBox hierarchy.
-     * @hide
-     */
-    public static class StackBoxInfo implements Parcelable {
-        public int stackBoxId;
-        public float weight;
-        public boolean vertical;
-        public Rect bounds;
-        public StackBoxInfo[] children;
-        public int stackId;
-        public StackInfo stack;
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(stackBoxId);
-            dest.writeFloat(weight);
-            dest.writeInt(vertical ? 1 : 0);
-            bounds.writeToParcel(dest, flags);
-            dest.writeInt(stackId);
-            if (children != null) {
-                children[0].writeToParcel(dest, flags);
-                children[1].writeToParcel(dest, flags);
-            } else {
-                stack.writeToParcel(dest, flags);
-            }
-        }
-
-        public void readFromParcel(Parcel source) {
-            stackBoxId = source.readInt();
-            weight = source.readFloat();
-            vertical = source.readInt() == 1;
-            bounds = Rect.CREATOR.createFromParcel(source);
-            stackId = source.readInt();
-            if (stackId == -1) {
-                children = new StackBoxInfo[2];
-                children[0] = StackBoxInfo.CREATOR.createFromParcel(source);
-                children[1] = StackBoxInfo.CREATOR.createFromParcel(source);
-            } else {
-                stack = StackInfo.CREATOR.createFromParcel(source);
-            }
-        }
-
-        public static final Creator<StackBoxInfo> CREATOR =
-                new Creator<ActivityManager.StackBoxInfo>() {
-
-            @Override
-            public StackBoxInfo createFromParcel(Parcel source) {
-                return new StackBoxInfo(source);
-            }
-
-            @Override
-            public StackBoxInfo[] newArray(int size) {
-                return new StackBoxInfo[size];
-            }
-        };
-
-        public StackBoxInfo() {
-        }
-
-        public StackBoxInfo(Parcel source) {
-            readFromParcel(source);
-        }
-
-        public String toString(String prefix) {
-            StringBuilder sb = new StringBuilder(256);
-            sb.append(prefix); sb.append("Box id=" + stackBoxId); sb.append(" weight=" + weight);
-            sb.append(" vertical=" + vertical); sb.append(" bounds=" + bounds.toShortString());
-            sb.append("\n");
-            if (children != null) {
-                sb.append(prefix); sb.append("First child=\n");
-                sb.append(children[0].toString(prefix + "  "));
-                sb.append(prefix); sb.append("Second child=\n");
-                sb.append(children[1].toString(prefix + "  "));
-            } else {
-                sb.append(prefix); sb.append("Stack=\n");
-                sb.append(stack.toString(prefix + "  "));
-            }
-            return sb.toString();
-        }
-
-        @Override
-        public String toString() {
-            return toString("");
-        }
-    }
-
-    /**
      * Information you can retrieve about an ActivityStack in the system.
      * @hide
      */
     public static class StackInfo implements Parcelable {
         public int stackId;
-        public Rect bounds;
+        public Rect bounds = new Rect();
         public int[] taskIds;
         public String[] taskNames;
+        public int displayId;
 
         @Override
         public int describeContents() {
@@ -1404,6 +1726,7 @@ public class ActivityManager {
             dest.writeInt(bounds.bottom);
             dest.writeIntArray(taskIds);
             dest.writeStringArray(taskNames);
+            dest.writeInt(displayId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1412,6 +1735,7 @@ public class ActivityManager {
                     source.readInt(), source.readInt(), source.readInt(), source.readInt());
             taskIds = source.createIntArray();
             taskNames = source.createStringArray();
+            displayId = source.readInt();
         }
 
         public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
@@ -1435,7 +1759,9 @@ public class ActivityManager {
         public String toString(String prefix) {
             StringBuilder sb = new StringBuilder(256);
             sb.append(prefix); sb.append("Stack id="); sb.append(stackId);
-                    sb.append(" bounds="); sb.append(bounds.toShortString()); sb.append("\n");
+                    sb.append(" bounds="); sb.append(bounds.toShortString());
+                    sb.append(" displayId="); sb.append(displayId);
+                    sb.append("\n");
             prefix = prefix + "  ";
             for (int i = 0; i < taskIds.length; ++i) {
                 sb.append(prefix); sb.append("taskId="); sb.append(taskIds[i]);
@@ -1657,13 +1983,6 @@ public class ActivityManager {
         public int lastTrimLevel;
 
         /**
-         * Constant for {@link #importance}: this is a persistent process.
-         * Only used when reporting to process observers.
-         * @hide
-         */
-        public static final int IMPORTANCE_PERSISTENT = 50;
-
-        /**
          * Constant for {@link #importance}: this process is running the
          * foreground UI.
          */
@@ -1708,7 +2027,29 @@ public class ActivityManager {
          * actively running code.
          */
         public static final int IMPORTANCE_EMPTY = 500;
-        
+
+        /**
+         * Constant for {@link #importance}: this process does not exist.
+         */
+        public static final int IMPORTANCE_GONE = 1000;
+
+        /** @hide */
+        public static int procStateToImportance(int procState) {
+            if (procState >= ActivityManager.PROCESS_STATE_HOME) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+            } else if (procState >= ActivityManager.PROCESS_STATE_SERVICE) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
+            } else if (procState > ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
+            } else if (procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
+            } else if (procState >= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+            } else {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+            }
+        }
+
         /**
          * The relative importance level that the system places on this
          * process.  May be one of {@link #IMPORTANCE_FOREGROUND},
@@ -1778,9 +2119,16 @@ public class ActivityManager {
          */
         public int importanceReasonImportance;
 
+        /**
+         * Current process state, as per PROCESS_STATE_* constants.
+         * @hide
+         */
+        public int processState;
+
         public RunningAppProcessInfo() {
             importance = IMPORTANCE_FOREGROUND;
             importanceReasonCode = REASON_UNKNOWN;
+            processState = PROCESS_STATE_IMPORTANT_FOREGROUND;
         }
         
         public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
@@ -1806,6 +2154,7 @@ public class ActivityManager {
             dest.writeInt(importanceReasonPid);
             ComponentName.writeToParcel(importanceReasonComponent, dest);
             dest.writeInt(importanceReasonImportance);
+            dest.writeInt(processState);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1821,6 +2170,7 @@ public class ActivityManager {
             importanceReasonPid = source.readInt();
             importanceReasonComponent = ComponentName.readFromParcel(source);
             importanceReasonImportance = source.readInt();
+            processState = source.readInt();
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR = 
@@ -1958,19 +2308,27 @@ public class ActivityManager {
      * call this method.
      * 
      * @param packageName The name of the package to be stopped.
+     * @param userId The user for which the running package is to be stopped.
      * 
      * @hide This is not available to third party applications due to
      * it allowing them to break other applications by stopping their
      * services, removing their alarms, etc.
      */
-    public void forceStopPackage(String packageName) {
+    public void forceStopPackageAsUser(String packageName, int userId) {
         try {
-            ActivityManagerNative.getDefault().forceStopPackage(packageName,
-                    UserHandle.myUserId());
+            ActivityManagerNative.getDefault().forceStopPackage(packageName, userId);
         } catch (RemoteException e) {
         }
     }
-    
+
+    /**
+     * @see #forceStopPackageAsUser(String, int)
+     * @hide
+     */
+    public void forceStopPackage(String packageName) {
+        forceStopPackageAsUser(packageName, UserHandle.myUserId());
+    }
+
     /**
      * Get the device configuration attributes.
      */
@@ -2025,7 +2383,11 @@ public class ActivityManager {
      * @return dimensions of square icons in terms of pixels
      */
     public int getLauncherLargeIconSize() {
-        final Resources res = mContext.getResources();
+        return getLauncherLargeIconSizeInner(mContext);
+    }
+
+    static int getLauncherLargeIconSizeInner(Context context) {
+        final Resources res = context.getResources();
         final int size = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
         final int sw = res.getConfiguration().smallestScreenWidthDp;
 
@@ -2080,7 +2442,7 @@ public class ActivityManager {
      *
      * @hide
      */
-    public Map<String, Integer> getAllPackageLaunchCounts() {
+    /*public Map<String, Integer> getAllPackageLaunchCounts() {
         try {
             IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
                     ServiceManager.getService("usagestats"));
@@ -2088,14 +2450,15 @@ public class ActivityManager {
                 return new HashMap<String, Integer>();
             }
 
-            PkgUsageStats[] allPkgUsageStats = usageStatsService.getAllPkgUsageStats();
+            UsageStats.PackageStats[] allPkgUsageStats = usageStatsService.getAllPkgUsageStats(
+                    ActivityThread.currentPackageName());
             if (allPkgUsageStats == null) {
                 return new HashMap<String, Integer>();
             }
 
             Map<String, Integer> launchCounts = new HashMap<String, Integer>();
-            for (PkgUsageStats pkgUsageStats : allPkgUsageStats) {
-                launchCounts.put(pkgUsageStats.packageName, pkgUsageStats.launchCount);
+            for (UsageStats.PackageStats pkgUsageStats : allPkgUsageStats) {
+                launchCounts.put(pkgUsageStats.getPackageName(), pkgUsageStats.getLaunchCount());
             }
 
             return launchCounts;
@@ -2103,7 +2466,7 @@ public class ActivityManager {
             Log.w(TAG, "Could not query launch counts", e);
             return new HashMap<String, Integer>();
         }
-    }
+    }*/
 
     /** @hide */
     public static int checkComponentPermission(String permission, int uid,
@@ -2193,7 +2556,11 @@ public class ActivityManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Gets the userId of the current foreground user. Requires system permissions.
+     * @hide
+     */
+    @SystemApi
     public static int getCurrentUser() {
         UserInfo ui;
         try {
@@ -2202,24 +2569,6 @@ public class ActivityManager {
         } catch (RemoteException e) {
             return 0;
         }
-    }
-
-    /**
-     * Returns the usage statistics of each installed package.
-     *
-     * @hide
-     */
-    public PkgUsageStats[] getAllPackageUsageStats() {
-        try {
-            IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
-                    ServiceManager.getService("usagestats"));
-            if (usageStatsService != null) {
-                return usageStatsService.getAllPkgUsageStats();
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not query usage stats", e);
-        }
-        return new PkgUsageStats[0];
     }
 
     /**
@@ -2272,16 +2621,16 @@ public class ActivityManager {
     public static void dumpPackageStateStatic(FileDescriptor fd, String packageName) {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new FastPrintWriter(fout);
+        dumpService(pw, fd, "package", new String[] { packageName });
+        pw.println();
         dumpService(pw, fd, Context.ACTIVITY_SERVICE, new String[] {
                 "-a", "package", packageName });
         pw.println();
-        dumpService(pw, fd, "meminfo", new String[] { "--local", packageName });
+        dumpService(pw, fd, "meminfo", new String[] { "--local", "--package", packageName });
         pw.println();
-        dumpService(pw, fd, ProcessStats.SERVICE_NAME, new String[] { "-a", packageName });
+        dumpService(pw, fd, ProcessStats.SERVICE_NAME, new String[] { packageName });
         pw.println();
         dumpService(pw, fd, "usagestats", new String[] { "--packages", packageName });
-        pw.println();
-        dumpService(pw, fd, "package", new String[] { packageName });
         pw.println();
         dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName });
         pw.flush();
@@ -2300,13 +2649,141 @@ public class ActivityManager {
             tp = new TransferPipe();
             tp.setBufferPrefix("  ");
             service.dumpAsync(tp.getWriteFd().getFileDescriptor(), args);
-            tp.go(fd);
+            tp.go(fd, 10000);
         } catch (Throwable e) {
             if (tp != null) {
                 tp.kill();
             }
             pw.println("Failure dumping service:");
             e.printStackTrace(pw);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void startLockTaskMode(int taskId) {
+        try {
+            ActivityManagerNative.getDefault().startLockTaskMode(taskId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void stopLockTaskMode() {
+        try {
+            ActivityManagerNative.getDefault().stopLockTaskMode();
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Return whether currently in lock task mode.  When in this mode
+     * no new tasks can be created or switched to.
+     *
+     * @see Activity#startLockTask()
+     */
+    public boolean isInLockTaskMode() {
+        try {
+            return ActivityManagerNative.getDefault().isInLockTaskMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * The AppTask allows you to manage your own application's tasks.
+     * See {@link android.app.ActivityManager#getAppTasks()}
+     */
+    public static class AppTask {
+        private IAppTask mAppTaskImpl;
+
+        /** @hide */
+        public AppTask(IAppTask task) {
+            mAppTaskImpl = task;
+        }
+
+        /**
+         * Finishes all activities in this task and removes it from the recent tasks list.
+         */
+        public void finishAndRemoveTask() {
+            try {
+                mAppTaskImpl.finishAndRemoveTask();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+            }
+        }
+
+        /**
+         * Get the RecentTaskInfo associated with this task.
+         *
+         * @return The RecentTaskInfo for this task, or null if the task no longer exists.
+         */
+        public RecentTaskInfo getTaskInfo() {
+            try {
+                return mAppTaskImpl.getTaskInfo();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+                return null;
+            }
+        }
+
+        /**
+         * Bring this task to the foreground.  If it contains activities, they will be
+         * brought to the foreground with it and their instances re-created if needed.
+         * If it doesn't contain activities, the root activity of the task will be
+         * re-launched.
+         */
+        public void moveToFront() {
+            try {
+                mAppTaskImpl.moveToFront();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+            }
+        }
+
+        /**
+         * Start an activity in this task.  Brings the task to the foreground.  If this task
+         * is not currently active (that is, its id < 0), then a new activity for the given
+         * Intent will be launched as the root of the task and the task brought to the
+         * foreground.  Otherwise, if this task is currently active and the Intent does not specify
+         * an activity to launch in a new task, then a new activity for the given Intent will
+         * be launched on top of the task and the task brought to the foreground.  If this
+         * task is currently active and the Intent specifies {@link Intent#FLAG_ACTIVITY_NEW_TASK}
+         * or would otherwise be launched in to a new task, then the activity not launched but
+         * this task be brought to the foreground and a new intent delivered to the top
+         * activity if appropriate.
+         *
+         * <p>In other words, you generally want to use an Intent here that does not specify
+         * {@link Intent#FLAG_ACTIVITY_NEW_TASK} or {@link Intent#FLAG_ACTIVITY_NEW_DOCUMENT},
+         * and let the system do the right thing.</p>
+         *
+         * @param intent The Intent describing the new activity to be launched on the task.
+         * @param options Optional launch options.
+         *
+         * @see Activity#startActivity(android.content.Intent, android.os.Bundle)
+         */
+        public void startActivity(Context context, Intent intent, Bundle options) {
+            ActivityThread thread = ActivityThread.currentActivityThread();
+            thread.getInstrumentation().execStartActivityFromAppTask(context,
+                    thread.getApplicationThread(), mAppTaskImpl, intent, options);
+        }
+
+        /**
+         * Modify the {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag in the root
+         * Intent of this AppTask.
+         *
+         * @param exclude If true, {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} will
+         * be set; otherwise, it will be cleared.
+         */
+        public void setExcludeFromRecents(boolean exclude) {
+            try {
+                mAppTaskImpl.setExcludeFromRecents(exclude);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+            }
         }
     }
 }

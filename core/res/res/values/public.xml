@@ -2087,4 +2087,507 @@
   <public type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" id="0x010301e3" />
   <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" id="0x010301e4" />
 
+<!-- ===============================================================
+     Resources added in version 20 of the platform
+     =============================================================== -->
+  <eat-comment />
+
+  <public type="attr" name="banner" id="0x10103f2" />
+  <public type="attr" name="windowSwipeToDismiss" id="0x10103f3" />
+  <public type="attr" name="isGame" id="0x10103f4" />
+  <public type="attr" name="allowEmbedded" id="0x10103f5" />
+  <public type="attr" name="setupActivity" id="0x10103f6"/>
+
+<!-- ===============================================================
+     Resources added in version 21 of the platform
+     =============================================================== -->
+    <eat-comment />
+
+    <public type="attr" name="fastScrollStyle" id="0x010103f7" />
+    <public type="attr" name="windowContentTransitions" id="0x010103f8" />
+    <public type="attr" name="windowContentTransitionManager" id="0x010103f9" />
+    <public type="attr" name="translationZ" id="0x010103fa" />
+    <public type="attr" name="tintMode" id="0x010103fb" />
+    <public type="attr" name="controlX1" id="0x010103fc" />
+    <public type="attr" name="controlY1" id="0x010103fd" />
+    <public type="attr" name="controlX2" id="0x010103fe" />
+    <public type="attr" name="controlY2" id="0x010103ff" />
+    <public type="attr" name="transitionName" id="0x01010400" />
+    <public type="attr" name="transitionGroup" id="0x01010401" />
+    <public type="attr" name="viewportWidth" id="0x01010402" />
+    <public type="attr" name="viewportHeight" id="0x01010403" />
+    <public type="attr" name="fillColor" id="0x01010404" />
+    <public type="attr" name="pathData" id="0x01010405" />
+    <public type="attr" name="strokeColor" id="0x01010406" />
+    <public type="attr" name="strokeWidth" id="0x01010407" />
+    <public type="attr" name="trimPathStart" id="0x01010408" />
+    <public type="attr" name="trimPathEnd" id="0x01010409" />
+    <public type="attr" name="trimPathOffset" id="0x0101040a" />
+    <public type="attr" name="strokeLineCap" id="0x0101040b" />
+    <public type="attr" name="strokeLineJoin" id="0x0101040c" />
+    <public type="attr" name="strokeMiterLimit" id="0x0101040d" />
+    <public type="attr" name="colorControlNormal" id="0x01010429" />
+    <public type="attr" name="colorControlActivated" id="0x0101042a" />
+    <public type="attr" name="colorButtonNormal" id="0x0101042b" />
+    <public type="attr" name="colorControlHighlight" id="0x0101042c" />
+    <public type="attr" name="persistableMode" id="0x0101042d" />
+    <public type="attr" name="titleTextAppearance" id="0x0101042e" />
+    <public type="attr" name="subtitleTextAppearance" id="0x0101042f" />
+    <public type="attr" name="slideEdge" id="0x01010430" />
+    <public type="attr" name="actionBarTheme" id="0x01010431" />
+    <public type="attr" name="textAppearanceListItemSecondary" id="0x01010432" />
+    <public type="attr" name="colorPrimary" id="0x01010433" />
+    <public type="attr" name="colorPrimaryDark" id="0x01010434" />
+    <public type="attr" name="colorAccent" id="0x01010435" />
+    <public type="attr" name="nestedScrollingEnabled" id="0x01010436" />
+    <public type="attr" name="windowEnterTransition" id="0x01010437" />
+    <public type="attr" name="windowExitTransition" id="0x01010438" />
+    <public type="attr" name="windowSharedElementEnterTransition" id="0x01010439" />
+    <public type="attr" name="windowSharedElementExitTransition" id="0x0101043a" />
+    <public type="attr" name="windowAllowReturnTransitionOverlap" id="0x0101043b" />
+    <public type="attr" name="windowAllowEnterTransitionOverlap" id="0x0101043c" />
+    <public type="attr" name="sessionService" id="0x0101043d" />
+    <public type="attr" name="stackViewStyle" id="0x0101043e" />
+    <public type="attr" name="switchStyle" id="0x0101043f" />
+    <public type="attr" name="elevation" id="0x01010440" />
+    <public type="attr" name="excludeId" id="0x01010441" />
+    <public type="attr" name="excludeClass" id="0x01010442" />
+    <public type="attr" name="hideOnContentScroll" id="0x01010443" />
+    <public type="attr" name="actionOverflowMenuStyle" id="0x01010444" />
+    <public type="attr" name="documentLaunchMode" id="0x01010445" />
+    <public type="attr" name="maxRecents" id="0x01010446" />
+    <public type="attr" name="autoRemoveFromRecents" id="0x01010447" />
+    <public type="attr" name="stateListAnimator" id="0x01010448" />
+    <public type="attr" name="toId" id="0x01010449" />
+    <public type="attr" name="fromId" id="0x0101044a" />
+    <public type="attr" name="reversible" id="0x0101044b" />
+    <public type="attr" name="splitTrack" id="0x0101044c" />
+    <public type="attr" name="targetName" id="0x0101044d" />
+    <public type="attr" name="excludeName" id="0x0101044e" />
+    <public type="attr" name="matchOrder" id="0x0101044f" />
+    <public type="attr" name="windowDrawsSystemBarBackgrounds" id="0x01010450" />
+    <public type="attr" name="statusBarColor" id="0x01010451" />
+    <public type="attr" name="navigationBarColor" id="0x01010452" />
+    <public type="attr" name="contentInsetStart" id="0x01010453" />
+    <public type="attr" name="contentInsetEnd" id="0x01010454" />
+    <public type="attr" name="contentInsetLeft" id="0x01010455" />
+    <public type="attr" name="contentInsetRight" id="0x01010456" />
+    <public type="attr" name="paddingMode" id="0x01010457" />
+    <public type="attr" name="layout_rowWeight" id="0x01010458" />
+    <public type="attr" name="layout_columnWeight" id="0x01010459" />
+    <public type="attr" name="translateX" id="0x0101045a" />
+    <public type="attr" name="translateY" id="0x0101045b" />
+    <public type="attr" name="selectableItemBackgroundBorderless" id="0x0101045c" />
+    <public type="attr" name="elegantTextHeight" id="0x0101045d" />
+    <public type="attr" name="searchKeyphraseId" id="0x0101045e" />
+    <public type="attr" name="searchKeyphrase" id="0x0101045f" />
+    <public type="attr" name="searchKeyphraseSupportedLocales" id="0x01010460" />
+    <public type="attr" name="windowTransitionBackgroundFadeDuration" id="0x01010461" />
+    <public type="attr" name="overlapAnchor" id="0x01010462" />
+    <public type="attr" name="progressTint" id="0x01010463" />
+    <public type="attr" name="progressTintMode" id="0x01010464" />
+    <public type="attr" name="progressBackgroundTint" id="0x01010465" />
+    <public type="attr" name="progressBackgroundTintMode" id="0x01010466" />
+    <public type="attr" name="secondaryProgressTint" id="0x01010467" />
+    <public type="attr" name="secondaryProgressTintMode" id="0x01010468" />
+    <public type="attr" name="indeterminateTint" id="0x01010469" />
+    <public type="attr" name="indeterminateTintMode" id="0x0101046a" />
+    <public type="attr" name="backgroundTint" id="0x0101046b" />
+    <public type="attr" name="backgroundTintMode" id="0x0101046c" />
+    <public type="attr" name="foregroundTint" id="0x0101046d" />
+    <public type="attr" name="foregroundTintMode" id="0x0101046e" />
+    <public type="attr" name="buttonTint" id="0x0101046f" />
+    <public type="attr" name="buttonTintMode" id="0x01010470" />
+    <public type="attr" name="thumbTint" id="0x01010471" />
+    <public type="attr" name="thumbTintMode" id="0x01010472" />
+    <public type="attr" name="fullBackupOnly" id="0x01010473" />
+    <public type="attr" name="propertyXName" id="0x01010474" />
+    <public type="attr" name="propertyYName" id="0x01010475" />
+    <public type="attr" name="relinquishTaskIdentity" id="0x01010476" />
+    <public type="attr" name="tileModeX" id="0x01010477" />
+    <public type="attr" name="tileModeY" id="0x01010478" />
+    <public type="attr" name="actionModeShareDrawable" id="0x01010479" />
+    <public type="attr" name="actionModeFindDrawable" id="0x0101047a" />
+    <public type="attr" name="actionModeWebSearchDrawable" id="0x0101047b" />
+    <public type="attr" name="transitionVisibilityMode" id="0x0101047c" />
+    <public type="attr" name="minimumHorizontalAngle" id="0x0101047d" />
+    <public type="attr" name="minimumVerticalAngle" id="0x0101047e" />
+    <public type="attr" name="maximumAngle" id="0x0101047f" />
+    <public type="attr" name="searchViewStyle" id="0x01010480" />
+    <public type="attr" name="closeIcon" id="0x01010481" />
+    <public type="attr" name="goIcon" id="0x01010482" />
+    <public type="attr" name="searchIcon" id="0x01010483" />
+    <public type="attr" name="voiceIcon" id="0x01010484" />
+    <public type="attr" name="commitIcon" id="0x01010485" />
+    <public type="attr" name="suggestionRowLayout" id="0x01010486" />
+    <public type="attr" name="queryBackground" id="0x01010487" />
+    <public type="attr" name="submitBackground" id="0x01010488" />
+    <public type="attr" name="buttonBarPositiveButtonStyle" id="0x01010489" />
+    <public type="attr" name="buttonBarNeutralButtonStyle" id="0x0101048a" />
+    <public type="attr" name="buttonBarNegativeButtonStyle" id="0x0101048b" />
+    <public type="attr" name="popupElevation" id="0x0101048c" />
+    <public type="attr" name="actionBarPopupTheme" id="0x0101048d" />
+    <public type="attr" name="multiArch" id="0x0101048e" />
+    <public type="attr" name="touchscreenBlocksFocus" id="0x0101048f" />
+    <public type="attr" name="windowElevation" id="0x01010490" />
+    <public type="attr" name="launchTaskBehindTargetAnimation" id="0x01010491" />
+    <public type="attr" name="launchTaskBehindSourceAnimation" id="0x01010492" />
+    <public type="attr" name="restrictionType" id="0x01010493" />
+    <public type="attr" name="dayOfWeekBackground" id="0x01010494" />
+    <public type="attr" name="dayOfWeekTextAppearance" id="0x01010495" />
+    <public type="attr" name="headerMonthTextAppearance" id="0x01010496" />
+    <public type="attr" name="headerDayOfMonthTextAppearance" id="0x01010497" />
+    <public type="attr" name="headerYearTextAppearance" id="0x01010498" />
+    <public type="attr" name="yearListItemTextAppearance" id="0x01010499" />
+    <public type="attr" name="yearListSelectorColor" id="0x0101049a" />
+    <public type="attr" name="calendarTextColor" id="0x0101049b" />
+    <public type="attr" name="recognitionService" id="0x0101049c" />
+    <public type="attr" name="timePickerStyle" id="0x0101049d" />
+    <public type="attr" name="timePickerDialogTheme" id="0x0101049e" />
+    <public type="attr" name="headerTimeTextAppearance" id="0x0101049f" />
+    <public type="attr" name="headerAmPmTextAppearance" id="0x010104a0" />
+    <public type="attr" name="numbersTextColor" id="0x010104a1" />
+    <public type="attr" name="numbersBackgroundColor" id="0x010104a2" />
+    <public type="attr" name="numbersSelectorColor" id="0x010104a3" />
+    <public type="attr" name="amPmTextColor" id="0x010104a4" />
+    <public type="attr" name="amPmBackgroundColor" id="0x010104a5" />
+    <public type="attr" name="searchKeyphraseRecognitionFlags" id="0x010104a6" />
+    <public type="attr" name="checkMarkTint" id="0x010104a7" />
+    <public type="attr" name="checkMarkTintMode" id="0x010104a8" />
+    <public type="attr" name="popupTheme" id="0x010104a9" />
+    <public type="attr" name="toolbarStyle" id="0x010104aa" />
+    <public type="attr" name="windowClipToOutline" id="0x010104ab" />
+    <public type="attr" name="datePickerDialogTheme" id="0x010104ac" />
+    <public type="attr" name="showText" id="0x010104ad" />
+    <public type="attr" name="windowReturnTransition" id="0x010104ae" />
+    <public type="attr" name="windowReenterTransition" id="0x010104af" />
+    <public type="attr" name="windowSharedElementReturnTransition" id="0x010104b0" />
+    <public type="attr" name="windowSharedElementReenterTransition" id="0x010104b1" />
+    <public type="attr" name="resumeWhilePausing" id="0x010104b2" />
+    <public type="attr" name="datePickerMode" id="0x010104b3" />
+    <public type="attr" name="timePickerMode" id="0x010104b4" />
+    <public type="attr" name="inset" id="0x010104b5" />
+    <public type="attr" name="letterSpacing" id="0x010104b6" />
+    <public type="attr" name="fontFeatureSettings" id="0x010104b7" />
+    <public type="attr" name="outlineProvider" id="0x010104b8" />
+    <public type="attr" name="contentAgeHint" id="0x010104b9" />
+    <public type="attr" name="country" id="0x010104ba" />
+    <public type="attr" name="windowSharedElementsUseOverlay" id="0x010104bb" />
+    <public type="attr" name="reparent" id="0x010104bc" />
+    <public type="attr" name="reparentWithOverlay" id="0x010104bd" />
+    <public type="attr" name="ambientShadowAlpha" id="0x010104be" />
+    <public type="attr" name="spotShadowAlpha" id="0x010104bf" />
+    <public type="attr" name="navigationIcon" id="0x010104c0" />
+    <public type="attr" name="navigationContentDescription" id="0x010104c1" />
+    <public type="attr" name="fragmentExitTransition" id="0x010104c2" />
+    <public type="attr" name="fragmentEnterTransition" id="0x010104c3" />
+    <public type="attr" name="fragmentSharedElementEnterTransition" id="0x010104c4" />
+    <public type="attr" name="fragmentReturnTransition" id="0x010104c5" />
+    <public type="attr" name="fragmentSharedElementReturnTransition" id="0x010104c6" />
+    <public type="attr" name="fragmentReenterTransition" id="0x010104c7" />
+    <public type="attr" name="fragmentAllowEnterTransitionOverlap" id="0x010104c8" />
+    <public type="attr" name="fragmentAllowReturnTransitionOverlap" id="0x010104c9" />
+    <public type="attr" name="patternPathData" id="0x010104ca" />
+    <public type="attr" name="strokeAlpha" id="0x010104cb" />
+    <public type="attr" name="fillAlpha" id="0x010104cc" />
+    <public type="attr" name="windowActivityTransitions" id="0x010104cd" />
+    <public type="attr" name="colorEdgeEffect" id="0x010104ce" />
+
+    <public type="id" name="mask" id="0x0102002e" />
+    <public type="id" name="statusBarBackground" id="0x0102002f" />
+    <public type="id" name="navigationBarBackground" id="0x01020030" />
+
+    <public type="style" name="Widget.FastScroll" id="0x010301e5" />
+    <public type="style" name="Widget.StackView" id="0x010301e6" />
+    <public type="style" name="Widget.Toolbar" id="0x010301e7" />
+    <public type="style" name="Widget.Toolbar.Button.Navigation" id="0x010301e8" />
+
+    <public type="style" name="Widget.DeviceDefault.FastScroll" id="0x010301e9" />
+    <public type="style" name="Widget.DeviceDefault.StackView" id="0x010301ea" />
+    <public type="style" name="Widget.DeviceDefault.Light.FastScroll" id="0x010301eb" />
+    <public type="style" name="Widget.DeviceDefault.Light.StackView" id="0x010301ec" />
+
+    <public type="style" name="TextAppearance.Material" id="0x010301ed" />
+    <public type="style" name="TextAppearance.Material.Button" id="0x010301ee" />
+    <public type="style" name="TextAppearance.Material.Body2" id="0x010301ef" />
+    <public type="style" name="TextAppearance.Material.Body1" id="0x010301f0" />
+    <public type="style" name="TextAppearance.Material.Caption" id="0x010301f1" />
+    <public type="style" name="TextAppearance.Material.DialogWindowTitle" id="0x010301f2" />
+    <public type="style" name="TextAppearance.Material.Display4" id="0x010301f3" />
+    <public type="style" name="TextAppearance.Material.Display3" id="0x010301f4" />
+    <public type="style" name="TextAppearance.Material.Display2" id="0x010301f5" />
+    <public type="style" name="TextAppearance.Material.Display1" id="0x010301f6" />
+    <public type="style" name="TextAppearance.Material.Headline" id="0x010301f7" />
+    <public type="style" name="TextAppearance.Material.Inverse" id="0x010301f8" />
+    <public type="style" name="TextAppearance.Material.Large" id="0x010301f9" />
+    <public type="style" name="TextAppearance.Material.Large.Inverse" id="0x010301fa" />
+    <public type="style" name="TextAppearance.Material.Medium" id="0x010301fb" />
+    <public type="style" name="TextAppearance.Material.Medium.Inverse" id="0x010301fc" />
+    <public type="style" name="TextAppearance.Material.Menu" id="0x010301fd" />
+    <public type="style" name="TextAppearance.Material.Notification" id="0x010301fe" />
+    <public type="style" name="TextAppearance.Material.Notification.Emphasis" id="0x010301ff" />
+    <public type="style" name="TextAppearance.Material.Notification.Info" id="0x01030200" />
+    <public type="style" name="TextAppearance.Material.Notification.Line2" id="0x01030201" />
+    <public type="style" name="TextAppearance.Material.Notification.Time" id="0x01030202" />
+    <public type="style" name="TextAppearance.Material.Notification.Title" id="0x01030203" />
+    <public type="style" name="TextAppearance.Material.SearchResult.Subtitle" id="0x01030204" />
+    <public type="style" name="TextAppearance.Material.SearchResult.Title" id="0x01030205" />
+    <public type="style" name="TextAppearance.Material.Small" id="0x01030206" />
+    <public type="style" name="TextAppearance.Material.Small.Inverse" id="0x01030207" />
+    <public type="style" name="TextAppearance.Material.Subhead" id="0x01030208" />
+    <public type="style" name="TextAppearance.Material.Title" id="0x01030209" />
+    <public type="style" name="TextAppearance.Material.WindowTitle" id="0x0103020a" />
+
+    <public type="style" name="TextAppearance.Material.Widget" id="0x0103020b" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionBar.Menu" id="0x0103020c" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionBar.Subtitle" id="0x0103020d" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse" id="0x0103020e" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionBar.Title" id="0x0103020f" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionBar.Title.Inverse" id="0x01030210" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionMode.Subtitle" id="0x01030211" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse" id="0x01030212" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionMode.Title" id="0x01030213" />
+    <public type="style" name="TextAppearance.Material.Widget.ActionMode.Title.Inverse" id="0x01030214" />
+    <public type="style" name="TextAppearance.Material.Widget.Button" id="0x01030215" />
+    <public type="style" name="TextAppearance.Material.Widget.DropDownHint" id="0x01030216" />
+    <public type="style" name="TextAppearance.Material.Widget.DropDownItem" id="0x01030217" />
+    <public type="style" name="TextAppearance.Material.Widget.EditText" id="0x01030218" />
+    <public type="style" name="TextAppearance.Material.Widget.IconMenu.Item" id="0x01030219" />
+    <public type="style" name="TextAppearance.Material.Widget.PopupMenu" id="0x0103021a" />
+    <public type="style" name="TextAppearance.Material.Widget.PopupMenu.Large" id="0x0103021b" />
+    <public type="style" name="TextAppearance.Material.Widget.PopupMenu.Small" id="0x0103021c" />
+    <public type="style" name="TextAppearance.Material.Widget.TabWidget" id="0x0103021d" />
+    <public type="style" name="TextAppearance.Material.Widget.TextView" id="0x0103021e" />
+    <public type="style" name="TextAppearance.Material.Widget.TextView.PopupMenu" id="0x0103021f" />
+    <public type="style" name="TextAppearance.Material.Widget.TextView.SpinnerItem" id="0x01030220" />
+    <public type="style" name="TextAppearance.Material.Widget.Toolbar.Subtitle" id="0x01030221" />
+    <public type="style" name="TextAppearance.Material.Widget.Toolbar.Title" id="0x01030222" />
+
+    <public type="style" name="Theme.DeviceDefault.Settings" id="0x01030223" />
+
+    <public type="style" name="Theme.Material" id="0x01030224" />
+    <public type="style" name="Theme.Material.Dialog" id="0x01030225" />
+    <public type="style" name="Theme.Material.Dialog.Alert" id="0x01030226" />
+    <public type="style" name="Theme.Material.Dialog.MinWidth" id="0x01030227" />
+    <public type="style" name="Theme.Material.Dialog.NoActionBar" id="0x01030228" />
+    <public type="style" name="Theme.Material.Dialog.NoActionBar.MinWidth" id="0x01030229" />
+    <public type="style" name="Theme.Material.Dialog.Presentation" id="0x0103022a" />
+    <public type="style" name="Theme.Material.DialogWhenLarge" id="0x0103022b" />
+    <public type="style" name="Theme.Material.DialogWhenLarge.NoActionBar" id="0x0103022c" />
+    <public type="style" name="Theme.Material.InputMethod" id="0x0103022d" />
+    <public type="style" name="Theme.Material.NoActionBar" id="0x0103022e" />
+    <public type="style" name="Theme.Material.NoActionBar.Fullscreen" id="0x0103022f" />
+    <public type="style" name="Theme.Material.NoActionBar.Overscan" id="0x01030230" />
+    <public type="style" name="Theme.Material.NoActionBar.TranslucentDecor" id="0x01030231" />
+    <public type="style" name="Theme.Material.Panel" id="0x01030232" />
+    <public type="style" name="Theme.Material.Settings" id="0x01030233" />
+    <public type="style" name="Theme.Material.Voice" id="0x01030234" />
+    <public type="style" name="Theme.Material.Wallpaper" id="0x01030235" />
+    <public type="style" name="Theme.Material.Wallpaper.NoTitleBar" id="0x01030236" />
+
+    <public type="style" name="Theme.Material.Light" id="0x01030237" />
+    <public type="style" name="Theme.Material.Light.DarkActionBar" id="0x01030238" />
+    <public type="style" name="Theme.Material.Light.Dialog" id="0x01030239" />
+    <public type="style" name="Theme.Material.Light.Dialog.Alert" id="0x0103023a" />
+    <public type="style" name="Theme.Material.Light.Dialog.MinWidth" id="0x0103023b" />
+    <public type="style" name="Theme.Material.Light.Dialog.NoActionBar" id="0x0103023c" />
+    <public type="style" name="Theme.Material.Light.Dialog.NoActionBar.MinWidth" id="0x0103023d" />
+    <public type="style" name="Theme.Material.Light.Dialog.Presentation" id="0x0103023e" />
+    <public type="style" name="Theme.Material.Light.DialogWhenLarge" id="0x0103023f" />
+    <public type="style" name="Theme.Material.Light.DialogWhenLarge.NoActionBar" id="0x01030240" />
+    <public type="style" name="Theme.Material.Light.NoActionBar" id="0x01030241" />
+    <public type="style" name="Theme.Material.Light.NoActionBar.Fullscreen" id="0x01030242" />
+    <public type="style" name="Theme.Material.Light.NoActionBar.Overscan" id="0x01030243" />
+    <public type="style" name="Theme.Material.Light.NoActionBar.TranslucentDecor" id="0x01030244" />
+    <public type="style" name="Theme.Material.Light.Panel" id="0x01030245" />
+    <public type="style" name="Theme.Material.Light.Voice" id="0x01030246" />
+
+    <public type="style" name="ThemeOverlay" id="0x01030247" />
+    <public type="style" name="ThemeOverlay.Material" id="0x01030248" />
+    <public type="style" name="ThemeOverlay.Material.ActionBar" id="0x01030249" />
+    <public type="style" name="ThemeOverlay.Material.Light" id="0x0103024a" />
+    <public type="style" name="ThemeOverlay.Material.Dark" id="0x0103024b" />
+    <public type="style" name="ThemeOverlay.Material.Dark.ActionBar" id="0x0103024c" />
+
+    <public type="style" name="Widget.Material" id="0x0103024d" />
+    <public type="style" name="Widget.Material.ActionBar" id="0x0103024e" />
+    <public type="style" name="Widget.Material.ActionBar.Solid" id="0x0103024f" />
+    <public type="style" name="Widget.Material.ActionBar.TabBar" id="0x01030250" />
+    <public type="style" name="Widget.Material.ActionBar.TabText" id="0x01030251" />
+    <public type="style" name="Widget.Material.ActionBar.TabView" id="0x01030252" />
+    <public type="style" name="Widget.Material.ActionButton" id="0x01030253" />
+    <public type="style" name="Widget.Material.ActionButton.CloseMode" id="0x01030254" />
+    <public type="style" name="Widget.Material.ActionButton.Overflow" id="0x01030255" />
+    <public type="style" name="Widget.Material.ActionMode" id="0x01030256" />
+    <public type="style" name="Widget.Material.AutoCompleteTextView" id="0x01030257" />
+    <public type="style" name="Widget.Material.Button" id="0x01030258" />
+    <public type="style" name="Widget.Material.Button.Borderless" id="0x01030259" />
+    <public type="style" name="Widget.Material.Button.Borderless.Colored" id="0x0103025a" />
+    <public type="style" name="Widget.Material.Button.Borderless.Small" id="0x0103025b" />
+    <public type="style" name="Widget.Material.Button.Inset" id="0x0103025c" />
+    <public type="style" name="Widget.Material.Button.Small" id="0x0103025d" />
+    <public type="style" name="Widget.Material.Button.Toggle" id="0x0103025e" />
+    <public type="style" name="Widget.Material.ButtonBar" id="0x0103025f" />
+    <public type="style" name="Widget.Material.ButtonBar.AlertDialog" id="0x01030260" />
+    <public type="style" name="Widget.Material.CalendarView" id="0x01030261" />
+    <public type="style" name="Widget.Material.CheckedTextView" id="0x01030262" />
+    <public type="style" name="Widget.Material.CompoundButton.CheckBox" id="0x01030263" />
+    <public type="style" name="Widget.Material.CompoundButton.RadioButton" id="0x01030264" />
+    <public type="style" name="Widget.Material.CompoundButton.Star" id="0x01030265" />
+    <public type="style" name="Widget.Material.DatePicker" id="0x01030266" />
+    <public type="style" name="Widget.Material.DropDownItem" id="0x01030267" />
+    <public type="style" name="Widget.Material.DropDownItem.Spinner" id="0x01030268" />
+    <public type="style" name="Widget.Material.EditText" id="0x01030269" />
+    <public type="style" name="Widget.Material.ExpandableListView" id="0x0103026a" />
+    <public type="style" name="Widget.Material.FastScroll" id="0x0103026b" />
+    <public type="style" name="Widget.Material.GridView" id="0x0103026c" />
+    <public type="style" name="Widget.Material.HorizontalScrollView" id="0x0103026d" />
+    <public type="style" name="Widget.Material.ImageButton" id="0x0103026e" />
+    <public type="style" name="Widget.Material.ListPopupWindow" id="0x0103026f" />
+    <public type="style" name="Widget.Material.ListView" id="0x01030270" />
+    <public type="style" name="Widget.Material.ListView.DropDown" id="0x01030271" />
+    <public type="style" name="Widget.Material.MediaRouteButton" id="0x01030272" />
+    <public type="style" name="Widget.Material.PopupMenu" id="0x01030273" />
+    <public type="style" name="Widget.Material.PopupMenu.Overflow" id="0x01030274" />
+    <public type="style" name="Widget.Material.PopupWindow" id="0x01030275" />
+    <public type="style" name="Widget.Material.ProgressBar" id="0x01030276" />
+    <public type="style" name="Widget.Material.ProgressBar.Horizontal" id="0x01030277" />
+    <public type="style" name="Widget.Material.ProgressBar.Large" id="0x01030278" />
+    <public type="style" name="Widget.Material.ProgressBar.Small" id="0x01030279" />
+    <public type="style" name="Widget.Material.ProgressBar.Small.Title" id="0x0103027a" />
+    <public type="style" name="Widget.Material.RatingBar" id="0x0103027b" />
+    <public type="style" name="Widget.Material.RatingBar.Indicator" id="0x0103027c" />
+    <public type="style" name="Widget.Material.RatingBar.Small" id="0x0103027d" />
+    <public type="style" name="Widget.Material.ScrollView" id="0x0103027e" />
+    <public type="style" name="Widget.Material.SearchView" id="0x0103027f" />
+    <public type="style" name="Widget.Material.SeekBar" id="0x01030280" />
+    <public type="style" name="Widget.Material.SegmentedButton" id="0x01030281" />
+    <public type="style" name="Widget.Material.StackView" id="0x01030282" />
+    <public type="style" name="Widget.Material.Spinner" id="0x01030283" />
+    <public type="style" name="Widget.Material.Spinner.Underlined" id="0x01030284" />
+    <public type="style" name="Widget.Material.Tab" id="0x01030285" />
+    <public type="style" name="Widget.Material.TabWidget" id="0x01030286" />
+    <public type="style" name="Widget.Material.TextView" id="0x01030287" />
+    <public type="style" name="Widget.Material.TextView.SpinnerItem" id="0x01030288" />
+    <public type="style" name="Widget.Material.TimePicker" id="0x01030289" />
+    <public type="style" name="Widget.Material.Toolbar" id="0x0103028a" />
+    <public type="style" name="Widget.Material.Toolbar.Button.Navigation" id="0x0103028b" />
+    <public type="style" name="Widget.Material.WebTextView" id="0x0103028c" />
+    <public type="style" name="Widget.Material.WebView" id="0x0103028d" />
+
+    <public type="style" name="Widget.Material.Light" id="0x0103028e" />
+    <public type="style" name="Widget.Material.Light.ActionBar" id="0x0103028f" />
+    <public type="style" name="Widget.Material.Light.ActionBar.Solid" id="0x01030290" />
+    <public type="style" name="Widget.Material.Light.ActionBar.TabBar" id="0x01030291" />
+    <public type="style" name="Widget.Material.Light.ActionBar.TabText" id="0x01030292" />
+    <public type="style" name="Widget.Material.Light.ActionBar.TabView" id="0x01030293" />
+    <public type="style" name="Widget.Material.Light.ActionButton" id="0x01030294" />
+    <public type="style" name="Widget.Material.Light.ActionButton.CloseMode" id="0x01030295" />
+    <public type="style" name="Widget.Material.Light.ActionButton.Overflow" id="0x01030296" />
+    <public type="style" name="Widget.Material.Light.ActionMode" id="0x01030297" />
+    <public type="style" name="Widget.Material.Light.AutoCompleteTextView" id="0x01030298" />
+    <public type="style" name="Widget.Material.Light.Button" id="0x01030299" />
+    <public type="style" name="Widget.Material.Light.Button.Borderless" id="0x0103029a" />
+    <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" id="0x0103029b" />
+    <public type="style" name="Widget.Material.Light.Button.Borderless.Small" id="0x0103029c" />
+    <public type="style" name="Widget.Material.Light.Button.Inset" id="0x0103029d" />
+    <public type="style" name="Widget.Material.Light.Button.Small" id="0x0103029e" />
+    <public type="style" name="Widget.Material.Light.Button.Toggle" id="0x0103029f" />
+    <public type="style" name="Widget.Material.Light.ButtonBar" id="0x010302a0" />
+    <public type="style" name="Widget.Material.Light.ButtonBar.AlertDialog" id="0x010302a1" />
+    <public type="style" name="Widget.Material.Light.CalendarView" id="0x010302a2" />
+    <public type="style" name="Widget.Material.Light.CheckedTextView" id="0x010302a3" />
+    <public type="style" name="Widget.Material.Light.CompoundButton.CheckBox" id="0x010302a4" />
+    <public type="style" name="Widget.Material.Light.CompoundButton.RadioButton" id="0x010302a5" />
+    <public type="style" name="Widget.Material.Light.CompoundButton.Star" id="0x010302a6" />
+    <public type="style" name="Widget.Material.Light.DatePicker" id="0x010302a7" />
+    <public type="style" name="Widget.Material.Light.DropDownItem" id="0x010302a8" />
+    <public type="style" name="Widget.Material.Light.DropDownItem.Spinner" id="0x010302a9" />
+    <public type="style" name="Widget.Material.Light.EditText" id="0x010302aa" />
+    <public type="style" name="Widget.Material.Light.ExpandableListView" id="0x010302ab" />
+    <public type="style" name="Widget.Material.Light.FastScroll" id="0x010302ac" />
+    <public type="style" name="Widget.Material.Light.GridView" id="0x010302ad" />
+    <public type="style" name="Widget.Material.Light.HorizontalScrollView" id="0x010302ae" />
+    <public type="style" name="Widget.Material.Light.ImageButton" id="0x010302af" />
+    <public type="style" name="Widget.Material.Light.ListPopupWindow" id="0x010302b0" />
+    <public type="style" name="Widget.Material.Light.ListView" id="0x010302b1" />
+    <public type="style" name="Widget.Material.Light.ListView.DropDown" id="0x010302b2" />
+    <public type="style" name="Widget.Material.Light.MediaRouteButton" id="0x010302b3" />
+    <public type="style" name="Widget.Material.Light.PopupMenu" id="0x010302b4" />
+    <public type="style" name="Widget.Material.Light.PopupMenu.Overflow" id="0x010302b5" />
+    <public type="style" name="Widget.Material.Light.PopupWindow" id="0x010302b6" />
+    <public type="style" name="Widget.Material.Light.ProgressBar" id="0x010302b7" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Horizontal" id="0x010302b8" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Inverse" id="0x010302b9" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Large" id="0x010302ba" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Large.Inverse" id="0x010302bb" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Small" id="0x010302bc" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Small.Inverse" id="0x010302bd" />
+    <public type="style" name="Widget.Material.Light.ProgressBar.Small.Title" id="0x010302be" />
+    <public type="style" name="Widget.Material.Light.RatingBar" id="0x010302bf" />
+    <public type="style" name="Widget.Material.Light.RatingBar.Indicator" id="0x010302c0" />
+    <public type="style" name="Widget.Material.Light.RatingBar.Small" id="0x010302c1" />
+    <public type="style" name="Widget.Material.Light.ScrollView" id="0x010302c2" />
+    <public type="style" name="Widget.Material.Light.SearchView" id="0x010302c3" />
+    <public type="style" name="Widget.Material.Light.SeekBar" id="0x010302c4" />
+    <public type="style" name="Widget.Material.Light.SegmentedButton" id="0x010302c5" />
+    <public type="style" name="Widget.Material.Light.StackView" id="0x010302c6" />
+    <public type="style" name="Widget.Material.Light.Spinner" id="0x010302c7" />
+    <public type="style" name="Widget.Material.Light.Spinner.Underlined" id="0x010302c8" />
+    <public type="style" name="Widget.Material.Light.Tab" id="0x010302c9" />
+    <public type="style" name="Widget.Material.Light.TabWidget" id="0x010302ca" />
+    <public type="style" name="Widget.Material.Light.TextView" id="0x010302cb" />
+    <public type="style" name="Widget.Material.Light.TextView.SpinnerItem" id="0x010302cc" />
+    <public type="style" name="Widget.Material.Light.TimePicker" id="0x010302cd" />
+    <public type="style" name="Widget.Material.Light.WebTextView" id="0x010302ce" />
+    <public type="style" name="Widget.Material.Light.WebView" id="0x010302cf" />
+
+    <!-- @hide This really shouldn't be public; clients using it should use @* to ref it.  -->
+    <public type="style" name="Theme.Leanback.FormWizard" id="0x010302d0" />
+
+    <public type="array" name="config_keySystemUuidMapping" id="0x01070005" />
+
+    <!-- An interpolator which accelerates fast but decelerates slowly. -->
+    <public type="interpolator" name="fast_out_slow_in" id="0x010c000d" />
+    <!-- An interpolator which starts with a peak non-zero velocity and decelerates slowly. -->
+    <public type="interpolator" name="linear_out_slow_in" id="0x010c000e" />
+    <!-- An interpolator which accelerates fast and keeps accelerating until the end. -->
+    <public type="interpolator" name="fast_out_linear_in" id="0x010c000f" />
+
+    <!-- Used for Activity Transitions, this transition indicates that no Transition
+         should be used. -->
+    <public type="transition" name="no_transition" id="0x010f0000" />
+    <!-- A transition that moves and resizes a view -->
+    <public type="transition" name="move" id="0x010f0001" />
+    <!-- A transition that fades views in and out. -->
+    <public type="transition" name="fade" id="0x010f0002" />
+    <!-- A transition that moves views in or out of the scene to or from the edges when
+         a view visibility changes. -->
+    <public type="transition" name="explode" id="0x010f0003" />
+    <!-- A transition that moves views in or out of the scene to or from the bottom edge when
+         a view visibility changes. -->
+    <public type="transition" name="slide_bottom" id="0x010f0004" />
+    <!-- A transition that moves views in or out of the scene to or from the top edge when
+         a view visibility changes. -->
+    <public type="transition" name="slide_top" id="0x010f0005" />
+    <!-- A transition that moves views in or out of the scene to or from the right edge when
+         a view visibility changes. -->
+    <public type="transition" name="slide_right" id="0x010f0006" />
+    <!-- A transition that moves views in or out of the scene to or from the left edge when
+         a view visibility changes. -->
+    <public type="transition" name="slide_left" id="0x010f0007" />
+
+    <!-- WebView error page for when the load fails. @hide @SystemApi -->
+    <public type="raw" name="loaderror" id="0x01100000" />
+    <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
+    <public type="raw" name="nodomain" id="0x01100001" />
+
+    <!-- ===============================================================
+         Insert space from public API 21 attributes to private attributes
+         =============================================================== -->
+    <eat-comment />
+
+    <!-- @hide -->
+    <public-padding type="attr" name="private_resource_pad" end="0x01010500" />
+
 </resources>

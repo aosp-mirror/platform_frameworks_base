@@ -295,6 +295,8 @@ public:
         data.writeString16(id);
         data.writeString16(key);
         data.writeInt32(ownerUid);
+        // Assume read-only
+        data.writeInt32(1);
         if (remote()->transact(TRANSACTION_mountSecureContainer, data, &reply) != NO_ERROR) {
             ALOGD("mountSecureContainer couldn't call remote");
             return -1;

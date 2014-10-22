@@ -1,0 +1,274 @@
+page.title=Adding Voice Capabilities
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#SystemProvided">Declare System-provided Voice Actions</a></li>
+      <li><a href="#AppProvided">Declare App-provided Voice Actions</a></li>
+      <li><a href="#FreeFormSpeech">Obtaining Free-form Speech Input</a></li>
+    </ol>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>Voice actions are an important part of the wearable experience. They let users carry
+out actions hands-free and quickly. Wear provides two types of voice actions:</p>
+
+<dl>
+  <dt><b>System-provided</b></dt>
+  <dd>These voice actions are task-based and are built
+  into the Wear platform. You filter for them in the activity that you want to start when the
+  voice action is spoken. Examples include "Take a note" or "Set an alarm".</dd>
+  <dt><b>App-provided</b></dt>
+  <dd>These voice actions are app-based, and you declare them just like a launcher icon.
+  Users say "Start <Your App Name>" to use these voice actions and an activity that you specify
+  starts.</dd>
+</dl>
+
+<h2 id="SystemProvided" style="clear:right">Declare System-provided Voice Actions</h2>
+<p>
+The Android Wear platform provides several voice intents that are based on user actions such
+as "Take a note" or "Set an alarm". This allows users to say what they want to do and let
+the system figure out the best activity to start.</p>
+
+<p>When users speak the voice action, your app can filter for the intent that is fired to start
+an activity. If you want to start a service to do something in the background, show an activity as
+a visual cue and start the service in the activity. Make sure to call
+{@link android.app.Activity#finish finish()} when you want to get rid of the visual cue.
+</p>
+
+<p>For example, for the "Take a note" command, declare this intent filter to start an activity
+named <code>MyNoteActivity</code>:
+</p>
+
+<pre>
+  &lt;activity android:name="MyNoteActivity"&gt;
+      &lt;intent-filter&gt;
+          &lt;action android:name="android.intent.action.SEND" /&gt;
+          &lt;category android:name="com.google.android.voicesearch.SELF_NOTE" /&gt;
+      &lt;/intent-filter&gt;
+  &lt;/activity&gt;
+</pre>
+
+<p>Here is a list of the voice intents supported by the Wear platform:</p>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Example Phrases</th>
+    <th>Intent</th>
+  </tr>
+
+  <tr>
+    <td>Call a car/taxi</td>
+    <td>"OK Google, get me a taxi"<br/><br/>"OK Google, call me a car"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd>
+          <code>com.google.android.gms.actions.RESERVE_TAXI_RESERVATION</code>
+        </dd>
+      </dl>
+    </td>
+  </tr>
+
+  <tr>
+    <td>Take a note</td>
+    <td>"OK Google, take a note"<br/><br/>"OK Google, note to self"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>android.intent.action.SEND</code></dd>
+        <dt>Category</dt>
+        <dd><code>com.google.android.voicesearch.SELF_NOTE</code></dd>
+        <dt>Extras</dt>
+        <dd><code>android.content.Intent.EXTRA_TEXT</code> - a string with note body</dd>
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
+    <td>Set alarm</td>
+    <td>"OK Google, set an alarm for 8 AM"<br/><br/>"OK Google, wake me up at 6 tomorrow"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>android.intent.action.SET_ALARM</code></dd>
+        <dt>Extras</dt>
+        <dd><code>android.provider.AlarmClock.EXTRA_HOUR</code> - an integer with the hour of
+        the alarm.
+        <p><code>android.provider.AlarmClock.EXTRA_MINUTES</code> -
+        an integer with the minute of the alarm
+        <p>(these 2 extras are optional, either none or
+        both are provided)</p></dd>
+
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
+    <td>Set timer</td>
+    <td>"Ok Google, set a timer for 10 minutes"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>android.intent.action.SET_TIMER</code></dd>
+        <dt>Extras</dt>
+        <dd><code>android.provider.AlarmClock.EXTRA_LENGTH</code> - an integer in the range of
+        1 to 86400 (number of seconds in 24 hours) representing the length of the timer </dd>
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
+    <td>Start/Stop a bike ride</td>
+    <td>"OK Google, start cycling"<br/><br/>"OK Google, start my bike ride"<br/><br/>"OK Google, stop cycling"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>vnd.google.fitness.TRACK</code></dd>
+        <dt>Mime Type</dt>
+        <dd><code>vnd.google.fitness.activity/biking</code></dd>
+        <dt>Extras</dt>
+        <dd><code>actionStatus</code> - a string with the value <code>ActiveActionStatus</code>
+        when starting and <code>CompletedActionStatus</code> when stopping.</dd>
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
+    <td>Start/Stop a run</td>
+    <td>"OK Google, track my run"<br/><br/>"OK Google, start running"<br/><br/>"OK Google, stop running"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>vnd.google.fitness.TRACK</code></dd>
+        <dt>MimeType</dt>
+        <dd><code>vnd.google.fitness.activity/running</code></dd>
+        <dt>Extras</dt>
+        <dd><code>actionStatus</code> - a string with the value <code>ActiveActionStatus</code>
+        when starting and <code>CompletedActionStatus</code> when stopping</dd>
+      </dl>
+   </td>
+  </tr>
+
+
+  <tr>
+    <td>Start/Stop a workout</td>
+    <td>"OK Google, start a workout"<br/><br/>"OK Google, track my workout"<br/><br/>"OK Google, stop workout"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>vnd.google.fitness.TRACK</code></dd>
+        <dt>MimeType</dt>
+        <dd><code>vnd.google.fitness.activity/other</code></dd>
+        <dt>Extras</dt>
+        <dd><code>actionStatus</code> - a string with the value <code>ActiveActionStatus</code>
+        when starting and <code>CompletedActionStatus</code> when stopping</dd>
+        </dd>
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
+    <td>Show heart rate</td>
+    <td>"OK Google, what’s my heart rate?"<br/><br/>"OK Google, what’s my bpm?"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>vnd.google.fitness.VIEW</code></dd>
+        <dt>Mime Type</dt>
+        <dd><code>vnd.google.fitness.data_type/com.google.heart_rate.bpm</code></dd>
+        </dd>
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
+    <td>Show step count</td>
+    <td>"OK Google, how many steps have I taken?"<br/><br/>"OK Google, what’s my step count?"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>vnd.google.fitness.VIEW</code></dd>
+        <dt>Mime Type</dt>
+        <dd><code>vnd.google.fitness.data_type/com.google.step_count.cumulative</code></dd>
+        </dd>
+      </dl>
+   </td>
+  </tr>
+
+</table>
+
+<p>
+For documentation on registering for platform intents and accessing the extras information
+contained in them, see <a href="{@docRoot}guide/components/intents-common.html">Common intents</a>.
+</p>
+
+<h2 id="AppProvided">Declare App-provided Voice Actions</h2>
+<p>
+If none of the platform voice intents work for you, you can start your apps directly with
+a "Start MyActivityName" voice action. </p>
+
+<p>Registering for a "Start" action is the same as registering
+for a launcher icon on a handheld. Instead of requesting an app icon in a launcher,
+your app requests a voice action instead.</p>
+
+<p>To specify the text to say after "Start", specify a <code>label</code> attribute for the activtiy
+that you want to start. For example, this intent filter recognizes the
+"Start MyRunningApp" voice action and launches <code>StartRunActivity</code>.
+</p>
+
+<pre>
+&lt;application&gt;
+  &lt;activity android:name="StartRunActivity" android:label="MyRunningApp"&gt;
+      &lt;intent-filter&gt;
+          &lt;action android:name="android.intent.action.MAIN" /&gt;
+          &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+      &lt;/intent-filter&gt;
+  &lt;/activity&gt;
+&lt;/application&gt;
+</pre>
+
+<h2 id="FreeFormSpeech">Obtaining Free-form Speech Input</h2>
+<p>In addition to using voice actions to launch activities, you can also call the system's
+built-in Speech Recognizer activity to obtain speech input from users. This is useful to obtain input
+from users and then process it, such as doing a search or sending it as a message.</p>
+
+In your app, you call {@link android.app.Activity#startActivityForResult startActivityForResult()} using
+the {@link android.speech.RecognizerIntent#ACTION_RECOGNIZE_SPEECH} action. This starts the
+speech recognition activity, and you can then handle the result
+in {@link android.app.Activity#onActivityResult onActivityResult()}.
+<pre>
+private static final int SPEECH_REQUEST_CODE = 0;
+
+// Create an intent that can start the Speech Recognizer activity
+private void displaySpeechRecognizer() {
+    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+// Start the activity, the intent will be populated with the speech text
+    startActivityForResult(intent, SPEECH_REQUEST_CODE);
+}
+
+// This callback is invoked when the Speech Recognizer returns.
+// This is where you process the intent and extract the speech text from the intent.
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode,
+        Intent data) {
+    if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+        List&lt;String&gt; results = data.getStringArrayListExtra(
+                RecognizerIntent.EXTRA_RESULTS);
+        String spokenText = results.get(0);
+        // Do something with spokenText
+    }
+    super.onActivityResult(requestCode, resultCode, data);
+}
+</pre>

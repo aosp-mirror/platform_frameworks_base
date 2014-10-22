@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="number" format="integer"/>
+    <style name="Theme.One" parent="@android:style/Theme.One">
+        <item name="number">1</item>
+    </style>
+</resources>

@@ -35,9 +35,12 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @hide
@@ -56,24 +59,19 @@ public final class ApduServiceInfo implements Parcelable {
     final String mDescription;
 
     /**
-     * Convenience AID list
-     */
-    final ArrayList<String> mAids;
-
-    /**
      * Whether this service represents AIDs running on the host CPU
      */
     final boolean mOnHost;
 
     /**
-     * All AID groups this service handles
+     * Mapping from category to static AID group
      */
-    final ArrayList<AidGroup> mAidGroups;
+    final HashMap<String, AidGroup> mStaticAidGroups;
 
     /**
-     * Convenience hashmap
+     * Mapping from category to dynamic AID group
      */
-    final HashMap<String, AidGroup> mCategoryToGroup;
+    final HashMap<String, AidGroup> mDynamicAidGroups;
 
     /**
      * Whether this service should only be started when the device is unlocked.
@@ -86,26 +84,33 @@ public final class ApduServiceInfo implements Parcelable {
     final int mBannerResourceId;
 
     /**
+     * The uid of the package the service belongs to
+     */
+    final int mUid;
+    /**
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> aidGroups, boolean requiresUnlock, int bannerResource) {
+            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
+            boolean requiresUnlock, int bannerResource, int uid) {
         this.mService = info;
         this.mDescription = description;
-        this.mAidGroups = aidGroups;
-        this.mAids = new ArrayList<String>();
-        this.mCategoryToGroup = new HashMap<String, AidGroup>();
+        this.mStaticAidGroups = new HashMap<String, AidGroup>();
+        this.mDynamicAidGroups = new HashMap<String, AidGroup>();
         this.mOnHost = onHost;
         this.mRequiresDeviceUnlock = requiresUnlock;
-        for (AidGroup aidGroup : aidGroups) {
-            this.mCategoryToGroup.put(aidGroup.category, aidGroup);
-            this.mAids.addAll(aidGroup.aids);
+        for (AidGroup aidGroup : staticAidGroups) {
+            this.mStaticAidGroups.put(aidGroup.category, aidGroup);
+        }
+        for (AidGroup aidGroup : dynamicAidGroups) {
+            this.mDynamicAidGroups.put(aidGroup.category, aidGroup);
         }
         this.mBannerResourceId = bannerResource;
+        this.mUid = uid;
     }
 
-    public ApduServiceInfo(PackageManager pm, ResolveInfo info, boolean onHost)
-            throws XmlPullParserException, IOException {
+    public ApduServiceInfo(PackageManager pm, ResolveInfo info, boolean onHost) throws
+            XmlPullParserException, IOException {
         ServiceInfo si = info.serviceInfo;
         XmlResourceParser parser = null;
         try {
@@ -163,10 +168,10 @@ public final class ApduServiceInfo implements Parcelable {
                 sa.recycle();
             }
 
-            mAidGroups = new ArrayList<AidGroup>();
-            mCategoryToGroup = new HashMap<String, AidGroup>();
-            mAids = new ArrayList<String>();
+            mStaticAidGroups = new HashMap<String, AidGroup>();
+            mDynamicAidGroups = new HashMap<String, AidGroup>();
             mOnHost = onHost;
+
             final int depth = parser.getDepth();
             AidGroup currentGroup = null;
 
@@ -179,14 +184,14 @@ public final class ApduServiceInfo implements Parcelable {
                     final TypedArray groupAttrs = res.obtainAttributes(attrs,
                             com.android.internal.R.styleable.AidGroup);
                     // Get category of AID group
-                    String groupDescription = groupAttrs.getString(
-                            com.android.internal.R.styleable.AidGroup_description);
                     String groupCategory = groupAttrs.getString(
                             com.android.internal.R.styleable.AidGroup_category);
+                    String groupDescription = groupAttrs.getString(
+                            com.android.internal.R.styleable.AidGroup_description);
                     if (!CardEmulation.CATEGORY_PAYMENT.equals(groupCategory)) {
                         groupCategory = CardEmulation.CATEGORY_OTHER;
                     }
-                    currentGroup = mCategoryToGroup.get(groupCategory);
+                    currentGroup = mStaticAidGroups.get(groupCategory);
                     if (currentGroup != null) {
                         if (!CardEmulation.CATEGORY_OTHER.equals(groupCategory)) {
                             Log.e(TAG, "Not allowing multiple aid-groups in the " +
@@ -200,9 +205,8 @@ public final class ApduServiceInfo implements Parcelable {
                 } else if (eventType == XmlPullParser.END_TAG && "aid-group".equals(tagName) &&
                         currentGroup != null) {
                     if (currentGroup.aids.size() > 0) {
-                        if (!mCategoryToGroup.containsKey(currentGroup.category)) {
-                            mAidGroups.add(currentGroup);
-                            mCategoryToGroup.put(currentGroup.category, currentGroup);
+                        if (!mStaticAidGroups.containsKey(currentGroup.category)) {
+                            mStaticAidGroups.put(currentGroup.category, currentGroup);
                         }
                     } else {
                         Log.e(TAG, "Not adding <aid-group> with empty or invalid AIDs");
@@ -214,9 +218,22 @@ public final class ApduServiceInfo implements Parcelable {
                             com.android.internal.R.styleable.AidFilter);
                     String aid = a.getString(com.android.internal.R.styleable.AidFilter_name).
                             toUpperCase();
-                    if (isValidAid(aid) && !currentGroup.aids.contains(aid)) {
+                    if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
                         currentGroup.aids.add(aid);
-                        mAids.add(aid);
+                    } else {
+                        Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
+                    }
+                    a.recycle();
+                } else if (eventType == XmlPullParser.START_TAG &&
+                        "aid-prefix-filter".equals(tagName) && currentGroup != null) {
+                    final TypedArray a = res.obtainAttributes(attrs,
+                            com.android.internal.R.styleable.AidFilter);
+                    String aid = a.getString(com.android.internal.R.styleable.AidFilter_name).
+                            toUpperCase();
+                    // Add wildcard char to indicate prefix
+                    aid = aid.concat("*");
+                    if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
+                        currentGroup.aids.add(aid);
                     } else {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
@@ -228,6 +245,8 @@ public final class ApduServiceInfo implements Parcelable {
         } finally {
             if (parser != null) parser.close();
         }
+        // Set uid
+        mUid = si.applicationInfo.uid;
     }
 
     public ComponentName getComponent() {
@@ -235,16 +254,72 @@ public final class ApduServiceInfo implements Parcelable {
                 mService.serviceInfo.name);
     }
 
+    /**
+     * Returns a consolidated list of AIDs from the AID groups
+     * registered by this service. Note that if a service has both
+     * a static (manifest-based) AID group for a category and a dynamic
+     * AID group, only the dynamically registered AIDs will be returned
+     * for that category.
+     * @return List of AIDs registered by the service
+     */
     public ArrayList<String> getAids() {
-        return mAids;
+        final ArrayList<String> aids = new ArrayList<String>();
+        for (AidGroup group : getAidGroups()) {
+            aids.addAll(group.aids);
+        }
+        return aids;
     }
 
+    /**
+     * Returns the registered AID group for this category.
+     */
+    public AidGroup getDynamicAidGroupForCategory(String category) {
+        return mDynamicAidGroups.get(category);
+    }
+
+    public boolean removeDynamicAidGroupForCategory(String category) {
+        return (mDynamicAidGroups.remove(category) != null);
+    }
+
+    /**
+     * Returns a consolidated list of AID groups
+     * registered by this service. Note that if a service has both
+     * a static (manifest-based) AID group for a category and a dynamic
+     * AID group, only the dynamically registered AID group will be returned
+     * for that category.
+     * @return List of AIDs registered by the service
+     */
     public ArrayList<AidGroup> getAidGroups() {
-        return mAidGroups;
+        final ArrayList<AidGroup> groups = new ArrayList<AidGroup>();
+        for (Map.Entry<String, AidGroup> entry : mDynamicAidGroups.entrySet()) {
+            groups.add(entry.getValue());
+        }
+        for (Map.Entry<String, AidGroup> entry : mStaticAidGroups.entrySet()) {
+            if (!mDynamicAidGroups.containsKey(entry.getKey())) {
+                // Consolidate AID groups - don't return static ones
+                // if a dynamic group exists for the category.
+                groups.add(entry.getValue());
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * Returns the category to which this service has attributed the AID that is passed in,
+     * or null if we don't know this AID.
+     */
+    public String getCategoryForAid(String aid) {
+        ArrayList<AidGroup> groups = getAidGroups();
+        for (AidGroup group : groups) {
+            if (group.aids.contains(aid.toUpperCase())) {
+                return group.category;
+            }
+        }
+        return null;
     }
 
     public boolean hasCategory(String category) {
-        return mCategoryToGroup.containsKey(category);
+        return (mStaticAidGroups.containsKey(category) || mDynamicAidGroups.containsKey(category));
     }
 
     public boolean isOnHost() {
@@ -257,6 +332,14 @@ public final class ApduServiceInfo implements Parcelable {
 
     public String getDescription() {
         return mDescription;
+    }
+
+    public int getUid() {
+        return mUid;
+    }
+
+    public void setOrReplaceDynamicAidGroup(AidGroup aidGroup) {
+        mDynamicAidGroups.put(aidGroup.getCategory(), aidGroup);
     }
 
     public CharSequence loadLabel(PackageManager pm) {
@@ -282,30 +365,17 @@ public final class ApduServiceInfo implements Parcelable {
         }
     }
 
-    static boolean isValidAid(String aid) {
-        if (aid == null)
-            return false;
-
-        int aidLength = aid.length();
-        if (aidLength == 0 || (aidLength % 2) != 0) {
-            Log.e(TAG, "AID " + aid + " is not correctly formatted.");
-            return false;
-        }
-        // Minimum AID length is 5 bytes, 10 hex chars
-        if (aidLength < 10) {
-            Log.e(TAG, "AID " + aid + " is shorter than 5 bytes.");
-            return false;
-        }
-        return true;
-    }
-
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder("ApduService: ");
         out.append(getComponent());
         out.append(", description: " + mDescription);
-        out.append(", AID Groups: ");
-        for (AidGroup aidGroup : mAidGroups) {
+        out.append(", Static AID Groups: ");
+        for (AidGroup aidGroup : mStaticAidGroups.values()) {
+            out.append(aidGroup.toString());
+        }
+        out.append(", Dynamic AID Groups: ");
+        for (AidGroup aidGroup : mDynamicAidGroups.values()) {
             out.append(aidGroup.toString());
         }
         return out.toString();
@@ -336,12 +406,17 @@ public final class ApduServiceInfo implements Parcelable {
         mService.writeToParcel(dest, flags);
         dest.writeString(mDescription);
         dest.writeInt(mOnHost ? 1 : 0);
-        dest.writeInt(mAidGroups.size());
-        if (mAidGroups.size() > 0) {
-            dest.writeTypedList(mAidGroups);
+        dest.writeInt(mStaticAidGroups.size());
+        if (mStaticAidGroups.size() > 0) {
+            dest.writeTypedList(new ArrayList<AidGroup>(mStaticAidGroups.values()));
+        }
+        dest.writeInt(mDynamicAidGroups.size());
+        if (mDynamicAidGroups.size() > 0) {
+            dest.writeTypedList(new ArrayList<AidGroup>(mDynamicAidGroups.values()));
         }
         dest.writeInt(mRequiresDeviceUnlock ? 1 : 0);
         dest.writeInt(mBannerResourceId);
+        dest.writeInt(mUid);
     };
 
     public static final Parcelable.Creator<ApduServiceInfo> CREATOR =
@@ -350,15 +425,22 @@ public final class ApduServiceInfo implements Parcelable {
         public ApduServiceInfo createFromParcel(Parcel source) {
             ResolveInfo info = ResolveInfo.CREATOR.createFromParcel(source);
             String description = source.readString();
-            boolean onHost = (source.readInt() != 0) ? true : false;
-            ArrayList<AidGroup> aidGroups = new ArrayList<AidGroup>();
-            int numGroups = source.readInt();
-            if (numGroups > 0) {
-                source.readTypedList(aidGroups, AidGroup.CREATOR);
+            boolean onHost = source.readInt() != 0;
+            ArrayList<AidGroup> staticAidGroups = new ArrayList<AidGroup>();
+            int numStaticGroups = source.readInt();
+            if (numStaticGroups > 0) {
+                source.readTypedList(staticAidGroups, AidGroup.CREATOR);
             }
-            boolean requiresUnlock = (source.readInt() != 0) ? true : false;
+            ArrayList<AidGroup> dynamicAidGroups = new ArrayList<AidGroup>();
+            int numDynamicGroups = source.readInt();
+            if (numDynamicGroups > 0) {
+                source.readTypedList(dynamicAidGroups, AidGroup.CREATOR);
+            }
+            boolean requiresUnlock = source.readInt() != 0;
             int bannerResource = source.readInt();
-            return new ApduServiceInfo(info, onHost, description, aidGroups, requiresUnlock, bannerResource);
+            int uid = source.readInt();
+            return new ApduServiceInfo(info, onHost, description, staticAidGroups,
+                    dynamicAidGroups, requiresUnlock, bannerResource, uid);
         }
 
         @Override
@@ -367,76 +449,22 @@ public final class ApduServiceInfo implements Parcelable {
         }
     };
 
-    public static class AidGroup implements Parcelable {
-        final ArrayList<String> aids;
-        final String category;
-        final String description;
-
-        AidGroup(ArrayList<String> aids, String category, String description) {
-            this.aids = aids;
-            this.category = category;
-            this.description = description;
-        }
-
-        AidGroup(String category, String description) {
-            this.aids = new ArrayList<String>();
-            this.category = category;
-            this.description = description;
-        }
-
-        public String getCategory() {
-            return category;
-        }
-
-        public ArrayList<String> getAids() {
-            return aids;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder out = new StringBuilder("Category: " + category +
-                      ", description: " + description + ", AIDs:");
-            for (String aid : aids) {
-                out.append(aid);
-                out.append(", ");
-            }
-            return out.toString();
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(category);
-            dest.writeString(description);
-            dest.writeInt(aids.size());
-            if (aids.size() > 0) {
-                dest.writeStringList(aids);
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("    " + getComponent() +
+                " (Description: " + getDescription() + ")");
+        pw.println("    Static AID groups:");
+        for (AidGroup group : mStaticAidGroups.values()) {
+            pw.println("        Category: " + group.category);
+            for (String aid : group.aids) {
+                pw.println("            AID: " + aid);
             }
         }
-
-        public static final Parcelable.Creator<ApduServiceInfo.AidGroup> CREATOR =
-                new Parcelable.Creator<ApduServiceInfo.AidGroup>() {
-
-            @Override
-            public AidGroup createFromParcel(Parcel source) {
-                String category = source.readString();
-                String description = source.readString();
-                int listSize = source.readInt();
-                ArrayList<String> aidList = new ArrayList<String>();
-                if (listSize > 0) {
-                    source.readStringList(aidList);
-                }
-                return new AidGroup(aidList, category, description);
+        pw.println("    Dynamic AID groups:");
+        for (AidGroup group : mDynamicAidGroups.values()) {
+            pw.println("        Category: " + group.category);
+            for (String aid : group.aids) {
+                pw.println("            AID: " + aid);
             }
-
-            @Override
-            public AidGroup[] newArray(int size) {
-                return new AidGroup[size];
-            }
-        };
+        }
     }
 }

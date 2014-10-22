@@ -87,7 +87,6 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
         final Intent intent = getIntent();
         final AlertController.AlertParams p = mAlertParams;
         Context context = getApplicationContext();
-        p.mIconId = com.android.internal.R.drawable.ic_dialog_usb;
         p.mTitle = intent.getStringExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_TITLE);
         p.mMessage = intent.getStringExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_MESSAGE);
         p.mPositiveButtonText = String.format(context.getString(R.string.gpsVerifYes));

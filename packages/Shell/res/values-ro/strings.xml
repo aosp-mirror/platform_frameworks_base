@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Raportul despre erori a fost creat"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Atingeți pentru a permite accesul la raportul despre erori"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Glisați la stânga pentru a trimite raportul de erori"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Atingeți pentru a permite accesul la raportul despre erori"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Rapoartele despre erori conțin date din diferite fișiere de jurnal ale sistemului, inclusiv informații private și personale. Permiteți accesul la rapoartele despre erori numai aplicațiilor și persoanelor în care aveți încredere."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Afișați acest mesaj data viitoare"</string>
 </resources>

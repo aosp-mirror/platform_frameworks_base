@@ -29,6 +29,22 @@
      ImageView -->
     <bool name="config_recents_thumbnail_image_fits_to_xy">false</bool>
 
+    <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
+    for devices where the java drawing of round rects may be slow -->
+    <bool name="config_recents_use_hardware_layers">false</bool>
+
+    <!-- The number of app thumbnails we keep in memory -->
+    <integer name="config_recents_max_thumbnail_count">10</integer>
+
+    <!-- The number of app icons we keep in memory -->
+    <integer name="config_recents_max_icon_count">20</integer>
+
+    <!-- Whether to use cheap, less good looking shadows for recents -->
+    <bool name="config_recents_fake_shadows">false</bool>
+
+    <!-- The theme to use for RecentsActivity. -->
+    <item type="style" name="config_recents_activity_theme">@style/RecentsTheme.Wallpaper</item>
+
     <!-- Control whether status bar should distinguish HSPA data icon form UMTS
     data icon on devices -->
     <bool name="config_hspa_data_distinguishable">false</bool>
@@ -50,17 +66,27 @@
     <!-- When true, show 1/2G networks as 3G. -->
     <bool name="config_showMin3G">false</bool>
 
-    <!-- Show rotation lock button in phone-style notification panel. -->
+    <!-- Show rotation lock toggle in System UI-->
     <bool name="config_showRotationLock">true</bool>
 
     <!-- Amount of time to hold off before showing the search panel when the user presses home -->
     <integer name="config_show_search_delay">200</integer>
 
-    <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
+    <!-- Vibration duration for GlowPadView used in SearchPanelView -->
     <integer translatable="false" name="config_vibration_duration">0</integer>
 
-    <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
+    <!-- Vibration duration for GlowPadView used in SearchPanelView -->
     <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
+
+    <!-- Show camera affordance on Keyguard -->
+    <bool name="config_keyguardShowCameraAffordance">true</bool>
+
+    <!-- Whether we should use SRC drawing mode when drawing the scrim behind. If this flag is set,
+         we change the canvas opacity so libhwui doesn't call glClear on our surface, and then we
+         draw the scrim with SRC to overwrite the whole buffer, which saves us a layer of overdraw.
+         However, SRC performs poorly on some devices, where it is more efficient to
+         glClear + SRC_OVER, in which case this flag should be disabled. -->
+    <bool name="config_status_bar_scrim_behind_use_src">true</bool>
 
     <!-- The length of the vibration when the notification pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
@@ -72,7 +98,7 @@
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
-    
+
     <bool name="config_dead_zone_flash">false</bool>
 
     <!-- Min alpha % that recent items will fade to while being dismissed -->
@@ -81,11 +107,22 @@
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
 
+    <!-- The maximum number of rows in the QuickSettings -->
+    <integer name="quick_settings_max_rows">4</integer>
+
+    <!-- The maximum number of rows in the QuickSettings when on the keyguard -->
+    <integer name="quick_settings_max_rows_keyguard">3</integer>
+
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
-    <!-- Whether rotation lock shows up in quick settings or not -->
-    <bool name="quick_settings_show_rotation_lock">false</bool>
+    <!-- The default tiles to display in QuickSettings -->
+    <string name="quick_settings_tiles_default" translatable="false">
+        wifi,bt,inversion,cell,airplane,rotation,flashlight,location,cast,hotspot
+    </string>
+
+    <!-- The tiles to display in QuickSettings -->
+    <string name="quick_settings_tiles" translatable="false">default</string>
 
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
@@ -96,19 +133,121 @@
 
     <integer name="blinds_pop_duration_ms">10</integer>
 
-    <!-- Disable the separate quick settings panel -->
-    <bool name="config_hasSettingsPanel">true</bool>
-
-    <!-- Enable the "flip settings" panel -->
-    <bool name="config_hasFlipSettingsPanel">true</bool>
-
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>
 
     <!-- milliseconds before the heads up notification auto-dismisses. -->
-    <integer name="heads_up_notification_decay">3700</integer>
+    <integer name="heads_up_notification_decay">10000</integer>
 
     <!-- milliseconds before the heads up notification accepts touches. -->
     <integer name="heads_up_sensitivity_delay">700</integer>
+
+    <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
+    <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
+    <!-- The min animation duration for animating views that are currently visible. -->
+    <integer name="recents_filter_animate_current_views_duration">250</integer>
+    <!-- The min animation duration for animating views that are newly visible. -->
+    <integer name="recents_filter_animate_new_views_duration">250</integer>
+    <!-- The min animation duration for animating the task bar in. -->
+    <integer name="recents_animate_task_bar_enter_duration">225</integer>
+    <!-- The animation delay for animating the first task in. This should roughly be the animation
+     duration of the transition in to recents. -->
+    <integer name="recents_animate_task_bar_enter_delay">275</integer>
+    <!-- The min animation duration for animating the task bar out. -->
+    <integer name="recents_animate_task_exit_to_home_duration">225</integer>
+    <!-- The min animation duration for animating the task bar out. -->
+    <integer name="recents_animate_task_bar_exit_duration">125</integer>
+    <!-- The animation delay for animating the first task in. This should roughly be the animation
+     duration of the transition in to recents from home. -->
+    <integer name="recents_animate_task_enter_from_home_delay">150</integer>
+    <!-- The min animation duration for animating the task in when transitioning from home. -->
+    <integer name="recents_animate_task_enter_from_home_duration">250</integer>
+    <!-- The animation stagger to apply to each task animation when transitioning from home. -->
+    <integer name="recents_animate_task_enter_from_home_stagger_delay">12</integer>
+    <!-- The short duration when animating in/out the lock to app button. -->
+    <integer name="recents_animate_lock_to_app_button_short_duration">150</integer>
+    <!-- The long duration when animating in/out the lock to app button. -->
+    <integer name="recents_animate_lock_to_app_button_long_duration">300</integer>
+    <!-- The min animation duration for animating the nav bar scrim in. -->
+    <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
+    <!-- The animation duration for animating the removal of a task view. -->
+    <integer name="recents_animate_task_view_remove_duration">250</integer>
+    <!-- The animation duration for scrolling the stack to a particular item. -->
+    <integer name="recents_animate_task_stack_scroll_duration">225</integer>
+    <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
+    <integer name="recents_max_task_stack_view_dim">96</integer>
+    <!-- The delay to enforce between each alt-tab key press. -->
+    <integer name="recents_alt_tab_key_delay">200</integer>
+    <!-- Transposes the search bar layout in landscape. -->
+    <bool name="recents_has_transposed_search_bar">true</bool>
+    <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
+    <bool name="recents_has_transposed_nav_bar">true</bool>
+
+    <!-- Whether to enable KeyguardService or not -->
+    <bool name="config_enableKeyguardService">true</bool>
+
+    <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
+     card. -->
+    <integer name="keyguard_max_notification_count">3</integer>
+
+    <!-- Defines the implementation of the velocity tracker to be used for the panel expansion. Can
+         be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
+    <string name="velocity_tracker_impl" translatable="false">platform</string>
+
+    <!-- Set to true to enable the classic notification ticker that scrolls
+         Notification.tickerText across the status bar for what seems like an
+         eternity. -->
+    <bool name="enable_ticker">false</bool>
+
+    <!-- Set to true to enable the user switcher on the keyguard. -->
+    <bool name="config_keyguardUserSwitcher">false</bool>
+
+    <!-- Doze: does this device support STATE_DOZE and STATE_DOZE_SUSPEND?  -->
+    <bool name="doze_display_state_supported">false</bool>
+
+    <!-- Doze: should the significant motion sensor be used as a pulse signal? -->
+    <bool name="doze_pulse_on_significant_motion">false</bool>
+
+    <!-- Doze: should the pickup sensor be used as a pulse signal? -->
+    <bool name="doze_pulse_on_pick_up">false</bool>
+
+    <!-- Doze: should notifications be used as a pulse signal? -->
+    <bool name="doze_pulse_on_notifications">true</bool>
+
+    <!-- Doze: when to pulse after a buzzworthy notification arrives -->
+    <string name="doze_pulse_schedule" translatable="false">1s,10s,30s,60s,120s</string>
+
+    <!-- Doze: maximum number of times the notification pulse schedule can be reset -->
+    <integer name="doze_pulse_schedule_resets">3</integer>
+
+    <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
+    <integer name="doze_pickup_vibration_threshold">2000</integer>
+
+    <!-- Doze: pulse parameter - how long does it take to fade in? -->
+    <integer name="doze_pulse_duration_in">1000</integer>
+
+    <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
+    <integer name="doze_pulse_duration_visible">3000</integer>
+
+    <!-- Doze: pulse parameter - how long does it take to fade out? -->
+    <integer name="doze_pulse_duration_out">1000</integer>
+
+    <!-- Doze: alpha to apply to small icons when dozing -->
+    <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
+
+    <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
+    <integer name="volume_panel_dismiss_delay">200</integer>
+
+    <!-- Tiles with feature timeouts: number of days to show after feature is used. -->
+    <integer name="days_to_show_timeout_tiles">30</integer>
+
+    <!-- Number of times to show the strong alarm warning text in the volume dialog -->
+    <integer name="zen_mode_alarm_warning_threshold">5</integer>
+
+    <!-- Zen toast fade in/out duration -->
+    <integer name="zen_toast_animation_duration">500</integer>
+
+    <!-- Zen toast visibility duration -->
+    <integer name="zen_toast_visible_duration">500</integer>
 </resources>
 

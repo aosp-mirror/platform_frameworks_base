@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Powłoka"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Raport o błędach został zapisany"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Kliknij, by udostępnić raport o błędach"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Przesuń palcem w lewo, by udostępnić swoje zgłoszenie błędu"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Kliknij, by udostępnić raport o błędach"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Raporty o błędach zawierają dane z różnych plików dzienników systemu, w tym dane osobowe i prywatne. Udostępniaj je tylko aplikacjom i osobom, którym ufasz."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Pokaż ten komunikat następnym razem"</string>
 </resources>

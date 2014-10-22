@@ -72,9 +72,9 @@ public final class PrinterDiscoverySession {
         }
     }
 
-    public final void startPrinterDisovery(List<PrinterId> priorityList) {
+    public final void startPrinterDiscovery(List<PrinterId> priorityList) {
         if (isDestroyed()) {
-            Log.w(LOG_TAG, "Ignoring start printers dsicovery - session destroyed");
+            Log.w(LOG_TAG, "Ignoring start printers discovery - session destroyed");
             return;
         }
         if (!mIsPrinterDiscoveryStarted) {
@@ -122,7 +122,7 @@ public final class PrinterDiscoverySession {
         try {
             mPrintManager.stopPrinterStateTracking(printerId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error stoping printer state tracking", re);
+            Log.e(LOG_TAG, "Error stopping printer state tracking", re);
         }
     }
 

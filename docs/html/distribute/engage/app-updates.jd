@@ -1,0 +1,50 @@
+page.title=Update Your Apps Regularly
+page.metaDescription=Keeping your content fresh gives users a reason to come back.
+page.tags="updates"
+page.image=/images/gp-your-user-0.jpg
+
+@jd:body
+
+<p>
+  Keeping your content fresh gives users a reason to come back. Use any
+  <a href="{@docRoot}distribute/users/know-your-user.html#add-analytics">in-app
+  or game measurement tool</a> to keep an eye on what users respond to. Use
+  <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">alpha-beta
+  testing</a> and <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#staged-rollouts">staged
+  rollouts</a> to quickly test new features, in-app content, and game
+  characters.
+</p>
+
+<p>
+  Updating regularly also gives you a chance to notify users about new content
+  should users lapse. Notification, email, and social media are several
+  channels to remind users to come back.
+</p>
+
+<p>
+  Check out the video below see how Kiwi uses frequent updates to engage and
+  retain users.
+</p>
+
+<p style="margin-bottom:2em">
+</p>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/engage/kiwi" data-sortorder="-timestamp" data-cardsizes=
+"18x6," data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/engage/appupdates" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>

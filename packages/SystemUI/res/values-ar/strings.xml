@@ -27,57 +27,65 @@
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"إزالة التطبيقات الحديثة"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"تطبيق حديث واحد"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d من التطبيقات الحديثة"</item>
+    <item quantity="other" msgid="1040784359794890744">"‏%d من التطبيقات الحديثة"</item>
   </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي تنبيهات"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي اشعارات"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"التنبيهات"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"توصيل الشاحن"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"انخفضت طاقة البطارية."</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"الإشعارات"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"البطارية منخفضة"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"المتبقي: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"شحن USB غير معتمد.\nاستخدم الشاحن الموفر فقط."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"استخدام البطارية"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"يتبقى <xliff:g id="NUMBER">%d%%</xliff:g>. وضع توفير الطاقة قيد التشغيل."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"‏شحن USB غير معتمد.\nاستخدم الشاحن الموفر فقط."</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"‏لا يمكن إجراء الشحن عبر USB."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"لا تستخدم سوى الشاحن المزوّد."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"الإعدادات"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"هل تريد بدء وضع توفير الطاقة؟"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"بدء"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"بدء وضع توفير الطاقة"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"للمساعدة في إطالة عمر البطارية، فإن وضع توفير الطاقة سيقلل من أداء جهازك.\n\nسيتم تعطيل وضع توفير الطاقة عند توصيل جهازك بالشاحن."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"الإعدادات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"وضع الطائرة"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"التدوير التلقائي للشاشة"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"كتم"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"تلقائي"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"التنبيهات"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"الإشعارات"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"تم إنشاء الاتصال بالإنترنت عن طريق البلوتوث."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"إعداد أسلوب الإدخال"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"لوحة مفاتيح فعلية"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"هل تريد السماح للتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى جهاز USB؟"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"هل تريد السماح للتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى ملحق USB؟"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"هل تريد فتح <xliff:g id="ACTIVITY">%1$s</xliff:g> عند توصيل جهاز USB هذا؟"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"هل تريد فتح <xliff:g id="ACTIVITY">%1$s</xliff:g> عند توصيل ملحق USB هذا؟"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"لا يعمل أي تطبيق مثبت مع ملحق UEB هذا. مزيد من المعلومات عن هذا الملحق على <xliff:g id="URL">%1$s</xliff:g>."</string>
-    <string name="title_usb_accessory" msgid="4966265263465181372">"ملحق USB"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"‏هل تريد السماح للتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى جهاز USB؟"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"‏هل تريد السماح للتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى ملحق USB؟"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"‏هل تريد فتح <xliff:g id="ACTIVITY">%1$s</xliff:g> عند توصيل جهاز USB هذا؟"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"‏هل تريد فتح <xliff:g id="ACTIVITY">%1$s</xliff:g> عند توصيل ملحق USB هذا؟"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"‏لا يعمل أي تطبيق مثبت مع ملحق UEB هذا. مزيد من المعلومات عن هذا الملحق على <xliff:g id="URL">%1$s</xliff:g>."</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"‏ملحق USB"</string>
     <string name="label_view" msgid="6304565553218192990">"عرض"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"الاستخدام بشكل افتراضي لجهاز USB هذا"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"الاستخدام بشكل افتراضي لملحق USB هذا"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"هل تريد السماح بتصحيح أخطاء USB؟"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"‏الاستخدام بشكل افتراضي لجهاز USB هذا"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"‏الاستخدام بشكل افتراضي لملحق USB هذا"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"تكبير/تصغير التوافق"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"عند تصميم تطبيق لشاشة أصغر، سيظهر عنصر تحكم في التكبير/التصغير بجوار الساعة."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"يتم حفظ لقطة."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"المس لعرض لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"تعذر حفظ لقطة الشاشة. قد يكون التخزين قيد الاستخدام."</string>
-    <string name="usb_preference_title" msgid="6551050377388882787">"خيارات نقل الملفات عبر USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"تحميل كمشغل وسائط (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7517127540301625751">"تحميل ككاميرا (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"تثبيت تطبيق Android File Transfer لـ Mac"</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
+    <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تحميل كمشغل وسائط (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تحميل ككاميرا (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"‏تثبيت تطبيق Android File Transfer لـ Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"رجوع"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"الرئيسية"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"القائمة"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"التطبيقات الحديثة"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"بحث"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"الكاميرا"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"الهاتف"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"زر تبديل طريقة الإدخال."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"زر تكبير/تصغير للتوافق."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"استخدام التكبير/التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
@@ -98,17 +106,17 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"إشارة البيانات تتكون من شريطين."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"إشارة البيانات تتكون من ثلاثة أشرطة."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"إشارة البيانات كاملة."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"تم إيقاف Wi-Fi."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"تم قطع اتصال Wi-Fi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"إشارة Wi-Fi تتكون من شريط واحد."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"إشارة Wi-Fi تتكون من شريطين."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"إشارة Wi-Fi تتكون من ثلاثة أشرطة."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"إشارة Wi-Fi كاملة."</string>
-    <string name="accessibility_no_wimax" msgid="4329180129727630368">"ليس هناك WiMAX."</string>
-    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"شريط WiMAX واحد."</string>
-    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"شريطا WiMAX."</string>
-    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"أشرطة WiMAX الثلاثة."</string>
-    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"إشارة WiMAX كاملة."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"‏تم إيقاف Wi-Fi."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"‏تم قطع اتصال Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"‏إشارة Wi-Fi تتكون من شريط واحد."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"‏إشارة Wi-Fi تتكون من شريطين."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"‏إشارة Wi-Fi تتكون من ثلاثة أشرطة."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"‏إشارة Wi-Fi كاملة."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏ليس هناك WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"‏شريط WiMAX واحد."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"‏شريطا WiMAX."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"‏أشرطة WiMAX الثلاثة."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"‏إشارة WiMAX كاملة."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"ليست هناك إشارة."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"غير متصل."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"ليست هناك أشرطة."</string>
@@ -119,26 +127,27 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"تم التشغيل."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"تم الإيقاف."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"متصل."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"جارٍ الاتصال."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1‎ X‎"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"شبكة الجيل الثالث"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"شبكة 3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"‏شبكة 3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"شبكة الجيل الرابع"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"تجوال"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"ليست هناك بطاقة SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك بطاقة SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"إعدادات النظام."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"الإشعارات."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"محو الإشعار."</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"تم تمكين GPS."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"الحصول على GPS."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏تم تمكين GPS."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏الحصول على GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"تم تمكين المبرقة الكاتبة."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"رنين مع الاهتزاز."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"رنين صامت."</string>
@@ -153,23 +162,28 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"وضع الطائرة <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"البلوتوث <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"حالة الموقع: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"تم ضبط المنبه على <xliff:g id="TIME">%s</xliff:g>."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"تم تعطيل بيانات شبكات الجيل الثاني والجيل الثالث"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"تم تعطيل بيانات شبكة الجيل الرابع"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"تم تعطيل بيانات الجوال"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"تم تعطيل البيانات"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"لقد وصلت إلى حد استخدام البيانات المحدد. \n \n إذا أعدت تمكين البيانات ، فقد يتم تحصيل رسوم منك من قبل مشغل شبكة الجوال."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"إعادة تمكين البيانات"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"إغلاق اللوحة"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"وقت أكثر"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"وقت أقل"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2-3 غيغابايت من البيانات المعطلة"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4 غيغابايت من البيانات المعطلة"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"البيانات الخلوية معطلة"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"البيانات معطلة"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"عطل جهازك البيانات نظرًا لبلوغها الحد الذي تم تعيينه.\n\nعلمًا بأن إعادتها قد يؤدي إلى تحمل رسوم من قبل مشغّل شبكة الجوّال."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"تشغيل البيانات"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"لا يوجد اتصال إنترنت"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi متصل"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"جارٍ البحث عن GPS"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"تم تعيين الموقع بواسطة GPS"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi متصل"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏جارٍ البحث عن GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"‏تم تعيين الموقع بواسطة GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"طلبات الموقع نشطة"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"محو جميع الإشعارات."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"معلومات التطبيق"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"سيتم تدوير الشاشة تلقائيًا."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"تم تأمين الشاشة في الاتجاه الأفقي."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"تم تأمين الشاشة في الاتجاه العمودي."</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"حالة الحلويات"</string>
     <string name="start_dreams" msgid="7219575858348719790">"حلم اليقظة"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"وضع الطائرة"</string>
@@ -178,9 +192,12 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"بلوتوث"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"بلوتوث (<xliff:g id="NUMBER">%d</xliff:g> من الأجهزة)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"إيقاف البلوتوث"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"لا يتوفر أي أجهزة مقترنة"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"تدوير تلقائي"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"تم قفل التدوير"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"دوران تلقائي"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"تم قفل التدوير"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودي"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"أفقي"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"أسلوب الإدخال"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"الموقع"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"الموقع قيد الإيقاف"</string>
@@ -190,16 +207,95 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"الإعدادات"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"الوقت"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"أنا"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"المستخدم"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"مستخدم جديد"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ليست متصلة"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"لا تتوفر شبكة"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"إيقاف Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"عرض Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"عرض شاشة لاسلكي"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏إيقاف Wi-Fi"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"لا تتوفر أية شبكة محفوظة"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"إرسال الشاشة"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"جهاز لا يحمل اسمًا"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"جاهز للإرسال"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"لا يتوفر أي جهاز"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"السطوع"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"تلقائي"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"تظهر الإشعارات هنا"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"يمكنك الدخول إليها في أي وقت بالتمرير السريع إلى أسفل.\nيمكنك التمرير السريع إلى أسفل مرة أخرى للوصول إلى عناصر تحكم النظام."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"مرر سريعًا لحافة الشاشة لإظهار الشريط"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"مرر سريعًا من حافة الشاشة لإظهار شريط النظام"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"قلب الألوان"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"وضع تصحيح الألوان"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"المزيد من الإعدادات"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"تم"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"متصل"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"جارٍ الاتصال..."</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"النطاق"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"نقطة اتصال"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"الإشعارات"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"الفلاش"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"البيانات الخلوية"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"استخدام البيانات"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"البيانات المتبقية"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"فوق القيد"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> مستخدم"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"قيد <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"تحذير <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"ليست هناك تطبيقات حديثة"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"معلومات التطبيق"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"تقييد بالتطبيق"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"بحث"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"تم الشحن"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"جارٍ الشحن"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> حتى الاكتمال"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"لا يتم الشحن"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"قد تكون الشبكة\nخاضعة للرقابة"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"بحث"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"تمرير لأعلى لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"تمرير لليسار لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"بدون إزعاج، بما في ذلك المنبهات"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"بدون مقاطعات"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"المقاطعات ذات الأولوية فقط"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"التنبيه المقبل في <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"التنبيه المقبل في <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"لن تسمع المنبهات في <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"الإشعارات الأقل إلحاحًا أدناه"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"انقر مرة أخرى للفتح"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"مرر سريعًا لأعلى لإلغاء القفل"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"مرر سريعًا إلى اليسار لفتح الهاتف"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"مرر سريعًا إلى اليمين لفتح الكاميرا"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"إلى أجل غير مسمى"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"بدون"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"الأولوية"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"الكل"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"جارٍ الشحن (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> حتى الامتلاء)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"المدعو"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ مدعو"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"الخروج من وضع الضيف"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"لمدة دقيقة واحدة"</item>
+    <item quantity="other" msgid="6924190729213550991">"‏لمدة %d من الدقائق"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"لمدة ساعة واحدة"</item>
+    <item quantity="other" msgid="5408537517529822157">"‏لمدة %d من الساعات"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"وضع توفير الطاقة قيد التشغيل"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"تم تقليل أداء الجهاز."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"فتح إعدادات وضع توفير الطاقة"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"المحتويات مخفية"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> سيبدأ التقاط كل شيء يتم عرضه على الشاشة."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"عدم الإظهار مرة أخرى"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"البدء الآن"</string>
 </resources>

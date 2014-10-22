@@ -28,6 +28,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
+
 /**
  * This class provides a base class for recognition service implementations. This class should be
  * extended only in case you wish to implement a new speech recognizer. Please note that the
@@ -91,9 +93,20 @@ public abstract class RecognitionService extends Service {
         }
     };
 
-    private void dispatchStartListening(Intent intent, IRecognitionListener listener) {
+    private void dispatchStartListening(Intent intent, final IRecognitionListener listener) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
+            try {
+                listener.asBinder().linkToDeath(new IBinder.DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_CANCEL, listener));
+                    }
+                }, 0);
+            } catch (RemoteException re) {
+                Log.e(TAG, "dead listener on startListening");
+                return;
+            }
             mCurrentCallback = new Callback(listener);
             RecognitionService.this.onStartListening(intent, mCurrentCallback);
         } else {
@@ -304,40 +317,46 @@ public abstract class RecognitionService extends Service {
     }
 
     /** Binder of the recognition service */
-    private static class RecognitionServiceBinder extends IRecognitionService.Stub {
-        private RecognitionService mInternalService;
+    private static final class RecognitionServiceBinder extends IRecognitionService.Stub {
+        private final WeakReference<RecognitionService> mServiceRef;
 
         public RecognitionServiceBinder(RecognitionService service) {
-            mInternalService = service;
+            mServiceRef = new WeakReference<RecognitionService>(service);
         }
 
+        @Override
         public void startListening(Intent recognizerIntent, IRecognitionListener listener) {
             if (DBG) Log.d(TAG, "startListening called by:" + listener.asBinder());
-            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
-                mInternalService.mHandler.sendMessage(Message.obtain(mInternalService.mHandler,
-                        MSG_START_LISTENING, mInternalService.new StartListeningArgs(
+            final RecognitionService service = mServiceRef.get();
+            if (service != null && service.checkPermissions(listener)) {
+                service.mHandler.sendMessage(Message.obtain(service.mHandler,
+                        MSG_START_LISTENING, service.new StartListeningArgs(
                                 recognizerIntent, listener)));
             }
         }
 
+        @Override
         public void stopListening(IRecognitionListener listener) {
             if (DBG) Log.d(TAG, "stopListening called by:" + listener.asBinder());
-            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
-                mInternalService.mHandler.sendMessage(Message.obtain(mInternalService.mHandler,
+            final RecognitionService service = mServiceRef.get();
+            if (service != null && service.checkPermissions(listener)) {
+                service.mHandler.sendMessage(Message.obtain(service.mHandler,
                         MSG_STOP_LISTENING, listener));
             }
         }
 
+        @Override
         public void cancel(IRecognitionListener listener) {
             if (DBG) Log.d(TAG, "cancel called by:" + listener.asBinder());
-            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
-                mInternalService.mHandler.sendMessage(Message.obtain(mInternalService.mHandler,
+            final RecognitionService service = mServiceRef.get();
+            if (service != null && service.checkPermissions(listener)) {
+                service.mHandler.sendMessage(Message.obtain(service.mHandler,
                         MSG_CANCEL, listener));
             }
         }
 
         public void clearReference() {
-            mInternalService = null;
+            mServiceRef.clear();
         }
     }
 }

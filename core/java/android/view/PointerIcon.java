@@ -140,7 +140,7 @@ public final class PointerIcon implements Parcelable {
         if ((resourceId & 0xff000000) == 0x01000000) {
             icon.mSystemIconResourceId = resourceId;
         } else {
-            icon.loadResource(context.getResources(), resourceId);
+            icon.loadResource(context, context.getResources(), resourceId);
         }
         return icon;
     }
@@ -149,9 +149,9 @@ public final class PointerIcon implements Parcelable {
      * Creates a custom pointer from the given bitmap and hotspot information.
      *
      * @param bitmap The bitmap for the icon.
-     * @param hotspotX The X offset of the pointer icon hotspot in the bitmap.
+     * @param hotSpotX The X offset of the pointer icon hotspot in the bitmap.
      *        Must be within the [0, bitmap.getWidth()) range.
-     * @param hotspotY The Y offset of the pointer icon hotspot in the bitmap.
+     * @param hotSpotY The Y offset of the pointer icon hotspot in the bitmap.
      *        Must be within the [0, bitmap.getHeight()) range.
      * @return A pointer icon for this bitmap.
      *
@@ -198,7 +198,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         PointerIcon icon = new PointerIcon(STYLE_CUSTOM);
-        icon.loadResource(resources, resourceId);
+        icon.loadResource(null, resources, resourceId);
         return icon;
     }
 
@@ -224,7 +224,7 @@ public final class PointerIcon implements Parcelable {
 
         PointerIcon result = new PointerIcon(mStyle);
         result.mSystemIconResourceId = mSystemIconResourceId;
-        result.loadResource(context.getResources(), mSystemIconResourceId);
+        result.loadResource(context, context.getResources(), mSystemIconResourceId);
         return result;
     }
 
@@ -373,19 +373,19 @@ public final class PointerIcon implements Parcelable {
         return true;
     }
 
-    private void loadResource(Resources resources, int resourceId) {
-        XmlResourceParser parser = resources.getXml(resourceId);
+    private void loadResource(Context context, Resources resources, int resourceId) {
+        final XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
         final float hotSpotX;
         final float hotSpotY;
         try {
             XmlUtils.beginDocument(parser, "pointer-icon");
 
-            TypedArray a = resources.obtainAttributes(
+            final TypedArray a = resources.obtainAttributes(
                     parser, com.android.internal.R.styleable.PointerIcon);
             bitmapRes = a.getResourceId(com.android.internal.R.styleable.PointerIcon_bitmap, 0);
-            hotSpotX = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
-            hotSpotY = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
+            hotSpotX = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
+            hotSpotY = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
             a.recycle();
         } catch (Exception ex) {
             throw new IllegalArgumentException("Exception parsing pointer icon resource.", ex);
@@ -397,7 +397,12 @@ public final class PointerIcon implements Parcelable {
             throw new IllegalArgumentException("<pointer-icon> is missing bitmap attribute.");
         }
 
-        Drawable drawable = resources.getDrawable(bitmapRes);
+        Drawable drawable;
+        if (context == null) {
+            drawable = resources.getDrawable(bitmapRes);
+        } else {
+            drawable = context.getDrawable(bitmapRes);
+        }
         if (!(drawable instanceof BitmapDrawable)) {
             throw new IllegalArgumentException("<pointer-icon> bitmap attribute must "
                     + "refer to a bitmap drawable.");

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- Colors specific to Holo themes. -->
+<resources>
+
+    <drawable name="dialog_holo_dark_frame">@drawable/dialog_full_holo_dark</drawable>
+    <drawable name="dialog_holo_light_frame">@drawable/dialog_full_holo_light</drawable>
+    <drawable name="input_method_fullscreen_background_holo">@drawable/screen_background_holo_dark</drawable>
+
+    <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
+    <drawable name="screen_background_holo_dark">#ff000000</drawable>
+
+    <color name="background_holo_dark">#ff000000</color>
+    <color name="background_holo_light">#fff3f3f3</color>
+    <color name="bright_foreground_holo_dark">@color/background_holo_light</color>
+    <color name="bright_foreground_holo_light">@color/background_holo_dark</color>
+    <color name="bright_foreground_disabled_holo_dark">#ff4c4c4c</color>
+    <color name="bright_foreground_disabled_holo_light">#ffb2b2b2</color>
+    <color name="bright_foreground_inverse_holo_dark">@color/bright_foreground_holo_light</color>
+    <color name="bright_foreground_inverse_holo_light">@color/bright_foreground_holo_dark</color>
+    <color name="dim_foreground_holo_dark">#bebebe</color>
+    <color name="dim_foreground_disabled_holo_dark">#80bebebe</color>
+    <color name="dim_foreground_inverse_holo_dark">#323232</color>
+    <color name="dim_foreground_inverse_disabled_holo_dark">#80323232</color>
+    <color name="hint_foreground_holo_dark">#808080</color>
+    <color name="dim_foreground_holo_light">#323232</color>
+    <color name="dim_foreground_disabled_holo_light">#80323232</color>
+    <color name="dim_foreground_inverse_holo_light">#bebebe</color>
+    <color name="dim_foreground_inverse_disabled_holo_light">#80bebebe</color>
+    <color name="hint_foreground_holo_light">#808080</color>
+    <color name="highlighted_text_holo_dark">#6633b5e5</color>
+    <color name="highlighted_text_holo_light">#6633b5e5</color>
+    <color name="link_text_holo_dark">#5c5cff</color>
+    <color name="link_text_holo_light">#0000ee</color>
+
+    <!-- General purpose colors for Holo-themed elements -->
+    <eat-comment />
+
+    <!-- A light Holo shade of blue -->
+    <color name="holo_blue_light">#ff33b5e5</color>
+    <!-- A light Holo shade of gray -->
+    <color name="holo_gray_light">#33999999</color>
+    <!-- A light Holo shade of green -->
+    <color name="holo_green_light">#ff99cc00</color>
+    <!-- A light Holo shade of red -->
+    <color name="holo_red_light">#ffff4444</color>
+    <!-- A dark Holo shade of blue -->
+    <color name="holo_blue_dark">#ff0099cc</color>
+    <!-- A dark Holo shade of green -->
+    <color name="holo_green_dark">#ff669900</color>
+    <!-- A dark Holo shade of red -->
+    <color name="holo_red_dark">#ffcc0000</color>
+    <!-- A Holo shade of purple -->
+    <color name="holo_purple">#ffaa66cc</color>
+    <!-- A light Holo shade of orange -->
+    <color name="holo_orange_light">#ffffbb33</color>
+    <!-- A dark Holo shade of orange -->
+    <color name="holo_orange_dark">#ffff8800</color>
+    <!-- A really bright Holo shade of blue -->
+    <color name="holo_blue_bright">#ff00ddff</color>
+    <!-- A really bright Holo shade of gray -->
+    <color name="holo_gray_bright">#33CCCCCC</color>
+
+    <!-- Forward compatibility for Material-style theme colors -->
+    <eat-comment />
+
+    <color name="holo_primary_dark">#ff000000</color>
+    <color name="holo_primary">#ffe6e6e6</color>
+    <color name="holo_primary_light">#ffffffff</color>
+    <color name="holo_control_activated">@color/holo_blue_light</color>
+    <color name="holo_control_normal">#39cccccc</color>
+    <color name="holo_button_pressed">#59f0f0f0</color>
+    <color name="holo_button_normal">#bd292f34</color>
+
+    <color name="holo_light_primary_dark">#ff000000</color>
+    <color name="holo_light_primary">#ffe6e6e6</color>
+    <color name="holo_light_primary_light">#ffffffff</color>
+    <color name="holo_light_control_activated">@color/holo_control_activated</color>
+    <color name="holo_light_control_normal">#dacccccc</color>
+    <color name="holo_light_button_pressed">#66666666</color>
+    <color name="holo_light_button_normal">#b3cccccc</color>
+
+    <!-- Group buttons -->
+    <eat-comment />
+
+    <color name="group_button_dialog_pressed_holo_dark">#46c5c1ff</color>
+    <color name="group_button_dialog_focused_holo_dark">#2699cc00</color>
+
+    <color name="group_button_dialog_pressed_holo_light">#ffffffff</color>
+    <color name="group_button_dialog_focused_holo_light">#4699cc00</color>
+
+    <!-- Time picker -->
+    <eat-comment />
+
+    <color name="timepicker_default_background_holo_light">@color/white</color>
+    <color name="timepicker_default_background_holo_dark">#ff303030</color>
+
+    <color name="timepicker_default_text_color_holo_light">#8c8c8c</color>
+    <color name="timepicker_default_text_color_holo_dark">@color/white</color>
+
+    <color name="timepicker_default_ampm_selected_background_color_holo_light">@color/holo_blue_light</color>
+    <color name="timepicker_default_ampm_selected_background_color_holo_dark">@color/holo_blue_light</color>
+
+    <color name="timepicker_default_ampm_unselected_background_color_holo_light">@color/white</color>
+    <color name="timepicker_default_ampm_unselected_background_color_holo_dark">@color/transparent</color>
+
+    <!-- DatePicker colors -->
+    <eat-comment />
+
+    <color name="datepicker_default_header_selector_background_holo_light">@android:color/white</color>
+    <color name="datepicker_default_header_selector_background_holo_dark">#ff303030</color>
+
+    <color name="datepicker_default_header_dayofweek_background_color_holo_light">#999999</color>
+    <color name="datepicker_default_header_dayofweek_background_color_holo_dark">@android:color/white</color>
+
+    <color name="datepicker_default_normal_text_color_holo_light">#ff999999</color>
+    <color name="datepicker_default_normal_text_color_holo_dark">@android:color/white</color>
+
+    <color name="datepicker_default_disabled_text_color_holo_light">#80999999</color>
+    <color name="datepicker_default_disabled_text_color_holo_dark">#80999999</color>
+
+    <color name="datepicker_default_selected_text_color_holo_light">#33b5e5</color>
+    <color name="datepicker_default_selected_text_color_holo_dark">#33b5e5</color>
+
+    <color name="datepicker_default_pressed_text_color_holo_light">#0099cc</color>
+    <color name="datepicker_default_pressed_text_color_holo_dark">#0099cc</color>
+
+    <color name="datepicker_default_circle_background_color_holo_light">@android:color/holo_blue_light</color>
+    <color name="datepicker_default_circle_background_color_holo_dark">@android:color/holo_blue_light</color>
+
+    <color name="datepicker_default_view_animator_color_holo_light">#f2f2f2</color>
+    <color name="datepicker_default_view_animator_color_holo_dark">#ff303030</color>
+
+</resources>

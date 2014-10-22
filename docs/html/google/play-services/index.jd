@@ -11,10 +11,8 @@ header.hide=1
 <div class="col-6">
 
   <h1 itemprop="name" style="margin-bottom:0;">Google Play Services</h1>
-  <p itemprop="description">
-  </p>
-
-  <p>Give your apps more features to attract users on a wider range of devices.
+  <p itemprop="description">Give your apps more features to attract users
+  on a wider range of devices.
   With Google Play services, your app can take advantage
   of the latest, Google-powered features such as Maps, Google+, and more,
   with automatic platform updates distributed as an APK through
@@ -29,9 +27,10 @@ header.hide=1
   <div class="layout-content-col span-4">
 
 <h4>Google Technology</h4>
-<p>Google Play services provides you with easy access to Google services and is tightly
-integrated with the Android OS. Easy-to-use client libraries are provided for
-each service that let you implement the functionality you want easier and faster.</p>
+<p>Google Play services provides you with easy access to Google services and is
+tightly integrated with the Android OS. Easy-to-use client libraries are
+provided for each service that let you implement the functionality you want
+easier and faster.</p>
 
   </div>
   <div class="layout-content-col span-4">
@@ -59,22 +58,282 @@ about your users' Android version.</p>
 
 </div>
 
-<h2 style="margin-top:0" id="newfeatures">New Features in Version 4.3</h2>
+<h2 style="margin-top:0" id="newfeatures">New Features</h2>
+
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+    class="toggle-content-img"
+      alt=""/>Google Play services, Version 6.1</a> <em>(October 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 6.1</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 6.1, see the
+announcement
+<a href="http://android-developers.blogspot.com/2014/09/google-play-services-61.html"
+class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Drive</strong> - This release adds the
+    <a href="{@docRoot}reference/com/google/android/gms/drive/events/CompletionEvent.html">
+      <code>CompletionEvent</code></a> class to notify you when actions are
+      committed to the server and respond to conflicts. Recent and starred views
+      are now available in the file picker user interface provided by
+    <a href="{@docRoot}reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">
+    <code>OpenFileActivityBuilder</code><a/>, and the user interface has been
+    updated to use
+      <a href="{@docRoot}preview/material/index.html">material design</a>. A new
+    <a href="{@docRoot}reference/com/google/android/gms/drive/DriveResource.html#setParents(com.google.android.gms.common.api.GoogleApiClient, java.util.Set<com.google.android.gms.drive.DriveId>)">
+      DriveResource.setParents()</a> method makes it possible to organize files
+    and folders. In addition, the
+    <a href="{@docRoot}reference/com/google/android/gms/drive/Contents.html">
+      <code>Contents</code></a>
+    class has been replaced with a
+    <a href="{@docRoot}reference/com/google/android/gms/drive/DriveContents.html">
+      <code>DriveContents</code></a> class that simplifies working with file
+      contents.
+  <ul>
+    <li><a href="https://developers.google.com/drive/release-notes"
+      class="external-link">Drive SDK release notes</a></li>
+    <li><a href="https://developers.google.com/drive/android/completion"
+      class="external-link">Completion events developer guide and Google
+      Developers video</a></li>
+    <li><a href="https://developers.google.com/drive/android/intro?hl=pt-PT#activity_builders"
+      class="external-link">Using the OpenFileActivity Builder</a></li>
+  </ul>
+  </li>
+
+  <li><strong>Tag Manager</strong> - Google Tag Manager now supports
+    <a href="https://developers.google.com/analytics/devguides/collection/android/v4/enhanced-ecommerce"
+    class="external-link">Enhanced Ecommerce</a> through the
+    <a href="https://support.google.com/tagmanager/answer/3281379"
+    class="external-link">Universal Analytics tag</a>.
+    <ul>
+      <li><a href="https://developers.google.com/analytics/devguides/collection/upgrade/"
+        class="external-link">Universal Analytics Upgrade Center</a></li>
+      <li><a href="https://developers.google.com/tag-manager/android/v4/"
+        class="external-link">Enhanced Ecommerce developer guide</a></li>
+    </ul>
+  </li>
+
+  <li><strong>Fit</strong> - The Google Fit developer preview, initially
+  <a href="http://googledevelopers.blogspot.com/2014/08/google-fit-preview-sdk-now-available.html"
+  class=""external-link>announced</a> in August, has been
+  refreshed to enable you to test your new fitness apps on any Android device.
+    <ul>
+      <li><a href="https://developers.google.com/fit/preview"
+        class="external-link">Google Fit developer guide</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/fitness/package-summary.html">
+        Fit API reference</a></li>
+    </ul>
+  </li>
+
+</ul>
+</dd>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+    class="toggle-content-img"
+      alt=""/>Google Play services, Version 5.0</a> <em>(July 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 5.0</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 5.0, see the
+announcement
+<a href="http://android-developers.blogspot.com/2014/07/google-play-services-5.html"
+class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Analytics</strong> - The Enhanced Ecommerce API allows your app
+to send product related information and actions to Google Analytics. Use this
+API to measure impressions of products seen by users, checkout steps, and
+products purchased. This information can be analyzed for the effectiveness of
+marketing and merchandising efforts, including the impact of internal
+promotions, coupons, and affiliate marketing programs.
+  <ul>
+    <li><a href="https://developers.google.com/analytics/devguides/collection/android/v4/enhanced-ecommerce.html" class="external-link">Enhanced Ecommerce developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/analytics/ecommerce/package-summary.html">Enhanced Ecommerce API reference</a></li>
+  </ul>
+  </li>
+
+  <li><strong>App Indexing</strong> - The App Indexing API provides a way
+for developers to notify Google about deep links in their native apps and
+allows the Google Search App, version 3.6 and above, to drive re-engagement
+through Google Search
+<a href="https://support.google.com/websearch/answer/106230"
+class="external-link">query autocompletions</a>, providing fast and easy access to
+inner pages in apps.
+  <ul>
+    <li><a href="https://developers.google.com/app-indexing/webmasters/appindexingapi.html"
+class="external-link">App Indexing developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/appindexing/package-summary.html">App
+Indexing API reference</a></li>
+  </ul>
+  </li>
+
+  <li><strong>Drive</strong> - The Query APIs now allow your app to retrieve
+Drive files by sorted order, according to a developer-specified sorting criteria.
+    <ul>
+      <li><a href="https://developers.google.com/drive/android/queries.html"
+class="external-link">Queries developer guide</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/drive/query/package-summary.html">Sortable
+queries API reference</a></li>
+    </ul>
+  </li>
+
+  <li><strong>Play Games</strong> - This release introduces the Quests and
+Saved Games services. The Quests service gives you the ability to issue
+time-bound in-game challenges based on Events data sent from your game, without
+republishing your game (for example:  Your game sends an event each time a
+“gem” is found by a player, and you create a quest to “Find 20 gems”). Players
+can complete a quest to earn rewards. Saved Games offers improved functionality
+for saving game state information and visually displaying player game progression.
+    <ul>
+    <li><a href="https://developers.google.com/games/services/android/quests.html"
+class="external-link">Events and Quests developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/games/event/package-summary.html">Events
+API reference</a></a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/games/quest/package-summary.html">Quests
+API reference</a></a></li>
+    <li><a href="https://developers.google.com/games/services/android/savedgames.html"
+class="external-link">Saved Games developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/games/snapshot/package-summary.html">Saved
+Games API reference</a></a></li>
+  </ul>
+  </li>
+
+  <li><strong>Security</strong> - The Security API allows you to easily
+install a dynamic security provider. New versions of Google Play Services will
+keep the security provider up-to-date with the latest security fixes as those
+become available.
+    <ul>
+      <li><a href="{@docRoot}reference/com/google/android/gms/security/package-summary.html">Security
+API reference</a></li>
+    </ul>
+  </li>
+
+    <li><strong>Wallet</strong> - The Save to Google API for Android lets users
+save Wallet Objects to their Google Wallet with the click of a button displayed
+in your Android app.
+    <ul>
+      <li><a href="https://developers.google.com/wallet/objects/savetowalletnative.html"
+class="external-link">Save to Google API for Android tutorial</a></li>
+    </ul>
+  </li>
+
+
+    <li><strong>Wearables</strong> - The Wearable Data Layer API provides a
+    communication channel between your handheld and wearable apps. The API
+    consists of a set of data objects that the system can send and synchronize
+    and listeners that notify your apps of important events from the other
+    device.
+    <ul>
+      <li><a href="{@docRoot}training/wearables/apps/index.html">Building
+Wearable Apps training class</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/wearable/package-summary.html">Wearables
+API reference</a></li>
+    </ul>
+  </li>
+
+</ul>
+</dd>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Google Play services, Version 4.4</a> <em>(May 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 4.4</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 4.4, see the
+announcement <a href="http://android-developers.blogspot.com/2014/05/google-play-services-44.html" class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Maps</strong> - New features for Street View and enhanced control of
+  Indoor Maps.
+  <ul>
+    <li><a href="http://developers.google.com/maps/documentation/android/streetview.html" class="external-link">Street View developer guide</a> - Add Street View to your app and programmatically control
+      the user’s experience.
+    <li><a href="http://developers.google.com/maps/documentation/android/map.html#indoor_maps" class="external-link">Indoor Maps developer guide</a> - Customize the level picker
+      and specify the active level of a building.</a>
+  </ul>
+  </li>
+
+  <li><strong>Activity recognition</strong> - The Location API has been updated with new activity detectors for running and walking.
+    <ul>
+      <li><a href="{@docRoot}reference/com/google/android/gms/location/DetectedActivity.html"><code>DetectedActivity</code> class reference</a>
+    </ul>
+  </li>
+
+  <li><strong>Mobile Ads</strong> - The new in-app purchase APIs allow
+    publishers to display in-app purchase ads, which enables users to purchase
+    advertised items directly.
+    <ul>
+      <li><a href="https://developers.google.com/mobile-ads-sdk/docs/admob/advanced#play-inapppurchaselistener" class="external-link">In-app purchase APIs developer guide</a> -
+        Enable in-app purchases via ads by using the in-app purchase APIs.
+      <li><a href="{@docRoot}reference/com/google/android/gms/ads/purchase/package-summary.html">In-app purchase API reference</a>
+    </ul>
+  </li>
+
+  <li><strong>Wallet Fragment</strong> - The new Wallet Fragment API allows you
+    to easily integrate Google Wallet Instant Buy with an existing app.
+    <ul>
+    <li><a href="http://developers.google.com/wallet/instant-buy/android/tutorial.html#about_walletfragment" class="external-link">About Wallet Fragment</a> - Tutorial showing how to
+      use wallet fragment to handle user events and to automate key parts of the purchase lifecycle.
+    <li><a href="http://developers.google.com/wallet/instant-buy/diagrams.html#detailed_api_process_flow" class="external-link">Detailed API process flow</a></a>
+  </ul>
+  </li>
+</ul>
+</dd>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Google Play services, Version 4.3</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 4.3</dt>
+<dd>
 <p>For a summary of the feature highlights in Google Play services 4.3, see the
 announcement <a href="http://android-developers.blogspot.com/2014/03/google-play-services-43.html" class="external-link">blog post</a>.</p>
 <ul>
 <li><strong>Play Games</strong> - The new Game Gifts API enables games to send virtual in-game requests to anyone in a player’s circles or through player search.
    <ul>
       <li><a href="http://developers.google.com/games/services/android/giftRequests.html" class="external-link">Developing Game Gifts in Android</a></li>
-      <li><a href="/reference/com/google/android/gms/games/request/package-summary.html">Game Gifts API reference</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/games/request/package-summary.html">Game Gifts API reference</a></li>
    </ul>
 </li>
 <li><strong>Analytics</strong> - Google Analytics and Tag Manager are now part of Google Play services.
    <ul>
-      <li><a href="http://developers.google.com/analytics/devguides/collection/android/v3/" class="external-link">Getting Started with the Analytics API in Android</a></li>
+      <li><a href="http://developers.google.com/analytics/devguides/collection/android/v4/" class="external-link">Getting Started with the Analytics API in Android</a></li>
       <li><a href="/reference/com/google/android/gms/analytics/package-summary.html">Analytics API reference</a></li>
       <li><a href="http://developers.google.com/tag-manager/android/" class="external-link">Getting Started with the Tag Manager API in Android</a></li>
-      <li><a href="/reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
    </ul>
 </li>
 <li><strong>Drive</strong> - Change notifications, offline content, and more.
@@ -86,10 +345,14 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
 </li>
 <li><strong>Address</strong> - Let your users provide complete addresses in a single click.
    <ul>
-      <li><a href="/reference/com/google/android/gms/identity/intents/package-summary.html">Address API reference</a> </li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/identity/intents/package-summary.html">Address API reference</a> </li>
    </ul>
 </li>
 </ul>
+</dd>
+</dl>
+  </div>
+</div>
 
 <h2>How It Works</h2>
 
@@ -151,7 +414,3 @@ easy for you to focus on what's important: your users' experience.</p>
 
 <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a> the SDK and check out
 the various products in the Google Play services platform now!</p>
-
-
-
-

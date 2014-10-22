@@ -23,7 +23,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -119,14 +118,11 @@ public class TextureView extends View {
     private boolean mUpdateLayer;
     private boolean mUpdateSurface;
 
-    private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
-
     private Canvas mCanvas;
     private int mSaveCount;
 
     private final Object[] mNativeWindowLock = new Object[0];
-    // Used from native code, do not write!
-    @SuppressWarnings({"UnusedDeclaration"})
+    // Set by native code, do not write!
     private long mNativeWindow;
 
     /**
@@ -145,7 +141,6 @@ public class TextureView extends View {
      * @param context The context to associate this view with.
      * @param attrs The attributes of the XML tag that is inflating the view.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
     public TextureView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -156,14 +151,30 @@ public class TextureView extends View {
      * 
      * @param context The context to associate this view with.
      * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public TextureView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TextureView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    /**
+     * Creates a new TextureView.
+     *
+     * @param context The context to associate this view with.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public TextureView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
@@ -210,29 +221,16 @@ public class TextureView extends View {
         }
     }
 
+    /** @hide */
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mLayer != null) {
-            boolean success = executeHardwareAction(new Runnable() {
-                @Override
-                public void run() {
-                    destroySurface();
-                }
-            });
-
-            if (!success) {
-                Log.w(LOG_TAG, "TextureView was not able to destroy its surface: " + this);
-            }
-        }
+    protected void onDetachedFromWindowInternal() {
+        destroySurface();
+        super.onDetachedFromWindowInternal();
     }
 
     private void destroySurface() {
         if (mLayer != null) {
-            mSurface.detachFromGLContext();
-            // SurfaceTexture owns the texture name and detachFromGLContext
-            // should have deleted it
-            mLayer.clearStorage();
+            mLayer.detachSurfaceTexture();
 
             boolean shouldRelease = true;
             if (mListener != null) {
@@ -271,6 +269,11 @@ public class TextureView extends View {
             mLayerPaint = paint == null ? new Paint() : paint;
             invalidate();
         }
+    }
+
+    @Override
+    public void setLayerPaint(Paint paint) {
+        setLayerType(/* ignored */ 0, paint);
     }
 
     /**
@@ -330,11 +333,6 @@ public class TextureView extends View {
         }
     }
 
-    @Override
-    boolean destroyLayer(boolean valid) {
-        return false;
-    }
-
     /**
      * @hide
      */
@@ -357,29 +355,16 @@ public class TextureView extends View {
                 return null;
             }
 
-            mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
+            mLayer = mAttachInfo.mHardwareRenderer.createTextureLayer();
             if (!mUpdateSurface) {
                 // Create a new SurfaceTexture for the layer.
-                mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
+                mSurface = new SurfaceTexture(false);
+                mLayer.setSurfaceTexture(mSurface);
             }
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             nCreateNativeWindow(mSurface);
 
-            mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
-                @Override
-                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                    // Per SurfaceTexture's documentation, the callback may be invoked
-                    // from an arbitrary thread
-                    updateLayer();
-
-                    if (Looper.myLooper() == Looper.getMainLooper()) {
-                        invalidate();
-                    } else {
-                        postInvalidate();
-                    }
-                }
-            };
-            mSurface.setOnFrameAvailableListener(mUpdateListener);
+            mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
 
             if (mListener != null && !mUpdateSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
@@ -398,7 +383,7 @@ public class TextureView extends View {
             updateLayer();
             mMatrixChanged = true;
 
-            mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
+            mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
         }
 
@@ -417,7 +402,9 @@ public class TextureView extends View {
             // To cancel updates, the easiest thing to do is simply to remove the
             // updates listener
             if (visibility == VISIBLE) {
-                mSurface.setOnFrameAvailableListener(mUpdateListener);
+                if (mLayer != null) {
+                    mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
+                }
                 updateLayerAndInvalidate();
             } else {
                 mSurface.setOnFrameAvailableListener(null);
@@ -451,7 +438,8 @@ public class TextureView extends View {
             }
         }
         
-        mLayer.update(getWidth(), getHeight(), mOpaque);
+        mLayer.prepare(getWidth(), getHeight(), mOpaque);
+        mLayer.updateSurfaceTexture();
 
         if (mListener != null) {
             mListener.onSurfaceTextureUpdated(mSurface);
@@ -589,14 +577,6 @@ public class TextureView extends View {
      */
     public Bitmap getBitmap(Bitmap bitmap) {
         if (bitmap != null && isAvailable()) {
-            AttachInfo info = mAttachInfo;
-            if (info != null && info.mHardwareRenderer != null &&
-                    info.mHardwareRenderer.isEnabled()) {
-                if (!info.mHardwareRenderer.validate()) {
-                    throw new IllegalStateException("Could not acquire hardware rendering context");
-                }
-            }
-
             applyUpdate();
             applyTransformMatrix();
 
@@ -768,6 +748,15 @@ public class TextureView extends View {
     public void setSurfaceTextureListener(SurfaceTextureListener listener) {
         mListener = listener;
     }
+
+    private final SurfaceTexture.OnFrameAvailableListener mUpdateListener =
+            new SurfaceTexture.OnFrameAvailableListener() {
+        @Override
+        public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+            updateLayer();
+            invalidate();
+        }
+    };
 
     /**
      * This listener can be used to be notified when the surface texture

@@ -16,9 +16,12 @@
 package android.speech.tts;
 
 import android.content.Context;
+import android.media.AudioSystem;
+import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.ConditionVariable;
+import android.speech.tts.TextToSpeechService.AudioOutputParams;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
 
@@ -27,7 +30,7 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
 
     private final Context mContext;
     private final Uri mUri;
-    private final int mStreamType;
+    private final AudioOutputParams mAudioParams;
 
     private final ConditionVariable mDone;
     private MediaPlayer mPlayer;
@@ -35,12 +38,12 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
 
     AudioPlaybackQueueItem(UtteranceProgressDispatcher dispatcher,
             Object callerIdentity,
-            Context context, Uri uri, int streamType) {
+            Context context, Uri uri, AudioOutputParams audioParams) {
         super(dispatcher, callerIdentity);
 
         mContext = context;
         mUri = uri;
-        mStreamType = streamType;
+        mAudioParams = audioParams;
 
         mDone = new ConditionVariable();
         mPlayer = null;
@@ -51,9 +54,13 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         final UtteranceProgressDispatcher dispatcher = getDispatcher();
 
         dispatcher.dispatchOnStart();
-        mPlayer = MediaPlayer.create(mContext, mUri);
+
+        int sessionId = mAudioParams.mSessionId;
+        mPlayer = MediaPlayer.create(
+                mContext, mUri, null, mAudioParams.mAudioAttributes,
+                sessionId > 0 ? sessionId : AudioSystem.AUDIO_SESSION_ALLOCATE);
         if (mPlayer == null) {
-            dispatcher.dispatchOnError();
+            dispatcher.dispatchOnError(TextToSpeech.ERROR_OUTPUT);
             return;
         }
 
@@ -73,7 +80,8 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
                     mDone.open();
                 }
             });
-            mPlayer.setAudioStreamType(mStreamType);
+
+            setupVolume(mPlayer, mAudioParams.mVolume, mAudioParams.mPan);
             mPlayer.start();
             mDone.block();
             finish();
@@ -83,10 +91,27 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         }
 
         if (mFinished) {
-            dispatcher.dispatchOnDone();
+            dispatcher.dispatchOnSuccess();
         } else {
-            dispatcher.dispatchOnError();
+            dispatcher.dispatchOnStop();
         }
+    }
+
+    private static void setupVolume(MediaPlayer player, float volume, float pan) {
+        final float vol = clip(volume, 0.0f, 1.0f);
+        final float panning = clip(pan, -1.0f, 1.0f);
+
+        float volLeft = vol, volRight = vol;
+        if (panning > 0.0f) {
+            volLeft *= (1.0f - panning);
+        } else if (panning < 0.0f) {
+            volRight *= (1.0f + panning);
+        }
+        player.setVolume(volLeft, volRight);
+    }
+
+    private static final float clip(float value, float min, float max) {
+        return value < min ? min : (value < max ? value : max);
     }
 
     private void finish() {
@@ -99,7 +124,7 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
     }
 
     @Override
-    void stop(boolean isError) {
+    void stop(int errorCode) {
         mDone.open();
     }
 }

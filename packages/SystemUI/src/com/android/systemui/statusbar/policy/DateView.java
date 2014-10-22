@@ -20,11 +20,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.TypedArray;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewParent;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -40,6 +38,7 @@ public class DateView extends TextView {
 
     private SimpleDateFormat mDateFormat;
     private String mLastText;
+    private String mDatePattern;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -61,6 +60,19 @@ public class DateView extends TextView {
 
     public DateView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.DateView,
+                0, 0);
+
+        try {
+            mDatePattern = a.getString(R.styleable.DateView_datePattern);
+        } finally {
+            a.recycle();
+        }
+        if (mDatePattern == null) {
+            mDatePattern = getContext().getString(R.string.system_ui_date_pattern);
+        }
     }
 
     @Override
@@ -72,7 +84,7 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        mContext.registerReceiver(mIntentReceiver, filter, null, null);
+        getContext().registerReceiver(mIntentReceiver, filter, null, null);
 
         updateClock();
     }
@@ -82,14 +94,13 @@ public class DateView extends TextView {
         super.onDetachedFromWindow();
 
         mDateFormat = null; // reload the locale next time
-        mContext.unregisterReceiver(mIntentReceiver);
+        getContext().unregisterReceiver(mIntentReceiver);
     }
 
     protected void updateClock() {
         if (mDateFormat == null) {
-            final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
             final Locale l = Locale.getDefault();
-            final String fmt = DateFormat.getBestDateTimePattern(l, dateFormat);
+            final String fmt = DateFormat.getBestDateTimePattern(l, mDatePattern);
             mDateFormat = new SimpleDateFormat(fmt, l);
         }
 

@@ -16,7 +16,6 @@
 
 package android.content;
 
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;

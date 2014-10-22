@@ -16,19 +16,39 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.test.activity">
-    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.REMOVE_TASKS" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application android:label="ActivityTest">
         <activity android:name="ActivityTestMain">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="www.angryredplanet.com"
+                        android:pathPrefix="" />
+            </intent-filter>
+            <preferred>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="www.angryredplanet.com"
+                        android:pathPrefix="" />
+            </preferred>
+        </activity>
+        <activity android:name="SpamActivity" android:label="Spam!"
+                android:documentLaunchMode="always">
+        </activity>
+        <activity android:name="DocActivity" android:label="Some doc">
         </activity>
         <service android:name="SingleUserService"
             android:singleUser="true" android:exported="true">

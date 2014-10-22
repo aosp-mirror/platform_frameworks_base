@@ -1,0 +1,11 @@
+#!/bin/bash
+
+PATH_TO_FRAMEWORK_RES=$(gettop)/prebuilts/sdk/current/android.jar
+
+aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES --split fr,de -F bundle.apk -f && \
+unzip bundle.apk resources.arsc && \
+mv resources.arsc basic.arsc && \
+xxd -i basic.arsc > basic_arsc.h && \
+unzip bundle_de_fr.apk resources.arsc && \
+mv resources.arsc split_de_fr.arsc && \
+xxd -i split_de_fr.arsc > split_de_fr_arsc.h

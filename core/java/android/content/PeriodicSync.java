@@ -34,16 +34,13 @@ public class PeriodicSync implements Parcelable {
     /** How frequently the sync should be scheduled, in seconds. Kept around for API purposes. */
     public final long period;
     /**
-     * {@hide}
      * How much flexibility can be taken in scheduling the sync, in seconds.
+     * {@hide}
      */
     public final long flexTime;
 
       /**
-       * Creates a new PeriodicSync, copying the Bundle. SM no longer uses this ctor - kept around
-       * becuse it is part of the API.
-       * Note - even calls to the old API will not use this ctor, as
-       * they are given a default flex time.
+       * Creates a new PeriodicSync, copying the Bundle. This constructor is no longer used.
        */
     public PeriodicSync(Account account, String authority, Bundle extras, long periodInSeconds) {
         this.account = account;
@@ -54,13 +51,13 @@ public class PeriodicSync implements Parcelable {
             this.extras = new Bundle(extras);
         }
         this.period = periodInSeconds;
-        // Initialise to a sane value.
+        // Old API uses default flex time. No-one should be using this ctor anyway.
         this.flexTime = 0L;
     }
 
     /**
-     * {@hide}
      * Create a copy of a periodic sync.
+     * {@hide}
      */
     public PeriodicSync(PeriodicSync other) {
         this.account = other.account;
@@ -71,8 +68,8 @@ public class PeriodicSync implements Parcelable {
     }
 
     /**
-     * {@hide}
      * A PeriodicSync for a sync with a specified provider.
+     * {@hide}
      */
     public PeriodicSync(Account account, String authority, Bundle extras,
             long period, long flexTime) {
@@ -127,9 +124,9 @@ public class PeriodicSync implements Parcelable {
         }
         final PeriodicSync other = (PeriodicSync) o;
         return account.equals(other.account)
-            && authority.equals(other.authority)
-            && period == other.period
-            && syncExtrasEquals(extras, other.extras);
+                && authority.equals(other.authority)
+                && period == other.period
+                && syncExtrasEquals(extras, other.extras);
     }
 
     /**

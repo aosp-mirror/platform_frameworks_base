@@ -19,12 +19,14 @@ package android.net;
 import android.content.ContentUris;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import junit.framework.TestCase;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import junit.framework.TestCase;
 
 public class UriTest extends TestCase {
 
@@ -751,5 +753,55 @@ public class UriTest extends TestCase {
     public void testPlusCharacterInQuery() {
         assertEquals("d e", Uri.parse("http://a/b?c=d%20e").getQueryParameter("c"));
         assertEquals("d e", Uri.parse("http://a/b?c=d+e").getQueryParameter("c"));
+    }
+
+    public void testPathPrefixMatch() {
+        // Exact match
+        assertTrue(Uri.parse("content://com.example/path").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/")));
+        assertTrue(Uri.parse("content://com.example/path").isPathPrefixMatch(
+                Uri.parse("content://com.example/path")));
+        assertTrue(Uri.parse("content://com.example///path///").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/")));
+        assertTrue(Uri.parse("content://com.example/path").isPathPrefixMatch(
+                Uri.parse("content://com.example///path///")));
+
+        // Child match
+        assertTrue(Uri.parse("content://com.example/path/to/child").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/")));
+        assertTrue(Uri.parse("content://com.example/path/to/child").isPathPrefixMatch(
+                Uri.parse("content://com.example/path")));
+
+        // Extra parameters
+        assertTrue(Uri.parse("content://com.example/path#fragment").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/")));
+        assertTrue(Uri.parse("content://com.example/path?q=v").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/")));
+        assertTrue(Uri.parse("content://com.example/path/?q=v").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/")));
+
+        // Different path
+        assertFalse(Uri.parse("content://com.example/path").isPathPrefixMatch(
+                Uri.parse("content://com.example/path/deeper/")));
+        assertFalse(Uri.parse("content://com.example/path2").isPathPrefixMatch(
+                Uri.parse("content://com.example/path")));
+
+        // Top-level match
+        assertTrue(Uri.parse("content://com.example/path/").isPathPrefixMatch(
+                Uri.parse("content://com.example/")));
+        assertTrue(Uri.parse("content://com.example/path/").isPathPrefixMatch(
+                Uri.parse("content://com.example")));
+
+        // Different prefixes
+        assertFalse(Uri.parse("content://com.example/path/").isPathPrefixMatch(
+                Uri.parse("file://com.example/path/")));
+        assertFalse(Uri.parse("content://com.example/path/").isPathPrefixMatch(
+                Uri.parse("content://org.example/path/")));
+
+        // Escaping
+        assertTrue(Uri.parse("content://com.example/path path/").isPathPrefixMatch(
+                Uri.parse("content://com.example/path%20path/")));
+        assertFalse(Uri.parse("content://com.example/path/path").isPathPrefixMatch(
+                Uri.parse("content://com.example/path%2Fpath")));
     }
 }

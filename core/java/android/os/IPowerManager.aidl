@@ -23,22 +23,27 @@ import android.os.WorkSource;
 
 interface IPowerManager
 {
-    // WARNING: The first four methods must remain the first three methods because their
+    // WARNING: The first five methods must remain the first five methods because their
     // transaction numbers must not change unless IPowerManager.cpp is also updated.
-    void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws);
-    void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName, int uidtoblame);
+    void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws,
+            String historyTag);
+    void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
+            int uidtoblame);
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
+    oneway void powerHint(int hintId, int data);
 
-    void updateWakeLockWorkSource(IBinder lock, in WorkSource ws);
+    void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
     boolean isWakeLockLevelSupported(int level);
 
     void userActivity(long time, int event, int flags);
     void wakeUp(long time);
-    void goToSleep(long time, int reason);
+    void goToSleep(long time, int reason, int flags);
     void nap(long time);
+    boolean isInteractive();
+    boolean isPowerSaveMode();
+    boolean setPowerSaveMode(boolean mode);
 
-    boolean isScreenOn();
     void reboot(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, boolean wait);
     void crash(String message);

@@ -123,20 +123,45 @@ android_hardware_UsbDeviceConnection_claim_interface(JNIEnv *env, jobject thiz,
     return (ret == 0) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jint
+static jboolean
 android_hardware_UsbDeviceConnection_release_interface(JNIEnv *env, jobject thiz, jint interfaceID)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
         ALOGE("device is closed in native_release_interface");
-        return -1;
+        return JNI_FALSE;
     }
     int ret = usb_device_release_interface(device, interfaceID);
     if (ret == 0) {
         // allow kernel to reconnect its driver
         usb_device_connect_kernel_driver(device, interfaceID, true);
     }
-    return ret;
+    return (ret == 0) ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean
+android_hardware_UsbDeviceConnection_set_interface(JNIEnv *env, jobject thiz, jint interfaceID,
+        jint alternateSetting)
+{
+    struct usb_device* device = get_device_from_object(env, thiz);
+    if (!device) {
+        ALOGE("device is closed in native_set_interface");
+        return JNI_FALSE;
+    }
+    int ret = usb_device_set_interface(device, interfaceID, alternateSetting);
+    return (ret == 0) ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean
+android_hardware_UsbDeviceConnection_set_configuration(JNIEnv *env, jobject thiz, jint configurationID)
+{
+    struct usb_device* device = get_device_from_object(env, thiz);
+    if (!device) {
+        ALOGE("device is closed in native_set_configuration");
+        return JNI_FALSE;
+    }
+    int ret = usb_device_set_configuration(device, configurationID);
+    return (ret == 0) ? JNI_TRUE : JNI_FALSE;
 }
 
 static jint
@@ -229,6 +254,8 @@ static JNINativeMethod method_table[] = {
     {"native_get_desc",         "()[B", (void *)android_hardware_UsbDeviceConnection_get_desc},
     {"native_claim_interface",  "(IZ)Z",(void *)android_hardware_UsbDeviceConnection_claim_interface},
     {"native_release_interface","(I)Z", (void *)android_hardware_UsbDeviceConnection_release_interface},
+    {"native_set_interface","(II)Z",    (void *)android_hardware_UsbDeviceConnection_set_interface},
+    {"native_set_configuration","(I)Z", (void *)android_hardware_UsbDeviceConnection_set_configuration},
     {"native_control_request",  "(IIII[BIII)I",
                                         (void *)android_hardware_UsbDeviceConnection_control_request},
     {"native_bulk_request",     "(I[BIII)I",

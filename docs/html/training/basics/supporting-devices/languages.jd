@@ -1,6 +1,6 @@
 page.title=Supporting Different Languages
 parent.title=Supporting Different Devices
-page.tags="localizing","localization","resources", "formats", "l10n"
+page.tags=localizing,localization,resources,formats,l10n
 parent.link=index.html
 
 trainingnavtop=true
@@ -19,7 +19,7 @@ next.link=screens.html
     </ol>
     <h2>You should also read</h2>
     <ul>
-    <li><a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization Checklist</a></li>
+    <li><a href="{@docRoot}distribute/tools/localization-checklist.html">Localization Checklist</a></li>
       <li><a href="{@docRoot}guide/topics/resources/localization.html">Localization with Resources</a></li>
     </ul>
   </div>
@@ -40,10 +40,11 @@ your string values.</p>
 <h2 id="CreateDirs">Create Locale Directories and String Files</h2> 
 
 <p>To add support for more languages, create additional <code>values</code> directories inside
-<code>res/</code> that include a hyphen and the ISO country code at the end of the
+<code>res/</code> that include a hyphen and the ISO language code at the end of the
 directory name. For example, <code>values-es/</code> is the directory containing simple
 resourcess for the Locales with the language code "es".  Android loads the appropriate resources
-according to the locale settings of the device at run time.</p>
+according to the locale settings of the device at run time. For more information, see
+ <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing Alternative Resources</a>.</p>
 
 <p>Once you’ve decided on the languages you will support, create the resource subdirectories and
 string resource files. For example:</p>

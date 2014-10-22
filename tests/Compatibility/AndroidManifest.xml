@@ -24,6 +24,4 @@
         android:name=".AppCompatibilityRunner"
         android:targetPackage="com.android.compatibilitytest"
         android:label="App Compability Test Runner" />
-
-    <uses-sdk android:minSdkVersion="8"></uses-sdk>
 </manifest>

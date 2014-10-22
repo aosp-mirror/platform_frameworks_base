@@ -1,0 +1,191 @@
+page.title=Brand Guidelines
+page.image=/assets/images/resource-card-default-android.jpg
+page.metaDescription=Guidelines and downloads for the Android and Google Play brands.
+page.tags="brand, bugdroid, assets"
+
+@jd:body
+
+<p>We encourage you to use the Android and Google Play brands with your Android app
+promotional materials. You can use the icons and other assets on this page
+provided that you follow the guidelines.</p>
+
+<p>Use of the Android or Google Play brands must be reviewed by the Android
+Partner Marketing team.  Use the <a
+href="https://docs.google.com/forms/d/1YE5gZpAAcFKjYcUddCsK1Bv9a9Y-luaLVnkazVlaJ2w/viewform">Android and Google Play Brand Permissions Inquiry form</a> to submit your
+marketing for review.</p>
+
+<h2 id="brand-android">Android</h2>
+
+ <p>The following are guidelines for the Android brand
+ and related assets.</p>
+ 
+
+  <h4 style="clear:right">Android in text</h4>
+    
+  <div style="float:right;clear:right;width:200px;margin:0 0 20px 30px">
+    <img alt="" src="{@docRoot}images/brand/mediaplayer.png">
+  </div>
+    <ul>
+    <li>Android&trade; should have a trademark symbol the first time it appears in a creative.</li>
+    <li>Android should always be capitalized and is never plural or possessive.</li>
+    <li>"Android" cannot be used in names of applications or accessory products,
+    including phones, tablets, TVs, speakers, headphones, watches, and other devices. Instead use "for Android".
+      <ul>
+        <li><span style="color:red">Incorrect</span>: "Android MediaPlayer"</li>
+        <li><span style="color:green">Correct</span>: "MediaPlayer for Android"</li>
+      </ul>
+      <p>If used with your logo, "for Android" should be no larger than 90% of your logo’s size.
+      First instance of this use should be followed by a TM symbol, "for Android&trade;".</p>
+    </li>
+    <li>Android may be used as a descriptor, as long as it is followed by a
+        proper generic term. (Think of "Android" as a term used in place of
+        "the Android platform.")
+      <ul>
+        <li><span style="color:red">Incorrect</span>: "Android MediaPlayer" or "Android XYZ app"</li>
+        <li><span style="color:green">Correct</span>: "Android features" or "Android applications"</li>
+      </ul>
+    </li>
+    </ul>
+  
+    <p>Any use of the Android name needs to include this
+    attribution in your communication:</p>
+    <blockquote><em>Android is a trademark of Google Inc.</em></blockquote></p>
+
+
+ <h4>Android robot</h4>
+
+  <div style="float:right;width:200px;margin-left:30px">
+    <img alt="" src="{@docRoot}images/brand/Android_Robot_100.png"
+      style="margin-left:50px">
+    <p style="text-align:center">
+       <a href="{@docRoot}images/brand/Android_Robot_100.png">100x118</a> |
+       <a href="{@docRoot}images/brand/Android_Robot_200.png">200x237</a><br>
+       <a href="{@docRoot}downloads/brand/Android_Robot_outlined.ai">Illustrator (.ai)</a></p>
+  </div>
+
+    <p>The Android robot can be used, reproduced, and modified freely in marketing
+    communications. The color value for print is PMS 376C and the online hex
+    color is <span style="color:#A4C639">#A4C639</span>.</p>
+
+    <p>When using the Android Robot or any modification of it, proper attribution is
+    required under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative
+    Commons Attribution 3.0</a> license:</p>
+   
+    <blockquote><em>The Android robot is reproduced or modified from work created and shared by Google and
+used according to terms described in the Creative Commons 3.0 Attribution License.</em></blockquote>
+    
+    <p>You may not file trademark applications incorporating the Android robot
+    logo or derivatives thereof within your company logo or business name. We
+    want to ensure that the Android robot remains available for all to use.</p>
+
+
+<h4 style="clear:right">Android logo</h4>
+
+<div style="float:right;width:210px;margin-left:30px;margin-top:-10px">
+  <img alt="" src="{@docRoot}images/brand/android_logo_no.png">
+</div>
+
+<p>The Android logo may not be used.</p>
+
+<p>The custom typeface may not be used.</p>
+
+<h2 id="brand-google_play">Google Play</h2>
+
+
+ <p>The following are guidelines for the Google Play brand
+ and related assets.</p>
+
+<h4>Google Play in text</h4>
+
+<p>Always include a TM symbol on the first or most prominent instance of Google Play&trade;
+in text.</p>
+
+<p>When referring to the mobile experience, use "Google Play" unless the text is clearly
+instructional for the user. For example, a marketing headline might read "Download our
+games on Google Play&trade;," but instructional text would read "Download our games using the Google
+Play&trade; store app."
+
+ <p>Any use of the Google Play name or icon needs to include this
+    attribution in your communication:</p>
+
+<blockquote><em>Google Play is a trademark of Google Inc.</em></blockquote>
+
+
+  <div style="float:right;width:96px;margin-left:30px;margin-top:-20px">
+     <img src="{@docRoot}images/brand/Google_Play_Store_96.png" alt="">
+    <p style="text-align:center">
+       <a href="{@docRoot}images/brand/Google_Play_Store_48.png">48x48</a> |
+       <a href="{@docRoot}images/brand/Google_Play_Store_96.png">96x96</a><br>
+       <a href="{@docRoot}images/brand/Google_Play_Store_600.png">600x576</a>
+       </p>
+  </div>
+  
+<h4>Google Play store icon</h4>
+
+<p>You may use the Google Play store icon, but you may not modify it.</p>
+
+<p>As mentioned above, when referring to the Google Play store app in copy, use the full name:
+"Google Play store." However, when labeling the Google Play store icon directly, it's OK to use
+"Play Store" alone to accurately reflect the icon label as it appears on a device.</p>
+
+        
+<h4>Google Play badge</h4>
+      
+  <div style="float:right;clear:right;width:172px;margin-left:30px">
+    <img src="{@docRoot}images/brand/en_app_rgb_wo_60.png" alt="">
+    <p style="text-align:center">
+       <a href="{@docRoot}images/brand/en_app_rgb_wo_45.png">129x45</a> |
+       <a href="{@docRoot}images/brand/en_app_rgb_wo_60.png">172x60</a></p>
+  </div>
+      
+  <div style="float:right;clear:right;width:172px;margin-left:30px">
+    <img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png" alt="">
+    <p style="text-align:center">
+       <a href="{@docRoot}images/brand/en_generic_rgb_wo_45.png">129x45</a> |
+       <a href="{@docRoot}images/brand/en_generic_rgb_wo_60.png">172x60</a></p>
+  </div>
+         
+  <p>The "Get it on Google Play" and "Android App on Google Play" logos are
+    badges that you can use on your website and promotional materials, to point
+    to your products on Google Play. Additional Google Play badge formats and
+    badges for music, books, magazines, movies, and TV shows are also available.
+    Use the  <a
+    href="https://docs.google.com/forms/d/1YE5gZpAAcFKjYcUddCsK1Bv9a9Y-luaLVnkazVlaJ2w/viewform">Android
+    and Google Play Brand Permissions Inquiry form</a> to request
+    those badges.</p>
+
+  <ul>
+    <li>Don't modify the color, proportions, spacing, or any other aspect of the badge image.
+    </li>
+    <li>When used alongside logos for other application marketplaces, the Google Play logo
+    should be of equal or greater size.</li>
+    <li>When used online, the badge should link to either:
+      <ul>
+        <li>A list of products published by you, for example:<br />
+        <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>publisherName</em></span>
+        </li>
+        <li>A specific app product details page within Google Play, for example:<br />
+        <span style="margin-left:1em;">http://play.google.com/store/apps/details?id=<em>packageName</em></span>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  
+  <p>To quickly create a badge that links to your apps on Google Play,
+  use the <a
+  href="{@docRoot}distribute/tools/promote/badges.html">Google Play badge generator</a>
+  (provides the badge in over 40 languages).</p>
+  
+  <p>To create your own size, download an Adobe&reg; Illustrator&reg; (.ai) file for the
+  <a href="{@docRoot}distribute/tools/promote/badge-files.html">Google Play
+  badge in over 40 languages</a>.</p>
+    
+  <p>For details on all the ways that you can link to your product details page in Google Play, 
+    see <a href="{@docRoot}distribute/tools/promote/linking.html">Linking to your products</a>.</p>
+
+<h2 id="Marketing_Review">Marketing Reviews and Brand Inquiries</h2>
+
+<p>Use the <a
+href="https://docs.google.com/forms/d/1YE5gZpAAcFKjYcUddCsK1Bv9a9Y-luaLVnkazVlaJ2w/viewform">Android
+and Google Play Brand Permissions Inquiry form</a> to submit any marketing
+reviews or brand inquires. Typical response time is at least one week.</p>

@@ -47,10 +47,11 @@ static jlong android_content_XmlBlock_nativeCreate(JNIEnv* env, jobject clazz,
     }
 
     jbyte* b = env->GetByteArrayElements(bArray, NULL);
-    ResXMLTree* osb = new ResXMLTree(b+off, len, true);
+    ResXMLTree* osb = new ResXMLTree();
+    osb->setTo(b+off, len, true);
     env->ReleaseByteArrayElements(bArray, b, 0);
 
-    if (osb == NULL || osb->getError() != NO_ERROR) {
+    if (osb->getError() != NO_ERROR) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return 0;
     }
@@ -113,6 +114,8 @@ static jint android_content_XmlBlock_nativeNext(JNIEnv* env, jobject clazz,
                 return 1;
             case ResXMLParser::BAD_DOCUMENT:
                 goto bad;
+            default:
+                break;
         }
     } while (true);
 

@@ -1,0 +1,51 @@
+page.title=Adding Wearable Features to Notifications
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>Dependencies and prerequisites</h2>
+    <ul>
+      <li>Android 4.3 (API Level 18) or higher on the handset device</li>
+      <li>An Android Wear device or Wear AVD</li>
+      <li><a href="{@docRoot}tools/support-library/features.html#v4">The Android v4 support library
+      (or v13, which includes v4)</li>
+    </ul>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>When an Android handheld (phone or tablet) and Android wearable are connected, the handheld
+automatically shares notifications with the wearable. On the wearable, each
+notification appears as a new card in the <a href="{@docRoot}design/wear/index.html"
+>context stream</a>.</p>
+
+<p>However, to give users the best experience, you should add wearable-specific functionality to the
+notifications you already create. The following lessons show you how to
+create notifications that are catered for handhelds and wearables at the same time.
+</p>
+
+<img src="{@docRoot}wear/images/notification_phone@2x.png" width="700" height="265" />
+
+<p class="caption"><b>Figure 1.</b> The same notification displayed on a handheld and wearable.</p>
+
+<h2>Lessons</h2>
+  <dl>
+    <dt><a href="{@docRoot}training/wearables/notifications/creating.html">Creating a notification</a></dt>
+      <dd>Learn how to create notifications with wearable features with the Android support library.</dd>
+    <dt><a href="{@docRoot}training/wearables/notifications/voice-input.html">Receiving Voice Input
+in a Notification</a></dt>
+      <dd>Learn how to add an action to a wearable notification that receives voice input from users and delivers
+      the transcribed message to your handset app.</dd>
+    <dt><a href="{@docRoot}training/wearables/notifications/pages.html">Adding Pages to a Notification</a></dt>
+      <dd>Learn how to add additional pages of information that are visible when the user
+swipes to the left.</dd>
+    <dt><a href="{@docRoot}training/wearables/notifications/stacks.html">Stacking Notifications</a></dt>
+      <dd>Learn how to place all similar notifications from your app in a stack, allowing users to view
+      each notification individually without adding multiple cards to the card stream.</dd>
+  </dl>
+
+</div>

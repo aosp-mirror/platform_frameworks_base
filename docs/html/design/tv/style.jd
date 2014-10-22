@@ -1,0 +1,105 @@
+page.title=Style for TV
+@jd:body
+
+
+<p>Follow these style guidelines to create beautiful, functional apps for TV.</p>
+
+
+<h2>Layouts</h2>
+
+<p>The difference between a TV experience that feels right and one that does not greatly depends
+  on the number, spacing, and size of on-screen elements. Although TV sizes and resolutions have
+  steadily increased over time, users expect TV experiences to be relatively simple and
+  uncluttered.</p>
+
+<p>The additional resolution and screen area afforded by modern displays is best used to display
+  things at better quality, rather than greater quantity. For example, use your layouts to show
+  large, beautiful pieces of content, or to resize type for both easy reading and generous spacing.
+</p>
+
+<p>If you are creating an app for browsing and playing content, use the prebuilt fragments in the
+  <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support
+  library</a>. These layouts have been built specifically for use on TV devices with
+  the guidance of the Android User Experience team. For more information on using these classes,
+  see the <a href="{@docRoot}training/tv/index.html">Building Apps for TV</a> training.
+</p>
+
+<p>Here are some additional recommendations for creating functional and attractive layouts for TV
+  apps:</p>
+
+<ul>
+  <li>Design layouts for landscape orientation. TV screens always use this
+      orientation.</li>
+  <li>Design your artwork assets for best viewing at HD resolution (1920 x 1080 pixels).</li>
+  <li>Put on-screen navigational controls on the left or right side of the screen, and
+      save the vertical space for content.</li>
+  <li>Use <a href="{@docRoot}guide/components/fragments.html">fragments</a> to create UIs that are
+    divided into sections, and use view groups like <a href=
+    "{@docRoot}guide/topics/ui/layout/gridview.html">Grid View</a> instead of <a href=
+    "{@docRoot}guide/topics/ui/layout/listview.html">List View</a> to make better use of the
+    horizontal screen space.
+  </li>
+  <li>Avoid a cluttered interface by adding sufficient margins between layout controls.</li>
+</ul>
+
+
+<h3>Overscan</h3>
+
+<p>During the evolution of TV technology, overscan originally described an area of TV content
+  outside of a safe zone that most TVs could reliably display. Even on some of today’s HDTV flat
+  screens, areas outside that zone may not be visible.</p>
+
+<img src="{@docRoot}design/tv/images/overscan.png" alt="Overscan borders for TV" />
+
+<p>Build a 10% margin into your TV screen designs to account for overscan area the TV may not
+  display correctly. On a 1920 x 1080 pixel screen, this margin should be a minimum of 27px from the
+  top and bottom edges and a minimum of 48px from the right and left edges of the picture.</p>
+
+
+<h2>Color</h2>
+
+<p>Color rendering on televisions can be imprecise compared to computer monitors or mobile
+  devices. LCD and Plasma TVs often apply smoothing and sharpening filters, and color rendering may
+  not match what you see on a computer screen.</p>
+
+<p>Subtle hue or brightness differences between elements may disappear or be over-emphasized on
+  TV screens. Some color gradient combinations will show bands. You should avoid pure whites on
+  large areas of the screen. For highly saturated colors (especially reds, greens and blues) you
+  should review them when used to fill significant areas of the screen.  You
+  should also avoid using very dark or muddy colors, as TV settings may display these colors with
+  exaggerated contrast, causing them to be indistinguishable.</p>
+
+
+<h2 id="typography">Typography</h2>
+
+<p>The text and controls in a TV application's UI should be easily visible and navigable from a
+  distance. The minimum recommended font size for TV is 12sp. The default text size setting should
+  be 18sp. We recommend the following guidelines for TV apps:</p>
+
+<ul>
+  <li><strong>Card Titles:</strong> Roboto Condensed 16sp</li>
+  <li><strong>Card Subtext:</strong> Roboto Condensed 12sp</li>
+  <li><strong>Browse Screen Title:</strong> Roboto Regular 44sp</li>
+  <li><strong>Browse Category Title:</strong> Roboto Condensed 20sp</li>
+  <li><strong>Details Content Titles:</strong> Roboto Regular 34sp</li>
+  <li><strong>Details Subtext:</strong> Roboto Regular 14sp</li>
+</ul>
+
+<p>Some TVs have strong sharpness and contrast settings as their defaults. These picture
+  settings make thin and light typefaces look jagged and make the text difficult for people to read.
+  Therefore you should avoid thin or light typefaces on TV.</p>
+
+<h2>Text</h2>
+
+<p>Use text in TV apps sparingly. The position of users relative to a TV screen
+  (typically about 10 feet away) makes it harder for users to read text. Users also don't expect to
+  read much in a TV environment. Follow these tips for the best handling of text in your app:</p>
+
+<ul>
+  <li>Break text into small chunks that users can quickly scan.</li>
+  <li>Use light text on a dark background. This style is easier to read on a TV.</li>
+  <li>Avoid lightweight fonts or fonts that have both very narrow and very broad
+      strokes. Use simple sans-serif fonts and anti-aliasing to increase readability.</li>
+  <li>Use layout-relative sizing rather than absolute sizing, and density-independent
+      pixel units instead of absolute pixel units.</li>
+</ul>

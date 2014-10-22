@@ -16,15 +16,16 @@
 
 package android.media;
 
-import android.media.MediaDrmException;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
+import android.annotation.SystemApi;
+import android.os.Binder;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -97,10 +98,26 @@ public final class MediaDrm {
 
     private final static String TAG = "MediaDrm";
 
+    private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
+
     private EventHandler mEventHandler;
     private OnEventListener mOnEventListener;
 
     private long mNativeContext;
+
+    /**
+     * Specify no certificate type
+     *
+     * @hide - not part of the public API at this time
+     */
+    public static final int CERTIFICATE_TYPE_NONE = 0;
+
+    /**
+     * Specify X.509 certificate type
+     *
+     * @hide - not part of the public API at this time
+     */
+    public static final int CERTIFICATE_TYPE_X509 = 1;
 
     /**
      * Query if the given scheme identified by its UUID is supported on
@@ -137,7 +154,7 @@ public final class MediaDrm {
     }
 
     private static final native boolean isCryptoSchemeSupportedNative(byte[] uuid,
-                                                                      String mimeType);
+            String mimeType);
 
     /**
      * Instantiate a MediaDrm object
@@ -161,7 +178,50 @@ public final class MediaDrm {
          * It's easier to create it here than in C++.
          */
         native_setup(new WeakReference<MediaDrm>(this),
-                     getByteArrayFromUUID(uuid));
+                getByteArrayFromUUID(uuid));
+    }
+
+    /**
+     * Thrown when an unrecoverable failure occurs during a MediaDrm operation.
+     * Extends java.lang.IllegalStateException with the addition of an error
+     * code that may be useful in diagnosing the failure.
+     */
+    public static final class MediaDrmStateException extends java.lang.IllegalStateException {
+        private final int mErrorCode;
+        private final String mDiagnosticInfo;
+
+        /**
+         * @hide
+         */
+        public MediaDrmStateException(int errorCode, String detailMessage) {
+            super(detailMessage);
+            mErrorCode = errorCode;
+
+            // TODO get this from DRM session
+            final String sign = errorCode < 0 ? "neg_" : "";
+            mDiagnosticInfo =
+                "android.media.MediaDrm.error_" + sign + Math.abs(errorCode);
+
+        }
+
+        /**
+         * Retrieve the associated error code
+         *
+         * @hide
+         */
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+
+        /**
+         * Retrieve a developer-readable diagnostic information string
+         * associated with the exception. Do not show this to end-users,
+         * since this string will not be localized or generally comprehensible
+         * to end-users.
+         */
+        public String getDiagnosticInfo() {
+            return mDiagnosticInfo;
+        }
     }
 
     /**
@@ -270,7 +330,7 @@ public final class MediaDrm {
      * the cookie passed to native_setup().)
      */
     private static void postEventFromNative(Object mediadrm_ref,
-                                            int eventType, int extra, Object obj)
+            int eventType, int extra, Object obj)
     {
         MediaDrm md = (MediaDrm)((WeakReference)mediadrm_ref).get();
         if (md == null) {
@@ -288,7 +348,8 @@ public final class MediaDrm {
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
      */
-    public native byte[] openSession() throws NotProvisionedException;
+    public native byte[] openSession() throws NotProvisionedException,
+            ResourceBusyException;
 
     /**
      * Close a session on the MediaDrm object that was previously opened
@@ -318,6 +379,9 @@ public final class MediaDrm {
      * Contains the opaque data an app uses to request keys from a license server
      */
     public final static class KeyRequest {
+        private byte[] mData;
+        private String mDefaultUrl;
+
         KeyRequest() {}
 
         /**
@@ -331,9 +395,6 @@ public final class MediaDrm {
          * server URL from other sources.
          */
         public String getDefaultUrl() { return mDefaultUrl; }
-
-        private byte[] mData;
-        private String mDefaultUrl;
     };
 
     /**
@@ -370,9 +431,8 @@ public final class MediaDrm {
      * problem with the certifcate
      */
     public native KeyRequest getKeyRequest(byte[] scope, byte[] init,
-                                           String mimeType, int keyType,
-                                           HashMap<String, String> optionalParameters)
-        throws NotProvisionedException;
+            String mimeType, int keyType, HashMap<String, String> optionalParameters)
+            throws NotProvisionedException;
 
 
     /**
@@ -396,7 +456,7 @@ public final class MediaDrm {
      * @throws ResourceBusyException if required resources are in use
      */
     public native byte[] provideKeyResponse(byte[] scope, byte[] response)
-        throws NotProvisionedException, DeniedByServerException;
+            throws NotProvisionedException, DeniedByServerException;
 
 
     /**
@@ -458,7 +518,12 @@ public final class MediaDrm {
      * is returned in ProvisionRequest.data. The recommended URL to deliver the provision
      * request to is returned in ProvisionRequest.defaultUrl.
      */
-    public native ProvisionRequest getProvisionRequest();
+    public ProvisionRequest getProvisionRequest() {
+        return getProvisionRequestNative(CERTIFICATE_TYPE_NONE, "");
+    }
+
+    private native ProvisionRequest getProvisionRequestNative(int certType,
+            String certAuthority);
 
     /**
      * After a provision response is received by the app, it is provided to the DRM
@@ -470,8 +535,25 @@ public final class MediaDrm {
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
      */
-    public native void provideProvisionResponse(byte[] response)
-        throws DeniedByServerException;
+    public void provideProvisionResponse(byte[] response)
+            throws DeniedByServerException {
+        provideProvisionResponseNative(response);
+    }
+
+    private native Certificate provideProvisionResponseNative(byte[] response)
+            throws DeniedByServerException;
+
+    /**
+     * Remove provisioning from a device.  Only system apps may unprovision a
+     * device.  Note that removing provisioning will invalidate any keys saved
+     * for offline use (KEY_TYPE_OFFLINE), which may render downloaded content
+     * unplayable until new licenses are acquired.  Since provisioning is global
+     * to the device, license invalidation will apply to all content downloaded
+     * by any app, so appropriate warnings should be given to the user.
+     * @hide
+     */
+    @SystemApi
+    public native void unprovisionDevice();
 
     /**
      * A means of enforcing limits on the number of concurrent streams per subscriber
@@ -558,23 +640,22 @@ public final class MediaDrm {
 
 
     private static final native void setCipherAlgorithmNative(MediaDrm drm, byte[] sessionId,
-                                                              String algorithm);
+            String algorithm);
 
     private static final native void setMacAlgorithmNative(MediaDrm drm, byte[] sessionId,
-                                                           String algorithm);
+            String algorithm);
 
     private static final native byte[] encryptNative(MediaDrm drm, byte[] sessionId,
-                                                     byte[] keyId, byte[] input, byte[] iv);
+            byte[] keyId, byte[] input, byte[] iv);
 
     private static final native byte[] decryptNative(MediaDrm drm, byte[] sessionId,
-                                                     byte[] keyId, byte[] input, byte[] iv);
+            byte[] keyId, byte[] input, byte[] iv);
 
     private static final native byte[] signNative(MediaDrm drm, byte[] sessionId,
-                                                  byte[] keyId, byte[] message);
+            byte[] keyId, byte[] message);
 
     private static final native boolean verifyNative(MediaDrm drm, byte[] sessionId,
-                                                     byte[] keyId, byte[] message,
-                                                     byte[] signature);
+            byte[] keyId, byte[] message, byte[] signature);
 
     /**
      * In addition to supporting decryption of DASH Common Encrypted Media, the
@@ -604,7 +685,7 @@ public final class MediaDrm {
         private byte[] mSessionId;
 
         CryptoSession(MediaDrm drm, byte[] sessionId,
-                      String cipherAlgorithm, String macAlgorithm)
+                String cipherAlgorithm, String macAlgorithm)
         {
             mSessionId = sessionId;
             mDrm = drm;
@@ -679,10 +760,122 @@ public final class MediaDrm {
      * "algorithms".
      */
     public CryptoSession getCryptoSession(byte[] sessionId,
-                                          String cipherAlgorithm,
-                                          String macAlgorithm)
+            String cipherAlgorithm, String macAlgorithm)
     {
         return new CryptoSession(this, sessionId, cipherAlgorithm, macAlgorithm);
+    }
+
+    /**
+     * Contains the opaque data an app uses to request a certificate from a provisioning
+     * server
+     *
+     * @hide - not part of the public API at this time
+     */
+    public final static class CertificateRequest {
+        private byte[] mData;
+        private String mDefaultUrl;
+
+        CertificateRequest(byte[] data, String defaultUrl) {
+            mData = data;
+            mDefaultUrl = defaultUrl;
+        }
+
+        /**
+         * Get the opaque message data
+         */
+        public byte[] getData() { return mData; }
+
+        /**
+         * Get the default URL to use when sending the certificate request
+         * message to a server, if known. The app may prefer to use a different
+         * certificate server URL obtained from other sources.
+         */
+        public String getDefaultUrl() { return mDefaultUrl; }
+    }
+
+    /**
+     * Generate a certificate request, specifying the certificate type
+     * and authority. The response received should be passed to
+     * provideCertificateResponse.
+     *
+     * @param certType Specifies the certificate type.
+     *
+     * @param certAuthority is passed to the certificate server to specify
+     * the chain of authority.
+     *
+     * @hide - not part of the public API at this time
+     */
+    public CertificateRequest getCertificateRequest(int certType,
+            String certAuthority)
+    {
+        ProvisionRequest provisionRequest = getProvisionRequestNative(certType, certAuthority);
+        return new CertificateRequest(provisionRequest.getData(),
+                provisionRequest.getDefaultUrl());
+    }
+
+    /**
+     * Contains the wrapped private key and public certificate data associated
+     * with a certificate.
+     *
+     * @hide - not part of the public API at this time
+     */
+    public final static class Certificate {
+        Certificate() {}
+
+        /**
+         * Get the wrapped private key data
+         */
+        public byte[] getWrappedPrivateKey() { return mWrappedKey; }
+
+        /**
+         * Get the PEM-encoded certificate chain
+         */
+        public byte[] getContent() { return mCertificateData; }
+
+        private byte[] mWrappedKey;
+        private byte[] mCertificateData;
+    }
+
+
+    /**
+     * Process a response from the certificate server.  The response
+     * is obtained from an HTTP Post to the url provided by getCertificateRequest.
+     * <p>
+     * The public X509 certificate chain and wrapped private key are returned
+     * in the returned Certificate objec.  The certificate chain is in PEM format.
+     * The wrapped private key should be stored in application private
+     * storage, and used when invoking the signRSA method.
+     *
+     * @param response the opaque certificate response byte array to provide to the
+     * DRM engine plugin.
+     *
+     * @throws DeniedByServerException if the response indicates that the
+     * server rejected the request
+     *
+     * @hide - not part of the public API at this time
+     */
+    public Certificate provideCertificateResponse(byte[] response)
+            throws DeniedByServerException {
+        return provideProvisionResponseNative(response);
+    }
+
+    private static final native byte[] signRSANative(MediaDrm drm, byte[] sessionId,
+            String algorithm, byte[] wrappedKey, byte[] message);
+
+    /**
+     * Sign data using an RSA key
+     *
+     * @param sessionId a sessionId obtained from openSession on the MediaDrm object
+     * @param algorithm the signing algorithm to use, e.g. "PKCS1-BlockType1"
+     * @param wrappedKey - the wrapped (encrypted) RSA private key obtained
+     * from provideCertificateResponse
+     * @param message the data for which a signature is to be computed
+     *
+     * @hide - not part of the public API at this time
+     */
+    public byte[] signRSA(byte[] sessionId, String algorithm,
+            byte[] wrappedKey, byte[] message) {
+        return signRSANative(this, sessionId, algorithm, wrappedKey, message);
     }
 
     @Override

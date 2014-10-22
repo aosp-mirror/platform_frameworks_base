@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;

@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> የ VPN ተያያዥ ለመፍጠር ሞክሯል።"</string>
-    <string name="warning" msgid="5470743576660160079">"በማስከተል፣ ትግበራው ሁሉንም የአውታረ መረብ ትራፊክ እንዲያጨናግፍ ፈቃድ እየሰጡ ነው።"<b>"  ትግበራውን ካላመኑት አይቀበሉ።"</b>"  አለበለዚያ፣ ውሂብዎ በተንኮል አዘል ሶፍትዌር ስጋት ውስጥ ይገኛል።"</string>
-    <string name="accept" msgid="2889226408765810173">"ይህን ትግበራ አምናለሁ"</string>
+    <string name="warning" msgid="5470743576660160079">"በማስከተል፣ መተግበሪያው ሁሉንም የአውታረ መረብ ትራፊክ እንዲያጨናግፍ ፈቃድ እየሰጡ ነው።"<b>"  መተግበሪያውን ካላመኑት አይቀበሉ።"</b>"  አለበለዚያ፣ ውሂብዎ በተንኮል አዘል ሶፍትዌር ስጋት ውስጥ ይገኛል።"</string>
+    <string name="accept" msgid="2889226408765810173">"ይህን መተግበሪያ አምናለሁ"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN ተያይዟል"</string>
     <string name="configure" msgid="4905518375574791375">"አዋቅር"</string>
     <string name="disconnect" msgid="971412338304200056">"አለያይ"</string>

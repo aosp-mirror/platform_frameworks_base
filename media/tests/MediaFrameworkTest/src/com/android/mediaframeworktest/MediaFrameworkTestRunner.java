@@ -32,11 +32,6 @@ import com.android.mediaframeworktest.functional.audio.MediaEqualizerTest;
 import com.android.mediaframeworktest.functional.audio.MediaPresetReverbTest;
 import com.android.mediaframeworktest.functional.audio.MediaVirtualizerTest;
 import com.android.mediaframeworktest.functional.audio.MediaVisualizerTest;
-import com.android.mediaframeworktest.functional.videoeditor.MediaItemThumbnailTest;
-import com.android.mediaframeworktest.functional.videoeditor.MediaPropertiesTest;
-import com.android.mediaframeworktest.functional.videoeditor.VideoEditorAPITest;
-import com.android.mediaframeworktest.functional.videoeditor.VideoEditorExportTest;
-import com.android.mediaframeworktest.functional.videoeditor.VideoEditorPreviewTest;
 import junit.framework.TestSuite;
 
 import android.os.Bundle;
@@ -76,12 +71,6 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaPresetReverbTest.class);
         suite.addTestSuite(MediaVirtualizerTest.class);
         suite.addTestSuite(MediaVisualizerTest.class);
-        /*Test for Video Editor*/
-        suite.addTestSuite(MediaItemThumbnailTest.class);
-        suite.addTestSuite(MediaPropertiesTest.class);
-        suite.addTestSuite(VideoEditorAPITest.class);
-        suite.addTestSuite(VideoEditorExportTest.class);
-        suite.addTestSuite(VideoEditorPreviewTest.class);
         return suite;
     }
 

@@ -1,5 +1,5 @@
 page.title=Advertising ID
-page.tags="Ads","Advertising ID", "ID"
+page.tags=Ads,Advertising ID,ID
 header.hide=1
 
 @jd:body
@@ -55,6 +55,19 @@ href="{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.
   </div>
 </div>
 
+<p class="caution" style=
+"background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">
+  As a reminder, please note that starting <strong>1 August 2014</strong>, new
+  apps and app updates distributed through Google Play must use the advertising
+  ID in lieu of any other persistent identifiers for any advertising purposes,
+  on devices that support the advertising ID.<br>
+  <br>
+  To learn how to check your app's compliance through the Developer Console, or
+  for details on the associated developer policy changes, please see the
+  <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6048248">Advertising
+  ID topic</a> in the Google Play developer help center.
+</p>
 
 <h2 id="get_started">Using the Advertising ID</h2>
 

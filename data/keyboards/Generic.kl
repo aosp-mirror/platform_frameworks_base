@@ -135,7 +135,7 @@ key 111   FORWARD_DEL
 key 113   VOLUME_MUTE
 key 114   VOLUME_DOWN
 key 115   VOLUME_UP
-key 116   POWER             WAKE
+key 116   POWER
 key 117   NUMPAD_EQUALS
 # key 118 "KEY_KPPLUSMINUS"
 key 119   BREAK
@@ -146,7 +146,7 @@ key 123   EISU
 key 124   YEN
 key 125   META_LEFT
 key 126   META_RIGHT
-key 127   MENU              WAKE_DROPPED
+key 127   MENU
 key 128   MEDIA_STOP
 # key 129 "KEY_AGAIN"
 # key 130 "KEY_PROPS"
@@ -158,11 +158,11 @@ key 128   MEDIA_STOP
 # key 136 "KEY_FIND"
 # key 137 "KEY_CUT"
 # key 138 "KEY_HELP"
-key 139   MENU              WAKE_DROPPED
+key 139   MENU
 key 140   CALCULATOR
 # key 141 "KEY_SETUP"
-key 142   POWER             WAKE
-key 143   POWER             WAKE
+key 142   SLEEP
+key 143   WAKEUP
 # key 144 "KEY_FILE"
 # key 145 "KEY_SENDFILE"
 # key 146 "KEY_DELETEFILE"
@@ -171,13 +171,13 @@ key 143   POWER             WAKE
 # key 149 "KEY_PROG2"
 key 150   EXPLORER
 # key 151 "KEY_MSDOS"
-key 152   POWER             WAKE
+key 152   POWER
 # key 153 "KEY_DIRECTION"
 # key 154 "KEY_CYCLEWINDOWS"
 key 155   ENVELOPE
 key 156   BOOKMARK
 # key 157 "KEY_COMPUTER"
-key 158   BACK              WAKE_DROPPED
+key 158   BACK
 key 159   FORWARD
 key 160   MEDIA_CLOSE
 key 161   MEDIA_EJECT
@@ -405,6 +405,7 @@ key 484   B                 FUNCTION
 # key 504 KEY_BRL_DOT8
 
 key 580   APP_SWITCH
+key 582   VOICE_ASSIST
 
 # Keys defined by HID usages
 key usage 0x0c006F BRIGHTNESS_UP
@@ -425,3 +426,16 @@ axis 0x09 GAS
 axis 0x0a BRAKE
 axis 0x10 HAT_X
 axis 0x11 HAT_Y
+
+# LEDs
+led 0x00 NUM_LOCK
+led 0x01 CAPS_LOCK
+led 0x02 SCROLL_LOCK
+led 0x03 COMPOSE
+led 0x04 KANA
+led 0x05 SLEEP
+led 0x06 SUSPEND
+led 0x07 MUTE
+led 0x08 MISC
+led 0x09 MAIL
+led 0x0a CHARGING

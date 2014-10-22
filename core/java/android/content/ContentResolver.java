@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.database.IContentObserver;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -141,7 +142,7 @@ public abstract class ContentResolver {
     public static final String SYNC_EXTRAS_PRIORITY = "sync_priority";
 
     /** {@hide} Flag to allow sync to occur on metered network. */
-    public static final String SYNC_EXTRAS_DISALLOW_METERED = "disallow_metered";
+    public static final String SYNC_EXTRAS_DISALLOW_METERED = "allow_metered";
 
     /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
@@ -159,6 +160,17 @@ public abstract class ContentResolver {
     public static final String SCHEME_CONTENT = "content";
     public static final String SCHEME_ANDROID_RESOURCE = "android.resource";
     public static final String SCHEME_FILE = "file";
+
+    /**
+     * An extra {@link Point} describing the optimal size for a requested image
+     * resource, in pixels. If a provider has multiple sizes of the image, it
+     * should return the image closest to this size.
+     *
+     * @see #openTypedAssetFileDescriptor(Uri, String, Bundle)
+     * @see #openTypedAssetFileDescriptor(Uri, String, Bundle,
+     *      CancellationSignal)
+     */
+    public static final String EXTRA_SIZE = "android.content.extra.SIZE";
 
     /**
      * This is the Android platform's base MIME type for a content: URI
@@ -191,6 +203,14 @@ public abstract class ContentResolver {
      * in the cursor is the same.
      */
     public static final String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
+
+    /**
+     * This is the Android platform's generic MIME type to match any MIME
+     * type of the form "{@link #CURSOR_ITEM_BASE_TYPE}/{@code SUB_TYPE}".
+     * {@code SUB_TYPE} is the sub-type of the application-dependent
+     * content, e.g., "audio", "video", "playlist".
+     */
+    public static final String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
 
     /** @hide */
     public static final int SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS = 1;
@@ -321,7 +341,7 @@ public abstract class ContentResolver {
 
         try {
             String type = ActivityManagerNative.getDefault().getProviderMimeType(
-                    url, UserHandle.myUserId());
+                    ContentProvider.getUriWithoutUserId(url), resolveUserId(url));
             return type;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
@@ -368,9 +388,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * <p>
      * Query the given URI, returning a {@link Cursor} over the result set.
-     * </p>
      * <p>
      * For best performance, the caller should follow these guidelines:
      * <ul>
@@ -405,9 +423,8 @@ public abstract class ContentResolver {
     }
 
     /**
-     * <p>
-     * Query the given URI, returning a {@link Cursor} over the result set.
-     * </p>
+     * Query the given URI, returning a {@link Cursor} over the result set
+     * with optional support for cancellation.
      * <p>
      * For best performance, the caller should follow these guidelines:
      * <ul>
@@ -1607,7 +1624,7 @@ public abstract class ContentResolver {
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
-        notifyChange(uri, observer, syncToNetwork, UserHandle.getCallingUserId());
+        notifyChange(uri, observer, syncToNetwork, UserHandle.myUserId());
     }
 
     /**
@@ -1636,9 +1653,10 @@ public abstract class ContentResolver {
      *
      * @see #getPersistedUriPermissions()
      */
-    public void takePersistableUriPermission(Uri uri, int modeFlags) {
+    public void takePersistableUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags) {
         try {
-            ActivityManagerNative.getDefault().takePersistableUriPermission(uri, modeFlags);
+            ActivityManagerNative.getDefault().takePersistableUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -1651,9 +1669,10 @@ public abstract class ContentResolver {
      *
      * @see #getPersistedUriPermissions()
      */
-    public void releasePersistableUriPermission(Uri uri, int modeFlags) {
+    public void releasePersistableUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags) {
         try {
-            ActivityManagerNative.getDefault().releasePersistableUriPermission(uri, modeFlags);
+            ActivityManagerNative.getDefault().releasePersistableUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -1744,6 +1763,15 @@ public abstract class ContentResolver {
      * @param extras any extras to pass to the SyncAdapter.
      */
     public static void requestSync(Account account, String authority, Bundle extras) {
+        requestSyncAsUser(account, authority, UserHandle.myUserId(), extras);
+    }
+
+    /**
+     * @see #requestSync(Account, String, Bundle)
+     * @hide
+     */
+    public static void requestSyncAsUser(Account account, String authority, int userId,
+            Bundle extras) {
         if (extras == null) {
             throw new IllegalArgumentException("Must specify extras.");
         }
@@ -1751,17 +1779,18 @@ public abstract class ContentResolver {
             new SyncRequest.Builder()
                 .setSyncAdapter(account, authority)
                 .setExtras(extras)
-                .syncOnce()
+                .syncOnce()     // Immediate sync.
                 .build();
-        requestSync(request);
+        try {
+            getContentService().syncAsUser(request, userId);
+        } catch(RemoteException e) {
+            // Shouldn't happen.
+        }
     }
 
     /**
      * Register a sync with the SyncManager. These requests are built using the
      * {@link SyncRequest.Builder}.
-     *
-     * @param request The immutable SyncRequest object containing the sync parameters. Use
-     * {@link SyncRequest.Builder} to construct these.
      */
     public static void requestSync(SyncRequest request) {
         try {
@@ -1829,7 +1858,18 @@ public abstract class ContentResolver {
      */
     public static void cancelSync(Account account, String authority) {
         try {
-            getContentService().cancelSync(account, authority);
+            getContentService().cancelSync(account, authority, null);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @see #cancelSync(Account, String)
+     * @hide
+     */
+    public static void cancelSyncAsUser(Account account, String authority, int userId) {
+        try {
+            getContentService().cancelSyncAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
         }
     }
@@ -1841,6 +1881,18 @@ public abstract class ContentResolver {
     public static SyncAdapterType[] getSyncAdapterTypes() {
         try {
             return getContentService().getSyncAdapterTypes();
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getSyncAdapterTypes()
+     * @hide
+     */
+    public static SyncAdapterType[] getSyncAdapterTypesAsUser(int userId) {
+        try {
+            return getContentService().getSyncAdapterTypesAsUser(userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -1864,6 +1916,19 @@ public abstract class ContentResolver {
     }
 
     /**
+     * @see #getSyncAutomatically(Account, String)
+     * @hide
+     */
+    public static boolean getSyncAutomaticallyAsUser(Account account, String authority,
+            int userId) {
+        try {
+            return getContentService().getSyncAutomaticallyAsUser(account, authority, userId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
      * Set whether or not the provider is synced when it receives a network tickle.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
@@ -1873,8 +1938,17 @@ public abstract class ContentResolver {
      * @param sync true if the provider should be synced when tickles are received for it
      */
     public static void setSyncAutomatically(Account account, String authority, boolean sync) {
+        setSyncAutomaticallyAsUser(account, authority, sync, UserHandle.myUserId());
+    }
+
+    /**
+     * @see #setSyncAutomatically(Account, String, boolean)
+     * @hide
+     */
+    public static void setSyncAutomaticallyAsUser(Account account, String authority, boolean sync,
+            int userId) {
         try {
-            getContentService().setSyncAutomatically(account, authority, sync);
+            getContentService().setSyncAutomaticallyAsUser(account, authority, sync, userId);
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
@@ -1897,12 +1971,13 @@ public abstract class ContentResolver {
      * {@link #SYNC_EXTRAS_INITIALIZE}, {@link #SYNC_EXTRAS_FORCE},
      * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL} set to true.
      * If any are supplied then an {@link IllegalArgumentException} will be thrown.
-     * <p>As of API level 19 this function introduces a default flexibility of ~4% (up to a maximum
-     * of one hour in the day) into the requested period. Use
-     * {@link SyncRequest.Builder#syncPeriodic(long, long)} to set this flexibility manually.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
+     * <p>The bundle for a periodic sync can be queried by applications with the correct
+     * permissions using
+     * {@link ContentResolver#getPeriodicSyncs(Account account, String provider)}, so no
+     * sensitive data should be transferred here.
      *
      * @param account the account to specify in the sync
      * @param authority the provider to specify in the sync request
@@ -1932,6 +2007,26 @@ public abstract class ContentResolver {
     }
 
     /**
+     * {@hide}
+     * Helper function to throw an <code>IllegalArgumentException</code> if any illegal
+     * extras were set for a periodic sync.
+     *
+     * @param extras bundle to validate.
+     */
+    public static boolean invalidPeriodicExtras(Bundle extras) {
+        if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Remove a periodic sync. Has no affect if account, authority and extras don't match
      * an existing periodic sync.
      * <p>This method requires the caller to hold the permission
@@ -1951,6 +2046,31 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Remove the specified sync. This will cancel any pending or active syncs. If the request is
+     * for a periodic sync, this call will remove any future occurrences.
+     * <p>
+     *     If a periodic sync is specified, the caller must hold the permission
+     *     {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
+     *</p>
+     * It is possible to cancel a sync using a SyncRequest object that is not the same object
+     * with which you requested the sync. Do so by building a SyncRequest with the same
+     * adapter, frequency, <b>and</b> extras bundle.
+     *
+     * @param request SyncRequest object containing information about sync to cancel.
+     */
+    public static void cancelSync(SyncRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("request cannot be null");
+        }
+        try {
+            getContentService().cancelRequest(request);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
      * Get the list of information about the periodic syncs for the given account and authority.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.
@@ -1961,7 +2081,7 @@ public abstract class ContentResolver {
      */
     public static List<PeriodicSync> getPeriodicSyncs(Account account, String authority) {
         try {
-            return getContentService().getPeriodicSyncs(account, authority);
+            return getContentService().getPeriodicSyncs(account, authority, null);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -1976,6 +2096,18 @@ public abstract class ContentResolver {
     public static int getIsSyncable(Account account, String authority) {
         try {
             return getContentService().getIsSyncable(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getIsSyncable(Account, String)
+     * @hide
+     */
+    public static int getIsSyncableAsUser(Account account, String authority, int userId) {
+        try {
+            return getContentService().getIsSyncableAsUser(account, authority, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2013,6 +2145,18 @@ public abstract class ContentResolver {
     }
 
     /**
+     * @see #getMasterSyncAutomatically()
+     * @hide
+     */
+    public static boolean getMasterSyncAutomaticallyAsUser(int userId) {
+        try {
+            return getContentService().getMasterSyncAutomaticallyAsUser(userId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
      * Sets the master auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
      * <p>This method requires the caller to hold the permission
@@ -2021,8 +2165,16 @@ public abstract class ContentResolver {
      * @param sync the master auto-sync setting that applies to all the providers and accounts
      */
     public static void setMasterSyncAutomatically(boolean sync) {
+        setMasterSyncAutomaticallyAsUser(sync, UserHandle.myUserId());
+    }
+
+    /**
+     * @see #setMasterSyncAutomatically(boolean)
+     * @hide
+     */
+    public static void setMasterSyncAutomaticallyAsUser(boolean sync, int userId) {
         try {
-            getContentService().setMasterSyncAutomatically(sync);
+            getContentService().setMasterSyncAutomaticallyAsUser(sync, userId);
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
@@ -2030,8 +2182,8 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Returns true if there is currently a sync operation for the given
-     * account or authority in the pending list, or actively being processed.
+     * Returns true if there is currently a sync operation for the given account or authority
+     * actively being processed.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#READ_SYNC_STATS}.
      * @param account the account whose setting we are querying
@@ -2039,8 +2191,15 @@ public abstract class ContentResolver {
      * @return true if a sync is active for the given account or authority.
      */
     public static boolean isSyncActive(Account account, String authority) {
+        if (account == null) {
+            throw new IllegalArgumentException("account must not be null");
+        }
+        if (authority == null) {
+            throw new IllegalArgumentException("authority must not be null");
+        }
+
         try {
-            return getContentService().isSyncActive(account, authority);
+            return getContentService().isSyncActive(account, authority, null);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2090,6 +2249,18 @@ public abstract class ContentResolver {
     }
 
     /**
+     * @see #getCurrentSyncs()
+     * @hide
+     */
+    public static List<SyncInfo> getCurrentSyncsAsUser(int userId) {
+        try {
+            return getContentService().getCurrentSyncsAsUser(userId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
      * Returns the status that matches the authority.
      * @param account the account whose setting we are querying
      * @param authority the provider whose behavior is being queried
@@ -2098,7 +2269,20 @@ public abstract class ContentResolver {
      */
     public static SyncStatusInfo getSyncStatus(Account account, String authority) {
         try {
-            return getContentService().getSyncStatus(account, authority);
+            return getContentService().getSyncStatus(account, authority, null);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getSyncStatus(Account, String)
+     * @hide
+     */
+    public static SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
+            int userId) {
+        try {
+            return getContentService().getSyncStatusAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2113,8 +2297,16 @@ public abstract class ContentResolver {
      * @return true if there is a pending sync with the matching account and authority
      */
     public static boolean isSyncPending(Account account, String authority) {
+        return isSyncPendingAsUser(account, authority, UserHandle.myUserId());
+    }
+
+    /**
+     * @see #requestSync(Account, String, Bundle)
+     * @hide
+     */
+    public static boolean isSyncPendingAsUser(Account account, String authority, int userId) {
         try {
-            return getContentService().isSyncPending(account, authority);
+            return getContentService().isSyncPendingAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2327,4 +2519,9 @@ public abstract class ContentResolver {
     private final Context mContext;
     final String mPackageName;
     private static final String TAG = "ContentResolver";
+
+    /** @hide */
+    public int resolveUserId(Uri uri) {
+        return ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+    }
 }

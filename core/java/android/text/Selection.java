@@ -116,7 +116,8 @@ public class Selection {
 
     /**
      * Move the cursor to the buffer offset physically above the current
-     * offset, or return false if the cursor is already on the top line.
+     * offset, to the beginning if it is on the top line but not at the
+     * start, or return false if the cursor is already on the top line.
      */
     public static boolean moveUp(Spannable text, Layout layout) {
         int start = getSelectionStart(text);
@@ -149,6 +150,9 @@ public class Selection {
 
                 setSelection(text, move);
                 return true;
+            } else if (end != 0) {
+                setSelection(text, 0);
+                return true;
             }
         }
 
@@ -157,7 +161,9 @@ public class Selection {
 
     /**
      * Move the cursor to the buffer offset physically below the current
-     * offset, or return false if the cursor is already on the bottom line.
+     * offset, to the end of the buffer if it is on the bottom line but
+     * not at the end, or return false if the cursor is already at the
+     * end of the buffer.
      */
     public static boolean moveDown(Spannable text, Layout layout) {
         int start = getSelectionStart(text);
@@ -189,6 +195,9 @@ public class Selection {
                 }
 
                 setSelection(text, move);
+                return true;
+            } else if (end != text.length()) {
+                setSelection(text, text.length());
                 return true;
             }
         }

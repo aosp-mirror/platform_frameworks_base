@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Заштита тастера"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Унесите PIN кôд"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Унесите PUK и нови PIN кôд"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK кôд"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Нови PIN кôд"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Унесите SIM PUK кôд и нови PIN кôд"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK кôд"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Нови SIM PIN кôд"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Додирните да бисте унели лозинку"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Откуцајте лозинку да бисте откључали"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Унесите PIN за откључавање"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Да бисте откључали, притисните „Мени“, а затим 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Премашен је највећи дозвољени број покушаја Откључавања лицем"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Напуњено"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Пуњење, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Пуњење"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Повежите пуњач."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Притисните Мени да бисте откључали."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Мрежа је закључана"</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Дугме за паузу"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Дугме за репродукцију"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Дугме за заустављање"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Свиђа ми се"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Не свиђа ми се"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Срце"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Откључајте да бисте наставили"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Покретање је отказано"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Отпустите виџет <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> да бисте га избрисали."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Виџет <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> неће бити избрисан."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -105,14 +113,13 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Унесите жељени PIN кôд"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Потврдите жељени PIN кôд"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Откључавање SIM картице…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN кôд је нетачан."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Унесите PIN који има од 4 до 8 бројева."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK кôд треба да има 8 или више бројева."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Поново унесите исправни PUK кôд. Поновљени покушаји ће трајно онемогућити SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодови се не подударају"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Превише покушаја уноса шаблона"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Да бисте откључали, пријавите се помоћу Google налога."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (адреса е-поште)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (имејл адреса)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави ме"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
@@ -121,18 +128,31 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Нетачан SIM PIN кôд. Сада морате да контактирате мобилног оператера да бисте откључали уређај."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушај, а онда морате да контактирате мобилног оператера да бисте откључали уређај."</item>
+    <item quantity="other" msgid="2215723361575359486">"Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушаја."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM картица је неупотребљива. Контактирајте мобилног оператера."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушај пре него што SIM картица постане трајно неупотребљива."</item>
+    <item quantity="other" msgid="5477305226026342036">"Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушаја пре него што SIM картица постане трајно неупотребљива."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Радња са SIM PIN кодом није успела!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Радња са SIM PUK кодом није успела!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Кôд је прихваћен!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Дугме за претходну песму"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Дугме за следећу песму"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Дугме за паузу"</string>
     <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Дугме за репродукцију"</string>
     <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Дугме за заустављање"</string>
-    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ван мреже сте."</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Офлајн сте."</string>
 </resources>

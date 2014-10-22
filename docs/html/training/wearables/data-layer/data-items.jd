@@ -1,0 +1,124 @@
+page.title=Syncing Data Items
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#SyncData">Sync Data with a Data Map</a></li>
+  <li><a href="#ListenEvents">Listen for Data Item Events</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+A <a href="@{docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
+defines the data interface that the system uses to synchronize data between handhelds
+and wearables. A <a href="@{docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a> generally
+consists of the following items:</p>
+<ul>
+  <li><b>Payload</b> - A byte array, which you can set with whatever data you wish, allowing you
+  to do your own object serialization and deserialization. The size of the payload is limited
+  to 100KB.</li>
+  <li><b>Path</b> - A unique string that must start with a forward slash (for instance,
+  <code>"/path/to/data"</code>)</li>
+</ul>
+
+<p>
+You normally don't implement <a href="@{docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
+directly. Instead, you:
+
+<ol>
+  <li>Create a <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html"><code>PutDataRequest</code></a> object,
+  specifying a string path to uniquely identify the item.
+  </li>
+  <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])">setData()</a> to set
+  the payload.
+  </li>
+  <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>DataApi.putDataItem()</code></a> to request the system to create the data item.
+  </li>
+  <li>When requesting data items, the system returns objects
+  that properly implement the <a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a> interface.
+  </li>
+</ol>
+
+<p>
+However, instead of working with raw bytes using <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])">setData()</a>,
+we recommend you <a href="#data-map">use a data map</a>, which exposes
+a data item in an easy-to-use {@link android.os.Bundle}-like interface.
+</p>
+
+<h2 id="SyncData">Sync Data with a Data Map</h2>
+<p>
+When possible, use the <a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html"><code>DataMap</code></a> class,
+which lets you work with data items in the form of an Android {@link android.os.Bundle},
+so object serialization and de-serialization is done for you, and you can manipulate data with key-value pairs.
+</p>
+
+<p>To use a data map:</p>
+
+<ol>
+  <li>Create a
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataMapRequest.html"><code>PutDataMapRequest</code></a>
+object, setting the path of the data item.
+<p class="note"><b>Note:</b> The path string is a unique identifier for the
+data item that allows you to access it from either side of the connection. The path must begin
+with a forward slash. If you're using hierarchical data in your
+app, you should create a path scheme that matches the structure of the data. 
+</p>
+</li>
+<li>Call
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataMapRequest.html#getDataMap()"><code>PutDataMapRequest.getDataMap()</code></a>
+</a> to obtain a data map that you can set values on.</li>
+  <li>Set any desired values for the data map using the <code>put...()</code> methods, such as
+  <a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html#putString(java.lang.String, java.lang.String)"><code>putString()</code></a>.
+  </li>
+  <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataMapRequest.html#asPutDataRequest()"><code>PutDataMapRequest.asPutDataRequest()</code></a>
+  to obtain a <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html"><code>PutDataRequest</code></a> object.
+   </li>
+  <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>DataApi.putDataItem()</code></a> to request the system to create the data item.
+  <p class="note"><b>Note:</b>
+  If the handset and wearable devices are disconnected,
+  the data is buffered and and synced when the connection is re-established.
+  </p>
+  </li>
+</ol>
+
+<p>The following example shows how to create a data map, set data on it, and create it:</p>
+
+<pre>
+PutDataMapRequest dataMap = PutDataMapRequest.create("/count");
+dataMap.getDataMap().putInt(COUNT_KEY, count++);
+PutDataRequest request = dataMap.asPutDataRequest();
+PendingResult&lt;DataApi.DataItemResult&gt; pendingResult = Wearable.DataApi
+        .putDataItem(mGoogleApiClient, request);
+</pre>
+
+<h2 id="ListenEvents">Listen for Data Item Events</h2>
+If one side of the data layer connection changes a data item, you probably want
+to be notified of any changes on the other side of the connection.
+You can do this by implementing a listener for data item events.
+
+<p>For example, here's what a typical callback looks like to carry out certain actions
+when data changes.</p>
+
+<pre>
+&#64;Override
+public void onDataChanged(DataEventBuffer dataEvents) {
+    for (DataEvent event : dataEvents) {
+        if (event.getType() == DataEvent.TYPE_DELETED) {
+            Log.d(TAG, "DataItem deleted: " + event.getDataItem().getUri());
+        } else if (event.getType() == DataEvent.TYPE_CHANGED) {
+             Log.d(TAG, "DataItem changed: " + event.getDataItem().getUri());
+        }
+    }
+}
+</pre>
+<p>
+This is just a snippet that requires more implementation details. Learn about
+how to implement a full listener service or activity in
+<a href="{@docRoot}training/wearables/data-layer/events.html">Listening for Data Layer Events</a>.
+</p>

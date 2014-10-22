@@ -16,57 +16,38 @@
 
 package com.android.connectivitymanagertest.functional;
 
-import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
-import com.android.connectivitymanagertest.ConnectivityManagerTestRunner;
-
-import android.content.Context;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo.State;
+import android.os.SystemClock;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 
-import java.util.ArrayList;
+import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
+import com.android.connectivitymanagertest.WifiConfigurationHelper;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Test Wi-Fi connection with different configuration
  * To run this tests:
- *     adb shell am instrument -e class
- *          com.android.connectivitymanagertest.functional.WifiConnectionTest
- *          -w com.android.connectivitymanagertest/.ConnectivityManagerTestRunner
+ *     adb shell am instrument \
+ *         -e class com.android.connectivitymanagertest.functional.WifiConnectionTest \
+ *         -w com.android.connectivitymanagertest/.ConnectivityManagerTestRunner
  */
-public class WifiConnectionTest
-    extends ConnectivityManagerTestBase {
-    private static final String TAG = "WifiConnectionTest";
-    private static final boolean DEBUG = false;
-    private List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
+public class WifiConnectionTest extends ConnectivityManagerTestBase {
+    private static final String WIFI_CONFIG_FILE = "/data/wifi_configs.json";
+    private static final long PAUSE_DURATION_MS = 60 * 1000;
+
+    public WifiConnectionTest() {
+        super(WifiConnectionTest.class.getSimpleName());
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        networks = loadNetworkConfigurations();
-        if (DEBUG) {
-            printNetworkConfigurations();
-        }
-
-        // enable Wifi and verify wpa_supplicant is started
-        assertTrue("enable Wifi failed", enableWifi());
-        sleep(2 * SHORT_TIMEOUT, "interrupted while waiting for WPA_SUPPLICANT to start");
-        WifiInfo mConnection = mWifiManager.getConnectionInfo();
-        assertNotNull(mConnection);
-        assertTrue("wpa_supplicant is not started ", mWifiManager.pingSupplicant());
-    }
-
-    private void printNetworkConfigurations() {
-        log("==== print network configurations parsed from XML file ====");
-        log("number of access points: " + networks.size());
-        for (WifiConfiguration config : networks) {
-            log(config.toString());
-        }
+        assertTrue("Failed to enable wifi", enableWifi());
     }
 
     @Override
@@ -75,51 +56,67 @@ public class WifiConnectionTest
         super.tearDown();
     }
 
-    /**
-     * Connect to the provided Wi-Fi network
-     * @param config is the network configuration
-     * @return true if the connection is successful.
-     */
-    private void connectToWifi(WifiConfiguration config) {
-        // step 1: connect to the test access point
-        assertTrue("failed to connect to " + config.SSID,
-                connectToWifiWithConfiguration(config));
-
-        // step 2: verify Wifi state and network state;
-        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
-
-        // step 3: verify the current connected network is the given SSID
-        assertNotNull("Wifi connection returns null", mWifiManager.getConnectionInfo());
-        if (DEBUG) {
-            log("config.SSID = " + config.SSID);
-            log("mWifiManager.getConnectionInfo.getSSID()" +
-                    mWifiManager.getConnectionInfo().getSSID());
-        }
-        assertTrue(config.SSID.contains(mWifiManager.getConnectionInfo().getSSID()));
-    }
-
-    private void sleep(long sometime, String errorMsg) {
-        try {
-            Thread.sleep(sometime);
-        } catch (InterruptedException e) {
-            fail(errorMsg);
-        }
-    }
-
-    private void log(String message) {
-        Log.v(TAG, message);
-    }
-
     @LargeTest
     public void testWifiConnections() {
-        for (int i = 0; i < networks.size(); i++) {
-            String ssid = networks.get(i).SSID;
-            log("-- START Wi-Fi connection test to : " + ssid + " --");
-            connectToWifi(networks.get(i));
-            // wait for 2 minutes between wifi stop and start
-            sleep(WIFI_STOP_START_INTERVAL, "interruped while connected to wifi");
-            log("-- END Wi-Fi connection test to " + ssid + " -- ");
+        List<WifiConfiguration> wifiConfigs = loadConfigurations();
+
+        printWifiConfigurations(wifiConfigs);
+
+        assertFalse("No configurations to test against", wifiConfigs.isEmpty());
+
+        boolean shouldPause = false;
+        for (WifiConfiguration config : wifiConfigs) {
+            if (shouldPause) {
+                logv("Pausing for %d seconds", PAUSE_DURATION_MS / 1000);
+                SystemClock.sleep(PAUSE_DURATION_MS);
+            }
+            logv("Start wifi connection test to: %s", config.SSID);
+            connectToWifi(config);
+
+            // verify that connection actually works
+            assertTrue("No connectivity at end of test", checkNetworkConnectivity());
+
+            // Disconnect and remove the network
+            assertTrue("Unable to remove network", disconnectAP());
+            logv("End wifi connection test to: %s", config.SSID);
+
+            shouldPause = true;
+        }
+    }
+
+    /**
+     * Load the configuration file from the root of the data partition
+     */
+    private List<WifiConfiguration> loadConfigurations() {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(new File(WIFI_CONFIG_FILE)));
+            StringBuffer jsonBuffer = new StringBuffer();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuffer.append(line);
+            }
+            return WifiConfigurationHelper.parseJson(jsonBuffer.toString());
+        } catch (IllegalArgumentException | IOException e) {
+            throw new AssertionError("Error parsing file", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    /**
+     * Print the wifi configurations to test against.
+     */
+    private void printWifiConfigurations(List<WifiConfiguration> wifiConfigs) {
+        logv("Wifi configurations to be tested");
+        for (WifiConfiguration config : wifiConfigs) {
+            logv(config.toString());
         }
     }
 }

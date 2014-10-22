@@ -62,8 +62,7 @@ public class SweepGradient extends Shader {
         mCy = cy;
         mColors = colors;
         mPositions = positions;
-        native_instance = nativeCreate1(cx, cy, colors, positions);
-        native_shader = nativePostCreate1(native_instance, cx, cy, colors, positions);
+        init(nativeCreate1(cx, cy, colors, positions));
     }
 
     /**
@@ -80,8 +79,7 @@ public class SweepGradient extends Shader {
         mCy = cy;
         mColor0 = color0;
         mColor1 = color1;
-        native_instance = nativeCreate2(cx, cy, color0, color1);
-        native_shader = nativePostCreate2(native_instance, cx, cy, color0, color1);
+        init(nativeCreate2(cx, cy, color0, color1));
     }
 
     /**
@@ -108,10 +106,5 @@ public class SweepGradient extends Shader {
 
     private static native long nativeCreate1(float x, float y, int colors[], float positions[]);
     private static native long nativeCreate2(float x, float y, int color0, int color1);
-
-    private static native long nativePostCreate1(long native_shader, float cx, float cy,
-            int[] colors, float[] positions);    
-    private static native long nativePostCreate2(long native_shader, float cx, float cy,
-            int color0, int color1);
 }
 

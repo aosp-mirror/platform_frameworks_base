@@ -21,7 +21,8 @@
 #include <assert.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
-#include <core/SkBitmap.h>
+#include <SkBitmap.h>
+#include <media/IMediaHTTPService.h>
 #include <media/mediametadataretriever.h>
 #include <media/mediascanner.h>
 #include <private/media/VideoFrame.h>
@@ -30,6 +31,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_media_Utils.h"
+#include "android_util_Binder.h"
 
 
 using namespace android;
@@ -81,7 +83,7 @@ static void setRetriever(JNIEnv* env, jobject thiz, MediaMetadataRetriever* retr
 
 static void
 android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jstring path,
+        JNIEnv *env, jobject thiz, jobject httpServiceBinderObj, jstring path,
         jobjectArray keys, jobjectArray values) {
 
     ALOGV("setDataSource");
@@ -123,10 +125,19 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
             env, keys, values, &headersVector)) {
         return;
     }
+
+    sp<IMediaHTTPService> httpService;
+    if (httpServiceBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, httpServiceBinderObj);
+        httpService = interface_cast<IMediaHTTPService>(binder);
+    }
+
     process_media_retriever_call(
             env,
             retriever->setDataSource(
-                pathStr.string(), headersVector.size() > 0 ? &headersVector : NULL),
+                httpService,
+                pathStr.string(),
+                headersVector.size() > 0 ? &headersVector : NULL),
 
             "java/lang/RuntimeException",
             "setDataSource failed");
@@ -446,7 +457,7 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 static JNINativeMethod nativeMethods[] = {
         {
             "_setDataSource",
-            "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+            "(Landroid/os/IBinder;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
             (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders
         },
 

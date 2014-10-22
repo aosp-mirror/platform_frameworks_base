@@ -34,7 +34,11 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
+import android.webkit.WebViewFactory;
 
+import dalvik.system.DexFile;
+import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -244,7 +248,18 @@ public class ZygoteInit {
         preloadClasses();
         preloadResources();
         preloadOpenGL();
+        preloadSharedLibraries();
+        // Ask the WebViewFactory to do any initialization that must run in the zygote process,
+        // for memory sharing purposes.
+        WebViewFactory.prepareWebViewInZygote();
         Log.d(TAG, "end preload");
+    }
+
+    private static void preloadSharedLibraries() {
+        Log.i(TAG, "Preloading shared libraries...");
+        System.loadLibrary("android");
+        System.loadLibrary("compiler_rt");
+        System.loadLibrary("jnigraphics");
     }
 
     private static void preloadOpenGL() {
@@ -400,7 +415,7 @@ public class ZygoteInit {
                 Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
             }
             if (id != 0) {
-                if (mResources.getDrawable(id) == null) {
+                if (mResources.getDrawable(id, null) == null) {
                     throw new IllegalArgumentException(
                             "Unable to find preloaded drawable resource #0x"
                             + Integer.toHexString(id)
@@ -443,18 +458,66 @@ public class ZygoteInit {
             Process.setArgV0(parsedArgs.niceName);
         }
 
+        final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
+        if (systemServerClasspath != null) {
+            performSystemServerDexOpt(systemServerClasspath);
+        }
+
         if (parsedArgs.invokeWith != null) {
+            String[] args = parsedArgs.remainingArgs;
+            // If we have a non-null system server class path, we'll have to duplicate the
+            // existing arguments and append the classpath to it. ART will handle the classpath
+            // correctly when we exec a new process.
+            if (systemServerClasspath != null) {
+                String[] amendedArgs = new String[args.length + 2];
+                amendedArgs[0] = "-cp";
+                amendedArgs[1] = systemServerClasspath;
+                System.arraycopy(parsedArgs.remainingArgs, 0, amendedArgs, 2, parsedArgs.remainingArgs.length);
+            }
+
             WrapperInit.execApplication(parsedArgs.invokeWith,
                     parsedArgs.niceName, parsedArgs.targetSdkVersion,
-                    null, parsedArgs.remainingArgs);
+                    null, args);
         } else {
+            ClassLoader cl = null;
+            if (systemServerClasspath != null) {
+                cl = new PathClassLoader(systemServerClasspath, ClassLoader.getSystemClassLoader());
+                Thread.currentThread().setContextClassLoader(cl);
+            }
+
             /*
              * Pass the remaining arguments to SystemServer.
              */
-            RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs);
+            RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);
         }
 
         /* should never reach here */
+    }
+
+    /**
+     * Performs dex-opt on the elements of {@code classPath}, if needed. We
+     * choose the instruction set of the current runtime.
+     */
+    private static void performSystemServerDexOpt(String classPath) {
+        final String[] classPathElements = classPath.split(":");
+        final InstallerConnection installer = new InstallerConnection();
+        final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
+
+        try {
+            for (String classPathElement : classPathElements) {
+                final byte dexopt = DexFile.isDexOptNeededInternal(classPathElement, "*", instructionSet,
+                        false /* defer */);
+                if (dexopt == DexFile.DEXOPT_NEEDED) {
+                    installer.dexopt(classPathElement, Process.SYSTEM_UID, false, instructionSet);
+                } else if (dexopt == DexFile.PATCHOAT_NEEDED) {
+                    installer.patchoat(classPathElement, Process.SYSTEM_UID, false, instructionSet);
+                }
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error starting system_server", ioe);
+        } finally {
+            installer.disconnect();
+        }
     }
 
     /**

@@ -1,0 +1,260 @@
+page.title=App Developer Best Practices
+page.image=/distribute/images/gp-app-practices.png
+page.metaDescription=Essential tips for launching successful apps in Google Play.
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Best Practices</h2>
+<ol>
+<li><a href="#essentials">Get the Essentials Right</a></li>
+<li><a href="#users">Get Users</a></li>
+<li><a href="#engage">Engage and Retain</a></li>
+<li><a href="#beyond">Beyond the Basics</a></li>
+<li><a href="#related-resources">Related Resources</a></li>
+</ol>
+</div></div>
+
+<p>The following best practices have enabled developers worldwide to build great, successful apps for Google Play.</p>
+
+<div class="headerLine">
+<h2 id="essentials">Get the Essentials Right</h2>
+</div>
+
+<h3>1. Make it Android</h3>
+
+<ul>
+  <li>
+  <p>
+    Build your apps to make best use of the unique Android features, such as
+    <a href="{@docRoot}distribute/engage/widgets.html">widgets</a>, <a href=
+    "{@docRoot}distribute/engage/notifications.html">rich notifications</a>,
+    <a href=
+    "http://android-developers.blogspot.com/2012/02/share-with-intents.html">sharing
+    through Intents</a>, and more.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Add the power of Google features your users already love, such as
+    <a href="https://developers.google.com/maps/documentation/android/">Google
+    Maps</a>, <a href="https://developers.google.com/drive/">Google
+    Drive</a>, and more, all with <a href=
+    "https://developers.google.com/+/mobile/android/sign-in">single sign
+    on</a>.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  2. Make it quality
+</h3>
+
+<ul>
+  <li>
+  <p>
+    Make sure your apps follow the <a href=
+    "{@docRoot}distribute/essentials/quality/core.html">Core App Quality</a>
+    guidelines.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Create apps that are available on all form factors and screen sizes, by
+    following the <a href=
+    "{@docRoot}distribute/essentials/quality/tablets.html">Tablet App
+    Quality</a> guidelines.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Test and <a href=
+    "{@docRoot}distribute/essentials/optimizing-your-app.html">optimize your
+    quality</a> at every step and make use of the Google Play <a href=
+    "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">beta-testing</a>
+    and <a href=
+    "{@docRoot}distribute/googleplay/developer-console.html#staged-rollouts">staged
+    rollouts</a> features to test with users before launch.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="users">
+  Get Users
+  </h2>
+
+
+</div>
+
+<h3>
+  1. Build buzz
+</h3>
+
+<ul>
+  <li>
+  <p>
+    Create a great <a href="{@docRoot}distribute/users/your-listing.html">app
+    listing page</a> to showcase your apps and grab users’ attention. Don’t
+    forget to include a <a href=
+    "{@docRoot}distribute/engage/video.html">YouTube video</a>.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    <a href="{@docRoot}distribute/tools/launch-checklist.html">Launch</a> on
+    multiple platforms simultaneously to maximize your reach.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Promote your apps with the official <a href=
+    "{@docRoot}distribute/tools/promote/badges.html">Google Play badge</a>
+    and <a href="{@docRoot}distribute/tools/promote/linking.html">link to
+    your products</a> on Google Play.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Build a community with social media, <a href=
+    "http://groups.google.com/">forums</a>, and <a href=
+    "http://plus.google.com">communities</a> to get and keep users talking.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  2. Optimize for great ratings
+</h3>
+
+<ul>
+  <li>
+  <p>
+    Get to <a href="{@docRoot}distribute/users/know-your-user.html">know your
+    users</a>, listen to and <a href=
+    "{@docRoot}distribute/engage/app-updates.html">update your apps</a> from
+    their feedback.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Focus on your strength markets first, get these right before expanding.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="engage">
+  Engage and Retain
+  </h2>
+
+
+</div>
+
+<h3>
+  1. Keep users coming back
+</h3>
+
+<ul>
+  <li>
+  <p>
+    Use <a href="{@docRoot}google/play/billing/index.html">Google Play In-app
+    Billing</a> to offer subscriptions to extended features.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Hold competitions and offer promotions, then announce them through
+    <a href="{@docRoot}design/patterns/notifications.html">notifications</a>.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  2. Earn users’ love
+</h3>
+
+<ul>
+  <li>
+  <p>
+    <a href=
+    "http://android-developers.blogspot.com/2013/05/all-google-play-developers-can-now.html">
+    Respond to reviews</a> and get valuable feedback from the community
+    you've built.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    <a href=
+    "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html">
+    Measure</a> your campaigns to see what is driving users to install your
+    apps.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    <a href=
+    "{@docRoot}distribute/essentials/optimizing-your-app.html#measuring-analyzing-responding">
+    Analyze in-app use</a> to steer content updates and prolong the life of
+    your apps.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="beyond">
+  Beyond the Basics
+  </h2>
+
+
+</div>
+
+<ul>
+  <li>
+  <p>
+    After you’ve launched in your market of strength, <a href=
+    "{@docRoot}distribute/users/expand-to-new-markets.html">expand into other
+    markets</a> strategically and <a href=
+    "{@docRoot}distribute/tools/localization-checklist.html">localize</a>
+    your apps as you go.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Keep users engaged, and stay ahead of the competition, by continually
+    <a href=
+    "{@docRoot}distribute/essentials/optimizing-your-app.html">optimizing
+    your apps</a> to offer new and better features, or retire those that
+    users aren’t using.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Build educational apps: learn <a href=
+    "{@docRoot}distribute/googleplay/edu/start.html">how to make apps for
+    Google Play for Education</a>.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/bestpractices/apps"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3"
+  data-maxResults="6"></div>
+

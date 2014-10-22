@@ -20,6 +20,7 @@ package android.service.dreams;
  * @hide
  */
 oneway interface IDreamService {
-    void attach(IBinder windowToken);
+    void attach(IBinder windowToken, boolean canDoze);
     void detach();
+    void wakeUp();
 }

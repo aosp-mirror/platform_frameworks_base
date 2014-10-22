@@ -25,26 +25,15 @@ static void Interpolator_reset(JNIEnv* env, jobject clazz, jlong interpHandle, j
 static void Interpolator_setKeyFrame(JNIEnv* env, jobject clazz, jlong interpHandle, jint index, jint msec, jfloatArray valueArray, jfloatArray blendArray)
 {
     SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
-    SkScalar    blendStorage[4];
-    SkScalar*   blend = NULL;
 
-    AutoJavaFloatArray  autoValues(env, valueArray);
-    float* values = autoValues.ptr();
-    int i, n = autoValues.length();
-
-    SkAutoSTMalloc<16, SkScalar>  storage(n);
-    SkScalar*                     scalars = storage.get();
-
-    for (i = 0; i < n; i++)
-        scalars[i] = SkFloatToScalar(values[i]);
-
-    if (blendArray != NULL) {
-        AutoJavaFloatArray autoBlend(env, blendArray, 4);
-        values = autoBlend.ptr();
-        for (i = 0; i < 4; i++)
-            blendStorage[i] = SkFloatToScalar(values[i]);
-        blend = blendStorage;
-    }
+    AutoJavaFloatArray autoValues(env, valueArray);
+    AutoJavaFloatArray autoBlend(env, blendArray, 4);
+#ifdef SK_SCALAR_IS_FLOAT
+    SkScalar* scalars = autoValues.ptr();
+    SkScalar* blend = autoBlend.ptr();
+#else
+    #error Need to convert float array to SkScalar array before calling the following function.
+#endif
 
     interp->setKeyFrame(index, msec, scalars, blend);
 }
@@ -55,7 +44,7 @@ static void Interpolator_setRepeatMirror(JNIEnv* env, jobject clazz, jlong inter
     if (repeatCount > 32000)
         repeatCount = 32000;
 
-    interp->setRepeatCount(SkFloatToScalar(repeatCount));
+    interp->setRepeatCount(repeatCount);
     interp->setMirror(mirror != 0);
 }
 

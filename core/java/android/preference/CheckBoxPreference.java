@@ -34,11 +34,16 @@ import android.widget.Checkable;
  */
 public class CheckBoxPreference extends TwoStatePreference {
 
-    public CheckBoxPreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.CheckBoxPreference, defStyle, 0);
+    public CheckBoxPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public CheckBoxPreference(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.CheckBoxPreference, defStyleAttr, defStyleRes);
         setSummaryOn(a.getString(com.android.internal.R.styleable.CheckBoxPreference_summaryOn));
         setSummaryOff(a.getString(com.android.internal.R.styleable.CheckBoxPreference_summaryOff));
         setDisableDependentsState(a.getBoolean(
@@ -61,7 +66,6 @@ public class CheckBoxPreference extends TwoStatePreference {
         View checkboxView = view.findViewById(com.android.internal.R.id.checkbox);
         if (checkboxView != null && checkboxView instanceof Checkable) {
             ((Checkable) checkboxView).setChecked(mChecked);
-            sendAccessibilityEvent(checkboxView);
         }
 
         syncSummaryView(view);

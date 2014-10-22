@@ -1,0 +1,90 @@
+page.title=Encourage Competition
+page.metaDescription= Bring out the competitor in your users with cloud save, multiplayer game play, and more.
+page.tags="games"
+page.image=/images/google/gps-play_games_logo.png
+
+@jd:body
+
+<div class="figure" style="width:330px;">
+  <img src="{@docRoot}images/google/gps-play_games_logo.png">
+</div>
+
+<p>
+  Increase game installs, in-app revenue, and engagement with <a href=
+  "{@docRoot}google/play-services/games.html">Google Play
+  Game Services</a>. Bring out the competitor in your users with cloud save,
+  multiplayer game play, and more.
+</p>
+
+<ul>
+  <li>
+    <p>
+      <a href=
+      "https://developers.google.com/games/services/android/achievements">Achievements</a>
+      encourage players to try new features, resulting in more time spent in
+      your games.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <a href=
+      "https://developers.google.com/games/services/android/leaderboards">Leaderboards</a>
+      are a fun way to drive competition among your players.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <a href=
+      "https://developers.google.com/games/services/android/cloudsave">Cloud
+      Save</a> allows users to continue where they left off on another device
+      or platform.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Multiplayer features allow users to invite friends to install games and
+      play together in <a href=
+      "https://developers.google.com/games/services/common/concepts/realtimeMultiplayer">
+      real-time</a> or <a href=
+      "https://developers.google.com/games/services/common/concepts/turnbasedMultiplayer">
+      turn-by-turn</a>.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <a href=
+      "https://play.google.com/store/apps/details?id=com.google.android.play.games">
+      Google Play Games App</a> provides additional exposure to increase
+      downloads and gameplay. It helps users play with friends, see what others
+      are playing, and discover featured games.
+    </p>
+  </li>
+</ul>
+
+<p>
+  And there is no need to worrying about device or OS version support. Google
+  Play Game Services is backward compatible, allowing you to reach more
+  users with less effort. Get started on <a href=
+  "{@docRoot}google/play-services/games.html">Google Play
+  Game Services</a>. For more tips on keeping gamers engaged, see the <a href=
+  "{@docRoot}distribute/essentials/best-practices/games.html">
+  Game Developer Best Practices</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/engage/googleplaygames" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>
+

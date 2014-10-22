@@ -19,12 +19,14 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <fragment
-        android:name="com.android.printspooler.SelectPrinterFragment"
-        android:id="@+id/select_printer_fragment"
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-    </fragment>
+        android:layout_height="fill_parent"
+        android:scrollbarStyle="outsideOverlay"
+        android:cacheColorHint="@android:color/transparent"
+        android:scrollbarAlwaysDrawVerticalTrack="true" >
+    </ListView>
 
     <FrameLayout
         android:id="@+id/empty_print_state"
@@ -61,7 +63,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                style="@android:style/Widget.Holo.ProgressBar.Horizontal">
+                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal">
             </ProgressBar>
 
         </LinearLayout>

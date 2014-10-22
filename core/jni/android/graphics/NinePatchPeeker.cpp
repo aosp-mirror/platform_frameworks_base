@@ -21,7 +21,7 @@
 using namespace android;
 
 bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
-    if (strcmp("npTc", tag) == 0 && length >= sizeof(Res_png_9patch)) {
+    if (!strcmp("npTc", tag) && length >= sizeof(Res_png_9patch)) {
         Res_png_9patch* patch = (Res_png_9patch*) data;
         size_t patchSize = patch->serializedSize();
         assert(length == patchSize);
@@ -30,12 +30,9 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
         memcpy(patchNew, patch, patchSize);
         Res_png_9patch::deserialize(patchNew);
         patchNew->fileToDevice();
-        free(fPatch);
-        fPatch = patchNew;
-        fPatchSize = patchSize;
-        //printf("9patch: (%d,%d)-(%d,%d)\n",
-        //       fPatch.sizeLeft, fPatch.sizeTop,
-        //       fPatch.sizeRight, fPatch.sizeBottom);
+        free(mPatch);
+        mPatch = patchNew;
+        mPatchSize = patchSize;
 
         // now update our host to force index or 32bit config
         // 'cause we don't want 565 predithered, since as a 9patch, we know
@@ -47,10 +44,15 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
         table.fPrefFor_8bpc_NoAlpha_src     = SkBitmap::kARGB_8888_Config;
         table.fPrefFor_8bpc_YesAlpha_src    = SkBitmap::kARGB_8888_Config;
 
-        fHost->setPrefConfigTable(table);
-    } else if (strcmp("npLb", tag) == 0 && length == sizeof(int) * 4) {
-        fLayoutBounds = new int[4];
-        memcpy(fLayoutBounds, data, sizeof(int) * 4);
+        mHost->setPrefConfigTable(table);
+    } else if (!strcmp("npLb", tag) && length == sizeof(int32_t) * 4) {
+        mHasInsets = true;
+        memcpy(&mOpticalInsets, data, sizeof(int32_t) * 4);
+    } else if (!strcmp("npOl", tag) && length == 24) { // 4 int32_ts, 1 float, 1 int32_t sized byte
+        mHasInsets = true;
+        memcpy(&mOutlineInsets, data, sizeof(int32_t) * 4);
+        mOutlineRadius = ((const float*)data)[4];
+        mOutlineAlpha = ((const int32_t*)data)[5] & 0xff;
     }
     return true;    // keep on decoding
 }

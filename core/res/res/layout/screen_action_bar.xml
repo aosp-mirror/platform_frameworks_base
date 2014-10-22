@@ -20,10 +20,11 @@ This is an optimized layout for a screen with the Action Bar enabled.
 
 <com.android.internal.widget.ActionBarOverlayLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/action_bar_overlay_layout"
+    android:id="@+id/decor_content_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:splitMotionEvents="false">
+    android:splitMotionEvents="false"
+    android:theme="?attr/actionBarTheme">
     <FrameLayout android:id="@android:id/content"
                  android:layout_width="match_parent"
                  android:layout_height="match_parent" />
@@ -32,24 +33,27 @@ This is an optimized layout for a screen with the Action Bar enabled.
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        style="?android:attr/actionBarStyle"
+        style="?attr/actionBarStyle"
+        android:transitionName="android:action_bar"
+        android:touchscreenBlocksFocus="true"
         android:gravity="top">
         <com.android.internal.widget.ActionBarView
             android:id="@+id/action_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="?android:attr/actionBarStyle" />
+            style="?attr/actionBarStyle" />
         <com.android.internal.widget.ActionBarContextView
             android:id="@+id/action_context_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            style="?android:attr/actionModeStyle" />
+            style="?attr/actionModeStyle" />
     </com.android.internal.widget.ActionBarContainer>
     <com.android.internal.widget.ActionBarContainer android:id="@+id/split_action_bar"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  style="?android:attr/actionBarSplitStyle"
+                  style="?attr/actionBarSplitStyle"
                   android:visibility="gone"
+                  android:touchscreenBlocksFocus="true"
                   android:gravity="center"/>
 </com.android.internal.widget.ActionBarOverlayLayout>

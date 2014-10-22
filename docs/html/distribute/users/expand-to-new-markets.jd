@@ -1,0 +1,321 @@
+page.title=Expand Into New Markets
+page.metaDescription=Tap fast-growing markets in Japan, Korea, India, Brazil, and many other countries around the world.
+page.image=/distribute/images/expand-into-new-markets.jpg
+page.tags="users, growth, global"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      Contents
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#localize-your-product">Localize Your Product</a>
+      </li>
+
+      <li>
+        <a href="#testing-and-support">Testing and Support</a>
+      </li>
+
+      <li>
+        <a href="#localize-your-google-play-listing">Localize Your Store
+        Listing</a>
+      </li>
+
+      <li>
+        <a href="#marketing">Marketing</a>
+      </li>
+
+      <li>
+        <a href="#related-resources">Related Resources</a>
+      </li>
+    </ol>
+  </div>
+</div>
+<p>
+  Android and Google Play give you a worldwide audience for your apps, with an
+  addressable user base that's growing very rapidly in countries such as Japan,
+  Korea, India, and Brazil. You can sell your app in more than 130 countries.
+</p>
+
+<p>
+  To <strong>maximize your app's distribution potential and earn high
+  ratings</strong> from users around the world, we encourage you to localize
+  your app. Once you’ve built a solid foundation in your home market, take
+  advantage of Android’s powerful growth around the world and expand your app
+  to new markets.
+</p>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      <strong>Tip:</strong> Localization is more than translation. Plan product
+      features, launch, and marketing for key markets.
+    </p>
+  </div>
+</div>
+
+<p class="caution" style="font-size:15.5px;">
+</p>
+
+<p>
+  Localization involves a variety of tasks throughout your app development
+  cycle, and advance planning is essential. But <strong>localization is more
+  than just translating your UI</strong>. To be successful, you also need to
+  localize your Google Play listing and ensure your marketing is suitable for
+  the demographic you’re addressing.
+</p>
+
+<p>
+  To reduce development and maintenance effort, use a single APK for all
+  regions. A single APK also allows you to more easily track metrics by
+  country. Google Play takes care of providing the appropriate localized
+  version of your app based on user location.
+</p>
+
+<div class="headerLine">
+  <h2 id="localize-your-product">
+    Localize Your Product
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      <strong>Tip:</strong> Use a professional translation service located in
+      your target country to ensure high quality and good user ratings.
+    </p>
+  </div>
+</div>
+
+<p>
+  The first step is to identify your target markets and associated languages,
+  then focus your product localization on those countries. Some of the tasks
+  include translating your UI strings and localizing dates and times, layouts,
+  text direction, and finally your Google Play store listing. To learn more
+  about how to localize your app, visit our <a href=
+  "{@docRoot}distribute/tools/localization-checklist.html">Localization
+  Checklist</a>.
+</p>
+<!-- <p>[Need graphic highlighting that it’s all about getting high ratings]</p> -->
+
+<p>
+  Work with a professional translator, preferably located in the country you’re
+  localizing your apps for, to ensure high quality results. Machine
+  translations may affect your apps’ ratings, as they’re less reliable than
+  high-quality professional translations. For example, a professional service
+  will know to consider the vocabulary expansion, left-to-right and
+  right-to-left support, and other factors in each language. Learn more about
+  UI considerations and other factors in the <a href=
+  "{@docRoot}distribute/tools/localization-checklist.html#design">Design for
+  Localization</a> section of the Localization Checklist.
+</p>
+
+<p>
+  <strong>Google Play App Translation Service</strong> can help you quickly
+  find and purchase translations of your apps. In the <a href=
+  "https://play.google.com/apps/publish/">Developer Console</a>, you can browse
+  a list of third-party vendors who are pre-qualified by Google to offer
+  high-quality professional translations at competitive prices.
+</p>
+
+<img src="{@docRoot}images/gp-listing-3.jpg" style="padding:8px 0">
+
+<img src="{@docRoot}images/gp-expand-2.jpg" style="padding:8px 0">
+
+<div class="headerLine">
+  <h2 id="testing-and-support">
+    Testing and Support
+  </h2>
+
+
+</div>
+
+<p>
+  Before you launch, be sure to use our <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">beta
+  testing</a> and <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#staged-rollouts">staged
+  rollouts</a> to identify and address issues before users can rate your app.
+  Feedback can be gathered using a <a href=
+  "https://support.google.com/groups/answer/46601">Google Group</a> or <a href=
+  "https://support.google.com/plus/topic/2888488">Google+ Community</a>. Watch
+  user sentiment and respond if necessary as you add countries.
+</p>
+
+<p>
+  After you launch, <strong>offer support hours in the local time zone in the
+  local language</strong>. When possible, having a local presence can
+  dramatically increase your daily active users and revenue. For example,
+  <a href="">this developer</a> was able to <strong>increase their revenue over
+  500% after creating a local presence</strong> in Asia and taking great care
+  of their users.
+</p>
+
+<div class="headerLine">
+  <h2 id="localize-your-google-play-listing">
+    Localize Your Google Play Store Listing
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      <strong>Tip:</strong> You can select regions, set regional pricing, and
+      localize your listing while maintaining only one APK.
+    </p>
+  </div>
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-buyer-currency.png" class="border-img">
+</div>
+
+<p>
+  Within your Google Play listing, you’ll need to set the regions in which your
+  apps will be available, set pricing for each, and customize your Google Play
+  listing to ensure it speaks to local audiences. You can change your country
+  and carrier targeting at any time just by saving changes in the Google Play
+  Developer Console.
+</p>
+
+<h3>
+  Region selection
+</h3>
+
+<p>
+  In the Developer Console, you can set the regions you make your app available
+  to, pricing in local currencies, and all Google Play listing marketing. You
+  can specify which countries and territories you want to distribute to, and
+  even which carriers (for some countries).
+</p>
+
+<h3>
+  Pricing
+</h3>
+
+<p>
+  When you start to address new markets you have several options for setting
+  the prices of your products: apps, in-app products, and subscriptions. You
+  can set a default price for each product and allow Google Play to adjust this
+  each month for changes in exchange rates, or manually set prices.
+</p>
+
+<p>
+  There are several reasons why it might be beneficial to set prices manually,
+  such as:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Cost of living differences. To better target developing markets you may
+      consider offering your apps at a lower price to make them more affordable
+      in relation to local incomes.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Price perception. Users in some countries respond well to prices set to
+      x.99, while others prefer x.00 pricing.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Numerology. You may wish to avoid using certain numbers that are
+      considered unlucky, such as 13 or 4.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Competition. Your app may have local competition in some markets that you
+      need to account for.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Local trends and interests. Your apps may be able to bear a higher price
+      in some markets. For example, the interest in various sports varies
+      greatly from country to country.
+    </p>
+  </li>
+</ul>
+
+<p>
+  You may also want to run short-term promotions and discounts in specific
+  countries.
+</p>
+
+<p>
+  The <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#selling-pricing-your-products">
+  Pricing &amp; Distribution</a> section in the <a href=
+  "https://play.google.com/apps/publish/">Developer Console</a> is where you
+  set and manage regional distribution and local prices.
+</p>
+
+<h3>
+  Copy and creative
+</h3>
+
+<p>
+  To market to users around the world, <strong>localize your store listing,
+  including app details and description, promotional graphics, screenshots, and
+  more.</strong> Graphical assets and copy can be uploaded for each country you
+  are targeting.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-expand-4.jpg" class="border-img">
+</div>
+
+<div>
+  <img src="{@docRoot}images/gp-expand-5.jpg" class="border-img">
+</div>
+
+<p>
+  Learn more about how to localize your <a href=
+  "{@docRoot}distribute/tools/launch-checklist.html#prepare-graphics">store
+  listing</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="marketing">
+    Marketing
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-badge-jp.png">
+</div>
+
+<p>
+  Just like your Google Play listing, all other marketing should be localized
+  to speak to the local audience. This includes images, colors, icons, and
+  audio. To maximize effectiveness, <strong>run promotions, contests, and
+  announcements at local time</strong>. You can build a localized <a href=
+  "{@docRoot}distribute/tools/promote/badges.html">Google Play badge</a> and
+  <a href="{@docRoot}distribute/tools/promote/device-art.html">device art</a>
+  for each language you support.
+</p>
+
+<div class="headerLine"><h2 id="related-resources">Related Resources</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/getusers/expandnewmarkets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3,6x3,6x3,6x3,6x3,6x3"
+  data-maxResults="6"></div>

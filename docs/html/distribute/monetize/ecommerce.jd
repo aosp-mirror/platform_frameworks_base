@@ -1,0 +1,61 @@
+page.title=E-commerce
+page.image=/distribute/images/ecommerce.jpg
+page.metaImage=With Instant Buy you can sell physical goods and services from your web pages.
+page.tags="monetizing", "physical goods", "wallet"
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-ecom-0.png" style="width:300px;">
+  <p class="img-caption">
+    Product Purchase with Instant Buy
+  </p>
+</div>
+
+<p>
+  With Google Wallet Instant Buy, you've the added flexibility of selling
+  physical goods and services, such as clothing or movie tickets, through your
+  apps using <a href=
+  "https://developers.google.com/wallet/instant-buy/">Instant Buy for
+  Android</a> <strong>(US Only)</strong>.
+</p>
+
+<p>
+  You can use this option where your app is the store-front for retail or
+  webtail operations. However, you can also combine it with your <a href=
+  "{@docRoot}distribute/monetize/premium.html">premium</a> and <a href=
+  "{@docRoot}distribute/monetize/freemium.html">freemium</a> apps by offering
+  related products.
+</p>
+
+<p>
+  Your customers purchase goods and services with any Google Wallet payment
+  method &mdash; credit card, gift card, or Wallet balance. Google Wallet
+  Instant Buy helps you minimize user data entry by enabling your payment flow
+  to retrieve information directly from the user’s wallet.
+</p>
+
+<p>
+  You also keep your existing payment infrastructure and leverage Google Wallet
+  to optimize your payment flow &mdash; users can make purchases in as a few as
+  two clicks and the flow is simplified with features to retrieve information
+  directly from the user’s wallet and intelligent auto-completion of addresses.
+  To get started, set up a <a href=
+  "{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant
+  Account</a>.
+</p>
+
+<p style="clear:both">
+</p>
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/ecommerce"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+

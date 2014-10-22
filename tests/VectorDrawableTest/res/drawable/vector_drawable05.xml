@@ -1,0 +1,43 @@
+<!--
+ Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="64dp"
+        android:width="64dp"
+        android:viewportHeight="12.25"
+        android:viewportWidth="7.30625" >
+
+    <group>
+        <path
+            android:name="one"
+            android:fillColor="#ffff00"
+            android:pathData="M 1.215625,9.5l 1.9375,0.0 0.0-6.671875-2.109375,0.421875 0.0-1.078125
+                l 2.09375-0.421875 1.1874998,0.0 0.0,7.75 1.9375,0.0 0.0,1.0
+                l-5.046875,0.0 0.0-1.0Z" />
+        <path
+            android:name="two"
+            android:fillColor="#ffff00"
+            android:fillAlpha="0"
+            android:pathData="M 2.534375,9.6875l 4.140625,0.0 0.0,1.0-5.5625,0.0 0.0-1.0q 0.671875-0.6875 1.828125-1.859375
+                        q 1.1718752-1.1875 1.4687502-1.53125 0.578125-0.625 0.796875-1.0625
+                        q 0.234375-0.453125 0.234375-0.875 0.0-0.703125-0.5-1.140625
+                        q-0.484375-0.4375-1.2656252-0.4375-0.5625,0.0-1.1875,0.1875
+                        q-0.609375,0.1875-1.3125,0.59375l 0.0-1.203125q 0.71875-0.28125 1.328125-0.421875
+                        q 0.625-0.15625 1.140625-0.15625 1.3593752,0.0 2.1718752,0.6875
+                        q 0.8125,0.671875 0.8125,1.8125 0.0,0.53125-0.203125,1.015625
+                        q-0.203125,0.484375-0.734375,1.140625-0.15625,0.171875-0.9375,0.984375
+                        q-0.78125024,0.8125-2.2187502,2.265625Z" />
+    </group>
+</vector>

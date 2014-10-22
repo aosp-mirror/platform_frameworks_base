@@ -17,16 +17,12 @@
 
 package android.hardware;
 
-import android.app.PendingIntent;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * @hide

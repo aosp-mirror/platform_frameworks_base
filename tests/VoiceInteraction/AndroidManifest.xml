@@ -1,0 +1,55 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.test.voiceinteraction">
+
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
+    <application>
+        <activity android:name="VoiceInteractionMain" android:label="Voice Interaction"
+                android:theme="@android:style/Theme.Material">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="SettingsActivity"
+                android:label="Voice Interaction Settings"
+                android:excludeFromRecents="true"
+                android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <service android:name="MainInteractionService"
+                android:label="Test Voice Interaction Service"
+                android:permission="android.permission.BIND_VOICE_INTERACTION"
+                android:process=":interactor">
+            <meta-data android:name="android.voice_interaction"
+                       android:resource="@xml/interaction_service" />
+            <intent-filter>
+                <action android:name="android.service.voice.VoiceInteractionService" />
+            </intent-filter>
+        </service>
+        <service android:name="MainInteractionSessionService"
+                android:permission="android.permission.BIND_VOICE_INTERACTION"
+                android:process=":session">
+        </service>
+        <service android:name="MainRecognitionService"
+                android:label="Test Voice Interaction Service">
+            <intent-filter>
+                <action android:name="android.speech.RecognitionService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.speech" android:resource="@xml/recognition_service" />
+        </service>
+        <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target"
+                  android:theme="@android:style/Theme.Material.Light.Voice">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.VOICE" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

@@ -41,7 +41,7 @@ new devices using the Backup API.</p>
 
 <h2 id="register">Register for the Android Backup Service</h2>
 <p>This lesson requires the use of the <a
-  href="http://code.google.com/android/backup/index.html">Android Backup
+  href="{@docRoot}google/backup/index.html">Android Backup
   Service</a>, which requires registration.  Go ahead and <a
   href="http://code.google.com/android/backup/signup.html">register here</a>.  Once
 that's done, the service pre-populates an XML tag for insertion in your Android

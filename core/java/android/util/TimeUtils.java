@@ -242,6 +242,9 @@ public class TimeUtils {
     private static final int SECONDS_PER_HOUR = 60 * 60;
     private static final int SECONDS_PER_DAY = 24 * 60 * 60;
 
+    /** @hide */
+    public static final long NANOS_PER_MS = 1000000;
+
     private static final Object sFormatSync = new Object();
     private static char[] sFormatStr = new char[HUNDRED_DAY_FIELD_LEN+5];
 

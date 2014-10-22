@@ -61,6 +61,12 @@ public class Process {
     public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
 
     /**
+     * Defines the root UID.
+     * @hide
+     */
+    public static final int ROOT_UID = 0;
+
+    /**
      * Defines the UID/GID under which system code runs.
      */
     public static final int SYSTEM_UID = 1000;
@@ -129,6 +135,12 @@ public class Process {
      * @hide
      */
     public static final int PACKAGE_INFO_GID = 1032;
+
+    /**
+     * Defines the UID/GID for the shared RELRO file updater process.
+     * @hide
+     */
+    public static final int SHARED_RELRO_UID = 1037;
 
     /**
      * Defines the start of a range of UIDs (and GIDs), going from this
@@ -961,19 +973,6 @@ public class Process {
     }
 
     /**
-     * Set the out-of-memory badness adjustment for a process.
-     * 
-     * @param pid The process identifier to set.
-     * @param amt Adjustment value -- linux allows -16 to +15.
-     * 
-     * @return Returns true if the underlying system supports this
-     *         feature, else false.
-     *         
-     * {@hide}
-     */
-    public static final native boolean setOomAdj(int pid, int amt);
-
-    /**
      * Adjust the swappiness level for a process.
      *
      * @param pid The process identifier to set.
@@ -1114,4 +1113,18 @@ public class Process {
          */
         public boolean usingWrapper;
     }
+
+    /**
+     * Kill all processes in a process group started for the given
+     * pid.
+     * @hide
+     */
+    public static final native int killProcessGroup(int uid, int pid);
+
+    /**
+     * Remove all process groups.  Expected to be called when ActivityManager
+     * is restarted.
+     * @hide
+     */
+    public static final native void removeAllProcessGroups();
 }

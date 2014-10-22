@@ -3,6 +3,9 @@
 
 #include "SkCamera.h"
 
+#include "Canvas.h"
+#include "GraphicsJNI.h"
+
 static jfieldID gNativeInstanceFieldID;
 
 static void Camera_constructor(JNIEnv* env, jobject obj) {
@@ -32,39 +35,39 @@ static void Camera_translate(JNIEnv* env, jobject obj,
                              jfloat dx, jfloat dy, jfloat dz) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->translate(SkFloatToScalar(dx), SkFloatToScalar(dy), SkFloatToScalar(dz));
+    v->translate(dx, dy, dz);
 }
 
 static void Camera_rotateX(JNIEnv* env, jobject obj, jfloat degrees) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->rotateX(SkFloatToScalar(degrees));
+    v->rotateX(degrees);
 }
 
 static void Camera_rotateY(JNIEnv* env, jobject obj, jfloat degrees) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->rotateY(SkFloatToScalar(degrees));
+    v->rotateY(degrees);
 }
 
 static void Camera_rotateZ(JNIEnv* env, jobject obj, jfloat degrees) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->rotateZ(SkFloatToScalar(degrees));
+    v->rotateZ(degrees);
 }
 
 static void Camera_rotate(JNIEnv* env, jobject obj, jfloat x, jfloat y, jfloat z) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->rotateX(SkFloatToScalar(x));
-    v->rotateY(SkFloatToScalar(y));
-    v->rotateZ(SkFloatToScalar(z));
+    v->rotateX(x);
+    v->rotateY(y);
+    v->rotateZ(z);
 }
 
 static void Camera_setLocation(JNIEnv* env, jobject obj, jfloat x, jfloat y, jfloat z) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->setCameraLocation(SkFloatToScalar(x), SkFloatToScalar(y), SkFloatToScalar(z));
+    v->setCameraLocation(x, y, z);
 }
 
 static jfloat Camera_getLocationX(JNIEnv* env, jobject obj) {
@@ -93,18 +96,17 @@ static void Camera_getMatrix(JNIEnv* env, jobject obj, jlong matrixHandle) {
 }
 
 static void Camera_applyToCanvas(JNIEnv* env, jobject obj, jlong canvasHandle) {
-    SkCanvas* native_canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->applyToCanvas((SkCanvas*)native_canvas);
+    v->applyToCanvas(canvas);
 }
 
 static jfloat Camera_dotWithNormal(JNIEnv* env, jobject obj,
                                   jfloat x, jfloat y, jfloat z) {
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    SkScalar dot = v->dotWithNormal(SkFloatToScalar(x), SkFloatToScalar(y),
-                                    SkFloatToScalar(z));
+    SkScalar dot = v->dotWithNormal(x, y, z);
     return SkScalarToFloat(dot);
 }
 

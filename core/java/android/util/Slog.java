@@ -16,11 +16,6 @@
 
 package android.util;
 
-import com.android.internal.os.RuntimeInit;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 /**
  * @hide
  */
@@ -78,20 +73,40 @@ public final class Slog {
                 msg + '\n' + Log.getStackTraceString(tr));
     }
 
+    /**
+     * Like {@link Log#wtf(String, String)}, but will never cause the caller to crash, and
+     * will always be handled asynchronously.  Primarily for use by coding running within
+     * the system process.
+     */
     public static int wtf(String tag, String msg) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false, true);
     }
 
+    /**
+     * Like {@link Log#wtfStack(String, String)}, but will never cause the caller to crash, and
+     * will always be handled asynchronously.  Primarily for use by coding running within
+     * the system process.
+     */
     public static int wtfStack(String tag, String msg) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true, true);
     }
 
+    /**
+     * Like {@link Log#wtf(String, Throwable)}, but will never cause the caller to crash,
+     * and will always be handled asynchronously.  Primarily for use by coding running within
+     * the system process.
+     */
     public static int wtf(String tag, Throwable tr) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false, true);
     }
 
+    /**
+     * Like {@link Log#wtf(String, String, Throwable)}, but will never cause the caller to crash,
+     * and will always be handled asynchronously.  Primarily for use by coding running within
+     * the system process.
+     */
     public static int wtf(String tag, String msg, Throwable tr) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false, true);
     }
 
     public static int println(int priority, String tag, String msg) {

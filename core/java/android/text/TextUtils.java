@@ -43,15 +43,17 @@ import android.text.style.SuggestionRangeSpan;
 import android.text.style.SuggestionSpan;
 import android.text.style.SuperscriptSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.TtsSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.util.Printer;
-
 import android.view.View;
+
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
+
 import libcore.icu.ICU;
 
 import java.lang.reflect.Array;
@@ -231,7 +233,12 @@ public class TextUtils {
     public static boolean regionMatches(CharSequence one, int toffset,
                                         CharSequence two, int ooffset,
                                         int len) {
-        char[] temp = obtain(2 * len);
+        int tempLen = 2 * len;
+        if (tempLen < len) {
+            // Integer overflow; len is unreasonably large
+            throw new IndexOutOfBoundsException();
+        }
+        char[] temp = obtain(tempLen);
 
         getChars(one, toffset, toffset + len, temp, 0);
         getChars(two, ooffset, ooffset + len, temp, len);
@@ -603,7 +610,9 @@ public class TextUtils {
     /** @hide */
     public static final int LOCALE_SPAN = 23;
     /** @hide */
-    public static final int LAST_SPAN = LOCALE_SPAN;
+    public static final int TTS_SPAN = 24;
+    /** @hide */
+    public static final int LAST_SPAN = TTS_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -780,6 +789,10 @@ public class TextUtils {
 
                 case LOCALE_SPAN:
                     readSpan(p, sp, new LocaleSpan(p));
+                    break;
+
+                case TTS_SPAN:
+                    readSpan(p, sp, new TtsSpan(p));
                     break;
 
                 default:
@@ -1318,7 +1331,7 @@ public class TextUtils {
         }
 
         if (buf == null || buf.length < len)
-            buf = new char[ArrayUtils.idealCharArraySize(len)];
+            buf = ArrayUtils.newUnpaddedCharArray(len);
 
         return buf;
     }

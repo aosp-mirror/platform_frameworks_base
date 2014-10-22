@@ -19,6 +19,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -27,11 +28,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.AttributeSet;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.util.LogWriter;
 import android.util.SparseArray;
 import android.util.SuperNotCalledException;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -392,12 +395,13 @@ final class FragmentManagerState implements Parcelable {
  */
 interface FragmentContainer {
     public View findViewById(int id);
+    public boolean hasView();
 }
 
 /**
  * Container for fragments associated with an activity.
  */
-final class FragmentManagerImpl extends FragmentManager {
+final class FragmentManagerImpl extends FragmentManager implements LayoutInflater.Factory2 {
     static boolean DEBUG = false;
     static final String TAG = "FragmentManager";
     
@@ -432,7 +436,7 @@ final class FragmentManagerImpl extends FragmentManager {
     boolean mDestroyed;
     String mNoTransactionsBecause;
     boolean mHavePendingDeferredStart;
-    
+
     // Temporary vars for state save and restore.
     Bundle mStateBundle = null;
     SparseArray<Parcelable> mStateArray = null;
@@ -1026,6 +1030,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                     f.mActivity = null;
                                     f.mParentFragment = null;
                                     f.mFragmentManager = null;
+                                    f.mChildFragmentManager = null;
                                 }
                             }
                         }
@@ -1493,7 +1498,10 @@ final class FragmentManagerImpl extends FragmentManager {
                 return false;
             }
             final BackStackRecord bss = mBackStack.remove(last);
-            bss.popFromBackStack(true);
+            SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
+            SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
+            bss.calculateBackFragments(firstOutFragments, lastInFragments);
+            bss.popFromBackStack(true, null, firstOutFragments, lastInFragments);
             reportBackStackChanged();
         } else {
             int index = -1;
@@ -1537,9 +1545,16 @@ final class FragmentManagerImpl extends FragmentManager {
                 states.add(mBackStack.remove(i));
             }
             final int LAST = states.size()-1;
+            SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
+            SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
+            for (int i=0; i<=LAST; i++) {
+                states.get(i).calculateBackFragments(firstOutFragments, lastInFragments);
+            }
+            BackStackRecord.TransitionState state = null;
             for (int i=0; i<=LAST; i++) {
                 if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
-                states.get(i).popFromBackStack(i == LAST);
+                state = states.get(i).popFromBackStack(i == LAST, state,
+                        firstOutFragments, lastInFragments);
             }
             reportBackStackChanged();
         }
@@ -1743,6 +1758,7 @@ final class FragmentManagerImpl extends FragmentManager {
                     fs.mSavedFragmentState.setClassLoader(mActivity.getClassLoader());
                     f.mSavedViewState = fs.mSavedFragmentState.getSparseParcelableArray(
                             FragmentManagerImpl.VIEW_STATE_TAG);
+                    f.mSavedFragmentState = fs.mSavedFragmentState;
                 }
             }
         }
@@ -2049,5 +2065,101 @@ final class FragmentManagerImpl extends FragmentManager {
                 break;
         }
         return animAttr;
+    }
+
+    @Override
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        if (!"fragment".equals(name)) {
+            return null;
+        }
+
+        String fname = attrs.getAttributeValue(null, "class");
+        TypedArray a =
+                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
+        if (fname == null) {
+            fname = a.getString(com.android.internal.R.styleable.Fragment_name);
+        }
+        int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, View.NO_ID);
+        String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
+        a.recycle();
+
+        int containerId = parent != null ? parent.getId() : 0;
+        if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
+            throw new IllegalArgumentException(attrs.getPositionDescription()
+                    + ": Must specify unique android:id, android:tag, or have a parent with"
+                    + " an id for " + fname);
+        }
+
+        // If we restored from a previous state, we may already have
+        // instantiated this fragment from the state and should use
+        // that instance instead of making a new one.
+        Fragment fragment = id != View.NO_ID ? findFragmentById(id) : null;
+        if (fragment == null && tag != null) {
+            fragment = findFragmentByTag(tag);
+        }
+        if (fragment == null && containerId != View.NO_ID) {
+            fragment = findFragmentById(containerId);
+        }
+
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "onCreateView: id=0x"
+                + Integer.toHexString(id) + " fname=" + fname
+                + " existing=" + fragment);
+        if (fragment == null) {
+            fragment = Fragment.instantiate(context, fname);
+            fragment.mFromLayout = true;
+            fragment.mFragmentId = id != 0 ? id : containerId;
+            fragment.mContainerId = containerId;
+            fragment.mTag = tag;
+            fragment.mInLayout = true;
+            fragment.mFragmentManager = this;
+            fragment.onInflate(mActivity, attrs, fragment.mSavedFragmentState);
+            addFragment(fragment, true);
+        } else if (fragment.mInLayout) {
+            // A fragment already exists and it is not one we restored from
+            // previous state.
+            throw new IllegalArgumentException(attrs.getPositionDescription()
+                    + ": Duplicate id 0x" + Integer.toHexString(id)
+                    + ", tag " + tag + ", or parent id 0x" + Integer.toHexString(containerId)
+                    + " with another fragment for " + fname);
+        } else {
+            // This fragment was retained from a previous instance; get it
+            // going now.
+            fragment.mInLayout = true;
+            // If this fragment is newly instantiated (either right now, or
+            // from last saved state), then give it the attributes to
+            // initialize itself.
+            if (!fragment.mRetaining) {
+                fragment.onInflate(mActivity, attrs, fragment.mSavedFragmentState);
+            }
+        }
+
+        // If we haven't finished entering the CREATED state ourselves yet,
+        // push the inflated child fragment along.
+        if (mCurState < Fragment.CREATED && fragment.mFromLayout) {
+            moveToState(fragment, Fragment.CREATED, 0, 0, false);
+        } else {
+            moveToState(fragment);
+        }
+
+        if (fragment.mView == null) {
+            throw new IllegalStateException("Fragment " + fname
+                    + " did not create a view.");
+        }
+        if (id != 0) {
+            fragment.mView.setId(id);
+        }
+        if (fragment.mView.getTag() == null) {
+            fragment.mView.setTag(tag);
+        }
+        return fragment.mView;
+    }
+
+    @Override
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        return null;
+    }
+
+    LayoutInflater.Factory2 getLayoutInflaterFactory() {
+        return this;
     }
 }

@@ -1,0 +1,37 @@
+page.title=Delight Users with Videos
+page.metaDescription=Videos are one of the most effective ways to get users excited about your apps. 
+page.tags="engagement"
+page.image=/images/gp-engage-smule.jpg
+
+@jd:body
+<p>
+  Videos are one of the most effective ways to get users excited about your
+  apps. Use videos to showcase your apps on your Google Play Product Details
+  pages. Be sure to build a <a href="http://www.youtube.com/yt/dev/">YouTube</a>
+  page to host new videos so users can see new features or content that will
+  get them excited to return to your apps.
+</p>
+
+<p>
+  Videos let you do more than tell users about your apps &mdash; you can
+  <em>show them</em>. One of the most viewed content types is how-to videos.
+  Help users progress to the next level with YouTube <strong>game play
+  videos</strong> in Google Play, on your YouTube channel, and on your website.
+</p>
+
+<div class="center-img">
+  <img src="{@docRoot}images/gp-engage-smule.jpg">
+</div>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/engage/video/more" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>

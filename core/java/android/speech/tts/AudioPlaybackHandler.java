@@ -43,7 +43,7 @@ class AudioPlaybackHandler {
             return;
         }
 
-        item.stop(false);
+        item.stop(TextToSpeech.STOPPED);
     }
 
     public void enqueue(PlaybackQueueItem item) {

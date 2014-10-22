@@ -16,24 +16,51 @@
 * limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.ResolverDrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:maxWidth="@dimen/resolver_max_width"
+    android:maxCollapsedHeight="192dp"
+    android:maxCollapsedHeightSmall="56dp"
+    android:id="@id/contentPanel"
+    >
+
+    <TextView android:id="@+id/title"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_alwaysShow="true"
+              android:minHeight="56dp"
+              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:gravity="start|center_vertical"
+              android:paddingStart="16dp"
+              android:paddingEnd="16dp"
+              android:paddingTop="8dp"
+              android:paddingBottom="8dp"
+              android:background="@color/white"
+              android:elevation="8dp"
+              />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/resolver_list"
+        android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:nestedScrollingEnabled="true"
+        android:divider="@null"
+        />
+
+    <TextView android:id="@+id/empty"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:divider="?android:attr/dividerHorizontal"
-              android:showDividers="middle"
-              android:dividerPadding="0dip">
-
-    <FrameLayout android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_weight="1">
-
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/resolver_list" />
-
-    </FrameLayout>
+              android:layout_alwaysShow="true"
+              android:text="@string/noApplications"
+              android:padding="32dp"
+              android:gravity="center"
+              android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/button_bar"
@@ -41,32 +68,38 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_ignoreOffset="true"
+        android:layout_alwaysShow="true"
+        android:gravity="end|center_vertical"
         android:orientation="horizontal"
         android:layoutDirection="locale"
-        android:measureWithLargestChild="true">
-        <Button android:id="@+id/button_always"
-                android:layout_width="wrap_content"
-                android:layout_gravity="end"
-                android:layout_weight="1"
-                android:maxLines="2"
-                android:minHeight="@dimen/alert_dialog_button_bar_height"
-                style="?android:attr/buttonBarButtonStyle"
-                android:textSize="14sp"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="@string/activity_resolver_use_always"
-                android:onClick="onButtonClick" />
+        android:measureWithLargestChild="true"
+        android:background="@color/white"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:elevation="8dp">
         <Button android:id="@+id/button_once"
                 android:layout_width="wrap_content"
                 android:layout_gravity="start"
-                android:layout_weight="1"
                 android:maxLines="2"
-                style="?android:attr/buttonBarButtonStyle"
-                android:textSize="14sp"
+                style="?android:attr/buttonBarNegativeButtonStyle"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="@string/activity_resolver_use_once"
                 android:onClick="onButtonClick" />
+        <Button android:id="@+id/button_always"
+                android:layout_width="wrap_content"
+                android:layout_gravity="end"
+                android:maxLines="2"
+                android:minHeight="@dimen/alert_dialog_button_bar_height"
+                style="?android:attr/buttonBarPositiveButtonStyle"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/activity_resolver_use_always"
+                android:onClick="onButtonClick" />
     </LinearLayout>
-</LinearLayout>
+
+</com.android.internal.widget.ResolverDrawerLayout>

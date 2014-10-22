@@ -1,0 +1,411 @@
+fullpage=true
+page.viewport_width=970
+no_footer_links=true
+excludeFromSuggestions=true
+page.metaDescription=Android Auto
+
+@jd:body
+
+<style>
+.jd-descr {
+    height:auto;
+}
+#copyright {
+    margin-top:-35px;
+}
+.auto-img-container {
+  position:relative;
+}
+.auto-img-frame {
+  z-index:2;
+  position:relative;
+}
+.auto-img-shot {
+  position:absolute;
+  top:9px;
+  left:8px;
+  z-index:1;
+}
+.auto-img-container-cols {
+  position:relative;
+  margin-top:10px;
+}
+.auto-img-frame-cols {
+  width:380px;
+  z-index:2;
+  position:relative;
+}
+.auto-img-shot-cols {
+  width:369px;
+  position:absolute;
+  top:7px;
+  left:6px;
+  z-index:1;
+}
+.auto-col-2 {
+  width:380px;
+  display: inline;
+  float: left;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.auto-img-container-single {
+  width:380px;
+  margin:0 auto;
+  margin-top:20px;
+}
+</style>
+
+<div style="width:780px; margin:0 auto;">
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#design">Design</a>
+    <ol>
+      <li><a href="#designprinciples">Design Principles</a></li>
+      <li><a href="#uioverview">UI Overview</a></li>
+    </ol>
+  </li>
+  <li><a href="#architecture">Architecture</a></li>
+  <li><a href="#ui">User Interface</a>
+    <ol>
+      <li><a href="#launchapp">Launch App</a></li>
+      <li><a href="#useractions">User Actions</a></li>
+      <li><a href="#drawertransitions">Drawer Transitions</a></li>
+      <li><a href="#daynighttransitions">Day and Night Transitions</a></li>
+      <li><a href="#customizeui">Customizing the UI</a></li>
+    </ol>
+  </li>
+  <li><a href="#devprocess">Development Process</a></li>
+  <li><a href="#emulator">Testing Your App</a></li>
+  <li><a href="#running">Running Your App</a></li>
+</ol>
+</div>
+</div>
+
+<h1>Android Auto Developer Overview</h1>
+
+<p>Android Auto extends the Android platform into the car. When users connect
+their Android handheld device to a compatible vehicle, Android Auto provides a car-optimized
+Android experience on the vehicle's screen. Users interact with compatible apps and services
+through voice actions and the vehicle's input controls.</p>
+
+<p>The Android Auto SDK lets you easily extend your existing apps to work in the car, without
+having to worry about vehicle-specific hardware differences. You can use many Android APIs and
+services you are already familiar with. Android Auto provides an easy to use UI model and
+supports notifications and voice actions:</p>
+
+<dl>
+<dt style="margin-bottom:10px"><strong>Media UI</strong></dt>
+<dd style="margin-bottom:20px">
+Android Auto defines interaction models and car-specific UI patterns for apps. The
+first version of Android Auto supports media apps, such as music, podcast, live radio, and
+audio news apps.
+</dd>
+<dt style="margin-bottom:10px"><strong>Notifications</strong></dt>
+<dd style="margin-bottom:20px">
+The platform will integrate with existing Android APIs for notifications. Users will get
+car appropiate notifications from Android apps on the vehicle's screen.</dd>
+
+<dt style="margin-bottom:10px"><strong>Voice Actions</strong></dt>
+<dd style="margin-bottom:20px">
+Android Auto supports a set of voice actions to interact with compatible apps and services.
+Apps can respond to the voice actions they're interested in, such as playing a particular song
+or taking a note.</dd>
+
+<dt style="margin-bottom:10px"><strong>Easy Development Workflow</strong></dt>
+<dd style="margin-bottom:20px">
+To extend an existing Android app for Android Auto, you implement a set of interfaces and
+services defined in the platform. You can reuse existing functionality and many Android APIs
+you already know.</dd>
+</dl>
+
+<p>We’ll release the Android Auto SDK in the coming months, which will let you test your
+Android Auto experience on a regular Android device.</p>
+
+
+<h2 id="design">Design</h2>
+
+<p>Android Auto extends users' digital ecosystem into their cars, allowing drivers to stay
+connected to their virtual worlds while staying focused on the road ahead.</p>
+
+<p>Because driving is the primary activity in the car, any digital experiences should be designed
+to complement and augment that activity. They should never demand the user's attention.</p>
+
+<p>Designing for cars is fundamentally different than designing for phones or tablets, and
+requires rethinking how experiences unfold. Because attention is limited and not all tasks are
+possible in the car, effective apps leverage the entire set of devices that drivers have,
+leveraging the app experience on those devices, outside of the car, to set the stage for simple
+experiences while driving.</p>
+
+<p>Android Auto experiences are:</p>
+
+<p><strong>Glanceable and simple</strong>. Driving requires users' full attention. In-car software
+should not. Android Auto was designed to simplify not only the UI, but to optimize interactions
+and require less thinking, induce lower cognitive load, and ultimately, be safer. Effective apps
+provide just enough information in the minimum amount of time the user needs to glance at it and
+return their attention back to the road. Apps should also reduce the number of features to only
+those that are safe and drive-appropriate.</p>
+
+<p><strong>Predictive, yet predictable</strong>. Android Auto leverages rich, contextual awareness
+to keep the driver informed about important situations during the drive. Rich, timely help is
+combined with predictable functions. Effective apps make use of the patterns for common tasks and
+show timely information only when relevant.</p>
+
+<p><strong>Connected</strong>. By leveraging the user's personal ecosystem of apps and services,
+Android Auto promotes a continuous experience from phone to car to other devices. The user's
+music, destinations, and virtual ecosystem are always available to augment the drive. Experiences
+that leverage personal context and other devices are naturally part of Android Auto.</p>
+
+<p><strong>Naturally integrated</strong>. Android Auto blends the user's apps with the car,
+creating a truly integrated experience that leverages what is unique about each car. By using
+the screens, controls, and capabilities of the vehicle, Android Auto feels like an extension of
+the car.</p>
+
+
+
+
+<h2 id="architecture">Architecture</h2>
+
+<p>The Android Auto app shows your app's customized UI on the vehicle's screen. To communicate
+with the Android Auto app, your media app implements a set of media interfaces.</p>
+
+<div style="width:750px;margin:0 auto">
+<img src="{@docRoot}auto/images/figure01.png" alt="" />
+<p class="img-caption">
+  <strong>Figure 1</strong> - Architecture of Android Auto.
+</p>
+</div>
+
+<p>The architecture consists of the following components:</p>
+
+<p><strong>Media App</strong> - Runs a media service that exposes content through browsing and
+playback APIs. The service provides content to the Android Auto app. This is your Android app.</p>
+
+<p><strong>Android Auto App</strong> - Creates the UI and handles user interactions.
+This app uses a media client to request content from the media service running in the media
+app. The client requests data from the media service and monitors service states.</p>
+
+<p><strong>Vehicle Display</strong> - Shows app content and supports user interaction via
+on-screen soft buttons and other components, such as physical buttons or steering
+wheel controls.</p>
+
+<p>Android media apps must implement binders to these APIs:</p>
+
+<ul>
+<li><strong>Browsing</strong> - Enables a media client to browse a hierarchy of a user’s
+media collection, presented as a virtual file system with containers (similar to directories)
+and items (similar to files).</li>
+<li><strong>Playback</strong> - Enables a media client to control media playback and monitor
+playback state through callbacks.</li>
+</ul>
+
+
+<h2 id="ui">User Interface</h2>
+
+<p>The Android Auto app uses a car-specific UI model to display content and user interaction
+opportunities. Android Auto provides you with a standard UI designed to minimize driver
+distraction. You do not have to test a custom UI for for driver distraction, which is a
+lengthy and expensive process involving multiple legislations across the globe and different
+standards for each vehicle OEM.</p>
+
+<p>The UI defines interfaces for browsing, searching, and listening to content from
+media apps. You can customize the UI colors, action icons, background images, and more.</p>
+
+<h3 id="launchapp">Launcher</h3>
+
+<p>The launcher shows all the compatible media apps installed on the user’s
+Android device and lets users select one of them from an scrollable list:</p>
+
+<div class="auto-img-container-single">
+  <div class="auto-img-container">
+    <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="/auto/images/assets/do_01_switcher.png" />
+  </div>
+  <p class="img-caption" style="margin-top:0px">
+    <strong>Figure 2.</strong> The launcher.
+  </p>
+</div>
+
+<h3>Primary App UI</h3>
+
+<p>After the user selects a media app, the display shows the primary app UI.
+You can customize this UI to show your own icons, app name, and
+background images. Figure 3 shows an example of a customized UI:</p>
+
+<div class="cols">
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_05_template.png" />
+  </div>
+</div>
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_02_music.png" />
+  </div>
+</div>
+</div>
+<p class="img-caption">
+  <strong>Figure 3.</strong> A customized UI.
+</p>
+
+
+
+<h3 id="useractions">User Actions</h3>
+
+<p>The primary app UI supports four main actions on the action bar, four auxiliary actions
+on the overflow bar, and the <em>Return</em> action. You can use standard controls and customize
+the actions and icons, as shown in Figure 4.</p>
+
+<div class="auto-img-container-single">
+  <div class="auto-img-container">
+    <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="/auto/images/assets/do_03_more.png" />
+  </div>
+  <p class="img-caption" style="margin-top:0px">
+    <strong>Figure 4.</strong> Custom extra actions.
+  </p>
+</div>
+
+<h3 id="drawertransitions">Drawer Transitions</h3>
+
+<p>For browse actions, the display shows the drawer transition as shown in Figure 5.</p>
+
+<div class="cols">
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_06_gdrawer.png" />
+  </div>
+</div>
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_04_mdrawer.png" />
+  </div>
+</div>
+</div>
+<p class="img-caption">
+  <strong>Figure 5.</strong> Generic and customized drawers.
+</p>
+
+<p>After the transition from the primary app UI to the drawer UI, the drawer
+appears on the center. The customized drawer UI shows the media containers and
+media files provided by the media service in your app. You can also customize drawers
+with icons for list items.</p>
+
+
+<h3 id="daynighttransitions">Day and Night Transitions</h3>
+
+<p>All the UIs support different color schemes for day and night.
+The platform provides the state (day or night) and makes adjustments automatically.</p>
+
+<div class="cols">
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_02_music.png" />
+  </div>
+</div>
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_02_music_night.png" />
+  </div>
+</div>
+</div>
+<p class="img-caption">
+  <strong>Figure 6.</strong> Day and night modes.
+</p>
+
+<h3 id="customizeui">Customizing UIs</h3>
+
+<p>To customize the UI, you provide the following app-specific resources and actions
+to the Android Auto media client:</p>
+
+<ul>
+<li><strong>Resources</strong> - App logo, app name, theme colors, and background images.</li>
+<li><strong>Actions</strong> - Multiple custom actions; for example: <em>Thumbs Up/Down</em>,
+<em>Favorite</em>, and <em>Bookmark</em>. These actions are app-specific.</li>
+</ul>
+
+<p>If provided, the media client automatically uses them in the UI.</p>
+
+
+<h2 id="devprocess">Development Process</h2>
+
+<p class="note"><strong>Note:</strong> When released, the Android Auto SDK will provide
+media service interfaces, an APK for handheld devices that simulates the Android Auto
+app, and other tools for Android Auto development.</p>
+
+<p>To create a media app for Android Auto, you include an Android service in your app
+that implements the media service interfaces provided by the Android Auto SDK. These
+interfaces define functionality for browsing and finding content, playing media,
+customizing the UI, and performing app-specific actions.</p>
+
+<p>The media service interfaces present the content library as a navigable tree and enable
+clients to play media, get album art, obtain theme resources for the UI, and
+invoke app-specific actions.</p>
+
+<p>You don’t have to create a new app for Android Auto: you can extend your existing
+Android app with implementations of the media service interfaces. Your service exposes
+your app’s media content, theme resources, and app-specific actions using the methods and
+data types specified by the media service interfaces. This simplifies the development
+cycle because:</p>
+
+<ul>
+<li>You do not have to maintain a separate project for Android Auto</li>
+<li>You can reuse existing functionality from your Android app</li>
+</ul>
+
+<p>The Android Auto client presents the customized UI to users and invokes the
+functionality from your service as needed. This has two additional advantages:</p>
+
+<ul>
+<li>Your app does not implement a UI for Android Auto</li>
+<li>Your app does not manage user interactions directly</li>
+</ul>
+
+<p>This also means that you do not have to worry about vehicle-specific hardware
+differences such as screen resolutions, software interfaces, knobs and touch
+controls.</p>
+
+
+<h2 id="emulator">Testing Your App on an Android Device</h2>
+
+<p>The Android Auto SDK includes an APK with a media client implementation, which is
+similar to those available in compatible vehicles. To test your app with this
+client:</p>
+
+<ol>
+<li>Get an Android device with a similar form factor to a dashboard screen (like a
+Nexus 7).</li>
+<li>Configure the device for Android development.</li>
+<li>Install the APK for the media client from the Android Auto SDK on the device.</li>
+<li>Install the APK for your app on the device.</li>
+<li>Open the media client app from the Android Auto SDK on the device.</li>
+<li>Select your app from the list of available services.</li>
+</ol>
+
+<p>The customized UI for your app appears on the client. You can navigate the content
+library and play media. If your app provides app-specific actions, these actions appear
+in the UI controls.</p>
+
+
+<h2 id="running">Running Your App on Android Auto</h2>
+
+<p>Media apps are available on the Google Play Store for compatible Android devices.
+When users connect their Android device to a compatible vehicle, the
+Android Auto media client shows a list of all the Android apps installed on the phone
+that implement the media service interfaces.</p>
+
+<p>When users select one of these apps, the Android Auto media client uses the app’s
+service to respond to user input and invoke the methods in the media service interfaces
+to build the UI, navigate the content library, and play media.</p>
+
+<div style="margin-bottom:40px"> </div>
+</div>

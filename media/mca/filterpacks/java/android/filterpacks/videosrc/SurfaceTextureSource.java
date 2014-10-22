@@ -16,30 +16,19 @@
 
 package android.filterpacks.videosrc;
 
-import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.FrameManager;
 import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.GLFrame;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
-import android.media.MediaPlayer;
 import android.os.ConditionVariable;
 import android.opengl.Matrix;
-
-import java.io.IOException;
-import java.io.FileDescriptor;
-import java.lang.IllegalArgumentException;
-import java.util.List;
-import java.util.Set;
 
 import android.util.Log;
 

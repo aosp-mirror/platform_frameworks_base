@@ -106,4 +106,69 @@ public final class Formatter {
     public static String formatIpAddress(int ipv4Address) {
         return NetworkUtils.intToInetAddress(ipv4Address).getHostAddress();
     }
+
+    private static final int SECONDS_PER_MINUTE = 60;
+    private static final int SECONDS_PER_HOUR = 60 * 60;
+    private static final int SECONDS_PER_DAY = 24 * 60 * 60;
+
+    /**
+     * Returns elapsed time for the given millis, in the following format:
+     * 1 day 5 hrs; will include at most two units, can go down to seconds precision.
+     * @param context the application context
+     * @param millis the elapsed time in milli seconds
+     * @return the formatted elapsed time
+     * @hide
+     */
+    public static String formatShortElapsedTime(Context context, long millis) {
+        long secondsLong = millis / 1000;
+
+        int days = 0, hours = 0, minutes = 0;
+        if (secondsLong >= SECONDS_PER_DAY) {
+            days = (int)(secondsLong / SECONDS_PER_DAY);
+            secondsLong -= days * SECONDS_PER_DAY;
+        }
+        if (secondsLong >= SECONDS_PER_HOUR) {
+            hours = (int)(secondsLong / SECONDS_PER_HOUR);
+            secondsLong -= hours * SECONDS_PER_HOUR;
+        }
+        if (secondsLong >= SECONDS_PER_MINUTE) {
+            minutes = (int)(secondsLong / SECONDS_PER_MINUTE);
+            secondsLong -= minutes * SECONDS_PER_MINUTE;
+        }
+        int seconds = (int)secondsLong;
+
+        if (days >= 2) {
+            days += (hours+12)/24;
+            return context.getString(com.android.internal.R.string.durationDays, days);
+        } else if (days > 0) {
+            if (hours == 1) {
+                return context.getString(com.android.internal.R.string.durationDayHour, days, hours);
+            }
+            return context.getString(com.android.internal.R.string.durationDayHours, days, hours);
+        } else if (hours >= 2) {
+            hours += (minutes+30)/60;
+            return context.getString(com.android.internal.R.string.durationHours, hours);
+        } else if (hours > 0) {
+            if (minutes == 1) {
+                return context.getString(com.android.internal.R.string.durationHourMinute, hours,
+                        minutes);
+            }
+            return context.getString(com.android.internal.R.string.durationHourMinutes, hours,
+                    minutes);
+        } else if (minutes >= 2) {
+            minutes += (seconds+30)/60;
+            return context.getString(com.android.internal.R.string.durationMinutes, minutes);
+        } else if (minutes > 0) {
+            if (seconds == 1) {
+                return context.getString(com.android.internal.R.string.durationMinuteSecond, minutes,
+                        seconds);
+            }
+            return context.getString(com.android.internal.R.string.durationMinuteSeconds, minutes,
+                    seconds);
+        } else if (seconds == 1) {
+            return context.getString(com.android.internal.R.string.durationSecond, seconds);
+        } else {
+            return context.getString(com.android.internal.R.string.durationSeconds, seconds);
+        }
+    }
 }

@@ -1,5 +1,5 @@
 page.title=Action Bar
-page.tags="actionbar","menu","tabs"
+page.tags=actionbar,menu,tabs
 
 @jd:body
 
@@ -1126,8 +1126,8 @@ android.widget.SpinnerAdapter} by using {@link android.widget.ArrayAdapter} impl
 uses a string array as the data source:</p>
 
 <pre>
-SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.action_list,
-          android.R.layout.simple_spinner_dropdown_item);
+SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this,
+        R.array.action_list, android.R.layout.simple_spinner_dropdown_item);
 </pre>
 
 <p>The {@link android.widget.ArrayAdapter#createFromResource createFromResource()} method takes
@@ -1145,7 +1145,7 @@ defined in a resource looks like this:</p>
         &lt;item&gt;Venus&lt;/item&gt;
         &lt;item&gt;Earth&lt;/item&gt;
     &lt;/string-array&gt;
-&lt;/pre&gt;
+&lt;/resources&gt;
 </pre>
 
 <p>The {@link android.widget.ArrayAdapter} returned by {@link
@@ -1179,10 +1179,13 @@ mOnNavigationListener = new OnNavigationListener() {
   public boolean onNavigationItemSelected(int position, long itemId) {
     // Create new fragment from our own Fragment class
     ListContentFragment newFragment = new ListContentFragment();
-    FragmentTransaction ft = openFragmentTransaction();
+    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
     // Replace whatever is in the fragment container with this fragment
-    //  and give the fragment a tag name equal to the string at the position selected
+    // and give the fragment a tag name equal to the string at the position
+    // selected
     ft.replace(R.id.fragment_container, newFragment, strings[position]);
+
     // Apply changes
     ft.commit();
     return true;
@@ -1210,7 +1213,8 @@ public class ListContentFragment extends Fragment {
     &#64;Override
     public void onAttach(Activity activity) {
       // This is the first callback received; here we can set the text for
-      // the fragment as defined by the tag specified during the fragment transaction
+      // the fragment as defined by the tag specified during the fragment
+      // transaction
       super.onAttach(activity);
       mText = getTag();
     }

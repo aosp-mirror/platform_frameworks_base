@@ -24,6 +24,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.utils.BinderHolder;
 import android.media.Image;
 import android.media.ImageReader;
@@ -84,20 +85,50 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     public class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
-        @Override
-        public void onCameraError(int errorCode) {
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onDeviceError(int,
+         * android.hardware.camera2.CaptureResultExtras)
+         */
+        public void onDeviceError(int errorCode, CaptureResultExtras resultExtras)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
 
-        @Override
-        public void onCameraIdle() {
+        /*
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onDeviceIdle()
+         */
+        public void onDeviceIdle() throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
 
-        @Override
-        public void onCaptureStarted(int requestId, long timestamp) {
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onCaptureStarted(
+         * android.hardware.camera2.CaptureResultExtras, long)
+         */
+        public void onCaptureStarted(CaptureResultExtras resultExtras, long timestamp)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
 
-        @Override
-        public void onResultReceived(int frameId, CameraMetadataNative result) {
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onResultReceived(
+         * android.hardware.camera2.impl.CameraMetadataNative,
+         * android.hardware.camera2.CaptureResultExtras)
+         */
+        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
     }
 
@@ -139,8 +170,10 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     }
 
     private int submitCameraRequest(CaptureRequest request, boolean streaming) throws Exception {
-        int requestId = mCameraUser.submitRequest(request, streaming);
-        assertTrue("Request IDs should be non-negative", requestId >= 0);
+        int requestId = mCameraUser.submitRequest(request, streaming, null);
+        assertTrue(
+                "Request IDs should be non-negative (expected: >= 0, actual: " + requestId + ")",
+                requestId >= 0);
         return requestId;
     }
 
@@ -250,13 +283,13 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         CaptureRequest.Builder builder = createDefaultBuilder(/* needStream */false);
         CaptureRequest request1 = builder.build();
-        int status = mCameraUser.submitRequest(request1, /* streaming */false);
+        int status = mCameraUser.submitRequest(request1, /* streaming */false, null);
         assertEquals("Expected submitRequest to return BAD_VALUE " +
                 "since we had 0 surface targets set.", CameraBinderTestUtils.BAD_VALUE, status);
 
         builder.addTarget(mSurface);
         CaptureRequest request2 = builder.build();
-        status = mCameraUser.submitRequest(request2, /* streaming */false);
+        status = mCameraUser.submitRequest(request2, /* streaming */false, null);
         assertEquals("Expected submitRequest to return BAD_VALUE since " +
                 "the target surface wasn't registered with createStream.",
                 CameraBinderTestUtils.BAD_VALUE, status);
@@ -290,15 +323,15 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertNotSame("Request IDs should be unique for multiple requests", requestId1,
                 requestIdStreaming);
 
-        int status = mCameraUser.cancelRequest(-1);
+        int status = mCameraUser.cancelRequest(-1, null);
         assertEquals("Invalid request IDs should not be cancellable",
                 CameraBinderTestUtils.BAD_VALUE, status);
 
-        status = mCameraUser.cancelRequest(requestId1);
+        status = mCameraUser.cancelRequest(requestId1, null);
         assertEquals("Non-streaming request IDs should not be cancellable",
                 CameraBinderTestUtils.BAD_VALUE, status);
 
-        status = mCameraUser.cancelRequest(requestIdStreaming);
+        status = mCameraUser.cancelRequest(requestIdStreaming, null);
         assertEquals("Streaming request IDs should be cancellable", CameraBinderTestUtils.NO_ERROR,
                 status);
 
@@ -337,7 +370,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
             CameraBinderTestUtils.INVALID_OPERATION, status);
 
         // Test good case, waitUntilIdle when there is no active repeating request
-        status = mCameraUser.cancelRequest(requestIdStreaming);
+        status = mCameraUser.cancelRequest(requestIdStreaming, null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
         status = mCameraUser.waitUntilIdle();
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
@@ -349,16 +382,14 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         CaptureRequest request = createDefaultBuilder(/* needStream */true).build();
 
         // Test both single request and streaming request.
-        int requestId1 = submitCameraRequest(request, /* streaming */false);
         verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).times(1)).onResultReceived(
-                eq(requestId1),
-                argThat(matcher));
+                argThat(matcher),
+                any(CaptureResultExtras.class));
 
-        int streamingId = submitCameraRequest(request, /* streaming */true);
         verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).atLeast(NUM_CALLBACKS_CHECKED))
                 .onResultReceived(
-                        eq(streamingId),
-                        argThat(matcher));
+                        argThat(matcher),
+                        any(CaptureResultExtras.class));
     }
 
     @SmallTest
@@ -370,13 +401,13 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         // Test both single request and streaming request.
         int requestId1 = submitCameraRequest(request, /* streaming */false);
         verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).times(1)).onCaptureStarted(
-                eq(requestId1),
+                any(CaptureResultExtras.class),
                 anyLong());
 
         int streamingId = submitCameraRequest(request, /* streaming */true);
         verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).atLeast(NUM_CALLBACKS_CHECKED))
                 .onCaptureStarted(
-                        eq(streamingId),
+                        any(CaptureResultExtras.class),
                         timestamps.capture());
 
         long timestamp = 0; // All timestamps should be larger than 0.
@@ -399,9 +430,9 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         SystemClock.sleep(WAIT_FOR_WORK_MS);
 
         // Cancel and make sure we eventually quiesce
-        status = mCameraUser.cancelRequest(streamingId);
+        status = mCameraUser.cancelRequest(streamingId, null);
 
-        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(1)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(1)).onDeviceIdle();
 
         // Submit a few capture requests
         int requestId1 = submitCameraRequest(request, /* streaming */false);
@@ -411,7 +442,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         int requestId5 = submitCameraRequest(request, /* streaming */false);
 
         // And wait for more idle
-        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(2)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(2)).onDeviceIdle();
 
     }
 
@@ -420,14 +451,14 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         int status;
 
         // Initial flush should work
-        status = mCameraUser.flush();
+        status = mCameraUser.flush(null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
         // Then set up a stream
         CaptureRequest request = createDefaultBuilder(/* needStream */true).build();
 
         // Flush should still be a no-op, really
-        status = mCameraUser.flush();
+        status = mCameraUser.flush(null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
         // Submit a few capture requests
@@ -438,10 +469,10 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         int requestId5 = submitCameraRequest(request, /* streaming */false);
 
         // Then flush and wait for idle
-        status = mCameraUser.flush();
+        status = mCameraUser.flush(null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
-        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(1)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(1)).onDeviceIdle();
 
         // Now a streaming request
         int streamingId = submitCameraRequest(request, /* streaming */true);
@@ -450,10 +481,10 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         SystemClock.sleep(WAIT_FOR_WORK_MS);
 
         // Then flush and wait for the idle callback
-        status = mCameraUser.flush();
+        status = mCameraUser.flush(null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
-        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(2)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(2)).onDeviceIdle();
 
         // TODO: When errors are hooked up, count that errors + successful
         // requests equal to 5.

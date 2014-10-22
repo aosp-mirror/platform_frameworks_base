@@ -26,27 +26,77 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
-
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
+import com.android.systemui.recents.AlternateRecentsComponent;
+
 
 public class Recents extends SystemUI implements RecentsComponent {
     private static final String TAG = "Recents";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
+
+    // Which recents to use
+    boolean mUseAlternateRecents = true;
+    AlternateRecentsComponent mAlternateRecents;
+    boolean mBootCompleted = false;
 
     @Override
     public void start() {
+        if (mUseAlternateRecents) {
+            if (mAlternateRecents == null) {
+                mAlternateRecents = new AlternateRecentsComponent(mContext);
+            }
+            mAlternateRecents.onStart();
+        }
+
         putComponent(RecentsComponent.class, this);
     }
 
     @Override
+    protected void onBootCompleted() {
+        if (mUseAlternateRecents) {
+            if (mAlternateRecents != null) {
+                mAlternateRecents.onBootCompleted();
+            }
+        }
+        mBootCompleted = true;
+    }
+
+    @Override
+    public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onShowRecents(triggeredFromAltTab, statusBarView);
+        }
+    }
+
+    @Override
+    public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onHideRecents(triggeredFromAltTab, triggeredFromHomeKey);
+        } else {
+            Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
+            intent.setPackage("com.android.systemui");
+            sendBroadcastSafely(intent);
+
+            RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+        }
+    }
+
+    @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
+        if (mUseAlternateRecents) {
+            // Launch the alternate recents if required
+            mAlternateRecents.onToggleRecents(statusBarView);
+            return;
+        }
+
         if (DEBUG) Log.d(TAG, "toggle recents panel");
         try {
             TaskDescription firstTask = RecentTasksLoader.getInstance(mContext).getFirstTask();
@@ -177,13 +227,11 @@ public class Recents extends SystemUI implements RecentsComponent {
                                 Intent intent =
                                         new Intent(RecentsActivity.WINDOW_ANIMATION_START_INTENT);
                                 intent.setPackage("com.android.systemui");
-                                mContext.sendBroadcastAsUser(intent,
-                                        new UserHandle(UserHandle.USER_CURRENT));
+                                sendBroadcastSafely(intent);
                             }
                         });
                 intent.putExtra(RecentsActivity.WAITING_FOR_WINDOW_ANIMATION_PARAM, true);
-                mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                        UserHandle.USER_CURRENT));
+                startActivitySafely(intent, opts.toBundle());
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentAppsIntent", e);
@@ -191,32 +239,74 @@ public class Recents extends SystemUI implements RecentsComponent {
     }
 
     @Override
-    public void preloadRecentTasksList() {
-        if (DEBUG) Log.d(TAG, "preloading recents");
-        Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.recent.RecentsPreloadReceiver");
-        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-
-        RecentTasksLoader.getInstance(mContext).preloadFirstTask();
+    protected void onConfigurationChanged(Configuration newConfig) {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onConfigurationChanged(newConfig);
+        }
     }
 
     @Override
-    public void cancelPreloadingRecentTasksList() {
-        if (DEBUG) Log.d(TAG, "cancel preloading recents");
-        Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.recent.RecentsPreloadReceiver");
-        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+    public void preloadRecents() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onPreloadRecents();
+        } else {
+            Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
+            intent.setClassName("com.android.systemui",
+                    "com.android.systemui.recent.RecentsPreloadReceiver");
+            sendBroadcastSafely(intent);
 
-        RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+            RecentTasksLoader.getInstance(mContext).preloadFirstTask();
+        }
     }
 
     @Override
-    public void closeRecents() {
-        if (DEBUG) Log.d(TAG, "closing recents panel");
-        Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
-        intent.setPackage("com.android.systemui");
+    public void cancelPreloadingRecents() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onCancelPreloadingRecents();
+        } else {
+            Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
+            intent.setClassName("com.android.systemui",
+                    "com.android.systemui.recent.RecentsPreloadReceiver");
+            sendBroadcastSafely(intent);
+
+            RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+        }
+    }
+
+    @Override
+    public void showNextAffiliatedTask() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onShowNextAffiliatedTask();
+        }
+    }
+
+    @Override
+    public void showPrevAffiliatedTask() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onShowPrevAffiliatedTask();
+        }
+    }
+
+    @Override
+    public void setCallback(Callbacks cb) {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.setRecentsComponentCallback(cb);
+        }
+    }
+
+    /**
+     * Send broadcast only if BOOT_COMPLETED
+     */
+    private void sendBroadcastSafely(Intent intent) {
+        if (!mBootCompleted) return;
         mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+    }
+
+    /**
+     * Start activity only if BOOT_COMPLETED
+     */
+    private void startActivitySafely(Intent intent, Bundle opts) {
+        if (!mBootCompleted) return;
+        mContext.startActivityAsUser(intent, opts, new UserHandle(UserHandle.USER_CURRENT));
     }
 }

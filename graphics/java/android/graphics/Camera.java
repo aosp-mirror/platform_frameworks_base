@@ -154,7 +154,7 @@ public class Camera {
             getMatrix(mMatrix);
             canvas.concat(mMatrix);
         } else {
-            nativeApplyToCanvas(canvas.mNativeCanvas);
+            nativeApplyToCanvas(canvas.getNativeCanvasWrapper());
         }
     }
 

@@ -16,7 +16,11 @@
 
 package android.app;
 
+import android.annotation.SdkConstant;
+import android.app.Notification.Builder;
+import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -70,6 +74,16 @@ public class NotificationManager
 {
     private static String TAG = "NotificationManager";
     private static boolean localLOGV = false;
+
+    /**
+     * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_EFFECTS_SUPPRESSOR_CHANGED
+            = "android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED";
 
     private static INotificationManager sService;
 
@@ -132,9 +146,11 @@ public class NotificationManager
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        Notification stripped = notification.clone();
+        Builder.stripForDelivery(stripped);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    notification, idOut, UserHandle.myUserId());
+                    stripped, idOut, UserHandle.myUserId());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
@@ -157,9 +173,11 @@ public class NotificationManager
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        Notification stripped = notification.clone();
+        Builder.stripForDelivery(stripped);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    notification, idOut, user.getIdentifier());
+                    stripped, idOut, user.getIdentifier());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
@@ -219,6 +237,30 @@ public class NotificationManager
         try {
             service.cancelAllNotifications(pkg, UserHandle.myUserId());
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public ComponentName getEffectsSuppressor() {
+        INotificationManager service = getService();
+        try {
+            return service.getEffectsSuppressor();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean matchesCallFilter(Bundle extras) {
+        INotificationManager service = getService();
+        try {
+            return service.matchesCallFilter(extras);
+        } catch (RemoteException e) {
+            return false;
         }
     }
 

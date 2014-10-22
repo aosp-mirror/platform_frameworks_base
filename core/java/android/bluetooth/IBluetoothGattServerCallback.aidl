@@ -22,7 +22,7 @@ import android.os.ParcelUuid;
  * Callback definitions for interacting with BLE / GATT
  * @hide
  */
-interface IBluetoothGattServerCallback {
+oneway interface IBluetoothGattServerCallback {
     void onServerRegistered(in int status, in int serverIf);
     void onScanResult(in String address, in int rssi, in byte[] advData);
     void onServerConnectionState(in int status, in int serverIf,
@@ -58,4 +58,5 @@ interface IBluetoothGattServerCallback {
                                      in ParcelUuid descrId,
                                      in byte[] value);
     void onExecuteWrite(in String address, in int transId, in boolean execWrite);
+    void onNotificationSent(in String address, in int status);
 }

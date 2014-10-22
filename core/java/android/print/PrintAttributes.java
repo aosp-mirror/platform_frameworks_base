@@ -105,6 +105,13 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Gets the minimal margins. If the content does not fit
      * these margins it will be clipped.
+     * <p>
+     * <strong>These margins are physically imposed by the printer and they
+     * are <em>not</em> rotated, i.e. they are the same for both portrait and
+     * landscape. For example, a printer may not be able to print in a stripe
+     * on both left and right sides of the page.
+     * </strong>
+     * </p>
      *
      * @return The margins or <code>null</code> if not set.
      */
@@ -115,6 +122,13 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Sets the minimal margins. If the content does not fit
      * these margins it will be clipped.
+     * <p>
+     * <strong>These margins are physically imposed by the printer and they
+     * are <em>not</em> rotated, i.e. they are the same for both portrait and
+     * landscape. For example, a printer may not be able to print in a stripe
+     * on both left and right sides of the page.
+     * </strong>
+     * </p>
      *
      * @param The margins.
      *
@@ -149,6 +163,93 @@ public final class PrintAttributes implements Parcelable {
     public void setColorMode(int colorMode) {
         enforceValidColorMode(colorMode);
         mColorMode = colorMode;
+    }
+
+    /**
+     * Gets whether this print attributes are in portrait orientation,
+     * which is the media size is in portrait and all orientation dependent
+     * attributes such as resolution and margins are properly adjusted.
+     *
+     * @return Whether this print attributes are in portrait.
+     *
+     * @hide
+     */
+    public boolean isPortrait() {
+        return mMediaSize.isPortrait();
+    }
+
+    /**
+     * Gets a new print attributes instance which is in portrait orientation,
+     * which is the media size is in portrait and all orientation dependent
+     * attributes such as resolution and margins are properly adjusted.
+     *
+     * @return New instance in portrait orientation if this one is in
+     * landscape, otherwise this instance.
+     *
+     * @hide
+     */
+    public PrintAttributes asPortrait() {
+        if (isPortrait()) {
+            return this;
+        }
+
+        PrintAttributes attributes = new PrintAttributes();
+
+        // Rotate the media size.
+        attributes.setMediaSize(getMediaSize().asPortrait());
+
+        // Rotate the resolution.
+        Resolution oldResolution = getResolution();
+        Resolution newResolution = new Resolution(
+                oldResolution.getId(),
+                oldResolution.getLabel(),
+                oldResolution.getVerticalDpi(),
+                oldResolution.getHorizontalDpi());
+        attributes.setResolution(newResolution);
+
+        // Do not rotate the physical margins.
+        attributes.setMinMargins(getMinMargins());
+
+        attributes.setColorMode(getColorMode());
+
+        return attributes;
+    }
+
+    /**
+     * Gets a new print attributes instance which is in landscape orientation,
+     * which is the media size is in landscape and all orientation dependent
+     * attributes such as resolution and margins are properly adjusted.
+     *
+     * @return New instance in landscape orientation if this one is in
+     * portrait, otherwise this instance.
+     *
+     * @hide
+     */
+    public PrintAttributes asLandscape() {
+        if (!isPortrait()) {
+            return this;
+        }
+
+        PrintAttributes attributes = new PrintAttributes();
+
+        // Rotate the media size.
+        attributes.setMediaSize(getMediaSize().asLandscape());
+
+        // Rotate the resolution.
+        Resolution oldResolution = getResolution();
+        Resolution newResolution = new Resolution(
+                oldResolution.getId(),
+                oldResolution.getLabel(),
+                oldResolution.getVerticalDpi(),
+                oldResolution.getHorizontalDpi());
+        attributes.setResolution(newResolution);
+
+        // Do not rotate the physical margins.
+        attributes.setMinMargins(getMinMargins());
+
+        attributes.setColorMode(getColorMode());
+
+        return attributes;
     }
 
     @Override

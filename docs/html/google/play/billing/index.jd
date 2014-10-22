@@ -1,4 +1,8 @@
 page.title=Google Play In-app Billing
+page.metaDescription=In-app Billing lets you sell digital content as one-time purchases or subscriptions.
+page.image=/images/play_dev.jpg
+meta.tags="monetizing, inappbilling, subscriptions"
+page.tags="billing, inapp, iap"
 @jd:body
 
 <p>In-app Billing is a Google Play service that lets you sell digital content from inside
@@ -10,17 +14,35 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
-  <li><strong>Purchase Status API</strong>&mdash;The <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Purchase Status API</a> lets you query the status of in-app product or subscription purchases. </li>
+  <li><strong>IAB v2 shutdown</strong>&mdash;In-app Billing v2 API is deprecated and will be shut down in January 2015. If your app is still using In-app Billing v2, please migrate to the v3 API as soon as possible.</li>
+  <li><strong>Seasonal subscriptions</strong>&mdash;You can now set up a
+    recurring <a href="billing_subscriptions.html#user-billing">seasonal
+    subscription</a> that starts and ends on the same date each year (for
+    example, a sports subscription that starts every September 1 and ends every
+    April 10).</li>
+  <li><strong>Deferred subscription billing</strong>&mdash;You can
+    <a href="billing_subscriptions.html#deferred-billing">defer</a> a
+    subscriber's next billing date until the date you choose. The user still has
+    access to the content but is not charged during the deferral period.</li>
+  <li><strong>Google Play Developer API</strong>&mdash;The
+    <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google
+    Play Developer API</a> allows you to perform a number of publishing and
+    app-management tasks. It includes the functionality previously known as the
+    <em>Purchase Status API.</em> </li>
+  <li><strong>Refund/Revoke subscription</strong>&mdash;You can use the
+    Google Play Developer API to <a href="billing_subscriptions.html#refunds">refund
+    and revoke</a> a user's subscription. If you do this, the user's
+    subscription ends
+    immediately, and his or her most recent subscription payment is
+    refunded.</li>
   <li><strong>In-app Billing Version 3</strong>&mdash;The <a href="{@docRoot}google/play/billing/api.html">latest version</a> of In-app Billing features a synchronous API that is easier to implement and lets you manage in-app products and subscriptions more effectively.</li>
-  <li><strong>Subscriptions now supported in Version 3</strong>&mdash;You can query and launch purchase flows for subscription items using the V3 API.</li>
-  <li><strong>Free trials</strong>&mdash;You can now offer users a configurable <a href="/google/play/billing/v2/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed.</li>
  </ul>
 </div>
 </div>
 
 <ul>
 <li>Standard in-app products (one-time billing), or</li>
-<li>Subscriptions, (recurring, automated billing)</li>
+<li>Subscriptions (recurring, automated billing)</li>
 </ul>
 
 <p>When you use the in-app billing service to sell an item,
@@ -40,8 +62,6 @@ products and subscriptions from inside an app.</p>
 
 <p>To get started, read the documents below or take the <a href="{@docRoot}training/in-app-billing/index.html">Selling 
     In-app Products</a> training class.</p>
-</div>
-</div>
 
 <dl>
   <dt><strong><a href="{@docRoot}google/play/billing/billing_overview.html">Overview</a></strong></dt>

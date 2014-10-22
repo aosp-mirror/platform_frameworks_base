@@ -39,10 +39,6 @@
 package android.renderscript;
 
 
-import android.graphics.Matrix;
-import android.util.Log;
-
-
 /**
  * @hide
  * @deprecated in API 16

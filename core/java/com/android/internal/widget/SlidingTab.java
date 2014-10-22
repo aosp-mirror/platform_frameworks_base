@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -65,6 +66,11 @@ public class SlidingTab extends ViewGroup {
     private static final int ANIM_TARGET_TIME = 500; // Time to show targets (in ms)
     private boolean mHoldLeftOnTransition = true;
     private boolean mHoldRightOnTransition = true;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     private OnTriggerListener mOnTriggerListener;
     private int mGrabbedState = OnTriggerListener.NO_HANDLE;
@@ -821,7 +827,7 @@ public class SlidingTab extends ViewGroup {
                 mVibrator = (android.os.Vibrator) getContext()
                         .getSystemService(Context.VIBRATOR_SERVICE);
             }
-            mVibrator.vibrate(duration);
+            mVibrator.vibrate(duration, VIBRATION_ATTRIBUTES);
         }
     }
 

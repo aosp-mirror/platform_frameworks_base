@@ -21,7 +21,34 @@ package android.speech.tts;
  * {@hide}
  */
 oneway interface ITextToSpeechCallback {
+    /**
+     * Tells the client that the synthesis has started.
+     *
+     * @param utteranceId Unique id identifying synthesis request.
+     */
     void onStart(String utteranceId);
-    void onDone(String utteranceId);
-    void onError(String utteranceId);
+
+    /**
+     * Tells the client that the synthesis has finished.
+     *
+     * @param utteranceId Unique id identifying synthesis request.
+     */
+    void onSuccess(String utteranceId);
+
+    /**
+     * Tells the client that the synthesis was stopped.
+     *
+     * @param utteranceId Unique id identifying synthesis request.
+     */
+    void onStop(String utteranceId);
+
+    /**
+     * Tells the client that the synthesis has failed.
+     *
+     * @param utteranceId Unique id identifying synthesis request.
+     * @param errorCode One of the values from
+     *        {@link android.speech.tts.v2.TextToSpeech}.
+     */
+    void onError(String utteranceId, int errorCode);
+
 }

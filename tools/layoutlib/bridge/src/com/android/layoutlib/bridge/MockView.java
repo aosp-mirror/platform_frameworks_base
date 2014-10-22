@@ -31,7 +31,11 @@ import android.widget.TextView;
 public class MockView extends TextView {
 
     public MockView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+        this(context, attrs, defStyle, 0);
+    }
+
+    public MockView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         setText(this.getClass().getSimpleName());
         setTextColor(0xFF000000);

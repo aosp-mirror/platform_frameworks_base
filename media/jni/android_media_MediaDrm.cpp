@@ -100,6 +100,21 @@ struct KeyTypes {
     jint kKeyTypeRelease;
 } gKeyTypes;
 
+struct CertificateTypes {
+    jint kCertificateTypeNone;
+    jint kCertificateTypeX509;
+} gCertificateTypes;
+
+struct CertificateFields {
+    jfieldID wrappedPrivateKey;
+    jfieldID certificateData;
+};
+
+struct StateExceptionFields {
+    jmethodID init;
+    jclass classId;
+};
+
 struct fields_t {
     jfieldID context;
     jmethodID post_event;
@@ -110,6 +125,12 @@ struct fields_t {
     SetFields set;
     IteratorFields iterator;
     EntryFields entry;
+    CertificateFields certificate;
+    StateExceptionFields stateException;
+    jclass certificateClassId;
+    jclass hashmapClassId;
+    jclass arraylistClassId;
+    jclass stringClassId;
 };
 
 static fields_t gFields;
@@ -197,6 +218,14 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
     }
 }
 
+static void throwStateException(JNIEnv *env, const char *msg, status_t err) {
+    ALOGE("Illegal state exception: %s (%d)", msg, err);
+
+    jobject exception = env->NewObject(gFields.stateException.classId,
+            gFields.stateException.init, static_cast<int>(err),
+            env->NewStringUTF(msg));
+    env->Throw(static_cast<jthrowable>(exception));
+}
 
 static bool throwExceptionAsNecessary(
         JNIEnv *env, status_t err, const char *msg = NULL) {
@@ -234,7 +263,7 @@ static bool throwExceptionAsNecessary(
 
     String8 vendorMessage;
     if (err >= ERROR_DRM_VENDOR_MIN && err <= ERROR_DRM_VENDOR_MAX) {
-        vendorMessage.format("DRM vendor-defined error: %d", err);
+        vendorMessage = String8::format("DRM vendor-defined error: %d", err);
         drmMessage = vendorMessage.string();
     }
 
@@ -256,12 +285,11 @@ static bool throwExceptionAsNecessary(
             if (msg == NULL) {
                 msg = drmMessage;
             } else {
-                errbuf.format("%s: %s", msg, drmMessage);
+                errbuf = String8::format("%s: %s", msg, drmMessage);
                 msg = errbuf.string();
             }
         }
-        ALOGE("Illegal state exception: %s", msg);
-        jniThrowException(env, "java/lang/IllegalStateException", msg);
+        throwStateException(env, msg, err);
         return true;
     }
     return false;
@@ -282,8 +310,6 @@ JDrm::JDrm(
 }
 
 JDrm::~JDrm() {
-    mDrm.clear();
-
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
     env->DeleteWeakGlobalRef(mObject);
@@ -348,6 +374,13 @@ void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) 
     }
 }
 
+void JDrm::disconnect() {
+    if (mDrm != NULL) {
+        mDrm->destroyPlugin();
+        mDrm.clear();
+    }
+}
+
 
 // static
 bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType) {
@@ -406,8 +439,7 @@ static String8 JStringToString8(JNIEnv *env, jstring const &jstr) {
 */
 
 static KeyedVector<String8, String8> HashMapToKeyedVector(JNIEnv *env, jobject &hashMap) {
-    jclass clazz;
-    FIND_CLASS(clazz, "java/lang/String");
+    jclass clazz = gFields.stringClassId;
     KeyedVector<String8, String8> keyedVector;
 
     jobject entrySet = env->CallObjectMethod(hashMap, gFields.hashmap.entrySet);
@@ -450,8 +482,7 @@ static KeyedVector<String8, String8> HashMapToKeyedVector(JNIEnv *env, jobject &
 }
 
 static jobject KeyedVectorToHashMap (JNIEnv *env, KeyedVector<String8, String8> const &map) {
-    jclass clazz;
-    FIND_CLASS(clazz, "java/util/HashMap");
+    jclass clazz = gFields.hashmapClassId;
     jobject hashMap = env->NewObject(clazz, gFields.hashmap.init);
     for (size_t i = 0; i < map.size(); ++i) {
         jstring jkey = env->NewStringUTF(map.keyAt(i).string());
@@ -465,8 +496,7 @@ static jobject KeyedVectorToHashMap (JNIEnv *env, KeyedVector<String8, String8> 
 
 static jobject ListOfVectorsToArrayListOfByteArray(JNIEnv *env,
                                                    List<Vector<uint8_t> > list) {
-    jclass clazz;
-    FIND_CLASS(clazz, "java/util/ArrayList");
+    jclass clazz = gFields.arraylistClassId;
     jobject arrayList = env->NewObject(clazz, gFields.arraylist.init);
     List<Vector<uint8_t> >::iterator iter = list.begin();
     while (iter != list.end()) {
@@ -515,6 +545,7 @@ static void android_media_MediaDrm_release(JNIEnv *env, jobject thiz) {
     sp<JDrm> drm = setDrm(env, thiz, NULL);
     if (drm != NULL) {
         drm->setListener(NULL);
+        drm->disconnect();
     }
 }
 
@@ -542,6 +573,11 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_RELEASE", "I");
     gKeyTypes.kKeyTypeRelease = env->GetStaticIntField(clazz, field);
 
+    GET_STATIC_FIELD_ID(field, clazz, "CERTIFICATE_TYPE_NONE", "I");
+    gCertificateTypes.kCertificateTypeNone = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "CERTIFICATE_TYPE_X509", "I");
+    gCertificateTypes.kCertificateTypeX509 = env->GetStaticIntField(clazz, field);
+
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyRequest");
     GET_FIELD_ID(gFields.keyRequest.data, clazz, "mData", "[B");
     GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
@@ -549,6 +585,11 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm$ProvisionRequest");
     GET_FIELD_ID(gFields.provisionRequest.data, clazz, "mData", "[B");
     GET_FIELD_ID(gFields.provisionRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
+
+    FIND_CLASS(clazz, "android/media/MediaDrm$Certificate");
+    GET_FIELD_ID(gFields.certificate.wrappedPrivateKey, clazz, "mWrappedKey", "[B");
+    GET_FIELD_ID(gFields.certificate.certificateData, clazz, "mCertificateData", "[B");
+    gFields.certificateClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "java/util/ArrayList");
     GET_METHOD_ID(gFields.arraylist.init, clazz, "<init>", "()V");
@@ -571,6 +612,19 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "java/util/Map$Entry");
     GET_METHOD_ID(gFields.entry.getKey, clazz, "getKey", "()Ljava/lang/Object;");
     GET_METHOD_ID(gFields.entry.getValue, clazz, "getValue", "()Ljava/lang/Object;");
+
+    FIND_CLASS(clazz, "java/util/HashMap");
+    gFields.hashmapClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
+
+    FIND_CLASS(clazz, "java/lang/String");
+    gFields.stringClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
+
+    FIND_CLASS(clazz, "java/util/ArrayList");
+    gFields.arraylistClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
+
+    FIND_CLASS(clazz, "android/media/MediaDrm$MediaDrmStateException");
+    GET_METHOD_ID(gFields.stateException.init, clazz, "<init>", "(ILjava/lang/String;)V");
+    gFields.stateException.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
 }
 
 static void android_media_MediaDrm_native_setup(
@@ -826,8 +880,8 @@ static jobject android_media_MediaDrm_queryKeyStatus(
     return KeyedVectorToHashMap(env, infoMap);
 }
 
-static jobject android_media_MediaDrm_getProvisionRequest(
-    JNIEnv *env, jobject thiz) {
+static jobject android_media_MediaDrm_getProvisionRequestNative(
+    JNIEnv *env, jobject thiz, jint jcertType, jstring jcertAuthority) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
@@ -839,7 +893,17 @@ static jobject android_media_MediaDrm_getProvisionRequest(
     Vector<uint8_t> request;
     String8 defaultUrl;
 
-    status_t err = drm->getProvisionRequest(request, defaultUrl);
+    String8 certType;
+    if (jcertType == gCertificateTypes.kCertificateTypeX509) {
+        certType = "X.509";
+    } else if (jcertType == gCertificateTypes.kCertificateTypeNone) {
+        certType = "none";
+    } else {
+        certType = "invalid";
+    }
+
+    String8 certAuthority = JStringToString8(env, jcertAuthority);
+    status_t err = drm->getProvisionRequest(certType, certAuthority, request, defaultUrl);
 
     if (throwExceptionAsNecessary(env, err, "Failed to get provision request")) {
         return NULL;
@@ -863,8 +927,47 @@ static jobject android_media_MediaDrm_getProvisionRequest(
     return provisionObj;
 }
 
-static void android_media_MediaDrm_provideProvisionResponse(
+static jobject android_media_MediaDrm_provideProvisionResponseNative(
     JNIEnv *env, jobject thiz, jbyteArray jresponse) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (drm == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
+        return NULL;
+    }
+
+    if (jresponse == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "provision response is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> response(JByteArrayToVector(env, jresponse));
+    Vector<uint8_t> certificate, wrappedKey;
+
+    status_t err = drm->provideProvisionResponse(response, certificate, wrappedKey);
+
+    // Fill out return obj
+    jclass clazz = gFields.certificateClassId;
+
+    jobject certificateObj = NULL;
+
+    if (clazz && certificate.size() && wrappedKey.size()) {
+        certificateObj = env->AllocObject(clazz);
+        jbyteArray jcertificate = VectorToJByteArray(env, certificate);
+        env->SetObjectField(certificateObj, gFields.certificate.certificateData, jcertificate);
+
+        jbyteArray jwrappedKey = VectorToJByteArray(env, wrappedKey);
+        env->SetObjectField(certificateObj, gFields.certificate.wrappedPrivateKey, jwrappedKey);
+    }
+
+    throwExceptionAsNecessary(env, err, "Failed to handle provision response");
+    return certificateObj;
+}
+
+static void android_media_MediaDrm_unprovisionDeviceNative(
+    JNIEnv *env, jobject thiz) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
@@ -873,17 +976,10 @@ static void android_media_MediaDrm_provideProvisionResponse(
         return;
     }
 
-    if (jresponse == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                          "provision response is null");
-        return;
-    }
-
-    Vector<uint8_t> response(JByteArrayToVector(env, jresponse));
-
-    status_t err = drm->provideProvisionResponse(response);
+    status_t err = drm->unprovisionDevice();
 
     throwExceptionAsNecessary(env, err, "Failed to handle provision response");
+    return;
 }
 
 static jobject android_media_MediaDrm_getSecureStops(
@@ -1209,6 +1305,38 @@ static jboolean android_media_MediaDrm_verifyNative(
 }
 
 
+static jbyteArray android_media_MediaDrm_signRSANative(
+    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    jstring jalgorithm, jbyteArray jwrappedKey, jbyteArray jmessage) {
+
+    sp<IDrm> drm = GetDrm(env, jdrm);
+
+    if (!CheckSession(env, drm, jsessionId)) {
+        return NULL;
+    }
+
+    if (jalgorithm == NULL || jwrappedKey == NULL || jmessage == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "required argument is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(env, jsessionId));
+    String8 algorithm = JStringToString8(env, jalgorithm);
+    Vector<uint8_t> wrappedKey(JByteArrayToVector(env, jwrappedKey));
+    Vector<uint8_t> message(JByteArrayToVector(env, jmessage));
+    Vector<uint8_t> signature;
+
+    status_t err = drm->signRSA(sessionId, algorithm, message, wrappedKey, signature);
+
+    if (throwExceptionAsNecessary(env, err, "Failed to sign")) {
+        return NULL;
+    }
+
+    return VectorToJByteArray(env, signature);
+}
+
+
 static JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaDrm_release },
     { "native_init", "()V", (void *)android_media_MediaDrm_native_init },
@@ -1244,11 +1372,14 @@ static JNINativeMethod gMethods[] = {
     { "queryKeyStatus", "([B)Ljava/util/HashMap;",
       (void *)android_media_MediaDrm_queryKeyStatus },
 
-    { "getProvisionRequest", "()Landroid/media/MediaDrm$ProvisionRequest;",
-      (void *)android_media_MediaDrm_getProvisionRequest },
+    { "getProvisionRequestNative", "(ILjava/lang/String;)Landroid/media/MediaDrm$ProvisionRequest;",
+      (void *)android_media_MediaDrm_getProvisionRequestNative },
 
-    { "provideProvisionResponse", "([B)V",
-      (void *)android_media_MediaDrm_provideProvisionResponse },
+    { "provideProvisionResponseNative", "([B)Landroid/media/MediaDrm$Certificate;",
+      (void *)android_media_MediaDrm_provideProvisionResponseNative },
+
+    { "unprovisionDevice", "()V",
+      (void *)android_media_MediaDrm_unprovisionDeviceNative },
 
     { "getSecureStops", "()Ljava/util/List;",
       (void *)android_media_MediaDrm_getSecureStops },
@@ -1287,10 +1418,12 @@ static JNINativeMethod gMethods[] = {
 
     { "verifyNative", "(Landroid/media/MediaDrm;[B[B[B[B)Z",
       (void *)android_media_MediaDrm_verifyNative },
+
+    { "signRSANative", "(Landroid/media/MediaDrm;[BLjava/lang/String;[B[B)[B",
+      (void *)android_media_MediaDrm_signRSANative },
 };
 
 int register_android_media_Drm(JNIEnv *env) {
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaDrm", gMethods, NELEM(gMethods));
 }
-

@@ -1,5 +1,6 @@
 page.title=Widgets
 page.tags="appwidget","home"
+page.metaDescription=Design guide to creating widgets that are easy to use and look great.
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}guide/topics/appwidgets/index.html">

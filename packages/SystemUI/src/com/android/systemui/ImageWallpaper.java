@@ -537,7 +537,7 @@ public class ImageWallpaper extends WallpaperService {
 
             checkGlError();
 
-            if (w < 0 || h < 0) {
+            if (w > 0 || h > 0) {
                 glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
             }

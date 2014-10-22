@@ -37,8 +37,9 @@ import android.view.View;
 
 public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "FULLockscreen";
+    private static final String FACE_LOCK_PACKAGE = "com.android.facelock";
 
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
@@ -64,10 +65,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     // the isRunning() function to return.  However, it is probably not necessary to have both
     // mRunning and mServiceRunning.  I'd just rather wait to change that logic.
     private volatile boolean mIsRunning = false;
-
-    // So the user has a consistent amount of time when brought to the backup method from Face
-    // Unlock
-    private final int BACKUP_LOCK_TIMEOUT = 5000;
 
     KeyguardSecurityCallback mKeyguardScreenCallback;
 
@@ -128,7 +125,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         if (!mBoundToService) {
             Log.d(TAG, "Binding to Face Unlock service for user="
                     + mLockPatternUtils.getCurrentUser());
-            mContext.bindServiceAsUser(new Intent(IFaceLockInterface.class.getName()),
+            mContext.bindServiceAsUser(
+                    new Intent(IFaceLockInterface.class.getName()).setPackage(FACE_LOCK_PACKAGE),
                     mConnection,
                     Context.BIND_AUTO_CREATE,
                     new UserHandle(mLockPatternUtils.getCurrentUser()));
@@ -266,7 +264,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
                 // When switching between portrait and landscape view while Face Unlock is running,
                 // the screen will eventually go dark unless we poke the wakelock when Face Unlock
                 // is restarted.
-                mKeyguardScreenCallback.userActivity(0);
+                mKeyguardScreenCallback.userActivity();
 
                 int[] position;
                 position = new int[2];
@@ -304,7 +302,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         int currentUserId = mLockPatternUtils.getCurrentUser();
         if (authenticatedUserId == currentUserId) {
             if (DEBUG) Log.d(TAG, "Unlocking for user " + authenticatedUserId);
-            mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
+            mKeyguardScreenCallback.reportUnlockAttempt(true);
             mKeyguardScreenCallback.dismiss(true);
         } else {
             Log.d(TAG, "Ignoring unlock for authenticated user (" + authenticatedUserId +
@@ -323,7 +321,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
         mKeyguardScreenCallback.showBackupSecurity();
         stop();
-        mKeyguardScreenCallback.userActivity(BACKUP_LOCK_TIMEOUT);
+        mKeyguardScreenCallback.userActivity();
     }
 
     /**
@@ -335,7 +333,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         // next time the user visits keyguard.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
 
-        mKeyguardScreenCallback.reportFailedUnlockAttempt();
+        mKeyguardScreenCallback.reportUnlockAttempt(false);
     }
 
     /**
@@ -345,7 +343,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     void handlePokeWakelock(int millis) {
       PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
       if (powerManager.isScreenOn()) {
-        mKeyguardScreenCallback.userActivity(millis);
+        mKeyguardScreenCallback.userActivity();
       }
     }
 

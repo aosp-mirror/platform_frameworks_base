@@ -16,7 +16,10 @@
 
 package android.renderscript;
 
-/** 
+
+/**
+ * Class for exposing the native RenderScript Short2 type back to the Android system.
+ *
  * Vector version of the basic short type.
  * Provides two short fields packed.
  */

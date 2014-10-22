@@ -27,7 +27,6 @@ import android.os.Message;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -93,6 +92,18 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * the device's default alert theme with a light background.
      */
     public static final int THEME_DEVICE_DEFAULT_LIGHT = 5;
+
+    /**
+     * No layout hint.
+     * @hide
+     */
+    public static final int LAYOUT_HINT_NONE = 0;
+
+    /**
+     * Hint layout to the side.
+     * @hide
+     */
+    public static final int LAYOUT_HINT_SIDE = 1;
     
     protected AlertDialog(Context context) {
         this(context, resolveDialogTheme(context, 0), true);
@@ -147,10 +158,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     /**
-     * Gets one of the buttons used in the dialog.
-     * <p>
-     * If a button does not exist in the dialog, null will be returned.
-     * 
+     * Gets one of the buttons used in the dialog. Returns null if the specified
+     * button does not exist or the dialog has not yet been fully created (for
+     * example, via {@link #show()} or {@link #create()}).
+     *
      * @param whichButton The identifier of the button that should be returned.
      *            For example, this can be
      *            {@link DialogInterface#BUTTON_POSITIVE}.
@@ -159,7 +170,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public Button getButton(int whichButton) {
         return mAlert.getButton(whichButton);
     }
-    
+
     /**
      * Gets the list view used in the dialog.
      *  
@@ -206,6 +217,14 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public void setView(View view, int viewSpacingLeft, int viewSpacingTop, int viewSpacingRight,
             int viewSpacingBottom) {
         mAlert.setView(view, viewSpacingLeft, viewSpacingTop, viewSpacingRight, viewSpacingBottom);
+    }
+
+    /**
+     * Internal api to allow hinting for the best button panel layout.
+     * @hide
+     */
+    void setButtonPanelLayoutHint(int layoutHint) {
+        mAlert.setButtonPanelLayoutHint(layoutHint);
     }
 
     /**
@@ -853,6 +872,21 @@ public class AlertDialog extends Dialog implements DialogInterface {
         }
         
         /**
+         * Set a custom view resource to be the contents of the Dialog. The
+         * resource will be inflated, adding all top-level views to the screen.
+         *
+         * @param layoutResId Resource ID to be inflated.
+         * @return This Builder object to allow for chaining of calls to set
+         *         methods
+         */
+        public Builder setView(int layoutResId) {
+            P.mView = null;
+            P.mViewLayoutResId = layoutResId;
+            P.mViewSpacingSpecified = false;
+            return this;
+        }
+
+        /**
          * Set a custom view to be the contents of the Dialog. If the supplied view is an instance
          * of a {@link ListView} the light background will be used.
          *
@@ -862,6 +896,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          */
         public Builder setView(View view) {
             P.mView = view;
+            P.mViewLayoutResId = 0;
             P.mViewSpacingSpecified = false;
             return this;
         }
@@ -891,6 +926,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
         public Builder setView(View view, int viewSpacingLeft, int viewSpacingTop,
                 int viewSpacingRight, int viewSpacingBottom) {
             P.mView = view;
+            P.mViewLayoutResId = 0;
             P.mViewSpacingSpecified = true;
             P.mViewSpacingLeft = viewSpacingLeft;
             P.mViewSpacingTop = viewSpacingTop;

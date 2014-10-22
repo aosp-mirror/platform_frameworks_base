@@ -1,0 +1,10 @@
+page.title=Building Apps for Wearables
+page.trainingcourse=true
+page.image=wear/images/notifications.png
+page.metaDescription=Learn how to build notifications, send and sync data, and use voice actions.
+
+@jd:body
+
+
+<p>These classes teach you how to build notifications in a handheld app that are automatically
+synced to wearables as well as how to build apps that run on wearables.</p>

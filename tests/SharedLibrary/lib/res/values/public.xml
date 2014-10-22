@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <public type="string" name="shared_string" id="0x00020003" />
+    <public type="style" name="CodeFont" id="0x00040000" />
+    <public type="style" name="Theme" id="0x00040001" />
+
+    <public type="attr" name="name"         id="0x00010000" />
+    <public type="attr" name="streetNumber" id="0x00010001" />
+    <public type="attr" name="streetName"   id="0x00010002" />
+    <public type="attr" name="city"         id="0x00010003" />
+    <public type="attr" name="state"        id="0x00010004" />
+    <public type="attr" name="zip"          id="0x00010005" />
+    <public type="attr" name="country"      id="0x00010006" />
+
+    <public type="drawable" name="size_48x48" id="0x00030000" />
+
+    <public type="array" name="animals"     id="0x02050000" />
+</resources>

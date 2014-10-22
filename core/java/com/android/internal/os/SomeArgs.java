@@ -35,11 +35,17 @@ public final class SomeArgs {
 
     private boolean mInPool;
 
+    static final int WAIT_NONE = 0;
+    static final int WAIT_WAITING = 1;
+    static final int WAIT_FINISHED = 2;
+    int mWaitState = WAIT_NONE;
+
     public Object arg1;
     public Object arg2;
     public Object arg3;
     public Object arg4;
     public Object arg5;
+    public Object arg6;
     public int argi1;
     public int argi2;
     public int argi3;
@@ -70,6 +76,9 @@ public final class SomeArgs {
         if (mInPool) {
             throw new IllegalStateException("Already recycled.");
         }
+        if (mWaitState != WAIT_NONE) {
+            return;
+        }
         synchronized (sPoolLock) {
             clear();
             if (sPoolSize < MAX_POOL_SIZE) {
@@ -87,6 +96,7 @@ public final class SomeArgs {
         arg3 = null;
         arg4 = null;
         arg5 = null;
+        arg6 = null;
         argi1 = 0;
         argi2 = 0;
         argi3 = 0;

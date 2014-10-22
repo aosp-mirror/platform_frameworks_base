@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -221,11 +222,16 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         return lineEnd(widget, buffer);
     }
 
+    private static boolean isTouchSelecting(boolean isMouse, Spannable buffer) {
+        return isMouse ? Touch.isActivelySelecting(buffer) : isSelecting(buffer);
+    }
+
     @Override
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
         int initialScrollX = -1;
         int initialScrollY = -1;
         final int action = event.getAction();
+        final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
 
         if (action == MotionEvent.ACTION_UP) {
             initialScrollX = Touch.getInitialScrollX(widget, buffer);
@@ -236,19 +242,30 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
         if (widget.isFocused() && !widget.didTouchFocusSelect()) {
             if (action == MotionEvent.ACTION_DOWN) {
-              if (isSelecting(buffer)) {
-                  int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-
-                  buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
-
-                  // Disallow intercepting of the touch events, so that
-                  // users can scroll and select at the same time.
-                  // without this, users would get booted out of select
-                  // mode once the view detected it needed to scroll.
-                  widget.getParent().requestDisallowInterceptTouchEvent(true);
-              }
+                // Capture the mouse pointer down location to ensure selection starts
+                // right under the mouse (and is not influenced by cursor location).
+                // The code below needs to run for mouse events.
+                // For touch events, the code should run only when selection is active.
+                if (isMouse || isTouchSelecting(isMouse, buffer)) {
+                    int offset = widget.getOffsetForPosition(event.getX(), event.getY());
+                    buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
+                    // Disallow intercepting of the touch events, so that
+                    // users can scroll and select at the same time.
+                    // without this, users would get booted out of select
+                    // mode once the view detected it needed to scroll.
+                    widget.getParent().requestDisallowInterceptTouchEvent(true);
+                }
             } else if (action == MotionEvent.ACTION_MOVE) {
-                if (isSelecting(buffer) && handled) {
+
+                // Cursor can be active at any location in the text while mouse pointer can start
+                // selection from a totally different location. Use LAST_TAP_DOWN span to ensure
+                // text selection will start from mouse pointer location.
+                if (isMouse && Touch.isSelectionStarted(buffer)) {
+                    int offset = buffer.getSpanStart(LAST_TAP_DOWN);
+                    Selection.setSelection(buffer, offset);
+                }
+
+                if (isTouchSelecting(isMouse, buffer) && handled) {
                     // Before selecting, make sure we've moved out of the "slop".
                     // handled will be true, if we're in select mode AND we're
                     // OUT of the slop
@@ -277,7 +294,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                 }
 
                 int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-                if (isSelecting(buffer)) {
+                if (isTouchSelecting(isMouse, buffer)) {
                     buffer.removeSpan(LAST_TAP_DOWN);
                     Selection.extendSelection(buffer, offset);
                 }
@@ -288,7 +305,6 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                 return true;
             }
         }
-
         return handled;
     }
 

@@ -1,0 +1,71 @@
+page.title=Adding Pages to a Notification
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li>Add Pages to a Notification</li>
+</ol>
+</div>
+</div>
+
+<p>When you'd like to provide more information without requiring users
+to open your app on their handheld device, you can
+add one or more pages to the notification on the wearable. The additional pages
+appear immediately to the right of the main notification card.
+</p>
+
+<img src="{@docRoot}wear/images/09_pages.png" height="200" style="margin:0 0 20px 0" />
+<img src="{@docRoot}wear/images/08_pages.png" height="200" style="margin:0 0 20px 40px" />
+
+<p>To create a notification with multiple pages:</p>
+<ol>
+    <li>Create the main notification (the first page) with
+    {@link android.support.v4.app.NotificationCompat.Builder},
+    in the way you'd like the notification to appear on a handset.</li>
+    <li>Create the additional pages for the wearable with
+    {@link android.support.v4.app.NotificationCompat.Builder}.</li>
+    <li>Apply the pages to the main notification with the
+    {@link android.support.v4.app.NotificationCompat.WearableExtender#addPage addPage()}
+    method or add multiple pages in a {@link java.util.Collection} with the
+    {@link android.support.v4.app.NotificationCompat.WearableExtender#addPage addPages()} method.
+    </li>
+</ol>
+
+<p>For example, here's some code that adds a second page to a notification:</p>
+
+<pre>
+// Create builder for the main notification
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.new_message)
+        .setContentTitle("Page 1")
+        .setContentText("Short message")
+        .setContentIntent(viewPendingIntent);
+
+// Create a big text style for the second page
+BigTextStyle secondPageStyle = new NotificationCompat.BigTextStyle();
+secondPageStyle.setBigContentTitle("Page 2")
+               .bigText("A lot of text...");
+
+// Create second page notification
+Notification secondPageNotification =
+        new NotificationCompat.Builder(this)
+        .setStyle(secondPageStyle)
+        .build();
+
+// Add second page with wearable extender and extend the main notification
+Notification twoPageNotification =
+        new WearableExtender()
+                .addPage(secondPageNotification)
+                .extend(notificationBuilder)
+                .build();
+
+// Issue the notification
+notificationManager =
+        NotificationManagerCompat.from(this);
+notificationManager.notify(notificationId, twoPageNotification);
+</pre>

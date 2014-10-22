@@ -17,6 +17,11 @@
 package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.AdvertiseSettings;
+import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
+import android.bluetooth.le.ResultStorageDescriptor;
 import android.os.ParcelUuid;
 
 import android.bluetooth.IBluetoothGattCallback;
@@ -29,23 +34,20 @@ import android.bluetooth.IBluetoothGattServerCallback;
 interface IBluetoothGatt {
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
 
-    void startScan(in int appIf, in boolean isServer);
-    void startScanWithUuids(in int appIf, in boolean isServer, in ParcelUuid[] ids);
+    void startScan(in int appIf, in boolean isServer, in ScanSettings settings,
+                   in List<ScanFilter> filters,
+                   in List scanStorages);
     void stopScan(in int appIf, in boolean isServer);
-
+    void flushPendingBatchResults(in int appIf, in boolean isServer);
+    void startMultiAdvertising(in int appIf,
+                               in AdvertiseData advertiseData,
+                               in AdvertiseData scanResponse,
+                               in AdvertiseSettings settings);
+    void stopMultiAdvertising(in int appIf);
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);
     void unregisterClient(in int clientIf);
-    void clientConnect(in int clientIf, in String address, in boolean isDirect);
+    void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport);
     void clientDisconnect(in int clientIf, in String address);
-    void startAdvertising(in int appIf);
-    void stopAdvertising();
-    boolean setAdvServiceData(in byte[] serviceData);
-    byte[] getAdvServiceData();
-    boolean setAdvManufacturerCodeAndData(int manufactureCode, in byte[] manufacturerData);
-    byte[] getAdvManufacturerData();
-    List<ParcelUuid> getAdvServiceUuids();
-    void removeAdvManufacturerCodeAndData(int manufacturerCode);
-    boolean isAdvertising();
     void refreshDevice(in int clientIf, in String address);
     void discoverServices(in int clientIf, in String address);
     void readCharacteristic(in int clientIf, in String address, in int srvcType,
@@ -73,10 +75,12 @@ interface IBluetoothGatt {
     void beginReliableWrite(in int clientIf, in String address);
     void endReliableWrite(in int clientIf, in String address, in boolean execute);
     void readRemoteRssi(in int clientIf, in String address);
+    void configureMTU(in int clientIf, in String address, in int mtu);
+    void connectionParameterUpdate(in int clientIf, in String address, in int connectionPriority);
 
     void registerServer(in ParcelUuid appId, in IBluetoothGattServerCallback callback);
     void unregisterServer(in int serverIf);
-    void serverConnect(in int servertIf, in String address, in boolean isDirect);
+    void serverConnect(in int servertIf, in String address, in boolean isDirect, in int transport);
     void serverDisconnect(in int serverIf, in String address);
     void beginServiceDeclaration(in int serverIf, in int srvcType,
                             in int srvcInstanceId, in int minHandles,

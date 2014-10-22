@@ -20,9 +20,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Messenger;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Interface to control and observe state of a specific network, hiding
@@ -44,7 +44,8 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
 
     protected NetworkInfo mNetworkInfo;
     protected LinkProperties mLinkProperties;
-    protected LinkCapabilities mLinkCapabilities;
+    protected NetworkCapabilities mNetworkCapabilities;
+    protected Network mNetwork = new Network(ConnectivityManager.NETID_UNSET);
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
@@ -54,7 +55,7 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
         mNetworkInfo = new NetworkInfo(
                 networkType, -1, ConnectivityManager.getNetworkTypeName(networkType), null);
         mLinkProperties = new LinkProperties();
-        mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = new NetworkCapabilities();
     }
 
     protected BaseNetworkStateTracker() {
@@ -98,18 +99,13 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     }
 
     @Override
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
+    public NetworkCapabilities getNetworkCapabilities() {
+        return new NetworkCapabilities(mNetworkCapabilities);
     }
 
     @Override
     public LinkQualityInfo getLinkQualityInfo() {
         return null;
-    }
-
-    @Override
-    public void captivePortalCheckComplete() {
-        // not implemented
     }
 
     @Override
@@ -205,5 +201,15 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     @Override
     public void stopSampling(SamplingDataTracker.SamplingSnapshot s) {
         // nothing to do
+    }
+
+    @Override
+    public void setNetId(int netId) {
+        mNetwork = new Network(netId);
+    }
+
+    @Override
+    public Network getNetwork() {
+        return mNetwork;
     }
 }

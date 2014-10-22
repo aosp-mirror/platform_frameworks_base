@@ -18,6 +18,8 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "NetdClient.h"
+#include "resolv_netid.h"
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -67,35 +69,14 @@ namespace android {
  */
 static struct fieldIds {
     jmethodID clear;
-    jmethodID setInterfaceName;
-    jmethodID addLinkAddress;
-    jmethodID addGateway;
+    jmethodID setIpAddress;
+    jmethodID setGateway;
     jmethodID addDns;
     jmethodID setDomains;
     jmethodID setServerAddress;
     jmethodID setLeaseDuration;
     jmethodID setVendorInfo;
 } dhcpResultsFieldIds;
-
-static jint android_net_utils_enableInterface(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_enable(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
-
-static jint android_net_utils_disableInterface(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_disable(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
 
 static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz,
       jstring ifname, jint mask)
@@ -148,21 +129,16 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     if (result == 0) {
         env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.clear);
 
-        // set mIfaceName
-        // dhcpResults->setInterfaceName(ifname)
-        env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.setInterfaceName, ifname);
-
         // set the linkAddress
         // dhcpResults->addLinkAddress(inetAddress, prefixLength)
-        result = env->CallBooleanMethod(dhcpResults, dhcpResultsFieldIds.addLinkAddress,
+        result = env->CallBooleanMethod(dhcpResults, dhcpResultsFieldIds.setIpAddress,
                 env->NewStringUTF(ipaddr), prefixLength);
     }
 
     if (result == 0) {
         // set the gateway
-        // dhcpResults->addGateway(gateway)
         result = env->CallBooleanMethod(dhcpResults,
-                dhcpResultsFieldIds.addGateway, env->NewStringUTF(gateway));
+                dhcpResultsFieldIds.setGateway, env->NewStringUTF(gateway));
     }
 
     if (result == 0) {
@@ -212,7 +188,8 @@ static jboolean android_net_utils_runDhcp(JNIEnv* env, jobject clazz, jstring if
     return android_net_utils_runDhcpCommon(env, clazz, ifname, info, false);
 }
 
-static jboolean android_net_utils_runDhcpRenew(JNIEnv* env, jobject clazz, jstring ifname, jobject info)
+static jboolean android_net_utils_runDhcpRenew(JNIEnv* env, jobject clazz, jstring ifname,
+        jobject info)
 {
     return android_net_utils_runDhcpCommon(env, clazz, ifname, info, true);
 }
@@ -243,11 +220,31 @@ static jstring android_net_utils_getDhcpError(JNIEnv* env, jobject clazz)
     return env->NewStringUTF(::dhcp_get_errmsg());
 }
 
-static void android_net_utils_markSocket(JNIEnv *env, jobject thiz, jint socket, jint mark)
+static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
 {
-    if (setsockopt(socket, SOL_SOCKET, SO_MARK, &mark, sizeof(mark)) < 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "Error marking socket");
-    }
+    return (jboolean) !setNetworkForProcess(netId);
+}
+
+static jint android_net_utils_getNetworkBoundToProcess(JNIEnv *env, jobject thiz)
+{
+    return getNetworkForProcess();
+}
+
+static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz,
+        jint netId)
+{
+    return (jboolean) !setNetworkForResolv(netId);
+}
+
+static jint android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jint socket,
+        jint netId)
+{
+    return setNetworkForSocket(netId, socket);
+}
+
+static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint socket)
+{
+    return (jboolean) !protectFromVpn(socket);
 }
 
 // ----------------------------------------------------------------------------
@@ -257,16 +254,17 @@ static void android_net_utils_markSocket(JNIEnv *env, jobject thiz, jint socket,
  */
 static JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
-
-    { "enableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_enableInterface },
-    { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
     { "resetConnections", "(Ljava/lang/String;I)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpResults;)Z",  (void *)android_net_utils_runDhcp },
     { "runDhcpRenew", "(Ljava/lang/String;Landroid/net/DhcpResults;)Z",  (void *)android_net_utils_runDhcpRenew },
     { "stopDhcp", "(Ljava/lang/String;)Z",  (void *)android_net_utils_stopDhcp },
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
-    { "markSocket", "(II)V", (void*) android_net_utils_markSocket },
+    { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
+    { "getNetworkBoundToProcess", "()I", (void*) android_net_utils_getNetworkBoundToProcess },
+    { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
+    { "bindSocketToNetwork", "(II)I", (void*) android_net_utils_bindSocketToNetwork },
+    { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
@@ -275,12 +273,10 @@ int register_android_net_NetworkUtils(JNIEnv* env)
     LOG_FATAL_IF(dhcpResultsClass == NULL, "Unable to find class android/net/DhcpResults");
     dhcpResultsFieldIds.clear =
             env->GetMethodID(dhcpResultsClass, "clear", "()V");
-    dhcpResultsFieldIds.setInterfaceName =
-            env->GetMethodID(dhcpResultsClass, "setInterfaceName", "(Ljava/lang/String;)V");
-    dhcpResultsFieldIds.addLinkAddress =
-            env->GetMethodID(dhcpResultsClass, "addLinkAddress", "(Ljava/lang/String;I)Z");
-    dhcpResultsFieldIds.addGateway =
-            env->GetMethodID(dhcpResultsClass, "addGateway", "(Ljava/lang/String;)Z");
+    dhcpResultsFieldIds.setIpAddress =
+            env->GetMethodID(dhcpResultsClass, "setIpAddress", "(Ljava/lang/String;I)Z");
+    dhcpResultsFieldIds.setGateway =
+            env->GetMethodID(dhcpResultsClass, "setGateway", "(Ljava/lang/String;)Z");
     dhcpResultsFieldIds.addDns =
             env->GetMethodID(dhcpResultsClass, "addDns", "(Ljava/lang/String;)Z");
     dhcpResultsFieldIds.setDomains =

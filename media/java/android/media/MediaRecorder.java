@@ -25,8 +25,8 @@ import android.util.Log;
 import android.view.Surface;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 
 /**
@@ -114,14 +114,29 @@ public class MediaRecorder
     }
 
     /**
-     * Sets a Camera to use for recording. Use this function to switch
-     * quickly between preview and capture mode without a teardown of
-     * the camera object. {@link android.hardware.Camera#unlock()} should be
-     * called before this. Must call before prepare().
+     * Sets a {@link android.hardware.Camera} to use for recording.
+     *
+     * <p>Use this function to switch quickly between preview and capture mode without a teardown of
+     * the camera object. {@link android.hardware.Camera#unlock()} should be called before
+     * this. Must call before {@link #prepare}.</p>
      *
      * @param c the Camera to use for recording
+     * @deprecated Use {@link #getSurface} and the {@link android.hardware.camera2} API instead.
      */
+    @Deprecated
     public native void setCamera(Camera c);
+
+    /**
+     * Gets the surface to record from when using SURFACE video source.
+     *
+     * <p> May only be called after {@link #prepare}. Frames rendered to the Surface before
+     * {@link #start} will be discarded.</p>
+     *
+     * @throws IllegalStateException if it is called before {@link #prepare}, after
+     * {@link #stop}, or is called when VideoSource is not set to SURFACE.
+     * @see android.media.MediaRecorder.VideoSource
+     */
+    public native Surface getSurface();
 
     /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
@@ -145,10 +160,15 @@ public class MediaRecorder
      * {@link MediaRecorder#setAudioSource(int)}.
      */
     public final class AudioSource {
+
+        private AudioSource() {}
+
+        /** @hide */
+        public final static int AUDIO_SOURCE_INVALID = -1;
+
       /* Do not change these values without updating their counterparts
        * in system/core/include/system/audio.h!
        */
-        private AudioSource() {}
 
         /** Default audio source **/
         public static final int DEFAULT = 0;
@@ -225,10 +245,23 @@ public class MediaRecorder
        */
         private VideoSource() {}
         public static final int DEFAULT = 0;
-        /** Camera video source */
+        /** Camera video source
+         * <p>
+         * Using the {@link android.hardware.Camera} API as video source.
+         * </p>
+         */
         public static final int CAMERA = 1;
-        /** @hide */
-        public static final int GRALLOC_BUFFER = 2;
+        /** Surface video source
+         * <p>
+         * Using a Surface as video source.
+         * </p><p>
+         * This flag must be used when recording from an
+         * {@link android.hardware.camera2} API source.
+         * </p><p>
+         * When using this video source type, use {@link MediaRecorder#getSurface()}
+         * to retrieve the surface created by MediaRecorder.
+         */
+        public static final int SURFACE = 2;
     }
 
     /**
@@ -271,6 +304,9 @@ public class MediaRecorder
 
         /** @hide H.264/AAC data encapsulated in MPEG2/TS */
         public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+
+        /** VP8/VORBIS data in a WEBM container */
+        public static final int WEBM = 9;
     };
 
     /**
@@ -293,6 +329,8 @@ public class MediaRecorder
         public static final int HE_AAC = 4;
         /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
         public static final int AAC_ELD = 5;
+        /** Ogg Vorbis audio codec */
+        public static final int VORBIS = 6;
     }
 
     /**
@@ -308,6 +346,7 @@ public class MediaRecorder
         public static final int H263 = 1;
         public static final int H264 = 2;
         public static final int MPEG_4_SP = 3;
+        public static final int VP8 = 4;
     }
 
     /**
@@ -392,8 +431,8 @@ public class MediaRecorder
         setParameter("time-lapse-enable=1");
 
         double timeBetweenFrameCapture = 1 / fps;
-        int timeBetweenFrameCaptureMs = (int) (1000 * timeBetweenFrameCapture);
-        setParameter("time-between-time-lapse-frame-capture=" + timeBetweenFrameCaptureMs);
+        long timeBetweenFrameCaptureUs = (long) (1000000 * timeBetweenFrameCapture);
+        setParameter("time-between-time-lapse-frame-capture=" + timeBetweenFrameCaptureUs);
     }
 
     /**
@@ -688,11 +727,11 @@ public class MediaRecorder
     public void prepare() throws IllegalStateException, IOException
     {
         if (mPath != null) {
-            FileOutputStream fos = new FileOutputStream(mPath);
+            RandomAccessFile file = new RandomAccessFile(mPath, "rws");
             try {
-                _setOutputFile(fos.getFD(), 0, 0);
+                _setOutputFile(file.getFD(), 0, 0);
             } finally {
-                fos.close();
+                file.close();
             }
         } else if (mFd != null) {
             _setOutputFile(mFd, 0, 0);

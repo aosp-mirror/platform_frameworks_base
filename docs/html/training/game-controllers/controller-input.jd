@@ -39,14 +39,15 @@ these input events by implementing the following callback methods in your active
 {@link android.app.Activity} or focused {@link android.view.View} (you should
 implement the callbacks for either the {@link android.app.Activity} or
 {@link android.view.View}, but not both): </p>
-
 <ul>
 <li>From {@link android.app.Activity}:
     <ul>
-    <li>{@link android.app.Activity#dispatchGenericMotionEvent(android.view.MotionEvent) dispatchGenericMotionEvent(android.view.MotionEvent)}
+    <li>{@link android.app.Activity#dispatchGenericMotionEvent(android.view.MotionEvent)
+      dispatchGenericMotionEvent(android.view. MotionEvent)}
         <p>Called to process generic motion events such as joystick movements.</p>
     </li>
-    <li>{@link android.app.Activity#dispatchKeyEvent(android.view.KeyEvent) dispatchKeyEvent(android.view.KeyEvent)}
+    <li>{@link android.app.Activity#dispatchKeyEvent(android.view.KeyEvent)
+      dispatchKeyEvent(android.view.KeyEvent)}
         <p>Called to process key events such as a press or release of a
           gamepad or D-pad button.</p>
     </li>
@@ -236,27 +237,32 @@ buttons.</p>
   </tr>
   <tr>
     <td>Start game in main menu, or pause/unpause during game</td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_START BUTTON_START}</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_START BUTTON_START}<sup>*</sup></td>
   </tr>
   <tr>
     <td>Display menu</td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_SELECT BUTTON_SELECT} and
-{@link android.view.KeyEvent#KEYCODE_MENU}</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_SELECT BUTTON_SELECT}<sup>*</sup>
+      and {@link android.view.KeyEvent#KEYCODE_MENU}<sup>*</sup></td>
   </tr>
   <tr>
-    <td>Same as Android <em>Back</em></td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_B BUTTON_B}<sup>*</sup> and
-{@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK}</td>
+    <td>Same as Android <em>Back</em> navigation behavior described in the
+      <a href="{@docRoot}design/patterns/navigation.html">Navigation</a> design
+      guide.</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK}</td>
+  </tr>
+  <tr>
+    <td>Navigate back to a previous item in a menu</td>
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_B BUTTON_B}</td>
   </tr>
   <tr>
     <td>Confirm selection, or perform primary game action</td>
-    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A}<sup>*</sup> and
+    <td>{@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A} and
 {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER DPAD_CENTER}</td>
   </tr>
 </table>
 <p>
-<em>* This could be the opposite button (A/B), depending on the locale that
-you are supporting.</em>
+<em>* Your game should not rely on the presence of the Start, Select, or Menu
+  buttons.</em>
 </p>
 
 <p class="note"><strong>Tip: </strong>Consider providing a configuration screen
@@ -302,41 +308,22 @@ public class GameView extends View {
 
     private static boolean isFireKey(int keyCode) {
         // Here we treat Button_A and DPAD_CENTER as the primary action
-        // keys for the game. You may need to switch this to Button_B and
-        // DPAD_CENTER depending on the user expectations for the locale
-        // in which your game runs.
+        // keys for the game.
         return keyCode == KeyEvent.KEYCODE_DPAD_CENTER
                 || keyCode == KeyEvent.KEYCODE_BUTTON_A;
     }
 }
 </pre>
 
-<p>Follow these best practices when handling button presses:</p>
-<ul>
-<li><strong>Provide localized button mappings.</strong> Generally, if your game
-has a primary gameplay action (for example, it fires lasers, lets your avatar
-do a high jump, or confirms an item selection), you should map
-both {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER DPAD_CENTER} and
-{@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A} to this action. However,
-in some locales, users may expect
-{@link android.view.KeyEvent#KEYCODE_BUTTON_B BUTTON_B} to be the confirm
-button and {@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A} to be the
-back button instead. If you are supporting these locales, make sure to treat
-the A and B buttons accordingly in your game. To determine the user's locale,
-call the {@link java.util.Locale#getDefault()} method.
-<li><strong>Map {@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A}
-consistently across different Android versions.</strong> On Android 4.2 (API
+<p class="note"><strong>Note: </strong>On Android 4.2 (API
 level 17) and lower, the system treats
 {@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A} as the Android
 <em>Back</em> key by default. If your app supports these Android
 versions, make sure to treat
 {@link android.view.KeyEvent#KEYCODE_BUTTON_A BUTTON_A} as the primary game
-action (except in the localization case mentioned
-above). To determine the current Android SDK
+action. To determine the current Android SDK
 version on the device, refer to the
-{@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT} value.
-</li>
-</ul>
+{@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT} value.</p>
 
 <h2 id="dpad">Process Directional Pad Input</h2>
 <p>The 4-way directional pad (D-pad) is a common physical control in many game
@@ -417,7 +404,7 @@ public class Dpad {
             // UP and DOWN direction accordingly.
             else if (Float.compare(yaxis, -1.0f) == 0) {
                 directionPressed =  Dpad.UP;
-            } else if (Float.compare(yaxis, -1.0f) == 0) {
+            } else if (Float.compare(yaxis, 1.0f) == 0) {
                 directionPressed =  Dpad.DOWN;
             }
         }

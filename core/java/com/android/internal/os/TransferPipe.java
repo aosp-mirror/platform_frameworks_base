@@ -174,15 +174,27 @@ public final class TransferPipe implements Runnable {
     }
 
     public void kill() {
-        closeFd(0);
-        closeFd(1);
+        synchronized (this) {
+            closeFd(0);
+            closeFd(1);
+        }
     }
 
     @Override
     public void run() {
         final byte[] buffer = new byte[1024];
-        final FileInputStream fis = new FileInputStream(getReadFd().getFileDescriptor());
-        final FileOutputStream fos = new FileOutputStream(mOutFd);
+        final FileInputStream fis;
+        final FileOutputStream fos;
+
+        synchronized (this) {
+            ParcelFileDescriptor readFd = getReadFd();
+            if (readFd == null) {
+                Slog.w(TAG, "Pipe has been closed...");
+                return;
+            }
+            fis = new FileInputStream(readFd.getFileDescriptor());
+            fos = new FileOutputStream(mOutFd);
+        }
 
         if (DEBUG) Slog.i(TAG, "Ready to read pipe...");
         byte[] bufferPrefix = null;

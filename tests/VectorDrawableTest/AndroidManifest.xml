@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.test.dynamic" >
+
+    <uses-sdk android:minSdkVersion="20" />
+
+    <application
+        android:hardwareAccelerated="true"
+        android:label="vector"
+        android:supportsRtl="true" >
+        <activity
+            android:name="VectorDrawablePerformance"
+            android:label="Vector Performance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="BitmapDrawableDupe"
+            android:label="Bitmap Performance of clones" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name="VectorDrawableAnimation"
+            android:label="VectorTestAnimation" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="VectorDrawableTest"
+            android:label="Vector Icon" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="AnimatedVectorDrawableTest"
+            android:label="AnimatedVectorDrawableTest" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="AnimatedStateVectorDrawableTest"
+            android:label="AnimatedStateList and AnimatedVectorDrawable" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="VectorDrawable01"
+            android:label="VectorTest1" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="VectorDrawableDupPerf"
+            android:label="Vector Performance of clones" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="AnimatedVectorDrawableDupPerf"
+            android:label="Animated Vector Performance of clones" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="VectorDrawableStaticPerf"
+            android:label="System icons" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="VectorCheckbox"
+            android:label="Basic static vector drawables" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="VectorPathChecking"
+            android:label="Path Checking graphics" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="ScaleDrawableTests"
+            android:label="Scale Type Test" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="BoundsCheckTest"
+            android:label="SetBound check" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -24,19 +24,19 @@ import android.os.Process;
 import android.util.Log;
 
 public class RemoteSubActivityScreen extends SubActivityScreen {
-	Handler mHandler = new Handler();
-	boolean mFirst = false;
+    Handler mHandler = new Handler();
+    boolean mFirst = false;
 
     public RemoteSubActivityScreen() {
     }
 
     @Override
     public void onCreate(Bundle icicle) {
-    	// We are running in a remote process, so want to have the sub-activity
-    	// sending the result back in the original process.
+        // We are running in a remote process, so want to have the sub-activity
+        // sending the result back in the original process.
         Intent intent = getIntent();
-    	intent.setClass(this, SubActivityScreen.class);
-    	
+        intent.setClass(this, SubActivityScreen.class);
+        
         super.onCreate(icicle);
         
         boolean kill = intent.getBooleanExtra("kill", false);
@@ -44,16 +44,16 @@ public class RemoteSubActivityScreen extends SubActivityScreen {
         //        + " kill=" + kill);
         
         if (kill) {
-	        // After finishing initialization, kill the process!  But only if
-	        // this is the first time...
-	        if (icicle == null) {
-		        mHandler.post(new Runnable() {
-		        	public void run() {
-		        		handleBeforeStopping();
-		        		Process.killProcess(Process.myPid());
-		        	}
-		        });
-	        }
+            // After finishing initialization, kill the process!  But only if
+            // this is the first time...
+            if (icicle == null) {
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        handleBeforeStopping();
+                        Process.killProcess(Process.myPid());
+                    }
+                });
+            }
         }
     }
 }

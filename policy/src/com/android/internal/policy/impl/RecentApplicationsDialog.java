@@ -123,7 +123,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+      public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_TAB) {
             // Ignore all meta keys other than SHIFT.  The app switch key could be a
             // fallback action chorded with ALT, META or even CTRL depending on the key map.

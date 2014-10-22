@@ -1,5 +1,5 @@
 page.title=Google Wallet Instant Buy for Android
-page.tags="Wallet","payments","Instant Buy"
+page.tags=Wallet,payments,Instant Buy
 header.hide=1
 
 @jd:body
@@ -11,10 +11,11 @@ header.hide=1
   services from your app.  Transactions are monitored for fraud 24/7. Keep your existing
   payments infrastructure and integrate Google Wallet quickly, easily and free of charge.</p>
 
-    <p><a class="external-link" href="http://getinstantbuy.withgoogle.com/">Apply for
-      production access</a> before launching Instant Buy in your app. We recommend applying
-      before starting development. Note that Instant Buy is currently only available to
-      US-based merchants. </p>
+  <p>To ensure that your app content is consistent with the requirements for
+    Instant Buy access, <a class="external-link" href="https://support.google.com/wallet/business/contact/interest">apply for content review</a> before
+    starting development. Note that Instant Buy is currently only
+    available to US-based merchants. Once you've completed integration, you can
+    apply for production access by <a class="external-link" href="https://support.google.com/wallet/business/contact/ui_review">submitting your sandbox integration for review</a>.</p>
 
   <p>Check out the <a 
   href="{@docRoot}reference/com/google/android/gms/wallet/package-summary.html">Instant
@@ -71,8 +72,8 @@ header.hide=1
     sample located in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/wallet</code>.
     The sample shows you how to use the major components of the Instant Buy API.</p>
     <p>The <a
-    class="external-link" href="https://developers.google.com/commerce/wallet/instant-buy/android/quickstart">Quick
-    Start guide</a> provides directions on how to get the Wallet sample up and running</p>
+    class="external-link" href="https://developers.google.com/wallet/instant-buy/android/tutorial">Instant Buy Android API tutorial</a>
+    provides directions on how to get the Wallet sample up and running.</p>
     <h4>3. Read the documentation</h4>
     <p>For quick access while developing your Android apps, the <a 
     href="{@docRoot}reference/com/google/android/gms/wallet/package-summary.html">Google Wallet

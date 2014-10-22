@@ -27,7 +27,7 @@ public class Int3 {
 
     public Int3() {
     }
-    
+
     /** @hide */
     public Int3(int i) {
         this.x = this.y = this.z = i;

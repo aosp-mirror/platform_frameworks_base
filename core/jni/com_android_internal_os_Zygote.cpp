@@ -39,8 +39,10 @@
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sched_policy.h>
+#include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 #include <selinux/android.h>
+#include <processgroup/processgroup.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "JNIHelp.h"
@@ -449,6 +451,17 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       }
     }
 
+    if (!is_system_server) {
+        int rc = createProcessGroup(uid, getpid());
+        if (rc != 0) {
+            if (rc == -EROFS) {
+                ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
+            } else {
+                ALOGE("createProcessGroup(%d, %d) failed: %s", uid, pid, strerror(-rc));
+            }
+        }
+    }
+
     SetGids(env, javaGids);
 
     SetRLimits(env, javaRlimits);
@@ -550,9 +563,15 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint debug_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose, jstring instructionSet, jstring appDataDir) {
+    // Grant CAP_WAKE_ALARM to the Bluetooth process.
+    jlong capabilities = 0;
+    if (uid == AID_BLUETOOTH) {
+        capabilities |= (1LL << CAP_WAKE_ALARM);
+    }
+
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
-            rlimits, 0, 0, mount_external, se_info, se_name, false, fdsToClose,
-            instructionSet, appDataDir);
+            rlimits, capabilities, capabilities, mount_external, se_info,
+            se_name, false, fdsToClose, instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(

@@ -29,9 +29,11 @@ public class StatusBarNotification implements Parcelable {
     private final String pkg;
     private final int id;
     private final String tag;
+    private final String key;
+    private final String groupKey;
 
     private final int uid;
-    private final String basePkg;
+    private final String opPkg;
     private final int initialPid;
     private final Notification notification;
     private final UserHandle user;
@@ -40,26 +42,20 @@ public class StatusBarNotification implements Parcelable {
     private final int score;
 
     /** @hide */
-    public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,
-            Notification notification, UserHandle user) {
-        this(pkg, null, id, tag, uid, initialPid, score, notification, user);
-    }
-
-    /** @hide */
-    public StatusBarNotification(String pkg, String basePkg, int id, String tag, int uid,
+    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user) {
-        this(pkg, basePkg, id, tag, uid, initialPid, score, notification, user,
+        this(pkg, opPkg, id, tag, uid, initialPid, score, notification, user,
                 System.currentTimeMillis());
     }
 
-    public StatusBarNotification(String pkg, String basePkg, int id, String tag, int uid,
+    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user,
             long postTime) {
         if (pkg == null) throw new NullPointerException();
         if (notification == null) throw new NullPointerException();
 
         this.pkg = pkg;
-        this.basePkg = pkg;
+        this.opPkg = opPkg;
         this.id = id;
         this.tag = tag;
         this.uid = uid;
@@ -67,14 +63,14 @@ public class StatusBarNotification implements Parcelable {
         this.score = score;
         this.notification = notification;
         this.user = user;
-        this.notification.setUser(user);
-
         this.postTime = postTime;
+        this.key = key();
+        this.groupKey = groupKey();
     }
 
     public StatusBarNotification(Parcel in) {
         this.pkg = in.readString();
-        this.basePkg = in.readString();
+        this.opPkg = in.readString();
         this.id = in.readInt();
         if (in.readInt() != 0) {
             this.tag = in.readString();
@@ -86,13 +82,31 @@ public class StatusBarNotification implements Parcelable {
         this.score = in.readInt();
         this.notification = new Notification(in);
         this.user = UserHandle.readFromParcel(in);
-        this.notification.setUser(this.user);
         this.postTime = in.readLong();
+        this.key = key();
+        this.groupKey = groupKey();
+    }
+
+    private String key() {
+        return user.getIdentifier() + "|" + pkg + "|" + id + "|" + tag + "|" + uid;
+    }
+
+    private String groupKey() {
+        final String group = getNotification().getGroup();
+        final String sortKey = getNotification().getSortKey();
+        if (group == null && sortKey == null) {
+            // a group of one
+            return key;
+        }
+        return user.getIdentifier() + "|" + pkg + "|" +
+                (group == null
+                        ? "p:" + notification.priority
+                        : "g:" + group);
     }
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(this.pkg);
-        out.writeString(this.basePkg);
+        out.writeString(this.opPkg);
         out.writeInt(this.id);
         if (this.tag != null) {
             out.writeInt(1);
@@ -133,14 +147,14 @@ public class StatusBarNotification implements Parcelable {
     public StatusBarNotification cloneLight() {
         final Notification no = new Notification();
         this.notification.cloneInto(no, false); // light copy
-        return new StatusBarNotification(this.pkg, this.basePkg,
+        return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 this.score, no, this.user, this.postTime);
     }
 
     @Override
     public StatusBarNotification clone() {
-        return new StatusBarNotification(this.pkg, this.basePkg,
+        return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 this.score, this.notification.clone(), this.user, this.postTime);
     }
@@ -148,9 +162,9 @@ public class StatusBarNotification implements Parcelable {
     @Override
     public String toString() {
         return String.format(
-                "StatusBarNotification(pkg=%s user=%s id=%d tag=%s score=%d: %s)",
+                "StatusBarNotification(pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
                 this.pkg, this.user, this.id, this.tag,
-                this.score, this.notification);
+                this.score, this.key, this.notification);
     }
 
     /** Convenience method to check the notification's flags for
@@ -169,7 +183,11 @@ public class StatusBarNotification implements Parcelable {
                 && ((notification.flags & Notification.FLAG_NO_CLEAR) == 0);
     }
 
-    /** Returns a userHandle for the instance of the app that posted this notification. */
+    /**
+     * Returns a userHandle for the instance of the app that posted this notification.
+     *
+     * @deprecated Use {@link #getUser()} instead.
+     */
     public int getUserId() {
         return this.user.getIdentifier();
     }
@@ -195,9 +213,9 @@ public class StatusBarNotification implements Parcelable {
         return uid;
     }
 
-    /** The notifying app's base package. @hide */
-    public String getBasePkg() {
-        return basePkg;
+    /** The package used for AppOps tracking. @hide */
+    public String getOpPkg() {
+        return opPkg;
     }
 
     /** @hide */
@@ -213,7 +231,6 @@ public class StatusBarNotification implements Parcelable {
 
     /**
      * The {@link android.os.UserHandle} for whom this notification is intended.
-     * @hide
      */
     public UserHandle getUser() {
         return user;
@@ -229,5 +246,19 @@ public class StatusBarNotification implements Parcelable {
     /** @hide */
     public int getScore() {
         return score;
+    }
+
+    /**
+     * A unique instance key for this notification record.
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * A key that indicates the group with which this message ranks.
+     */
+    public String getGroupKey() {
+        return groupKey;
     }
 }

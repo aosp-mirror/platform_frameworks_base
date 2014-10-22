@@ -26,13 +26,14 @@
 #include "Debug.h"
 #include "Properties.h"
 #include "Texture.h"
+#include "utils/Macros.h"
 #include "utils/Pair.h"
 
 class SkBitmap;
 class SkCanvas;
 class SkPaint;
 class SkPath;
-class SkRect;
+struct SkRect;
 
 namespace android {
 namespace uirenderer {
@@ -107,6 +108,7 @@ enum ShapeType {
 };
 
 struct PathDescription {
+    DESCRIPTION_TYPE(PathDescription);
     ShapeType type;
     SkPaint::Join join;
     SkPaint::Cap cap;
@@ -116,7 +118,7 @@ struct PathDescription {
     SkPathEffect* pathEffect;
     union Shape {
         struct Path {
-            SkPath* mPath;
+            const SkPath* mPath;
         } path;
         struct RoundRect {
             float mWidth;
@@ -145,32 +147,9 @@ struct PathDescription {
     } shape;
 
     PathDescription();
-    PathDescription(ShapeType shapeType, SkPaint* paint);
+    PathDescription(ShapeType shapeType, const SkPaint* paint);
 
     hash_t hash() const;
-
-    int compare(const PathDescription& rhs) const;
-
-    bool operator==(const PathDescription& other) const {
-        return compare(other) == 0;
-    }
-
-    bool operator!=(const PathDescription& other) const {
-        return compare(other) != 0;
-    }
-
-    friend inline int strictly_order_type(
-            const PathDescription& lhs, const PathDescription& rhs) {
-        return lhs.compare(rhs) < 0;
-    }
-
-    friend inline int compare_type(const PathDescription& lhs, const PathDescription& rhs) {
-        return lhs.compare(rhs);
-    }
-
-    friend inline hash_t hash_type(const PathDescription& entry) {
-        return entry.hash();
-    }
 };
 
 /**
@@ -207,13 +186,13 @@ public:
      */
     uint32_t getSize();
 
-    PathTexture* getRoundRect(float width, float height, float rx, float ry, SkPaint* paint);
-    PathTexture* getCircle(float radius, SkPaint* paint);
-    PathTexture* getOval(float width, float height, SkPaint* paint);
-    PathTexture* getRect(float width, float height, SkPaint* paint);
+    PathTexture* getRoundRect(float width, float height, float rx, float ry, const SkPaint* paint);
+    PathTexture* getCircle(float radius, const SkPaint* paint);
+    PathTexture* getOval(float width, float height, const SkPaint* paint);
+    PathTexture* getRect(float width, float height, const SkPaint* paint);
     PathTexture* getArc(float width, float height, float startAngle, float sweepAngle,
-            bool useCenter, SkPaint* paint);
-    PathTexture* get(SkPath* path, SkPaint* paint);
+            bool useCenter, const SkPaint* paint);
+    PathTexture* get(const SkPath* path, const SkPaint* paint);
 
     /**
      * Removes the specified path. This is meant to be called from threads
@@ -239,9 +218,9 @@ public:
     /**
      * Precaches the specified path using background threads.
      */
-    void precache(SkPath* path, SkPaint* paint);
+    void precache(const SkPath* path, const SkPaint* paint);
 
-    static bool canDrawAsConvexPath(SkPath* path, SkPaint* paint);
+    static bool canDrawAsConvexPath(SkPath* path, const SkPaint* paint);
     static void computePathBounds(const SkPath* path, const SkPaint* paint,
             float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
     static void computeBounds(const SkRect& bounds, const SkPaint* paint,
@@ -292,17 +271,20 @@ private:
 
     class PathTask: public Task<SkBitmap*> {
     public:
-        PathTask(SkPath* path, SkPaint* paint, PathTexture* texture):
-            path(path), paint(*paint), texture(texture) {
+        PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
+            path(*path), paint(*paint), texture(texture) {
         }
 
         ~PathTask() {
             delete future()->get();
         }
 
-        SkPath* path;
-        //copied, since input paint may not be immutable
-        SkPaint paint;
+        // copied, since input path not refcounted / guaranteed to survive for duration of task
+        // TODO: avoid deep copy with refcounting
+        const SkPath path;
+
+        // copied, since input paint may not be immutable
+        const SkPaint paint;
         PathTexture* texture;
     };
 

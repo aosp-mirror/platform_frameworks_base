@@ -52,7 +52,6 @@ bool AssetStreamAdaptor::isAtEnd() const {
 }
 
 SkStreamRewindable* AssetStreamAdaptor::duplicate() const {
-    SkASSERT(false);
     // Cannot create a duplicate, since each AssetStreamAdaptor
     // would be modifying the Asset.
     //return new AssetStreamAdaptor(fAsset);

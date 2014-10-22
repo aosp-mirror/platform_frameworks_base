@@ -1,0 +1,51 @@
+page.title=Monetize Premium Apps
+page.image=/distribute/images/premium.jpg
+page.metaDescription=Charging users to download your apps is a simple, convenient monetization model.
+page.tags="monetizing", "paid"
+
+@jd:body
+
+<div class="figure"><img src="{@docRoot}images/gp-premium-0.png" />
+<p class="img-caption" style="width:300px">Paid app</p>
+</div>
+<p>
+  Charging users to download your apps is a simple, convenient monetization
+  model. After creating your <a href=
+  "/distribute/googleplay/start.html#merchant-account">Merchant
+  Account</a>, you <a href=
+  "/distribute/googleplay/developer-console.html#selling-pricing-your-products">set prices for your
+  apps</a> in the Developer Console. You can optionally include advertising or use
+  <a href="{@docRoot}google/play/billing/index.html">In-app
+  Billing</a> to sell additional features or content.
+</p>
+
+<p>
+  This model could work well for any app or game, but might be particularly
+  relevant to those with extensive features or that address a narrow niche in
+  the market. Certain categories of apps, such as games for children, should be
+  monetized by paying for them up front instead of advertising or in-app
+  purchases.
+</p>
+
+<p>
+  However, this model may limit your apps monetization potential, particularly
+  in developing markets. You may be able to achieve greater revenue using the
+  <a href="{@docRoot}distribute/monetize/freemium.html">freemium</a>, <a href=
+  "{@docRoot}distribute/monetize/subscriptions.html">subscriptions</a> or
+  <a href="{@docRoot}distribute/monetize/ads.html">advertising</a> models.
+</p>
+
+<p style="clear:both">
+</p>
+<div class="headerLine">
+  <h2>
+  Related Resources
+  </h2>
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/premium"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

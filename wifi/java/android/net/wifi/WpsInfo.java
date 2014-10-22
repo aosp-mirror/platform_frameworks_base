@@ -19,8 +19,6 @@ package android.net.wifi;
 import android.os.Parcelable;
 import android.os.Parcel;
 
-import java.util.BitSet;
-
 /**
  * A class representing Wi-Fi Protected Setup
  *
@@ -42,7 +40,7 @@ public class WpsInfo implements Parcelable {
     /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
     public int setup;
 
-    /** @hide */
+    /** Passed with pin method KEYPAD */
     public String BSSID;
 
     /** Passed with pin method configuration */

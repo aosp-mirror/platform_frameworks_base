@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.graphics.Point;
 import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.List;
 
@@ -51,4 +52,12 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param interactionId The interaction id to match the result with the request.
      */
     void setPerformAccessibilityActionResult(boolean succeeded, int interactionId);
+
+    /**
+     * Sets the result of a request to compute a point for clicking in a view.
+     *
+     * @param point The point of null if no such point.
+     * @param interactionId The interaction id to match the result with the request.
+     */
+    void setComputeClickPointInScreenActionResult(in Point point, int interactionId);
 }

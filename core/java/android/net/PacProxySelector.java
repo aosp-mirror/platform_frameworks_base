@@ -39,6 +39,9 @@ import java.util.List;
 public class PacProxySelector extends ProxySelector {
     private static final String TAG = "PacProxySelector";
     public static final String PROXY_SERVICE = "com.android.net.IProxyService";
+    private static final String SOCKS = "SOCKS ";
+    private static final String PROXY = "PROXY ";
+
     private IProxyService mProxyService;
     private final List<Proxy> mDefaultList;
 
@@ -88,22 +91,34 @@ public class PacProxySelector extends ProxySelector {
             String trimmed = s.trim();
             if (trimmed.equals("DIRECT")) {
                 ret.add(java.net.Proxy.NO_PROXY);
-            } else if (trimmed.startsWith("PROXY ")) {
-                String[] hostPort = trimmed.substring(6).split(":");
-                String host = hostPort[0];
-                int port;
-                try {
-                    port = Integer.parseInt(hostPort[1]);
-                } catch (Exception e) {
-                    port = 8080;
+            } else if (trimmed.startsWith(PROXY)) {
+                Proxy proxy = proxyFromHostPort(Type.HTTP, trimmed.substring(PROXY.length()));
+                if (proxy != null) {
+                    ret.add(proxy);
                 }
-                ret.add(new Proxy(Type.HTTP, InetSocketAddress.createUnresolved(host, port)));
+            } else if (trimmed.startsWith(SOCKS)) {
+                Proxy proxy = proxyFromHostPort(Type.SOCKS, trimmed.substring(SOCKS.length()));
+                if (proxy != null) {
+                    ret.add(proxy);
+                }
             }
         }
         if (ret.size() == 0) {
             ret.add(java.net.Proxy.NO_PROXY);
         }
         return ret;
+    }
+
+    private static Proxy proxyFromHostPort(Proxy.Type type, String hostPortString) {
+        try {
+            String[] hostPort = hostPortString.split(":");
+            String host = hostPort[0];
+            int port = Integer.parseInt(hostPort[1]);
+            return new Proxy(type, InetSocketAddress.createUnresolved(host, port));
+        } catch (NumberFormatException|ArrayIndexOutOfBoundsException e) {
+            Log.d(TAG, "Unable to parse proxy " + hostPortString + " " + e);
+            return null;
+        }
     }
 
     @Override

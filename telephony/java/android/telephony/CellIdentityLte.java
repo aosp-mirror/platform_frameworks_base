@@ -130,7 +130,7 @@ public final class CellIdentityLte implements Parcelable {
                 return mMcc == o.mMcc &&
                         mMnc == o.mMnc &&
                         mCi == o.mCi &&
-                        mPci == o.mCi &&
+                        mPci == o.mPci &&
                         mTac == o.mTac;
             } catch (ClassCastException e) {
                 return false;

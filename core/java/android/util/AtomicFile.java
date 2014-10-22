@@ -200,6 +200,20 @@ public class AtomicFile {
     }
 
     /**
+     * Gets the last modified time of the atomic file.
+     * {@hide}
+     *
+     * @return last modified time in milliseconds since epoch.
+     * @throws IOException
+     */
+    public long getLastModifiedTime() throws IOException {
+        if (mBackupName.exists()) {
+            return mBackupName.lastModified();
+        }
+        return mBaseName.lastModified();
+    }
+
+    /**
      * A convenience for {@link #openRead()} that also reads all of the
      * file contents into a byte array which is returned.
      */

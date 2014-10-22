@@ -124,7 +124,7 @@ public final class AnimatorSet extends Animator {
     // was set on this AnimatorSet, so it should not be passed down to the children.
     private TimeInterpolator mInterpolator = null;
 
-
+    private boolean mReversible = true;
     /**
      * Sets up this AnimatorSet to play all of the supplied animations at the same time.
      * This is equivalent to calling {@link #play(Animator)} with the first animator in the
@@ -177,6 +177,7 @@ public final class AnimatorSet extends Animator {
             if (items.length == 1) {
                 play(items[0]);
             } else {
+                mReversible = false;
                 for (int i = 0; i < items.length - 1; ++i) {
                     play(items[i]).before(items[i+1]);
                 }
@@ -196,6 +197,7 @@ public final class AnimatorSet extends Animator {
             if (items.size() == 1) {
                 play(items.get(0));
             } else {
+                mReversible = false;
                 for (int i = 0; i < items.size() - 1; ++i) {
                     play(items.get(i)).before(items.get(i+1));
                 }
@@ -407,6 +409,9 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public void setStartDelay(long startDelay) {
+        if (mStartDelay > 0) {
+            mReversible = false;
+        }
         mStartDelay = startDelay;
     }
 
@@ -499,6 +504,10 @@ public final class AnimatorSet extends Animator {
         mStarted = true;
         mPaused = false;
 
+        for (Node node : mNodes) {
+            node.animation.setAllowRunningAsynchronously(false);
+        }
+
         if (mDuration >= 0) {
             // If the duration was set on this AnimatorSet, pass it along to all child animations
             for (Node node : mNodes) {
@@ -512,7 +521,7 @@ public final class AnimatorSet extends Animator {
                 node.animation.setInterpolator(mInterpolator);
             }
         }
-            // First, sort the nodes (if necessary). This will ensure that sortedNodes
+        // First, sort the nodes (if necessary). This will ensure that sortedNodes
         // contains the animation nodes in the correct order.
         sortNodes();
 
@@ -626,6 +635,8 @@ public final class AnimatorSet extends Animator {
         anim.mNodeMap = new HashMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>();
         anim.mSortedNodes = new ArrayList<Node>();
+        anim.mReversible = mReversible;
+        anim.mSetListener = null;
 
         // Walk through the old nodes list, cloning each node and adding it to the new nodemap.
         // One problem is that the old node dependencies point to nodes in the old AnimatorSet.
@@ -908,6 +919,35 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public boolean canReverse() {
+        if (!mReversible)  {
+            return false;
+        }
+        // Loop to make sure all the Nodes can reverse.
+        for (Node node : mNodes) {
+            if (!node.animation.canReverse() || node.animation.getStartDelay() > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void reverse() {
+        if (canReverse()) {
+            for (Node node : mNodes) {
+                node.animation.reverse();
+            }
+        }
+    }
+
+    /**
      * Dependency holds information about the node that some other node is
      * dependent upon and the nature of that dependency.
      *
@@ -1124,6 +1164,7 @@ public final class AnimatorSet extends Animator {
          * {@link AnimatorSet#play(Animator)} method ends.
          */
         public Builder before(Animator anim) {
+            mReversible = false;
             Node node = mNodeMap.get(anim);
             if (node == null) {
                 node = new Node(anim);
@@ -1144,6 +1185,7 @@ public final class AnimatorSet extends Animator {
          * {@link AnimatorSet#play(Animator)} method to play.
          */
         public Builder after(Animator anim) {
+            mReversible = false;
             Node node = mNodeMap.get(anim);
             if (node == null) {
                 node = new Node(anim);

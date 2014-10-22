@@ -96,7 +96,7 @@ public:
         SkScalar*   posPtr = pos ? tmpPos : NULL;
         SkScalar*   tanPtr = tan ? tmpTan : NULL;
         
-        if (!pair->fMeasure.getPosTan(SkFloatToScalar(dist), (SkPoint*)posPtr, (SkVector*)tanPtr)) {
+        if (!pair->fMeasure.getPosTan(dist, (SkPoint*)posPtr, (SkVector*)tanPtr)) {
             return JNI_FALSE;
         }
     
@@ -113,7 +113,7 @@ public:
                           jlong matrixHandle, jint flags) {
         PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
-        bool result = pair->fMeasure.getMatrix(SkFloatToScalar(dist), matrix, (SkPathMeasure::MatrixFlags)flags);
+        bool result = pair->fMeasure.getMatrix(dist, matrix, (SkPathMeasure::MatrixFlags)flags);
         return result ? JNI_TRUE : JNI_FALSE;
     }
 
@@ -121,7 +121,7 @@ public:
                                jfloat stopF, jlong dstHandle, jboolean startWithMoveTo) {
         PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
-        bool result = pair->fMeasure.getSegment(SkFloatToScalar(startF), SkFloatToScalar(stopF), dst, startWithMoveTo);
+        bool result = pair->fMeasure.getSegment(startF, stopF, dst, startWithMoveTo);
         return result ? JNI_TRUE : JNI_FALSE;
     }
 

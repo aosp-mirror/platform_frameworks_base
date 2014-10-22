@@ -17,14 +17,9 @@
 package android.hardware;
 
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import java.nio.ByteBuffer;
 

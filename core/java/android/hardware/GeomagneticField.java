@@ -361,7 +361,7 @@ public class GeomagneticField {
             mP[0] = new float[] { 1.0f };
             mPDeriv[0] = new float[] { 0.0f };
             for (int n = 1; n <= maxN; n++) {
-            	mP[n] = new float[n + 1];
+                mP[n] = new float[n + 1];
                 mPDeriv[n] = new float[n + 1];
                 for (int m = 0; m <= n; m++) {
                     if (n == m) {

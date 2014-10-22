@@ -42,7 +42,7 @@
 
             <!-- navigation controls -->
             <View
-                android:layout_width="48dp"
+                android:layout_width="@dimen/navigation_extra_key_width"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 android:layout_marginStart="2dp"
@@ -59,7 +59,6 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:keyCode="4"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_back"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
@@ -69,7 +68,6 @@
                 systemui:keyCode="3"
                 systemui:keyRepeat="true"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_home"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
@@ -77,7 +75,6 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_recent"
                 />
             <Space 
@@ -85,17 +82,30 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_width="48dp"
+            <FrameLayout
+                android:layout_width="@dimen/navigation_extra_key_width"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_menu"
-                android:layout_marginEnd="2dp"
-                systemui:keyCode="82"
                 android:layout_weight="0"
-                android:visibility="invisible"
-                android:contentDescription="@string/accessibility_menu"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                />
+                android:layout_marginEnd="2dp" >
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                    android:layout_width="@dimen/navigation_extra_key_width"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sysbar_menu"
+                    android:layout_marginEnd="2dp"
+                    systemui:keyCode="82"
+                    android:visibility="invisible"
+                    android:contentDescription="@string/accessibility_menu"
+                    />
+                <com.android.systemui.statusbar.policy.KeyButtonView
+                    android:id="@+id/ime_switcher"
+                    android:layout_width="@dimen/navigation_extra_key_width"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="2dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_ime_switcher_default"
+                    android:visibility="invisible"
+                    android:contentDescription="@string/accessibility_ime_switch_button" />
+            </FrameLayout>
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -140,17 +150,6 @@
                 android:layout_weight="1"
                 />
         </LinearLayout>
-
-        <com.android.systemui.statusbar.policy.KeyButtonView
-            android:layout_width="128dp"
-            android:id="@+id/search_light"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/search_light"
-            android:scaleType="center"
-            android:visibility="gone"
-            android:contentDescription="@string/accessibility_search_light"
-            />
 
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"
@@ -184,7 +183,7 @@
 
             <!-- navigation controls -->
             <View
-                android:layout_width="48dp"
+                android:layout_width="@dimen/navigation_extra_key_width"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 android:layout_marginStart="2dp"
@@ -201,7 +200,6 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:keyCode="4"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_back"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
@@ -211,7 +209,6 @@
                 systemui:keyCode="3"
                 systemui:keyRepeat="true"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_home"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
@@ -219,7 +216,6 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_recent"
                 />
             <Space 
@@ -227,17 +223,29 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_width="48dp"
+            <FrameLayout
+                android:layout_width="@dimen/navigation_extra_key_width"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="2dp"
-                android:src="@drawable/ic_sysbar_menu"
-                systemui:keyCode="82"
-                android:layout_weight="0"
-                android:visibility="invisible"
-                android:contentDescription="@string/accessibility_menu"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                />
+                android:layout_weight="0" >
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                    android:layout_width="@dimen/navigation_extra_key_width"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="2dp"
+                    android:src="@drawable/ic_sysbar_menu"
+                    systemui:keyCode="82"
+                    android:visibility="invisible"
+                    android:contentDescription="@string/accessibility_menu" />
+                <com.android.systemui.statusbar.policy.KeyButtonView
+                    android:id="@+id/ime_switcher"
+                    android:layout_width="@dimen/navigation_extra_key_width"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="2dp"
+                    android:src="@drawable/ic_ime_switcher_default"
+                    android:visibility="invisible"
+                    android:contentDescription="@string/accessibility_ime_switch_button"
+                    android:scaleType="centerInside" />
+            </FrameLayout>
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -283,17 +291,6 @@
                 />
         </LinearLayout>
 
-        <com.android.systemui.statusbar.policy.KeyButtonView
-            android:layout_width="162dp"
-            android:id="@+id/search_light"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/search_light"
-            android:scaleType="center"
-            android:visibility="gone"
-            android:contentDescription="@string/accessibility_search_light"
-            />
-
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"
             android:layout_height="match_parent"
@@ -306,12 +303,4 @@
             android:layout_gravity="top"
             />
     </FrameLayout>
-
-    <!-- not used -->
-    <View android:id="@+id/rot270"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:visibility="gone"
-        />
-
 </com.android.systemui.statusbar.phone.NavigationBarView>

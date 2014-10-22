@@ -28,16 +28,24 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:button="@null"
+        android:background="@*android:drawable/switch_track_material"
+        android:visibility="gone"
         />
-    <SeekBar
+    <com.android.systemui.settings.ToggleSeekBar
         android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/toggle"
         android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:thumb="@drawable/ic_brightness_thumb"
+        android:splitTrack="false"
+        android:contentDescription="@string/accessibility_brightness"
         />
     <TextView
         android:id="@+id/label"
@@ -50,5 +58,6 @@
         android:paddingTop="26dp"
         android:textColor="#666666"
         android:textSize="12sp"
+        android:visibility="gone"
         />
 </merge>

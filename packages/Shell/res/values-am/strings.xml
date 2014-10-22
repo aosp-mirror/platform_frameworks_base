@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ቀፎ"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"የሳንካ ሪፖርት ተይዟል"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"የሳንካ ሪፖርትዎን ለማጋራት ይንክኩ"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"የሳንካ ሪፖርትዎን ለማጋራት ወደ ግራ ያንሸራትቱ"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"የሳንካ ሪፖርትዎን ለማጋራት ይንክኩ"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"የሳንካ ሪፖርቶች የግል መረጃን ጨምሮ ከበርካታ የስርዓቱ ምዝግብ ማስታወሻዎች የመጣ ውሂብን ይዟል። የሳንካ ሪፖርቶች ለሚያምኗቸው መተግበሪያዎችን እና ሰዎችን ብቻ ያጋሩ።"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ይህን መልዕክት በሚቀጥለው ጊዜ አሳይ"</string>
 </resources>

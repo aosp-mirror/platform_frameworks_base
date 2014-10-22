@@ -271,27 +271,19 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                     whichHeap = HEAP_DALVIK_OTHER;
                     if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
                         subHeap = HEAP_DALVIK_LINEARALLOC;
-                    } else if ((strstr(name, "/dev/ashmem/dalvik-mark") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space live-bitmap") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space mark-bitmap") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-card table") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-allocation stack") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-live stack") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-imagespace") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-bitmap") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-card-table") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-mark-stack") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-aux-structure") == name)) {
-                        subHeap = HEAP_DALVIK_ACCOUNTING;
-                    } else if (strstr(name, "/dev/ashmem/dalvik-large") == name) {
+                    } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-main space") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-non moving space") == name)) {
+                        // This is the regular Dalvik heap.
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_NORMAL;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name) {
                         whichHeap = HEAP_DALVIK;
                         subHeap = HEAP_DALVIK_LARGE;
                     } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
                         subHeap = HEAP_DALVIK_CODE_CACHE;
                     } else {
-                        // This is the regular Dalvik heap.
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_NORMAL;
+                        subHeap = HEAP_DALVIK_ACCOUNTING;  // Default to accounting.
                     }
                 } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
                     whichHeap = HEAP_CURSOR;

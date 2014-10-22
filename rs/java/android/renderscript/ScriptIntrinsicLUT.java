@@ -16,8 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
-
 /**
  * Intrinsic for applying a per-channel lookup table. Each
  * channel of the input has an independant lookup table. The
@@ -116,7 +114,6 @@ public final class ScriptIntrinsicLUT extends ScriptIntrinsic {
         mDirty = true;
     }
 
-
     /**
      * Invoke the kernel and apply the lookup to each cell of ain
      * and copy to aout.
@@ -125,11 +122,23 @@ public final class ScriptIntrinsicLUT extends ScriptIntrinsic {
      * @param aout Output allocation
      */
     public void forEach(Allocation ain, Allocation aout) {
+        forEach(ain, aout, null);
+    }
+
+    /**
+     * Invoke the kernel and apply the lookup to each cell of ain
+     * and copy to aout.
+     *
+     * @param ain Input allocation
+     * @param aout Output allocation
+     * @param opt Options for clipping
+     */
+    public void forEach(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
         if (mDirty) {
             mDirty = false;
             mTables.copyFromUnchecked(mCache);
         }
-        forEach(0, ain, aout, null);
+        forEach(0, ain, aout, null, opt);
     }
 
     /**

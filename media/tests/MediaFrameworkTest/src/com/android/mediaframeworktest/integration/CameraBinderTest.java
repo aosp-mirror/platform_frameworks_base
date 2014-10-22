@@ -22,10 +22,10 @@ import android.hardware.ICameraClient;
 import android.hardware.ICameraServiceListener;
 import android.hardware.IProCameraCallbacks;
 import android.hardware.IProCameraUser;
-import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.utils.BinderHolder;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.os.Binder;
@@ -50,7 +50,13 @@ import android.util.Log;
  * </pre>
  */
 public class CameraBinderTest extends AndroidTestCase {
+    private static final int MAX_PARAMETERS_LENGTH = 100;
+
     static String TAG = "CameraBinderTest";
+
+    // From ICameraService.h
+    private static final int API_VERSION_1 = 1;
+    private static final int API_VERSION_2 = 2;
 
     protected CameraBinderTestUtils mUtils;
 
@@ -91,6 +97,56 @@ public class CameraBinderTest extends AndroidTestCase {
 
             Log.v(TAG, "Camera " + cameraId + " info: facing " + info.info.facing
                     + ", orientation " + info.info.orientation);
+        }
+    }
+
+    @SmallTest
+    public void testGetLegacyParameters() throws Exception {
+        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
+
+            String[] parameters = new String[1];
+            assertEquals("Camera service returned parameters for camera " + cameraId,
+                    CameraBinderTestUtils.NO_ERROR,
+                    mUtils.getCameraService().getLegacyParameters(cameraId, /*out*/parameters));
+            assertNotNull(parameters[0]);
+            assertTrue("Parameters should have at least one character in it",
+                    parameters[0].length() > 0);
+
+            int end = parameters[0].length();
+            if (end > MAX_PARAMETERS_LENGTH) {
+                end = MAX_PARAMETERS_LENGTH;
+            }
+
+            Log.v(TAG, "Camera " + cameraId + " parameters: " + parameters[0].substring(0, end));
+        }
+    }
+
+    /** The camera2 api is only supported on HAL3.2+ devices */
+    @SmallTest
+    public void testSupportsCamera2Api() throws Exception {
+        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
+
+            int res = mUtils.getCameraService().supportsCameraApi(cameraId, API_VERSION_2);
+
+            if (res != CameraBinderTestUtils.NO_ERROR && res != CameraBinderTestUtils.EOPNOTSUPP) {
+                fail("Camera service returned bad value when queried if it supports camera2 api: "
+                        + res + " for camera ID " + cameraId);
+            }
+
+            boolean supports = res == CameraBinderTestUtils.NO_ERROR;
+            Log.v(TAG, "Camera " + cameraId + " supports api2: " + supports);
+        }
+    }
+
+    /** The camera1 api is supported on *all* devices regardless of HAL version */
+    @SmallTest
+    public void testSupportsCamera1Api() throws Exception {
+        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
+
+            int res = mUtils.getCameraService().supportsCameraApi(cameraId, API_VERSION_1);
+            assertEquals(
+                    "Camera service returned bad value when queried if it supports camera1 api: "
+                    + res + " for camera ID " + cameraId, CameraBinderTestUtils.NO_ERROR, res);
         }
     }
 
@@ -149,23 +205,87 @@ public class CameraBinderTest extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    public void testConnectLegacy() throws Exception {
+        final int CAMERA_HAL_API_VERSION_1_0 = 0x100;
+        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
+            ICamera cameraUser = null;
+            ICameraClient dummyCallbacks = new DummyCameraClient();
+
+            String clientPackageName = getContext().getPackageName();
+
+            BinderHolder holder = new BinderHolder();
+
+            try {
+                CameraBinderDecorator.newInstance(mUtils.getCameraService())
+                        .connectLegacy(dummyCallbacks, cameraId, CAMERA_HAL_API_VERSION_1_0,
+                        clientPackageName,
+                        CameraBinderTestUtils.USE_CALLING_UID, holder);
+                cameraUser = ICamera.Stub.asInterface(holder.getBinder());
+                assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
+
+                Log.v(TAG, String.format("Camera %s connected as HAL1 legacy device", cameraId));
+            } catch (RuntimeException e) {
+                // Not all camera device support openLegacy.
+                Log.i(TAG, "Unable to open camera as HAL1 legacy camera device " + e);
+            } finally {
+                if (cameraUser != null) {
+                    cameraUser.disconnect();
+                }
+            }
+        }
+    }
+
     static class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onCameraError(int,
+         * android.hardware.camera2.CaptureResultExtras)
+         */
         @Override
-        public void onCameraError(int errorCode) {
-        }
-
-        @Override
-        public void onCameraIdle() {
-        }
-
-        @Override
-        public void onCaptureStarted(int requestId, long timestamp) {
-        }
-
-        @Override
-        public void onResultReceived(int frameId, CameraMetadataNative result)
+        public void onDeviceError(int errorCode, CaptureResultExtras resultExtras)
                 throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onCaptureStarted(
+         * android.hardware.camera2.CaptureResultExtras, long)
+         */
+        @Override
+        public void onCaptureStarted(CaptureResultExtras resultExtras, long timestamp)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * android.hardware.camera2.ICameraDeviceCallbacks#onResultReceived(
+         * android.hardware.camera2.impl.CameraMetadataNative,
+         * android.hardware.camera2.CaptureResultExtras)
+         */
+        @Override
+        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onCameraIdle()
+         */
+        @Override
+        public void onDeviceIdle() throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
     }
 

@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Введите PIN-код"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Введите PUK-код и новый PIN-код"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-код"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Новый PIN-код"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Введите PUK-код и новый PIN-код"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-код"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Новый PIN-код"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Нажмите для ввода пароля"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Введите пароль"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Введите PIN-код"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Все попытки войти с помощью Фейсконтроля использованы"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Батарея заряжена"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Зарядка батареи"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Подключите зарядное устройство."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Для разблокировки нажмите \"Меню\"."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Сеть заблокирована"</string>
@@ -42,7 +43,7 @@
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM-карта отсутствует или недоступна. Вставьте SIM-карту."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM-карта непригодна."</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM-карта окончательно заблокирована.\nЧтобы получить новую, обратитесь к своему оператору."</string>
-    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-карта заблокирована."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-карта заблокирована"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Для разблокировки SIM-карты требуется PUK-код."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Разблокировка SIM-карты…"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виджет %2$d из %3$d."</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Кнопка паузы"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Кнопка воспроизведения"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Кнопка выключения"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Нравится"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Не нравится"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Рейтинг"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Разблокируйте экран, чтобы продолжить."</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Запуск отменен."</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Отпустите виджет \"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>\", чтобы удалить его."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Виджет \"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>\" не будет удален."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Введите желаемый PIN-код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Введите PIN-код ещё раз"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Разблокировка SIM-карты…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неверный PIN-код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Введите PIN-код (от 4 до 8 цифр)."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-код должен содержать не менее 8 символов."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Введите правильный PUK-код. После нескольких неудачных попыток SIM-карта будет заблокирована."</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google.\n\nПовтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Удалить"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неверный PIN-код. Обратитесь к оператору связи, чтобы разблокировать SIM-карту."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Неверный PIN-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи."</item>
+    <item quantity="other" msgid="2215723361575359486">"Неверный PIN-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-карта заблокирована навсегда. Обратитесь к оператору связи."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Неверный PUK-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована навсегда."</item>
+    <item quantity="other" msgid="5477305226026342036">"Неверный PUK-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована навсегда."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Не удалось разблокировать SIM-карту"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Не удалось разблокировать SIM-карту"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Код принят"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Кнопка перехода к предыдущему треку"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Кнопка перехода к следующему треку"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Кнопка паузы"</string>

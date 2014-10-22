@@ -16,8 +16,33 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="RecentsStyle" parent="@android:style/Theme.Holo.Wallpaper.NoTitleBar">
+    <style name="RecentsStyle" parent="@android:style/Theme.DeviceDefault.Wallpaper.NoTitleBar">
         <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
+    </style>
+
+    <style name="RecentsTheme" parent="@android:style/Theme">
+        <!-- NoTitle -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- Misc -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
+        <item name="android:ambientShadowAlpha">0.35</item>
+    </style>
+
+
+    <!-- Alternate Recents theme -->
+    <style name="RecentsTheme.Wallpaper">
+        <!-- Wallpaper -->
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowShowWallpaper">true</item>
+    </style>
+
+    <!-- Performance optimized alternate Recents theme (no wallpaper) -->
+    <style name="RecentsTheme.NoWallpaper">
+        <item name="android:windowBackground">@android:color/black</item>
     </style>
 
     <!-- Animations for a non-full-screen window or activity. -->
@@ -53,27 +78,36 @@
     </style>
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
-        <!-- Note: must be dp to fit in status bar -->
-        <item name="android:textSize">16dp</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/status_bar_clock_size</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
-        <item name="android:textSize">32dp</item>
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/qs_time_expanded_size</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">#ffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">@dimen/qs_date_collapsed_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#cccccc</item>
-        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">#b2ffffff</item>
     </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
+        <item name="android:textSize">@dimen/qs_emergency_calls_only_text_size</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#66ffffff</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+           parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
+
+    <style name="TextAppearance.StatusBar.Expanded.ChargingInfo"
+            parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
 
     <style name="TextAppearance.StatusBar.Expanded.Network" parent="@style/TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textColor">#999999</item>
@@ -82,58 +116,85 @@
     <style name="TextAppearance.StatusBar.Expanded.Network.EmergencyOnly">
     </style>
 
-    <style name="TextAppearance" />
-    <style name="TextAppearance.QuickSettings" />
-
-    <style name="TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">12dp</item>
+    <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textColor">@color/qs_user_detail_name</item>
+    </style>
+    <style name="TextAppearance.StatusBar.Expanded.UserSwitcher.UserName" />
+
+    <style name="TextAppearance" />
+
+    <style name="TextAppearance.QS">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/qs_text</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailHeader">
+        <item name="android:textSize">@dimen/qs_detail_header_text_size</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailItemPrimary">
+        <item name="android:textSize">@dimen/qs_detail_item_primary_text_size</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailItemSecondary">
+        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
+        <item name="android:textColor">@color/system_accent_color</item>
+    </style>
+
+    <style name="TextAppearance.QS.VolumeSuppressor">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/qs_tile_text</item>
+    </style>
+
+    <style name="TextAppearance.QS.DetailButton">
+        <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:paddingStart">6dp</item>
-        <item name="android:paddingEnd">6dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
     </style>
 
-    <style name="TextAppearance.QuickSettings.TileView.AllInOne" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:lines">2</item>
-        <item name="android:gravity">top</item>
-        <item name="android:paddingBottom">2dp</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:drawablePadding">8dp</item>
+    <style name="TextAppearance.QS.DetailEmpty">
+        <item name="android:textSize">@dimen/qs_detail_empty_text_size</item>
+        <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
-    <style name="TextAppearance.QuickSettings.Clock" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">20dp</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+    <style name="TextAppearance.QS.Subhead">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
-    <style name="TextAppearance.QuickSettings.Date" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">14dp</item>
+    <style name="TextAppearance.QS.ZenToast">
+        <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="TextAppearance.QuickSettings.Alarm" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">14dp</item>
-        <item name="android:textColor">#ff3a3b39</item>
+    <style name="TextAppearance.QS.SegmentedButton">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
-    <style name="TextAppearance.QuickSettings.CaCertWarning" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textAllCaps">false</item>
+    <style name="TextAppearance.QS.DataUsage">
+        <item name="android:textSize">@dimen/qs_data_usage_text_size</item>
     </style>
 
-    <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:background">#CC000000</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:fadingEdge">horizontal</item>
+    <style name="TextAppearance.QS.DataUsage.Usage">
+        <item name="android:textSize">@dimen/qs_data_usage_usage_text_size</item>
+        <item name="android:textColor">@color/system_accent_color</item>
+    </style>
+
+    <style name="TextAppearance.QS.DataUsage.Secondary">
+        <item name="android:textColor">@color/data_usage_secondary</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:padding">16dp</item>
     </style>
+
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer" />
 
     <style name="Animation" />
@@ -162,5 +223,52 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
     </style>
-    
+
+    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">@color/system_primary_color</item>
+        <item name="android:colorControlActivated">@color/system_accent_color</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
+        <item name="android:colorPrimary">@color/system_primary_color</item>
+        <item name="android:colorControlActivated">@color/system_accent_color</item>
+    </style>
+
+    <style name="QSBorderlessButton">
+        <item name="android:padding">12dp</item>
+        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Window animations used for volume panel. -->
+    <style name="VolumePanelAnimation">
+        <item name="android:windowEnterAnimation">@*android:anim/popup_enter_material</item>
+        <item name="android:windowExitAnimation">@*android:anim/popup_exit_material</item>
+    </style>
+
+    <style name="TextAppearance.Material.Notification.Parenthetical"
+           parent="@*android:style/TextAppearance.Material.Notification">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">#60000000</item>
+    </style>
+
+    <style name="SearchPanelCircle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="SearchPanelScrim">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/search_panel_scrim_height</item>
+        <item name="android:layout_gravity">bottom</item>
+    </style>
+
+    <style name="UserDetailView">
+        <item name="numColumns">3</item>
+    </style>
+
+    <style name="ZenToastAnimations">
+        <item name="android:windowEnterAnimation">@anim/zen_toast_enter</item>
+        <item name="android:windowExitAnimation">@anim/zen_toast_exit</item>
+    </style>
 </resources>

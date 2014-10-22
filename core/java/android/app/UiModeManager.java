@@ -123,7 +123,18 @@ public class UiModeManager {
      * will switch to the car home activity even if we are already in car mode.
      */
     public static final int ENABLE_CAR_MODE_GO_CAR_HOME = 0x0001;
-    
+
+    /**
+     * Flag for use with {@link #enableCarMode(int)}: allow sleep mode while in car mode.
+     * By default, when this flag is not set, the system may hold a full wake lock to keep the
+     * screen turned on and prevent the system from entering sleep mode while in car mode.
+     * Setting this flag disables such behavior and the system may enter sleep mode
+     * if there is no other user activity and no other wake lock held.
+     * Setting this flag can be relevant for a car dock application that does not require the
+     * screen kept on.
+     */
+    public static final int ENABLE_CAR_MODE_ALLOW_SLEEP = 0x0002;
+
     /**
      * Force device into car mode, like it had been placed in the car dock.
      * This will cause the device to switch to the car home UI as part of
@@ -166,9 +177,11 @@ public class UiModeManager {
     /**
      * Return the current running mode type.  May be one of
      * {@link Configuration#UI_MODE_TYPE_NORMAL Configuration.UI_MODE_TYPE_NORMAL},
-     * {@link Configuration#UI_MODE_TYPE_DESK Configuration.UI_MODE_TYPE_DESK}, or
-     * {@link Configuration#UI_MODE_TYPE_CAR Configuration.UI_MODE_TYPE_CAR}, or
-     * {@link Configuration#UI_MODE_TYPE_TELEVISION Configuration.UI_MODE_TYPE_APPLIANCE}.
+     * {@link Configuration#UI_MODE_TYPE_DESK Configuration.UI_MODE_TYPE_DESK},
+     * {@link Configuration#UI_MODE_TYPE_CAR Configuration.UI_MODE_TYPE_CAR},
+     * {@link Configuration#UI_MODE_TYPE_TELEVISION Configuration.UI_MODE_TYPE_TELEVISION},
+     * {@link Configuration#UI_MODE_TYPE_APPLIANCE Configuration.UI_MODE_TYPE_APPLIANCE}, or
+     * {@link Configuration#UI_MODE_TYPE_WATCH Configuration.UI_MODE_TYPE_WATCH}.
      */
     public int getCurrentModeType() {
         if (mService != null) {

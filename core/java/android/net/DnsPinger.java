@@ -248,7 +248,7 @@ public final class DnsPinger extends Handler {
             return mDefaultDns;
         }
 
-        Collection<InetAddress> dnses = curLinkProps.getDnses();
+        Collection<InetAddress> dnses = curLinkProps.getDnsServers();
         if (dnses == null || dnses.size() == 0) {
             loge("getDns::LinkProps has null dns - returning default");
             return mDefaultDns;

@@ -22,9 +22,8 @@
 #include <SkPath.h>
 #include <cutils/compiler.h>
 
-#include "DisplayList.h"
 #include "DisplayListLogBuffer.h"
-#include "OpenGLRenderer.h"
+#include "RenderNode.h"
 
 namespace android {
 namespace uirenderer {
@@ -32,9 +31,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-#define MIN_WRITER_SIZE 4096
-#define OP_MAY_BE_SKIPPED_MASK 0xff000000
 
 // Debug
 #if DEBUG_DISPLAY_LIST
@@ -54,160 +50,142 @@ class DrawOp;
 class StateOp;
 
 /**
- * Records drawing commands in a display list for latter playback.
+ * Records drawing commands in a display list for later playback into an OpenGLRenderer.
  */
-class DisplayListRenderer: public OpenGLRenderer {
+class ANDROID_API DisplayListRenderer: public StatefulBaseRenderer {
 public:
-    ANDROID_API DisplayListRenderer();
+    DisplayListRenderer();
     virtual ~DisplayListRenderer();
 
-    ANDROID_API DisplayList* getDisplayList(DisplayList* displayList);
+    void insertReorderBarrier(bool enableReorder);
 
-    virtual bool isDeferred();
+    DisplayListData* finishRecording();
 
-    virtual void setViewport(int width, int height);
+// ----------------------------------------------------------------------------
+// Frame state operations
+// ----------------------------------------------------------------------------
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
-
-    virtual status_t callDrawGLFunction(Functor *functor, Rect& dirty);
-
     virtual void interrupt();
     virtual void resume();
 
+// ----------------------------------------------------------------------------
+// Canvas state operations
+// ----------------------------------------------------------------------------
+    // Save (layer)
     virtual int save(int flags);
     virtual void restore();
     virtual void restoreToCount(int saveCount);
-
     virtual int saveLayer(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags);
+            const SkPaint* paint, int flags);
 
-    virtual void translate(float dx, float dy);
+    // Matrix
+    virtual void translate(float dx, float dy, float dz = 0.0f);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
-    virtual void setMatrix(SkMatrix* matrix);
-    virtual void concatMatrix(SkMatrix* matrix);
+    virtual void setMatrix(const SkMatrix& matrix);
+    virtual void concatMatrix(const SkMatrix& matrix);
 
+    // Clip
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags);
-    virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
-            float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, SkPaint* paint);
-    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-            float* vertices, int* colors, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawColor(int color, SkXfermode::Mode mode);
-    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, SkPaint* paint);
-    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint);
-    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
-    virtual status_t drawPath(SkPath* path, SkPaint* paint);
-    virtual status_t drawLines(float* points, int count, SkPaint* paint);
-    virtual status_t drawPoints(float* points, int count, SkPaint* paint);
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
-            float hOffset, float vOffset, SkPaint* paint);
-    virtual status_t drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, SkPaint* paint);
-    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
-            DrawOpMode drawOpMode);
-
-    virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
-
-    virtual void resetShader();
-    virtual void setupShader(SkiaShader* shader);
-
-    virtual void resetColorFilter();
-    virtual void setupColorFilter(SkiaColorFilter* filter);
-
-    virtual void resetShadow();
-    virtual void setupShadow(float radius, float dx, float dy, int color);
-
+    // Misc - should be implemented with SkPaint inspection
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
-    ANDROID_API void reset();
-
-    sp<DisplayListData> getDisplayListData() const {
-        return mDisplayListData;
+    bool isCurrentTransformSimple() {
+        return currentTransform()->isSimple();
     }
 
-    const Vector<SkBitmap*>& getBitmapResources() const {
-        return mBitmapResources;
-    }
+// ----------------------------------------------------------------------------
+// Canvas draw operations
+// ----------------------------------------------------------------------------
+    virtual status_t drawColor(int color, SkXfermode::Mode mode);
 
-    const Vector<SkBitmap*>& getOwnedBitmapResources() const {
-        return mOwnedBitmapResources;
-    }
+    // Bitmap-based
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
+            float srcRight, float srcBottom, float dstLeft, float dstTop,
+            float dstRight, float dstBottom, const SkPaint* paint);
+    virtual status_t drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
+    virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors, const SkPaint* paint);
+    virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+            float left, float top, float right, float bottom, const SkPaint* paint);
 
-    const Vector<SkiaColorFilter*>& getFilterResources() const {
-        return mFilterResources;
-    }
+    // Shapes
+    virtual status_t drawRect(float left, float top, float right, float bottom,
+            const SkPaint* paint);
+    virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
+    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, const SkPaint* paint);
+    virtual status_t drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+                CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+                CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+                CanvasPropertyPaint* paint);
+    virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint);
+    virtual status_t drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+                CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
+    virtual status_t drawOval(float left, float top, float right, float bottom,
+            const SkPaint* paint);
+    virtual status_t drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
+    virtual status_t drawPath(const SkPath* path, const SkPaint* paint);
+    virtual status_t drawLines(const float* points, int count, const SkPaint* paint);
+    virtual status_t drawPoints(const float* points, int count, const SkPaint* paint);
 
-    const Vector<Res_png_9patch*>& getPatchResources() const {
-        return mPatchResources;
-    }
+    // Text
+    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
+            const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
+            DrawOpMode drawOpMode = kDrawOpMode_Immediate);
+    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+            float hOffset, float vOffset, const SkPaint* paint);
+    virtual status_t drawPosText(const char* text, int bytesCount, int count,
+            const float* positions, const SkPaint* paint);
 
-    const Vector<SkiaShader*>& getShaders() const {
-        return mShaders;
-    }
+// ----------------------------------------------------------------------------
+// Canvas draw operations - special
+// ----------------------------------------------------------------------------
+    virtual status_t drawLayer(Layer* layer, float x, float y);
+    virtual status_t drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags);
 
-    const Vector<SkPaint*>& getPaints() const {
-        return mPaints;
-    }
+    // TODO: rename for consistency
+    virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
-    const Vector<SkPath*>& getPaths() const {
-        return mPaths;
+    void setHighContrastText(bool highContrastText) {
+        mHighContrastText = highContrastText;
     }
-
-    const SortedVector<SkPath*>& getSourcePaths() const {
-        return mSourcePaths;
-    }
-
-    const Vector<SkRegion*>& getRegions() const {
-        return mRegions;
-    }
-
-    const Vector<Layer*>& getLayers() const {
-        return mLayers;
-    }
-
-    const Vector<SkMatrix*>& getMatrices() const {
-        return mMatrices;
-    }
-
-    uint32_t getFunctorCount() const {
-        return mFunctorCount;
-    }
-
 private:
-    void insertRestoreToCount();
-    void insertTranslate();
+    enum DeferredBarrierType {
+        kBarrier_None,
+        kBarrier_InOrder,
+        kBarrier_OutOfOrder,
+    };
+
+    void flushRestoreToCount();
+    void flushTranslate();
+    void flushReorderBarrier();
 
     LinearAllocator& alloc() { return mDisplayListData->allocator; }
-    void addStateOp(StateOp* op);
-    void addDrawOp(DrawOp* op);
-    void addOpInternal(DisplayListOp* op) {
-        insertRestoreToCount();
-        insertTranslate();
-        mDisplayListData->displayListOps.add(op);
-    }
+
+    // Each method returns final index of op
+    size_t addOpAndUpdateChunk(DisplayListOp* op);
+    // flushes any deferred operations, and appends the op
+    size_t flushAndAddOp(DisplayListOp* op);
+
+    size_t addStateOp(StateOp* op);
+    size_t addDrawOp(DrawOp* op);
+    size_t addRenderNodeOp(DrawRenderNodeOp* op);
+
 
     template<class T>
-    inline T* refBuffer(const T* srcBuffer, int32_t count) {
-        if (srcBuffer == NULL) return NULL;
+    inline const T* refBuffer(const T* srcBuffer, int32_t count) {
+        if (!srcBuffer) return NULL;
+
         T* dstBuffer = (T*) mDisplayListData->allocator.alloc(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
         return dstBuffer;
@@ -217,153 +195,122 @@ private:
         return (char*) refBuffer<uint8_t>((uint8_t*)text, byteLength);
     }
 
-    inline SkPath* refPath(SkPath* path) {
+    inline const SkPath* refPath(const SkPath* path) {
         if (!path) return NULL;
 
-        SkPath* pathCopy = mPathMap.valueFor(path);
+        const SkPath* pathCopy = mPathMap.valueFor(path);
         if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
-            pathCopy = new SkPath(*path);
-            pathCopy->setSourcePath(path);
+            SkPath* newPathCopy = new SkPath(*path);
+            newPathCopy->setSourcePath(path);
+
+            pathCopy = newPathCopy;
             // replaceValueFor() performs an add if the entry doesn't exist
             mPathMap.replaceValueFor(path, pathCopy);
-            mPaths.add(pathCopy);
+            mDisplayListData->paths.add(pathCopy);
         }
-        if (mSourcePaths.indexOf(path) < 0) {
+        if (mDisplayListData->sourcePaths.indexOf(path) < 0) {
             mCaches.resourceCache.incrementRefcount(path);
-            mSourcePaths.add(path);
+            mDisplayListData->sourcePaths.add(path);
         }
         return pathCopy;
     }
 
-    inline SkPaint* refPaint(SkPaint* paint) {
-        if (!paint) {
-            return paint;
-        }
+    inline const SkPaint* refPaint(const SkPaint* paint) {
+        if (!paint) return NULL;
 
-        SkPaint* paintCopy = mPaintMap.valueFor(paint);
-        if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
-            paintCopy = new SkPaint(*paint);
+        const SkPaint* paintCopy = mPaintMap.valueFor(paint);
+        if (paintCopy == NULL
+                || paintCopy->getGenerationID() != paint->getGenerationID()
+                // We can't compare shader pointers because that will always
+                // change as we do partial copying via wrapping. However, if the
+                // shader changes the paint generationID will have changed and
+                // so we don't hit this comparison anyway
+                || !(paint->getShader() && paintCopy->getShader()
+                        && paint->getShader()->getGenerationID() == paintCopy->getShader()->getGenerationID())) {
+            paintCopy = copyPaint(paint);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(paint, paintCopy);
-            mPaints.add(paintCopy);
         }
 
         return paintCopy;
     }
 
-    inline SkRegion* refRegion(SkRegion* region) {
+    inline SkPaint* copyPaint(const SkPaint* paint) {
+        if (!paint) return NULL;
+        SkPaint* paintCopy = new SkPaint(*paint);
+        if (paint->getShader()) {
+            SkShader* shaderCopy = SkShader::CreateLocalMatrixShader(
+                    paint->getShader(), paint->getShader()->getLocalMatrix());
+            paintCopy->setShader(shaderCopy);
+            paintCopy->setGenerationID(paint->getGenerationID());
+            shaderCopy->setGenerationID(paint->getShader()->getGenerationID());
+            shaderCopy->unref();
+        }
+        mDisplayListData->paints.add(paintCopy);
+        return paintCopy;
+    }
+
+    inline const SkRegion* refRegion(const SkRegion* region) {
         if (!region) {
             return region;
         }
 
-        SkRegion* regionCopy = mRegionMap.valueFor(region);
+        const SkRegion* regionCopy = mRegionMap.valueFor(region);
         // TODO: Add generation ID to SkRegion
         if (regionCopy == NULL) {
             regionCopy = new SkRegion(*region);
             // replaceValueFor() performs an add if the entry doesn't exist
             mRegionMap.replaceValueFor(region, regionCopy);
-            mRegions.add(regionCopy);
+            mDisplayListData->regions.add(regionCopy);
         }
 
         return regionCopy;
     }
 
-    inline SkMatrix* refMatrix(SkMatrix* matrix) {
-        if (matrix) {
-            // Copying the matrix is cheap and prevents against the user changing
-            // the original matrix before the operation that uses it
-            SkMatrix* copy = new SkMatrix(*matrix);
-            mMatrices.add(copy);
-            return copy;
-        }
-        return matrix;
-    }
-
     inline Layer* refLayer(Layer* layer) {
-        mLayers.add(layer);
+        mDisplayListData->layers.add(layer);
         mCaches.resourceCache.incrementRefcount(layer);
         return layer;
     }
 
-    inline SkBitmap* refBitmap(SkBitmap* bitmap) {
+    inline const SkBitmap* refBitmap(const SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        mBitmapResources.add(bitmap);
+        mDisplayListData->bitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
         return bitmap;
     }
 
-    inline SkBitmap* refBitmapData(SkBitmap* bitmap) {
-        mOwnedBitmapResources.add(bitmap);
+    inline const SkBitmap* refBitmapData(const SkBitmap* bitmap) {
+        mDisplayListData->ownedBitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
         return bitmap;
     }
 
-    inline SkiaShader* refShader(SkiaShader* shader) {
-        if (!shader) return NULL;
-
-        SkiaShader* shaderCopy = mShaderMap.valueFor(shader);
-        // TODO: We also need to handle generation ID changes in compose shaders
-        if (shaderCopy == NULL || shaderCopy->getGenerationId() != shader->getGenerationId()) {
-            shaderCopy = shader->copy();
-            // replaceValueFor() performs an add if the entry doesn't exist
-            mShaderMap.replaceValueFor(shader, shaderCopy);
-            mShaders.add(shaderCopy);
-            mCaches.resourceCache.incrementRefcount(shaderCopy);
-        }
-        return shaderCopy;
-    }
-
-    inline SkiaColorFilter* refColorFilter(SkiaColorFilter* colorFilter) {
-        mFilterResources.add(colorFilter);
-        mCaches.resourceCache.incrementRefcount(colorFilter);
-        return colorFilter;
-    }
-
-    inline Res_png_9patch* refPatch(Res_png_9patch* patch) {
-        mPatchResources.add(patch);
+    inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
+        mDisplayListData->patchResources.add(patch);
         mCaches.resourceCache.incrementRefcount(patch);
         return patch;
     }
 
-    Vector<SkBitmap*> mBitmapResources;
-    Vector<SkBitmap*> mOwnedBitmapResources;
-    Vector<SkiaColorFilter*> mFilterResources;
-    Vector<Res_png_9patch*> mPatchResources;
-
-    Vector<SkPaint*> mPaints;
-    DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;
-
-    Vector<SkPath*> mPaths;
-    DefaultKeyedVector<SkPath*, SkPath*> mPathMap;
-
-    SortedVector<SkPath*> mSourcePaths;
-
-    Vector<SkRegion*> mRegions;
-    DefaultKeyedVector<SkRegion*, SkRegion*> mRegionMap;
-
-    Vector<SkiaShader*> mShaders;
-    DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
-
-    Vector<SkMatrix*> mMatrices;
-
-    Vector<Layer*> mLayers;
-
-    int mRestoreSaveCount;
+    DefaultKeyedVector<const SkPaint*, const SkPaint*> mPaintMap;
+    DefaultKeyedVector<const SkPath*, const SkPath*> mPathMap;
+    DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
 
     Caches& mCaches;
-    sp<DisplayListData> mDisplayListData;
+    DisplayListData* mDisplayListData;
 
     float mTranslateX;
     float mTranslateY;
-    bool mHasTranslate;
-    bool mHasDrawOps;
+    bool mHasDeferredTranslate;
+    DeferredBarrierType mDeferredBarrierType;
+    bool mHighContrastText;
 
-    uint32_t mFunctorCount;
+    int mRestoreSaveCount;
 
-    friend class DisplayList;
+    friend class RenderNode;
 
 }; // class DisplayListRenderer
 

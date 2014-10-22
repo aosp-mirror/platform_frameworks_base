@@ -16,7 +16,6 @@
 
 package android.test;
 
-import com.google.android.collect.Lists;
 import junit.framework.Assert;
 
 import java.util.Arrays;
@@ -127,6 +126,33 @@ public final class MoreAsserts {
     public static void assertEquals(int[] expected, int[] actual) {
         assertEquals(null, expected, actual);
     }
+
+    /**
+     * @hide Asserts that array {@code actual} is the same size and every element equals
+     * those in array {@code expected}. On failure, message indicates first
+     * specific element mismatch.
+     */
+    public static void assertEquals(
+            String message, long[] expected, long[] actual) {
+        if (expected.length != actual.length) {
+            failWrongLength(message, expected.length, actual.length);
+        }
+        for (int i = 0; i < expected.length; i++) {
+            if (expected[i] != actual[i]) {
+                failWrongElement(message, i, expected[i], actual[i]);
+            }
+        }
+    }
+
+    /**
+     * @hide Asserts that array {@code actual} is the same size and every element equals
+     * those in array {@code expected}. On failure, message indicates first
+     * specific element mismatch.
+     */
+    public static void assertEquals(long[] expected, long[] actual) {
+        assertEquals(null, expected, actual);
+    }
+
 
     /**
      * Asserts that array {@code actual} is the same size and every element equals

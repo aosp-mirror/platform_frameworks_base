@@ -166,7 +166,7 @@ the intent. If it is <code>false</code>, then there aren't any apps to handle th
 starts in case you need to disable the feature that uses the intent before the user attempts to use
 it. If you know of a specific app that can handle the intent, you can also provide a link for the
 user to download the app (see how to <a
-href="{@docRoot}distribute/googleplay/promote/linking.html">link to your product on Google
+href="{@docRoot}distribute/tools/promote/linking.html">link to your product on Google
 Play</a>).</p>
 
 

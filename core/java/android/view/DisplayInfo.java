@@ -20,9 +20,11 @@ import android.content.res.CompatibilityInfo;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.util.DisplayMetrics;
 
+import java.util.Arrays;
+
+import libcore.util.EmptyArray;
 import libcore.util.Objects;
 
 /**
@@ -144,6 +146,7 @@ public final class DisplayInfo implements Parcelable {
      * more than one physical display.
      * </p>
      */
+    @Surface.Rotation
     public int rotation;
 
     /**
@@ -154,6 +157,11 @@ public final class DisplayInfo implements Parcelable {
      * </p>
      */
     public float refreshRate;
+
+    /**
+     * The supported refresh rates of this display at the current resolution in frames per second.
+     */
+    public float[] supportedRefreshRates = EmptyArray.FLOAT;
 
     /**
      * The logical display density which is the basis for density-independent
@@ -178,6 +186,25 @@ public final class DisplayInfo implements Parcelable {
      * </p>
      */
     public float physicalYDpi;
+
+    /**
+     * This is a positive value indicating the phase offset of the VSYNC events provided by
+     * Choreographer relative to the display refresh.  For example, if Choreographer reports
+     * that the refresh occurred at time N, it actually occurred at (N - appVsyncOffsetNanos).
+     */
+    public long appVsyncOffsetNanos;
+
+    /**
+     * This is how far in advance a buffer must be queued for presentation at
+     * a given time.  If you want a buffer to appear on the screen at
+     * time N, you must submit the buffer before (N - bufferDeadlineNanos).
+     */
+    public long presentationDeadlineNanos;
+
+    /**
+     * The state of the display, such as {@link android.view.Display#STATE_ON}.
+     */
+    public int state;
 
     /**
      * The UID of the application that owns this display, or zero if it is owned by the system.
@@ -248,6 +275,9 @@ public final class DisplayInfo implements Parcelable {
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
+                && appVsyncOffsetNanos == other.appVsyncOffsetNanos
+                && presentationDeadlineNanos == other.presentationDeadlineNanos
+                && state == other.state
                 && ownerUid == other.ownerUid
                 && Objects.equal(ownerPackageName, other.ownerPackageName);
     }
@@ -277,9 +307,14 @@ public final class DisplayInfo implements Parcelable {
         overscanBottom = other.overscanBottom;
         rotation = other.rotation;
         refreshRate = other.refreshRate;
+        supportedRefreshRates = Arrays.copyOf(
+                other.supportedRefreshRates, other.supportedRefreshRates.length);
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
+        appVsyncOffsetNanos = other.appVsyncOffsetNanos;
+        presentationDeadlineNanos = other.presentationDeadlineNanos;
+        state = other.state;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
     }
@@ -304,9 +339,13 @@ public final class DisplayInfo implements Parcelable {
         overscanBottom = source.readInt();
         rotation = source.readInt();
         refreshRate = source.readFloat();
+        supportedRefreshRates = source.createFloatArray();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
+        appVsyncOffsetNanos = source.readLong();
+        presentationDeadlineNanos = source.readLong();
+        state = source.readInt();
         ownerUid = source.readInt();
         ownerPackageName = source.readString();
     }
@@ -332,9 +371,13 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(overscanBottom);
         dest.writeInt(rotation);
         dest.writeFloat(refreshRate);
+        dest.writeFloatArray(supportedRefreshRates);
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
+        dest.writeLong(appVsyncOffsetNanos);
+        dest.writeLong(presentationDeadlineNanos);
+        dest.writeInt(state);
         dest.writeInt(ownerUid);
         dest.writeString(ownerPackageName);
     }
@@ -431,7 +474,9 @@ public final class DisplayInfo implements Parcelable {
         sb.append(smallestNominalAppHeight);
         sb.append(", ");
         sb.append(refreshRate);
-        sb.append(" fps, rotation");
+        sb.append(" fps, supportedRefreshRates ");
+        sb.append(Arrays.toString(supportedRefreshRates));
+        sb.append(", rotation ");
         sb.append(rotation);
         sb.append(", density ");
         sb.append(logicalDensityDpi);
@@ -441,11 +486,17 @@ public final class DisplayInfo implements Parcelable {
         sb.append(physicalYDpi);
         sb.append(") dpi, layerStack ");
         sb.append(layerStack);
+        sb.append(", appVsyncOff ");
+        sb.append(appVsyncOffsetNanos);
+        sb.append(", presDeadline ");
+        sb.append(presentationDeadlineNanos);
         sb.append(", type ");
         sb.append(Display.typeToString(type));
         if (address != null) {
             sb.append(", address ").append(address);
         }
+        sb.append(", state ");
+        sb.append(Display.stateToString(state));
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");

@@ -40,7 +40,7 @@ public:
      * Returns the desired size for the stencil buffer. If the returned value
      * is 0, then no stencil buffer is required.
      */
-    ANDROID_API static uint32_t getStencilSize();
+    ANDROID_API static uint8_t getStencilSize();
 
     /**
      * Returns the smallest stencil format accepted by render buffers.

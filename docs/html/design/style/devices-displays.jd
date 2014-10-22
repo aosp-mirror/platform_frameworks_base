@@ -1,7 +1,9 @@
 page.title=Devices and Displays
+page.metaDescription=Take advantage of Android's flexible layout system and create apps that gracefully scale from phones to tablets and beyond.
+
 @jd:body
 
-<p>Android powers millions of phones, tablets, and other devices in a wide variety of screen sizes and
+<p>Android powers hundreds of millions of phones, tablets, and other devices in a wide variety of screen sizes and
 form factors. By taking advantage of Android's flexible layout system, you can create apps that
 gracefully scale from large tablets to smaller phones.</p>
 

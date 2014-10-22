@@ -44,24 +44,24 @@ public class SubActivityScreen extends Activity {
         // Move on to the next thing that will generate a result...  but only
         // if we are being launched for the first time.
         if (icicle == null) {
-	        if (mMode == PENDING_RESULT_MODE) {
-	            PendingIntent apr = createPendingResult(1, null,
-	                    Intent.FILL_IN_ACTION);
-	            Intent res = new Intent();
+            if (mMode == PENDING_RESULT_MODE) {
+                PendingIntent apr = createPendingResult(1, null,
+                        Intent.FILL_IN_ACTION);
+                Intent res = new Intent();
                 res.putExtra("tkey", "tval");
                 res.setAction("test");
-	            try {
-    	            apr.send(this, RESULT_OK, res);
-	            } catch (PendingIntent.CanceledException e) {
-	            }
-	        } else if (mMode < CHILD_OFFSET) {
-	            Intent intent = new Intent();
-	        	intent.setClass(this, SubActivityScreen.class);
-	            intent.putExtra("mode", CHILD_OFFSET+mMode);
-	            //System.out.println("*** Starting from onStart: " + intent);
-	            startActivityForResult(intent, 1);
-	            return;
-	        }
+                try {
+                    apr.send(this, RESULT_OK, res);
+                } catch (PendingIntent.CanceledException e) {
+                }
+            } else if (mMode < CHILD_OFFSET) {
+                Intent intent = new Intent();
+                intent.setClass(this, SubActivityScreen.class);
+                intent.putExtra("mode", CHILD_OFFSET+mMode);
+                //System.out.println("*** Starting from onStart: " + intent);
+                startActivityForResult(intent, 1);
+                return;
+            }
         }
     }
 
@@ -77,15 +77,15 @@ public class SubActivityScreen extends Activity {
         //Log.i("foo", "SubActivityScreen pid=" + Process.myPid() + " onResume");
         
         if (mMode >= CHILD_OFFSET) {
-        	// Wait a little bit, to give our parent time to kill itself
-        	// if that is something it is into.
-        	try {
-	        	Thread.sleep(500);
-        	} catch (InterruptedException e) {
-        		setResult(RESULT_CANCELED, (new Intent()).setAction("Interrupted!"));
-        		finish();
-        		return;
-        	}
+            // Wait a little bit, to give our parent time to kill itself
+            // if that is something it is into.
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                setResult(RESULT_CANCELED, (new Intent()).setAction("Interrupted!"));
+                finish();
+                return;
+            }
             //System.out.println("Resuming sub-activity: mode=" + mMode);
             switch (mMode-CHILD_OFFSET) {
             case NO_RESULT_MODE:

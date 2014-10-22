@@ -290,18 +290,14 @@ public class TypedValue {
         return -1;
     }
 
+    /**
+     * @hide Was accidentally exposed in API level 1 for debugging purposes.
+     * Kept for compatibility just in case although the debugging code has been removed.
+     */
+    @Deprecated
     public static float complexToDimensionNoisy(int data, DisplayMetrics metrics)
     {
-        float res = complexToDimension(data, metrics);
-        System.out.println(
-            "Dimension (0x" + ((data>>TypedValue.COMPLEX_MANTISSA_SHIFT)
-                               & TypedValue.COMPLEX_MANTISSA_MASK)
-            + "*" + (RADIX_MULTS[(data>>TypedValue.COMPLEX_RADIX_SHIFT)
-                                & TypedValue.COMPLEX_RADIX_MASK] / MANTISSA_MULT)
-            + ")" + DIMENSION_UNIT_STRS[(data>>COMPLEX_UNIT_SHIFT)
-                                & COMPLEX_UNIT_MASK]
-            + " = " + res);
-        return res;
+        return complexToDimension(data, metrics);
     }
 
     /**

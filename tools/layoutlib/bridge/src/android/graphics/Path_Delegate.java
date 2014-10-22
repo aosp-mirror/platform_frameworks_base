@@ -142,7 +142,14 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_getFillType(long nPath) {
+    /*package*/ static boolean native_isConvex(long nPath) {
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.isConvex is not supported.", null, null);
+        return true;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int native_getFillType(long nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return 0;
@@ -290,14 +297,15 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_arcTo(long nPath, RectF oval,
+    /*package*/ static void native_arcTo(long nPath, float left, float top, float right,
+            float bottom,
                     float startAngle, float sweepAngle, boolean forceMoveTo) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
-        pathDelegate.arcTo(oval, startAngle, sweepAngle, forceMoveTo);
+        pathDelegate.arcTo(left, top, right, bottom, startAngle, sweepAngle, forceMoveTo);
     }
 
     @LayoutlibDelegate
@@ -308,16 +316,6 @@ public final class Path_Delegate {
         }
 
         pathDelegate.close();
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_addRect(long nPath, RectF rect, int dir) {
-        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
-        if (pathDelegate == null) {
-            return;
-        }
-
-        pathDelegate.addRect(rect.left, rect.top, rect.right, rect.bottom, dir);
     }
 
     @LayoutlibDelegate
@@ -332,14 +330,15 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addOval(long nPath, RectF oval, int dir) {
+    /*package*/ static void native_addOval(long nPath, float left, float top, float right,
+            float bottom, int dir) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
         pathDelegate.mPath.append(new Ellipse2D.Float(
-                oval.left, oval.top, oval.width(), oval.height()), false);
+                left, top, right - left, bottom - top), false);
     }
 
     @LayoutlibDelegate
@@ -355,8 +354,8 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addArc(long nPath, RectF oval,
-            float startAngle, float sweepAngle) {
+    /*package*/ static void native_addArc(long nPath, float left, float top, float right,
+            float bottom, float startAngle, float sweepAngle) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
@@ -364,13 +363,13 @@ public final class Path_Delegate {
 
         // because x/y is the center of the circle, need to offset this by the radius
         pathDelegate.mPath.append(new Arc2D.Float(
-                oval.left, oval.top, oval.width(), oval.height(),
+                left, top, right - left, bottom - top,
                 -startAngle, -sweepAngle, Arc2D.OPEN), false);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addRoundRect(
-            long nPath, RectF rect, float rx, float ry, int dir) {
+    /*package*/ static void native_addRoundRect(long nPath, float left, float top, float right,
+            float bottom, float rx, float ry, int dir) {
 
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
@@ -378,14 +377,15 @@ public final class Path_Delegate {
         }
 
         pathDelegate.mPath.append(new RoundRectangle2D.Float(
-                rect.left, rect.top, rect.width(), rect.height(), rx * 2, ry * 2), false);
+                left, top, right - left, bottom - top, rx * 2, ry * 2), false);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addRoundRect(long nPath, RectF rect, float[] radii, int dir) {
+    /*package*/ static void native_addRoundRect(long nPath, float left, float top, float right,
+            float bottom, float[] radii, int dir) {
         // Java2D doesn't support different rounded corners in each corner, so just use the
         // first value.
-        native_addRoundRect(nPath, rect, radii[0], radii[1], dir);
+        native_addRoundRect(nPath, left, top, right, bottom, radii[0], radii[1], dir);
 
         // there can be a case where this API is used but with similar values for all corners, so
         // in that case we don't warn.
@@ -484,6 +484,11 @@ public final class Path_Delegate {
         sManager.removeJavaReferenceFor(nPath);
     }
 
+    @LayoutlibDelegate
+    /*package*/ static float[] native_approximate(long nPath, float error) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.approximate() not supported", null);
+        return new float[0];
+    }
 
     // ---- Private helper methods ----
 
@@ -603,6 +608,9 @@ public final class Path_Delegate {
      * @param y The y-coordinate of the end of a line
      */
     private void lineTo(float x, float y) {
+        if (isEmpty()) {
+            mPath.moveTo(mLastX = 0, mLastY = 0);
+        }
         mPath.lineTo(mLastX = x, mLastY = y);
     }
 
@@ -707,14 +715,19 @@ public final class Path_Delegate {
      * start of the arc. However, if the path is empty, then we call moveTo()
      * with the first point of the arc. The sweep angle is tread mod 360.
      *
-     * @param oval        The bounds of oval defining shape and size of the arc
+     * @param left        The left of oval defining shape and size of the arc
+     * @param top         The top of oval defining shape and size of the arc
+     * @param right       The right of oval defining shape and size of the arc
+     * @param bottom      The bottom of oval defining shape and size of the arc
      * @param startAngle  Starting angle (in degrees) where the arc begins
      * @param sweepAngle  Sweep angle (in degrees) measured clockwise, treated
      *                    mod 360.
      * @param forceMoveTo If true, always begin a new contour with the arc
      */
-    private void arcTo(RectF oval, float startAngle, float sweepAngle, boolean forceMoveTo) {
-        Arc2D arc = new Arc2D.Float(oval.left, oval.top, oval.width(), oval.height(), -startAngle,
+    private void arcTo(float left, float top, float right, float bottom, float startAngle,
+            float sweepAngle,
+            boolean forceMoveTo) {
+        Arc2D arc = new Arc2D.Float(left, top, right - left, bottom - top, -startAngle,
                 -sweepAngle, Arc2D.OPEN);
         mPath.append(arc, true /*connect*/);
 

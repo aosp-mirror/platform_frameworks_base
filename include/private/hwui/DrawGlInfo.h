@@ -55,7 +55,15 @@ struct DrawGlInfo {
         kModeDraw,
         // Indicates the the functor is called only to perform
         // processing and that no draw should be attempted
-        kModeProcess
+        kModeProcess,
+        // Same as kModeProcess, however there is no GL context because it was
+        // lost or destroyed
+        kModeProcessNoContext,
+        // Invoked every time the UI thread pushes over a frame to the render thread
+        // *and the owning view has a dirty display list*. This is a signal to sync
+        // any data that needs to be shared between the UI thread and the render thread.
+        // During this time the UI thread is blocked.
+        kModeSync
     };
 
     /**
@@ -65,14 +73,6 @@ struct DrawGlInfo {
     enum Status {
         // The functor is done
         kStatusDone = 0x0,
-        // The functor is requesting a redraw (the clip rect
-        // used by the redraw is specified by DrawGlInfo.)
-        // The rest of the UI might redraw too.
-        kStatusDraw = 0x1,
-        // The functor needs to be invoked again but will
-        // not redraw. Only the functor is invoked again
-        // (unless another functor requests a redraw.)
-        kStatusInvoke = 0x2,
         // DisplayList actually issued GL drawing commands.
         // This is used to signal the HardwareRenderer that the
         // buffers should be flipped - otherwise, there were no

@@ -1,0 +1,86 @@
+page.title=Creating a Project
+
+@jd:body
+
+<p>Android Studio makes it easy to create Android apps for several form factors, such as phone,
+tablet, TV, Wear, and Google Glass. The <em>New Project</em> wizard lets you choose the form factors
+for your app and populates the project structure with everything you need to get started.</p>
+
+<p>Follow the steps in this section to create a project in Android Studio.</p>
+
+<h2>Step 1: Create a New Project</h2>
+
+<p>If you didn't have a project opened, Android Studio shows the Welcome screen.
+To create a new project, click <strong>New Project</strong>.</p>
+
+<p>If you had a project opened, Android Studio shows the development environment.
+To create a new project, click <strong>File</strong> > <strong>New Project</strong>.</p>
+
+<p>The next window lets you configure the name of your app, the package name, and the location
+of your project.</p>
+
+<img src="{@docRoot}images/tools/wizard2.png" alt="" width="500" height="381">
+<p class="img-caption"><strong>Figure 1.</strong> Choose a name for your project.</p>
+
+<p>Enter the values for your project and click <strong>Next</strong>.</p>
+
+
+<h2>Step 2: Select Form Factors and API Level</h2>
+
+<p>The next window lets you select the form factors supported by your app, such as phone, tablet,
+TV, Wear, and Google Glass. For each form factor, you can also select the API
+Level that your app requires. To get more information, click <strong>Help me choose</strong>.</p>
+
+<img src="{@docRoot}images/tools/wizard4.png" alt="" width="750" height="510">
+<p class="img-caption"><strong>Figure 2.</strong> Select the API Level.</p>
+
+<p>The API Level window shows the distribution of mobile devices running each version of Android,
+as shown in Figure 2. Click on an API level to see a list of features introduced in the corresponding
+version of Android. This helps you choose the minimum API Level that has all the features that
+your apps needs, so you can reach as many devices as possible. Then click <strong>OK</strong>.</p>
+
+<img src="{@docRoot}images/tools/wizard3.png" alt="" width="500" height="480">
+<p class="img-caption"><strong>Figure 3.</strong> Choose form factors for your app.</p>
+
+<p>Then, on the Form Factors Window, click <strong>Next</strong>.</p>
+
+
+<h2>Step 3: Add an Activity</h2>
+
+<p>The next screen lets you select an activity type to add to your app, as shown in Figure 4.
+This screen depends on the form factors you selected earlier.</p>
+
+<img src="{@docRoot}images/tools/wizard5.png" alt="" width="720" height="504">
+<p class="img-caption"><strong>Figure 4.</strong> Add an activity to your app.</p>
+
+<p>Choose an activity type and click <strong>Next</strong>.</p>
+
+
+<h2>Step 4: Configure Your Activity</h2>
+
+<p>The next screen lets you configure the activity to add to your app, as shown in Figure 6.</p>
+
+<img src="{@docRoot}images/tools/wizard6.png" alt="" width="450" height="385">
+<p class="img-caption"><strong>Figure 6.</strong> Choose a name for your activity.</p>
+
+<p>Enter the activity name, the layout name, and the activity title. Then click
+<strong>Finish</strong>.</p>
+
+
+<h2>Step 5: Develop Your App</h2>
+
+<p>Android Studio creates the default structure for your project and opens the development
+environment. If your app supports more than one form factor, Android Studio creates a module for
+each of them, as shown in Figure 7.</p>
+
+<img src="{@docRoot}images/tools/wizard7.png" alt="" width="750" height="509">
+<p class="img-caption"><strong>Figure 7.</strong> The default project structure for a mobile app.</p>
+
+<p>Now you are ready to develop your app. For more information, see the following links:</p>
+
+<ul>
+<li><a href="{@docRoot}training/">Training Lessons</a></li>
+<li><a href="{@docRoot}training/building-wearables.html">Building Apps for Wearables</a></li>
+<li><a href="{@docRoot}tv/">Android TV</a></li>
+<li><a href="https://developers.google.com/glass/">Google Glass</a></li>
+</ul>

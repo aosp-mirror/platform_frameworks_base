@@ -27,7 +27,6 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.SimpleExpandableListAdapter;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import java.util.Map;
 

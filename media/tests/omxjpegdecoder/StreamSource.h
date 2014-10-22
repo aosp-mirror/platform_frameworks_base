@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-#include <core/SkStream.h>
+#include <SkStream.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaErrors.h>
 #include <utils/threads.h>

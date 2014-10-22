@@ -1,5 +1,8 @@
 page.title=Metrics and Grids
+page.metaDescription=Optimize your app's UI by designing layouts based on density-independent grids.
 page.tags="layout","screens"
+meta.tags="multiple screens, layout, tablets"
+page.image=/design/media/metrics_closeup.png
 @jd:body
 
 <p>Devices vary not only in physical size, but also in screen density (<acronym title="Dots per

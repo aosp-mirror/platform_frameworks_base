@@ -16,9 +16,6 @@
 
 package android.renderscript;
 
-import java.lang.reflect.Field;
-import android.util.Log;
-
 /**
  * <p>An Element represents one item within an {@link
  * android.renderscript.Allocation}.  An Element is roughly equivalent to a C

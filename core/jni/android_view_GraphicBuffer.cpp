@@ -21,6 +21,7 @@
 
 #include "android_os_Parcel.h"
 #include "android_view_GraphicBuffer.h"
+#include "android/graphics/GraphicsJNI.h"
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -74,14 +75,9 @@ static struct {
 } gRectClassInfo;
 
 static struct {
-    jfieldID mFinalizer;
-    jfieldID mNativeCanvas;
     jfieldID mSurfaceFormat;
+    jmethodID setNativeBitmap;
 } gCanvasClassInfo;
-
-static struct {
-    jfieldID mNativeCanvas;
-} gCanvasFinalizerClassInfo;
 
 #define GET_INT(object, field) \
     env->GetIntField(object, field)
@@ -146,25 +142,16 @@ static void android_view_GraphiceBuffer_destroy(JNIEnv* env, jobject clazz,
 // Canvas management
 // ----------------------------------------------------------------------------
 
-static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
-    jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
-    SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-            GET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas));
-    SET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas, (long) newCanvas);
-    SET_LONG(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (long) newCanvas);
-    SkSafeUnref(previousCanvas);
-}
-
-static inline SkBitmap::Config convertPixelFormat(int32_t format) {
+static inline SkColorType convertPixelFormat(int32_t format) {
     switch (format) {
         case PIXEL_FORMAT_RGBA_8888:
-            return SkBitmap::kARGB_8888_Config;
+            return kN32_SkColorType;
         case PIXEL_FORMAT_RGBX_8888:
-            return SkBitmap::kARGB_8888_Config;
+            return kN32_SkColorType;
         case PIXEL_FORMAT_RGB_565:
-            return SkBitmap::kRGB_565_Config;
+            return kRGB_565_SkColorType;
         default:
-            return SkBitmap::kNo_Config;
+            return kUnknown_SkColorType;
     }
 }
 
@@ -201,8 +188,10 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     ssize_t bytesCount = buffer->getStride() * bytesPerPixel(buffer->getPixelFormat());
 
     SkBitmap bitmap;
-    bitmap.setConfig(convertPixelFormat(buffer->getPixelFormat()),
-            buffer->getWidth(), buffer->getHeight(), bytesCount);
+    bitmap.setInfo(SkImageInfo::Make(buffer->getWidth(), buffer->getHeight(),
+                                     convertPixelFormat(buffer->getPixelFormat()),
+                                     kPremul_SkAlphaType),
+                   bytesCount);
 
     if (buffer->getWidth() > 0 && buffer->getHeight() > 0) {
         bitmap.setPixels(bits);
@@ -211,12 +200,11 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     }
 
     SET_INT(canvas, gCanvasClassInfo.mSurfaceFormat, buffer->getPixelFormat());
-
-    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
-    swapCanvasPtr(env, canvas, nativeCanvas);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(&bitmap));
 
     SkRect clipRect;
     clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
+    SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
     nativeCanvas->clipRect(clipRect);
 
     if (dirtyRect) {
@@ -232,8 +220,7 @@ static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobj
 
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
-    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    swapCanvasPtr(env, canvas, nativeCanvas);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     if (wrapper) {
         status_t status = wrapper->buffer->unlock();
@@ -332,13 +319,8 @@ int register_android_view_GraphicBuffer(JNIEnv* env) {
     GET_FIELD_ID(gRectClassInfo.bottom, clazz, "bottom", "I");
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
-    GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer",
-            "Landroid/graphics/Canvas$CanvasFinalizer;");
-    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
     GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
-
-    FIND_CLASS(clazz, "android/graphics/Canvas$CanvasFinalizer");
-    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
+    GET_METHOD_ID(gCanvasClassInfo.setNativeBitmap, clazz, "setNativeBitmap", "(J)V");
 
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

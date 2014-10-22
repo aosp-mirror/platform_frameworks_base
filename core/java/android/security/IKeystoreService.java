@@ -478,6 +478,59 @@ public interface IKeystoreService extends IInterface {
                 }
                 return _result;
             }
+
+            public int reset_uid(int uid) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(uid);
+                    mRemote.transact(Stub.TRANSACTION_reset_uid, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            public int sync_uid(int srcUid, int dstUid) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(srcUid);
+                    _data.writeInt(dstUid);
+                    mRemote.transact(Stub.TRANSACTION_sync_uid, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            public int password_uid(String password, int uid) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(password);
+                    _data.writeInt(uid);
+                    mRemote.transact(Stub.TRANSACTION_password_uid, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "android.security.keystore";
@@ -505,6 +558,9 @@ public interface IKeystoreService extends IInterface {
         static final int TRANSACTION_duplicate = IBinder.FIRST_CALL_TRANSACTION + 20;
         static final int TRANSACTION_is_hardware_backed = IBinder.FIRST_CALL_TRANSACTION + 21;
         static final int TRANSACTION_clear_uid = IBinder.FIRST_CALL_TRANSACTION + 22;
+        static final int TRANSACTION_reset_uid = IBinder.FIRST_CALL_TRANSACTION + 23;
+        static final int TRANSACTION_sync_uid = IBinder.FIRST_CALL_TRANSACTION + 24;
+        static final int TRANSACTION_password_uid = IBinder.FIRST_CALL_TRANSACTION + 25;
 
         /**
          * Cast an IBinder object into an IKeystoreService interface, generating
@@ -597,4 +653,10 @@ public interface IKeystoreService extends IInterface {
     public int is_hardware_backed(String string) throws RemoteException;
 
     public int clear_uid(long uid) throws RemoteException;
+
+    public int reset_uid(int uid) throws RemoteException;
+
+    public int sync_uid(int sourceUid, int targetUid) throws RemoteException;
+
+    public int password_uid(String password, int uid) throws RemoteException;
 }

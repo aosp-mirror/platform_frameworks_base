@@ -28,230 +28,90 @@
 #include "ProgramCache.h"
 #include "TextureCache.h"
 #include "GradientCache.h"
-#include "Snapshot.h"
 
 namespace android {
 namespace uirenderer {
 
 class Caches;
-
-///////////////////////////////////////////////////////////////////////////////
-// Base shader
-///////////////////////////////////////////////////////////////////////////////
+class Layer;
 
 /**
- * Represents a Skia shader. A shader will modify the GL context and active
- * program to recreate the original effect.
+ * Type of Skia shader in use.
  */
-struct SkiaShader {
-    /**
-     * Type of Skia shader in use.
-     */
-    enum Type {
-        kNone,
-        kBitmap,
-        kLinearGradient,
-        kCircularGradient,
-        kSweepGradient,
-        kCompose
-    };
+enum SkiaShaderType {
+    kNone_SkiaShaderType,
+    kBitmap_SkiaShaderType,
+    kGradient_SkiaShaderType,
+    kCompose_SkiaShaderType,
+    kLayer_SkiaShaderType
+};
 
-    ANDROID_API SkiaShader(Type type, SkShader* key, SkShader::TileMode tileX,
-            SkShader::TileMode tileY, SkMatrix* matrix, bool blend);
-    virtual ~SkiaShader();
+class SkiaShader {
+public:
+    static SkiaShaderType getType(const SkShader& shader);
+    static void describe(Caches* caches, ProgramDescription& description,
+            const Extensions& extensions, const SkShader& shader);
+    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
+            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
+};
 
-    virtual SkiaShader* copy() = 0;
-    void copyFrom(const SkiaShader& shader);
-
-    virtual void describe(ProgramDescription& description, const Extensions& extensions);
-    virtual void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
-            GLuint* textureUnit);
-
-    inline SkShader* getSkShader() {
-        return mKey;
+class InvalidSkiaShader {
+public:
+    static void describe(Caches* caches, ProgramDescription& description,
+            const Extensions& extensions, const SkShader& shader) {
+        // This shader is unsupported. Skip it.
+    }
+    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
+            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
+        // This shader is unsupported. Skip it.
     }
 
-    inline bool blend() const {
-        return mBlend;
-    }
-
-    Type type() const {
-        return mType;
-    }
-
-    virtual void setCaches(Caches& caches) {
-        mCaches = &caches;
-    }
-
-    uint32_t getGenerationId() {
-        return mGenerationId;
-    }
-
-    void setMatrix(SkMatrix* matrix) {
-        updateLocalMatrix(matrix);
-        mGenerationId++;
-    }
-
-    void updateLocalMatrix(const SkMatrix* matrix) {
-        if (matrix) {
-            mat4 localMatrix(*matrix);
-            mShaderMatrix.loadInverse(localMatrix);
-        } else {
-            mShaderMatrix.loadIdentity();
-        }
-    }
-
-    void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
-
-protected:
-    SkiaShader();
-
-    /**
-     * The appropriate texture unit must have been activated prior to invoking
-     * this method.
-     */
-    inline void bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT);
-
-    Type mType;
-    SkShader* mKey;
-    SkShader::TileMode mTileX;
-    SkShader::TileMode mTileY;
-    bool mBlend;
-
-    Caches* mCaches;
-
-    mat4 mUnitMatrix;
-    mat4 mShaderMatrix;
-
-private:
-    uint32_t mGenerationId;
-}; // struct SkiaShader
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Implementations
-///////////////////////////////////////////////////////////////////////////////
+};
+/**
+ * A shader that draws a layer.
+ */
+class SkiaLayerShader {
+public:
+    static void describe(Caches* caches, ProgramDescription& description,
+            const Extensions& extensions, const SkShader& shader);
+    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
+            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
+}; // class SkiaLayerShader
 
 /**
  * A shader that draws a bitmap.
  */
-struct SkiaBitmapShader: public SkiaShader {
-    ANDROID_API SkiaBitmapShader(SkBitmap* bitmap, SkShader* key, SkShader::TileMode tileX,
-            SkShader::TileMode tileY, SkMatrix* matrix, bool blend);
-    SkiaShader* copy();
+class SkiaBitmapShader {
+public:
+    static void describe(Caches* caches, ProgramDescription& description,
+            const Extensions& extensions, const SkShader& shader);
+    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
+            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
 
-    void describe(ProgramDescription& description, const Extensions& extensions);
-    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
-            GLuint* textureUnit);
 
-private:
-    SkiaBitmapShader() : mBitmap(NULL), mTexture(NULL) {
-    }
-
-    SkBitmap* mBitmap;
-    Texture* mTexture;
-    GLenum mWrapS;
-    GLenum mWrapT;
-}; // struct SkiaBitmapShader
+}; // class SkiaBitmapShader
 
 /**
- * A shader that draws a linear gradient.
+ * A shader that draws one of three types of gradient, depending on shader param.
  */
-struct SkiaLinearGradientShader: public SkiaShader {
-    ANDROID_API SkiaLinearGradientShader(float* bounds, uint32_t* colors, float* positions,
-            int count, SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
-    ~SkiaLinearGradientShader();
-    SkiaShader* copy();
-
-    void describe(ProgramDescription& description, const Extensions& extensions);
-    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
-            GLuint* textureUnit);
-
-private:
-    SkiaLinearGradientShader() {
-    }
-
-    bool mIsSimple;
-    float* mBounds;
-    uint32_t* mColors;
-    float* mPositions;
-    int mCount;
-}; // struct SkiaLinearGradientShader
-
-/**
- * A shader that draws a sweep gradient.
- */
-struct SkiaSweepGradientShader: public SkiaShader {
-    ANDROID_API SkiaSweepGradientShader(float x, float y, uint32_t* colors, float* positions,
-            int count, SkShader* key, SkMatrix* matrix, bool blend);
-    ~SkiaSweepGradientShader();
-    SkiaShader* copy();
-
-    virtual void describe(ProgramDescription& description, const Extensions& extensions);
-    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
-            GLuint* textureUnit);
-
-protected:
-    SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors, float* positions,
-            int count, SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
-    SkiaSweepGradientShader() {
-    }
-
-    bool mIsSimple;
-    uint32_t* mColors;
-    float* mPositions;
-    int mCount;
-}; // struct SkiaSweepGradientShader
-
-/**
- * A shader that draws a circular gradient.
- */
-struct SkiaCircularGradientShader: public SkiaSweepGradientShader {
-    ANDROID_API SkiaCircularGradientShader(float x, float y, float radius, uint32_t* colors,
-            float* positions, int count, SkShader* key,SkShader::TileMode tileMode,
-            SkMatrix* matrix, bool blend);
-    SkiaShader* copy();
-
-    void describe(ProgramDescription& description, const Extensions& extensions);
-
-private:
-    SkiaCircularGradientShader() {
-    }
-}; // struct SkiaCircularGradientShader
+class SkiaGradientShader {
+public:
+    static void describe(Caches* caches, ProgramDescription& description,
+            const Extensions& extensions, const SkShader& shader);
+    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
+            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
+};
 
 /**
  * A shader that draws two shaders, composited with an xfermode.
  */
-struct SkiaComposeShader: public SkiaShader {
-    ANDROID_API SkiaComposeShader(SkiaShader* first, SkiaShader* second, SkXfermode::Mode mode,
-            SkShader* key);
-    ~SkiaComposeShader();
-    SkiaShader* copy();
-
-    void setCaches(Caches& caches) {
-        SkiaShader::setCaches(caches);
-        mFirst->setCaches(caches);
-        mSecond->setCaches(caches);
-    }
-
-    void describe(ProgramDescription& description, const Extensions& extensions);
-    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
-            GLuint* textureUnit);
-
-private:
-    SkiaComposeShader(): mCleanup(false) {
-    }
-
-    void cleanup() {
-        mCleanup = true;
-    }
-
-    SkiaShader* mFirst;
-    SkiaShader* mSecond;
-    SkXfermode::Mode mMode;
-
-    bool mCleanup;
-}; // struct SkiaComposeShader
+class SkiaComposeShader {
+public:
+    static void describe(Caches* caches, ProgramDescription& description,
+            const Extensions& extensions, const SkShader& shader);
+    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
+            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
+}; // class SkiaComposeShader
 
 }; // namespace uirenderer
 }; // namespace android

@@ -31,18 +31,12 @@ easier.
 ===============================================================
  -->
 <resources>
-    <style name="Theme.DeviceDefault.DialogWhenLarge"
-            parent="@android:style/Theme.DeviceDefault.Dialog.FixedSize">
+    <style name="Theme.DeviceDefault.DialogWhenLarge" parent="@style/Theme.DeviceDefault.Dialog.FixedSize">
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
-    <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar"
-            parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar.FixedSize">
+    <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="@style/Theme.DeviceDefault.Dialog.NoActionBar.FixedSize">
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
-    <style name="Theme.DeviceDefault.Light.DialogWhenLarge"
-            parent="@android:style/Theme.DeviceDefault.Light.Dialog.FixedSize">
-    </style>
-    <style name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar"
-            parent="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.FixedSize">
-    </style>
+    <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="@style/Theme.DeviceDefault.Light.Dialog.FixedSize" />
+    <style name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.DeviceDefault.Light.Dialog.NoActionBar.FixedSize" />
 </resources>

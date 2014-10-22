@@ -19,8 +19,6 @@ package android.net.nsd;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -213,6 +211,7 @@ public final class NsdManager {
     private Context mContext;
 
     private static final int INVALID_LISTENER_KEY = 0;
+    private static final int BUSY_LISTENER_KEY = -1;
     private int mListenerKey = 1;
     private final SparseArray mListenerMap = new SparseArray();
     private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<NsdServiceInfo>();
@@ -319,71 +318,74 @@ public final class NsdManager {
                 Log.d(TAG, "Stale key " + message.arg2);
                 return;
             }
-            boolean listenerRemove = true;
             NsdServiceInfo ns = getNsdService(message.arg2);
             switch (message.what) {
                 case DISCOVER_SERVICES_STARTED:
                     String s = getNsdServiceInfoType((NsdServiceInfo) message.obj);
                     ((DiscoveryListener) listener).onDiscoveryStarted(s);
-                    // Keep listener until stop discovery
-                    listenerRemove = false;
                     break;
                 case DISCOVER_SERVICES_FAILED:
+                    removeListener(message.arg2);
                     ((DiscoveryListener) listener).onStartDiscoveryFailed(getNsdServiceInfoType(ns),
                             message.arg1);
                     break;
                 case SERVICE_FOUND:
                     ((DiscoveryListener) listener).onServiceFound((NsdServiceInfo) message.obj);
-                    // Keep listener until stop discovery
-                    listenerRemove = false;
                     break;
                 case SERVICE_LOST:
                     ((DiscoveryListener) listener).onServiceLost((NsdServiceInfo) message.obj);
-                    // Keep listener until stop discovery
-                    listenerRemove = false;
                     break;
                 case STOP_DISCOVERY_FAILED:
+                    removeListener(message.arg2);
                     ((DiscoveryListener) listener).onStopDiscoveryFailed(getNsdServiceInfoType(ns),
                             message.arg1);
                     break;
                 case STOP_DISCOVERY_SUCCEEDED:
+                    removeListener(message.arg2);
                     ((DiscoveryListener) listener).onDiscoveryStopped(getNsdServiceInfoType(ns));
                     break;
                 case REGISTER_SERVICE_FAILED:
+                    removeListener(message.arg2);
                     ((RegistrationListener) listener).onRegistrationFailed(ns, message.arg1);
                     break;
                 case REGISTER_SERVICE_SUCCEEDED:
                     ((RegistrationListener) listener).onServiceRegistered(
                             (NsdServiceInfo) message.obj);
-                    // Keep listener until unregister
-                    listenerRemove = false;
                     break;
                 case UNREGISTER_SERVICE_FAILED:
+                    removeListener(message.arg2);
                     ((RegistrationListener) listener).onUnregistrationFailed(ns, message.arg1);
                     break;
                 case UNREGISTER_SERVICE_SUCCEEDED:
+                    removeListener(message.arg2);
                     ((RegistrationListener) listener).onServiceUnregistered(ns);
                     break;
                 case RESOLVE_SERVICE_FAILED:
+                    removeListener(message.arg2);
                     ((ResolveListener) listener).onResolveFailed(ns, message.arg1);
                     break;
                 case RESOLVE_SERVICE_SUCCEEDED:
+                    removeListener(message.arg2);
                     ((ResolveListener) listener).onServiceResolved((NsdServiceInfo) message.obj);
                     break;
                 default:
                     Log.d(TAG, "Ignored " + message);
                     break;
             }
-            if (listenerRemove) {
-                removeListener(message.arg2);
-            }
         }
     }
+
+    // if the listener is already in the map, reject it.  Otherwise, add it and
+    // return its key.
 
     private int putListener(Object listener, NsdServiceInfo s) {
         if (listener == null) return INVALID_LISTENER_KEY;
         int key;
         synchronized (mMapLock) {
+            int valueIndex = mListenerMap.indexOfValue(listener);
+            if (valueIndex != -1) {
+                return BUSY_LISTENER_KEY;
+            }
             do {
                 key = mListenerKey++;
             } while (key == INVALID_LISTENER_KEY);
@@ -424,7 +426,6 @@ public final class NsdManager {
         return INVALID_LISTENER_KEY;
     }
 
-
     private String getNsdServiceInfoType(NsdServiceInfo s) {
         if (s == null) return "?";
         return s.getServiceType();
@@ -451,14 +452,18 @@ public final class NsdManager {
      * Register a service to be discovered by other services.
      *
      * <p> The function call immediately returns after sending a request to register service
-     * to the framework. The application is notified of a success to initiate
-     * discovery through the callback {@link RegistrationListener#onServiceRegistered} or a failure
+     * to the framework. The application is notified of a successful registration
+     * through the callback {@link RegistrationListener#onServiceRegistered} or a failure
      * through {@link RegistrationListener#onRegistrationFailed}.
+     *
+     * <p> The application should call {@link #unregisterService} when the service
+     * registration is no longer required, and/or whenever the application is stopped.
      *
      * @param serviceInfo The service being registered
      * @param protocolType The service discovery protocol
      * @param listener The listener notifies of a successful registration and is used to
      * unregister this service through a call on {@link #unregisterService}. Cannot be null.
+     * Cannot be in use for an active service registration.
      */
     public void registerService(NsdServiceInfo serviceInfo, int protocolType,
             RegistrationListener listener) {
@@ -475,8 +480,11 @@ public final class NsdManager {
         if (protocolType != PROTOCOL_DNS_SD) {
             throw new IllegalArgumentException("Unsupported protocol");
         }
-        mAsyncChannel.sendMessage(REGISTER_SERVICE, 0, putListener(listener, serviceInfo),
-                serviceInfo);
+        int key = putListener(listener, serviceInfo);
+        if (key == BUSY_LISTENER_KEY) {
+            throw new IllegalArgumentException("listener already in use");
+        }
+        mAsyncChannel.sendMessage(REGISTER_SERVICE, 0, key, serviceInfo);
     }
 
     /**
@@ -486,7 +494,11 @@ public final class NsdManager {
      *
      * @param listener This should be the listener object that was passed to
      * {@link #registerService}. It identifies the service that should be unregistered
-     * and notifies of a successful unregistration.
+     * and notifies of a successful or unsuccessful unregistration via the listener
+     * callbacks.  In API versions 20 and above, the listener object may be used for
+     * another service registration once the callback has been called.  In API versions <= 19,
+     * there is no entirely reliable way to know when a listener may be re-used, and a new
+     * listener should be created for each service registration request.
      */
     public void unregisterService(RegistrationListener listener) {
         int id = getListenerKey(listener);
@@ -516,12 +528,16 @@ public final class NsdManager {
      * <p> Upon failure to start, service discovery is not active and application does
      * not need to invoke {@link #stopServiceDiscovery}
      *
+     * <p> The application should call {@link #stopServiceDiscovery} when discovery of this
+     * service type is no longer required, and/or whenever the application is paused or
+     * stopped.
+     *
      * @param serviceType The service type being discovered. Examples include "_http._tcp" for
      * http services or "_ipp._tcp" for printers
      * @param protocolType The service discovery protocol
      * @param listener  The listener notifies of a successful discovery and is used
      * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
-     * Cannot be null.
+     * Cannot be null. Cannot be in use for an active service discovery.
      */
     public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
         if (listener == null) {
@@ -537,11 +553,17 @@ public final class NsdManager {
 
         NsdServiceInfo s = new NsdServiceInfo();
         s.setServiceType(serviceType);
-        mAsyncChannel.sendMessage(DISCOVER_SERVICES, 0, putListener(listener, s), s);
+
+        int key = putListener(listener, s);
+        if (key == BUSY_LISTENER_KEY) {
+            throw new IllegalArgumentException("listener already in use");
+        }
+
+        mAsyncChannel.sendMessage(DISCOVER_SERVICES, 0, key, s);
     }
 
     /**
-     * Stop service discovery initiated with {@link #discoverServices}. An active service
+     * Stop service discovery initiated with {@link #discoverServices}.  An active service
      * discovery is notified to the application with {@link DiscoveryListener#onDiscoveryStarted}
      * and it stays active until the application invokes a stop service discovery. A successful
      * stop is notified to with a call to {@link DiscoveryListener#onDiscoveryStopped}.
@@ -550,7 +572,11 @@ public final class NsdManager {
      * {@link DiscoveryListener#onStopDiscoveryFailed}.
      *
      * @param listener This should be the listener object that was passed to {@link #discoverServices}.
-     * It identifies the discovery that should be stopped and notifies of a successful stop.
+     * It identifies the discovery that should be stopped and notifies of a successful or
+     * unsuccessful stop.  In API versions 20 and above, the listener object may be used for
+     * another service discovery once the callback has been called.  In API versions <= 19,
+     * there is no entirely reliable way to know when a listener may be re-used, and a new
+     * listener should be created for each service discovery request.
      */
     public void stopServiceDiscovery(DiscoveryListener listener) {
         int id = getListenerKey(listener);
@@ -570,6 +596,7 @@ public final class NsdManager {
      *
      * @param serviceInfo service to be resolved
      * @param listener to receive callback upon success or failure. Cannot be null.
+     * Cannot be in use for an active service resolution.
      */
     public void resolveService(NsdServiceInfo serviceInfo, ResolveListener listener) {
         if (TextUtils.isEmpty(serviceInfo.getServiceName()) ||
@@ -579,8 +606,13 @@ public final class NsdManager {
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
         }
-        mAsyncChannel.sendMessage(RESOLVE_SERVICE, 0, putListener(listener, serviceInfo),
-                serviceInfo);
+
+        int key = putListener(listener, serviceInfo);
+
+        if (key == BUSY_LISTENER_KEY) {
+            throw new IllegalArgumentException("listener already in use");
+        }
+        mAsyncChannel.sendMessage(RESOLVE_SERVICE, 0, key, serviceInfo);
     }
 
     /** Internal use only @hide */

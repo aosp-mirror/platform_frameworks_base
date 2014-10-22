@@ -1,0 +1,350 @@
+page.title=What's New
+
+@jd:body
+
+<p>The following code samples were recently published for the L Developer Preview. You can
+download them in the Android SDK Manager under the <b>SDK Samples</b> component
+for the L Developer Preview.</p>
+
+<p class="note">
+  <strong>Note:</strong> At this time, the downloadable projects are designed
+   for use with Gradle and Android Studio.
+</p>
+
+
+<h3 id="BasicManagedProfile">BasicManagedProfile</h3>
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}samples/images/BasicManagedProfile.png"
+     srcset="{@docRoot}samples/images/BasicManagedProfile@2x.png 2x"
+     alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 1.</strong> The BasicManagedProfile sample app.
+  </p>
+</div>
+
+<p>This sample demonstrates how to create a managed profile. You can also:</p>
+<ul>
+  <li>Enable or disable other apps, and set restrictions on them.</li>
+  <li>Configure intents to be forwarded between the primary account and the
+   managed profile.</li>
+  <li>Wipe all the data associated with the managed profile.</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> There can be only one managed profile on
+  a device at a time.</p>
+
+<p><a href="http://github.com/googlesamples/android-BasicManagedProfile">Get it on GitHub</a></p>
+
+<h3 id="Camera2Basic">Camera2Basic</h3>
+
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>This sample demonstrates the basic use of the Camera2 API. The sample code
+demonstrates how you can display camera preview and take pictures.</p>
+
+<p><a href="http://github.com/googlesamples/android-Camera2Basic">Get it on GitHub</a></p>
+
+
+<h3 id="Camera2Video">Camera2Video</h3>
+<!--
+<div class="figure" style="width:220px">
+<img src="" srcset="@2x.png 2x" alt="" height="375" />
+    <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>This sample demonstrates how to record video using the Camera2 API.</p>
+
+<p><a href="http://github.com/googlesamples/android-Camera2Video">Get it on GitHub</a></p>
+
+<h3 id="ActivitySceneTransitionBasic">ActivitySceneTransitionBasic</h3>
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}samples/images/ActivitySceneTransitionBasic.png"
+      srcset="{@docRoot}samples/images/ActivitySceneTransitionBasic@2x.png 2x"
+      alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 2.</strong> The ActivitySceneTransitionBasic sample app.
+  </p>
+  </div>
+
+<p> This sample demonstrates how to the use {@link android.app.Activity} scene
+transitions when transitioning from one activity to another. Uses a combination
+of <code>moveImage</code> and <code>changeBounds</code> to nicely transition
+from a grid of images to an activity with a large image and detail text. </p>
+
+<p><a href="http://github.com/googlesamples/android-ActivitySceneTransition">Get it on GitHub</a></p>
+
+<h3 id="ElevationBasic">ElevationBasic</h3>
+<!--
+<div class="figure" style="width:220px">
+<img src="" srcset="@2x.png 2x" alt="" height="375" />
+    <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>
+This sample demonstrates two alternative ways to move a view in the z-axis:</p>
+
+<ul>
+  <li>With a fixed elevation, using XML.</li>
+  <li>Raising the elevation when the user taps on it, using
+      <code>setTranslationZ()</code>.</li>
+</ul>
+
+<p><a href="http://github.com/googlesamples/android-ElevationBasic">Get it on GitHub</a></p>
+
+<h3 id="ElevationDrag">ElevationDrag</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>This sample demonstrates a drag and drop action on different shapes.
+Elevation and z-translation are used to render the shadows. The views are
+clipped using different outlines.</p>
+
+<p><a href="http://github.com/googlesamples/android-ElevationDrag">Get it on GitHub</a></p>
+
+
+<h3 id="ClippingBasic">ClippingBasic</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>
+This sample demonstrates clipping on a {@link android.view.View}.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-ClippingBasic">Get it on GitHub</a></p>
+
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}samples/images/JobSchedulerSample.png"
+      srcset="{@docRoot}samples/images/JobSchedulerSample@2x.png 2x"
+      alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 3.</strong> The JobSchedulerSample sample app.
+  </p>
+</div>
+
+<h3 id="GameControllerSample">GameControllerSample</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>
+This sample implements a multi-player game, demonstrating game controller input
+handling.
+</p>
+
+<p><a href="http://github.com/googlesamples/androidtv-GameController">Get it on GitHub</a></p>
+
+
+<h3 id="Visual-Game-Controller">Visual-Game-Controller</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>
+This sample displays events received from a game controller shown on the screen.
+</p>
+
+<p><a href="http://github.com/googlesamples/androidtv-VisualGameController">Get it on GitHub</a></p>
+
+<h3 id="AndroidTVLeanbackSample">AndroidTVLeanbackSample</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>
+This sample demonstrates use of the Android TV Leanback Support Library.
+</p>
+
+<p><a href="http://github.com/googlesamples/androidtv-Leanback">Get it on GitHub</a></p>
+
+<h3 id="JobSchedulerSample">JobSchedulerSample</h3>
+
+<p>
+This sample app allows the user to schedule jobs through the UI, and shows
+visual cues when the jobs are executed.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-JobScheduler">Get it on GitHub</a></p>
+
+<h3 id="NavigationDrawerSample">NavigationDrawerSample</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>
+This sample illustrates a common usage of the Android support library's
+{@link android.support.v4.widget.DrawerLayout} widget.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-NavigationDrawer">Get it on GitHub</a></p>
+<!--
+<h3 id="">SampleName</h3>
+
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+
+<p>
+**description**
+</p>
+-->
+
+<h3 id="FloatingActionButtonBasic">FloatingActionButtonBasic</h3>
+
+<p>
+This sample shows the two sizes of Floating Action Buttons and how to interact with
+them.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-FloatingActionButtonBasic">Get it on GitHub</a></p>
+
+<h3 id="RevealEffectBasic">RevealEffectBasic</h3>
+
+<p>
+A sample demonstrating how to perform a reveal effect for UI elements within the Material Design framework.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-RevealEffectBasic">Get it on GitHub</a></p>
+
+<h3 id="RecyclerView">RecyclerView</h3>
+
+<p>
+Demonstration of using RecyclerView with a LayoutManager to create a vertical ListView.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-RecyclerView">Get it on GitHub</a></p>
+
+<h3 id="CardView">CardView</h3>
+
+<p>
+This sample demonstrates how to use the CardView UI widget introduced in Android 5.0, using the support library for backward compatibility.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-CardView">Get it on GitHub</a></p>
+
+<h3 id="LNotifications">LNotifications</h3>
+
+<p>
+This sample demonstrates how new features for notifications introduced in Android 5.0
+are used such as Heads-Up notifications, visibility, people, category and priority
+metadata. </p>
+<p><a href="http://github.com/googlesamples/android-LNotifications">Get it on GitHub</a></p>
+
+<h3 id="DrawableTinting">DrawableTinting</h3>
+
+<p>Sample that shows applying tinting and color filters to Drawables both programmatically
+and as Drawable resources in XML.</p>
+<p>Tinting is set on a nine-patch drawable through the "tint" and "tintMode" parameters.
+A color state list is referenced as the tint color, which defines colors for different
+states of a View (for example disabled/enabled, focused, pressed or selected).</p>
+<p>Programmatically, tinting is applied to a Drawable through its "setColorFilter" method,
+with a reference to a color and a PorterDuff blend mode. The color and blend mode can be
+changed from the UI to see the effect of different options.</p>
+
+<p><a href="http://github.com/googlesamples/android-DrawableTinting">Get it on GitHub</a></p>
+
+<h3 id="Interpolator">Interpolator</h3>
+
+<p>
+This sample demonstrates the use of animation interpolators and path animations for
+Material Design. It shows how an ObjectAnimator is used to animate two properties of a
+view (scale X and Y) along a path.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-Interpolator">Get it on GitHub</a></p>
+
+<h3 id="HdrViewfinder">HdrViewfinder</h3>
+
+<p>
+This demo implements a real-time high-dynamic-range camera viewfinder, by alternating
+the sensor's exposure time between two exposure values on even and odd frames, and then
+compositing together the latest two frames whenever a new frame is captured.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-HdrViewfinder">Get it on GitHub</a></p>
+
+<h3 id="DocumentCentricApps">DocumentCentricApps</h3>
+
+<p>
+This sample shows the basic usage of the new "Document Centric Apps" API.
+It let's you create new documents in the system overview menu and persists its
+state through reboots. If "Task per document" is checked a new task will be
+created for every new document in the overview menu.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-DocumentCentricApps">Get it on GitHub</a></p>
+
+<h3 id="DocumentCentricRelinquishIdentity">DocumentCentricRelinquishIdentity</h3>
+
+<p>
+This sample shows how to relinquish identity to activities above it in the task stack.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-DocumentCentricRelinquishIdentity">Get it on GitHub</a></p>
+
+<h3 id="AppRestrictionEnforcer">AppRestrictionEnforcer</h3>
+
+<p>
+This sample demonstrates how to set restrictions to other apps as a profile owner.
+Use AppRestrictionSchema sample as a app with available restrictions.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-AppRestrictionEnforcer">Get it on GitHub</a></p>
+
+<h3 id="AppRestrictionSchema">AppRestrictionSchema</h3>
+
+<p>
+This sample shows how to use app restrictions. This application has one boolean
+restriction with a key "can_say_hello" that defines whether the only feature of this
+app (press the button to show "Hello" message) is enabled or disabled. Use
+AppRestrictionEnforcer sample to toggle the restriction.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-AppRestrictionSchema">Get it on GitHub</a></p>

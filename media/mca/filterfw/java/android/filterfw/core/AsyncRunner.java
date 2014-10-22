@@ -18,16 +18,8 @@
 package android.filterfw.core;
 
 import android.os.AsyncTask;
-import android.os.Handler;
 
 import android.util.Log;
-
-import java.lang.InterruptedException;
-import java.lang.Runnable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @hide

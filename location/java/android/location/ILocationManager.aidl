@@ -21,7 +21,8 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
-import android.location.IGeocodeProvider;
+import android.location.IGpsMeasurementsListener;
+import android.location.IGpsNavigationMessageListener;
 import android.location.IGpsStatusListener;
 import android.location.ILocationListener;
 import android.location.Location;
@@ -59,6 +60,14 @@ interface ILocationManager
         in GeocoderParams params, out List<Address> addrs);
 
     boolean sendNiResponse(int notifId, int userResponse);
+
+    boolean addGpsMeasurementsListener(in IGpsMeasurementsListener listener, in String packageName);
+    boolean removeGpsMeasurementsListener(in IGpsMeasurementsListener listener);
+
+    boolean addGpsNavigationMessageListener(
+            in IGpsNavigationMessageListener listener,
+            in String packageName);
+    boolean removeGpsNavigationMessageListener(in IGpsNavigationMessageListener listener);
 
     // --- deprecated ---
     List<String> getAllProviders();

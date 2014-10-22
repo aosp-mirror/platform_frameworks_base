@@ -1,5 +1,5 @@
-page.title=MediaRouter
-page.tags="cast","chromecast","wireless display","miracast"
+page.title=Media Router
+page.tags="mediarouter","cast","chromecast","wireless display","miracast"
 @jd:body
 
 <div id="qv-wrapper">
@@ -35,6 +35,10 @@ page.tags="cast","chromecast","wireless display","miracast"
       <li>{@link android.support.v7.media.MediaRouter}</li>
       <li>{@link android.support.v7.media.MediaRouter.Callback}</li>
       <li>{@link android.support.v7.media.MediaRouteProvider}</li>
+    </ol>
+    <h2>Related Samples</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/media/mediarouter.html">MediaRouter</a></li>
     </ol>
   </div>
 </div>
@@ -105,15 +109,17 @@ page.tags="cast","chromecast","wireless display","miracast"
   (API level 7) and higher.
 </p>
 
-<p class="note">
-  <strong>Note:</strong> There is another set of media router APIs provided in the
+<p class="caution">
+  <strong>Caution:</strong> There is another set of media router APIs provided in the
   {@link android.media} that have been superseded by the v7-mediarouter support library.
   You <em>should not</em> use the {@link android.media} classes for media router functions.
 </p>
 
 <p>In order to use the {@link android.support.v7.media} media router classes, you must add
   the <a href="{@docRoot}tools/support-library/features.html#v7-mediarouter">v7-mediarouter
-  support library package</a> to your app development project.
+  support library package</a> to your app development project.  For more
+  information on adding support libraries to your app development project, see
+  <a href="{@docRoot}tools/support-library/setup.html">Support Library Setup</a>.
 </p>
 
 
@@ -211,9 +217,9 @@ page.tags="cast","chromecast","wireless display","miracast"
     CATEGORY_LIVE_VIDEO} &mdash; Output of video to a secondary output device, such as Wireless
     Display devices.</li>
   <li>{@link android.support.v7.media.MediaControlIntent#CATEGORY_REMOTE_PLAYBACK
-    CATEGORY_REMOTE_PLAYBACK} &mdash; Play video or audio on a separate device that supports the
-    <a href="https://developers.google.com/cast/">Google Cast</a> remote control protocol, such
-    as <a href="https://www.google.com/url?q=http://www.google.com/chromecast">Chromecast</a>.
+    CATEGORY_REMOTE_PLAYBACK} &mdash; Play video or audio on a separate device that handles media
+    retrieval, decoding, and playback, such as
+    <a href="https://www.google.com/url?q=http://www.google.com/chromecast">Chromecast</a> devices.
     </li>
 </ul>
 
@@ -279,7 +285,7 @@ public boolean onCreateOptionsMenu(Menu menu) {
 <p>In order to connect to a media route selected by the user, your app must obtain the {@link
   android.support.v7.media.MediaRouter} framework object and then attach a {@link
   android.support.v7.media.MediaRouter.Callback} object. The callback object receives messages
-  from the media router framework when a route selected, changed or disconnected by the user.</p>
+  from the media router framework when a route is selected, changed, or disconnected by the user.</p>
 
 <p>To obtain an instance of the {@link android.support.v7.media.MediaRouter} framework object,
   call {@link android.support.v7.media.MediaRouter#getInstance MediaRouter.getInstance()}
@@ -299,11 +305,11 @@ public boolean onCreateOptionsMenu(Menu menu) {
 <p>The media router framework communicates with an app through a callback object that
   you attach to the {@link android.support.v7.media.MediaRouter} framework object. An app
   that uses the media router framework must extend the {@link
-  android.support.v7.media.MediaRouter.Callback} object to receive messages when a media route is
-  connected and provide content to the connected device through that route.</p>
+  android.support.v7.media.MediaRouter.Callback} object in order to receive messages when a
+  media route is connected.</p>
 
-<p>There are several methods in the callback that can be overwritten to receive messages about
-  media router events. At the minimum, your implementation of the {@link
+<p>There are several methods in the callback that you can override to receive information about
+  media router events. At minimum, your implementation of the {@link
   android.support.v7.media.MediaRouter.Callback} class should override the following
   methods:</p>
 
@@ -440,12 +446,12 @@ public class MediaRouterPlaybackActivity extends ActionBarActivity {
 
 <p class="note">
   <strong>Note:</strong> The media route framework also provides a
-  {@link android.support.v7.app.MediaRouteDiscoveryFragment} class which takes care of adding and
-  removing the call back for an activity.
+  {@link android.support.v7.app.MediaRouteDiscoveryFragment} class, which takes care of adding and
+  removing the callback for an activity.
 </p>
 
 <p>Now when you run your application, you should see a Cast button appear in your activity.
-  When you press the button the media router framework, a route selection dialog appears as shown
+  When you touch the button, a route selection dialog appears as shown
   in figure 3, allowing your user to select an available media route. Make sure you have a
   supported device available on your local network when testing this interface.</p>
 

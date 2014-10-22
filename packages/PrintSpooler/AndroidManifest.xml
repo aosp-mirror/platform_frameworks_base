@@ -17,9 +17,9 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.printspooler"
-        android:versionName="1"
-        android:versionCode="1">
+    package="com.android.printspooler"
+    android:versionName="1"
+    android:versionCode="1">
 
     <!-- Allows an application to call APIs that give it access to all print jobs
          on the device. Usually an app can access only the print jobs it created. -->
@@ -42,23 +42,28 @@
     <uses-permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"/>
 
     <application
-            android:allowClearUserData="true"
-            android:label="@string/app_label"
-            android:allowBackup= "false"
-            android:supportsRtl="true"
-            android:icon="@*android:drawable/ic_print">
+        android:allowClearUserData="true"
+        android:label="@string/app_label"
+        android:allowBackup= "false"
+        android:supportsRtl="true">
 
         <service
-            android:name=".PrintSpoolerService"
+            android:name=".model.PrintSpoolerService"
             android:exported="true"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE">
         </service>
 
+        <service
+            android:name=".renderer.PdfManipulationService"
+            android:isolatedProcess="true"
+            android:process=":renderer">
+        </service>
+
         <activity
-            android:name=".PrintJobConfigActivity"
+            android:name=".ui.PrintActivity"
             android:configChanges="orientation|screenSize"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
-            android:theme="@style/PrintJobConfigActivityTheme">
+            android:theme="@style/PrintActivity">
             <intent-filter>
                 <action android:name="android.print.PRINT_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -67,14 +72,14 @@
         </activity>
 
         <activity
-            android:name=".SelectPrinterActivity"
+            android:name=".ui.SelectPrinterActivity"
             android:label="@string/all_printers_label"
-            android:theme="@style/SelectPrinterActivityTheme"
+            android:theme="@android:style/Theme.Material.Settings"
             android:exported="false">
         </activity>
 
         <receiver
-            android:name=".NotificationController$NotificationBroadcastReceiver"
+            android:name=".model.NotificationController$NotificationBroadcastReceiver"
             android:exported="false" >
         </receiver>
 

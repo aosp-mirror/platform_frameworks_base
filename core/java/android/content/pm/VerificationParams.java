@@ -24,8 +24,10 @@ import android.os.Parcelable;
 /**
  * Represents verification parameters used to verify packages to be installed.
  *
+ * @deprecated callers should migrate to {@link PackageInstaller}.
  * @hide
  */
+@Deprecated
 public class VerificationParams implements Parcelable {
     /** A constant used to indicate that a uid value is not present. */
     public static final int NO_UID = -1;

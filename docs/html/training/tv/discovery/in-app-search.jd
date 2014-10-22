@@ -1,0 +1,145 @@
+page.title=Searching within TV Apps
+page.tags="leanback"
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#add-search-action">Add a Search Action</a></li>
+    <li><a href="#add-search-ui">Add Search Input and Results</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>
+  Users frequently have specific content in mind when using a media app on TV. If your app contains
+  a large catalog of content, browsing for a specific title may not be the most efficient way for
+  users to find what they are looking for. A search interface can help your users get to the
+  content they want faster than browsing.
+</p>
+
+<p>
+  The <a href="{@docRoot}tools/support-library/features.html#v17-leanback">Leanback support
+  library</a> provides a set of classes to enable a standard search interface within your app that
+  is consistent with other search functions on TV and provides features such as voice input.
+</p>
+
+<p>
+  This lesson discusses how to provide a search interface in your app using Leanback support
+  library classes.
+</p>
+
+
+<h2 id="add-search-action">Add a Search Action</h2>
+
+<p>
+  When you use the {@link android.support.v17.leanback.app.BrowseFragment} class for a media
+  browsing interface, you can enable a search interface as a standard part of the user
+  interface. The search interface is an icon that appears in the layout when you set {@link
+  android.view.View.OnClickListener} on the {@link android.support.v17.leanback.app.BrowseFragment}
+  object. The following sample code demonstrates this technique.
+</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.browse_activity);
+
+    mBrowseFragment = (BrowseFragment)
+            getFragmentManager().findFragmentById(R.id.browse_fragment);
+
+    ...
+
+    mBrowseFragment.setOnSearchClickedListener(new View.OnClickListener() {
+        &#64;Override
+        public void onClick(View view) {
+            Intent intent = new Intent(BrowseActivity.this, SearchActivity.class);
+            startActivity(intent);
+        }
+    });
+
+    mBrowseFragment.setAdapter(buildAdapter());
+}
+</pre>
+
+<p class="note">
+  <strong>Note:</strong> You can set the color of the search icon using the
+  {@link android.support.v17.leanback.app.BrowseFragment#setSearchAffordanceColor}.
+</p>
+
+
+<h2 id="add-search-ui">Add a Search Input and Results</h2>
+
+<p>
+  When a user selects the search icon, the system invokes a search activity via the defined intent.
+  Your search activity should use a linear layout containing a {@link
+  android.support.v17.leanback.app.SearchFragment}. This fragment must also implement the {@link
+  android.support.v17.leanback.app.SearchFragment.SearchResultProvider} interface in order to
+  display the results of a search.
+</p>
+
+<p>
+  The following code sample shows how to extend the {@link
+  android.support.v17.leanback.app.SearchFragment} class to provide a search interface and results:
+</p>
+
+<pre>
+public class MySearchFragment extends SearchFragment
+        implements SearchFragment.SearchResultProvider {
+
+    private static final int SEARCH_DELAY_MS = 300;
+    private ArrayObjectAdapter mRowsAdapter;
+    private Handler mHandler = new Handler();
+    private SearchRunnable mDelayedLoad;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+        setSearchResultProvider(this);
+        setOnItemClickedListener(getDefaultItemClickedListener());
+        mDelayedLoad = new SearchRunnable();
+    }
+
+    &#64;Override
+    public ObjectAdapter getResultsAdapter() {
+        return mRowsAdapter;
+    }
+
+    &#64;Override
+    public boolean onQueryTextChange(String newQuery) {
+        mRowsAdapter.clear();
+        if (!TextUtils.isEmpty(newQuery)) {
+            mDelayedLoad.setSearchQuery(newQuery);
+            mHandler.removeCallbacks(mDelayedLoad);
+            mHandler.postDelayed(mDelayedLoad, SEARCH_DELAY_MS);
+        }
+        return true;
+    }
+
+    &#64;Override
+    public boolean onQueryTextSubmit(String query) {
+        mRowsAdapter.clear();
+        if (!TextUtils.isEmpty(query)) {
+            mDelayedLoad.setSearchQuery(query);
+            mHandler.removeCallbacks(mDelayedLoad);
+            mHandler.postDelayed(mDelayedLoad, SEARCH_DELAY_MS);
+        }
+        return true;
+    }
+}
+</pre>
+
+<p>
+  The example code shown above is meant to be used with a separate {@code SearchRunnable} class
+  that runs the search query on a separate thread. This technique keeps potentially slow-running
+  queries from blocking the main user interface thread.
+</p>

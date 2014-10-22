@@ -18,16 +18,16 @@ package android.view;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
 /**
  * Hardware accelerated canvas.
- * 
+ *
  * @hide
  */
 public abstract class HardwareCanvas extends Canvas {
-    private String mName;
 
     @Override
     public boolean isHardwareAccelerated() {
@@ -40,37 +40,10 @@ public abstract class HardwareCanvas extends Canvas {
     }
 
     /**
-     * Specifies the name of this canvas. Naming the canvas is entirely
-     * optional but can be useful for debugging purposes.
-     *
-     * @param name The name of the canvas, can be null
-     *
-     * @see #getName()
-     *
-     * @hide
-     */
-    public void setName(String name) {
-        mName = name;
-    }
-
-    /**
-     * Returns the name of this canvas.
-     *
-     * @return The name of the canvas or null
-     *
-     * @see #setName(String)
-     *
-     * @hide
-     */
-    public String getName() {
-        return mName;
-    }
-
-    /**
      * Invoked before any drawing operation is performed in this canvas.
-     * 
+     *
      * @param dirty The dirty rectangle to update, can be null.
-     * @return {@link DisplayList#STATUS_DREW} if anything was drawn (such as a call to clear
+     * @return {@link RenderNode#STATUS_DREW} if anything was drawn (such as a call to clear
      *         the canvas).
      *
      * @hide
@@ -86,40 +59,28 @@ public abstract class HardwareCanvas extends Canvas {
 
     /**
      * Draws the specified display list onto this canvas. The display list can only
-     * be drawn if {@link android.view.DisplayList#isValid()} returns true.
+     * be drawn if {@link android.view.RenderNode#isValid()} returns true.
      *
-     * @param displayList The display list to replay.
+     * @param renderNode The RenderNode to replay.
      */
-    public void drawDisplayList(DisplayList displayList) {
-        drawDisplayList(displayList, null, DisplayList.FLAG_CLIP_CHILDREN);
+    public void drawRenderNode(RenderNode renderNode) {
+        drawRenderNode(renderNode, null, RenderNode.FLAG_CLIP_CHILDREN);
     }
 
     /**
      * Draws the specified display list onto this canvas.
      *
-     * @param displayList The display list to replay.
-     * @param dirty The dirty region to redraw in the next pass, matters only
-     *        if this method returns {@link DisplayList#STATUS_DRAW}, can be null.
-     * @param flags Optional flags about drawing, see {@link DisplayList} for
+     * @param renderNode The RenderNode to replay.
+     * @param dirty Ignored, can be null.
+     * @param flags Optional flags about drawing, see {@link RenderNode} for
      *              the possible flags.
      *
-     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW}, or
-     *         {@link DisplayList#STATUS_INVOKE}, or'd with {@link DisplayList#STATUS_DREW}
+     * @return One of {@link RenderNode#STATUS_DONE} or {@link RenderNode#STATUS_DREW}
      *         if anything was drawn.
      *
      * @hide
      */
-    public abstract int drawDisplayList(DisplayList displayList, Rect dirty, int flags);
-
-    /**
-     * Outputs the specified display list to the log. This method exists for use by
-     * tools to output display lists for selected nodes to the log.
-     *
-     * @param displayList The display list to be logged.
-     *
-     * @hide
-     */
-    abstract void outputDisplayList(DisplayList displayList);
+    public abstract int drawRenderNode(RenderNode renderNode, Rect dirty, int flags);
 
     /**
      * Draws the specified layer onto this canvas.
@@ -139,96 +100,25 @@ public abstract class HardwareCanvas extends Canvas {
      * This function may return true if an invalidation is needed after the call.
      *
      * @param drawGLFunction A native function pointer
-     *                       
-     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
-     *         {@link DisplayList#STATUS_INVOKE}
+     *
+     * @return {@link RenderNode#STATUS_DONE}
      *
      * @hide
      */
     public int callDrawGLFunction(long drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
-        return DisplayList.STATUS_DONE;
+        return RenderNode.STATUS_DONE;
     }
 
-    /**
-     * Invoke all the functors who requested to be invoked during the previous frame.
-     * 
-     * @param dirty The region to redraw when the functors return {@link DisplayList#STATUS_DRAW}
-     *              
-     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
-     *         {@link DisplayList#STATUS_INVOKE}
-     *
-     * @hide
-     */
-    public int invokeFunctors(Rect dirty) {
-        return DisplayList.STATUS_DONE;
+    public abstract void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
+            CanvasProperty<Float> radius, CanvasProperty<Paint> paint);
+
+    public abstract void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
+            CanvasProperty<Float> right, CanvasProperty<Float> bottom,
+            CanvasProperty<Float> rx, CanvasProperty<Float> ry,
+            CanvasProperty<Paint> paint);
+
+    public static void setProperty(String name, String value) {
+        GLES20Canvas.setProperty(name, value);
     }
-
-    /**
-     * Detaches the specified functor from the current functor execution queue.
-     *
-     * @param functor The native functor to remove from the execution queue.
-     *
-     * @see #invokeFunctors(android.graphics.Rect)
-     * @see #callDrawGLFunction(long)
-     * @see #detachFunctor(long)
-     *
-     * @hide
-     */
-    abstract void detachFunctor(long functor);
-
-    /**
-     * Attaches the specified functor to the current functor execution queue.
-     *
-     * @param functor The native functor to add to the execution queue.
-     *
-     * @see #invokeFunctors(android.graphics.Rect)
-     * @see #callDrawGLFunction(long)
-     * @see #detachFunctor(long)
-     *
-     * @hide
-     */
-    abstract void attachFunctor(long functor);
-
-    /**
-     * Indicates that the specified layer must be updated as soon as possible.
-     * 
-     * @param layer The layer to update
-     *
-     * @see #clearLayerUpdates()
-     *
-     * @hide
-     */
-    abstract void pushLayerUpdate(HardwareLayer layer);
-
-    /**
-     * Cancels a queued layer update. If the specified layer was not
-     * queued for update, this method has no effect.
-     *
-     * @param layer The layer whose update to cancel
-     *
-     * @see #pushLayerUpdate(HardwareLayer)
-     * @see #clearLayerUpdates()
-     *
-     * @hide
-     */
-    abstract void cancelLayerUpdate(HardwareLayer layer);
-
-    /**
-     * Immediately executes all enqueued layer updates.
-     *
-     * @see #pushLayerUpdate(HardwareLayer)
-     *
-     * @hide
-     */
-    abstract void flushLayerUpdates();
-
-    /**
-     * Removes all enqueued layer updates.
-     * 
-     * @see #pushLayerUpdate(HardwareLayer)
-     *
-     * @hide
-     */
-    abstract void clearLayerUpdates();
 }

@@ -1,0 +1,59 @@
+page.title=Use Rich Notifications to Keep Users Informed
+page.metaDescription=Use Android's notifications to keep users in touch with your content and services &mdash; even when the app is not in use.
+page.tags=""
+page.image=/design/media/notifications_pattern_anatomy.png
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}design/media/notifications_pattern_anatomy.png">
+</div>
+
+<p>
+  The <a href="/design/patterns/notifications.html">notification system</a>
+  allows your app to keep the user informed about events, such as new messages,
+  upcoming calendar appointments, shared photos, and much more. They are a
+  fundamental feature of Android that consumers check frequently to receive
+  important notifications and status updates. Notifications are like a news
+  channel that alerts the user to events as they happen and maintains a list of
+  updates since last review.
+</p>
+
+
+
+<p>
+  In addition to status updates from friends and family, notifications can also
+  be used to help gamers know when a time-based action is completed or another
+  player took their turn.</p>
+
+  <p>Some game developers use notifications to alert users
+  when a new limited time character can be won or a discount on an in-app
+  purchase is available. </p>
+
+<h3>But Use Them Sparingly</h3>
+
+<p>
+  Frequent notifications and spam notifications can turn users off, thereby
+  risking your ratings and user base. Also sure to check our <a href=
+  "https://support.google.com/googleplay/android-developer/answer/4430948">policies</a>
+  to ensure you’re treating your user respectfully.
+</p>
+
+
+          <p><strong>Tip:</strong>
+       Use notifications sparingly &mdash; be sure any information presented is
+      useful. Give users the option to turn notifications off.
+    </p>
+
+  <div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/getusers/notifications"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+</div>

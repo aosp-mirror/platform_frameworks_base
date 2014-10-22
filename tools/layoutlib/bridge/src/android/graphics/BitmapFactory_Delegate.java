@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import com.android.annotations.Nullable;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.ninepatch.NinePatchChunk;
@@ -48,7 +49,7 @@ import java.util.Set;
 
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeStream(InputStream is, byte[] storage,
-            Rect padding, Options opts) {
+            @Nullable Rect padding, @Nullable Options opts) {
         Bitmap bm = null;
 
         Density density = Density.MEDIUM;
@@ -77,18 +78,20 @@ import java.util.Set;
                 // put the chunk in the bitmap
                 bm.setNinePatchChunk(NinePatch_Delegate.serialize(chunk));
 
-                // read the padding
-                int[] paddingarray = chunk.getPadding();
-                padding.left = paddingarray[0];
-                padding.top = paddingarray[1];
-                padding.right = paddingarray[2];
-                padding.bottom = paddingarray[3];
+                if (padding != null) {
+                    // read the padding
+                    int[] paddingArray = chunk.getPadding();
+                    padding.left = paddingArray[0];
+                    padding.top = paddingArray[1];
+                    padding.right = paddingArray[2];
+                    padding.bottom = paddingArray[3];
+                }
             } else {
                 // load the bitmap directly.
                 bm = Bitmap_Delegate.createBitmap(is, bitmapCreateFlags, density);
             }
         } catch (IOException e) {
-            Bridge.getLog().error(null,"Failed to load image" , e, null);
+            Bridge.getLog().error(null, "Failed to load image", e, null);
         }
 
         return bm;

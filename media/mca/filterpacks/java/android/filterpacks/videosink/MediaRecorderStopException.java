@@ -18,7 +18,6 @@
 package android.filterpacks.videosink;
 
 import java.lang.RuntimeException;
-import android.util.Log;
 
 /** @hide **/
 public class MediaRecorderStopException extends RuntimeException {

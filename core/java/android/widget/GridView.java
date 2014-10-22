@@ -16,25 +16,31 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.animation.GridLayoutAnimationController;
-import android.widget.AbsListView.LayoutParams;
 import android.widget.RemoteViews.RemoteView;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 
 /**
@@ -53,6 +59,11 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class GridView extends AbsListView {
+    /** @hide */
+    @IntDef({NO_STRETCH, STRETCH_SPACING, STRETCH_COLUMN_WIDTH, STRETCH_SPACING_UNIFORM})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StretchMode {}
+
     /**
      * Disables stretching.
      * 
@@ -110,11 +121,15 @@ public class GridView extends AbsListView {
         this(context, attrs, com.android.internal.R.attr.gridViewStyle);
     }
 
-    public GridView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public GridView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.GridView, defStyle, 0);
+    public GridView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.GridView, defStyleAttr, defStyleRes);
 
         int hSpacing = a.getDimensionPixelOffset(
                 com.android.internal.R.styleable.GridView_horizontalSpacing, 0);
@@ -336,6 +351,7 @@ public class GridView extends AbsListView {
         final int selectedPosition = mSelectedPosition;
 
         View child = null;
+        final int nextChildDir = isLayoutRtl ? -1 : +1;
         for (int pos = startPos; pos < last; pos++) {
             // is this the selected item?
             boolean selected = pos == selectedPosition;
@@ -344,9 +360,9 @@ public class GridView extends AbsListView {
             final int where = flow ? -1 : pos - startPos;
             child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
 
-            nextLeft += (isLayoutRtl ? -1 : +1) * columnWidth;
+            nextLeft += nextChildDir * columnWidth;
             if (pos < last - 1) {
-                nextLeft += horizontalSpacing;
+                nextLeft += nextChildDir * horizontalSpacing;
             }
 
             if (selected && (hasFocus || inClick)) {
@@ -1202,6 +1218,34 @@ public class GridView extends AbsListView {
 
             setSelectedPositionInt(mNextSelectedPosition);
 
+            AccessibilityNodeInfo accessibilityFocusLayoutRestoreNode = null;
+            View accessibilityFocusLayoutRestoreView = null;
+            int accessibilityFocusPosition = INVALID_POSITION;
+
+            // Remember which child, if any, had accessibility focus. This must
+            // occur before recycling any views, since that will clear
+            // accessibility focus.
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                final View focusHost = viewRootImpl.getAccessibilityFocusedHost();
+                if (focusHost != null) {
+                    final View focusChild = getAccessibilityFocusedChild(focusHost);
+                    if (focusChild != null) {
+                        if (!dataChanged || focusChild.hasTransientState()
+                                || mAdapterHasStableIds) {
+                            // The views won't be changing, so try to maintain
+                            // focus on the current host and virtual view.
+                            accessibilityFocusLayoutRestoreView = focusHost;
+                            accessibilityFocusLayoutRestoreNode = viewRootImpl
+                                    .getAccessibilityFocusedVirtualView();
+                        }
+
+                        // Try to maintain focus at the same position.
+                        accessibilityFocusPosition = getPositionForView(focusChild);
+                    }
+                }
+            }
+
             // Pull all children into the RecycleBin.
             // These views will be reused if possible
             final int firstPosition = mFirstPosition;
@@ -1216,7 +1260,6 @@ public class GridView extends AbsListView {
             }
 
             // Clear out old views
-            //removeAllViewsInLayout();
             detachAllViewsFromParent();
             recycleBin.removeSkippedScrap();
 
@@ -1279,12 +1322,57 @@ public class GridView extends AbsListView {
             if (sel != null) {
                positionSelector(INVALID_POSITION, sel);
                mSelectedTop = sel.getTop();
-            } else if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
-                View child = getChildAt(mMotionPosition - mFirstPosition);
-                if (child != null) positionSelector(mMotionPosition, child);
             } else {
-                mSelectedTop = 0;
-                mSelectorRect.setEmpty();
+                final boolean inTouchMode = mTouchMode > TOUCH_MODE_DOWN
+                        && mTouchMode < TOUCH_MODE_SCROLL;
+                if (inTouchMode) {
+                    // If the user's finger is down, select the motion position.
+                    final View child = getChildAt(mMotionPosition - mFirstPosition);
+                    if (child != null) {
+                        positionSelector(mMotionPosition, child);
+                    }
+                } else if (mSelectedPosition != INVALID_POSITION) {
+                    // If we had previously positioned the selector somewhere,
+                    // put it back there. It might not match up with the data,
+                    // but it's transitioning out so it's not a big deal.
+                    final View child = getChildAt(mSelectorPosition - mFirstPosition);
+                    if (child != null) {
+                        positionSelector(mSelectorPosition, child);
+                    }
+                } else {
+                    // Otherwise, clear selection.
+                    mSelectedTop = 0;
+                    mSelectorRect.setEmpty();
+                }
+            }
+
+            // Attempt to restore accessibility focus, if necessary.
+            if (viewRootImpl != null) {
+                final View newAccessibilityFocusedView = viewRootImpl.getAccessibilityFocusedHost();
+                if (newAccessibilityFocusedView == null) {
+                    if (accessibilityFocusLayoutRestoreView != null
+                            && accessibilityFocusLayoutRestoreView.isAttachedToWindow()) {
+                        final AccessibilityNodeProvider provider =
+                                accessibilityFocusLayoutRestoreView.getAccessibilityNodeProvider();
+                        if (accessibilityFocusLayoutRestoreNode != null && provider != null) {
+                            final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(
+                                    accessibilityFocusLayoutRestoreNode.getSourceNodeId());
+                            provider.performAction(virtualViewId,
+                                    AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+                        } else {
+                            accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
+                        }
+                    } else if (accessibilityFocusPosition != INVALID_POSITION) {
+                        // Bound the position within the visible children.
+                        final int position = MathUtils.constrain(
+                                accessibilityFocusPosition - mFirstPosition, 0,
+                                getChildCount() - 1);
+                        final View restoreView = getChildAt(position);
+                        if (restoreView != null) {
+                            restoreView.requestAccessibilityFocus();
+                        }
+                    }
+                }
             }
 
             mLayoutMode = LAYOUT_NORMAL;
@@ -2056,13 +2144,14 @@ public class GridView extends AbsListView {
      *
      * @attr ref android.R.styleable#GridView_stretchMode
      */
-    public void setStretchMode(int stretchMode) {
+    public void setStretchMode(@StretchMode int stretchMode) {
         if (stretchMode != mStretchMode) {
             mStretchMode = stretchMode;
             requestLayoutIfNecessary();
         }
     }
 
+    @StretchMode
     public int getStretchMode() {
         return mStretchMode;
     }
@@ -2265,7 +2354,9 @@ public class GridView extends AbsListView {
 
         final int columnsCount = getNumColumns();
         final int rowsCount = getCount() / columnsCount;
-        final CollectionInfo collectionInfo = CollectionInfo.obtain(columnsCount, rowsCount, false);
+        final int selectionMode = getSelectionModeForAccessibility();
+        final CollectionInfo collectionInfo = CollectionInfo.obtain(
+                rowsCount, columnsCount, false, selectionMode);
         info.setCollectionInfo(collectionInfo);
     }
 
@@ -2292,7 +2383,9 @@ public class GridView extends AbsListView {
 
         final LayoutParams lp = (LayoutParams) view.getLayoutParams();
         final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
-        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(column, 1, row, 1, isHeading);
+        final boolean isSelected = isItemChecked(position);
+        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
+                row, 1, column, 1, isHeading, isSelected);
         info.setCollectionItemInfo(itemInfo);
     }
 }

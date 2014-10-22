@@ -53,7 +53,7 @@ public class TranslucentFancyActivity extends Activity
      * describe what is to be displayed in the screen.
      */
     @Override
-	protected void onCreate(Bundle icicle)
+    protected void onCreate(Bundle icicle)
     {
         // Be sure to call the super class.
         super.onCreate(icicle);

@@ -16,6 +16,9 @@
 
 package com.android.internal.util;
 
+import android.test.MoreAsserts;
+
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 /**
@@ -77,4 +80,79 @@ public class ArrayUtilsTest extends TestCase {
         assertFalse(ArrayUtils.containsAll(new Object[] { }, new Object[] { null }));
         assertFalse(ArrayUtils.containsAll(new Object[] { A }, new Object[] { null }));
     }
+
+    public void testContainsInt() throws Exception {
+        assertTrue(ArrayUtils.contains(new int[] { 1, 2, 3 }, 1));
+        assertTrue(ArrayUtils.contains(new int[] { 1, 2, 3 }, 2));
+        assertTrue(ArrayUtils.contains(new int[] { 1, 2, 3 }, 3));
+
+        assertFalse(ArrayUtils.contains(new int[] { 1, 2, 3 }, 0));
+        assertFalse(ArrayUtils.contains(new int[] { 1, 2, 3 }, 4));
+        assertFalse(ArrayUtils.contains(new int[] { }, 2));
+    }
+
+    public void testAppendInt() throws Exception {
+        MoreAsserts.assertEquals(new int[] { 1 },
+                ArrayUtils.appendInt(null, 1));
+        MoreAsserts.assertEquals(new int[] { 1 },
+                ArrayUtils.appendInt(new int[] { }, 1));
+        MoreAsserts.assertEquals(new int[] { 1, 2 },
+                ArrayUtils.appendInt(new int[] { 1 }, 2));
+        MoreAsserts.assertEquals(new int[] { 1, 2 },
+                ArrayUtils.appendInt(new int[] { 1, 2 }, 1));
+    }
+
+    public void testRemoveInt() throws Exception {
+        assertNull(ArrayUtils.removeInt(null, 1));
+        MoreAsserts.assertEquals(new int[] { },
+                ArrayUtils.removeInt(new int[] { }, 1));
+        MoreAsserts.assertEquals(new int[] { 1, 2, 3, },
+                ArrayUtils.removeInt(new int[] { 1, 2, 3}, 4));
+        MoreAsserts.assertEquals(new int[] { 2, 3, },
+                ArrayUtils.removeInt(new int[] { 1, 2, 3}, 1));
+        MoreAsserts.assertEquals(new int[] { 1, 3, },
+                ArrayUtils.removeInt(new int[] { 1, 2, 3}, 2));
+        MoreAsserts.assertEquals(new int[] { 1, 2, },
+                ArrayUtils.removeInt(new int[] { 1, 2, 3}, 3));
+        MoreAsserts.assertEquals(new int[] { 2, 3, 1 },
+                ArrayUtils.removeInt(new int[] { 1, 2, 3, 1 }, 1));
+    }
+
+    public void testContainsLong() throws Exception {
+        assertTrue(ArrayUtils.contains(new long[] { 1, 2, 3 }, 1));
+        assertTrue(ArrayUtils.contains(new long[] { 1, 2, 3 }, 2));
+        assertTrue(ArrayUtils.contains(new long[] { 1, 2, 3 }, 3));
+
+        assertFalse(ArrayUtils.contains(new long[] { 1, 2, 3 }, 0));
+        assertFalse(ArrayUtils.contains(new long[] { 1, 2, 3 }, 4));
+        assertFalse(ArrayUtils.contains(new long[] { }, 2));
+    }
+
+    public void testAppendLong() throws Exception {
+        MoreAsserts.assertEquals(new long[] { 1 },
+                ArrayUtils.appendLong(null, 1));
+        MoreAsserts.assertEquals(new long[] { 1 },
+                ArrayUtils.appendLong(new long[] { }, 1));
+        MoreAsserts.assertEquals(new long[] { 1, 2 },
+                ArrayUtils.appendLong(new long[] { 1 }, 2));
+        MoreAsserts.assertEquals(new long[] { 1, 2 },
+                ArrayUtils.appendLong(new long[] { 1, 2 }, 1));
+    }
+
+    public void testRemoveLong() throws Exception {
+        assertNull(ArrayUtils.removeLong(null, 1));
+        MoreAsserts.assertEquals(new long[] { },
+                ArrayUtils.removeLong(new long[] { }, 1));
+        MoreAsserts.assertEquals(new long[] { 1, 2, 3, },
+                ArrayUtils.removeLong(new long[] { 1, 2, 3}, 4));
+        MoreAsserts.assertEquals(new long[] { 2, 3, },
+                ArrayUtils.removeLong(new long[] { 1, 2, 3}, 1));
+        MoreAsserts.assertEquals(new long[] { 1, 3, },
+                ArrayUtils.removeLong(new long[] { 1, 2, 3}, 2));
+        MoreAsserts.assertEquals(new long[] { 1, 2, },
+                ArrayUtils.removeLong(new long[] { 1, 2, 3}, 3));
+        MoreAsserts.assertEquals(new long[] { 2, 3, 1 },
+                ArrayUtils.removeLong(new long[] { 1, 2, 3, 1 }, 1));
+    }
+
 }

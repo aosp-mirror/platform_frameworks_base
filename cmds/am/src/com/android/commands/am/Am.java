@@ -19,29 +19,44 @@
 package com.android.commands.am;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
+import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
+import android.app.ProfilerInfo;
 import android.app.UiAutomationConnection;
+import android.app.usage.ConfigurationStats;
+import android.app.usage.IUsageStatsManager;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.AndroidException;
+import android.util.ArrayMap;
 import android.view.IWindowManager;
+import android.view.View;
+
 import com.android.internal.os.BaseCommand;
 
 import dalvik.system.VMRuntime;
@@ -53,6 +68,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -69,6 +87,8 @@ public class Am extends BaseCommand {
     private String mReceiverPermission;
 
     private String mProfileFile;
+    private int mSamplingInterval;
+    private boolean mAutoStop;
 
     /**
      * Command-line entry point.
@@ -84,7 +104,7 @@ public class Am extends BaseCommand {
         out.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--R COUNT] [-S] [--opengl-trace]\n" +
+                "               [--sampling INTERVAL] [-R COUNT] [-S] [--opengl-trace]\n" +
                 "               [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
@@ -94,11 +114,7 @@ public class Am extends BaseCommand {
                 "       am broadcast [--user <USER_ID> | all | current] <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--user <USER_ID> | current]\n" +
-                "               [--no-window-animation]\n" +
-                "               [--abi <ABI>]\n : Launch the instrumented process with the "  +
-                "                   selected ABI. This assumes that the process supports the" +
-                "                   selected ABI." +
-                "               <COMPONENT>\n" +
+                "               [--no-window-animation] [--abi <ABI>] <COMPONENT>\n" +
                 "       am profile start [--user <USER_ID> current] <PROCESS> <FILE>\n" +
                 "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
@@ -112,17 +128,23 @@ public class Am extends BaseCommand {
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
+                "       am start-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
-                "       am stack create <TASK_ID> <RELATIVE_STACK_BOX_ID> <POSITION> <WEIGHT>\n" +
+                "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
-                "       am stack resize <STACK_ID> <WEIGHT>\n" +
-                "       am stack boxes\n" +
-                "       am stack box <STACK_BOX_ID>\n" +
+                "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack list\n" +
+                "       am stack info <STACK_ID>\n" +
+                "       am lock-task <TASK_ID>\n" +
+                "       am lock-task stop\n" +
+                "       am get-config\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
                 "    -W: wait for launch to complete\n" +
                 "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
+                "    --sampling INTERVAL: use sample profiling with INTERVAL microseconds\n" +
+                "        between samples (use with --start-profiler)\n" +
                 "    -P <FILE>: like above, but profiling stops when app goes idle\n" +
                 "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
                 "        the top activity will be finished.\n" +
@@ -168,6 +190,8 @@ public class Am extends BaseCommand {
                 "    --user <USER_ID> | current: Specify user instrumentation runs in;\n" +
                 "        current user if not specified.\n" +
                 "    --no-window-animation: turn off window animations while running.\n" +
+                "    --abi <ABI>: Launch the instrumented process with the selected ABI.\n"  +
+                "        This assumes that the process supports the selected ABI.\n" +
                 "\n" +
                 "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
                 "  may be either a process name or pid.  Options are:\n" +
@@ -208,27 +232,27 @@ public class Am extends BaseCommand {
                 "am switch-user: switch to put USER_ID in the foreground, starting\n" +
                 "  execution of that user if it is currently stopped.\n" +
                 "\n" +
-                "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
-                "  code until a later explicit switch to it.\n" +
+                "am start-user: start USER_ID in background if it is currently stopped,\n" +
+                "  use switch-user if you want to start the user in foreground.\n" +
                 "\n" +
-                "am stack create: create a new stack relative to an existing one.\n" +
-                "   <TASK_ID>: the task to populate the new stack with. Must exist.\n" +
-                "   <RELATIVE_STACK_BOX_ID>: existing stack box's id.\n" +
-                "   <POSITION>: 0: before <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
-                "               1: after <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
-                "               2: to left of <RELATIVE_STACK_BOX_ID>,\n" +
-                "               3: to right of <RELATIVE_STACK_BOX_ID>," +
-                "               4: above <RELATIVE_STACK_BOX_ID>, 5: below <RELATIVE_STACK_BOX_ID>\n" +
-                "   <WEIGHT>: float between 0.2 and 0.8 inclusive.\n" +
+                "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
+                "  code until a later explicit start or switch to it.\n" +
+                "\n" +
+                "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
                 "\n" +
-                "am stack resize: change <STACK_ID> relative size to new <WEIGHT>.\n" +
+                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>.\n" +
                 "\n" +
-                "am stack boxes: list the hierarchy of stack boxes and their contents.\n" +
+                "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
-                "am stack box: list the hierarchy of stack boxes rooted at <STACK_BOX_ID>.\n" +
+                "am stack info: display the information about activity stack <STACK_ID>.\n" +
+                "\n" +
+                "am lock-task: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
+                "\n" +
+                "am get-config: retrieve the configuration and any recent configurations\n" +
+                "  of the device\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -244,8 +268,11 @@ public class Am extends BaseCommand {
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
+                "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
+                "        (to embed a comma into a string escape it using \"\\,\")\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
+                "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
                 "    [--include-stopped-packages]\n" +
                 "    [--activity-brought-to-front] [--activity-clear-top]\n" +
@@ -315,10 +342,16 @@ public class Am extends BaseCommand {
             runToUri(true);
         } else if (op.equals("switch-user")) {
             runSwitchUser();
+        } else if (op.equals("start-user")) {
+            runStartUserInBackground();
         } else if (op.equals("stop-user")) {
             runStopUser();
         } else if (op.equals("stack")) {
             runStack();
+        } else if (op.equals("lock-task")) {
+            runLockTask();
+        } else if (op.equals("get-config")) {
+            runGetConfig();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -346,6 +379,8 @@ public class Am extends BaseCommand {
         mStopOption = false;
         mRepeat = 0;
         mProfileFile = null;
+        mSamplingInterval = 0;
+        mAutoStop = false;
         mUserId = defUser;
         Uri data = null;
         String type = null;
@@ -431,6 +466,15 @@ public class Am extends BaseCommand {
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;
+            } else if (opt.equals("--esa")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                // Split on commas unless they are preceeded by an escape.
+                // The escape character must be escaped for the string and
+                // again for the regex, thus four escape characters become one.
+                String[] strings = value.split("(?<!\\\\),");
+                intent.putExtra(key, strings);
+                hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -450,6 +494,10 @@ public class Am extends BaseCommand {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             } else if (opt.equals("--grant-write-uri-permission")) {
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            } else if (opt.equals("--grant-persistable-uri-permission")) {
+                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            } else if (opt.equals("--grant-prefix-uri-permission")) {
+                intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
             } else if (opt.equals("--exclude-stopped-packages")) {
                 intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
             } else if (opt.equals("--include-stopped-packages")) {
@@ -499,10 +547,12 @@ public class Am extends BaseCommand {
                 mWaitOption = true;
             } else if (opt.equals("-P")) {
                 mProfileFile = nextArgRequired();
-                mStartFlags |= ActivityManager.START_FLAG_AUTO_STOP_PROFILER;
+                mAutoStop = true;
             } else if (opt.equals("--start-profiler")) {
                 mProfileFile = nextArgRequired();
-                mStartFlags &= ~ActivityManager.START_FLAG_AUTO_STOP_PROFILER;
+                mAutoStop = false;
+            } else if (opt.equals("--sampling")) {
+                mSamplingInterval = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-R")) {
                 mRepeat = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-S")) {
@@ -658,12 +708,13 @@ public class Am extends BaseCommand {
                 mAm.forceStopPackage(packageName, mUserId);
                 Thread.sleep(250);
             }
-    
+
             System.out.println("Starting: " + intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    
+
             ParcelFileDescriptor fd = null;
-    
+            ProfilerInfo profilerInfo = null;
+
             if (mProfileFile != null) {
                 try {
                     fd = ParcelFileDescriptor.open(
@@ -675,18 +726,21 @@ public class Am extends BaseCommand {
                     System.err.println("Error: Unable to open file: " + mProfileFile);
                     return;
                 }
+                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
             }
 
             IActivityManager.WaitResult result = null;
             int res;
+            final long startTime = SystemClock.uptimeMillis();
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, null, intent, mimeType,
-                            null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
+                            null, null, 0, mStartFlags, profilerInfo, null, mUserId);
                 res = result.result;
             } else {
                 res = mAm.startActivityAsUser(null, null, intent, mimeType,
-                        null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
+                        null, null, 0, mStartFlags, profilerInfo, null, mUserId);
             }
+            final long endTime = SystemClock.uptimeMillis();
             PrintStream out = mWaitOption ? System.out : System.err;
             boolean launched = false;
             switch (res) {
@@ -739,6 +793,11 @@ public class Am extends BaseCommand {
                             "Error: Activity not started, you do not "
                             + "have permission to access it.");
                     break;
+                case ActivityManager.START_NOT_VOICE_COMPATIBLE:
+                    out.println(
+                            "Error: Activity not started, voice control not allowed for: "
+                                    + intent);
+                    break;
                 default:
                     out.println(
                             "Error: Activity not started, unknown error code " + res);
@@ -759,6 +818,7 @@ public class Am extends BaseCommand {
                 if (result.totalTime >= 0) {
                     System.out.println("TotalTime: " + result.totalTime);
                 }
+                System.out.println("WaitTime: " + (endTime-startTime));
                 System.out.println("Complete");
             }
             mRepeat--;
@@ -803,7 +863,7 @@ public class Am extends BaseCommand {
     }
 
     private void sendBroadcast() throws Exception {
-        Intent intent = makeIntent(UserHandle.USER_ALL);
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
         mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, mReceiverPermission,
@@ -887,8 +947,7 @@ public class Am extends BaseCommand {
             }
         }
 
-        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId,
-                abi)) {
+        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId, abi)) {
             throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
         }
 
@@ -911,7 +970,7 @@ public class Am extends BaseCommand {
             SystemProperties.set("dalvik.vm.extra-opts", props);
         }
     }
-    
+
     private void runProfile() throws Exception {
         String profileFile = null;
         boolean start = false;
@@ -965,6 +1024,7 @@ public class Am extends BaseCommand {
         }
 
         ParcelFileDescriptor fd = null;
+        ProfilerInfo profilerInfo = null;
 
         if (start) {
             profileFile = nextArgRequired();
@@ -978,6 +1038,7 @@ public class Am extends BaseCommand {
                 System.err.println("Error: Unable to open file: " + profileFile);
                 return;
             }
+            profilerInfo = new ProfilerInfo(profileFile, fd, 0, false);
         }
 
         try {
@@ -991,7 +1052,7 @@ public class Am extends BaseCommand {
             } else if (start) {
                 //removeWallOption();
             }
-            if (!mAm.profileControl(process, userId, start, profileFile, fd, profileType)) {
+            if (!mAm.profileControl(process, userId, start, profilerInfo, profileType)) {
                 wall = false;
                 throw new AndroidException("PROFILE FAILED on process " + process);
             }
@@ -1074,6 +1135,16 @@ public class Am extends BaseCommand {
     private void runSwitchUser() throws Exception {
         String user = nextArgRequired();
         mAm.switchUser(Integer.parseInt(user));
+    }
+
+    private void runStartUserInBackground() throws Exception {
+        String user = nextArgRequired();
+        boolean success = mAm.startUserInBackground(Integer.parseInt(user));
+        if (success) {
+            System.out.println("Success: user started");
+        } else {
+            System.err.println("Error: could not start user");
+        }
     }
 
     private void runStopUser() throws Exception {
@@ -1434,7 +1505,7 @@ public class Am extends BaseCommand {
 
         System.out.println("Performing idle maintenance...");
         Intent intent = new Intent(
-                "com.android.server.IdleMaintenanceService.action.FORCE_IDLE_MAINTENANCE");
+                "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE");
         mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
                 android.app.AppOpsManager.OP_NONE, true, false, UserHandle.USER_ALL);
     }
@@ -1573,35 +1644,32 @@ public class Am extends BaseCommand {
 
     private void runStack() throws Exception {
         String op = nextArgRequired();
-        if (op.equals("create")) {
-            runStackCreate();
+        if (op.equals("start")) {
+            runStackStart();
         } else if (op.equals("movetask")) {
             runStackMoveTask();
         } else if (op.equals("resize")) {
-            runStackBoxResize();
-        } else if (op.equals("boxes")) {
-            runStackBoxes();
-        } else if (op.equals("box")) {
-            runStackBoxInfo();
+            runStackResize();
+        } else if (op.equals("list")) {
+            runStackList();
+        } else if (op.equals("info")) {
+            runStackInfo();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
         }
     }
 
-    private void runStackCreate() throws Exception {
-        String taskIdStr = nextArgRequired();
-        int taskId = Integer.valueOf(taskIdStr);
-        String relativeToStr = nextArgRequired();
-        int relativeTo = Integer.valueOf(relativeToStr);
-        String positionStr = nextArgRequired();
-        int position = Integer.valueOf(positionStr);
-        String weightStr = nextArgRequired();
-        float weight = Float.valueOf(weightStr);
+    private void runStackStart() throws Exception {
+        String displayIdStr = nextArgRequired();
+        int displayId = Integer.valueOf(displayIdStr);
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
 
         try {
-            int stackId = mAm.createStack(taskId, relativeTo, position, weight);
-            System.out.println("createStack returned new stackId=" + stackId + "\n\n");
+            IBinder homeActivityToken = mAm.getHomeActivityToken();
+            IActivityContainer container = mAm.createActivityContainer(homeActivityToken, null);
+            container.attachToDisplay(displayId);
+            container.startActivity(intent);
         } catch (RemoteException e) {
         }
     }
@@ -1628,34 +1696,138 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackBoxResize() throws Exception {
-        String stackBoxIdStr = nextArgRequired();
-        int stackBoxId = Integer.valueOf(stackBoxIdStr);
-        String weightStr = nextArgRequired();
-        float weight = Float.valueOf(weightStr);
+    private void runStackResize() throws Exception {
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        String leftStr = nextArgRequired();
+        int left = Integer.valueOf(leftStr);
+        String topStr = nextArgRequired();
+        int top = Integer.valueOf(topStr);
+        String rightStr = nextArgRequired();
+        int right = Integer.valueOf(rightStr);
+        String bottomStr = nextArgRequired();
+        int bottom = Integer.valueOf(bottomStr);
 
         try {
-            mAm.resizeStackBox(stackBoxId, weight);
+            mAm.resizeStack(stackId, new Rect(left, top, right, bottom));
         } catch (RemoteException e) {
         }
     }
 
-    private void runStackBoxes() throws Exception {
+    private void runStackList() throws Exception {
         try {
-            List<StackBoxInfo> stackBoxes = mAm.getStackBoxes();
-            for (StackBoxInfo info : stackBoxes) {
+            List<StackInfo> stacks = mAm.getAllStackInfos();
+            for (StackInfo info : stacks) {
                 System.out.println(info);
             }
         } catch (RemoteException e) {
         }
     }
 
-    private void runStackBoxInfo() throws Exception {
+    private void runStackInfo() throws Exception {
         try {
-            String stackBoxIdStr = nextArgRequired();
-            int stackBoxId = Integer.valueOf(stackBoxIdStr);
-            StackBoxInfo stackBoxInfo = mAm.getStackBoxInfo(stackBoxId); 
-            System.out.println(stackBoxInfo);
+            String stackIdStr = nextArgRequired();
+            int stackId = Integer.valueOf(stackIdStr);
+            StackInfo info = mAm.getStackInfo(stackId);
+            System.out.println(info);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runLockTask() throws Exception {
+        String taskIdStr = nextArgRequired();
+        try {
+            if (taskIdStr.equals("stop")) {
+                mAm.stopLockTaskMode();
+            } else {
+                int taskId = Integer.valueOf(taskIdStr);
+                mAm.startLockTaskMode(taskId);
+            }
+            System.err.println("Activity manager is " + (mAm.isInLockTaskMode() ? "" : "not ") +
+                    "in lockTaskMode");
+        } catch (RemoteException e) {
+        }
+    }
+
+    private List<Configuration> getRecentConfigurations(int days) {
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                    Context.USAGE_STATS_SERVICE));
+        final long now = System.currentTimeMillis();
+        final long nDaysAgo = now - (days * 24 * 60 * 60 * 1000);
+        try {
+            @SuppressWarnings("unchecked")
+            ParceledListSlice<ConfigurationStats> configStatsSlice = usm.queryConfigurationStats(
+                    UsageStatsManager.INTERVAL_BEST, nDaysAgo, now, "com.android.shell");
+            if (configStatsSlice == null) {
+                return Collections.emptyList();
+            }
+
+            final ArrayMap<Configuration, Integer> recentConfigs = new ArrayMap<>();
+            final List<ConfigurationStats> configStatsList = configStatsSlice.getList();
+            final int configStatsListSize = configStatsList.size();
+            for (int i = 0; i < configStatsListSize; i++) {
+                final ConfigurationStats stats = configStatsList.get(i);
+                final int indexOfKey = recentConfigs.indexOfKey(stats.getConfiguration());
+                if (indexOfKey < 0) {
+                    recentConfigs.put(stats.getConfiguration(), stats.getActivationCount());
+                } else {
+                    recentConfigs.setValueAt(indexOfKey,
+                            recentConfigs.valueAt(indexOfKey) + stats.getActivationCount());
+                }
+            }
+
+            final Comparator<Configuration> comparator = new Comparator<Configuration>() {
+                @Override
+                public int compare(Configuration a, Configuration b) {
+                    return recentConfigs.get(b).compareTo(recentConfigs.get(a));
+                }
+            };
+
+            ArrayList<Configuration> configs = new ArrayList<>(recentConfigs.size());
+            configs.addAll(recentConfigs.keySet());
+            Collections.sort(configs, comparator);
+            return configs;
+
+        } catch (RemoteException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    private void runGetConfig() throws Exception {
+        int days = 14;
+        String option = nextOption();
+        if (option != null) {
+            if (!option.equals("--days")) {
+                throw new IllegalArgumentException("unrecognized option " + option);
+            }
+
+            days = Integer.parseInt(nextArgRequired());
+            if (days <= 0) {
+                throw new IllegalArgumentException("--days must be a positive integer");
+            }
+        }
+
+        try {
+            Configuration config = mAm.getConfiguration();
+            if (config == null) {
+                System.err.println("Activity manager has no configuration");
+                return;
+            }
+
+            System.out.println("config: " + Configuration.resourceQualifierString(config));
+            System.out.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
+
+            final List<Configuration> recentConfigs = getRecentConfigurations(days);
+            final int recentConfigSize = recentConfigs.size();
+            if (recentConfigSize > 0) {
+                System.out.println("recentConfigs:");
+            }
+
+            for (int i = 0; i < recentConfigSize; i++) {
+                System.out.println("  config: " + Configuration.resourceQualifierString(
+                        recentConfigs.get(i)));
+            }
+
         } catch (RemoteException e) {
         }
     }

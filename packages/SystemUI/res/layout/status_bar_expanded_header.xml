@@ -15,50 +15,153 @@
 ** limitations under the License.
 -->
 
-<LinearLayout
+<!-- Extends RelativeLayout -->
+<com.android.systemui.statusbar.phone.StatusBarHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/header"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/notification_panel_header_height"
-    android:background="@drawable/notification_header_bg"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
+    android:layout_width="@dimen/notification_panel_width"
+    android:layout_height="@dimen/status_bar_header_height"
+    android:layout_gravity="@integer/notification_panel_layout_gravity"
+    android:paddingStart="@dimen/notification_side_padding"
+    android:paddingEnd="@dimen/notification_side_padding"
     android:baselineAligned="false"
+    android:elevation="4dp"
+    android:background="@drawable/notification_header_bg"
+    android:clickable="true"
+    android:focusable="true"
     >
-    <RelativeLayout
-        android:id="@+id/datetime"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:background="@drawable/ic_notify_button_bg"
-        android:enabled="false"
-        >
-        <com.android.systemui.statusbar.policy.Clock
-            android:id="@+id/clock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-            android:layout_centerVertical="true"
-            />
 
-        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
+    <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+        android:layout_width="@dimen/multi_user_switch_width_collapsed"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/ripple_drawable" >
+        <ImageView android:id="@+id/multi_user_avatar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:scaleType="centerInside"/>
+    </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
+    <com.android.keyguard.AlphaOptimizedImageButton android:id="@+id/settings_button"
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:layout_toStartOf="@id/multi_user_switch"
+        android:layout_width="48dp"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:background="@drawable/ripple_drawable"
+        android:src="@drawable/ic_settings"
+        android:contentDescription="@string/accessibility_desc_settings" />
+
+    <LinearLayout android:id="@+id/system_icons_super_container"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_toStartOf="@id/multi_user_switch"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/ripple_drawable"
+        android:paddingEnd="4dp" >
+        <FrameLayout android:id="@+id/system_icons_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/status_bar_height"
+            android:layout_gravity="center_vertical"
+            >
+            <include layout="@layout/system_icons" />
+        </FrameLayout>
+        <TextView android:id="@+id/battery_level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/header_battery_margin_expanded"
+            android:paddingEnd="@dimen/battery_level_padding_end"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/battery_level_text_size"
+            android:importantForAccessibility="noHideDescendants"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/header_emergency_calls_only"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_width="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/system_icons_super_container"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+        android:text="@*android:string/emergency_calls_only"
+        android:singleLine="true"
+        android:gravity="center_vertical" />
+
+    <FrameLayout
+        android:id="@+id/date_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin"
+        android:layout_alignParentBottom="true">
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-            android:layout_toEndOf="@id/clock"
-            android:layout_alignBaseline="@id/clock"
+            android:layout_below="@id/clock"
+            systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
             />
-    </RelativeLayout>
 
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_expanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+            android:layout_below="@id/clock"
+            systemui:datePattern="eeeeMMMMd"
+            />
+    </FrameLayout>
+
+    <include layout="@layout/split_clock_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_above="@id/date_group"
+        android:id="@+id/clock"
+        />
+
+    <Button android:id="@+id/alarm_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@id/date_group"
+        android:layout_marginBottom="4dp"
+        android:drawablePadding="6dp"
+        android:drawableStart="@drawable/ic_access_alarms_small"
+        android:textColor="#64ffffff"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+        android:paddingEnd="6dp"
+        android:paddingStart="6dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:visibility="gone"
+        />
+
+    <include
+        android:id="@+id/qs_detail_header"
+        layout="@layout/qs_detail_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        />
+
+    <ImageView
+        android:id="@+id/qs_detail_header_progress"
+        android:src="@drawable/indeterminate_anim"
+        android:alpha="0"
+        android:background="@color/qs_detail_progress_track"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         />
 
     <TextView
@@ -74,36 +177,4 @@
         android:padding="2dp"
         />
 
-    <ImageView android:id="@+id/clear_all_button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:scaleType="center"
-        android:src="@drawable/ic_notify_clear"
-        android:background="@drawable/ic_notify_button_bg"
-        android:contentDescription="@string/accessibility_clear_all"
-        />     
-
-    <FrameLayout android:id="@+id/settings_button_holder"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="12dp"
-        >
-        <ImageView android:id="@+id/settings_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_notify_settings"
-            android:background="@drawable/ic_notify_button_bg"
-            android:contentDescription="@string/accessibility_desc_quick_settings"
-            />
-        <ImageView android:id="@+id/notification_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_notifications"
-            android:background="@drawable/ic_notify_button_bg"
-            android:visibility="gone"
-            android:contentDescription="@string/accessibility_notifications_button"
-            />
-    </FrameLayout>
-</LinearLayout>
+</com.android.systemui.statusbar.phone.StatusBarHeaderView>

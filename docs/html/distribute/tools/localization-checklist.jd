@@ -1,0 +1,953 @@
+page.title=Localization Checklist
+page.metaDescription=Take advantage of the worldwide audience offered by Android and Google Play. Read this checklist to get an overview of how to deliver your product to markets around the world.
+meta.tags="localizing, publishing, disttools"
+page.tags="local, l10n, translation, language"
+page.image=/distribute/images/localization-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>Checklist</h2>
+    <ol>
+      <li><a href="#identify-languages">1. Identify target languages and locales</a></li>
+      <li><a href="#design">2. Design for localization</a></li>
+      <li><a href="#manage-strings">3. Manage strings for localization</a></li>
+      <li><a href="#translate-strings">4. Translate UI strings and other resources</a></li>
+      <li><a href="#test">5. Test your localized app</a></li>
+      <li><a href="#prepare-launch">6. Prepare for international launch</a></li>
+      <li><a href="#support-users">7. Support international users after launch</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px">
+  <img src="{@docRoot}distribute/images/localization-checklist.jpg">
+</div>
+
+<p>
+  Android and Google Play offer you a worldwide audience for your apps, with an
+  addressable user base that's growing very rapidly in countries such as Japan,
+  Korea, India, Brazil, and Russia. We strongly encourage you to localize as it
+  can maximize your apps’ distribution potential resulting in ratings from
+  users around the world.
+</p>
+
+<p>
+  Localization involves a variety of tasks throughout your app development
+  cycle, and advance planning is essential. This document helps you identify
+  key aspects of localization to get your app ready for a successful worldwide
+  launch on Google Play.
+</p>
+
+<div class="headerLine">
+  <h2 id="identify-languages">
+    1. Identify target languages and locales
+  </h2>
+
+
+</div>
+
+<p>
+  A basic but important step in preparing for localization is identifying the
+  countries where you’ll distribute your apps and the languages spoken there.
+  Localizing your apps is particularly important in countries where there is a
+  large market opportunity and English or another international language is not
+  widely used.
+</p>
+
+<p>
+  For international users, you can manage your apps in three main dimensions:
+  country, locale, and language. Of those, language is the key consideration
+  for localization (locale can also significant because of differences in
+  formats for dates, times, currencies, and similar information). Users control
+  both the language and locale used on their Android devices and in turn those
+  affect how your app is displayed.
+</p>
+
+<p>
+  Typically, you would decide which countries to target first, based on overall
+  market size and opportunity, app category, competitive landscape, local
+  pricing and financial factors, and so on. Then, based on your country
+  targeting, you would determine the languages you need to support in your
+  apps.
+</p>
+
+<p>
+  You may then decide to localize into some or all languages of the targeted
+  country. It might make sense to start with a major regional language and add
+  more languages as user base grows.
+</p>
+
+<p>
+  Once you have identified your target languages, you can focus your
+  development, translation, testing, and marketing efforts to these markets.
+</p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/identifylocales"
+data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="design">
+    2. Design for localization
+  </h2>
+
+
+</div>
+
+<p>
+  After you've determined your target languages for localization, assess what
+  you'll need to do to support them in your apps and plan the work early.
+  Consider the vocabulary expansion, script requirements, character spacing and
+  wrapping constraints, left-to-right and right-to-left support, and other
+  potential factors in each language.
+</p>
+
+<h4>
+  <strong>Design a single set of flexible layouts</strong>
+</h4>
+
+<p>
+  As you create your layouts, make sure that any UI elements that hold text are
+  designed generously. It’s good to allow more space than necessary for your
+  language (up to 30% more is normal) to accommodate other languages.
+</p>
+
+<p>
+  Also, elements should be able to expand horizontally or vertically to
+  accommodate variations in the width and height of UI strings or input text.
+  Your text strings shouldn’t overlap borders or the screen edge in any of your
+  target languages.
+</p>
+
+<p>
+  If you design your UI carefully, you can typically use a single set of
+  layouts for all of the languages you support. See <a href=
+  "{@docRoot}training/basics/fragments/fragment-ui.html">Building a Flexible
+  UI</a> for more information.
+</p>
+
+<h4>
+  <strong>Use alternative layouts where needed</strong>
+</h4>
+
+<p>
+  In cases where your UI can't accommodate text in one of your target
+  languages, you can create an <a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+  alternative layout</a> for that language only. Android makes it easy to
+  declare sets of layouts and other resources to load for specific languages,
+  locales, screen sizes, and so on, simply by tagging them with the appropriate
+  resource qualifiers. While the flexibility of alternative layouts exists it
+  can also make your apps harder to maintain over time. In general, using a
+  single, more flexible layout is preferred.
+</p>
+
+<h4>
+  <strong>Support RTL layouts and text</strong>
+</h4>
+
+<p>
+  If you’re distributing to countries where right-to-left (RTL) scripts are
+  used, you should consider implementing support for RTL layouts and text
+  display and editing, to the extent possible.
+</p>
+
+<p>
+  Android 4.1 introduced limited support for bidirectional text, allowing apps
+  to display and edit text in both left-to-right (LTR) and right-to-left (RTL)
+  scripts. Android 4.2 added <a href=
+  "http://android-developers.blogspot.fr/2013/03/native-rtl-support-in-android-42.html">
+  full native support for RTL layouts</a>, including layout mirroring, so that
+  you can deliver the same great app experiences to all of your users.
+</p>
+
+<p>
+  At a minimum, for Android 4.2 users, it's simple to add basic RTL layout
+  mirroring, which goes a long way toward meeting the needs of RTL users.
+</p>
+
+<h4>
+  <strong>Use system-provided formats for dates, times, numbers, and
+  currencies</strong>
+</h4>
+
+<p>
+  Where your apps specify dates, times, numbers, currencies, and other entities
+  that can vary by locale, make sure to use the system-provided formats, rather
+  than app-specific formats. Keep in mind that not every locale uses the same
+  thousands separator, decimal separator, or percent sign.
+</p>
+
+<p>
+  Android provides a variety of utilities for formatting and converting
+  patterns across locales, such as <a href=
+  "{@docRoot}reference/android/text/format/DateUtils.html">DateUtils</a> and
+  <a href="{@docRoot}reference/java/text/DateFormat.html">DateFormat</a> for
+  dates; <a href=
+  "{@docRoot}reference/java/lang/String.html#format(java.lang.String,%20java.lang.Object...)">
+  String.format()</a> or <a href=
+  "{@docRoot}reference/java/text/DecimalFormat.html">DecimalFormat</a> for
+  numbers and currency; <a href=
+  "{@docRoot}reference/android/telephony/PhoneNumberUtils.html">PhoneNumberUtils</a>
+  for phone numbers; and others.
+</p>
+
+<p>
+  Hardcoding your formats based on assumptions about the user's locale can
+  result in problems when the user changes to another locale. Using
+  system-provided formats and utilities is strongly encouraged.
+</p>
+
+<h4>
+  <strong>Include a full set of default resources</strong>
+</h4>
+
+<p>
+  Make sure that your apps can run properly regardless of language or locale by
+  providing a complete set of default resources. The app's default resources
+  are those that are <em>not marked</em> with any language or locale
+  qualifiers, for example those stored in res/drawable/ and res/values/. If
+  your apps attempt to load a resource that isn't available in the current
+  language or in the default set, they will crash.
+</p>
+
+<p>
+  Whatever the default language you’re using in your apps, make sure that you
+  store the associated layouts, drawables, and strings in default resource
+  directories, without language or locale qualifiers.
+</p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/tools/loc/designforloc" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="manage-strings">
+    3. Manage strings for localization
+  </h2>
+
+
+</div>
+
+<p>
+  It's important to manage your apps’ UI strings properly, so that you deliver
+  a great experience for users and make localization straightforward.
+</p>
+
+<h4>
+  <strong>Move all strings into strings.xml</strong>
+</h4>
+
+<p>
+  As you build your apps, remember not to hard code any string. Instead declare
+  <em>all</em> of your strings as resources in a default strings.xml file which
+  makes it easy to update and localize. Strings in strings.xml file can be
+  extracted, translated and integrated back into your app (with appropriate
+  qualifiers) without any changes to compiled code.
+</p>
+
+<p>
+  If you generate images with text, put those strings in strings.xml as well,
+  and regenerate the images after translation.
+</p>
+
+<h4>
+  <strong>Follow Android guidelines for UI strings</strong>
+</h4>
+
+<p>
+  As you design and develop your UIs, make sure that you pay close attention to
+  <em>how</em> you talk to your user. In general, use a <a href=
+  "{@docRoot}design/style/writing.html">succinct and compressed style</a> that
+  is friendly but brief, and use a consistent style throughout your UIs.
+</p>
+
+<p>
+  Make sure that you read and follow the Android Design recommendations for
+  <a href="{@docRoot}design/style/writing.html">writing style and word
+  choice</a>. Doing so will make your apps appear more polished to the user and
+  will help users understand your UI more quickly.
+</p>
+
+<p>
+  Also, always use Android standard terminology wherever possible&mdash;such as
+  for UI elements such as "Action Bar," "Options Menu," "System Bar,"
+  "Notifications," and so on. Using Android terms correctly and consistently
+  makes translation easier and results in a better end-product for users.
+</p>
+
+<h4>
+  <strong>Provide sufficient context for declared strings</strong>
+</h4>
+
+<p>
+  As you declare strings in your strings.xml file, make sure to describe the
+  context in which the string is used. This information will be invaluable to
+  translators and result in better quality translation and will also help you
+  manage your strings more effectively over time.
+</p>
+
+<p>
+  Here's an example:
+</p>
+
+<pre class="prettyprint">
+&lt;!-- The action for submitting a form. This text is on a button that can fit 30 chars --&gt;
+&lt;string name="login_submit_button"&gt;Sign in&lt;/string&gt;
+</pre>
+<p>
+  Consider providing context information that may include:
+</p>
+
+<ul>
+  <li>
+    <p>
+      What is this string for? When/where is it presented to the user?
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Where is this in the layout? For example, if it’s a button, translations
+      are less flexible than if it were a text box.
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>Mark message parts that should not be translated</strong>
+</h4>
+
+<p>
+  Often strings contain contain text that shouldn’t be translated to other
+  languages. Common examples might be a piece of code, a placeholder for a
+  value, a special symbol, or a name. As you prepare you strings for
+  translation, look for and mark text that should remain as-is, without
+  translation, so that translators don’t change it.
+</p>
+
+<p>
+  To mark text that should not be translated, use an
+  <code>&lt;xliff:g&gt;</code> placeholder tag. Here's an example tag that
+  ensures the text "%1$s" will not be changed during translation (otherwise it
+  could break the message):
+</p>
+
+<pre class="prettyprint">
+&lt;string name="countdown"&gt;
+    &lt;xliff:g id="time" example="5 days&gt;%1$s&lt;/xliff:g&gt;until holiday
+&lt;/string&gt;
+</pre>
+<p>
+  When you declare a placeholder tag, always add an id attribute that explains
+  what the placeholder is for. If your apps will later replace the placeholder
+  value, be sure to provide an example attribute to clarify the expected use.
+</p>
+
+<p>
+  Here are some more examples of placeholder tags:
+</p>
+
+<pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+
+&lt;!-- Example placeholder for a special unicode symbol --&gt;
+
+&lt;string name="star_rating"&gt;Check out our 5
+
+    &lt;xliff:g id="star"&gt;\u2605&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a for a URL --&gt;
+
+&lt;string name="app_homeurl"&gt;
+
+    Visit us at &lt;xliff:g id="application_homepage"&gt;http://my/app/home.html&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a name --&gt;
+
+&lt;string name="prod_name"&gt;
+
+    Learn more at &lt;xliff:g id="prod_gamegroup"&gt;Game Group&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a literal --&gt;
+
+&lt;string name="promo_message"&gt;
+
+    Please use the "&lt;xliff:g id="promotion_code"&gt;ABCDEFG&lt;/xliff:g&gt;” to get a discount.
+
+&lt;/string&gt;
+
+...
+
+&lt;/resources&gt;
+</pre>
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/managestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="translate-strings">
+    4. Translate UI strings and other resources
+  </h2>
+
+
+</div>
+
+<p>
+  Translating your apps’ UI strings and resources to your target languages is
+  the key phase of localization, and it's the one that requires the most care
+  and planning.
+</p>
+
+<p>
+  It is recommended to work with a professional translator (see <a href=
+  "#gp-trans">Purchase professional translations</a>) to ensure high quality
+  translations that enhance the value of your app. Machine translations,
+  although an option may not produce as good an experience for your users.
+</p>
+
+<h4>
+  <strong>Prepare for translation</strong>
+</h4>
+
+<p>
+  Translation output quality will depend in part on your input therefore make
+  sure that your strings.xml file is well organized, well commented, and
+  accurate.
+</p>
+
+<p>
+  Here are some ways to prepare your strings for translation:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Make sure your strings are formatted correctly and consistently.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Follow the strings recommendations listed in <a href=
+      "#manage-strings">Manage strings for localization</a>, above.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Clean up the strings.xml file and remove unused strings.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Place comments in the file to identify the owner, origin, and the version
+      of the file, as well as any special instructions for translators.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Identify existing translations, if any, and include those in an outgoing
+      zip file or other package that you send to translators.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Identify drawables or other resources that require translation and
+      include them in the translators’ package.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Additionally, consider translating your apps’ store listing details
+      &mdash; app title and description, release notes, and so on &mdash; as
+      well as other international marketing materials.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Create a terminology list that explains the meaning and use of key terms
+      found in your product, your market, or the underlying technology. Add the
+      list to the translators’ package.
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>Send your strings for translation</strong>
+</h4>
+
+<p>
+  Early in the development cycle, contact professional translation vendors to
+  get an idea of cost and turnaround time. Make sure to include multiple
+  iterations in the cost. You can find translation vendors online or use
+  translation services available directly from Google Play Developer console
+  (see <a href="#gp-trans">Purchase professional translations</a>).
+</p>
+
+<p>
+  When your translations are complete, take a preliminary look at the
+  translations. Check that all files were translated, check for potential
+  encoding issues, and make sure that declaration formats are intact.
+</p>
+
+<p>
+  If everything looks good, carefully move the localized directories and files
+  back into your apps’ resources. Make sure to tag the directories with the
+  appropriate language and locale qualifiers so that they'll later be loaded
+  properly.
+</p>
+
+<p>
+  After the translations are merged back into your app, start <a href=
+  "#test">testing the localized app</a>.
+</p>
+
+<h4 id="gp-trans">
+  <strong>Purchase professional translations through Google Play</strong>
+</h4>
+
+<p>
+  Google Play App Translation Service can help you quickly find and purchase
+  translations of your app. In the Developer Console, you can browse a list of
+  third-party vendors who are pre-qualified by Google to offer high-quality
+  translation at competitive prices. You can upload the strings you want
+  translated, select the languages you want to translate into, and select your
+  translation vendor based on time and price.
+</p>
+
+<p>
+  Once you've purchased translations, you'll receive an email from your vendor.
+  Your translations are a direct business agreement between you and your
+  vendor; you'll need to work directly with the vendor to manage the
+  translation process and deliverables and resolve any support issues.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
+</div>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/translatestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test">
+    5. Test your localized app
+  </h2>
+
+
+</div>
+
+<p>
+  Once you've received your translated strings and resources and moved them
+  back into your apps, you need to test the apps to make sure that they’re
+  ready for distribution to your international users.
+</p>
+
+<p>
+  Manual testing can help you discover localization issues in your layouts and
+  strings that can affect user satisfaction and, ultimately, your apps' user
+  rating.
+</p>
+
+<h4>
+  <strong>Set up a test environment</strong>
+</h4>
+
+<p>
+  To test your localized app, you'll need to set up an environment consisting
+  of multiple devices (or virtual devices) and screen sizes, based on the
+  markets and form factors you’re targeting. Note that the range of devices in
+  specific regions might be different. If possible, match your test devices to
+  the actual devices likely to be available to users.
+</p>
+
+<h4>
+  <strong>Look for common localization issues</strong>
+</h4>
+
+<p>
+  On each test device, set the language or locale in Settings. Install and
+  launch the app and then navigate through all of the UI flows, dialogs, and
+  user interactions. Enter text in inputs. Some things to look for include:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Clipped text, or text that overlaps the edge of UI elements or the screen
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Poor line wrapping
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Incorrect word breaks or punctuation
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Incorrect alphabetical sorting
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Incorrect layout direction or text direction
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Untranslated text &mdash; if your default strings are displayed instead
+      of translated strings, then you may have overlooked those strings for
+      translation or marked the resources directory with an incorrect language
+      qualifier.
+    </p>
+  </li>
+</ul>
+
+<p>
+  For cases where your strings have expanded in translation and no longer fit
+  your layouts, it's suggested you try to simplify your default text, simplify
+  your translated text, or adjust your default layouts. If none of those
+  resolves the issue, you can create a custom layout for the language.
+</p>
+
+<h4>
+  <strong>Test for default resources</strong>
+</h4>
+
+<p>
+  After you've tested your apps in all of your supported languages and locales,
+  make sure to test it again in an <em>unsupported language</em> and locale.
+  This’ll help you make sure that your apps includes a full set of default
+  strings and resources, so that your apps are usable to all users, regardless
+  of their preferred language.
+</p>
+
+<h4>
+  <strong>Review with native-language speakers</strong>
+</h4>
+
+<p>
+  During or after testing, it's recommended that you let native speakers review
+  your localized apps. One way to do that is through beta testing with regional
+  users &mdash; Google Play can help you do this. <!-- </p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/test"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> -->
+</p>
+
+<div class="headerLine">
+  <h2 id="prepare-launch">
+    6. Prepare for international launch
+  </h2>
+
+
+</div>
+
+<p>
+  Getting your apps translated is a key part of localization, but to help your
+  product attract users and gain visibility, you should prepare for launch in
+  your target countries and create a broader launch and marketing plan for
+  international users.
+</p>
+
+<h4>
+  <strong>Localize your Google Play listing</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Localize your Google Play listing
+    </h2>
+
+    <p>
+      Google Play Store listing is the first impression international users
+      will have of your app. You should highlight what's great about your apps
+      to all of your users! Localize your listing in the Developer Console,
+      including:
+    </p>
+
+    <ul>
+      <li>App title and description
+      </li>
+
+      <li>App screenshots on phones and tablets
+      </li>
+
+      <li>Promotional graphics and videos.
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  If you want your apps to be successful in international markets, it's
+  essential to localize your Google Play store listing. You can manage your
+  localized listing in the Developer Console.
+</p>
+
+<p>
+  Well before launch, decide on your app title, description, promotional text,
+  marketing names and programs, and other text and images. Send your listing
+  text and images for translation early, so that you’ve them ready when beta
+  testing begins. When your translated text is available, you can add it
+  through the Developer Console.
+</p>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Store listing translation in Google Play
+    </h2>
+
+    <p>
+      You can use the App Translation service on Google Play to translate your
+      store listing. Prepare an XML file with your store listing information
+      and upload just as you would upload the strings.xml file (see <a href=
+      "#gp-trans">Purchase professional translations</a>)
+    </p>
+  </div>
+</div>
+
+<p>
+  Also, since you've made the effort to create a great localized app, let users
+  know about it! Take screenshots of your UI in each language, for phones and
+  7- and 10- inch tablets. You can upload screenshots to the Developer Console
+  for each language you support. These will be of great value to users browsing
+  your app listings in other languages.
+</p>
+
+<p>
+  It's also essential to create localized versions of your promotional graphics
+  and videos. For example, your apps’ feature graphics might include text that
+  should be translated, for maximum effectiveness, or you might want to take a
+  different visual approach in one country than you do in another. You can
+  create different versions of your promotional graphics for each language and
+  upload them to the Developer Console. If you offer a promotional video, you
+  can create localized versions of it and then add a link to the correct
+  localized video for each language you support.
+</p>
+
+<h4>
+  <strong>Plan a beta release in key countries</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Easy beta testing
+    </h2>
+
+    <p>
+      Google Play now lets you set up groups of alpha and beta testers,
+      anywhere around the world. Check out this powerful feature next time you
+      sign in to the Developer Console.
+    </p>
+  </div>
+</div>
+
+<p>
+  Before launching your apps, it's always valuable to get real-world feedback
+  from users &mdash; even more so when you are launching an app in a new
+  language, country, or region. In those cases, it's highly recommended that
+  you distribute a pre-release version of your apps to users across your key
+  markets and provide an easy means for them to provide feedback and report
+  bugs.
+</p>
+
+<p>
+  Google Play can help you set up a beta program for your apps. After you sign
+  in to the Developer Console and upload your APK, you can set up groups of
+  users for alpha testing and beta testing the app. You can start with a small
+  group of alpha testers, then move to a larger group of beta testers.
+</p>
+
+<p>
+  Once users are added, they access your app's store listing and install the
+  app. <strong>Users on alpha or beta versions cannot leave reviews or
+  ratings</strong>, so there is <strong>no risk to your rating</strong> on
+  Google Play, however it does mean you need to setup a mechanism for your
+  testers to provide you with feedback: consider creating a <a href=
+  "http://www.google.com/+/business/">Google+</a> page or <a href=
+  "https://groups.google.com/forum/#!overview">Google Groups</a>.
+</p>
+
+<p>
+  The feedback you receive will help you adjust your UI, translations, and
+  store listing to ensure a great experience for users.
+</p>
+
+<h4>
+  <strong>Plan for international marketing</strong>
+</h4>
+
+<p>
+  For highest visibility across countries, consider an international marketing
+  or advertising campaign. The scope of the campaign will vary based on the
+  budget you can support, but in general it's cost-effective and productive to
+  do regional or country-specific marketing at launch and after.
+</p>
+
+<h4>
+  <strong>Create localized Google Play badges</strong>
+</h4>
+
+<p>
+  If you’re preparing international marketing, make sure to include a <a href=
+  "{@docRoot}distribute/tools/promote/badges.html">localized Google Play
+  badge</a> to tell users you're on Google Play. You can use the badge
+  generator to quickly build localized badges that you can use on websites or
+  marketing materials. High-resolution assets are also available.
+</p>
+
+<h4>
+  <strong>Create Localized Device Art</strong>
+</h4>
+
+<p>
+  If you feature product shots of your apps running on Android devices, make
+  sure that those shots look great and reflect the latest in Android devices.
+  To help you create high-quality marketing materials, use the drag-and-drop
+  <a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art
+  Generator</a> to quickly frame your screenshot on a Nexus device.
+</p>
+
+<h4>
+  <strong>Check your Optimization Tips</strong>
+</h4>
+
+<p>
+  As you prepare for launch, make sure to sign into the Developer Console and
+  check your apps’ Optimization Tips. The Optimization Tips let you know when
+  you’re missing parts of your localized store listing and provide other
+  helpful reminders for a successful localized launch.
+</p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/preplaunch"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    7. Support international users after launch
+  </h2>
+
+
+</div>
+
+<p>
+  After you launch your apps internationally, you should be prepared to support
+  users in a variety of languages and time zones. The extent of your
+  international user support depends on your budget, but at a minimum you
+  should watch your ratings, reviews, and download stats carefully after
+  launch.
+</p>
+
+<p>
+  Here are some suggestions:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Use the app stats in the Developer Console to compare your downloads,
+      installs, and uninstalls, and ratings across languages and
+      countries&mdash;If your downloads or ratings aren’t keeping up in
+      specific languages or countries, consider options for improving your
+      product or changing your marketing approach.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Check reviews regularly&mdash;Google Play translates all user reviews for
+      you, so you can stay in touch with how international users feel about
+      your apps, what features they like and what issues are affecting them. By
+      watching reviews, you can spot technical issues that may affect users in
+      a particular country, then fix and update your apps.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Respond to reviews if possible&mdash;It's good to engage with
+      international users in their language or a common language if possible.
+      If not, you can try using translation tools, although results may not be
+      predictable. If your apps gets very popular in a language, consider
+      getting support help from native-language speakers.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Make sure there's a link to any support resources on your website.
+      Consider setting up language-specific user groups, Google+ communities,
+      or other support forums.
+    </p>
+  </li>
+</ul>
+
+<p>
+  By following these practices for localizing your apps, promoting and
+  marketing to international users, and providing ongoing support, you can
+  attract many new users to your apps and maintain their loyalty.
+</p>
+
+<p>
+  Make sure to read the <a href=
+  "{@docRoot}distribute/tools/launch-checklist.html">Launch Checklist</a> to
+  learn more about how to plan, build, and launch your app on Google Play.
+</p>
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>
+

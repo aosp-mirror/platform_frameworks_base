@@ -1,0 +1,160 @@
+page.title=App Structure for Android Wear
+@jd:body
+
+<style>
+ol.inline-list {
+  margin:0 0 20px 0;
+}
+ol.inline-list li {
+display: block;
+float:left;
+width: 162px;
+margin: 0 10px 20px 20px;
+}
+</style>
+
+<p>Users are used to tapping icons to launch apps. Android Wear is different. A typical Wear app adds a card to the stream at a contextually relevant moment. It might have a button that opens a full screen view for a fast micro interaction, but it just as well might not.
+</p>
+
+<p>These are the building blocks, ordered by simplicity. You can use one of them or some of them, but we strongly recommend not building apps the user has to launch and quit before thinking really hard about how you could react to a specific location, activity, time of day, or something happening in the cloud.</p>
+
+
+<ul>
+  <li><strong>Contextual card in the stream</strong>:
+  <ul>
+    <li><a href="#Bridged"><strong>Bridged notifications</strong></a>, such as new message notifications, are pushed to the wearable from the connected handheld using standard Android notifications. They require very little or no Wear-specific code.
+    <li><a href="#Contextual"><strong>Contextual notifications</strong></a>, such as an exercise card that appears when you begin running, are generated locally on the wearable and appear at contextually relevant moments. You can do more with this kind of card than with a notification bridged from the handheld.
+  </ul>
+  </li>
+  <li><strong>Full screen UI app</strong>:
+  <ul>
+    <li><a href="#2DPicker"><strong>2D Picker</strong></a> is design pattern that allows the user to select from a set of items, such as to select an artist then an album. We recommend using this pre-built component from the SDK whenever relevant.
+    <li><a href="#Custom"><strong>Custom layouts</strong></a> are also possible where apps need to extend beyond the basic card/stream metaphor, such as to present a graph or map.</li>
+  </ul>
+  </li>
+</ul>
+
+
+
+<h2 id="Bridged">Bridged Notifications</h2>
+
+<img src="{@docRoot}design/media/wear/bridgednotifications.jpg" height="147" style="float:right;margin:0 0 20px 20px" alt="">
+<img src="{@docRoot}design/media/wear/Bluebird.png" height="147" style="float:right;margin:0 0 20px 40px" alt="">
+
+<p>This is the simplest way to get on Android Wear. In fact, your app already does this if it uses notifications. You can add Wear-specific features like extra pages and voice replies by using the new notification APIs. </p>
+
+<a class="notice-developers left" style="clear:none" href="{@docRoot}training/wearables/notifications/creating.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating a Notification</p>
+  </div>
+</a>
+
+
+<h2 id="Contextual" style="clear:both">Contextual Notifications</h2>
+
+
+<img src="{@docRoot}design/media/wear/context_workout.png" width="323" height="147" style="float:right;margin:0 0 20px 40px;clear:right" alt="" />
+<img src="{@docRoot}design/media/wear/context_lights.png" width="323" height="147" style="float:right;margin:0 0 20px 40px;clear:right" alt="" />
+
+<p>This is what Android Wear does best: showing users information and functionality just when they need it.</p>
+
+<p>Here’s how it works: Your app knows when it is relevant for the user. When the appropriate event occurs, the app triggers a notification. Maybe you’re building a running app that’s relevant when the user is running. Maybe it’s a museum guide that’s relevant when the user is visiting your museum. Check out the <a href="{@docRoot}design/wear/principles.html">design principles</a> for more about how to make your app contextual. </p>
+
+<p>Getting contextual triggering right is one of the most impactful things you can do to craft a great user experience. </p>
+
+<p>The easiest way to do this is to use standard templates for Android notifications. But you can also make your own layout from scratch with an <a href="{@docRoot}guide/components/activities.html">activity</a> inside a card. If you decide to do this, we strongly recommend you take a look at the <a href="{@docRoot}design/wear/style.html">Style</a> guide to make sure you stay consistent with the rest of the device. </p>
+
+
+<a class="notice-developers" style="clear:none" href="{@docRoot}training/wearables/apps/layouts.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Custom Layouts</p>
+  </div>
+</a>
+
+<p>Don’t forget to test your triggering thoroughly. Triggering too often can be so annoying that users might end up blocking all your notifications. </p>
+
+
+
+<h2 id="2DPicker">2D Picker</h2>
+
+<p>The 2D Picker design pattern (available as the <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>GridViewPager</code> component</a>) is useful for showing options in a list. Google search results are a great example of this pattern in action.</p>
+
+<img src="{@docRoot}design/media/wear/1D_picker.png" alt="" width="499px" />
+<p class="img-caption">This pattern can be used to present a single vertical list, or a “1D Picker”</p>
+
+<img src="{@docRoot}design/media/wear/2D_picker.png" alt="" width:760px" />
+<p class="img-caption">It can also be used as a 2D matrix of options, as a way of presenting categorized options.</p>
+
+
+
+<h3>Actions</h3>
+<p>For actions on each card, use the <a href="{@docRoot}design/wear/patterns.html#Actions">Action cards pattern</a>.</p>
+
+<h3>Making it fast</h3>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}design/media/wear/2d_picker_indicated.png" alt="" width="350" />
+<p class="img-caption">Navigation should be vertical-then-horizontal, not horizontal-then-vertical, and limit the the vertical set to about five cards.</p>
+</div>
+
+<p>Here are a few of our favorite tips about how to make the 2D picker really fast for your users:</p>
+<ul>
+<li>Minimize the number of cards</li>
+<li>Show the most popular card at the top </li>
+<li>Keep the cards extremely simple</li>
+<li>Optimize for speed over customization</li>
+</ul>
+
+
+<h3>Exiting</h3>
+<p>Your app should dismiss the 2D picker when the user makes a selection. Users should also be able to exit by swiping the first card down, or swiping left to right on a left-most card.</p>
+
+
+
+<h2 id="Custom">Breaking out of the card (with custom layouts)</h2>
+
+<a class="notice-developers" href="{@docRoot}training/wearables/apps/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Wearable Apps</p>
+  </div>
+</a>
+
+<p>There are some things you can’t do on a card. Swiping in many directions on a map or controlling a game with a joystick are a couple examples. In those cases it might be good idea to <em>momentarily</em> go full screen.</p>
+
+<p>A typical user experience with a full screen app on Android Wear looks like this:</p>
+
+<img src="{@docRoot}design/media/wear/appstructuresample.png" alt="" />
+
+<ol class="inline-list">
+  <li>Your contextual card enters the stream.
+  <li>The user taps the card action.
+  <li>A full screen activity opens for a micro interaction.
+  <li style="margin-right:0">The activity quits and the user returns to the stream.
+</ol>
+
+<h3>When to go full screen</h3>
+<p>We highly recommend going full screen only when you can’t do what you want on a card, and quickly exit back to the stream the moment the user is done with the micro interaction. This will make your app will feel like an integrated part of the system. Android Wear itself uses full screen for voice replies and the stopwatch.</p>
+
+<h3>Making it distinct</h3>
+
+<p>Your full screen design shouldn’t look too much like the card stream as it could confuse users. If you do need a card-like UI, the <a
+href="#2DPicker">2D picker</a> is always available.</p>
+
+<h3>Automatically exiting</h3>
+
+<p>Many devices don’t have back or home buttons, so exiting is something you have to think about. Here are a few examples of natural ways to exit:</p>
+<ul>
+  <li>A map that asks the user to drop a pin should exit when the pin is dropped.</li>
+  <li>A short game can exit when the game finishes.</li>
+  <li>A drawing app can finish after 5 seconds of inactivity.</li>
+</ul>
+
+<h3>Manually exiting</h3>
+
+<p>Even with logical exit points like these, some cases may exist where the user may want to immediately exit. This may be common in apps that are used for a longer while. In all cases, you should treat long-press as the user's intent to exit, using
+<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>DismissOverlayView</code></a>.</p>
+
+

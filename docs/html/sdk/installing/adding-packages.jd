@@ -1,63 +1,226 @@
-page.title=Adding Platforms and Packages
+page.title=Adding SDK Packages
 
 @jd:body
 
+<style>
+ol.large {
+  margin-left:0;
+}
+ol.large > li {
+  list-style-position: inside;
+  list-style-type:none;
+  margin:30px 0 0 0;
+  padding:30px 20px;
+  background:#eee;
+}
+ol.large > li:nth-child(odd) {
+}
+ol.large > li:before {
+  display:inline;
+  left:-40px;
+  float:left;
+  width:20px;
+  font-size:20px;
+  line-height:20px;
+}
+ol.large > li > h2 {
+  font-size:20px;
+  line-height:20px;
+  padding:0 0 0 20px;
+  margin:0 0 20px 0;
+  display:inline-block;
+  font-weight:normal;
+}
+ol.large > li:nth-child(1):before {
+  content:"1. ";
+}
+ol.large > li:nth-child(2):before {
+  content:"2. ";
+}
+ol.large > li:nth-child(3):before {
+  content:"3. ";
+}
+ol.large > li:nth-child(4):before {
+  content:"4. ";
+}
+ol.large > li:nth-child(5):before {
+  content:"5. ";
+}
+ol.large > li:nth-child(6):before {
+  content:"6. ";
+}
+</style>
 
-<p>The Android SDK separates tools, platforms, and other components into packages you can
-  download using the Android SDK Manager. The original
-SDK package you've downloaded includes only the SDK Tools. To develop an Android app,
-you also need to download at least one Android platform and the latest SDK Platform-tools.</p>
 
-<ol>
-<li>Launch the SDK Manager.
-<p>If you've used the Windows installer to install the SDK tools, you should already have the
-Android SDK Manager open. Otherwise, you can launch the Android SDK Manager in one of the following
-ways:</p>
+<p>
+By default, the Android SDK does not include everything you need to start developing.
+The SDK separates tools, platforms, and other components into packages you can
+download as needed using the
+<a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.
+So before you can start, there are a few packages you should add to your Android SDK.</p>
+
+<p>To start adding packages, launch the Android SDK Manager in one of the following ways:</p>
 <ul>
-  <li>On Windows, double-click the <code>SDK Manager.exe</code> file at the root of the Android
-SDK directory.</li>
-  <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the
-Android SDK, then execute <code>android sdk</code>.</li>
+  <li>In Eclipse or Android Studio, click <strong>SDK Manager</strong>
+<img src="{@docRoot}images/tools/sdk-manager-studio.png"
+style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
+  <li>If you're not using Eclipse or Android Studio:
+    <ul>
+      <li>Windows: Double-click the <code>SDK Manager.exe</code> file at the root of the Android
+  SDK directory.</li>
+      <li>Mac/Linux: Open a terminal and navigate to the <code>tools/</code> directory in the
+  Android SDK, then execute <code>android sdk</code>.</li>
+    </ul>
+  </li>
 </ul>
+
+<p>When you open the SDK Manager for the first time, several packages will be selected by
+default. Leave these selected, but be sure you have everything you need
+to get started by following these steps:</p>
+
+
+<ol class="large">
+<li>
+  <h2 id="GetTools" class="norule">Get the latest SDK tools</h2>
+
+<img src="/images/sdk_manager_packages.png" alt="" width="350" style="float:right;margin-left:20px" />
+
+  <p>As a minimum when setting up the Android SDK,
+  you should download the latest tools and Android platform:</p>
+  <ol>
+   <li>Open the Tools directory and select:
+     <ul>
+       <li><strong>Android SDK Tools</strong></li>
+       <li><strong>Android SDK Platform-tools</strong></li>
+       <li><strong>Android SDK Build-tools</strong> (highest version)</li>
+     </ul>
+   </li>
+   <li>Open the first Android X.X folder (the latest version) and select:
+     <ul>
+      <li><strong>SDK Platform</strong></li>
+      <li>A system image for the emulator, such as <br>
+      <strong>ARM EABI v7a System Image</strong></li>
+     </ul>
+   </li>
+  </ol>
 </li>
 
-<li>The SDK Manager shows all the SDK packages available for you to add to your Android SDK.
-As a minimum configuration for your SDK, we recommend you install the following:
-<ul>
- <li>The latest Tools packages (check the <strong>Tools</strong> folder).</li>
- <li>The latest version of Android (check the first <strong>Android</strong> folder).</li>
- <li>The Android Support Library (open the <strong>Extras</strong> folder and check
-  <strong>Android Support Library</strong>).</li>
-</ul>
+<li>
+  <h2 id="GetSupportLib" class="norule">Get the support library for additional APIs</h2>
 
-<p>Once you've chosen your packages, click <strong>Install</strong>. The Android SDK Manager
-installs the selected packages into your Android SDK environment.</li>
+  <div class="sidebox">
+    <p>The support library is required for:</p>
+    <ul>
+      <li><a href="{@docRoot}wear/index.html">Android Wear</a></li>
+      <li><a href="{@docRoot}tv/index.html">Android TV</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+    </ul>
+
+    <p>It also provides these popular APIs:</p>
+    <ul>
+      <li><a href="{@docRoot}reference/android/support/v4/widget/DrawerLayout.html">Navigation
+      drawer</a></li>
+      <li><a href="{@docRoot}reference/android/support/v4/view/ViewPager.html">Swipe views</a></li>
+      <li><a href="{@docRoot}reference/android/support/v7/app/ActionBar.html">Backward-compatible
+      action bar</a></li>
+    </ul>
+  </div>
+
+  <p>The <a href="{@docRoot}tools/support-library/features.html">Android Support Library</a>
+  provides an extended set of APIs that are compatible with most versions of Android.</p>
+
+  <p>Open the <strong>Extras</strong> directory and select:</p>
+     <ul>
+       <li><strong>Android Support Repository</strong></li>
+       <li><strong>Android Support Library</strong></li>
+     </ul>
+
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+
+</li>
+
+
+<li>
+  <h2 id="GetGoogle" class="norule">Get Google Play services for even more APIs</h2>
+
+  <div class="sidebox">
+
+    <p>The Google Play services APIs provide a variety of features and services for your Android
+    apps, such as:</p>
+    <ul>
+      <li><a href="{@docRoot}google/play-services/plus.html">User authentication</a></li>
+      <li><a href="{@docRoot}google/play-services/maps.html">Google Maps</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+      <li><a href="{@docRoot}google/play-services/games.html">Games achievements and
+      leaderboards</a></li>
+      <li><a href="{@docRoot}google/play-services/index.html">And much more</a></li>
+    </ul>
+  </div>
+
+  <p>To develop with Google APIs, you need the Google Play services package:</p>
+  <p>Open the <strong>Extras</strong> directory and select:</p>
+     <ul>
+       <li><strong>Google Repository</strong></li>
+       <li><strong>Google Play services</strong></li>
+     </ul>
+
+  <p class="note"><strong>Note:</strong> Google Play services APIs are not available on all
+  Android-powered devices, but are available on all devices with Google Play Store. To use these
+  APIs in the Android emulator, you must also install the the <strong>Google APIs</strong>
+  system image from the latest Android X.X directory in the SDK Manager.</p>
+</li>
+
+
+<li>
+  <h2 id="Install" class="norule">Install the packages</h2>
+  <p>Once you've selected all the desired packages, continue to install:</p>
+  <ol>
+   <li>Click <strong>Install X packages</strong>.</li>
+   <li>In the next window, double-click each package name on the left
+   to accept the license agreement for each.</li>
+   <li>Click <strong>Install</strong>.</li>
+  </ol>
+  <p>The download progress is shown at the bottom of the SDK Manager window.
+  <strong>Do not exit the SDK Manager</strong> or it will cancel the download.</p>
+</li>
+
+<li>
+  <h2 id="Build" class="norule">Build something!</h2>
+
+<p>With the above packages now in your Android SDK, you're ready to build apps
+for Android. As new tools and other APIs become available, simply launch the SDK Manager
+  to download the new packages for your SDK.</p>
+
+<p>Here are a few options for how you should proceed:</p>
+
+<div class="cols" style="padding:10px 0">
+<div class="col-4">
+<h3>Get started</h3>
+<p>If you're new to Android development, learn the basics of Android apps by following
+the guide to <strong><a href="{@docRoot}training/basics/firstapp/index.html"
+>Building Your First App</a></strong>.</p>
+
+</div>
+<div class="col-4 box">
+<h3>Build for wearables</h3>
+<p>If you're ready to start building apps for Android wearables, see the guide to
+<strong><a href="{@docRoot}wear/preview/start.html">Building Apps for Android Wear</a></strong>.</p>
+
+</div>
+<div class="col-4 box">
+<h3>Use Google APIs</h3>
+<p>To start using Google APIs, such as Maps or
+Play Game services, see the guide to
+<strong><a href="{@docRoot}google/play-services/setup.html">Setting Up Google Play
+Services</a></strong>.</p>
+
+</div>
+</div><!-- end cols -->
+
+
+</li>
+
 </ol>
-
-<p>With these packages installed, you're ready to start developing.
-To get started, read <a href="{@docRoot}training/basics/firstapp/index.html"
->Building Your First App</a>.</p>
-
-<img src="/images/sdk_manager_packages.png" alt="" height="396" />
-<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager shows the
-SDK packages that are available, already installed, or for which an update is available.</p>
-
-
-
-<h3>Additional information</h3>
-
-<ul>
-  <li>For more information about using the SDK Manager and some of the available packages,
-see the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> document.</li>
-  <li>This web site provides all information you need to develop Android apps, including <a
-href="{@docRoot}design/index.html">design guidelines</a>,
-<a href="{@docRoot}training/index.html">developer training</a>, <a
-href="{@docRoot}reference/packages.html">API reference</a>, and information
-about how you can <a href="{@docRoot}distribute/index.html">distribute your app</a>. We recommend
-you begin by reading <a href="{@docRoot}training/basics/firstapp/index.html"
->Building Your First App</a>.</li>
-  <li>For additional resources about developing and distributing your app, see the
-<a href="{@docRoot}support.html">Developer Support Resources</a>.</li>
-</ul>
 
 

@@ -19,9 +19,9 @@
 -->
 <resources>
     <!-- The width that is used when creating thumbnails of applications. -->
-    <dimen name="thumbnail_width">164dp</dimen>
+    <dimen name="thumbnail_width">192dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
-    <dimen name="thumbnail_height">145dp</dimen>
+    <dimen name="thumbnail_height">192dp</dimen>
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
@@ -42,24 +42,9 @@
     <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
-    <!-- Height of the system bar (combined status & navigation); used by
-         SystemUI internally, not respected by the window manager. -->
-    <dimen name="system_bar_height">@dimen/navigation_bar_height</dimen>
-    <!-- Height of notification icons in the system bar -->
-    <dimen name="system_bar_icon_size">32dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
-    <!-- Minimum size of the fastscroll overlay -->
-    <dimen name="fastscroll_overlay_size">104dp</dimen>
-    <!-- Text size of the fastscroll overlay -->
-    <dimen name="fastscroll_overlay_text_size">52sp</dimen>
-    <!-- Padding of the fastscroll overlay -->
-    <dimen name="fastscroll_overlay_padding">16dp</dimen>
-    <!-- Width of the fastscroll thumb -->
-    <dimen name="fastscroll_thumb_width">64dp</dimen>
-    <!-- Height of the fastscroll thumb -->
-    <dimen name="fastscroll_thumb_height">52dp</dimen>
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
 
@@ -76,18 +61,6 @@
 
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">270dp</dimen>
-
-    <!-- Default target placement radius for GlowPadView. Should be 1/2 of outerring diameter. -->
-    <dimen name="glowpadview_target_placement_radius">135dip</dimen>
-
-    <!-- Default glow radius for GlowPadView -->
-    <dimen name="glowpadview_glow_radius">75dip</dimen>
-
-    <!-- Default distance beyond which GlowPadView snaps to the matching target -->
-    <dimen name="glowpadview_snap_margin">40dip</dimen>
-
-    <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
-    <dimen name="glowpadview_inner_radius">15dip</dimen>
 
     <!-- Preference activity side margins -->
     <dimen name="preference_screen_side_margin">0dp</dimen>
@@ -161,10 +134,16 @@
     <!-- Preferred width of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
 
+    <!-- Dialog padding for round display -->
+    <dimen name="alert_dialog_round_padding">27dip</dimen>
     <!-- Dialog title height -->
     <dimen name="alert_dialog_title_height">64dip</dimen>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">48dip</dimen>
+    <!-- Leanback dialog vertical margin -->
+    <dimen name="leanback_alert_dialog_vertical_margin">27dip</dimen>
+    <!-- Leanback dialog horizontal margin -->
+    <dimen name="leanback_alert_dialog_horizontal_margin">54dip</dimen>
 
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height">48dip</dimen>
@@ -218,9 +197,6 @@
     <!-- Default width for a textview error popup -->
     <dimen name="textview_error_popup_default_width">240dip</dimen>
 
-    <!-- Volume panel y offset -->
-    <dimen name="volume_panel_top">80dp</dimen>
-
     <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
     <dimen name="default_app_widget_padding_left">8dp</dimen>
     <dimen name="default_app_widget_padding_top">8dp</dimen>
@@ -239,11 +215,29 @@
     <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
 
     <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
-    <dimen name="notification_text_size">14dp</dimen>
+    <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
-    <dimen name="notification_title_text_size">18dp</dimen>
+    <dimen name="notification_title_text_size">16sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
-    <dimen name="notification_subtext_size">12dp</dimen>
+    <dimen name="notification_subtext_size">12sp</dimen>
+
+    <!-- Top padding for notifications in the standard layout. -->
+    <dimen name="notification_top_pad">10dp</dimen>
+
+    <!-- Top padding for notifications when narrow (i.e. it has 3 lines) -->
+    <dimen name="notification_top_pad_narrow">4dp</dimen>
+
+    <!-- Top padding for notification when text is large -->
+    <dimen name="notification_top_pad_large_text">5dp</dimen>
+
+    <!-- Top padding for notification when text is large and narrow (i.e. it has 3 lines -->
+    <dimen name="notification_top_pad_large_text_narrow">-4dp</dimen>
+
+    <!-- Padding for notification icon when drawn with circle around it -->
+    <dimen name="notification_large_icon_circle_padding">11dp</dimen>
+
+    <!-- Size of the profile badge for notifications -->
+    <dimen name="notification_badge_size">16dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
@@ -356,6 +350,69 @@
     <!-- Outline width for video subtitles. -->
     <dimen name="subtitle_outline_width">2dp</dimen>
 
+    <!-- New TimePicker dimensions. -->
+    <item name="timepicker_circle_radius_multiplier" format="float" type="string">0.82</item>
+    <item name="timepicker_circle_radius_multiplier_24HourMode" format="float" type="string">0.85</item>
+    <item name="timepicker_selection_radius_multiplier" format="float" type="string">0.16</item>
+    <item name="timepicker_ampm_circle_radius_multiplier" format="float" type="string">0.19</item>
+    <item name="timepicker_numbers_radius_multiplier_normal" format="float" type="string">0.81</item>
+    <item name="timepicker_numbers_radius_multiplier_inner" format="float" type="string">0.60</item>
+    <item name="timepicker_numbers_radius_multiplier_outer" format="float" type="string">0.83</item>
+    <item name="timepicker_text_size_multiplier_normal" format="float" type="string">0.17</item>
+    <item name="timepicker_text_size_multiplier_inner" format="float" type="string">0.14</item>
+    <item name="timepicker_text_size_multiplier_outer" format="float" type="string">0.11</item>
+    <item name="timepicker_transition_mid_radius_multiplier" format="float" type="string">0.95</item>
+    <item name="timepicker_transition_end_radius_multiplier" format="float" type="string">1.3</item>
+
+    <dimen name="timepicker_time_label_size">60sp</dimen>
+    <dimen name="timepicker_extra_time_label_margin">-30dp</dimen>
+    <dimen name="timepicker_ampm_label_size">16sp</dimen>
+    <dimen name="timepicker_ampm_left_padding">6dip</dimen>
+    <dimen name="timepicker_separator_padding">4dip</dimen>
+    <dimen name="timepicker_header_height">96dip</dimen>
+    <dimen name="timepicker_minimum_margin_sides">48dip</dimen>
+    <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
+    <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
+
+    <!-- Used by SimpleMonthView -->
+    <dimen name="datepicker_day_number_size">12sp</dimen>
+    <dimen name="datepicker_month_label_size">14sp</dimen>
+    <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
+    <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
+    <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
+    <dimen name="datepicker_view_animator_height">244dp</dimen>
+
+    <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
+    <dimen name="datepicker_year_label_height">64dp</dimen>
+    <dimen name="datepicker_year_label_text_size">22dp</dimen>
+    <dimen name="datepicker_component_width">270dp</dimen>
+    <dimen name="datepicker_selected_date_day_size">88dp</dimen>
+    <dimen name="datepicker_selected_date_month_size">24dp</dimen>
+    <dimen name="datepicker_selected_date_year_size">24dp</dimen>
+    <dimen name="datepicker_header_height">30dp</dimen>
+    <dimen name="datepicker_header_text_size">14dp</dimen>
+
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
+
+    <dimen name="resolver_max_width">480dp</dimen>
+
+     <!-- Size of the offset applied to the position of the circular mask. This is only
+     used on circular displays. In the case where there is no "chin", this will default
+     to 0 -->
+     <dimen name="circular_display_mask_offset">0px</dimen>
+
+     <dimen name="lock_pattern_dot_line_width">3dp</dimen>
+     <dimen name="lock_pattern_dot_size">12dp</dimen>
+     <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
+
+     <dimen name="text_handle_min_size">40dp</dimen>
+
+     <!-- Lighting and shadow properties -->
+     <dimen name="light_y">-200dp</dimen>
+     <dimen name="light_z">800dp</dimen>
+     <dimen name="light_radius">800dp</dimen>
+     <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
+     <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
+
 </resources>

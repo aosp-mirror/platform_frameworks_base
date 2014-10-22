@@ -18,6 +18,7 @@ package android.hardware.location;
 
 import android.location.IFusedGeofenceHardware;
 import android.location.IGpsGeofenceHardware;
+import android.hardware.location.GeofenceHardwareRequestParcelable;
 import android.hardware.location.IGeofenceHardwareCallback;
 import android.hardware.location.IGeofenceHardwareMonitorCallback;
 
@@ -27,9 +28,10 @@ interface IGeofenceHardware {
     void setFusedGeofenceHardware(in IFusedGeofenceHardware service);
     int[] getMonitoringTypes();
     int getStatusOfMonitoringType(int monitoringType);
-    boolean addCircularFence(int id,  int monitoringType, double lat, double longitude,
-            double radius, int lastTransition, int monitorTransitions,
-            int notificationResponsiveness, int unknownTimer,in IGeofenceHardwareCallback callback);
+    boolean addCircularFence(
+            int monitoringType,
+            in GeofenceHardwareRequestParcelable request,
+            in IGeofenceHardwareCallback callback);
     boolean removeGeofence(int id, int monitoringType);
     boolean pauseGeofence(int id, int monitoringType);
     boolean resumeGeofence(int id, int monitoringType, int monitorTransitions);

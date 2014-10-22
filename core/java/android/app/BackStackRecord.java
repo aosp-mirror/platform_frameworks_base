@@ -16,12 +16,24 @@
 
 package android.app;
 
+import com.android.internal.util.FastPrintWriter;
+
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.transition.Transition;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.transition.TransitionUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;
-import com.android.internal.util.FastPrintWriter;
+import android.util.Pair;
+import android.util.SparseArray;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -37,15 +49,19 @@ final class BackStackState implements Parcelable {
     final CharSequence mBreadCrumbTitleText;
     final int mBreadCrumbShortTitleRes;
     final CharSequence mBreadCrumbShortTitleText;
+    final ArrayList<String> mSharedElementSourceNames;
+    final ArrayList<String> mSharedElementTargetNames;
 
     public BackStackState(FragmentManagerImpl fm, BackStackRecord bse) {
         int numRemoved = 0;
         BackStackRecord.Op op = bse.mHead;
         while (op != null) {
-            if (op.removed != null) numRemoved += op.removed.size();
+            if (op.removed != null) {
+                numRemoved += op.removed.size();
+            }
             op = op.next;
         }
-        mOps = new int[bse.mNumOp*7 + numRemoved];
+        mOps = new int[bse.mNumOp * 7 + numRemoved];
 
         if (!bse.mAddToBackStack) {
             throw new IllegalStateException("Not on back stack");
@@ -63,7 +79,7 @@ final class BackStackState implements Parcelable {
             if (op.removed != null) {
                 final int N = op.removed.size();
                 mOps[pos++] = N;
-                for (int i=0; i<N; i++) {
+                for (int i = 0; i < N; i++) {
                     mOps[pos++] = op.removed.get(i).mIndex;
                 }
             } else {
@@ -79,6 +95,8 @@ final class BackStackState implements Parcelable {
         mBreadCrumbTitleText = bse.mBreadCrumbTitleText;
         mBreadCrumbShortTitleRes = bse.mBreadCrumbShortTitleRes;
         mBreadCrumbShortTitleText = bse.mBreadCrumbShortTitleText;
+        mSharedElementSourceNames = bse.mSharedElementSourceNames;
+        mSharedElementTargetNames = bse.mSharedElementTargetNames;
     }
 
     public BackStackState(Parcel in) {
@@ -91,6 +109,8 @@ final class BackStackState implements Parcelable {
         mBreadCrumbTitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mBreadCrumbShortTitleRes = in.readInt();
         mBreadCrumbShortTitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSharedElementSourceNames = in.createStringArrayList();
+        mSharedElementTargetNames = in.createStringArrayList();
     }
 
     public BackStackRecord instantiate(FragmentManagerImpl fm) {
@@ -100,8 +120,10 @@ final class BackStackState implements Parcelable {
         while (pos < mOps.length) {
             BackStackRecord.Op op = new BackStackRecord.Op();
             op.cmd = mOps[pos++];
-            if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
-                    "Instantiate " + bse + " op #" + num + " base fragment #" + mOps[pos]);
+            if (FragmentManagerImpl.DEBUG) {
+                Log.v(FragmentManagerImpl.TAG,
+                        "Instantiate " + bse + " op #" + num + " base fragment #" + mOps[pos]);
+            }
             int findex = mOps[pos++];
             if (findex >= 0) {
                 Fragment f = fm.mActive.get(findex);
@@ -116,9 +138,11 @@ final class BackStackState implements Parcelable {
             final int N = mOps[pos++];
             if (N > 0) {
                 op.removed = new ArrayList<Fragment>(N);
-                for (int i=0; i<N; i++) {
-                    if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
-                            "Instantiate " + bse + " set remove fragment #" + mOps[pos]);
+                for (int i = 0; i < N; i++) {
+                    if (FragmentManagerImpl.DEBUG) {
+                        Log.v(FragmentManagerImpl.TAG,
+                                "Instantiate " + bse + " set remove fragment #" + mOps[pos]);
+                    }
                     Fragment r = fm.mActive.get(mOps[pos++]);
                     op.removed.add(r);
                 }
@@ -135,6 +159,8 @@ final class BackStackState implements Parcelable {
         bse.mBreadCrumbTitleText = mBreadCrumbTitleText;
         bse.mBreadCrumbShortTitleRes = mBreadCrumbShortTitleRes;
         bse.mBreadCrumbShortTitleText = mBreadCrumbShortTitleText;
+        bse.mSharedElementSourceNames = mSharedElementSourceNames;
+        bse.mSharedElementTargetNames = mSharedElementTargetNames;
         bse.bumpBackStackNesting(1);
         return bse;
     }
@@ -153,6 +179,8 @@ final class BackStackState implements Parcelable {
         TextUtils.writeToParcel(mBreadCrumbTitleText, dest, 0);
         dest.writeInt(mBreadCrumbShortTitleRes);
         TextUtils.writeToParcel(mBreadCrumbShortTitleText, dest, 0);
+        dest.writeStringList(mSharedElementSourceNames);
+        dest.writeStringList(mSharedElementTargetNames);
     }
 
     public static final Parcelable.Creator<BackStackState> CREATOR
@@ -217,6 +245,9 @@ final class BackStackRecord extends FragmentTransaction implements
     int mBreadCrumbShortTitleRes;
     CharSequence mBreadCrumbShortTitleText;
 
+    ArrayList<String> mSharedElementSourceNames;
+    ArrayList<String> mSharedElementTargetNames;
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
@@ -240,78 +271,112 @@ final class BackStackRecord extends FragmentTransaction implements
 
     void dump(String prefix, PrintWriter writer, boolean full) {
         if (full) {
-            writer.print(prefix); writer.print("mName="); writer.print(mName);
-                    writer.print(" mIndex="); writer.print(mIndex);
-                    writer.print(" mCommitted="); writer.println(mCommitted);
+            writer.print(prefix);
+            writer.print("mName=");
+            writer.print(mName);
+            writer.print(" mIndex=");
+            writer.print(mIndex);
+            writer.print(" mCommitted=");
+            writer.println(mCommitted);
             if (mTransition != FragmentTransaction.TRANSIT_NONE) {
-                writer.print(prefix); writer.print("mTransition=#");
-                        writer.print(Integer.toHexString(mTransition));
-                        writer.print(" mTransitionStyle=#");
-                        writer.println(Integer.toHexString(mTransitionStyle));
+                writer.print(prefix);
+                writer.print("mTransition=#");
+                writer.print(Integer.toHexString(mTransition));
+                writer.print(" mTransitionStyle=#");
+                writer.println(Integer.toHexString(mTransitionStyle));
             }
-            if (mEnterAnim != 0 || mExitAnim !=0) {
-                writer.print(prefix); writer.print("mEnterAnim=#");
-                        writer.print(Integer.toHexString(mEnterAnim));
-                        writer.print(" mExitAnim=#");
-                        writer.println(Integer.toHexString(mExitAnim));
+            if (mEnterAnim != 0 || mExitAnim != 0) {
+                writer.print(prefix);
+                writer.print("mEnterAnim=#");
+                writer.print(Integer.toHexString(mEnterAnim));
+                writer.print(" mExitAnim=#");
+                writer.println(Integer.toHexString(mExitAnim));
             }
-            if (mPopEnterAnim != 0 || mPopExitAnim !=0) {
-                writer.print(prefix); writer.print("mPopEnterAnim=#");
-                        writer.print(Integer.toHexString(mPopEnterAnim));
-                        writer.print(" mPopExitAnim=#");
-                        writer.println(Integer.toHexString(mPopExitAnim));
+            if (mPopEnterAnim != 0 || mPopExitAnim != 0) {
+                writer.print(prefix);
+                writer.print("mPopEnterAnim=#");
+                writer.print(Integer.toHexString(mPopEnterAnim));
+                writer.print(" mPopExitAnim=#");
+                writer.println(Integer.toHexString(mPopExitAnim));
             }
             if (mBreadCrumbTitleRes != 0 || mBreadCrumbTitleText != null) {
-                writer.print(prefix); writer.print("mBreadCrumbTitleRes=#");
-                        writer.print(Integer.toHexString(mBreadCrumbTitleRes));
-                        writer.print(" mBreadCrumbTitleText=");
-                        writer.println(mBreadCrumbTitleText);
+                writer.print(prefix);
+                writer.print("mBreadCrumbTitleRes=#");
+                writer.print(Integer.toHexString(mBreadCrumbTitleRes));
+                writer.print(" mBreadCrumbTitleText=");
+                writer.println(mBreadCrumbTitleText);
             }
             if (mBreadCrumbShortTitleRes != 0 || mBreadCrumbShortTitleText != null) {
-                writer.print(prefix); writer.print("mBreadCrumbShortTitleRes=#");
-                        writer.print(Integer.toHexString(mBreadCrumbShortTitleRes));
-                        writer.print(" mBreadCrumbShortTitleText=");
-                        writer.println(mBreadCrumbShortTitleText);
+                writer.print(prefix);
+                writer.print("mBreadCrumbShortTitleRes=#");
+                writer.print(Integer.toHexString(mBreadCrumbShortTitleRes));
+                writer.print(" mBreadCrumbShortTitleText=");
+                writer.println(mBreadCrumbShortTitleText);
             }
         }
 
         if (mHead != null) {
-            writer.print(prefix); writer.println("Operations:");
+            writer.print(prefix);
+            writer.println("Operations:");
             String innerPrefix = prefix + "    ";
             Op op = mHead;
             int num = 0;
             while (op != null) {
                 String cmdStr;
                 switch (op.cmd) {
-                    case OP_NULL: cmdStr="NULL"; break;
-                    case OP_ADD: cmdStr="ADD"; break;
-                    case OP_REPLACE: cmdStr="REPLACE"; break;
-                    case OP_REMOVE: cmdStr="REMOVE"; break;
-                    case OP_HIDE: cmdStr="HIDE"; break;
-                    case OP_SHOW: cmdStr="SHOW"; break;
-                    case OP_DETACH: cmdStr="DETACH"; break;
-                    case OP_ATTACH: cmdStr="ATTACH"; break;
-                    default: cmdStr="cmd=" + op.cmd; break;
+                    case OP_NULL:
+                        cmdStr = "NULL";
+                        break;
+                    case OP_ADD:
+                        cmdStr = "ADD";
+                        break;
+                    case OP_REPLACE:
+                        cmdStr = "REPLACE";
+                        break;
+                    case OP_REMOVE:
+                        cmdStr = "REMOVE";
+                        break;
+                    case OP_HIDE:
+                        cmdStr = "HIDE";
+                        break;
+                    case OP_SHOW:
+                        cmdStr = "SHOW";
+                        break;
+                    case OP_DETACH:
+                        cmdStr = "DETACH";
+                        break;
+                    case OP_ATTACH:
+                        cmdStr = "ATTACH";
+                        break;
+                    default:
+                        cmdStr = "cmd=" + op.cmd;
+                        break;
                 }
-                writer.print(prefix); writer.print("  Op #"); writer.print(num);
-                        writer.print(": "); writer.print(cmdStr);
-                        writer.print(" "); writer.println(op.fragment);
+                writer.print(prefix);
+                writer.print("  Op #");
+                writer.print(num);
+                writer.print(": ");
+                writer.print(cmdStr);
+                writer.print(" ");
+                writer.println(op.fragment);
                 if (full) {
                     if (op.enterAnim != 0 || op.exitAnim != 0) {
-                        writer.print(innerPrefix); writer.print("enterAnim=#");
-                                writer.print(Integer.toHexString(op.enterAnim));
-                                writer.print(" exitAnim=#");
-                                writer.println(Integer.toHexString(op.exitAnim));
+                        writer.print(innerPrefix);
+                        writer.print("enterAnim=#");
+                        writer.print(Integer.toHexString(op.enterAnim));
+                        writer.print(" exitAnim=#");
+                        writer.println(Integer.toHexString(op.exitAnim));
                     }
                     if (op.popEnterAnim != 0 || op.popExitAnim != 0) {
-                        writer.print(innerPrefix); writer.print("popEnterAnim=#");
-                                writer.print(Integer.toHexString(op.popEnterAnim));
-                                writer.print(" popExitAnim=#");
-                                writer.println(Integer.toHexString(op.popExitAnim));
+                        writer.print(innerPrefix);
+                        writer.print("popEnterAnim=#");
+                        writer.print(Integer.toHexString(op.popEnterAnim));
+                        writer.print(" popExitAnim=#");
+                        writer.println(Integer.toHexString(op.popExitAnim));
                     }
                 }
                 if (op.removed != null && op.removed.size() > 0) {
-                    for (int i=0; i<op.removed.size(); i++) {
+                    for (int i = 0; i < op.removed.size(); i++) {
                         writer.print(innerPrefix);
                         if (op.removed.size() == 1) {
                             writer.print("Removed: ");
@@ -319,8 +384,10 @@ final class BackStackRecord extends FragmentTransaction implements
                             if (i == 0) {
                                 writer.println("Removed:");
                             }
-                            writer.print(innerPrefix); writer.print("  #"); writer.print(i);
-                                    writer.print(": "); 
+                            writer.print(innerPrefix);
+                            writer.print("  #");
+                            writer.print(i);
+                            writer.print(": ");
                         }
                         writer.println(op.removed.get(i));
                     }
@@ -494,6 +561,62 @@ final class BackStackRecord extends FragmentTransaction implements
         return this;
     }
 
+    @Override
+    public FragmentTransaction addSharedElement(View sharedElement, String name) {
+        String transitionName = sharedElement.getTransitionName();
+        if (transitionName == null) {
+            throw new IllegalArgumentException("Unique transitionNames are required for all" +
+                    " sharedElements");
+        }
+        if (mSharedElementSourceNames == null) {
+            mSharedElementSourceNames = new ArrayList<String>();
+            mSharedElementTargetNames = new ArrayList<String>();
+        }
+        mSharedElementSourceNames.add(transitionName);
+        mSharedElementTargetNames.add(name);
+        return this;
+    }
+
+    /** TODO: remove this */
+    @Override
+    public FragmentTransaction setSharedElement(View sharedElement, String name) {
+        String transitionName = sharedElement.getTransitionName();
+        if (transitionName == null) {
+            throw new IllegalArgumentException("Unique transitionNames are required for all" +
+                    " sharedElements");
+        }
+        mSharedElementSourceNames = new ArrayList<String>(1);
+        mSharedElementSourceNames.add(transitionName);
+
+        mSharedElementTargetNames = new ArrayList<String>(1);
+        mSharedElementTargetNames.add(name);
+        return this;
+    }
+
+    /** TODO: remove this */
+    @Override
+    public FragmentTransaction setSharedElements(Pair<View, String>... sharedElements) {
+        if (sharedElements == null || sharedElements.length == 0) {
+            mSharedElementSourceNames = null;
+            mSharedElementTargetNames = null;
+        } else {
+            ArrayList<String> sourceNames = new ArrayList<String>(sharedElements.length);
+            ArrayList<String> targetNames = new ArrayList<String>(sharedElements.length);
+            for (int i = 0; i < sharedElements.length; i++) {
+                String transitionName = sharedElements[i].first.getTransitionName();
+                if (transitionName == null) {
+                    throw new IllegalArgumentException("Unique transitionNames are required for all"
+                            + " sharedElements");
+                }
+                sourceNames.add(transitionName);
+                targetNames.add(sharedElements[i].second);
+            }
+            mSharedElementSourceNames = sourceNames;
+            mSharedElementTargetNames = targetNames;
+        }
+        return this;
+    }
+
     public FragmentTransaction setTransitionStyle(int styleRes) {
         mTransitionStyle = styleRes;
         return this;
@@ -550,21 +673,27 @@ final class BackStackRecord extends FragmentTransaction implements
         if (!mAddToBackStack) {
             return;
         }
-        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting in " + this
-                + " by " + amt);
+        if (FragmentManagerImpl.DEBUG) {
+            Log.v(TAG, "Bump nesting in " + this
+                    + " by " + amt);
+        }
         Op op = mHead;
         while (op != null) {
             if (op.fragment != null) {
                 op.fragment.mBackStackNesting += amt;
-                if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
-                        + op.fragment + " to " + op.fragment.mBackStackNesting);
+                if (FragmentManagerImpl.DEBUG) {
+                    Log.v(TAG, "Bump nesting of "
+                            + op.fragment + " to " + op.fragment.mBackStackNesting);
+                }
             }
             if (op.removed != null) {
-                for (int i=op.removed.size()-1; i>=0; i--) {
+                for (int i = op.removed.size() - 1; i >= 0; i--) {
                     Fragment r = op.removed.get(i);
                     r.mBackStackNesting += amt;
-                    if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
-                            + r + " to " + r.mBackStackNesting);
+                    if (FragmentManagerImpl.DEBUG) {
+                        Log.v(TAG, "Bump nesting of "
+                                + r + " to " + r.mBackStackNesting);
+                    }
                 }
             }
             op = op.next;
@@ -578,9 +707,11 @@ final class BackStackRecord extends FragmentTransaction implements
     public int commitAllowingStateLoss() {
         return commitInternal(true);
     }
-    
+
     int commitInternal(boolean allowStateLoss) {
-        if (mCommitted) throw new IllegalStateException("commit already called");
+        if (mCommitted) {
+            throw new IllegalStateException("commit already called");
+        }
         if (FragmentManagerImpl.DEBUG) {
             Log.v(TAG, "Commit: " + this);
             LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
@@ -597,9 +728,11 @@ final class BackStackRecord extends FragmentTransaction implements
         mManager.enqueueAction(this, allowStateLoss);
         return mIndex;
     }
-    
+
     public void run() {
-        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Run: " + this);
+        if (FragmentManagerImpl.DEBUG) {
+            Log.v(TAG, "Run: " + this);
+        }
 
         if (mAddToBackStack) {
             if (mIndex < 0) {
@@ -609,6 +742,11 @@ final class BackStackRecord extends FragmentTransaction implements
 
         bumpBackStackNesting(1);
 
+        SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
+        SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
+        calculateFragments(firstOutFragments, lastInFragments);
+        beginTransition(firstOutFragments, lastInFragments, false);
+
         Op op = mHead;
         while (op != null) {
             switch (op.cmd) {
@@ -616,14 +754,17 @@ final class BackStackRecord extends FragmentTransaction implements
                     Fragment f = op.fragment;
                     f.mNextAnim = op.enterAnim;
                     mManager.addFragment(f, false);
-                } break;
+                }
+                break;
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
                     if (mManager.mAdded != null) {
-                        for (int i=0; i<mManager.mAdded.size(); i++) {
+                        for (int i = 0; i < mManager.mAdded.size(); i++) {
                             Fragment old = mManager.mAdded.get(i);
-                            if (FragmentManagerImpl.DEBUG) Log.v(TAG,
-                                    "OP_REPLACE: adding=" + f + " old=" + old);
+                            if (FragmentManagerImpl.DEBUG) {
+                                Log.v(TAG,
+                                        "OP_REPLACE: adding=" + f + " old=" + old);
+                            }
                             if (f == null || old.mContainerId == f.mContainerId) {
                                 if (old == f) {
                                     op.fragment = f = null;
@@ -635,8 +776,10 @@ final class BackStackRecord extends FragmentTransaction implements
                                     old.mNextAnim = op.exitAnim;
                                     if (mAddToBackStack) {
                                         old.mBackStackNesting += 1;
-                                        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
-                                                + old + " to " + old.mBackStackNesting);
+                                        if (FragmentManagerImpl.DEBUG) {
+                                            Log.v(TAG, "Bump nesting of "
+                                                    + old + " to " + old.mBackStackNesting);
+                                        }
                                     }
                                     mManager.removeFragment(old, mTransition, mTransitionStyle);
                                 }
@@ -647,32 +790,38 @@ final class BackStackRecord extends FragmentTransaction implements
                         f.mNextAnim = op.enterAnim;
                         mManager.addFragment(f, false);
                     }
-                } break;
+                }
+                break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.exitAnim;
                     mManager.removeFragment(f, mTransition, mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_HIDE: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.exitAnim;
                     mManager.hideFragment(f, mTransition, mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_SHOW: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.enterAnim;
                     mManager.showFragment(f, mTransition, mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_DETACH: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.exitAnim;
                     mManager.detachFragment(f, mTransition, mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_ATTACH: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.enterAnim;
                     mManager.attachFragment(f, mTransition, mTransitionStyle);
-                } break;
+                }
+                break;
                 default: {
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
                 }
@@ -689,13 +838,685 @@ final class BackStackRecord extends FragmentTransaction implements
         }
     }
 
-    public void popFromBackStack(boolean doStateMove) {
+    private static void setFirstOut(SparseArray<Fragment> fragments, Fragment fragment) {
+        if (fragment != null) {
+            int containerId = fragment.mContainerId;
+            if (containerId != 0 && !fragment.isHidden() && fragment.isAdded() &&
+                    fragment.getView() != null && fragments.get(containerId) == null) {
+                fragments.put(containerId, fragment);
+            }
+        }
+    }
+
+    private void setLastIn(SparseArray<Fragment> fragments, Fragment fragment) {
+        if (fragment != null) {
+            int containerId = fragment.mContainerId;
+            if (containerId != 0) {
+                fragments.put(containerId, fragment);
+            }
+        }
+    }
+
+    /**
+     * Finds the first removed fragment and last added fragments when going forward.
+     * If none of the fragments have transitions, then both lists will be empty.
+     *
+     * @param firstOutFragments The list of first fragments to be removed, keyed on the
+     *                          container ID. This list will be modified by the method.
+     * @param lastInFragments The list of last fragments to be added, keyed on the
+     *                        container ID. This list will be modified by the method.
+     */
+    private void calculateFragments(SparseArray<Fragment> firstOutFragments,
+            SparseArray<Fragment> lastInFragments) {
+        if (!mManager.mContainer.hasView()) {
+            return; // nothing to see, so no transitions
+        }
+        Op op = mHead;
+        while (op != null) {
+            switch (op.cmd) {
+                case OP_ADD:
+                    setLastIn(lastInFragments, op.fragment);
+                    break;
+                case OP_REPLACE: {
+                    Fragment f = op.fragment;
+                    if (mManager.mAdded != null) {
+                        for (int i = 0; i < mManager.mAdded.size(); i++) {
+                            Fragment old = mManager.mAdded.get(i);
+                            if (f == null || old.mContainerId == f.mContainerId) {
+                                if (old == f) {
+                                    f = null;
+                                } else {
+                                    setFirstOut(firstOutFragments, old);
+                                }
+                            }
+                        }
+                    }
+                    setLastIn(lastInFragments, f);
+                    break;
+                }
+                case OP_REMOVE:
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+                case OP_HIDE:
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+                case OP_SHOW:
+                    setLastIn(lastInFragments, op.fragment);
+                    break;
+                case OP_DETACH:
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+                case OP_ATTACH:
+                    setLastIn(lastInFragments, op.fragment);
+                    break;
+            }
+
+            op = op.next;
+        }
+    }
+
+    /**
+     * Finds the first removed fragment and last added fragments when popping the back stack.
+     * If none of the fragments have transitions, then both lists will be empty.
+     *
+     * @param firstOutFragments The list of first fragments to be removed, keyed on the
+     *                          container ID. This list will be modified by the method.
+     * @param lastInFragments The list of last fragments to be added, keyed on the
+     *                        container ID. This list will be modified by the method.
+     */
+    public void calculateBackFragments(SparseArray<Fragment> firstOutFragments,
+            SparseArray<Fragment> lastInFragments) {
+        if (!mManager.mContainer.hasView()) {
+            return; // nothing to see, so no transitions
+        }
+        Op op = mHead;
+        while (op != null) {
+            switch (op.cmd) {
+                case OP_ADD:
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+                case OP_REPLACE:
+                    if (op.removed != null) {
+                        for (int i = op.removed.size() - 1; i >= 0; i--) {
+                            setLastIn(lastInFragments, op.removed.get(i));
+                        }
+                    }
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+                case OP_REMOVE:
+                    setLastIn(lastInFragments, op.fragment);
+                    break;
+                case OP_HIDE:
+                    setLastIn(lastInFragments, op.fragment);
+                    break;
+                case OP_SHOW:
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+                case OP_DETACH:
+                    setLastIn(lastInFragments, op.fragment);
+                    break;
+                case OP_ATTACH:
+                    setFirstOut(firstOutFragments, op.fragment);
+                    break;
+            }
+
+            op = op.next;
+        }
+    }
+
+    /**
+     * When custom fragment transitions are used, this sets up the state for each transition
+     * and begins the transition. A different transition is started for each fragment container
+     * and consists of up to 3 different transitions: the exit transition, a shared element
+     * transition and an enter transition.
+     *
+     * <p>The exit transition operates against the leaf nodes of the first fragment
+     * with a view that was removed. If no such fragment was removed, then no exit
+     * transition is executed. The exit transition comes from the outgoing fragment.</p>
+     *
+     * <p>The enter transition operates against the last fragment that was added. If
+     * that fragment does not have a view or no fragment was added, then no enter
+     * transition is executed. The enter transition comes from the incoming fragment.</p>
+     *
+     * <p>The shared element transition operates against all views and comes either
+     * from the outgoing fragment or the incoming fragment, depending on whether this
+     * is going forward or popping the back stack. When going forward, the incoming
+     * fragment's enter shared element transition is used, but when going back, the
+     * outgoing fragment's return shared element transition is used. Shared element
+     * transitions only operate if there is both an incoming and outgoing fragment.</p>
+     *
+     * @param firstOutFragments The list of first fragments to be removed, keyed on the
+     *                          container ID.
+     * @param lastInFragments The list of last fragments to be added, keyed on the
+     *                        container ID.
+     * @param isBack true if this is popping the back stack or false if this is a
+     *               forward operation.
+     * @return The TransitionState used to complete the operation of the transition
+     * in {@link #setNameOverrides(android.app.BackStackRecord.TransitionState, java.util.ArrayList,
+     * java.util.ArrayList)}.
+     */
+    private TransitionState beginTransition(SparseArray<Fragment> firstOutFragments,
+            SparseArray<Fragment> lastInFragments, boolean isBack) {
+        TransitionState state = new TransitionState();
+
+        // Adding a non-existent target view makes sure that the transitions don't target
+        // any views by default. They'll only target the views we tell add. If we don't
+        // add any, then no views will be targeted.
+        state.nonExistentView = new View(mManager.mActivity);
+
+        // Go over all leaving fragments.
+        for (int i = 0; i < firstOutFragments.size(); i++) {
+            int containerId = firstOutFragments.keyAt(i);
+            configureTransitions(containerId, state, isBack, firstOutFragments,
+                    lastInFragments);
+        }
+
+        // Now go over all entering fragments that didn't have a leaving fragment.
+        for (int i = 0; i < lastInFragments.size(); i++) {
+            int containerId = lastInFragments.keyAt(i);
+            if (firstOutFragments.get(containerId) == null) {
+                configureTransitions(containerId, state, isBack, firstOutFragments,
+                        lastInFragments);
+            }
+        }
+        return state;
+    }
+
+    private static Transition cloneTransition(Transition transition) {
+        if (transition != null) {
+            transition = transition.clone();
+        }
+        return transition;
+    }
+
+    private static Transition getEnterTransition(Fragment inFragment, boolean isBack) {
+        if (inFragment == null) {
+            return null;
+        }
+        return cloneTransition(isBack ? inFragment.getReenterTransition() :
+                inFragment.getEnterTransition());
+    }
+
+    private static Transition getExitTransition(Fragment outFragment, boolean isBack) {
+        if (outFragment == null) {
+            return null;
+        }
+        return cloneTransition(isBack ? outFragment.getReturnTransition() :
+                outFragment.getExitTransition());
+    }
+
+    private static Transition getSharedElementTransition(Fragment inFragment, Fragment outFragment,
+            boolean isBack) {
+        if (inFragment == null || outFragment == null) {
+            return null;
+        }
+        return cloneTransition(isBack ? outFragment.getSharedElementReturnTransition() :
+                inFragment.getSharedElementEnterTransition());
+    }
+
+    private static ArrayList<View> captureExitingViews(Transition exitTransition,
+            Fragment outFragment, ArrayMap<String, View> namedViews) {
+        ArrayList<View> viewList = null;
+        if (exitTransition != null) {
+            viewList = new ArrayList<View>();
+            View root = outFragment.getView();
+            root.captureTransitioningViews(viewList);
+            if (namedViews != null) {
+                viewList.removeAll(namedViews.values());
+            }
+            addTargets(exitTransition, viewList);
+        }
+        return viewList;
+    }
+
+    private ArrayMap<String, View> remapSharedElements(TransitionState state, Fragment outFragment,
+            boolean isBack) {
+        ArrayMap<String, View> namedViews = new ArrayMap<String, View>();
+        if (mSharedElementSourceNames != null) {
+            outFragment.getView().findNamedViews(namedViews);
+            if (isBack) {
+                namedViews.retainAll(mSharedElementTargetNames);
+            } else {
+                namedViews = remapNames(mSharedElementSourceNames, mSharedElementTargetNames,
+                        namedViews);
+            }
+        }
+
+        if (isBack) {
+            outFragment.mEnterTransitionCallback.onMapSharedElements(
+                    mSharedElementTargetNames, namedViews);
+            setBackNameOverrides(state, namedViews, false);
+        } else {
+            outFragment.mExitTransitionCallback.onMapSharedElements(
+                    mSharedElementTargetNames, namedViews);
+            setNameOverrides(state, namedViews, false);
+        }
+
+        return namedViews;
+    }
+
+    /**
+     * Prepares the enter transition by adding a non-existent view to the transition's target list
+     * and setting it epicenter callback. By adding a non-existent view to the target list,
+     * we can prevent any view from being targeted at the beginning of the transition.
+     * We will add to the views before the end state of the transition is captured so that the
+     * views will appear. At the start of the transition, we clear the list of targets so that
+     * we can restore the state of the transition and use it again.
+     *
+     * <p>The shared element transition maps its shared elements immediately prior to
+     * capturing the final state of the Transition.</p>
+     */
+    private ArrayList<View> addTransitionTargets(final TransitionState state,
+            final Transition enterTransition, final Transition sharedElementTransition,
+            final Transition overallTransition, final View container,
+            final Fragment inFragment, final Fragment outFragment,
+            final ArrayList<View> hiddenFragmentViews, final boolean isBack,
+            final ArrayList<View> sharedElementTargets) {
+        if (enterTransition == null && sharedElementTransition == null &&
+                overallTransition == null) {
+            return null;
+        }
+        final ArrayList<View> enteringViews = new ArrayList<View>();
+        container.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        container.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                        // Don't include any newly-hidden fragments in the transition.
+                        excludeHiddenFragments(hiddenFragmentViews, inFragment.mContainerId,
+                                overallTransition);
+
+                        ArrayMap<String, View> namedViews = null;
+                        if (sharedElementTransition != null) {
+                            namedViews = mapSharedElementsIn(state, isBack, inFragment);
+                            removeTargets(sharedElementTransition, sharedElementTargets);
+                            sharedElementTargets.clear();
+                            if (namedViews.isEmpty()) {
+                                sharedElementTargets.add(state.nonExistentView);
+                            } else {
+                                sharedElementTargets.addAll(namedViews.values());
+                            }
+
+                            addTargets(sharedElementTransition, sharedElementTargets);
+
+                            setEpicenterIn(namedViews, state);
+
+                            callSharedElementEnd(state, inFragment, outFragment, isBack,
+                                    namedViews);
+                        }
+
+                        if (enterTransition != null) {
+                            View view = inFragment.getView();
+                            if (view != null) {
+                                view.captureTransitioningViews(enteringViews);
+                                if (namedViews != null) {
+                                    enteringViews.removeAll(namedViews.values());
+                                }
+                                addTargets(enterTransition, enteringViews);
+                            }
+                            setSharedElementEpicenter(enterTransition, state);
+                        }
+                        return true;
+                    }
+                });
+        return enteringViews;
+    }
+
+    private void callSharedElementEnd(TransitionState state, Fragment inFragment,
+            Fragment outFragment, boolean isBack, ArrayMap<String, View> namedViews) {
+        SharedElementCallback sharedElementCallback = isBack ?
+                outFragment.mEnterTransitionCallback :
+                inFragment.mEnterTransitionCallback;
+        ArrayList<String> names = new ArrayList<String>(namedViews.keySet());
+        ArrayList<View> views = new ArrayList<View>(namedViews.values());
+        sharedElementCallback.onSharedElementEnd(names, views, null);
+    }
+
+    private void setEpicenterIn(ArrayMap<String, View> namedViews, TransitionState state) {
+        if (mSharedElementTargetNames != null && !namedViews.isEmpty()) {
+            // now we know the epicenter of the entering transition.
+            View epicenter = namedViews
+                    .get(mSharedElementTargetNames.get(0));
+            if (epicenter != null) {
+                state.enteringEpicenterView = epicenter;
+            }
+        }
+    }
+
+    private ArrayMap<String, View> mapSharedElementsIn(TransitionState state,
+            boolean isBack, Fragment inFragment) {
+        // Now map the shared elements in the incoming fragment
+        ArrayMap<String, View> namedViews = mapEnteringSharedElements(state, inFragment, isBack);
+
+        // remap shared elements and set the name mapping used
+        // in the shared element transition.
+        if (isBack) {
+            inFragment.mExitTransitionCallback.onMapSharedElements(
+                    mSharedElementTargetNames, namedViews);
+            setBackNameOverrides(state, namedViews, true);
+        } else {
+            inFragment.mEnterTransitionCallback.onMapSharedElements(
+                    mSharedElementTargetNames, namedViews);
+            setNameOverrides(state, namedViews, true);
+        }
+        return namedViews;
+    }
+
+    private static Transition mergeTransitions(Transition enterTransition,
+            Transition exitTransition, Transition sharedElementTransition, Fragment inFragment,
+            boolean isBack) {
+        boolean overlap = true;
+        if (enterTransition != null && exitTransition != null) {
+            overlap = isBack ? inFragment.getAllowReturnTransitionOverlap() :
+                    inFragment.getAllowEnterTransitionOverlap();
+        }
+
+        // Wrap the transitions. Explicit targets like in enter and exit will cause the
+        // views to be targeted regardless of excluded views. If that happens, then the
+        // excluded fragments views (hidden fragments) will still be in the transition.
+
+        Transition transition;
+        if (overlap) {
+            // Regular transition -- do it all together
+            TransitionSet transitionSet = new TransitionSet();
+            if (enterTransition != null) {
+                transitionSet.addTransition(enterTransition);
+            }
+            if (exitTransition != null) {
+                transitionSet.addTransition(exitTransition);
+            }
+            if (sharedElementTransition != null) {
+                transitionSet.addTransition(sharedElementTransition);
+            }
+            transition = transitionSet;
+        } else {
+            // First do exit, then enter, but allow shared element transition to happen
+            // during both.
+            Transition staggered = null;
+            if (exitTransition != null && enterTransition != null) {
+                staggered = new TransitionSet()
+                        .addTransition(exitTransition)
+                        .addTransition(enterTransition)
+                        .setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+            } else if (exitTransition != null) {
+                staggered = exitTransition;
+            } else if (enterTransition != null) {
+                staggered = enterTransition;
+            }
+            if (sharedElementTransition != null) {
+                TransitionSet together = new TransitionSet();
+                if (staggered != null) {
+                    together.addTransition(staggered);
+                }
+                together.addTransition(sharedElementTransition);
+                transition = together;
+            } else {
+                transition = staggered;
+            }
+        }
+        return transition;
+    }
+
+    /**
+     * Configures custom transitions for a specific fragment container.
+     *
+     * @param containerId The container ID of the fragments to configure the transition for.
+     * @param state The Transition State keeping track of the executing transitions.
+     * @param firstOutFragments The list of first fragments to be removed, keyed on the
+     *                          container ID.
+     * @param lastInFragments The list of last fragments to be added, keyed on the
+     *                        container ID.
+     * @param isBack true if this is popping the back stack or false if this is a
+     *               forward operation.
+     */
+    private void configureTransitions(int containerId, TransitionState state, boolean isBack,
+            SparseArray<Fragment> firstOutFragments, SparseArray<Fragment> lastInFragments) {
+        ViewGroup sceneRoot = (ViewGroup) mManager.mContainer.findViewById(containerId);
+        if (sceneRoot != null) {
+            Fragment inFragment = lastInFragments.get(containerId);
+            Fragment outFragment = firstOutFragments.get(containerId);
+
+            Transition enterTransition = getEnterTransition(inFragment, isBack);
+            Transition sharedElementTransition = getSharedElementTransition(inFragment, outFragment,
+                    isBack);
+            Transition exitTransition = getExitTransition(outFragment, isBack);
+
+            if (enterTransition == null && sharedElementTransition == null &&
+                    exitTransition == null) {
+                return; // no transitions!
+            }
+            if (enterTransition != null) {
+                enterTransition.addTarget(state.nonExistentView);
+            }
+            ArrayMap<String, View> namedViews = null;
+            ArrayList<View> sharedElementTargets = new ArrayList<View>();
+            if (sharedElementTransition != null) {
+                namedViews = remapSharedElements(state, outFragment, isBack);
+                if (namedViews.isEmpty()) {
+                    sharedElementTargets.add(state.nonExistentView);
+                } else {
+                    sharedElementTargets.addAll(namedViews.values());
+                }
+                addTargets(sharedElementTransition, sharedElementTargets);
+
+                // Notify the start of the transition.
+                SharedElementCallback callback = isBack ?
+                        outFragment.mEnterTransitionCallback :
+                        inFragment.mEnterTransitionCallback;
+                ArrayList<String> names = new ArrayList<String>(namedViews.keySet());
+                ArrayList<View> views = new ArrayList<View>(namedViews.values());
+                callback.onSharedElementStart(names, views, null);
+            }
+
+            ArrayList<View> exitingViews = captureExitingViews(exitTransition, outFragment,
+                    namedViews);
+            if (exitingViews == null || exitingViews.isEmpty()) {
+                exitTransition = null;
+            }
+
+            // Set the epicenter of the exit transition
+            if (mSharedElementTargetNames != null && namedViews != null) {
+                View epicenterView = namedViews.get(mSharedElementTargetNames.get(0));
+                if (epicenterView != null) {
+                    if (exitTransition != null) {
+                        setEpicenter(exitTransition, epicenterView);
+                    }
+                    if (sharedElementTransition != null) {
+                        setEpicenter(sharedElementTransition, epicenterView);
+                    }
+                }
+            }
+
+            Transition transition = mergeTransitions(enterTransition, exitTransition,
+                    sharedElementTransition, inFragment, isBack);
+
+            if (transition != null) {
+                ArrayList<View> hiddenFragments = new ArrayList<View>();
+                ArrayList<View> enteringViews = addTransitionTargets(state, enterTransition,
+                        sharedElementTransition, transition, sceneRoot, inFragment, outFragment,
+                        hiddenFragments, isBack, sharedElementTargets);
+
+                transition.setNameOverrides(state.nameOverrides);
+                // We want to exclude hidden views later, so we need a non-null list in the
+                // transition now.
+                transition.excludeTarget(state.nonExistentView, true);
+                // Now exclude all currently hidden fragments.
+                excludeHiddenFragments(hiddenFragments, containerId, transition);
+                TransitionManager.beginDelayedTransition(sceneRoot, transition);
+                // Remove the view targeting after the transition starts
+                removeTargetedViewsFromTransitions(sceneRoot, state.nonExistentView,
+                        enterTransition, enteringViews, exitTransition, exitingViews,
+                        sharedElementTransition, sharedElementTargets, transition, hiddenFragments);
+            }
+        }
+    }
+
+    /**
+     * After the transition has started, remove all targets that we added to the transitions
+     * so that the transitions are left in a clean state.
+     */
+    private void removeTargetedViewsFromTransitions(
+            final ViewGroup sceneRoot, final View nonExistingView,
+            final Transition enterTransition, final ArrayList<View> enteringViews,
+            final Transition exitTransition, final ArrayList<View> exitingViews,
+            final Transition sharedElementTransition, final ArrayList<View> sharedElementTargets,
+            final Transition overallTransition, final ArrayList<View> hiddenViews) {
+        if (overallTransition != null) {
+            sceneRoot.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+                    if (enterTransition != null) {
+                        enterTransition.removeTarget(nonExistingView);
+                        removeTargets(enterTransition, enteringViews);
+                    }
+                    if (exitTransition != null) {
+                        removeTargets(exitTransition, exitingViews);
+                    }
+                    if (sharedElementTransition != null) {
+                        removeTargets(sharedElementTransition, sharedElementTargets);
+                    }
+                    int numViews = hiddenViews.size();
+                    for (int i = 0; i < numViews; i++) {
+                        overallTransition.excludeTarget(hiddenViews.get(i), false);
+                    }
+                    overallTransition.excludeTarget(nonExistingView, false);
+                    return true;
+                }
+            });
+        }
+    }
+
+    private static void removeTargets(Transition transition, ArrayList<View> views) {
+        int numViews = views.size();
+        for (int i = 0; i < numViews; i++) {
+            transition.removeTarget(views.get(i));
+        }
+    }
+
+    private static void addTargets(Transition transition, ArrayList<View> views) {
+        int numViews = views.size();
+        for (int i = 0; i < numViews; i++) {
+            transition.addTarget(views.get(i));
+        }
+    }
+
+    /**
+     * Remaps a name-to-View map, substituting different names for keys.
+     *
+     * @param inMap A list of keys found in the map, in the order in toGoInMap
+     * @param toGoInMap A list of keys to use for the new map, in the order of inMap
+     * @param namedViews The current mapping
+     * @return a new Map after it has been mapped with the new names as keys.
+     */
+    private static ArrayMap<String, View> remapNames(ArrayList<String> inMap,
+            ArrayList<String> toGoInMap, ArrayMap<String, View> namedViews) {
+        ArrayMap<String, View> remappedViews = new ArrayMap<String, View>();
+        if (!namedViews.isEmpty()) {
+            int numKeys = inMap.size();
+            for (int i = 0; i < numKeys; i++) {
+                View view = namedViews.get(inMap.get(i));
+
+                if (view != null) {
+                    remappedViews.put(toGoInMap.get(i), view);
+                }
+            }
+        }
+        return remappedViews;
+    }
+
+    /**
+     * Maps shared elements to views in the entering fragment.
+     *
+     * @param state The transition State as returned from {@link #beginTransition(
+     * android.util.SparseArray, android.util.SparseArray, boolean)}.
+     * @param inFragment The last fragment to be added.
+     * @param isBack true if this is popping the back stack or false if this is a
+     *               forward operation.
+     */
+    private ArrayMap<String, View> mapEnteringSharedElements(TransitionState state,
+            Fragment inFragment, boolean isBack) {
+        ArrayMap<String, View> namedViews = new ArrayMap<String, View>();
+        View root = inFragment.getView();
+        if (root != null) {
+            if (mSharedElementSourceNames != null) {
+                root.findNamedViews(namedViews);
+                if (isBack) {
+                    namedViews = remapNames(mSharedElementSourceNames,
+                            mSharedElementTargetNames, namedViews);
+                } else {
+                    namedViews.retainAll(mSharedElementTargetNames);
+                }
+            }
+        }
+        return namedViews;
+    }
+
+    private void excludeHiddenFragments(final ArrayList<View> hiddenFragmentViews, int containerId,
+            Transition transition) {
+        if (mManager.mAdded != null) {
+            for (int i = 0; i < mManager.mAdded.size(); i++) {
+                Fragment fragment = mManager.mAdded.get(i);
+                if (fragment.mView != null && fragment.mContainer != null &&
+                        fragment.mContainerId == containerId) {
+                    if (fragment.mHidden) {
+                        if (!hiddenFragmentViews.contains(fragment.mView)) {
+                            transition.excludeTarget(fragment.mView, true);
+                            hiddenFragmentViews.add(fragment.mView);
+                        }
+                    } else {
+                        transition.excludeTarget(fragment.mView, false);
+                        hiddenFragmentViews.remove(fragment.mView);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void setEpicenter(Transition transition, View view) {
+        final Rect epicenter = new Rect();
+        view.getBoundsOnScreen(epicenter);
+
+        transition.setEpicenterCallback(new Transition.EpicenterCallback() {
+            @Override
+            public Rect onGetEpicenter(Transition transition) {
+                return epicenter;
+            }
+        });
+    }
+
+    private void setSharedElementEpicenter(Transition transition, final TransitionState state) {
+        transition.setEpicenterCallback(new Transition.EpicenterCallback() {
+            private Rect mEpicenter;
+
+            @Override
+            public Rect onGetEpicenter(Transition transition) {
+                if (mEpicenter == null && state.enteringEpicenterView != null) {
+                    mEpicenter = new Rect();
+                    state.enteringEpicenterView.getBoundsOnScreen(mEpicenter);
+                }
+                return mEpicenter;
+            }
+        });
+    }
+
+    public TransitionState popFromBackStack(boolean doStateMove, TransitionState state,
+            SparseArray<Fragment> firstOutFragments, SparseArray<Fragment> lastInFragments) {
         if (FragmentManagerImpl.DEBUG) {
             Log.v(TAG, "popFromBackStack: " + this);
             LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
             PrintWriter pw = new FastPrintWriter(logw, false, 1024);
             dump("  ", null, pw, null);
             pw.flush();
+        }
+
+        if (state == null) {
+            if (firstOutFragments.size() != 0 || lastInFragments.size() != 0) {
+                state = beginTransition(firstOutFragments, lastInFragments, true);
+            }
+        } else if (!doStateMove) {
+            setNameOverrides(state, mSharedElementTargetNames, mSharedElementSourceNames);
         }
 
         bumpBackStackNesting(-1);
@@ -709,7 +1530,8 @@ final class BackStackRecord extends FragmentTransaction implements
                     mManager.removeFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition),
                             mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
                     if (f != null) {
@@ -719,42 +1541,48 @@ final class BackStackRecord extends FragmentTransaction implements
                                 mTransitionStyle);
                     }
                     if (op.removed != null) {
-                        for (int i=0; i<op.removed.size(); i++) {
+                        for (int i = 0; i < op.removed.size(); i++) {
                             Fragment old = op.removed.get(i);
                             old.mNextAnim = op.popEnterAnim;
                             mManager.addFragment(old, false);
                         }
                     }
-                } break;
+                }
+                break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popEnterAnim;
                     mManager.addFragment(f, false);
-                } break;
+                }
+                break;
                 case OP_HIDE: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popEnterAnim;
                     mManager.showFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_SHOW: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popExitAnim;
                     mManager.hideFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_DETACH: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popEnterAnim;
                     mManager.attachFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                } break;
+                }
+                break;
                 case OP_ATTACH: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popExitAnim;
                     mManager.detachFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                } break;
+                }
+                break;
                 default: {
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
                 }
@@ -766,11 +1594,69 @@ final class BackStackRecord extends FragmentTransaction implements
         if (doStateMove) {
             mManager.moveToState(mManager.mCurState,
                     FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle, true);
+            state = null;
         }
 
         if (mIndex >= 0) {
             mManager.freeBackStackIndex(mIndex);
             mIndex = -1;
+        }
+        return state;
+    }
+
+    private static void setNameOverride(ArrayMap<String, String> overrides,
+            String source, String target) {
+        if (source != null && target != null && !source.equals(target)) {
+            for (int index = 0; index < overrides.size(); index++) {
+                if (source.equals(overrides.valueAt(index))) {
+                    overrides.setValueAt(index, target);
+                    return;
+                }
+            }
+            overrides.put(source, target);
+        }
+    }
+
+    private static void setNameOverrides(TransitionState state, ArrayList<String> sourceNames,
+            ArrayList<String> targetNames) {
+        if (sourceNames != null) {
+            for (int i = 0; i < sourceNames.size(); i++) {
+                String source = sourceNames.get(i);
+                String target = targetNames.get(i);
+                setNameOverride(state.nameOverrides, source, target);
+            }
+        }
+    }
+
+    private void setBackNameOverrides(TransitionState state, ArrayMap<String, View> namedViews,
+            boolean isEnd) {
+        int count = mSharedElementTargetNames.size();
+        for (int i = 0; i < count; i++) {
+            String source = mSharedElementSourceNames.get(i);
+            String originalTarget = mSharedElementTargetNames.get(i);
+            View view = namedViews.get(originalTarget);
+            if (view != null) {
+                String target = view.getTransitionName();
+                if (isEnd) {
+                    setNameOverride(state.nameOverrides, source, target);
+                } else {
+                    setNameOverride(state.nameOverrides, target, source);
+                }
+            }
+        }
+    }
+
+    private void setNameOverrides(TransitionState state, ArrayMap<String, View> namedViews,
+            boolean isEnd) {
+        int count = namedViews.size();
+        for (int i = 0; i < count; i++) {
+            String source = namedViews.keyAt(i);
+            String target = namedViews.valueAt(i).getTransitionName();
+            if (isEnd) {
+                setNameOverride(state.nameOverrides, source, target);
+            } else {
+                setNameOverride(state.nameOverrides, target, source);
+            }
         }
     }
 
@@ -788,5 +1674,11 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public boolean isEmpty() {
         return mNumOp == 0;
+    }
+
+    public class TransitionState {
+        public ArrayMap<String, String> nameOverrides = new ArrayMap<String, String>();
+        public View enteringEpicenterView;
+        public View nonExistentView;
     }
 }

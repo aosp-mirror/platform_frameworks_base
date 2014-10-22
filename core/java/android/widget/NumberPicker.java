@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -53,6 +54,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 import libcore.icu.LocaleData;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -427,12 +430,12 @@ public class NumberPicker extends LinearLayout {
      * Flag whether to ignore move events - we ignore such when we show in IME
      * to prevent the content from scrolling.
      */
-    private boolean mIngonreMoveEvents;
+    private boolean mIgnoreMoveEvents;
 
     /**
-     * Flag whether to show soft input on tap.
+     * Flag whether to perform a click on tap.
      */
-    private boolean mShowSoftInputOnTap;
+    private boolean mPerformClickOnTap;
 
     /**
      * The top of the top selection divider.
@@ -475,6 +478,11 @@ public class NumberPicker extends LinearLayout {
     private int mLastHandledDownDpadKeyCode = -1;
 
     /**
+     * If true then the selector wheel is hidden until the picker has focus.
+     */
+    private boolean mHideWheelUntilFocused;
+
+    /**
      * Interface to listen for changes of the current value.
      */
     public interface OnValueChangeListener {
@@ -493,6 +501,10 @@ public class NumberPicker extends LinearLayout {
      * Interface to listen for the picker scroll state.
      */
     public interface OnScrollListener {
+        /** @hide */
+        @IntDef({SCROLL_STATE_IDLE, SCROLL_STATE_TOUCH_SCROLL, SCROLL_STATE_FLING})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ScrollState {}
 
         /**
          * The view is not scrolling.
@@ -518,7 +530,7 @@ public class NumberPicker extends LinearLayout {
          *            {@link #SCROLL_STATE_TOUCH_SCROLL} or
          *            {@link #SCROLL_STATE_IDLE}.
          */
-        public void onScrollStateChange(NumberPicker view, int scrollState);
+        public void onScrollStateChange(NumberPicker view, @ScrollState int scrollState);
     }
 
     /**
@@ -559,18 +571,40 @@ public class NumberPicker extends LinearLayout {
      *
      * @param context the application environment.
      * @param attrs a collection of attributes.
-     * @param defStyle The default style to apply to this view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public NumberPicker(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public NumberPicker(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    /**
+     * Create a new number picker
+     *
+     * @param context the application environment.
+     * @param attrs a collection of attributes.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public NumberPicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         // process style attributes
-        TypedArray attributesArray = context.obtainStyledAttributes(
-                attrs, R.styleable.NumberPicker, defStyle, 0);
+        final TypedArray attributesArray = context.obtainStyledAttributes(
+                attrs, R.styleable.NumberPicker, defStyleAttr, defStyleRes);
         final int layoutResId = attributesArray.getResourceId(
                 R.styleable.NumberPicker_internalLayout, DEFAULT_LAYOUT_RESOURCE_ID);
 
         mHasSelectorWheel = (layoutResId != DEFAULT_LAYOUT_RESOURCE_ID);
+
+        mHideWheelUntilFocused = attributesArray.getBoolean(
+            R.styleable.NumberPicker_hideWheelUntilFocused, false);
 
         mSolidColor = attributesArray.getColor(R.styleable.NumberPicker_solidColor, 0);
 
@@ -808,8 +842,8 @@ public class NumberPicker extends LinearLayout {
                 mInputText.setVisibility(View.INVISIBLE);
                 mLastDownOrMoveEventY = mLastDownEventY = event.getY();
                 mLastDownEventTime = event.getEventTime();
-                mIngonreMoveEvents = false;
-                mShowSoftInputOnTap = false;
+                mIgnoreMoveEvents = false;
+                mPerformClickOnTap = false;
                 // Handle pressed state before any state change.
                 if (mLastDownEventY < mTopSelectionDividerTop) {
                     if (mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
@@ -840,7 +874,7 @@ public class NumberPicker extends LinearLayout {
                     postChangeCurrentByOneFromLongPress(
                             true, ViewConfiguration.getLongPressTimeout());
                 } else {
-                    mShowSoftInputOnTap = true;
+                    mPerformClickOnTap = true;
                     postBeginSoftInputOnLongPressCommand();
                 }
                 return true;
@@ -861,7 +895,7 @@ public class NumberPicker extends LinearLayout {
         int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
-                if (mIngonreMoveEvents) {
+                if (mIgnoreMoveEvents) {
                     break;
                 }
                 float currentMoveY = event.getY();
@@ -893,9 +927,9 @@ public class NumberPicker extends LinearLayout {
                     int deltaMoveY = (int) Math.abs(eventY - mLastDownEventY);
                     long deltaTime = event.getEventTime() - mLastDownEventTime;
                     if (deltaMoveY <= mTouchSlop && deltaTime < ViewConfiguration.getTapTimeout()) {
-                        if (mShowSoftInputOnTap) {
-                            mShowSoftInputOnTap = false;
-                            showSoftInput();
+                        if (mPerformClickOnTap) {
+                            mPerformClickOnTap = false;
+                            performClick();
                         } else {
                             int selectorIndexOffset = (eventY / mSelectorElementHeight)
                                     - SELECTOR_MIDDLE_ITEM_INDEX;
@@ -948,8 +982,8 @@ public class NumberPicker extends LinearLayout {
                 }
                 switch (event.getAction()) {
                     case KeyEvent.ACTION_DOWN:
-                        if (mWrapSelectorWheel || (keyCode == KeyEvent.KEYCODE_DPAD_DOWN)
-                                ? getValue() < getMaxValue() : getValue() > getMinValue()) {
+                        if (mWrapSelectorWheel || ((keyCode == KeyEvent.KEYCODE_DPAD_DOWN)
+                                ? getValue() < getMaxValue() : getValue() > getMinValue())) {
                             requestFocus();
                             mLastHandledDownDpadKeyCode = keyCode;
                             removeAllCallbacks();
@@ -1186,6 +1220,27 @@ public class NumberPicker extends LinearLayout {
      */
     public void setValue(int value) {
         setValueInternal(value, false);
+    }
+
+    @Override
+    public boolean performClick() {
+        if (!mHasSelectorWheel) {
+            return super.performClick();
+        } else if (!super.performClick()) {
+            showSoftInput();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean performLongClick() {
+        if (!mHasSelectorWheel) {
+            return super.performLongClick();
+        } else if (!super.performLongClick()) {
+            showSoftInput();
+            mIgnoreMoveEvents = true;
+        }
+        return true;
     }
 
     /**
@@ -1450,11 +1505,12 @@ public class NumberPicker extends LinearLayout {
             super.onDraw(canvas);
             return;
         }
+        final boolean showSelectorWheel = mHideWheelUntilFocused ? hasFocus() : true;
         float x = (mRight - mLeft) / 2;
         float y = mCurrentScrollOffset;
 
         // draw the virtual buttons pressed state if needed
-        if (mVirtualButtonPressedDrawable != null
+        if (showSelectorWheel && mVirtualButtonPressedDrawable != null
                 && mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
             if (mDecrementVirtualButtonPressed) {
                 mVirtualButtonPressedDrawable.setState(PRESSED_STATE_SET);
@@ -1479,14 +1535,15 @@ public class NumberPicker extends LinearLayout {
             // item. Otherwise, if the user starts editing the text via the
             // IME he may see a dimmed version of the old value intermixed
             // with the new one.
-            if (i != SELECTOR_MIDDLE_ITEM_INDEX || mInputText.getVisibility() != VISIBLE) {
+            if ((showSelectorWheel && i != SELECTOR_MIDDLE_ITEM_INDEX) ||
+                (i == SELECTOR_MIDDLE_ITEM_INDEX && mInputText.getVisibility() != VISIBLE)) {
                 canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
             }
             y += mSelectorElementHeight;
         }
 
         // draw the selection dividers
-        if (mSelectionDivider != null) {
+        if (showSelectorWheel && mSelectionDivider != null) {
             // draw the top divider
             int topOfTopDivider = mTopSelectionDividerTop;
             int bottomOfTopDivider = topOfTopDivider + mSelectionDividerHeight;
@@ -2175,8 +2232,7 @@ public class NumberPicker extends LinearLayout {
 
         @Override
         public void run() {
-            showSoftInput();
-            mIngonreMoveEvents = true;
+            performLongClick();
         }
     }
 
@@ -2304,7 +2360,14 @@ public class NumberPicker extends LinearLayout {
                         }
                         case AccessibilityNodeInfo.ACTION_CLICK: {
                             if (NumberPicker.this.isEnabled()) {
-                                showSoftInput();
+                                performClick();
+                                return true;
+                            }
+                            return false;
+                        }
+                        case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                            if (NumberPicker.this.isEnabled()) {
+                                performLongClick();
                                 return true;
                             }
                             return false;

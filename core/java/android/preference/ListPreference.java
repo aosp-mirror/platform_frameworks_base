@@ -42,12 +42,12 @@ public class ListPreference extends DialogPreference {
     private String mSummary;
     private int mClickedDialogEntryIndex;
     private boolean mValueSet;
-    
-    public ListPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ListPreference, 0, 0);
+
+    public ListPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ListPreference, defStyleAttr, defStyleRes);
         mEntries = a.getTextArray(com.android.internal.R.styleable.ListPreference_entries);
         mEntryValues = a.getTextArray(com.android.internal.R.styleable.ListPreference_entryValues);
         a.recycle();
@@ -56,9 +56,17 @@ public class ListPreference extends DialogPreference {
          * in the Preference class.
          */
         a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Preference, 0, 0);
+                com.android.internal.R.styleable.Preference, defStyleAttr, defStyleRes);
         mSummary = a.getString(com.android.internal.R.styleable.Preference_summary);
         a.recycle();
+    }
+
+    public ListPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ListPreference(Context context, AttributeSet attrs) {
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
 
     public ListPreference(Context context) {

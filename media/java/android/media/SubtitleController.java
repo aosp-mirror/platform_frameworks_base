@@ -275,7 +275,7 @@ public class SubtitleController {
                      mSelectedTrack.getFormat().getInteger(
                             MediaFormat.KEY_IS_FORCED_SUBTITLE, 0) != 0)) {
                     show();
-                } else {
+                } else if (mSelectedTrack != null && !mSelectedTrack.isTimedText()) {
                     hide();
                 }
                 mVisibilityIsExplicit = false;
@@ -417,6 +417,19 @@ public class SubtitleController {
                 // TODO should added renderers override existing ones (to allow replacing?)
                 mRenderers.add(renderer);
             }
+        }
+    }
+
+    /** @hide */
+    public boolean hasRendererFor(MediaFormat format) {
+        synchronized(mRenderers) {
+            // TODO how to get available renderers in the system
+            for (Renderer renderer: mRenderers) {
+                if (renderer.supports(format)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

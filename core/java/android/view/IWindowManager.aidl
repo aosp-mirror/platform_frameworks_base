@@ -27,10 +27,10 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
-import android.view.IMagnificationCallbacks;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
+import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.MagnificationSpec;
@@ -38,6 +38,7 @@ import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
+import android.view.WindowContentFrameStats;
 
 /**
  * System private interface to the window manager.
@@ -56,7 +57,7 @@ interface IWindowManager
     boolean stopViewServer();            // Transaction #2
     boolean isViewServerRunning();       // Transaction #3
 
-    IWindowSession openSession(in IInputMethodClient client,
+    IWindowSession openSession(in IWindowSessionCallback callback, in IInputMethodClient client,
             in IInputContext inputContext);
     boolean inputMethodClientHasFocus(IInputMethodClient client);
 
@@ -79,7 +80,7 @@ interface IWindowManager
     void removeWindowToken(IBinder token);
     void addAppToken(int addPos, IApplicationToken token, int groupId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
-            int configChanges);
+            int configChanges, boolean voiceInteraction, boolean launchTaskBehind);
     void setAppGroupId(IBinder token, int groupId);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
@@ -92,6 +93,9 @@ interface IWindowManager
             int startHeight);
     void overridePendingAppTransitionThumb(in Bitmap srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp);
+    void overridePendingAppTransitionAspectScaledThumb(in Bitmap srcThumb, int startX,
+            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
+            boolean scaleUp);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
@@ -120,6 +124,8 @@ interface IWindowManager
     boolean isKeyguardSecure();
     boolean inKeyguardRestrictedInputMode();
     void dismissKeyguard();
+    void keyguardGoingAway(boolean disableWindowAnimations,
+            boolean keyguardGoingToNotificationShade);
 
     void closeSystemDialogs(String reason);
 
@@ -128,6 +134,8 @@ interface IWindowManager
     float[] getAnimationScales();
     void setAnimationScale(int which, float scale);
     void setAnimationScales(in float[] scales);
+
+    float getCurrentAnimatorScale();
 
     // For testing
     void setInTouchMode(boolean showFocus);
@@ -144,6 +152,11 @@ interface IWindowManager
     // the system default (differs per build variant) or any valid
     // boolean string as parsed by SystemProperties.getBoolean().
     void setStrictModeVisualIndicatorPreference(String enabled);
+
+    /**
+     * Set whether screen capture is disabled for all windows of a specific user
+     */
+    void setScreenCaptureDisabled(int userId, boolean disabled);
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
@@ -197,7 +210,7 @@ interface IWindowManager
     void thawRotation();
 
     /**
-     * Gets whether the rotation is frozen. 
+     * Gets whether the rotation is frozen.
      *
      * @return Whether the rotation is frozen.
      */
@@ -215,12 +228,6 @@ interface IWindowManager
     oneway void statusBarVisibilityChanged(int visibility);
 
     /**
-     * Block until the given window has been drawn to the screen.
-     * Returns true if really waiting, false if the window does not exist.
-     */
-    boolean waitForWindowDrawn(IBinder token, in IRemoteCallback callback);
-
-    /**
      * Device has a software navigation bar (separate from the status bar).
      */
     boolean hasNavigationBar();
@@ -231,55 +238,28 @@ interface IWindowManager
     void lockNow(in Bundle options);
 
     /**
-     * Gets the token for the focused window.
-     */
-    IBinder getFocusedWindowToken();
-
-    /**
-     * Sets an input filter for manipulating the input event stream.
-     */
-    void setInputFilter(in IInputFilter filter);
-
-    /**
-     * Gets the frame of a window given its token.
-     */
-    void getWindowFrame(IBinder token, out Rect outFrame);
-
-    /**
      * Device is in safe mode.
      */
     boolean isSafeModeEnabled();
 
     /**
-     * Sets the display magnification callbacks. These callbacks notify
-     * the client for contextual changes related to display magnification.
-     *
-     * @param callbacks The magnification callbacks.
+     * Enables the screen if all conditions are met.
      */
-    void setMagnificationCallbacks(IMagnificationCallbacks callbacks);
+    void enableScreenIfNeeded();
 
     /**
-     * Sets the magnification spec to be applied to all windows that can be
-     * magnified.
+     * Clears the frame statistics for a given window.
      *
-     * @param spec The current magnification spec.
+     * @param token The window token.
+     * @return Whether the frame statistics were cleared.
      */
-    void setMagnificationSpec(in MagnificationSpec spec);
+    boolean clearWindowContentFrameStats(IBinder token);
 
     /**
-     * Gets the magnification spec for a window given its token. If the
-     * window has a compatibility scale it is also folded in the returned
-     * magnification spec.
+     * Gets the content frame statistics for a given window.
      *
-     * @param windowToken The unique window token.
-     * @return The magnification spec if such or null.
+     * @param token The window token.
+     * @return The frame statistics or null if the window does not exist.
      */
-    MagnificationSpec getCompatibleMagnificationSpecForWindow(in IBinder windowToken);
-
-    /**
-     * Sets the current touch exploration state.
-     *
-     * @param enabled Whether touch exploration is enabled.
-     */
-    void setTouchExplorationEnabled(boolean enabled);
+    WindowContentFrameStats getWindowContentFrameStats(IBinder token);
 }

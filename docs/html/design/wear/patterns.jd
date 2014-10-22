@@ -1,0 +1,150 @@
+page.title=UI Patterns for Android Wear
+@jd:body
+
+
+
+<p>Android Wear is used for micro-interactions, and so adhering to consistent design patterns that users are already accustomed to is paramount.</p>
+
+<h2 id="Cards">Cards</h2>
+
+<p>Cards in the stream can take slightly different forms:</p>
+
+  <img src="{@docRoot}design/media/wear/Bluebird.png" width="147" height="147" style="float:left;margin:0 0 20px 0px">
+
+
+  <img src="{@docRoot}design/media/wear/single_action_controls.jpg" width="147" height="147" style="float:left;margin:0 0 20px 40px">
+
+
+  <img src="{@docRoot}design/media/wear/expandable_stacks.png" width="147" height="147" style="float:left;margin:0 0 20px 40px">
+
+<ul style="clear:both">
+<li>Standard cards for displaying information from a notification</li>
+<li>Single-action controls (such as a play/pause toggle)</li>
+<li>Expandable stack of cards, for grouping a set of related notifications together</li>
+</ul>
+
+
+<h2 id="Icons">App icons</h2>
+
+  <img src="{@docRoot}design/media/wear/clear_bold_type.jpg" width="147" height="147" style="float:right;margin:0 0 20px 40px">
+
+<p>App icons appear in a fixed position overhanging the edge at the top right of the card by default for all notifications in the Context Stream. This is an opportunity for cards to be recognized as coming from a specific source. Photo backgrounds should be used only to convey information, not to brand a card. App icons are necessary only on the leftmost card; it is not necessary to add the app icon to pages.</p>
+
+<h2 id="Pages" style="clear:both">Pages</h2>
+
+  <img src="{@docRoot}design/media/wear/separate-info-cards.png" height="147" style="float:right;margin:0 0 20px 40px">
+
+<p>Supplementary information should be displayed on additional cards to the right of a main Context Stream card. In most cases one additional detail card should be sufficient. For example, a weather card might show the weather for the current location today, with subsequent days listed in an additional card to the right. Keep the number of detail cards as low as possible. Actions (see below) should always come after pages; don’t change the order or interleave them.</p>
+
+
+<a class="notice-developers left" href="{@docRoot}training/wearables/notifications/pages.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Adding Pages to a Notification</p>
+  </div>
+</a>
+
+<h2 id="Dismissing" style="clear:both">Dismissing cards</h2>
+
+  <img src="{@docRoot}design/media/wear/dismiss_cards.png" height="147">
+
+<p>Swiping from left to right on a card causes it to be dismissed from the stream. Dismissed cards may return when they next have relevant information. State is synced between the Android Wear context stream and the notifications on the Android handheld device, so dismissing from one causes an automatic dismissal from the other.</p>
+
+
+
+<h2 id="Actions" style="clear:both">Action buttons</h2>
+
+  <img src="{@docRoot}design/media/wear/action_button.png" width="147" height="147" style="float:right;margin:0 0 20px 40px">
+
+<p>Where the user may need to take action on the information shown in a notification, you can provide action buttons. These are system-rendered buttons that appear to the right of detail cards. They consist of a white icon set on a blue system-rendered circular button and a short caption with a verb. Actions should be limited to three for a single card row.</p>
+
+<p>Tapping on an action button can cause an action to be executed, an action to be continued on the companion handheld, or a full screen activity to be invoked for further input (see the <a href="#2DPicker">2D Picker</a> section below).</p>
+
+<p>Refer to the UI Toolkit provided in the <a href="{@docRoot}design/downloads/index.html#Wear">Downloads</a> page for detailed specs regarding action icons.</p>
+
+
+<h2 id="Countdown" style="clear:both">Action countdown and confirmation</h2>
+
+  <img src="{@docRoot}design/media/wear/countdown.png" width="149" height="149" style="float:right;margin:0 0 20px 40px">
+
+<p>Where tapping on an action button results in an action being executed, one of the following can happen:</p>
+
+<ol>
+<li>The action is completed immediately and the result of the action is shown (either by updating the relevant card contents immediately, or by showing a confirmation animation).</li>
+<li>A short countdown animation to completing the action is played, which the user can interrupt to cancel. Once the timer has counted down, a confirmation animation is played. This animation can be custom-designed by developers.</li>
+<li>A confirmation step is required. This is for actions that are potentially damaging if accidentally triggered. A generic confirmation template is supplied by the system. Once the user confirms, the standard confirmation animation is played.</li>
+<li>The cue card can be invoked to continue specifying the action. For example in a messaging application, tapping a “Reply” action button invokes the Cue Card and prompts for voice input. In this case the prompt label (such as “Speak your message…”) and a set of sample voice suggestions can be specified by developers.</li>
+</ol>
+
+
+<h2 id="Continuing" style="clear:both">Continuing activities on phone</h2>
+
+  <img src="{@docRoot}design/media/wear/continue_phone.png" width="147" height="147" style="float:right;margin:0 0 20px 40px">
+
+<p>Developers should attempt to perform actions on the wearable device wherever possible. In cases where the phone must be used, a generic animation should be played once the action button has been tapped and the corresponding Android app will open on the phone.</p>
+
+
+<h2 id="ActionOnCard" style="clear:both">Actions on cards (such as media controls)</h2>
+
+  <img src="{@docRoot}design/media/wear/action_on_card.png" width="147" height="147" style="float:right;margin:0 0 20px 40px">
+
+<p>Some cards may benefit from having tappable actions directly on a card. Some guidance on when to use this pattern versus using an action button:</p>
+
+<ul>
+<li>This pattern should be used when only one possible action could be reasonably expected. For example, tapping on an address with a car icon and ETA seems like it would very obviously launch directions. Conversely, if you see a contact's photo and name, it's not clear what tapping would do (call them? email them?), so the pattern shouldn't be used in this case.</li>
+<li>On-card actions should not require a text label to be understood.</li>
+<li>On-card actions should only result in something happening on the wearable (apart from web links to open them on the phone).</li>
+<li>You should only have one action per card.</li>
+<li>Do not put menus on a single card.</li>
+</ul>
+
+<p>Good examples of using an action on card include: play and pause music, toggle light switch on and off, navigate to an address, and call a phone number.</p>
+
+
+<h2 id="Stacks" style="clear:both">Card stacks</h2>
+  <img src="{@docRoot}design/media/wear/expandable_stacks.png" width="147" height="147" style="float:right;margin:0 0 20px 40px">
+<p>Card stacks group related cards together and allow them to be progressively expanded vertically in the stream. A tap on a stack fans the cards out so that the top edge of each card can be seen. A subsequent tap on a fanned card reveals that card fully. Stacks of cards revert to a fully collapsed state once the user has swiped away from them.</p>
+
+
+<a class="notice-developers left" style="clear:none" href="{@docRoot}training/wearables/notifications/stacks.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Stacking Notifications</p>
+  </div>
+</a>
+
+<h2 id="2DPicker" style="clear:both">2D Picker</h2>
+
+<p>A 2D Picker component in your app can be invoked from the cue card or from an action button. It allows users to choose from a list of items, and optionally select an attribute of each item. For example, for a social check-in app, you could show a 2D Picker with a vertical list of places
+to check-in to.</p>
+
+<img src="{@docRoot}design/media/wear/2D_picker_action.png" width="500" alt="">
+
+<p>In some instances, further information may be required. In these cases, the most probable default values for these choices should be chosen on the user’s behalf with the option to edit before completing the action. This pattern is in keeping with Android Wear’s core design principle of minimizing interactions required.</p>
+
+<p>More information about how to use the 2D Picker pattern is provided in the <a href="{@docRoot}design/wear/structure.html#2DPicker">App Structure</a> guide.</p>
+
+
+<h2 id="Voice" style="clear:both">Voice commands</h2>
+
+  <img src="{@docRoot}design/media/wear/voice_commands.png" width="147" height="147" style="float:right;margin:0 0 20px 40px">
+
+<p>It is possible for apps to take action in response to Android voice commands that invoke intents. For example, an app can register for the “Take a note” intent and capture the subsequent voice input for processing. In the case where multiple apps registered for the same intent, user preference will be captured once and saved. Users can edit their intent preferences in the Android Wear app on their handheld.</p>
+
+<a class="notice-developers left" style="clear:none" href="{@docRoot}training/wearables/apps/voice.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Adding Voice Capabilities</p>
+  </div>
+</a>
+
+
+<h2 id="Selection" style="clear:both">Selection List</h2>
+
+  <img src="{@docRoot}design/media/wear/selection_list.png" width="147" height="147" style="float:right;margin:0 0 20px 40px;border:1px solid #ddd">
+
+<p>Choosing an item from a list is a common interaction. The Selection List pattern (available as the <a
+href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WearableListView</code></a> component) creates a simple list optimized for ease of use on a small screen where the focused item snaps to the center of the screen and a single tap selects. This widget is recommended as a common pattern for selecting items. It is used throughout the system UI, including in the list that can be accessed by swiping up on the cue card.</p>
+
+
+<p>Of course, it is possible for Android Wear apps to extend themselves beyond the familiarities of these patterns. For a deeper look at the options available, see the <a href="{@docRoot}design/wear/structure.html">App Structure</a> guide.</p>

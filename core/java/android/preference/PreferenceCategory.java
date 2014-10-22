@@ -16,8 +16,6 @@
 
 package android.preference;
 
-import java.util.Map;
-
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -34,9 +32,14 @@ import android.util.AttributeSet;
  */
 public class PreferenceCategory extends PreferenceGroup {
     private static final String TAG = "PreferenceCategory";
-    
-    public PreferenceCategory(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+
+    public PreferenceCategory(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public PreferenceCategory(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public PreferenceCategory(Context context, AttributeSet attrs) {

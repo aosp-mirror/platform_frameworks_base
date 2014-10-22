@@ -1,0 +1,1162 @@
+page.title=Core App Quality
+page.metaDescription=App quality directly influences the long-term success of your app—in terms of installs, user rating and reviews, engagement, and user retention.
+page.image=/distribute/images/core-quality-guidelines.jpg
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Quality Criteria</h2>
+  <ol>
+    <li><a href="#ux">Design and Interaction</a></li>
+        <li><a href="#fn">Functionality</a></li>
+        <li><a href="#ps">Performance and Stability</a></li>
+        <li><a href="#listing">Google Play</a></li>
+
+  </ol>
+  
+  <h2>Testing</h2>
+  <ol>
+    <li><a href="#test-environment">Setting Up a Test Environment</a></li>
+        <li><a href="#tests">Test Procedures</a></li>
+        </ol>
+
+  <h2>You Should Also Read</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">Tablet App Quality</a></li>
+        <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">Optimize Your App</a></li>
+  </ol>
+  
+
+</div>
+</div>
+
+<div class="top-right-float">
+  <img src="{@docRoot}images/gp-core-quality.png" style="margin-left: 20px;">
+</div>
+
+<p>
+  Android users expect high-quality apps. App quality directly influences the
+  long-term success of your app—in terms of installs, user rating and reviews,
+  engagement, and user retention.
+</p>
+
+<p>
+  This document helps you assess basic aspects of quality in your app through a
+  compact set of core app quality criteria and associated tests. All Android
+  apps should meet these criteria.
+</p>
+
+<p>
+  Before publishing your apps, test them against these criteria to ensure that
+  they function well on many devices, meets Android standards for navigation
+  and design, and are prepared for promotional opportunities in the Google Play
+  store. Your testing will go well beyond what's described here—the purpose of
+  this document is to specify the essential quality characteristics all apps
+  should display, so that you can cover them in your test plans.
+</p>
+
+<p>
+  If you're creating apps for tablets and or Google Play for Education there
+  are additional quality criteria you should consider, which are defined in the
+  <a href="{@docRoot}distribute/essentials/quality/tablets.html">Tablet App
+  Quality</a> guidelines and <a href=
+  "{@docRoot}distribute/essentials/gpfe-guidelines.html">Education
+  Guidelines</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="ux">
+  Visual Design and User Interaction
+  </h2>
+
+
+</div>
+
+<p>
+  These criteria ensure that your app provides standard Android visual design
+  and interaction patterns where appropriate, for a consistent and intuitive
+  user experience.
+</p>
+
+<table>
+  <tr>
+    <th style="width:2px;">
+      Area
+    </th>
+    <th style="width:54px;">
+      ID
+    </th>
+    
+
+    <th>
+      Description
+    </th>
+    <th style="width:54px;">
+      Tests
+    </th>
+  </tr>
+  <tr id="UX-B1">
+  <td>Standard design</td>
+  <td>
+    UX-B1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App follows <a href="{@docRoot}design/index.html">Android Design</a>
+    guidelines and uses common <a href=
+    "{@docRoot}design/patterns/index.html">UI patterns and icons</a>:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>App does not redefine the expected function of a system icon (such
+    as the Back button).
+    </li>
+
+    <li>App does not replace a system icon with a completely different icon
+    if it triggers the standard UI behavior.
+    </li>
+
+    <li>If the app provides a customized version of a standard system icon,
+    the icon strongly resembles the system icon and triggers the standard
+    system behavior.
+    </li>
+
+    <li>App does not redefine or misuse Android UI patterns, such that
+    icons or behaviors could be misleading or confusing to users.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-all</a>
+  </td>
+  </tr>
+
+  <tr>
+  <td rowspan="3">
+    Navigation
+  </td>
+  <td id="UX-N1">
+    UX-N1
+  </td>
+  <td>
+    <p>
+    App supports standard system <a href=
+    "{@docRoot}design/patterns/navigation.html">Back button navigation</a>
+    and does not make use of any custom, on-screen "Back button" prompts.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-3</a>
+  </td>
+  </tr>
+
+  <tr>
+  <td id="UX-N2">
+    UX-N2
+  </td>
+  <td>
+    <p>
+    All dialogs are dismissable using the Back button.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-3</a>
+  </td>
+  </tr>
+
+  <tr id="UX-N3">
+  <td>
+    UX-N3
+  </td>
+  <td>
+    Pressing the Home button at any point navigates to the Home screen of the
+    device.
+  </td>
+  <td>
+    <a href="#core">CR-1</a>
+  </td>
+  </tr>
+
+  <tr id="UX-S1">
+  <td rowspan="2">
+    Notifications
+  </td>
+  <td>
+    UX-S1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Notifications follow Android Design <a href=
+    "{@docRoot}design/patterns/notifications.html">guidelines</a>. In
+    particular:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Multiple notifications are stacked into a single notification
+    object, where possible.
+    </li>
+
+    <li>Notifications are persistent only if related to ongoing events
+    (such as music playback or a phone call).
+    </li>
+
+    <li>Notifications do not contain advertising or content unrelated to
+    the core function of the app, unless the user has opted in.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+
+  <tr id="UX-S2">
+  <td>
+    UX-S2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App uses notifications only to:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Indicate a change in context relating to the user personally (such
+    as an incoming message), or
+    </li>
+
+    <li>Expose information/controls relating to an ongoing event (such as
+    music playback or a phone call).
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/corequalityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,6x3,6x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="fn">
+  Functionality
+  </h2>
+
+
+</div>
+
+<p>
+  These criteria ensure that your app provides expected functional behavior,
+  with the appropriate level of permissions.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Area
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Description
+  </th>
+  <th style="width:54px;">
+    Tests
+  </th>
+  </tr>
+
+  <tr id="FN-P1">
+  <td rowspan="2">
+    Permissions
+  </td>
+  <td>
+    FN-P1
+  </td>
+  <td>
+    App requests only the <em>absolute minimum</em> permissions that it needs
+    to support core functionality.
+  </td>
+  <td rowspan="2">
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+
+  <tr id="FN-P2">
+  <td>
+    FN-P2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App does not request permissions to access sensitive data (such as
+    Contacts or the System Log) or services that can cost the user money
+    (such as the Dialer or SMS), unless related to a core capability of the
+    app.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="FN-L1">
+  <td>
+    Install location
+  </td>
+  <td>
+    FN-L1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App functions normally when installed on SD card (if supported by app).
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Supporting installation to SD card is recommended for most large apps
+    (10MB+). See the <a href=
+    "{@docRoot}guide/topics/data/install-location.html">App Install
+    Location</a> developer guide for information about which types of apps
+    should support installation to SD card.
+    </p>
+  </td>
+  <td>
+    <a href="#SD-1">SD-1</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A1">
+  <td rowspan="4">
+    Audio
+  </td>
+  <td>
+    FN-A1
+  </td>
+  <td>
+    Audio does not play when the screen is off, unless this is a core feature
+    (for example, the app is a music player).
+  </td>
+  <td>
+    <a href="#core">CR-7</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A2">
+  <td>
+    FN-A2
+  </td>
+  <td>
+    Audio does not <a href=
+    "http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html">
+    play behind the lock screen</a>, unless this is a core feature.
+  </td>
+  <td>
+    <a href="#core">CR-8</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A3">
+  <td>
+    FN-A3
+  </td>
+  <td>
+    Audio does not play on the home screen or over another app, unless this
+    is a core feature.
+  </td>
+  <td>
+    <a href="#core">CR-1,<br>
+    CR-2</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A4">
+  <td>
+    FN-A4
+  </td>
+  <td>
+    Audio resumes when the app returns to the foreground, or indicates to the
+    user that playback is in a paused state.
+  </td>
+  <td>
+    <a href="#core">CR-1, CR-8</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U1">
+  <td rowspan="3">
+    UI and Graphics
+  </td>
+  <td>
+    FN-U1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App supports both landscape and portrait orientations (if possible).
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Orientations expose largely the same features and actions and preserve
+    functional parity. Minor changes in content or views are acceptable.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U2">
+  <td>
+    FN-U2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App uses the whole screen in both orientations and does not letterbox
+    to account for orientation changes.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Minor letterboxing to compensate for small variations in screen
+    geometry is acceptable.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U3">
+  <td>
+    FN-U3
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App correctly handles rapid transitions between display orientations
+    without rendering problems.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-S1">
+  <td rowspan="2">
+    User/app state
+  </td>
+  <td>
+    FN-S1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App should not leave any services running when the app is in the
+    background, unless related to a core capability of the app.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    For example, the app should not leave services running to maintain a
+    network connection for notifications, to maintain a Bluetooth
+    connection, or to keep the GPS powered-on.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-6</a>
+  </td>
+  </tr>
+
+  <tr id="FN-S2">
+  <td>
+    FN-S2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App correctly preserves and restores user or app state.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    App preserves user or app state when leaving the foreground and
+    prevents accidental data loss due to back-navigation and other state
+    changes. When returning to the foreground, the app must restore the
+    preserved state and any significant stateful transaction that was
+    pending, such as changes to editable fields, game progress, menus,
+    videos, and other sections of the app or game.
+    </p>
+
+    <ol style="margin-bottom:.25em;list-style-type:lower-alpha">
+    <li>When the app is resumed from the Recents app switcher, the app
+    returns the user to the exact state in which it was last used.
+    </li>
+
+    <li>When the app is resumed after the device wakes from sleep (locked)
+    state, the app returns the user to the exact state in which it was last
+    used.
+    </li>
+
+    <li>When the app is relaunched from Home or All Apps, the app restores
+    the app state as closely as possible to the previous state.
+    </li>
+
+    <li>On Back keypresses, the app gives the user the option of saving any
+    app or user state that would otherwise be lost on back-navigation.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-1, CR-3, CR-5</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/corequalityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ps">
+  Performance and Stability
+  </h2>
+
+
+</div>
+
+<p>
+  These criteria ensure that apps provide the performance, stability, and
+  responsiveness expected by users.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Area
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Description
+  </th>
+  <th style="width:54px;">
+    Tests
+  </th>
+  </tr>
+
+  <tr id="PS-S1">
+  <td>
+    Stability
+  </td>
+  <td>
+    PS-S1
+  </td>
+  <td>
+    App does not crash, force close, freeze, or otherwise function abnormally
+    on any targeted device.
+  </td>
+  <td>
+    <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>, <a href=
+    "#HA-1">HA-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-P1">
+  <td rowspan="2">
+    Performance
+  </td>
+  <td>
+    PS-P1
+  </td>
+  <td>
+    App loads quickly or provides onscreen feedback to the user (a progress
+    indicator or similar cue) if the app takes longer than two seconds to
+    load.
+  </td>
+  <td>
+    <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-P2">
+  <td>
+    PS-P2
+  </td>
+  <td>
+    With StrictMode enabled (see <a href="#strictmode">StrictMode
+    Testing</a>, below), no red flashes (performance warnings from
+    StrictMode) are visible when exercising the app, including during game
+    play, animations and UI transitions, and any other part of the app.
+  </td>
+  <td>
+    <a href="#PM-1">PM-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-M1">
+  <td>
+    Media
+  </td>
+  <td>
+    PS-M1
+  </td>
+  <td>
+    Music and video playback is smooth, without crackle, stutter, or other
+    artifacts, during normal app usage and load.
+  </td>
+  <td>
+    <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>, <a href=
+    "#HA-1">HA-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-V1">
+  <td rowspan="2">
+    Visual quality
+  </td>
+  <td>
+    PS-V1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App displays graphics, text, images, and other UI elements without
+    noticeable distortion, blurring, or pixelation.
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>App provides high-quality graphics for all targeted screen sizes
+    and form factors, including for <a href=
+    "{@docRoot}distribute/essentials/quality/tablet.html">larger-screen
+    devices such as tablets</a>.
+    </li>
+
+    <li>No aliasing at the edges of menus, buttons, and other UI elements
+    is visible.
+    </li>
+    </ol>
+  </td>
+  <td rowspan="2">
+    <a href="#core">CR-all</a>
+  </td>
+  </tr>
+
+  <tr id="PS-V2">
+  <td>
+    PS-V2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App displays text and text blocks in an acceptable manner.
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Composition is acceptable in all supported form factors, including
+    for larger-screen devices such as tablets.
+    </li>
+
+    <li>No cut-off letters or words are visible.
+    </li>
+
+    <li>No improper word wraps within buttons or icons are visible.
+    </li>
+
+    <li>Sufficient spacing between text and surrounding elements.
+    </li>
+    </ol>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/core/performance" data-sortorder="-timestamp"
+data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="listing">
+  Google Play
+  </h2>
+
+
+</div>
+
+<p>
+  These criteria ensure that your apps are ready to publish on Google Play.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Area
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Description
+  </th>
+  <th style="width:54px;">
+    Tests
+  </th>
+  </tr>
+
+  <tr id="GP-P1">
+  <td rowspan="2">
+    Policies
+  </td>
+  <td>
+    GP-P1
+  </td>
+  <td>
+    App strictly adheres to the terms of the <a href=
+    "http://play.google.com/about/developer-content-policy.html">Google Play
+    Developer Content Policy</a> and does not offer inappropriate content,
+    does not use intellectual property or brand of others, and so on.
+  </td>
+  <td>
+    <a href="#gp">GP-all</a>
+  </td>
+  </tr>
+
+  <tr id="GP-P2">
+  <td>
+    GP-P2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App maturity level is set appropriately, based on the <a href=
+    "http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=188189">
+    Content Rating Guidelines</a>.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Especially, note that apps that request permission to use the device
+    location cannot be given the maturity level "Everyone".
+    </p>
+  </td>
+  <td>
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D1">
+  <td rowspan="3">
+    App&nbsp;Details Page
+  </td>
+  <td>
+    GP-D1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App feature graphic follows the guidelines outlined in this <a href=
+    "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html">
+    blog post</a>. Make sure that:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>The app listing includes a high-quality feature graphic.
+    </li>
+
+    <li>The feature graphic does not contain device images, screenshots, or
+    small text that will be illegible when scaled down and displayed on the
+    smallest screen size that your app is targeting.
+    </li>
+
+    <li>The feature graphic does not resemble an advertisement.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#gp">GP-1, GP-2</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D2">
+  <td>
+    GP-D2
+  </td>
+  <td>
+    App screenshots and videos do not show or reference non-Android devices.
+  </td>
+  <td rowspan="2">
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D3">
+  <td>
+    GP-D3
+  </td>
+  <td>
+    App screenshots or videos do not represent the content and experience of
+    your app in a misleading way.
+  </td>
+  </tr>
+
+  <tr id="GP-X1">
+  <td>
+    User Support
+  </td>
+  <td>
+    GP-X1
+  </td>
+  <td>
+    Common user-reported bugs in the Reviews tab of the Google Play page are
+    addressed if they are reproducible and occur on many different devices.
+    If a bug occurs on only a few devices, you should still address it if
+    those devices are particularly popular or new.
+  </td>
+  <td>
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/core/play" data-sortorder="-timestamp"
+data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-environment">
+  Setting Up a Test Environment
+  </h2>
+
+
+</div>
+
+<p>
+  To assess the quality of your app, you need to set up a suitable hardware or
+  emulator environment for testing.
+</p>
+
+<p>
+  The ideal test environment would include a small number of actual hardware
+  devices that represent key form factors and hardware/software combinations
+  currently available to consumers. It's not necessary to test on
+  <em>every</em> device that's on the market &mdash; rather, you should focus
+  on a small number of representative devices, even using one or two devices
+  per form factor.
+</p>
+
+<p>
+  If you are not able to obtain actual hardware devices for testing, you should
+  <a href="{@docRoot}tools/devices/index.html">set up emulated devices
+  (AVDs)</a> to represent the most common form factors and hardware/software
+  combinations.
+</p>
+
+<p>
+  To go beyond basic testing, you can add more devices, more form factors, or
+  new hardware/software combinations to your test environment. You can also
+  increase the number or complexity of tests and quality criteria.
+</p>
+
+<div class="headerLine">
+  <h2 id="tests">
+  Test Procedures
+  </h2>
+
+
+</div>
+
+<p>
+  These test procedures help you discover various types of quality issues in
+  your app. You can combine the tests or integrate groups of tests together in
+  your own test plans. See the sections above for references that associate
+  specific criteria with specific tests.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Type
+  </th>
+  <th style="width:54px;">
+    Test
+  </th>
+  <th>
+    Description
+  </th>
+  </tr>
+
+  <tr>
+  <td rowspan="12" id="core">
+    Core Suite
+  </td>
+  <td>
+    CR-0
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Navigate to all parts of the app &mdash; all screens, dialogs,
+    settings, and all user flows.
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>If the application allows for editing or content creation, game
+    play, or media playback, make sure to enter those flows to create or
+    modify content.
+    </li>
+
+    <li>While exercising the app, introduce transient changes in network
+    connectivity, battery function, GPS or location availability, system
+    load, and so on.
+    </li>
+    </ol>
+  </td>
+  </tr>
+
+  <tr id="tg2">
+  <td id="core2">
+    CR-1
+  </td>
+  <td>
+    From each app screen, press the device's Home key, then re-launch the app
+    from the All Apps screen.
+  </td>
+  </tr>
+
+  <tr id="CR-2">
+  <td>
+    CR-2
+  </td>
+  <td>
+    From each app screen, switch to another running app and then return to
+    the app under test using the Recents app switcher.
+  </td>
+  </tr>
+
+  <tr id="CR-3">
+  <td>
+    CR-3
+  </td>
+  <td>
+    From each app screen (and dialogs), press the Back button.
+  </td>
+  </tr>
+
+  <tr id="CR-5">
+  <td>
+    CR-5
+  </td>
+  <td>
+    From each app screen, rotate the device between landscape and portrait
+    orientation at least three times.
+  </td>
+  </tr>
+
+  <tr id="CR-6">
+  <td>
+    CR-6
+  </td>
+  <td>
+    Switch to another app to send the test app into the background. Go to
+    Settings and check whether the test app has any services running while in
+    the background. In Android 4.0 and higher, go to the Apps screen and find
+    the app in the "Running" tab. In earlier versions, use "Manage
+    Applications" to check for running services.
+  </td>
+  </tr>
+
+  <tr id="CR-7">
+  <td>
+    CR-7
+  </td>
+  <td>
+    Press the power button to put the device to sleep, then press the power
+    button again to awaken the screen.
+  </td>
+  </tr>
+
+  <tr id="CR-8">
+  <td>
+    CR-8
+  </td>
+  <td>
+    Set the device to lock when the power button is pressed. Press the power
+    button to put the device to sleep, then press the power button again to
+    awaken the screen, then unlock the device.
+  </td>
+  </tr>
+
+  <tr id="CR-9">
+  <!-- Hardware features -->
+
+  <td>
+    CR-9
+  </td>
+  <td>
+    For devices that have slide-out keyboards, slide the keyboard in and out
+    at least once. For devices that have keyboard docks, attach the device to
+    the keyboard dock.
+  </td>
+  </tr>
+
+  <tr id="CR-10">
+  <td>
+    CR-10
+  </td>
+  <td>
+    For devices that have an external display port, plug-in the external
+    display.
+  </td>
+  </tr>
+
+  <tr id="CR-11">
+  <td>
+    CR-11
+  </td>
+  <td>
+    Trigger and observe in the notications drawer all types of notifications
+    that the app can display. Expand notifications where applicable (Android
+    4.1 and higher), and tap all actions offered.
+  </td>
+  </tr>
+
+  <tr id="CR-12">
+  <td>
+    CR-12
+  </td>
+  <td>
+    Examine the permissions requested by the app by going to Settings &gt;
+    App Info.
+  </td>
+  </tr>
+
+  <tr id="tg3">
+  <td>
+    Install on SD Card
+  </td>
+  <td>
+    SD-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repeat <em>Core Suite</em> with app installed to <a href=
+    "{@docRoot}guide/topics/data/install-location.html">device SD card</a>
+    (if supported by app).
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    To move the app to SD card, you can use Settings &gt; App Info &gt;
+    Move to SD Card.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="tg32">
+  <td>
+    Hardware acceleration
+  </td>
+  <td>
+    HA-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repeat <em>Core Suite</em> with hardware acceleration enabled.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    To force-enable hardware acceleration (where supported by device), add
+    <code>hardware-accelerated="true"</code> to the
+    <code>&lt;application&gt;</code> in the app manifest and recompile.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="tg33">
+  <td>
+    Performance Monitoring
+  </td>
+  <td>
+    PM-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repeat <em>Core Suite</em> with StrictMode profiling enabled <a href=
+    "#strictmode">as described below</a>.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Pay close attention to garbage collection and its impact on the user
+    experience.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="gp">
+  <td rowspan="3">
+    Google Play
+  </td>
+  <td>
+    GP-1
+  </td>
+  <td>
+    Sign into the <a href="https://play.google.com/apps/publish/">Developer
+    Console</a> to review your developer profile, app description,
+    screenshots, feature graphic, maturity settings, and user feedback.
+  </td>
+  </tr>
+
+  <tr id="GP-2">
+  <td>
+    GP-2
+  </td>
+  <td>
+    Download your feature graphic and screenshots and scale them down to
+    match the display sizes on the devices and form factors you are
+    targeting.
+  </td>
+  </tr>
+
+  <tr id="GP-3">
+  <td>
+    GP-3
+  </td>
+  <td>
+    Review all graphical assets, media, text, code libraries, and other
+    content packaged in the app or expansion file download.
+  </td>
+  </tr>
+
+  <tr id="GP-4">
+  <td>
+    Payments
+  </td>
+  <td>
+    GP-4
+  </td>
+  <td>
+    Navigate to all screens of your app and enter all in-app purchase flows.
+  </td>
+  </tr>
+</table>
+
+<h3 id="strictmode">
+  Testing with StrictMode
+</h3>
+
+<p>
+  For performance testing, we recommend enabling {@link android.os.StrictMode}
+  in your app and using it to catch operations on the main thread and other
+  threads that could affect performance, network accesses, file reads/writes,
+  and so on.
+</p>
+
+<p>
+  You can set up a monitoring policy per thread using {@link
+  android.os.StrictMode.ThreadPolicy.Builder} and enable all supported
+  monitoring in the <code>ThreadPolicy</code> using {@link
+  android.os.StrictMode.ThreadPolicy.Builder#detectAll()}.
+</p>
+
+<p>
+  Make sure to enable <strong>visual notification</strong> of policy violations
+  for the <code>ThreadPolicy</code> using {@link
+  android.os.StrictMode.ThreadPolicy.Builder#penaltyFlashScreen()
+  penaltyFlashScreen()}.
+</p>

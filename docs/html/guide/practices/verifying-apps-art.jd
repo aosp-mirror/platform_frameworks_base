@@ -1,0 +1,296 @@
+page.title=Verifying App Behavior on the Android Runtime (ART)
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Quickview</h2>
+  <ul>
+    <li>The new Android runtime (ART) is available on some of the newest Android
+      devices, though all of them currently have Dalvik as the default
+      runtime.</li>
+    <li>App developers should make sure their apps are compatible with ART,
+      especially if you use JNI to run native code or if you use certain tools
+      that produce non-standard code (such as some obfuscators).</li>
+  </ul>
+
+  <h2 id="Contents">In this document</h2>
+ <ol>
+    <li><a href="#GC_Migration">Addressing Garbage Collection (GC) Issues</a></li>
+    <li><a href="#JNI_Issues">Preventing JNI Issues</a>
+      <ol>
+        <li><a href="#JNI_and_GC">Checking JNI code for garbage-collection
+          issues</a></li>
+        <li><a href="#Error_Handling">Error handling</a></li>
+        <li><a href="#Object_Model_Changes">Object model changes</a></li>
+      </ol>
+    </li>
+    <li><a href="#Stack_Size">Preventing Stack Size Issues</a></li>
+    <li><a href="#AOT_Fails">Fixing AOT Compilation Issues</a></li>
+    <li><a href="#Reporting_Problems">Reporting Problems</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="http://source.android.com/devices/tech/dalvik/art.html">Introducing ART</a></li>
+    <li><a
+href="http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">Debugging
+Android JNI with CheckJNI</a></li>
+  </ol>
+</div>
+</div>
+
+<p>With Android 4.4, we are beginning to roll out a new Android runtime,
+<strong>ART</strong>. This runtime offers a number of new features that improve
+performance and smoothness of the Android platform and apps. (You can find more
+information about ART's new features in <a
+href="http://source.android.com/devices/tech/dalvik/art.html">Introducing
+ART</a>.)</p>
+
+<p>Currently, ART is available on a number of Android 4.4 devices, such as the
+Nexus 4, Nexus 5, Nexus 7, and Google Play edition devices.
+At this time, all devices still use Dalvik as the default runtime. We encourage
+you to test your apps for ART compatibility and to take advantage of ART's new
+features. However, for the time being, you should also take care to maintain
+compatibility with Dalvik.</p>
+
+<p>This document lets you know about things to watch for when migrating an
+existing app to be compatible with ART. Most apps should just work when
+running with ART. However, some techniques that work on Dalvik do not work on
+ART. This document discusses some of these issues.</p>
+
+<h2 id="GC_Migration">Addressing Garbage Collection (GC) Issues</h2>
+
+<p>Under Dalvik, apps frequently find it useful to explicitly call {@link
+java.lang.System#gc() System.gc()} to prompt garbage collection (GC). This should be
+far less necessary with ART, particularly if you're invoking garbage collection
+to prevent <a
+href="{@docRoot}/tools/debugging/debugging-memory.html#LogMessages"><code>GC_FOR_ALLOC</code></a>-type
+occurrences or to reduce fragmentation. You can verify which runtime is in use
+by calling {@link java.lang.System#getProperty(java.lang.String)
+System.getProperty("java.vm.version")}. If ART is in use, the property's value
+is <code>"2.0.0"</code> or higher.</p>
+
+<p>Furthermore, a compacting garbage collector is under development in the <a
+href="https://source.android.com">Android Open-Source Project (AOSP)</a> to
+improve memory management. Because of this, you should avoid using techniques
+that are incompatible with compacting GC (such as saving pointers to object
+instance data). This is particularly important for apps that make use of the
+Java Native Interface (JNI). For more information, see <a
+href="#JNI_Issues">Preventing JNI Issues</a>.</p>
+
+<h2 id="JNI_Issues">Preventing JNI Issues</h2>
+
+<p>ART's JNI is somewhat stricter than Dalvik's. It is an especially good idea
+to use CheckJNI mode to catch common problems. If your app makes use of C/C++
+code, you should review the following article:</p>
+
+<p><a
+href="http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">Debugging
+Android JNI with CheckJNI</a></p>
+
+<h3 id="JNI_and_GC">Checking JNI code for garbage-collection issues</h3>
+
+<p>ART has a compacting garbage collector under development on the
+Android Open Source Project (AOSP). Once the compacting garbage collector is in
+use, objects may be moved in memory. If you use C/C++ code, do not
+perform operations that are incompatible with compacting GC. We have enhanced
+CheckJNI to identify some potential issues (as described in <a
+href="http://android-developers.blogspot.com/2011/11/jni-local-reference-changes-in-ics.html">JNI
+Local Reference Changes in ICS</a>).</p>
+
+<p>One area to watch for in particular is the use of
+<code>Get...ArrayElements()</code> and <code>Release...ArrayElements()</code>
+functions. In runtimes with non-compacting GC, the
+<code>Get...ArrayElements()</code> functions typically return a reference to the
+actual memory backing the array object. If you make a change to one of the
+returned array elements, the array object is itself changed (and the arguments
+to <code>Release...ArrayElements()</code> are usually ignored). However, if
+compacting GC is in use, the <code>Get...ArrayElements()</code> functions may
+return a copy of the memory. If you misuse the reference when compacting GC is
+in use, this can lead to memory corruption or other problems. For example:</p>
+
+<ul>
+
+  <li>If you make any changes to the returned array elements, you must call the
+  appropriate <code>Release...ArrayElements()</code> function when you are done,
+  to make sure the changes you made are correctly copied back to the underlying
+  array object.</li>
+
+  <li>When you release the memory array elements, you must use the appropriate
+  mode, depending on what changes you made:
+
+    <ul>
+
+      <li>If you did not make any changes to the array elements, use
+      <code>JNI_ABORT</code> mode, which releases the memory without copying
+      changes back to the underlying array object.</li>
+
+      <li>If you made changes to the array, and do not need the reference any
+      more, use code <code>0</code> (which updates the array object and frees
+      the copy of the memory).</li>
+
+      <li>If you made changes to the array that you want to commit, and you want
+      to keep the copy of the array, use <code>JNI_COMMIT</code> (which updates
+      the underlying array object and retains the copy).</li>
+
+    </ul>
+
+  </li>
+
+  <li>When you call <code>Release...ArrayElements()</code>, return the same
+  pointer that was originally returned by <code>Get...ArrayElements()</code>. For
+  example, it's not safe to increment the original pointer (to scan through the
+  returned array elements) then pass the incremented pointer to
+  <code>Release...ArrayElements()</code>. Passing this modified pointer can cause
+  the wrong memory to be freed, resulting in memory corruption.</li>
+
+</ul>
+
+<h3 id="Error_Handling">Error handling</h3>
+
+<p>ART's JNI throws errors in a number of cases where Dalvik didn’t. (Once
+again, you can catch many such cases by testing with CheckJNI.)</p>
+
+<p>For example, if <code>RegisterNatives</code> is called with a method that
+does not exist (perhaps because the method was removed by a tool such as
+<strong>ProGuard</strong>), ART now properly throws {@link
+java.lang.NoSuchMethodError}:</p>
+
+<pre class="no-pretty-print">
+08-12 17:09:41.082 13823 13823 E AndroidRuntime: FATAL EXCEPTION: main
+08-12 17:09:41.082 13823 13823 E AndroidRuntime: java.lang.NoSuchMethodError:
+    no static or non-static method
+    "Lcom/foo/Bar;.native_frob(Ljava/lang/String;)I"
+08-12 17:09:41.082 13823 13823 E AndroidRuntime:
+    at java.lang.Runtime.nativeLoad(Native Method)
+08-12 17:09:41.082 13823 13823 E AndroidRuntime:
+    at java.lang.Runtime.doLoad(Runtime.java:421)
+08-12 17:09:41.082 13823 13823 E AndroidRuntime:
+    at java.lang.Runtime.loadLibrary(Runtime.java:362)
+08-12 17:09:41.082 13823 13823 E AndroidRuntime:
+    at java.lang.System.loadLibrary(System.java:526)
+</pre>
+
+<p>ART also logs an error (visible in logcat) if <code>RegisterNatives</code> is
+called with no methods:</p>
+
+<pre class="no-pretty-print">
+W/art     ( 1234): JNI RegisterNativeMethods: attempt to register 0 native
+methods for &lt;classname>
+</pre>
+
+<p>In addition, the JNI functions <code>GetFieldID()</code> and
+<code>GetStaticFieldID()</code> now properly throw {@link java.lang.NoSuchFieldError}
+instead of simply returning null. Similarly, <code>GetMethodID()</code> and
+<code>GetStaticMethodID()</code> now properly throw {@link java.lang.NoSuchMethodError}.
+This can lead to CheckJNI failures because of the unhandled exceptions or the
+exceptions being thrown to Java callers of native code. This makes it
+particularly important to test ART-compatible apps with CheckJNI mode.</p>
+
+<p>ART expects users of the JNI <code>CallNonvirtual...Method()</code> methods
+(such as <code>CallNonvirtualVoidMethod()</code>) to use the method's declaring
+class, not a subclass, as required by the JNI specification.</p>
+
+<h2 id="Stack_Size">Preventing Stack Size Issues</h2>
+
+<p>Dalvik had separate stacks for native and Java code, with a default Java
+stack size of 32KB and a default native stack size of 1MB. ART has a unified
+stack for better locality. Ordinarily, the ART {@link java.lang.Thread} stack
+size should be approximately the same as for Dalvik. However, if you explicitly
+set stack sizes, you may need to revisit those values for apps running in
+ART.</p>
+
+<ul>
+
+  <li>In Java, review calls to the {@link
+  java.lang.Thread#Thread(java.lang.ThreadGroup, java.lang.Runnable,
+  java.lang.String, long) Thread} constructor that specify an explicit stack
+  size. For example, you will need to increase the size if {@link
+  java.lang.StackOverflowError} occurs.</li>
+
+  <li>In C/C++, review use of <code>pthread_attr_setstack()</code> and
+  <code>pthread_attr_setstacksize()</code> for threads that also run Java code via
+  JNI. Here is an example of the error logged when an app attempts to call JNI
+  <code>AttachCurrentThread()</code> when the pthread size is too small:
+
+<pre class="no-pretty-print">F/art: art/runtime/thread.cc:435]
+    Attempt to attach a thread with a too-small stack (16384 bytes)</pre>
+  </li>
+
+</ul>
+
+<h2 id="Object_Model_Changes">Object model changes</h2>
+
+<p>Dalvik incorrectly allowed subclasses to override package-private methods.
+ART issues a warning in such cases:</p>
+
+<pre class="no-pretty-print">
+Before Android 4.1, method void com.foo.Bar.quux()
+would have incorrectly overridden the package-private method in
+com.quux.Quux
+</pre>
+
+<p>If you intend to override a class's method in a different package, declare the
+method as <code>public</code> or <code>protected</code>.</p>
+
+<p>{@link java.lang.Object} now has private fields. Apps that reflect on fields
+in their class hierarchies should be careful not to attempt to look at the
+fields of {@link java.lang.Object}. For example, if you are iterating up a class
+hierarchy as part of a serialization framework, stop when
+
+<pre>Class.getSuperclass() == java.lang.Object.class</pre>
+
+instead of continuing until the method returns <code>null</code>.</p>
+
+<p>Proxy {@link
+java.lang.reflect.InvocationHandler#invoke(java.lang.Object,java.lang.reflect.Method,java.lang.Object[])
+InvocationHandler.invoke()} now receives <code>null</code> if there are no
+arguments instead of an empty array. This behavior was documented previously but
+not correctly handled in Dalvik. Previous versions of <a
+href="https://code.google.com/p/mockito/">Mockito</a> have difficulties with
+this, so use an updated Mockito version when testing with ART.</p>
+
+<h2 id="AOT_Fails">Fixing AOT Compilation Issues</h2>
+
+<p>ART's Ahead-Of-Time (AOT) Java compilation should work for all standard Java
+code. Compilation is performed by ART's
+<code>dex2oat</code> tool; if you encounter any issues related to
+<code>dex2oat</code> at install time, let us know (see <a
+href="#Reporting_Problems">Reporting Problems</a>) so we can fix them as quickly
+as possible. A couple of issues to note:</p>
+
+<ul>
+
+  <li>ART does tighter bytecode verification at install time than Dalvik does.
+  Code produced by the Android build tools should be fine. However, some
+  post-processing tools (especially tools that perform obfuscation) may produce
+  invalid files that are tolerated by Dalvik but rejected by ART. We have been
+  working with tool vendors to find and fix such issues. In many cases, getting
+  the latest versions of your tools and regenerating the DEX files can fix these
+  problems.</li>
+
+  <li>Some typical problems that are flagged by the ART verifier include:
+    <ul>
+      <li>invalid control flow</li>
+      <li>unbalanced <code>moniterenter</code>/<code>moniterexit</code></li>
+      <li>0-length parameter type list size</li>
+    </ul>
+  </li>
+
+  <li>Some apps have dependencies on the installed <code>.odex</code> file
+  format in <code>/system/framework</code>, <code>/data/dalvik-cache</code>, or
+  in {@link dalvik.system.DexClassLoader}’s optimized output directory. These
+  files are now ELF files and not an extended form of DEX files. While ART tries
+  to follow the same naming and locking rules as Dalvik, apps should not depend
+  on the file format; the format is subject to change without notice.</li>
+
+
+
+<h2 id="Reporting_Problems">Reporting Problems</h2>
+
+<p>If you run into any issues that aren’t due to app JNI issues, report
+them via the Android Open Source Project Issue Tracker at <a
+href="https://code.google.com/p/android/issues/list">https://code.google.com/p/android/issues/list</a>.
+Include an <code>"adb bugreport"</code> and a link to the app in the Google
+Play store if available. Otherwise, if possible, attach an APK that reproduces
+the issue. Note that issues (including attachments) are publicly
+visible.</p>

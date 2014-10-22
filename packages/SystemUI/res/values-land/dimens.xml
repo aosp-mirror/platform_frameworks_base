@@ -38,6 +38,10 @@
     <dimen name="status_bar_recents_app_icon_left_margin">8dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
 
-    <!-- The fixed height of each tile -->
-    <dimen name="quick_settings_cell_height">100dp</dimen>
+    <!-- The side padding for the task stack as a percentage of the width. -->
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.26</item>
+
+    <!-- Standard notification width + gravity -->
+    <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
+    <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
 </resources>

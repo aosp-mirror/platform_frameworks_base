@@ -18,7 +18,6 @@ package android.os;
 
 import android.util.Log;
 import android.util.Printer;
-import android.util.PrefixPrinter;
 
 /**
   * Class used to run a message loop for a thread.  Threads by default do
@@ -150,7 +149,7 @@ public final class Looper {
                         + msg.callback + " what=" + msg.what);
             }
 
-            msg.recycle();
+            msg.recycleUnchecked();
         }
     }
 

@@ -17,6 +17,7 @@
 package android.os;
 
 import android.util.Log;
+import android.util.Slog;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -30,15 +31,32 @@ import java.lang.reflect.Modifier;
  * Base class for a remotable object, the core part of a lightweight
  * remote procedure call mechanism defined by {@link IBinder}.
  * This class is an implementation of IBinder that provides
- * the standard support creating a local implementation of such an object.
- * 
+ * standard local implementation of such an object.
+ *
  * <p>Most developers will not implement this class directly, instead using the
  * <a href="{@docRoot}guide/components/aidl.html">aidl</a> tool to describe the desired
  * interface, having it generate the appropriate Binder subclass.  You can,
  * however, derive directly from Binder to implement your own custom RPC
  * protocol or simply instantiate a raw Binder object directly to use as a
  * token that can be shared across processes.
- * 
+ *
+ * <p>This class is just a basic IPC primitive; it has no impact on an application's
+ * lifecycle, and is valid only as long as the process that created it continues to run.
+ * To use this correctly, you must be doing so within the context of a top-level
+ * application component (a {@link android.app.Service}, {@link android.app.Activity},
+ * or {@link android.content.ContentProvider}) that lets the system know your process
+ * should remain running.</p>
+ *
+ * <p>You must keep in mind the situations in which your process
+ * could go away, and thus require that you later re-create a new Binder and re-attach
+ * it when the process starts again.  For example, if you are using this within an
+ * {@link android.app.Activity}, your activity's process may be killed any time the
+ * activity is not started; if the activity is later re-created you will need to
+ * create a new Binder and hand it back to the correct place again; you need to be
+ * aware that your process may be started for another reason (for example to receive
+ * a broadcast) that will not involve re-creating the activity and thus run its code
+ * to create a new Binder.</p>
+ *
  * @see IBinder
  */
 public class Binder implements IBinder {
@@ -48,7 +66,8 @@ public class Binder implements IBinder {
      * of classes can potentially create leaks.
      */
     private static final boolean FIND_POTENTIAL_LEAKS = false;
-    private static final String TAG = "Binder";
+    private static final boolean CHECK_PARCEL_SIZE = false;
+    static final String TAG = "Binder";
 
     /**
      * Control whether dump() calls are allowed.
@@ -385,7 +404,30 @@ public class Binder implements IBinder {
             super.finalize();
         }
     }
-    
+
+    static void checkParcel(IBinder obj, int code, Parcel parcel, String msg) {
+        if (CHECK_PARCEL_SIZE && parcel.dataSize() >= 800*1024) {
+            // Trying to send > 800k, this is way too much
+            StringBuilder sb = new StringBuilder();
+            sb.append(msg);
+            sb.append(": on ");
+            sb.append(obj);
+            sb.append(" calling ");
+            sb.append(code);
+            sb.append(" size ");
+            sb.append(parcel.dataSize());
+            sb.append(" (data: ");
+            parcel.setDataPosition(0);
+            sb.append(parcel.readInt());
+            sb.append(", ");
+            sb.append(parcel.readInt());
+            sb.append(", ");
+            sb.append(parcel.readInt());
+            sb.append(")");
+            Slog.wtfStack(TAG, sb.toString());
+        }
+    }
+
     private native final void init();
     private native final void destroy();
 
@@ -405,16 +447,18 @@ public class Binder implements IBinder {
         } catch (RemoteException e) {
             if ((flags & FLAG_ONEWAY) != 0) {
                 Log.w(TAG, "Binder call failed.", e);
+            } else {
+                reply.setDataPosition(0);
+                reply.writeException(e);
             }
-            reply.setDataPosition(0);
-            reply.writeException(e);
             res = true;
         } catch (RuntimeException e) {
             if ((flags & FLAG_ONEWAY) != 0) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+            } else {
+                reply.setDataPosition(0);
+                reply.writeException(e);
             }
-            reply.setDataPosition(0);
-            reply.writeException(e);
             res = true;
         } catch (OutOfMemoryError e) {
             // Unconditionally log this, since this is generally unrecoverable.
@@ -424,8 +468,17 @@ public class Binder implements IBinder {
             reply.writeException(re);
             res = true;
         }
+        checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
         reply.recycle();
         data.recycle();
+
+        // Just in case -- we are done with the IPC, so there should be no more strict
+        // mode violations that have gathered for this thread.  Either they have been
+        // parceled and are now in transport off to the caller, or we are returning back
+        // to the main transaction loop to wait for another incoming transaction.  Either
+        // way, strict mode begone!
+        StrictMode.clearGatheredViolations();
+
         return res;
     }
 }
@@ -433,13 +486,18 @@ public class Binder implements IBinder {
 final class BinderProxy implements IBinder {
     public native boolean pingBinder();
     public native boolean isBinderAlive();
-    
+
     public IInterface queryLocalInterface(String descriptor) {
         return null;
     }
-    
+
+    public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+        Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
+        return transactNative(code, data, reply, flags);
+    }
+
     public native String getInterfaceDescriptor() throws RemoteException;
-    public native boolean transact(int code, Parcel data, Parcel reply,
+    public native boolean transactNative(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException;
     public native void linkToDeath(DeathRecipient recipient, int flags)
             throws RemoteException;

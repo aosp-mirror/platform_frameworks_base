@@ -1,0 +1,361 @@
+page.title=Handling TV Hardware
+page.tags="unsupported"
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you how to</h2>
+  <ol>
+    <li><a href="#runtime-check">Check for a TV Device</a>
+    <li><a href="#handle-features">Handle Unsupported Hardware Features</a></li>
+    <li><a href="#controllers">Manage Hardware Controllers</a>
+    </li>
+  </ol>
+</div>
+</div>
+
+<p>
+  TV hardware is substantially different from other Android devices. TVs do not
+  include some of the hardware features found on other Android devices, such as touch screens,
+  cameras, and GPS receivers. TVs are also completely dependent on secondary hardware devices.
+  In order for users to interact with TV apps, they must use a remote control or game pad. When
+  you build an app for TV, you must carefully consider the hardware limitations and requirements of
+  operating on TV hardware.
+</p>
+
+<p>
+  This lesson discusses how to check if your app is running on a TV, how to handle unsupported
+  hardware features, and discusses the requirements for handling controllers for TV devices.
+</p>
+
+
+<h2 id="runtime-check">Check for a TV Device</h2>
+
+<p>
+  If you are building an app that operates both on TV devices and other devices, you may need to
+  check what kind of device your app is running on and adjust the operation of your app. For
+  instance, if you have an app that can be started through an {@link android.content.Intent}, your
+  application should check the device properties to determine if it should start a TV-oriented
+  activity or a phone activity.
+</p>
+
+<p>
+  The recommended way to determine if your app is running on a TV device is to use the {@link
+  android.app.UiModeManager#getCurrentModeType UiModeManager.getCurrentModeType()} method to check
+  if the device is running in television mode. The following example code shows you how to check if
+  your app is running on a TV device:
+</p>
+
+<pre>
+public static final String TAG = "DeviceTypeRuntimeCheck";
+
+UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+    Log.d(TAG, "Running on a TV Device")
+} else {
+    Log.d(TAG, "Running on a non-TV Device")
+}
+</pre>
+
+
+<h2 id="handle-features">Handle Unsupported Hardware Features</h2>
+
+<p>
+  Depending on the design and functionality of your app, you may be able to work around certain
+  hardware features being unavailable. This section discusses what hardware features are typically
+  not available for TV, how to detect missing hardware features, and suggests alternatives to
+  using these features.
+</p>
+
+
+<h3 id="unsupported-features">Unsupported TV hardware features</h3>
+
+<p>
+  TVs have a different purpose from other devices, and so they do not have hardware features that
+  other Android-powered devices often have. For this reason, the Android system does not support
+  the following features for a TV device:
+</p>
+
+<table>
+  <tr>
+    <th>Hardware</th>
+    <th>Android feature descriptor</th>
+  </tr>
+  <tr>
+    <td>Touchscreen</td>
+    <td>android.hardware.touchscreen</td>
+  </tr>
+  <tr>
+    <td>Telephony</td>
+    <td>android.hardware.telephony</td>
+  </tr>
+  <tr>
+    <td>Camera</td>
+    <td>android.hardware.camera</td>
+  </tr>
+  <tr>
+    <td>Near Field Communications (NFC)</td>
+    <td>android.hardware.nfc</td>
+  </tr>
+  <tr>
+    <td>GPS</td>
+    <td>android.hardware.location.gps</td>
+  </tr>
+  <tr>
+    <td>Microphone</td>
+    <td>android.hardware.microphone</td>
+  </tr>
+</table>
+
+
+<h3 id="declare-hardware-requirements">Declaring hardware requirements for TV</h3>
+
+<p>
+  Android apps can declare hardware feature requirements in the app manifest to ensure that they do
+  not get installed on devices that do not provide those features. If you are extending an existing
+  app for use on TV, closely review your app's manifest for any hardware requirement
+  declarations that might prevent it from being installed on a TV device.
+</p>
+
+<p>
+  If your app uses hardware features (such as a touchscreen or camera) that are not available on
+  TV, but can operate without the use of those features, modify your app's manifest to
+  indicate that these features are not required by your app. The following manifest code snippet
+  demonstrates how to declare that your app does not require hardware features which are unavailable
+  on TV devices, even though your app may use these features on non-TV devices:
+</p>
+
+<pre>
+&lt;uses-feature android:name="android.hardware.touchscreen"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.telephony"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.camera"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.nfc"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.gps"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.microphone"
+        android:required="false"/&gt;
+</pre>
+
+<p class="caution">
+  <strong>Caution:</strong> Declaring an unavailable hardware feature as required by setting its
+  value to {@code true} in your app manifest prevents your app from being installed on TV
+  devices or appearing in the Android TV home screen launcher.
+</p>
+
+<p class="caution">
+  <strong>Caution:</strong> Some <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code uses-permission}</a> manifest declarations <em>imply hardware use</em>, which can also
+  prevent your app from being installed and used on TV devices. For example, requesting the
+  {@link android.Manifest.permission#RECORD_AUDIO} permission in your app implies the
+  {@code android.hardware.microphone} hardware feature requirement. In which case, you must declare
+  the microphone feature as not required ({@code android:required="false"}) in your app manifest.
+  For a list of permission requests that imply a hardware feature requirement, see <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features">
+  {@code uses-feature}</a> guide.
+</p>
+
+<p>
+  Once you decide to make hardware features optional for your app, you must check for the
+  availability of those features at runtime and then adjust your app's behavior. The next section
+  discusses how to check for hardware features and suggests some approaches for changing the
+  behavior of your app.
+</p>
+
+<p>
+  For more information on filtering and declaring features in the manifest, see the
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code uses-feature}</a>
+  guide.
+</p>
+
+
+<h3 id="check-features">Checking for hardware features</h2>
+
+<p>
+  The Android framework can tell you if hardware features are not available on the device where
+  your app is running. Use the {@link android.content.pm.PackageManager#hasSystemFeature(String)}
+  method to check for specific features at runtime. This method takes a single string argument that
+  specifies the feature you want to check.
+</p>
+
+<p>The following code example demonstrates how to detect the availability of hardware features
+  at runtime:</p>
+
+<pre>
+// Check if the telephony hardware feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.telephony")) {
+    Log.d("HardwareFeatureTest", "Device can make phone calls");
+}
+
+// Check if android.hardware.touchscreen feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.touchscreen")) {
+    Log.d("HardwareFeatureTest", "Device has a touch screen.");
+}
+</pre>
+
+
+<h4 id="no-touchscreen">Touch screen</h4>
+
+<p>
+  Since most TVs do not have touch screens, Android does not support touch screen interaction for
+  TV devices. Furthermore, using a touch screen is not consistent with a viewing environment where
+  the user is seated 10 feet away from the display.
+</p>
+
+<p>
+  On TV devices, you should design your app to work with this interaction model by supporting
+  navigation using a directional pad (D-pad) on a TV remote control. For more information on
+  properly supporting navigation using TV-friendly controls, see
+  <a href="{@docRoot}training/tv/start/navigation.html">Creating TV Navigation</a>.
+</p>
+
+
+<h4 id="no-camera">Camera</h4>
+
+<p>
+  Although a TV typically does not have a camera, you can still provide a photography-related
+  app on a TV. For example, if you have an app that takes, views, and edits photos, you can
+  disable its picture-taking functionality for TVs and still allow users to view and even edit
+  photos. If you decide to enable your camera-related app to work on a TV, add the
+  following feature declaration your app manifest:
+</p>
+
+<pre>
+&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;
+</pre>
+
+<p>
+  If you enable your app to run without a camera, add code to your app
+  that detects if the camera feature is available and makes adjustments to the operation of your
+  app. The following code example demonstrates how to detect the presence of a camera:
+</p>
+
+<pre>
+// Check if the camera hardware feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.camera")) {
+    Log.d("Camera test", "Camera available!");
+} else {
+    Log.d("Camera test", "No camera available. View and edit features only.");
+}
+</pre>
+
+
+<h4 id="no-gps">GPS</h4>
+
+<p>
+  TVs are stationary, indoor devices, and do not have built-in global positioning system (GPS)
+  receivers. If your app uses location information, you can still allow users to search for
+  a location, or use a static location provider such as a zip code configured during the TV device
+  setup.
+</p>
+
+<pre>
+// Request a static location from the location manager
+LocationManager locationManager = (LocationManager) this.getSystemService(
+        Context.LOCATION_SERVICE);
+Location location = locationManager.getLastKnownLocation("static");
+
+// Attempt to get postal or zip code from the static location object
+Geocoder geocoder = new Geocoder(this);
+Address address = null;
+try {
+  address = geocoder.getFromLocation(location.getLatitude(),
+          location.getLongitude(), 1).get(0);
+  Log.d("Zip code", address.getPostalCode());
+
+} catch (IOException e) {
+  Log.e(TAG, "Geocoder error", e);
+}
+</pre>
+
+
+<h2 id="controllers">Handling Controllers</h2>
+
+<p>
+  TV devices require a secondary hardware device for interacting with apps, in the form of a basic
+  remote controller or game controller. This means that your app must support D-pad input. It also
+  means that your app may need to handle controllers going offline and input from more than one
+  type of controller.
+</p>
+
+
+<h3 id="d-pad-minimum">D-pad minimum controls</h3>
+
+<p>
+  The default controller for a TV device is a D-pad. In general, your app should be operable from a
+  remote controller that only has up, down, left, right, select, Back, and Home buttons. If your app
+  is a game that typically requires a game controller with additional controls, your app should
+  attempt to allow gameplay with these D-pad controls. In this case, your app should also warn the
+  user that
+  a controller is required and allow them to exit your game gracefully using the D-pad controller.
+  For more information about handling navigation with D-pad controller for TV devices, see
+  <a href="{@docRoot}training/tv/start/navigation.html">Creating TV Navigation</a>.
+</p>
+
+
+<h3 id="controller-disconnects">Handle controller disconnects</h3>
+
+<p>
+  Controllers for TV are frequently Bluetooth devices which may attempt to save power by periodically
+  going into sleep mode and disconnecting from the TV device. This means that an app might be
+  interrupted or restarted if it is not configured to handle these reconnect events. These events
+  can happen in any of the following circumstances:
+</p>
+
+<ul>
+  <li>While watching a video which is several minutes long, a D-Pad or game controller goes into
+  sleep mode, disconnects from the TV device and then reconnects later on.
+  </li>
+  <li>During gameplay, a new player joins the game using a game controller that is not currently
+  connected.
+  </li>
+  <li>During gameplay, a player leaves the game and disconnects a game controller.
+  </li>
+</ul>
+
+<p>
+  Any TV app activity that is subject to disconnect and reconnect events must be configured to
+  handle reconnection events in the app manifest. The following code sample demonstrates how to
+  enable an activity to handle configuration changes, including a keyboard or navigation device
+  connecting, disconnecting, or reconnecting:
+</p>
+
+<pre>
+&lt;activity
+  android:name=&quot;com.example.android.TvActivity&quot;
+  android:label=&quot;&#64;string/app_name&quot;
+  <strong>android:configChanges="keyboard|keyboardHidden|navigation"</strong>
+  android:theme=&quot;&#64;style/Theme.Leanback&quot;&gt;
+
+  &lt;intent-filter&gt;
+    &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+    &lt;category android:name="android.intent.category.LEANBACK_LAUNCHER" /&gt;
+  &lt;/intent-filter&gt;
+  ...
+&lt;/activity&gt;
+</pre>
+
+<p>
+  This configuration change allows the app to continue running through a reconnection event, rather
+  than being restarted by the Android framework, which is not a good user experience.
+</p>
+
+
+<h3 id="d-pad-variants">Handle D-pad input variations</h3>
+
+<p>
+  TV device users may have more than one type of controller that they use with their TV. For
+  example, a user might have both a basic D-pad controller and a game controller. The key codes
+  provided by a game controller when it is being used for D-pad functions may vary from the key
+  codes sent by a physical D-pad.
+</p>
+
+<p>
+  Your app should handle the variations of D-pad input from a game controller, so the user does not
+  have to physically switch controllers to operate your app. For more information on handling these
+  input variations, see <a href="{@docRoot}training/game-controllers/controller-input.html#dpad">
+  Handling Controller Actions</a>.
+</p>

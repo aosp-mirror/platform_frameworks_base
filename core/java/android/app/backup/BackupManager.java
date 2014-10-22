@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.SystemApi;
 import android.app.backup.RestoreSession;
 import android.app.backup.IBackupManager;
 import android.app.backup.IRestoreSession;
@@ -114,7 +115,7 @@ public class BackupManager {
             try {
                 sService.dataChanged(packageName);
             } catch (RemoteException e) {
-                Log.d(TAG, "dataChanged(pkg) couldn't connect");
+                Log.e(TAG, "dataChanged(pkg) couldn't connect");
             }
         }
     }
@@ -150,7 +151,7 @@ public class BackupManager {
                     result = session.restorePackage(mContext.getPackageName(), observer);
                 }
             } catch (RemoteException e) {
-                Log.w(TAG, "restoreSelf() unable to contact service");
+                Log.e(TAG, "restoreSelf() unable to contact service");
             } finally {
                 if (session != null) {
                     session.endRestoreSession();
@@ -160,11 +161,14 @@ public class BackupManager {
         return result;
     }
 
+    // system APIs start here
+
     /**
      * Begin the process of restoring data from backup.  See the
      * {@link android.app.backup.RestoreSession} class for documentation on that process.
      * @hide
      */
+    @SystemApi
     public RestoreSession beginRestoreSession() {
         RestoreSession session = null;
         checkServiceBinder();
@@ -176,9 +180,163 @@ public class BackupManager {
                     session = new RestoreSession(mContext, binder);
                 }
             } catch (RemoteException e) {
-                Log.w(TAG, "beginRestoreSession() couldn't connect");
+                Log.e(TAG, "beginRestoreSession() couldn't connect");
             }
         }
         return session;
+    }
+
+    /**
+     * Enable/disable the backup service entirely.  When disabled, no backup
+     * or restore operations will take place.  Data-changed notifications will
+     * still be observed and collected, however, so that changes made while the
+     * mechanism was disabled will still be backed up properly if it is enabled
+     * at some point in the future.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setBackupEnabled(boolean isEnabled) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.setBackupEnabled(isEnabled);
+            } catch (RemoteException e) {
+                Log.e(TAG, "setBackupEnabled() couldn't connect");
+            }
+        }
+    }
+
+    /**
+     * Report whether the backup mechanism is currently enabled.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isBackupEnabled() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.isBackupEnabled();
+            } catch (RemoteException e) {
+                Log.e(TAG, "isBackupEnabled() couldn't connect");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Enable/disable data restore at application install time.  When enabled, app
+     * installation will include an attempt to fetch the app's historical data from
+     * the archival restore dataset (if any).  When disabled, no such attempt will
+     * be made.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setAutoRestore(boolean isEnabled) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.setAutoRestore(isEnabled);
+            } catch (RemoteException e) {
+                Log.e(TAG, "setAutoRestore() couldn't connect");
+            }
+        }
+    }
+
+    /**
+     * Identify the currently selected transport.  Callers must hold the
+     * android.permission.BACKUP permission to use this method.
+     * @return The name of the currently active backup transport.  In case of
+     *   failure or if no transport is currently active, this method returns {@code null}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public String getCurrentTransport() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.getCurrentTransport();
+            } catch (RemoteException e) {
+                Log.e(TAG, "getCurrentTransport() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Request a list of all available backup transports' names.  Callers must
+     * hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public String[] listAllTransports() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.listAllTransports();
+            } catch (RemoteException e) {
+                Log.e(TAG, "listAllTransports() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Specify the current backup transport.  Callers must hold the
+     * android.permission.BACKUP permission to use this method.
+     *
+     * @param transport The name of the transport to select.  This should be one
+     *   of the names returned by {@link #listAllTransports()}.
+     * @return The name of the previously selected transport.  If the given transport
+     *   name is not one of the currently available transports, no change is made to
+     *   the current transport setting and the method returns null.
+     *
+     * @hide
+     */
+    @SystemApi
+    public String selectBackupTransport(String transport) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.selectBackupTransport(transport);
+            } catch (RemoteException e) {
+                Log.e(TAG, "selectBackupTransport() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Schedule an immediate backup attempt for all pending key/value updates.  This
+     * is primarily intended for transports to use when they detect a suitable
+     * opportunity for doing a backup pass.  If there are no pending updates to
+     * be sent, no action will be taken.  Even if some updates are pending, the
+     * transport will still be asked to confirm via the usual requestBackupTime()
+     * method.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void backupNow() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.backupNow();
+            } catch (RemoteException e) {
+                Log.e(TAG, "backupNow() couldn't connect");
+            }
+        }
     }
 }

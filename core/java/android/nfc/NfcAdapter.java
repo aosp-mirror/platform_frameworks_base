@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.OnActivityPausedListener;
@@ -260,6 +261,7 @@ public final class NfcAdapter {
     public static final String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
 
     /** @hide */
+    @SystemApi
     public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 0x1;
 
     /** @hide */
@@ -309,6 +311,8 @@ public final class NfcAdapter {
 
     final NfcActivityManager mNfcActivityManager;
     final Context mContext;
+    final HashMap<NfcUnlockHandler, INfcUnlockHandler> mNfcUnlockHandlers;
+    final Object mLock;
 
     /**
      * A callback to be invoked when the system finds a tag while the foreground activity is
@@ -379,6 +383,22 @@ public final class NfcAdapter {
     public interface CreateBeamUrisCallback {
         public Uri[] createBeamUris(NfcEvent event);
     }
+
+    /**
+     * A callback to be invoked when an application has registered as a
+     * handler to unlock the device given an NFC tag at the lockscreen.
+     * @hide
+     */
+    @SystemApi
+    public interface NfcUnlockHandler {
+        /**
+         * Called at the lock screen to attempt to unlock the device with the given tag.
+         * @param tag the detected tag, to be used to unlock the device
+         * @return true if the device was successfully unlocked
+         */
+        public boolean onUnlockAttempted(Tag tag);
+    }
+
 
     /**
      * Helper to check if this device has FEATURE_NFC, but without using
@@ -512,6 +532,8 @@ public final class NfcAdapter {
     NfcAdapter(Context context) {
         mContext = context;
         mNfcActivityManager = new NfcActivityManager(this);
+        mNfcUnlockHandlers = new HashMap<NfcUnlockHandler, INfcUnlockHandler>();
+        mLock = new Object();
     }
 
     /**
@@ -641,6 +663,7 @@ public final class NfcAdapter {
      *
      * @hide
      */
+    @SystemApi
     public boolean enable() {
         try {
             return sService.enable();
@@ -668,13 +691,54 @@ public final class NfcAdapter {
      *
      * @hide
      */
-
+    @SystemApi
     public boolean disable() {
         try {
             return sService.disable(true);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
+        }
+    }
+
+    /**
+     * Disable NFC hardware.
+     * @hide
+    */
+    @SystemApi
+    public boolean disable(boolean persist) {
+        try {
+            return sService.disable(persist);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * Pauses polling for a {@code timeoutInMs} millis. If polling must be resumed before timeout,
+     * use {@link #resumePolling()}.
+     * @hide
+     */
+    public void pausePolling(int timeoutInMs) {
+        try {
+            sService.pausePolling(timeoutInMs);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Resumes default polling for the current device state if polling is paused. Calling
+     * this while polling is not paused is a no-op.
+     *
+     * @hide
+     */
+    public void resumePolling() {
+        try {
+            sService.resumePolling();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
         }
     }
 
@@ -921,6 +985,7 @@ public final class NfcAdapter {
     /**
      * @hide
      */
+    @SystemApi
     public void setNdefPushMessage(NdefMessage message, Activity activity, int flags) {
         if (activity == null) {
             throw new NullPointerException("activity cannot be null");
@@ -1225,6 +1290,60 @@ public final class NfcAdapter {
     }
 
     /**
+     * Manually invoke Android Beam to share data.
+     *
+     * <p>The Android Beam animation is normally only shown when two NFC-capable
+     * devices come into range.
+     * By calling this method, an Activity can invoke the Beam animation directly
+     * even if no other NFC device is in range yet. The Beam animation will then
+     * prompt the user to tap another NFC-capable device to complete the data
+     * transfer.
+     *
+     * <p>The main advantage of using this method is that it avoids the need for the
+     * user to tap the screen to complete the transfer, as this method already
+     * establishes the direction of the transfer and the consent of the user to
+     * share data. Callers are responsible for making sure that the user has
+     * consented to sharing data on NFC tap.
+     *
+     * <p>Note that to use this method, the passed in Activity must have already
+     * set data to share over Beam by using method calls such as
+     * {@link #setNdefPushMessageCallback} or
+     * {@link #setBeamPushUrisCallback}.
+     *
+     * @param activity the current foreground Activity that has registered data to share
+     * @return whether the Beam animation was successfully invoked
+     */
+    public boolean invokeBeam(Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity may not be null.");
+        }
+        enforceResumed(activity);
+        try {
+            sService.invokeBeam();
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "invokeBeam: NFC process has died.");
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean invokeBeam(BeamShareData shareData) {
+        try {
+            Log.e(TAG, "invokeBeamInternal()");
+            sService.invokeBeamInternal(shareData);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "invokeBeam: NFC process has died.");
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
      * Enable NDEF message push over NFC while this Activity is in the foreground.
      *
      * <p>You must explicitly call this method every time the activity is
@@ -1294,6 +1413,7 @@ public final class NfcAdapter {
      * <p>This API is for the Settings application.
      * @hide
      */
+    @SystemApi
     public boolean enableNdefPush() {
         try {
             return sService.enableNdefPush();
@@ -1308,6 +1428,7 @@ public final class NfcAdapter {
      * <p>This API is for the Settings application.
      * @hide
      */
+    @SystemApi
     public boolean disableNdefPush() {
         try {
             return sService.disableNdefPush();
@@ -1375,6 +1496,81 @@ public final class NfcAdapter {
             sService.setP2pModes(initiatorModes, targetModes);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Registers a new NFC unlock handler with the NFC service.
+     *
+     * <p />NFC unlock handlers are intended to unlock the keyguard in the presence of a trusted
+     * NFC device. The handler should return true if it successfully authenticates the user and
+     * unlocks the keyguard.
+     *
+     * <p /> The parameter {@code tagTechnologies} determines which Tag technologies will be polled for
+     * at the lockscreen. Polling for less tag technologies reduces latency, and so it is
+     * strongly recommended to only provide the Tag technologies that the handler is expected to
+     * receive. There must be at least one tag technology provided, otherwise the unlock handler
+     * is ignored.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean addNfcUnlockHandler(final NfcUnlockHandler unlockHandler,
+                                       String[] tagTechnologies) {
+        // If there are no tag technologies, don't bother adding unlock handler
+        if (tagTechnologies.length == 0) {
+            return false;
+        }
+
+        try {
+            synchronized (mLock) {
+                if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
+                    // update the tag technologies
+                    sService.removeNfcUnlockHandler(mNfcUnlockHandlers.get(unlockHandler));
+                    mNfcUnlockHandlers.remove(unlockHandler);
+                }
+
+                INfcUnlockHandler.Stub iHandler = new INfcUnlockHandler.Stub() {
+                    @Override
+                    public boolean onUnlockAttempted(Tag tag) throws RemoteException {
+                        return unlockHandler.onUnlockAttempted(tag);
+                    }
+                };
+
+                sService.addNfcUnlockHandler(iHandler,
+                        Tag.getTechCodesFromStrings(tagTechnologies));
+                mNfcUnlockHandlers.put(unlockHandler, iHandler);
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register LockscreenDispatch", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes a previously registered unlock handler. Also removes the tag technologies
+     * associated with the removed unlock handler.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean removeNfcUnlockHandler(NfcUnlockHandler unlockHandler) {
+        try {
+            synchronized (mLock) {
+                if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
+                    sService.removeNfcUnlockHandler(mNfcUnlockHandlers.remove(unlockHandler));
+                }
+
+                return true;
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
         }
     }
 

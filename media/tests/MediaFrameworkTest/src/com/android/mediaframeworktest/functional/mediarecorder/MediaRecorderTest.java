@@ -22,6 +22,10 @@ import com.android.mediaframeworktest.MediaNames;
 import java.io.*;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -30,6 +34,7 @@ import android.media.EncoderCapabilities.VideoEncoderCap;
 import android.media.EncoderCapabilities.AudioEncoderCap;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import com.android.mediaframeworktest.MediaProfileReader;
@@ -41,27 +46,28 @@ import java.util.List;
 
 
 /**
- * Junit / Instrumentation test case for the media recorder api 
- */  
+ * Junit / Instrumentation test case for the media recorder api
+ */
 public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaRecorderTest";
     private int mOutputDuration =0;
     private int mOutputVideoWidth = 0;
     private int mOutputVideoHeight= 0 ;
-    
+
     private SurfaceHolder mSurfaceHolder = null;
     private MediaRecorder mRecorder;
 
     private int MIN_VIDEO_FPS = 5;
+    private int HIGH_SPEED_FPS = 120;
 
     private static final int CAMERA_ID = 0;
 
     Context mContext;
     Camera mCamera;
-  
+
     public MediaRecorderTest() {
-        super("com.android.mediaframeworktest", MediaFrameworkTest.class);
-       
+        super(MediaFrameworkTest.class);
+
     }
 
     protected void setUp() throws Exception {
@@ -69,8 +75,8 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         mRecorder = new MediaRecorder();
         super.setUp();
     }
- 
-    private void recordVideo(int frameRate, int width, int height, 
+
+    private void recordVideo(int frameRate, int width, int height,
             int videoFormat, int outFormat, String outFile, boolean videoOnly) {
         Log.v(TAG,"startPreviewAndPrepareRecording");
         try {
@@ -80,7 +86,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             }
             mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
             mRecorder.setOutputFormat(outFormat);
-            Log.v(TAG, "output format " + outFormat);          
+            Log.v(TAG, "output format " + outFormat);
             mRecorder.setOutputFile(outFile);
             mRecorder.setVideoFrameRate(frameRate);
             mRecorder.setVideoSize(width, height);
@@ -105,7 +111,186 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             mRecorder.release();
         }
     }
-    
+
+    private boolean validateGetSurface(boolean useSurface) {
+        Log.v(TAG,"validateGetSurface, useSurface=" + useSurface);
+        MediaRecorder recorder = new MediaRecorder();
+        Surface surface;
+        boolean success = true;
+        try {
+            /* initialization */
+            if (!useSurface) {
+                mCamera = Camera.open(CAMERA_ID);
+                Camera.Parameters parameters = mCamera.getParameters();
+                parameters.setPreviewSize(352, 288);
+                parameters.set("orientation", "portrait");
+                mCamera.setParameters(parameters);
+                mCamera.unlock();
+                recorder.setCamera(mCamera);
+                mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+                recorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+            }
+
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            int videoSource = useSurface ?
+                    MediaRecorder.VideoSource.SURFACE :
+                    MediaRecorder.VideoSource.CAMERA;
+            recorder.setVideoSource(videoSource);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setOutputFile(MediaNames.RECORDED_SURFACE_3GP);
+            recorder.setVideoFrameRate(30);
+            recorder.setVideoSize(352, 288);
+            recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+            /* Test: getSurface() before prepare()
+             * should throw IllegalStateException
+             */
+            try {
+                surface = recorder.getSurface();
+                throw new Exception("getSurface failed to throw IllegalStateException");
+            } catch (IllegalStateException e) {
+                // OK
+            }
+
+            recorder.prepare();
+
+            /* Test: getSurface() after prepare()
+             * should succeed for surface source
+             * should fail for camera source
+             */
+            try {
+                surface = recorder.getSurface();
+                if (!useSurface) {
+                    throw new Exception("getSurface failed to throw IllegalStateException");
+                }
+            } catch (IllegalStateException e) {
+                if (useSurface) {
+                    throw new Exception("getSurface failed to throw IllegalStateException");
+                }
+            }
+
+            recorder.start();
+
+            /* Test: getSurface() after start()
+             * should succeed for surface source
+             * should fail for camera source
+             */
+            try {
+                surface = recorder.getSurface();
+                if (!useSurface) {
+                    throw new Exception("getSurface failed to throw IllegalStateException");
+                }
+            } catch (IllegalStateException e) {
+                if (useSurface) {
+                    throw new Exception("getSurface failed to throw IllegalStateException");
+                }
+            }
+
+            try {
+                recorder.stop();
+            } catch (Exception e) {
+                // stop() could fail if the recording is empty, as we didn't render anything.
+                // ignore any failure in stop, we just want it stopped.
+            }
+
+            /* Test: getSurface() after stop()
+             * should throw IllegalStateException
+             */
+            try {
+                surface = recorder.getSurface();
+                throw new Exception("getSurface failed to throw IllegalStateException");
+            } catch (IllegalStateException e) {
+                // OK
+            }
+        } catch (Exception e) {
+            // fail
+            success = false;
+        }
+
+        try {
+            if (mCamera != null) {
+                mCamera.lock();
+                mCamera.release();
+                mCamera = null;
+            }
+            recorder.release();
+        } catch (Exception e) {
+            success = false;
+        }
+
+        return success;
+    }
+
+    private boolean recordVideoFromSurface(
+            int frameRate, int captureRate, int width, int height,
+            int videoFormat, int outFormat, String outFile, boolean videoOnly) {
+        Log.v(TAG,"recordVideoFromSurface");
+        MediaRecorder recorder = new MediaRecorder();
+        int sleepTime = 33; // normal capture at 33ms / frame
+        try {
+            if (!videoOnly) {
+                recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            }
+            recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+            recorder.setOutputFormat(outFormat);
+            recorder.setOutputFile(outFile);
+            recorder.setVideoFrameRate(frameRate);
+            if (captureRate > 0) {
+                recorder.setCaptureRate(captureRate);
+                sleepTime = 1000 / captureRate;
+            }
+            recorder.setVideoSize(width, height);
+            recorder.setVideoEncoder(videoFormat);
+            if (!videoOnly) {
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            }
+            recorder.prepare();
+            Surface surface = recorder.getSurface();
+
+            Paint paint = new Paint();
+            paint.setTextSize(16);
+            paint.setColor(Color.RED);
+            int i;
+
+            /* Test: draw 10 frames at 30fps before start
+             * these should be dropped and not causing malformed stream.
+             */
+            for(i = 0; i < 10; i++) {
+                Canvas canvas = surface.lockCanvas(null);
+                int background = (i * 255 / 99);
+                canvas.drawARGB(255, background, background, background);
+                String text = "Frame #" + i;
+                canvas.drawText(text, 100, 100, paint);
+                surface.unlockCanvasAndPost(canvas);
+                Thread.sleep(sleepTime);
+            }
+
+            Log.v(TAG, "start");
+            recorder.start();
+
+            /* Test: draw another 90 frames at 30fps after start */
+            for(i = 10; i < 100; i++) {
+                Canvas canvas = surface.lockCanvas(null);
+                int background = (i * 255 / 99);
+                canvas.drawARGB(255, background, background, background);
+                String text = "Frame #" + i;
+                canvas.drawText(text, 100, 100, paint);
+                surface.unlockCanvasAndPost(canvas);
+                Thread.sleep(sleepTime);
+            }
+
+            Log.v(TAG, "stop");
+            recorder.stop();
+            recorder.release();
+        } catch (Exception e) {
+            Log.v("record video failed ", e.toString());
+            recorder.release();
+            return false;
+        }
+        return true;
+    }
+
     private boolean recordVideoWithPara(VideoEncoderCap videoCap, AudioEncoderCap audioCap, boolean highQuality){
         boolean recordSuccess = false;
         int videoEncoder = videoCap.mCodec;
@@ -171,7 +356,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         return recordSuccess;
     }
 
-    private boolean invalidRecordSetting(int frameRate, int width, int height, 
+    private boolean invalidRecordSetting(int frameRate, int width, int height,
             int videoFormat, int outFormat, String outFile, boolean videoOnly) {
         try {
             if (!videoOnly) {
@@ -180,7 +365,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             }
             mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
             mRecorder.setOutputFormat(outFormat);
-            Log.v(TAG, "output format " + outFormat);          
+            Log.v(TAG, "output format " + outFormat);
             mRecorder.setOutputFile(outFile);
             mRecorder.setVideoFrameRate(frameRate);
             mRecorder.setVideoSize(width, height);
@@ -208,7 +393,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         }
         return false;
     }
-    
+
     private void getOutputVideoProperty(String outputFilePath) {
         MediaPlayer mediaPlayer = new MediaPlayer();
         try {
@@ -223,13 +408,13 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             Thread.sleep(1000);
             mOutputVideoHeight = mediaPlayer.getVideoHeight();
             mOutputVideoWidth = mediaPlayer.getVideoWidth();
-            mediaPlayer.release();    
+            mediaPlayer.release();
         } catch (Exception e) {
             Log.v(TAG, e.toString());
             mediaPlayer.release();
-        }       
+        }
     }
-    
+
     private boolean validateVideo(String filePath, int width, int height) {
         boolean validVideo = false;
         getOutputVideoProperty(filePath);
@@ -260,7 +445,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             int codec = MediaRecorder.VideoEncoder.H263;
             int frameRate = MediaProfileReader.getMaxFrameRateForCodec(codec);
             recordVideo(frameRate, 352, 288, codec,
-                    MediaRecorder.OutputFormat.THREE_GPP, 
+                    MediaRecorder.OutputFormat.THREE_GPP,
                     MediaNames.RECORDED_PORTRAIT_H263, true);
             mCamera.lock();
             mCamera.release();
@@ -271,15 +456,15 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         }
         assertTrue("PortraitH263", videoRecordedResult);
     }
-    
+
     @LargeTest
-    public void testInvalidVideoPath() throws Exception {       
+    public void testInvalidVideoPath() throws Exception {
         boolean isTestInvalidVideoPathSuccessful = false;
-        isTestInvalidVideoPathSuccessful = invalidRecordSetting(15, 176, 144, MediaRecorder.VideoEncoder.H263, 
-               MediaRecorder.OutputFormat.THREE_GPP, MediaNames.INVALD_VIDEO_PATH, false);      
+        isTestInvalidVideoPathSuccessful = invalidRecordSetting(15, 176, 144, MediaRecorder.VideoEncoder.H263,
+               MediaRecorder.OutputFormat.THREE_GPP, MediaNames.INVALD_VIDEO_PATH, false);
         assertTrue("Invalid outputFile Path", isTestInvalidVideoPathSuccessful);
     }
-    
+
     @LargeTest
     //test cases for the new codec
     public void testDeviceSpecificCodec() throws Exception {
@@ -309,4 +494,83 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             assertTrue("testDeviceSpecificCodec", false);
         }
     }
+
+    // Test MediaRecorder.getSurface() api with surface or camera source
+    public void testGetSurfaceApi() {
+        boolean success = false;
+        int noOfFailure = 0;
+        try {
+            for (int k = 0; k < 2; k++) {
+                success = validateGetSurface(
+                        k == 0 ? true : false /* useSurface */);
+                if (!success) {
+                    noOfFailure++;
+                }
+            }
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
+        assertTrue("testGetSurfaceApi", noOfFailure == 0);
+    }
+
+    // Test recording from surface source with/without audio
+    public void testSurfaceRecording() {
+        boolean success = false;
+        int noOfFailure = 0;
+        try {
+            int codec = MediaRecorder.VideoEncoder.H264;
+            int frameRate = MediaProfileReader.getMaxFrameRateForCodec(codec);
+            for (int k = 0; k < 2; k++) {
+                String filename = "/sdcard/surface_" +
+                            (k==0?"video_only":"with_audio") + ".3gp";
+
+                success = recordVideoFromSurface(frameRate, 0, 352, 288, codec,
+                        MediaRecorder.OutputFormat.THREE_GPP, filename,
+                        k == 0 ? true : false /* videoOnly */);
+                if (success) {
+                    success = validateVideo(filename, 352, 288);
+                }
+                if (!success) {
+                    noOfFailure++;
+                }
+            }
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
+        assertTrue("testSurfaceRecording", noOfFailure == 0);
+    }
+
+    // Test recording from surface source with/without audio
+    public void testSurfaceRecordingTimeLapse() {
+        boolean success = false;
+        int noOfFailure = 0;
+        try {
+            int codec = MediaRecorder.VideoEncoder.H264;
+            int frameRate = MediaProfileReader.getMaxFrameRateForCodec(codec);
+            for (int k = 0; k < 2; k++) {
+                // k==0: time lapse test, set capture rate to MIN_VIDEO_FPS
+                // k==1: slow motion test, set capture rate to HIGH_SPEED_FPS
+                String filename = "/sdcard/surface_" +
+                            (k==0 ? "time_lapse" : "slow_motion") + ".3gp";
+
+                // always set videoOnly=false, MediaRecorder should disable
+                // audio automatically with time lapse/slow motion
+                success = recordVideoFromSurface(frameRate,
+                        k==0 ? MIN_VIDEO_FPS : HIGH_SPEED_FPS,
+                        352, 288, codec,
+                        MediaRecorder.OutputFormat.THREE_GPP,
+                        filename, false /* videoOnly */);
+                if (success) {
+                    success = validateVideo(filename, 352, 288);
+                }
+                if (!success) {
+                    noOfFailure++;
+                }
+            }
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
+        assertTrue("testSurfaceRecordingTimeLapse", noOfFailure == 0);
+    }
+
 }

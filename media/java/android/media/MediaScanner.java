@@ -57,6 +57,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -1413,27 +1414,60 @@ public class MediaScanner
         return false;
     }
 
-    public static boolean isNoMediaPath(String path) {
-        if (path == null) return false;
+    private static HashMap<String,String> mNoMediaPaths = new HashMap<String,String>();
+    private static HashMap<String,String> mMediaPaths = new HashMap<String,String>();
 
-        // return true if file or any parent directory has name starting with a dot
-        if (path.indexOf("/.") >= 0) return true;
-
-        // now check to see if any parent directories have a ".nomedia" file
-        // start from 1 so we don't bother checking in the root directory
-        int offset = 1;
-        while (offset >= 0) {
-            int slashIndex = path.indexOf('/', offset);
-            if (slashIndex > offset) {
-                slashIndex++; // move past slash
-                File file = new File(path.substring(0, slashIndex) + ".nomedia");
-                if (file.exists()) {
-                    // we have a .nomedia in one of the parent directories
-                    return true;
-                }
+    /* MediaProvider calls this when a .nomedia file is added or removed */
+    public static void clearMediaPathCache(boolean clearMediaPaths, boolean clearNoMediaPaths) {
+        synchronized (MediaScanner.class) {
+            if (clearMediaPaths) {
+                mMediaPaths.clear();
             }
-            offset = slashIndex;
+            if (clearNoMediaPaths) {
+                mNoMediaPaths.clear();
+            }
         }
+    }
+
+    public static boolean isNoMediaPath(String path) {
+        if (path == null) {
+            return false;
+        }
+        // return true if file or any parent directory has name starting with a dot
+        if (path.indexOf("/.") >= 0) {
+            return true;
+        }
+
+        int firstSlash = path.lastIndexOf('/');
+        if (firstSlash <= 0) {
+            return false;
+        }
+        String parent = path.substring(0,  firstSlash);
+
+        synchronized (MediaScanner.class) {
+            if (mNoMediaPaths.containsKey(parent)) {
+                return true;
+            } else if (!mMediaPaths.containsKey(parent)) {
+                // check to see if any parent directories have a ".nomedia" file
+                // start from 1 so we don't bother checking in the root directory
+                int offset = 1;
+                while (offset >= 0) {
+                    int slashIndex = path.indexOf('/', offset);
+                    if (slashIndex > offset) {
+                        slashIndex++; // move past slash
+                        File file = new File(path.substring(0, slashIndex) + ".nomedia");
+                        if (file.exists()) {
+                            // we have a .nomedia in one of the parent directories
+                            mNoMediaPaths.put(parent, "");
+                            return true;
+                        }
+                    }
+                    offset = slashIndex;
+                }
+                mMediaPaths.put(parent, "");
+            }
+        }
+
         return isNoMediaFile(path);
     }
 

@@ -16,20 +16,112 @@
 
 package android.graphics;
 
+/**
+ * A color filter that can be used to tint the source pixels using a single
+ * color and a specific {@link PorterDuff Porter-Duff composite mode}.
+ */
 public class PorterDuffColorFilter extends ColorFilter {
+    private int mColor;
+    private PorterDuff.Mode mMode;
+
     /**
-     * Create a colorfilter that uses the specified color and porter-duff mode.
+     * Create a color filter that uses the specified color and Porter-Duff mode.
      *
-     * @param srcColor       The source color used with the specified
-     *                       porter-duff mode
-     * @param mode           The porter-duff mode that is applied
+     * @param color The ARGB source color used with the specified Porter-Duff mode
+     * @param mode The porter-duff mode that is applied
+     *
+     * @see Color
+     * @see #setColor(int)
+     * @see #setMode(android.graphics.PorterDuff.Mode)
      */
-    public PorterDuffColorFilter(int srcColor, PorterDuff.Mode mode) {
-        native_instance = native_CreatePorterDuffFilter(srcColor, mode.nativeInt);
-        nativeColorFilter = nCreatePorterDuffFilter(native_instance, srcColor, mode.nativeInt);
+    public PorterDuffColorFilter(int color, PorterDuff.Mode mode) {
+        mColor = color;
+        mMode = mode;
+        update();
+    }
+
+    /**
+     * Returns the ARGB color used to tint the source pixels when this filter
+     * is applied.
+     *
+     * @see Color
+     * @see #setColor(int)
+     *
+     * @hide
+     */
+    public int getColor() {
+        return mColor;
+    }
+
+    /**
+     * Specifies the color to tint the source pixels with when this color
+     * filter is applied.
+     *
+     * @param color An ARGB {@link Color color}
+     *
+     * @see Color
+     * @see #getColor()
+     * @see #getMode()
+     *
+     * @hide
+     */
+    public void setColor(int color) {
+        mColor = color;
+        update();
+    }
+
+    /**
+     * Returns the Porter-Duff mode used to composite this color filter's
+     * color with the source pixel when this filter is applied.
+     *
+     * @see PorterDuff
+     * @see #setMode(android.graphics.PorterDuff.Mode)
+     *
+     * @hide
+     */
+    public PorterDuff.Mode getMode() {
+        return mMode;
+    }
+
+    /**
+     * Specifies the Porter-Duff mode to use when compositing this color
+     * filter's color with the source pixel at draw time.
+     *
+     * @see PorterDuff
+     * @see #getMode()
+     * @see #getColor()
+     *
+     * @hide
+     */
+    public void setMode(PorterDuff.Mode mode) {
+        mMode = mode;
+        update();
+    }
+
+    private void update() {
+        destroyFilter(native_instance);
+        native_instance = native_CreatePorterDuffFilter(mColor, mMode.nativeInt);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        final PorterDuffColorFilter other = (PorterDuffColorFilter) object;
+        if (mColor != other.mColor || mMode != other.mMode) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 *  mMode.hashCode() + mColor;
     }
 
     private static native long native_CreatePorterDuffFilter(int srcColor, int porterDuffMode);
-    private static native long nCreatePorterDuffFilter(long nativeFilter, int srcColor,
-            int porterDuffMode);
 }

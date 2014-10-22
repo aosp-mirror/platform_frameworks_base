@@ -1,0 +1,305 @@
+page.title=Creating Lists
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#add-list">Add a List View</a></li>
+  <li><a href="#layout-impl">Create a Layout Implementation for List Items</a></li>
+  <li><a href="#layout-def">Create a Layout Definition for Items</a></li>
+  <li><a href="#adapter">Create an Adapter to Populate the List</a></li>
+  <li><a href="#adapter-listener">Associate the Adapter and Set a Click Listener</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Lists let users select an item from a set of choices easily on wearable devices. This lesson
+shows you how to create lists in your Android Wear apps.</p>
+
+<p>The Wearable UI Library includes the <code>WearableListView</code> class, which is a list
+implementation optimized for wearable devices..</p>
+
+<p class="note"><strong>Note:</strong> The <em>Notifications</em> sample in the Android SDK
+demonstrates how to use <code>WearableListView</code> in your apps. This sample is located in
+the <code>android-sdk/samples/android-20/wearable/Notifications</code> directory.</p>
+
+<p>To create a list in your Android Wear apps:</p>
+
+<ol>
+<li>Add a <code>WearableListView</code> element to your activity's layout definition.</li>
+<li>Create a custom layout implementation for your list items.</li>
+<li>Use this implementation to create a layout definition file for your list items.</li>
+<div style="float:right;margin-left:25px;width:215px;margin-top:-20px">
+<img src="{@docRoot}wear/images/06_uilib.png" width="200" height="200" alt=""/>
+<p class="img-caption" style="text-align:center"><strong>Figure 3:</strong>
+A list view on Android Wear.</p>
+</div>
+<li>Create an adapter to populate the list.</li>
+<li>Assign the adapter to the <code>WearableListView</code> element.</li>
+</ol>
+
+<p>These steps are described in detail in the following sections.</p>
+
+
+<h2 id="add-list">Add a List View</h2>
+
+<p>The following layout adds a list view to an activity using a <code>BoxInsetLayout</code>, so
+the list is displayed properly on both round and square devices:</p>
+
+<pre>
+&lt;android.support.wearable.view.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/robot_background"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    &lt;FrameLayout
+        android:id="@+id/frame_layout"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        app:layout_box="left|bottom|right">
+
+        &lt;<strong>android.support.wearable.view.WearableListView</strong>
+            android:id="@+id/wearable_list"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+        &lt;/android.support.wearable.view.WearableListView>
+    &lt;/FrameLayout>
+&lt;/android.support.wearable.view.BoxInsetLayout>
+</pre>
+
+
+<h2 id="layout-impl">Create a Layout Implementation for List Items</h2>
+
+<p>In many cases, each list item consists of an icon and a description. The
+<em>Notifications</em> sample from the Android SDK implements a custom layout that extends
+{@link android.widget.LinearLayout} to incorporate these two elements inside each list item.
+This layout also implements the methods in the <code>WearableListView.Item</code> interface
+to animate the item's icon and fade the text in response to events from
+<code>WearableListView</code> as the user scrolls through the list.</p>
+
+<pre>
+public class WearableListItemLayout extends LinearLayout
+                                    implements WearableListView.Item {
+
+    private final float mFadedTextAlpha;
+    private final int mFadedCircleColor;
+    private final int mChosenCircleColor;
+    private ImageView mCircle;
+    private float mScale;
+    private TextView mName;
+
+    public WearableListItemLayout(Context context) {
+        this(context, null);
+    }
+
+    public WearableListItemLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public WearableListItemLayout(Context context, AttributeSet attrs,
+                                  int defStyle) {
+        super(context, attrs, defStyle);
+        mFadedTextAlpha = getResources()
+                         .getInteger(R.integer.action_text_faded_alpha) / 100f;
+        mFadedCircleColor = getResources().getColor(R.color.grey);
+        mChosenCircleColor = getResources().getColor(R.color.blue);
+    }
+
+    // Get references to the icon and text in the item layout definition
+    &#64;Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        // These are defined in the layout file for list items
+        // (see next section)
+        mCircle = (ImageView) findViewById(R.id.circle);
+        mName = (TextView) findViewById(R.id.name);
+    }
+
+    // Provide scaling values for WearableListView animations
+    &#64;Override
+    public float getProximityMinValue() {
+        return 1f;
+    }
+
+    &#64;Override
+    public float getProximityMaxValue() {
+        return 1.6f;
+    }
+
+    &#64;Override
+    public float getCurrentProximityValue() {
+        return mScale;
+    }
+
+    // Scale the icon for WearableListView animations
+    &#64;Override
+    public void setScalingAnimatorValue(float scale) {
+        mScale = scale;
+        mCircle.setScaleX(scale);
+        mCircle.setScaleY(scale);
+    }
+
+    // Change color of the icon, remove fading from the text
+    &#64;Override
+    public void onScaleUpStart() {
+        mName.setAlpha(1f);
+        ((GradientDrawable) mCircle.getDrawable()).setColor(mChosenCircleColor);
+    }
+
+    // Change the color of the icon, fade the text
+    &#64;Override
+    public void onScaleDownStart() {
+        ((GradientDrawable) mCircle.getDrawable()).setColor(mFadedCircleColor);
+        mName.setAlpha(mFadedTextAlpha);
+    }
+}
+</pre>
+
+
+<h2 id="layout-def">Create a Layout Definition for Items</h2>
+
+<p>After you implement a custom layout for list items, you provide a layout definition file that
+specifies the layout parameters of each of the components inside a list item. The following layout
+definition uses the custom layout implementation from the previous section and defines an icon
+and a text view whose IDs match those in the layout implementation class:</p>
+
+<p class="code-caption">res/layout/list_item.xml</p>
+
+<pre>
+&lt;com.example.android.support.wearable.notifications.WearableListItemLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center_vertical"
+    android:layout_width="match_parent"
+    android:layout_height="80dp">
+    &lt;ImageView
+        android:id="@+id/circle"
+        android:layout_height="20dp"
+        android:layout_margin="16dp"
+        android:layout_width="20dp"
+        android:src="@drawable/wl_circle"/>
+    &lt;TextView
+        android:id="@+id/name"
+        android:gravity="center_vertical|left"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="16dp"
+        android:layout_height="match_parent"
+        android:fontFamily="sans-serif-condensed-light"
+        android:lineSpacingExtra="-4sp"
+        android:textColor="@color/text_color"
+        android:textSize="16sp"/>
+&lt;/com.example.android.support.wearable.notifications.WearableListItemLayout>
+</pre>
+
+
+<h2 id="adapter">Create an Adapter to Populate the List</h2>
+
+<p>The adapter populates the <code>WearableListView</code> with content. The following simple
+adapter populates the list with elements based on an array of strings:</p>
+
+<pre>
+private static final class Adapter extends WearableListView.Adapter {
+    private String[] mDataset;
+    private final Context mContext;
+    private final LayoutInflater mInflater;
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public Adapter(Context context, String[] dataset) {
+        mContext = context;
+        mInflater = LayoutInflater.from(context);
+        mDataset = dataset;
+    }
+
+    // Provide a reference to the type of views you're using
+    public static class ItemViewHolder extends WearableListView.ViewHolder {
+        private TextView textView;
+        public ItemViewHolder(View itemView) {
+            super(itemView);
+            // find the text view within the custom item's layout
+            textView = (TextView) itemView.findViewById(R.id.name);
+        }
+    }
+
+    // Create new views for list items
+    // (invoked by the WearableListView's layout manager)
+    &#64;Override
+    public WearableListView.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                          int viewType) {
+        // Inflate our custom layout for list items
+        return new ItemViewHolder(mInflater.inflate(R.layout.list_item, null));
+    }
+
+    // Replace the contents of a list item
+    // Instead of creating new views, the list tries to recycle existing ones
+    // (invoked by the WearableListView's layout manager)
+    &#64;Override
+    public void onBindViewHolder(WearableListView.ViewHolder holder,
+                                 int position) {
+        // retrieve the text view
+        ItemViewHolder itemHolder = (ItemViewHolder) holder;
+        TextView view = itemHolder.textView;
+        // replace text contents
+        view.setText(mDataset[position]);
+        // replace list item's metadata
+        holder.itemView.setTag(position);
+    }
+
+    // Return the size of your dataset
+    // (invoked by the WearableListView's layout manager)
+    &#64;Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
+}
+</pre>
+
+
+<h2 id="adapter-listener">Associate the Adapter and Set a Click Listener</h2>
+
+<p>In your activity, obtain a reference to the <code>WearableListView</code> element from
+your layout, assign an instance of the adapter to populate the list, and set a click listener
+to complete an action when the user selects a particular list item.</p>
+
+<pre>
+public class WearActivity extends Activity
+                          implements WearableListView.ClickListener {
+
+    // Sample dataset for the list
+    String[] elements = { "List Item 1", "List Item 2", ... };
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_list_activity);
+
+        // Get the list component from the layout of the activity
+        WearableListView listView =
+            (WearableListView) findViewById(R.id.wearable_list);
+
+        // Assign an adapter to the list
+        listView.setAdapter(new Adapter(this, elements));
+
+        // Set a click listener
+        listView.setClickListener(this);
+    }
+
+    // WearableListView click listener
+    &#64;Override
+    public void onClick(WearableListView.ViewHolder v) {
+        Integer tag = (Integer) v.itemView.getTag();
+        // use this data to complete some action ...
+    }
+
+    &#64;Override
+    public void onTopEmptyRegionClick() {
+    }
+}
+</pre>

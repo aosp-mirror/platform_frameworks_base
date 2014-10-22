@@ -20,8 +20,8 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
+#include <jni.h>
+#include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <assert.h>

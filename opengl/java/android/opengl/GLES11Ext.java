@@ -132,7 +132,7 @@ public class GLES11Ext {
 
     native private static void _nativeClassInit();
     static {
-	    _nativeClassInit();
+        _nativeClassInit();
     }
     
     private static final int GL_BYTE = GLES10.GL_BYTE;

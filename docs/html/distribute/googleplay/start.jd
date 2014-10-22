@@ -1,0 +1,163 @@
+page.title=Get Started with Publishing
+page.metaDescription=Start publishing on Google Play in minutes by registering for a developer account.
+meta.tags="publishing"
+page.tags="google play", "publishing", "register", "signup"
+page.image=/distribute/images/getting-started.jpg
+
+@jd:body
+
+<div class="top-right-float" style="margin-right:24px;margin-top:-18px">
+  <a href="https://play.google.com/apps/publish/"><img src=
+  "{@docRoot}images/gp-start-button.png"></a>
+</div>
+
+<p>
+  Start publishing on Google Play in minutes by:
+</p>
+
+<ul>
+  <li>Registering for a Google Play publisher account
+  </li>
+
+  <li>Setting up a Google Wallet Merchant Account, if you will sell apps or
+  in-app products.
+  </li>
+
+  <li>Exploring the <a href="https://play.google.com/apps/publish/">Google Play
+  Developer Console</a> and publishing tools.
+  </li>
+</ul>
+
+<p>
+  When you're ready, use the Start button to go to the Developer Console.
+</p>
+
+<div class="headerLine">
+  <h2>
+    Register for a Publisher Account
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Tips
+    </h2>
+
+    <ul>
+      <li>You need a Google account to register. You can create one during the
+      process.
+      </li>
+
+      <li>If you are an organization, consider registering a new Google account
+      rather than using a personal account.
+      </li>
+
+      <li>Review the <a href=
+      "https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=138294">
+        developer countries</a> and <a href=
+        "https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">
+        merchant countries</a> where you can distribute and sell apps.
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ol>
+  <li>Visit the <a href="https://play.google.com/apps/publish/">Google Play
+  Developer Console</a>.
+  </li>
+
+  <li>Enter basic information about your <strong>developer identity</strong>
+  &mdash; name, email address, and so on. You can modify this information
+  later.
+  </li>
+
+  <li>Read and accept the <strong>Developer Distribution Agreement</strong> for
+  your country or region. Note that apps and store listings that you publish on
+  Google Play must comply with the Developer Program Policies and US export
+  law.
+  </li>
+
+  <li>Pay a <strong>$25 USD registration fee</strong> using Google Wallet. If
+  you don't have a Google Wallet account, you can quickly set one up during the
+  process.
+  </li>
+
+  <li>When your registration is verified, you’ll be notified at the email
+  address you entered during registration.
+  </li>
+</ol>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Set Up a Google Wallet Merchant Account
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:200px;">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png">
+</div>
+
+<p>
+  If you want to sell priced apps, in-app products, or subscriptions, you’ll
+  need a Google Wallet Merchant Account. You can set one up at any time, but
+  first review the list of <a href=
+  "https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">
+  merchant countries</a>.<br>
+  <br>
+  To set up a Google Wallet Merchant Account:<br>
+  <br>
+</p>
+
+<ol>
+  <li>
+    <strong>Sign in</strong> to your Google Play Developer Console at <a href=
+    "https://play.google.com/apps/publish/" target=
+    "_blank">https://play.google.com/apps/publish/</a>.
+  </li>
+
+  <li>Open <strong>Financial reports</strong> <img src=
+  "{@docRoot}images/distribute/console-reports.png"> on the side navigation.
+  </li>
+
+  <li>Click <strong>Setup a Merchant Account now</strong>.
+  </li>
+</ol>
+
+<p>
+  This takes you to the Google Wallet site; you'll need information about your
+  business to complete this step.
+</p>
+
+<div class="headerLine">
+  <h2>
+    Explore the Developer Console
+  </h2>
+
+
+</div>
+
+<p>
+  When your registration is verified, you can sign in to your Developer
+  Console, which is the home for your app publishing operations and tools on
+  Google Play.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2><hr />
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/gettingstarted"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

@@ -16,7 +16,6 @@
 
 package android.graphics;
 
-
 /**
  * The NinePatch class permits drawing a bitmap in nine or more sections.
  * Essentially, it allows the creation of custom graphics that will scale the
@@ -32,6 +31,39 @@ package android.graphics;
  * </p>
  */
 public class NinePatch {
+    /**
+     * Struct of inset information attached to a 9 patch bitmap.
+     *
+     * Present on a 9 patch bitmap if it optical insets were manually included,
+     * or if outline insets were automatically included by aapt.
+     *
+     * @hide
+     */
+    public static class InsetStruct {
+        @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
+        InsetStruct(int opticalLeft, int opticalTop, int opticalRight, int opticalBottom,
+                int outlineLeft, int outlineTop, int outlineRight, int outlineBottom,
+                float outlineRadius, int outlineAlpha, float decodeScale) {
+            opticalRect = new Rect(opticalLeft, opticalTop, opticalRight, opticalBottom);
+            outlineRect = new Rect(outlineLeft, outlineTop, outlineRight, outlineBottom);
+
+            if (decodeScale != 1.0f) {
+                // if bitmap was scaled when decoded, scale the insets from the metadata values
+                opticalRect.scale(decodeScale);
+
+                // round inward while scaling outline, as the outline should always be conservative
+                outlineRect.scaleRoundIn(decodeScale);
+            }
+            this.outlineRadius = outlineRadius * decodeScale;
+            this.outlineAlpha = outlineAlpha / 255.0f;
+        }
+
+        public final Rect opticalRect;
+        public final Rect outlineRect;
+        public final float outlineRadius;
+        public final float outlineAlpha;
+    }
+
     private final Bitmap mBitmap;
 
     /**
@@ -86,7 +118,10 @@ public class NinePatch {
     @Override
     protected void finalize() throws Throwable {
         try {
-            nativeFinalize(mNativeChunk);
+            if (mNativeChunk != 0) {
+                // only attempt to destroy correctly initilized chunks
+                nativeFinalize(mNativeChunk);
+            }
         } finally {
             super.finalize();
         }
@@ -164,12 +199,12 @@ public class NinePatch {
     }
 
     void drawSoftware(Canvas canvas, RectF location, Paint paint) {
-        nativeDraw(canvas.mNativeCanvas, location, mBitmap.ni(), mNativeChunk,
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.ni(), mNativeChunk,
                 paint != null ? paint.mNativePaint : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
     void drawSoftware(Canvas canvas, Rect location, Paint paint) {
-        nativeDraw(canvas.mNativeCanvas, location, mBitmap.ni(), mNativeChunk,
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.ni(), mNativeChunk,
                 paint != null ? paint.mNativePaint : 0, canvas.mDensity, mBitmap.mDensity);
     }
 

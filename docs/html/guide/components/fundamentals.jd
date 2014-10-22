@@ -335,8 +335,8 @@ documentation. </p>
 {@link android.content.Intent} to start activities, services, and broadcast receivers. You can do so
 by explicitly naming the target component (using the component class name) in the intent. However,
 the real power of intents lies in the concept of <em>implicit intents</em>. An implicit intent
-simply describe the type of action to perform (and optionally, the data upon which you’d like to
-perform the action) and allow the system to find a component on the device that can perform the
+simply describes the type of action to perform (and, optionally, the data upon which you’d like to
+perform the action) and allows the system to find a component on the device that can perform the
 action and start it. If there are multiple components that can perform the action described by the
 intent, then the user selects which one to use.</p>
 

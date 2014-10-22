@@ -28,4 +28,9 @@ public class RemoteException extends AndroidException {
     public RemoteException(String message) {
         super(message);
     }
+
+    /** {@hide} */
+    public RuntimeException rethrowAsRuntimeException() {
+        throw new RuntimeException(this);
+    }
 }

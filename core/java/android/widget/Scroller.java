@@ -60,6 +60,8 @@ import android.view.animation.Interpolator;
  * }</pre>
  */
 public class Scroller  {
+    private final Interpolator mInterpolator;
+
     private int mMode;
 
     private int mStartX;
@@ -80,7 +82,6 @@ public class Scroller  {
     private float mDeltaX;
     private float mDeltaY;
     private boolean mFinished;
-    private Interpolator mInterpolator;
     private boolean mFlywheel;
 
     private float mVelocity;
@@ -141,17 +142,7 @@ public class Scroller  {
             SPLINE_TIME[i] = coef * ((1.0f - y) * P1 + y * P2) + y * y * y;
         }
         SPLINE_POSITION[NB_SAMPLES] = SPLINE_TIME[NB_SAMPLES] = 1.0f;
-
-        // This controls the viscous fluid effect (how much of it)
-        sViscousFluidScale = 8.0f;
-        // must be set to 1.0 (used in viscousFluid())
-        sViscousFluidNormalize = 1.0f;
-        sViscousFluidNormalize = 1.0f / viscousFluid(1.0f);
-
     }
-
-    private static float sViscousFluidScale;
-    private static float sViscousFluidNormalize;
 
     /**
      * Create a Scroller with the default duration and interpolator.
@@ -177,7 +168,11 @@ public class Scroller  {
      */
     public Scroller(Context context, Interpolator interpolator, boolean flywheel) {
         mFinished = true;
-        mInterpolator = interpolator;
+        if (interpolator == null) {
+            mInterpolator = new ViscousFluidInterpolator();
+        } else {
+            mInterpolator = interpolator;
+        }
         mPpi = context.getResources().getDisplayMetrics().density * 160.0f;
         mDeceleration = computeDeceleration(ViewConfiguration.getScrollFriction());
         mFlywheel = flywheel;
@@ -311,13 +306,7 @@ public class Scroller  {
         if (timePassed < mDuration) {
             switch (mMode) {
             case SCROLL_MODE:
-                float x = timePassed * mDurationReciprocal;
-    
-                if (mInterpolator == null)
-                    x = viscousFluid(x); 
-                else
-                    x = mInterpolator.getInterpolation(x);
-    
+                final float x = mInterpolator.getInterpolation(timePassed * mDurationReciprocal);
                 mCurrX = mStartX + Math.round(x * mDeltaX);
                 mCurrY = mStartY + Math.round(x * mDeltaY);
                 break;
@@ -498,20 +487,6 @@ public class Scroller  {
         return mFlingFriction * mPhysicalCoeff * Math.exp(DECELERATION_RATE / decelMinusOne * l);
     }
 
-    static float viscousFluid(float x)
-    {
-        x *= sViscousFluidScale;
-        if (x < 1.0f) {
-            x -= (1.0f - (float)Math.exp(-x));
-        } else {
-            float start = 0.36787944117f;   // 1/e == exp(-1)
-            x = 1.0f - (float)Math.exp(1.0f - x);
-            x = start + x * (1.0f - start);
-        }
-        x *= sViscousFluidNormalize;
-        return x;
-    }
-    
     /**
      * Stops the animation. Contrary to {@link #forceFinished(boolean)},
      * aborting the animating cause the scroller to move to the final x and y
@@ -581,5 +556,42 @@ public class Scroller  {
     public boolean isScrollingInDirection(float xvel, float yvel) {
         return !mFinished && Math.signum(xvel) == Math.signum(mFinalX - mStartX) &&
                 Math.signum(yvel) == Math.signum(mFinalY - mStartY);
+    }
+
+    static class ViscousFluidInterpolator implements Interpolator {
+        /** Controls the viscous fluid effect (how much of it). */
+        private static final float VISCOUS_FLUID_SCALE = 8.0f;
+
+        private static final float VISCOUS_FLUID_NORMALIZE;
+        private static final float VISCOUS_FLUID_OFFSET;
+
+        static {
+
+            // must be set to 1.0 (used in viscousFluid())
+            VISCOUS_FLUID_NORMALIZE = 1.0f / viscousFluid(1.0f);
+            // account for very small floating-point error
+            VISCOUS_FLUID_OFFSET = 1.0f - VISCOUS_FLUID_NORMALIZE * viscousFluid(1.0f);
+        }
+
+        private static float viscousFluid(float x) {
+            x *= VISCOUS_FLUID_SCALE;
+            if (x < 1.0f) {
+                x -= (1.0f - (float)Math.exp(-x));
+            } else {
+                float start = 0.36787944117f;   // 1/e == exp(-1)
+                x = 1.0f - (float)Math.exp(1.0f - x);
+                x = start + x * (1.0f - start);
+            }
+            return x;
+        }
+
+        @Override
+        public float getInterpolation(float input) {
+            final float interpolated = VISCOUS_FLUID_NORMALIZE * viscousFluid(input);
+            if (interpolated > 0) {
+                return interpolated + VISCOUS_FLUID_OFFSET;
+            }
+            return interpolated;
+        }
     }
 }

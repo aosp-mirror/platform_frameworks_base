@@ -73,13 +73,18 @@ public class MediaRouteButton extends View {
     }
 
     public MediaRouteButton(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public MediaRouteButton(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         mRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mCallback = new MediaRouterCallback();
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.MediaRouteButton, defStyleAttr, 0);
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.MediaRouteButton, defStyleAttr, defStyleRes);
         setRemoteIndicatorDrawable(a.getDrawable(
                 com.android.internal.R.styleable.MediaRouteButton_externalRouteEnabledDrawable));
         mMinWidth = a.getDimensionPixelSize(

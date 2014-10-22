@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@com.google.android.test.shared_library:string/shared_string"
+        style="@com.google.android.test.shared_library:style/CodeFont"/>
+
+    <com.google.android.test.shared_library.AddressView
+        xmlns:custom="http://schemas.android.com/apk/res/com.google.android.test.shared_library"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        custom:name="Professor Android"
+        custom:streetNumber="44"
+        custom:streetName="KitKat Lane"
+        custom:city="AndroidVille"
+        custom:state="OS"
+        custom:country="Mobile"
+        custom:zip="12345"/>
+</LinearLayout>

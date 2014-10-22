@@ -19,9 +19,12 @@ package android.graphics.drawable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.graphics.*;
+import android.graphics.PorterDuff.Mode;
 import android.view.Gravity;
 import android.util.AttributeSet;
 
@@ -51,7 +54,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;
-    
+
     ClipDrawable() {
         this(null, null);
     }
@@ -72,13 +75,14 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
         int type;
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ClipDrawable);
+        TypedArray a = obtainAttributes(
+                r, theme, attrs, com.android.internal.R.styleable.ClipDrawable);
 
         int orientation = a.getInt(
                 com.android.internal.R.styleable.ClipDrawable_clipOrientation,
@@ -94,7 +98,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            dr = Drawable.createFromXmlInner(r, parser, attrs);
+            dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
         if (dr == null) {
@@ -110,6 +114,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
     // overrides from Drawable.Callback
 
+    @Override
     public void invalidateDrawable(Drawable who) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -117,6 +122,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -124,6 +130,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -168,6 +175,16 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void setTintList(ColorStateList tint) {
+        mClipState.mDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mClipState.mDrawable.setTintMode(tintMode);
+    }
+
+    @Override
     public int getOpacity() {
         return mClipState.mDrawable.getOpacity();
     }
@@ -196,7 +213,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void draw(Canvas canvas) {
-        
+
         if (mClipState.mDrawable.getLevel() == 0) {
             return;
         }
@@ -269,6 +286,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
                 }
                 mDrawable.setCallback(owner);
                 mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
                 mOrientation = orig.mOrientation;
                 mGravity = orig.mGravity;
                 mCheckedConstantState = mCanConstantState = true;

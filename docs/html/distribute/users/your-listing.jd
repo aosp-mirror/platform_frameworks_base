@@ -1,0 +1,188 @@
+page.title=Create a Great Listing
+page.metaDescription=Make your listing page compelling and integrate it into your marketing campaigns.
+page.image=/distribute/images/create-listing.jpg
+page.tags="listing, google play, users, growth"
+
+@jd:body
+
+<p>
+  Your Google Play app listings are a vital part of your app marketing, from
+  organic traffic or visits you generate through marketing and promotion.
+  Potential users will quickly move on from a poor listing, so the importance
+  of having a great one can't be ignored.
+</p>
+
+<div class="headerLine">
+  <h2 id="graphics-imagery">
+    Graphics &amp; Imagery Tips
+  </h2>
+
+
+</div>
+
+<p>
+  Be sure to supply a variety of high-quality graphic assets to showcase your
+  apps or brand on Google Play search results and your product details pages.
+  These graphic assets are key parts of successful product details pages that
+  attracts and engages users, so consider having a professional produce them
+  for you.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-listing-0.jpg" class="border-img">
+</div>
+
+<h3>
+  Icons
+</h3>
+
+<p>
+  For most users, the <a href=
+  "{@docRoot}design/style/iconography.html#launcher">launcher icon</a>
+  (sometimes referred to as the app icon) is the first impression of your app.
+  As higher density screens on both phones and tablets gain popularity, it's
+  important to make sure your launcher icon is crisp and high quality. To do
+  this, make sure you’re including XHDPI (320dpi) and XXHDPI (480dpi) versions
+  of the icon in your apps. Learn more about <a href=
+  "http://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html">
+  Making Beautiful Android App Icons</a> from the <a href=
+  "http://android-developers.blogspot.com/">Android Developers blog</a>.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-listing-1.png" class="border-img">
+</div>
+
+<h3>
+  Screenshots and videos
+</h3>
+
+<p>
+  Be sure to showcase how your apps look, their important features, and what
+  makes them different. Showcase any game play, characters, and their
+  personalities. Some developers build special screens to highlight what’s
+  happening in the screenshot, and extra video footage to highlight the brand.
+  Get more details <a href=
+  "{@docRoot}distribute/tools/launch-checklist.html#prepare-graphics">here</a>.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-listing-2.jpg">
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      <strong>Tip:</strong> If your app runs on both phones and tablets, be
+      sure to include screenshots from both devices, including both horizontal
+      and portrait aspect ratios.
+    </p>
+  </div>
+</div>
+
+<h3>
+  Featured image
+</h3>
+
+<p>
+  Choosing the right featured image is important, it needs to convey as much
+  about the features of your apps and what makes them special as possible,
+  without being cluttered and confusing. To get started with the featured
+  image specs, read the <a
+  href="https://support.google.com/googleplay/android-developer/answer/1078870">featured
+  image guidelines</a> in the Help Center.
+</p>
+
+<div class="headerLine">
+  <h2 id="localization-tips">
+    Localization Tips
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      <strong>Tip:</strong> Translate any embedded text, use different imagery
+      or presentation, and match any marketing promotion to the needs of users
+      in other markets. For example: Some eastern markets respond to price
+      points that end in .00 or .05 more than .99.
+    </p>
+  </div>
+</div>
+
+<p>
+  Many developers start in their country of strength, then expand into new
+  markets. To help you market your apps more effectively to a global audience,
+  create <a href=
+  "http://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html">
+  localized versions of your promotional graphics, screenshots, and videos</a>.
+  When a user visits your product display pages, Google Play will show the
+  localized assets that you’ve provided for that country. Find out more about
+  <a href="{@docRoot}distribute/users/expand-to-new-markets.html">capitalize on
+  the growing international audience</a>.
+</p>
+
+  <img src="{@docRoot}images/gp-listing-3.jpg">
+
+<div class="headerLine">
+  <h2 id="keyword-tips">
+    Keyword Tips
+  </h2>
+
+
+</div>
+
+<p>
+  Think carefully about the keywords you use for your apps. Think about words
+  that represent the core feature of your apps. Also consider other words that
+  the user might use to search for your app. For example, if you have a Live
+  Wallpaper app, you may want to include the term ‘background’. This way, users
+  who don’t yet know the terminology can find your app.
+</p>
+
+<div class="headerLine">
+  <h2 id="app-indexing">
+    Sign Up for App Indexing
+  </h2>
+
+
+</div>
+
+<p>
+  App Indexing provides deep links from Google searches to your apps. Get more
+  details and a link to the sign up page <a href=
+  "https://developers.google.com/app-indexing/">here</a>.
+</p>
+
+<div class="center-img">
+  <img src="{@docRoot}images/gp-listing-4.jpg">
+</div>
+
+<div class="headerLine">
+  <h2 id="education-app">
+    Education App Tips
+  </h2>
+
+
+</div>
+
+<p>
+  If you’ve an educational app for the K-12 market, include it in Google Play
+  for Education. Google Play for Education can help your innovative educational
+  apps gain visibility with the right audiences, without having to knock on
+  school doors. Learn more about <a href=
+  "{@docRoot}distribute/googleplay/edu/about.html">Google Play for
+  Education</a>.
+</p>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/createagreatlisting"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>

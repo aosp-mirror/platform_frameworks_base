@@ -18,6 +18,7 @@ package libcore.icu;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import com.ibm.icu.text.DateTimePatternGenerator;
+import com.ibm.icu.util.Currency;
 import com.ibm.icu.util.ULocale;
 
 import java.util.Locale;
@@ -117,6 +118,11 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static int getCurrencyNumericCode(String currencyCode) {
+        return Currency.getInstance(currencyCode).getNumericCode();
+    }
+
+    @LayoutlibDelegate
     /*package*/ static String getCurrencySymbol(String locale, String currencyCode) {
         return "";
     }
@@ -142,12 +148,12 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static String getISO3CountryNative(String locale) {
+    /*package*/ static String getISO3Country(String locale) {
         return "";
     }
 
     @LayoutlibDelegate
-    /*package*/ static String getISO3LanguageNative(String locale) {
+    /*package*/ static String getISO3Language(String locale) {
         return "";
     }
 
@@ -169,17 +175,6 @@ public class ICU_Delegate {
     @LayoutlibDelegate
     /*package*/ static String[] getISOCountriesNative() {
         return Locale.getISOCountries();
-    }
-
-
-    @LayoutlibDelegate
-    /*package*/ static String localeForLanguageTag(String languageTag, boolean strict) {
-        return "";
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static String languageTagForLocale(String locale) {
-        return "";
     }
 
     @LayoutlibDelegate

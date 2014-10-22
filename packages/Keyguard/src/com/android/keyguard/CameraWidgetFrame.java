@@ -38,7 +38,7 @@ import com.android.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
 
 public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnClickListener {
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
-    private static final boolean DEBUG = KeyguardHostView.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final int WIDGET_ANIMATION_DURATION = 250; // ms
     private static final int WIDGET_WAIT_DURATION = 400; // ms
     private static final int RECOVERY_DELAY = 1000; // ms
@@ -113,12 +113,14 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         private boolean mShowing;
-        void onKeyguardVisibilityChanged(boolean showing) {
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
             if (mShowing == showing)
                 return;
             mShowing = showing;
             CameraWidgetFrame.this.onKeyguardVisibilityChanged(mShowing);
-        };
+        }
     };
 
     private static final class FixedSizeFrameLayout extends FrameLayout {

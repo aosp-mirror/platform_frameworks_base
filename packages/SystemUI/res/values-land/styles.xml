@@ -18,4 +18,10 @@
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer">
         <item name="android:layout_width">360dp</item>
     </style>
+
+    <style name="SearchPanelScrim">
+        <item name="android:layout_width">@dimen/search_panel_scrim_height</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_gravity">right</item>
+    </style>
 </resources>

@@ -32,8 +32,9 @@ public class SeekBarDialogPreference extends DialogPreference {
 
     private Drawable mMyIcon;
 
-    public SeekBarDialogPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public SeekBarDialogPreference(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         setDialogLayoutResource(com.android.internal.R.layout.seekbar_dialog);
         createActionButtons();
@@ -41,6 +42,18 @@ public class SeekBarDialogPreference extends DialogPreference {
         // Steal the XML dialogIcon attribute's value
         mMyIcon = getDialogIcon();
         setDialogIcon(null);
+    }
+
+    public SeekBarDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public SeekBarDialogPreference(Context context, AttributeSet attrs) {
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
+    }
+
+    public SeekBarDialogPreference(Context context) {
+        this(context, null);
     }
 
     // Allow subclasses to override the action buttons

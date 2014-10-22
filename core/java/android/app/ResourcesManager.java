@@ -144,14 +144,16 @@ public class ResourcesManager {
      * Creates the top level Resources for applications with the given compatibility info.
      *
      * @param resDir the resource directory.
+     * @param overlayDirs the resource overlay directories.
+     * @param libDirs the shared library resource dirs this app references.
      * @param compatInfo the compability info. Must not be null.
      * @param token the application token for determining stack bounds.
      */
-    public Resources getTopLevelResources(String resDir, String[] overlayDirs, int displayId,
+    public Resources getTopLevelResources(String resDir, String[] splitResDirs,
+            String[] overlayDirs, String[] libDirs, int displayId,
             Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
         final float scale = compatInfo.applicationScale;
-        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale,
-                token);
+        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale, token);
         Resources r;
         synchronized (this) {
             // Resources is app scale dependent.
@@ -176,13 +178,35 @@ public class ResourcesManager {
         //}
 
         AssetManager assets = new AssetManager();
-        if (assets.addAssetPath(resDir) == 0) {
-            return null;
+        // resDir can be null if the 'android' package is creating a new Resources object.
+        // This is fine, since each AssetManager automatically loads the 'android' package
+        // already.
+        if (resDir != null) {
+            if (assets.addAssetPath(resDir) == 0) {
+                return null;
+            }
+        }
+
+        if (splitResDirs != null) {
+            for (String splitResDir : splitResDirs) {
+                if (assets.addAssetPath(splitResDir) == 0) {
+                    return null;
+                }
+            }
         }
 
         if (overlayDirs != null) {
             for (String idmapPath : overlayDirs) {
                 assets.addOverlayPath(idmapPath);
+            }
+        }
+
+        if (libDirs != null) {
+            for (String libDir : libDirs) {
+                if (assets.addAssetPath(libDir) == 0) {
+                    Slog.w(TAG, "Asset path '" + libDir +
+                            "' does not exist or contains no resources.");
+                }
             }
         }
 

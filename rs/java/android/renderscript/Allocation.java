@@ -16,16 +16,12 @@
 
 package android.renderscript;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import android.content.res.Resources;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Surface;
 import android.util.Log;
-import android.util.TypedValue;
 import android.graphics.Canvas;
 import android.os.Trace;
 
@@ -609,7 +605,6 @@ public class Allocation extends BaseObj {
      * without reinterpretation.
      *
      * @param array The source data array
-     * @hide
      */
     public void copyFromUnchecked(Object array) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyFromUnchecked");
@@ -669,8 +664,7 @@ public class Allocation extends BaseObj {
      * android.renderscript.Element} does not match the array's
      * primitive type.
      *
-     * @param d the source data array
-     * @hide
+     * @param array The source data array
      */
     public void copyFrom(Object array) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
@@ -871,7 +865,6 @@ public class Allocation extends BaseObj {
      * @param off The offset of the first element to be copied.
      * @param count The number of elements to be copied.
      * @param array The source data array
-     * @hide
      */
     public void copy1DRangeFromUnchecked(int off, int count, Object array) {
         copy1DRangeFromUnchecked(off, count, array,
@@ -936,7 +929,6 @@ public class Allocation extends BaseObj {
      * @param off The offset of the first element to be copied.
      * @param count The number of elements to be copied.
      * @param array The source data array.
-     * @hide
      */
     public void copy1DRangeFrom(int off, int count, Object array) {
         copy1DRangeFromUnchecked(off, count, array,
@@ -1052,8 +1044,7 @@ public class Allocation extends BaseObj {
      * @param yoff Y offset of the region to update in this Allocation
      * @param w Width of the region to update
      * @param h Height of the region to update
-     * @param data to be placed into the Allocation
-     * @hide
+     * @param array Data to be placed into the Allocation
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, Object array) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFrom");
@@ -1283,7 +1274,6 @@ public class Allocation extends BaseObj {
      * type of the array passed in.
      *
      * @param array The array to be set from the Allocation.
-     * @hide
      */
     public void copyTo(Object array) {
         copyTo(array, validateObjectIsPrimitiveArray(array, true),
@@ -1351,9 +1341,13 @@ public class Allocation extends BaseObj {
      * @param dimX The new size of the allocation.
      *
      * @deprecated RenderScript objects should be immutable once created.  The
-     * replacement is to create a new allocation and copy the contents.
+     * replacement is to create a new allocation and copy the contents. This
+     * function will throw an exception if API 21 or higher is used.
      */
     public synchronized void resize(int dimX) {
+        if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 21) {
+            throw new RSRuntimeException("Resize is not allowed in API 21+.");
+        }
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
             throw new RSInvalidStateException("Resize only support for 1D allocations at this time.");
         }
@@ -1874,7 +1868,7 @@ public class Allocation extends BaseObj {
         }
     }
 
-    static void sendBufferNotification(int id) {
+    static void sendBufferNotification(long id) {
         synchronized(mAllocationMap) {
             Allocation a = mAllocationMap.get(new Long(id));
 
@@ -1885,4 +1879,3 @@ public class Allocation extends BaseObj {
     }
 
 }
-

@@ -16,11 +16,19 @@
 
 package android.service.notification;
 
+import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.NotificationRankingUpdate;
 
 /** @hide */
 oneway interface INotificationListener
 {
-    void onNotificationPosted(in StatusBarNotification notification);
-    void onNotificationRemoved(in StatusBarNotification notification);
+    void onListenerConnected(in NotificationRankingUpdate update);
+    void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
+            in NotificationRankingUpdate update);
+    void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder,
+            in NotificationRankingUpdate update);
+    void onNotificationRankingUpdate(in NotificationRankingUpdate update);
+    void onListenerHintsChanged(int hints);
+    void onInterruptionFilterChanged(int interruptionFilter);
 }

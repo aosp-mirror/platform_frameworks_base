@@ -1,0 +1,139 @@
+page.title=Monetize with Ads
+page.metaDescription=Ads are a quick and easy way to incorporate a monetization option into both your free and paid apps.
+page.tags="monetizing", "free", "freemium", "ads"
+page.image=/distribute/images/advertising.png
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}distribute/images/advertising.jpg" style="width:460px;">
+</div>
+
+<p>
+  Ads can be a quick and easy way to earn more from your <a href=
+  "{@docRoot}distribute/monetize/freemium.html">freemium</a>, <a href=
+  "{@docRoot}distribute/monetize/premium.html">premium</a>, and <a href=
+  "{@docRoot}distribute/monetize/subscriptions.html">subscription</a> apps.
+  AdMob and the Google Mobile Ads SDK let you add advertising to your apps with
+  just a few lines of code.
+</p>
+
+<p>
+  The question is: which model gets the best results for your app? Google's ad
+  tools are made to help you figure out what combination works best for both
+  your audience and your bottom line. </p>
+
+<p>Start by linking your AdMob and Google
+  Analytics accounts to get better insights and more earning power: for
+  instance, AdMob can promote in-app purchases to the people who buy them most
+  often, while showing income-generating ads to those less likely to buy right
+  now.
+</p>
+
+<p>
+  Using <a href=
+  "http://www.google.com/ads/admob/monetize.html#subid=us-en-et-dac">AdMob</a>
+  and the <a href="{@docRoot}google/play-services/ads.html">Google Mobile Ads
+  SDK</a> included in Google Play Services, you’re able to add advertising into
+  your apps, with just a few lines of code.
+</p>
+
+<p>
+  When including ads in your apps you should consider:
+</p>
+
+<ul>
+  <li>
+    <p>
+      <strong>Placement within your apps</strong> &mdash; Well-placed ads make
+      it more likely that users will click through and convert. Poorly-placed
+      ads lead to lower click-through rates, and even poor ratings and users
+      abandoning your apps. Our <a href=
+      "{@docRoot}training/monetization/ads-and-ux.html">developer training</a>
+      on using ads shows some of the best ways to place ads.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <strong>Ad formats</strong> &mdash; Every app offers a different type of
+      experience for users, so it’s important that your ad formats match that
+      experience. While banner ads may work well for a flashlight utility app,
+      an immersive gaming app may benefit more from a video interstitial.
+      Mismatched ad formats can make users unhappy and leave money on the
+      table.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <strong>Maximizing your performance</strong> &mdash; Make sure you’re
+      optimizing your advertising revenue by maximizing your CPMs and fill
+      rate. Ad providers often cite their very high CPMs but don't mention low
+      fill rates that can severely decrease your effective CPM. Be sure to look
+      at both of these figures. Consider using a <a href=
+      "https://support.google.com/admob/v2/answer/3063564?hl=en&amp;ref_topic=3063091#subid=us-en-et-dac">
+      mediation</a> solution if you’d like to use multiple ad providers in your
+      apps. Look for solutions that offer yield management or <a href=
+      "https://support.google.com/admob/v2/answer/3379794?hl=en&amp;ref_topic=3379793#subid=us-en-et-dac">
+      network optimization</a> features to serve the highest paying ad for each
+      impression.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <strong>Exercising control options</strong> &mdash; A variety of ads may
+      show up within your app. It may make sense to <a href=
+      "https://support.google.com/admob/v2/answer/3150235?hl=enl#subid=us-en-et-dac">
+      block</a> certain of those advertisements from appearing, depending on
+      your goals and the type of experience you want to provide. Some
+      developers, for instance, don’t want ads for apps in their same category
+      showing to their users, while others don’t mind at all.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      <strong>Cross promoting your other apps</strong> &mdash; Ads can do more
+      than earn revenue. Consider running <a href=
+      "https://support.google.com/admob/v2/answer/3210452?hl=en#subid=us-en-et-dac">
+      house ads</a> within your apps to promote other apps in your portfolio.
+      When you launch a new app, this kind of promotion is a free and easy way
+      to attract new users quickly.
+    </p>
+  </li>
+</ul>
+
+<p>
+  Don't forget that paid channels like AdWords and YouTube can help you cast a
+  wider net by reaching targeted audiences outside the app ecosystem. They're a
+  great way to find new users at a price that you control. <a href=
+  "https://support.google.com/adwords/answer/2549053">Learn more</a>.
+</p>
+
+<p>
+  To start monetizing with ads, sign up for AdMob and integrate the Google
+  Mobile Ads SDK into your apps. If you also need to manage direct deals with
+  advertisers, consider using DoubleClick for Publishers Small Business.
+</p>
+
+
+<p>
+  To start monetizing with ads sign up for <a href=
+  "http://www.google.com/ads/admob/#subid=us-en-et-dac">AdMob</a> and integrate
+  the <a href="https://developers.google.com/mobile-ads-sdk/download">Google
+  Mobile Ads SDK</a> into your apps. If you also need to manage direct deals
+  with advertisers, consider using <a href=
+  "http://www.google.com/doubleclick/publishers/small-business/index.html#subid=us-en-et-dac">
+  DoubleClick for Publishers Small Business</a>.
+</p>
+
+<div class="headerLine"><h2 id="related-resources">Related resources</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/advertising"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+

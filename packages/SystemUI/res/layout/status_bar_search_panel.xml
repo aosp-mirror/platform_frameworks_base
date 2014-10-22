@@ -18,50 +18,26 @@
 */
 -->
 
+<!-- Extends FrameLayout -->
 <com.android.systemui.SearchPanelView
-    xmlns:prvandroid="http://schemas.android.com/apk/prv/res/android"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_panel_container"
     android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    android:paddingBottom="0dip">
+    android:layout_width="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/search_bg_protect"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="0dip">
+    <com.android.systemui.statusbar.AlphaOptimizedView
+        style="@style/SearchPanelScrim"
+        android:id="@+id/search_panel_scrim"
+        android:background="@drawable/search_panel_scrim" />
 
-        <RelativeLayout
-            android:id="@+id/search_panel_container"
-            android:layout_width="match_parent"
+    <com.android.systemui.SearchPanelCircleView
+        style="@style/SearchPanelCircle"
+        android:id="@+id/search_panel_circle">
+
+        <ImageView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true">
-
-            <com.android.internal.widget.multiwaveview.GlowPadView
-                android:id="@+id/glow_pad_view"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/navbar_search_panel_height"
-                android:layout_alignParentBottom="true"
-                android:gravity="top"
-
-                prvandroid:targetDrawables="@array/navbar_search_targets"
-                prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
-                prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
-                prvandroid:outerRingDrawable="@drawable/navbar_search_outerring"
-                prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
-                prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
-                prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
-                prvandroid:feedbackCount="0"
-                prvandroid:vibrationDuration="@integer/config_vibration_duration"
-                prvandroid:alwaysTrackFinger="true"
-                prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
-                prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"
-               />
-
-        </RelativeLayout>
-
-    </RelativeLayout>
+            android:id="@+id/search_logo" />
+    </com.android.systemui.SearchPanelCircleView>
 
 </com.android.systemui.SearchPanelView>

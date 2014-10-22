@@ -1,5 +1,7 @@
-page.title=Getting Started with Android Studio
+page.title=Android Studio
 page.tags="studio"
+page.image=images/resource-card-android-studio.png
+page.metaDescription=Learn about the new features in the beta release of our new IDE.
 @jd:body
 
 
@@ -7,7 +9,7 @@ page.tags="studio"
 
 <div style="position:relative;min-height:660px;">
 
-<h3 style="color:#f80">EARLY ACCESS PREVIEW</h3>
+<h3 style="color:#FF4444;margin:-30px 0 20px">BETA</h3>
 
 <div id="tos" style="position:absolute;display:none;width:inherit;">
 <div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
@@ -183,23 +185,21 @@ This is the Android Software Development Kit License Agreement
 
 
 
-
-
 <div id="main">
 
-<div class="figure" style="width:400px;margin-top:-20px">
-<img src="{@docRoot}images/tools/android-studio.png" height="330" width="400" style="margin-bottom:20px" />
+<div class="figure" style="width:400px;margin-top:-75px">
+<img src="{@docRoot}images/tools/laptop-studio.png" height="366" width="400" style="margin-bottom:20px" />
 
 <a class="big button subtitle" id="download-ide-button"
-href="" style="display:none;width:265px;margin:0 auto;display:block;font-size:18px" ></a>
-<div style="width:290px;padding:10px 40px 0 60px;font-size:12px;line-height:16px">
+href="" style="display:none;width:368px;margin:0 auto;display:block;font-size:18px" ></a>
+<div style="margin:20px 0 0 0">
 
 <p style="margin-bottom:8px">This download includes:</p>
-<ul>
-<li>Android Studio <b>early access preview</b></li>
-<li>All the Android SDK Tools to design, test, debug, and profile your app</li>
-<li>The latest Android platform to compile your app</li>
-<li>The latest Android system image to run your app in the emulator</li>
+<ul style="margin-bottom:20px">
+<li>Android Studio Beta</li>
+<li>All the Android SDK Tools to design, test, and debug your app</li>
+<li>A version of the Android platform to compile your app</li>
+<li>A version of the Android system image to run your app in the emulator</li>
 </ul>
 
 </div>
@@ -208,36 +208,34 @@ href="" style="display:none;width:265px;margin:0 auto;display:block;font-size:18
 
 
 <p>Android Studio is a new Android development environment based on IntelliJ
-IDEA. Similar to Eclipse with the
-ADT Plugin, Android Studio provides integrated Android developer tools
-for development and debugging. On top of the
+IDEA. It provides new features and improvements over Eclipse ADT
+and will be the official Android IDE once it's ready. On top of the
 capabilities you expect from IntelliJ, Android Studio offers:</p>
 
 <ul>
-  <li>Gradle-based build support.</li>
-  <li>Android-specific refactoring and quick fixes.</li>
-  <li>Lint tools to catch performance, usability, version compatibility and other problems.</li>
-  <li>ProGuard and app-signing capabilities. </li>
-  <li>Template-based wizards to create common Android designs and components.</li>
-  <li>A rich layout editor that allows you to drag-and-drop UI components, preview layouts on
-  multiple screen configurations, and much more.</li>
+  <li>Flexible Gradle-based build system.</li>
+  <li>Build variants and multiple APK generation.</li>
+  <li>Expanded template support for Google Services and various device types.</li>
+  <li>Rich layout editor with support for theme editing.</li>
+  <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
+  <li>ProGuard and app-signing capabilities.</li>
   <li>Built-in support for <a
-  href="http://android-developers.blogspot.com/2013/06/adding-backend-to-your-app-in-android.html"
+  href="https://developers.google.com/cloud/mobile"
   class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
-  Messaging and App Engine as server-side components.
+  Messaging and App Engine.
 </ul>
 
-<p class="caution"><strong>Caution:</strong> Android Studio is currently available as
-an <strong>early access preview</strong>. Several features
-are either incomplete or not yet implemented and you may encounter bugs. If you are not
+<p class="caution"><strong>Caution:</strong> Android Studio is currently in
+<strong>beta</strong>. Some features
+are not yet implemented and you may encounter bugs. If you are not
 comfortable using an unfinished product, you may want to instead
-download (or continue to use) the
-<a href="{@docRoot}sdk/index.html">ADT Bundle</a> (Eclipse with the ADT Plugin).</p>
+download (or continue to use)
+<a href="{@docRoot}sdk/index.html">Eclipse with ADT</a>.</p>
 
 
-<h4 style="clear:right;text-align:right;margin-right:50px"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.pax');return false;"
-  >DOWNLOAD FOR OTHER PLATFORMS</a></h4>
+<h4 style="margin-top: 20px;"><a href='' class="expandable"
+  onclick="toggleExpandable(this,'.pax');hideExpandable('.reqs');return false;"
+  >VIEW ALL DOWNLOADS AND SIZES</a></h4>
 
 <div class="pax col-13 online" style="display:none;margin:0;">
 
@@ -253,40 +251,162 @@ download (or continue to use) the
     <td>Windows</td>
     <td>
   <a onclick="return onDownload(this)" id="win-studio"
-      href="http://dl.google.com/android/studio/install/0.4.6/android-studio-bundle-133.1028713-windows.exe">
-      android-studio-bundle-133.1028713-windows.exe
+      href="https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-windows.exe">
+      android-studio-bundle-135.1339820-windows.exe
       </a>
     </td>
-    <td>519592042 bytes</td>
-    <td>9029c18738a75830786326d62c96d557</td>
+    <td>379497130 bytes</td>
+    <td>024e002b8c8fa7dcd2ff69fd69e06e56</td>
   </tr>
 
   <tr>
     <td><nobr>Mac OS X</nobr></td>
     <td>
   <a onclick="return onDownload(this)" id="mac-studio"
-    href="http://dl.google.com/android/studio/install/0.4.6/android-studio-bundle-133.1028713-mac.dmg">
-    android-studio-bundle-133.1028713-mac.dmg
+    href="https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-mac.dmg">
+    android-studio-bundle-135.1339820-mac.dmg
     </a>
     </td>
-    <td>497595811 bytes</td>
-    <td>eb2474e6d17537ddfa535e6fe8adcf0d</td>
+    <td>368507143 bytes</td>
+    <td>4143f2aa556634eae91701965d88899b</td>
   </tr>
 
   <tr>
     <td>Linux</td>
     <td>
   <a onclick="return onDownload(this)" id="linux-studio"
-    href="http://dl.google.com/android/studio/install/0.4.6/android-studio-bundle-133.1028713-linux.tgz">
-    android-studio-bundle-133.1028713-linux.tgz
+    href="https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz">
+    android-studio-bundle-135.1339820-linux.tgz
     </a>
     </td>
-    <td>522177460 bytes</td>
-    <td>cc847dd6249b3033737dabe0377c8c66</td>
+    <td>417631443 bytes</td>
+    <td>fa403762ecd0a5da87acbeff485f81cc</td>
   </tr>
   </table>
 
 </div><!-- end pax -->
+
+
+<h4 style="margin-top: 20px;"><a href='' class="expandable"
+  onclick="toggleExpandable(this,'.reqs');hideExpandable('.pax');return false;"
+  >SYSTEM REQUIREMENTS</a></h4>
+
+<div class="reqs col-13 online" style="display:none;margin:0;">
+<table>
+<tr>
+<th>Windows</th>
+<th style="width:40%">Mac OS</th>
+<th>Linux</th>
+</tr>
+<tr>
+<td>
+<ul>
+  <li>Microsoft Windows 8, 7, Vista, 2003, or XP (32 or 64 bit)</li>
+  <li>1 GB of RAM minimum, 2 GB recommended</li>
+  <li>400 MB of disk space</li>
+  <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Development Kit (JDK) 6 or higher</li>
+</ul>
+</td>
+<td>
+<ul>
+  <li>Mac OS X 10.8.5 or higher, up to 10.9 (Mavericks)</li>
+  <li>1 GB of RAM minimum, 2 GB recommended</li>
+  <li>400 MB of disk space</li>
+  <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Runtime Environment (JRE) 6 *</li>
+  <li>Java Development Kit (JDK) 6 or JDK 7</li>
+</ul>
+<p>* On Mac OS, run Android Studio with Java Runtime Environment (JRE) 6 for optimized font
+rendering. You can then configure your project to use Java Development Kit (JDK) 6 or JDK 7.</p>
+</td>
+<td>
+<ul>
+  <li>64-bit distribution capable of running 32-bit applications</li>
+  <li>GNU C Library (glibc) 2.11 or later is required.</li>
+  <li>Tested on Ubuntu 12.04, Precise Pangolin</li>
+  <li>GNOME or KDE desktop</li>
+  <li>1 GB of RAM minimum, 2 GB recommended</li>
+  <li>400 MB of disk space</li>
+  <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Oracle Java Development Kit (JDK) 6 or JDK 7</li>
+</ul>
+</td>
+</tr>
+</table>
+<p class="note"><strong>Note:</strong> Java Development Kit (JDK) 7 is required if you're targeting
+the Android L Developer Preview.</p>
+</div><!-- end pax -->
+
+
+
+<h2 style="margin-bottom: 0px;">Android Studio vs. Eclipse ADT Comparison</h2>
+
+<p>
+The following table lists some key differences between Android Studio Beta and
+<a href="{@docRoot}sdk/index.html">Eclipse with ADT</a>.
+</p>
+
+<style>
+td.yes {
+  color: #669900;
+}
+td.no {
+  color: #CC0000;
+}
+</style>
+
+<table>
+  <tbody><tr>
+    <th>Feature</th>
+    <th>Android Studio</th>
+    <th>ADT</th>
+  </tr>
+  <tr>
+    <td>Build system</td>
+    <td><a href="http://www.gradle.org/" class="external-link">Gradle</a></td>
+    <td><a href="http://ant.apache.org/" class="external-link">Ant</a></td>
+    </tr>
+    <tr>
+
+    <td>Maven-based build dependencies</td>
+    <td class="yes">Yes</td>
+    <td class="no">No</td>
+    </tr>
+
+    <td>Build variants and multiple-APK generation (great for Android Wear)</td>
+    <td class="yes">Yes</td>
+    <td class="no">No</td>
+    </tr>
+
+    <tr>
+    <td>Advanced Android code completion and refactoring</td>
+    <td class="yes">Yes</td>
+    <td class="no">No</td>
+    </tr>
+  <tr>
+    <td>Graphical layout editor</td>
+    <td class="yes">Yes</td>
+    <td class="yes">Yes</td>
+   </tr>
+   <tr>
+  </tr>
+
+    <tr>
+    <td>APK signing and keystore management</td>
+    <td class="yes">Yes</td>
+    <td class="yes">Yes</td>
+    </tr>
+
+    <tr>
+    <td>NDK support</td>
+    <td class="no">Coming soon</td>
+    <td class="yes">Yes</td>
+    </tr>
+ </tbody></table>
 
 
 
@@ -298,7 +418,7 @@ version by installing a patch. From within Android Studio, select
 Check for updates</strong>) to see whether an update is available.</p>
 
 <p>If an update is not available,
-follow the <a href="#Installing">installation instructions</a> below and replace your existing
+click the button above to download and replace your existing
 installation.</p>
 
 <div class="caution">
@@ -310,103 +430,6 @@ before installing the update. Then move them back once the update is complete.
 If you fail to copy these packages, then you can instead download them again through
 the Android SDK Manager.</p>
 </div>
-
-
-<p>Also note that due to the update to Android Gradle Plugin 0.6, you will encounter errors when opening
-existing projects. See the <a href="#Troubleshooting">Troubleshooting</a> notes below for
-information about how to resolve them.</p>
-
-
-<h2 id="Installing">Installing Android Studio</h2>
-<p>Android Studio requires JDK 6 or greater (JRE alone is not sufficient). To check if you
-have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
-If JDK is not available or the version is lower than 6,
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">download
-JDK from here</a>.</p>
-<p>To install Android Studio:</p>
-<ol>
-<li>Download the <strong>Android Studio</strong> package from above.</li>
-<li>Install Android Studio and the SDK tools:
-  <p><b>Windows:</b></p>
-  <ol>
-    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.</li>
-    <li>Follow the setup wizard to install Android Studio.
-
-    <div class="caution"><p><strong>Known issue:</strong>
-      On some Windows systems, the launcher script does not find where Java is installed.
-      If you encounter this problem,
-      you need to set an environment variable indicating the correct location.</p>
-      <p>Select <strong>Start menu > Computer > System Properties >
-      Advanced System Properties</strong>. Then open <strong>Advanced tab > Environment
-      Variables</strong> and add a new system variable <code>JAVA_HOME</code> that points to
-      your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
-    </div>
-    </li>
-
-  </ol>
-  <p><b>Mac OS X:</b></p>
-  <ol>
-    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.</li>
-    <li>Drag and drop Android Studio into the Applications folder.
-
-    <div class="caution"><p><strong>Known issue:</strong>
-      Depending on your security settings, when you attempt to open Android Studio, you might
-      see a warning that says the package is damaged and should be moved to the trash. If this
-      happens, go to <strong>System Preferences > Security &amp; Privacy</strong> and under
-      <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
-      Then open Android Studio again.</p>
-    </div>
-    </li>
-
-  </ol>
-  <p><b>Linux:</b></p>
-  <ol>
-    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an appropriate
-    location for your applications.
-    <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
-    in a terminal and execute {@code studio.sh}.
-      <p>You may want to add {@code android-studio/bin/} to your PATH environmental
-      variable so that you can start Android Studio from any directory.</p>
-    </li>
-  </ol>
-</li>
-</ol>
-
-<p>That's it! You're ready to start developing apps with Android Studio.</p>
-
-<div class="note">
-<p><strong>Note:</strong> On Windows and Mac, the individual tools and
-other SDK packages are saved within the Android Studio application directory.
-To access the tools directly, use a terminal to navigate into the application and locate
-the {@code sdk/} directory. For example:</p>
-<p>Windows: <code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
-<p>Mac: <code>/Applications/Android\ Studio.app/sdk/</code></p>
-</div>
-
-<p>For a list of some known issues, see <a
-href="http://tools.android.com/knownissues">tools.android.com/knownissues</a>.</p>
-
-
-<h2 id="Start">Starting a Project</h2>
-
-<p>When you launch Android Studio for the first time, you'll see a Welcome
-screen that offers several ways to get started:</p>
-
-<ul>
-  <li>To start building a new app, click <strong>New Project</strong>.
-    <p>This starts the New Project wizard, which helps you set up a project using an app template.
-  </li>
-  <li>To import an existing Android app project, click <strong>Import Project</strong>.
-    <p class="note"><strong>Note:</strong> If you previously developed your Android project
-    with Eclipse, you should first use the new export feature in the ADT plugin to prepare
-    your project with the new Gradle build system. For more information, read
-    <a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a>.</p>
-  </li>
-</ul>
-
-<p>For additional help using Android Studio, read <a
-href="{@docRoot}sdk/installing/studio-tips.html">Tips and Tricks</a>.</p>
-
 
 <p>As you continue developing apps, you may need to install additional versions
 of Android for the emulator and other packages such as the <a
@@ -430,6 +453,42 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.8.6</a> <em>(August 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.8.0</a> <em>(June 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Added support for Android Wear projects.</p>
+    <p>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.5.2</a> <em>(May 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v0.4.6</a> <em>(March 2014)</em>
   </p>
 
@@ -478,8 +537,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
     <li>Android Gradle plug-in updated to 0.5.0.
       <p class="caution"><strong>Caution:</strong> This new version is not backwards compatible.
       When opening a project that uses an older version of the plug-in, Studio will show an error
-      stating <strong>Gradle &lt;project_name&gt; project refresh failed.</strong> See <a
-      href="#Troubleshooting">Troubleshooting</a> below for details.</p>
+      stating <strong>Gradle &lt;project_name&gt; project refresh failed.</strong></p>
       <p>The updated Gradle plug-in includes the following changes:</p>
       <ul>
         <li>Fixed IDE model to contain the output file even if it's customized through the DSL. Also
@@ -553,65 +611,7 @@ Check for updates</strong>).</p>
 
 <h2 id="Troubleshooting">Troubleshooting</h2>
 
-
-<div class="figure" style="width:330px">
-<img src="{@docRoot}images/tools/studio_error_gradle5.png" width="330"/>
-<p class="img-caption"><strong>Figure 1.</strong> Error dialog when opening an existing project.</p>
-</div>
-
-<h3>Error: Gradle project refresh failed</h3>
-
-<p>Android Studio 0.2.0 has updated the Gradle plug-in to 0.5.0, which is not backwards compatible.
-When opening a project that uses an older version of the plug-in, Studio will display the error
-shown in figure 1 in the upper right corner of the IDE.
-To resolve the error, you must change the version of the Android Gradle plug-in to 0.5.0.</p>
-
-<ol>
-  <li>Click the link in the error dialog <strong>Search in build.gradle files</strong>. If the dialog
-is no longer visible, click <strong>Event Log</strong>
-<img src="{@docRoot}images/tools/studio_error_eventlog.png"
-style="vertical-align:bottom;margin:0;height:19px"/> in the bottom-right corner of the IDE,
-then click <strong>Search in build.gradle files</strong>.</li>
-  <li>Double-click the line under the <em>build.gradle</em> usage. For example:
-  <strong>classpath 'com.android.tools.build:gradle:0.4</strong>. This opens the project
-  <code>build.gradle</code> file.</li>
-  <li>Edit the <code>classpath</code> to change the gradle version to <code>0.5.+</code>.
-  For example:
-  <pre class="no-pretty-print">
-dependencies {
-  classpath 'com.android.tools.build:gradle:<strong>0.5.+</strong>'
-}
-</pre>
-  </li>
-  <li>Save the file and rebuild your project.</li>
-</ol>
-
-
-
-<div class="figure" style="width:330px">
-<img src="{@docRoot}images/tools/studio_error_supportlib.png" width="330"/>
-<p class="img-caption"><strong>Figure 2.</strong> Error dialog when creating a new project
-or opening a project using the support library.</p>
-</div>
-
-<h3>Error: Failed to import Gradle project</h3>
-
-<p>If, after updating to Android Studio 0.2.x and creating or opening a project, you receive an
-error stating <em>"Could not find any version that matches
-com.android.support:support-v4:13.0.+"</em>, then you must install the <strong>Android Support
-Repository</strong>. This was likely caused because you're pointing Android Studio to an external
-Android SDK location that does not have the new Maven repository included with Android Studio
-0.2.x. This new Maven repository is used by the new build system for the Support Library, instead
-of using the Support Library JAR files, so must be present in the SDK.</p>
-
-
-<ol>
-  <li>Open the <strong>Android SDK Manager</strong>.</li>
-  <li>Expand the <strong>Extras</strong> directory
-and install <strong>Android Support Repository</strong>.</li>
-</ol>
-
-<p>If you've encountered other problems in Android Studio, look at the following page
+<p>If you encounter problems in Android Studio, look at the following page
 for possible resolutions to known issues: <a href="http://tools.android.com/knownissues"
 >http://tools.android.com/knownissues</a>.</p>
 
@@ -650,8 +650,8 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
   if (os) {
     /* set up primary ACE download button */
     $('#download-ide-button').show();
-    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.4.6</span>"
-        + "<br/> <span class='small'>for " + os + "</span>");
+    $('#download-ide-button').append("Download Android Studio Beta <span class='small'>v0.8.6</span>"
+        + "<br/> <span class='small'>with the Android SDK for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
   } else {
@@ -693,10 +693,14 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
-      $("#tos").hide();
-      $("#main").show();
-      location.hash = "Updating";
-      _gaq.push(['_trackEvent', 'SDK', 'Android Studio', $("#downloadForRealz").html()]);
+      $("h1").text('Now redirecting to the install instructions...');
+      $("#tos").slideUp();
+      $("#jd-content .jd-descr").fadeOut('slow', function() {
+        setTimeout(function() {
+          window.location = "/sdk/installing/index.html?pkg=studio";
+        }, 1000);
+      });
+      ga('send', 'event', 'SDK', 'Android Studio', $("#downloadForRealz").html());
       return true;
     } else {
       $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,

@@ -23,22 +23,13 @@ import com.android.internal.view.IInputMethodClient;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.IApplicationToken;
-import android.view.IInputFilter;
-import android.view.IOnKeyguardExitResult;
-import android.view.IRotationWatcher;
-import android.view.IWindowManager;
-import android.view.IWindowSession;
 
-import java.util.List;
+import java.lang.Override;
 
 /**
  * Basic implementation of {@link IWindowManager} so that {@link Display} (and
@@ -81,7 +72,7 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
-            boolean arg5, boolean arg6, int arg7, int arg8)
+            boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10)
             throws RemoteException {
         // TODO Auto-generated method stub
 
@@ -204,8 +195,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public IWindowSession openSession(IInputMethodClient arg0, IInputContext arg1)
-            throws RemoteException {
+    public IWindowSession openSession(IWindowSessionCallback argn1, IInputMethodClient arg0,
+            IInputContext arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -226,6 +217,13 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
+            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
+            boolean scaleUp) {
         // TODO Auto-generated method stub
     }
 
@@ -282,6 +280,11 @@ public class IWindowManagerImpl implements IWindowManager {
     public void setAnimationScales(float[] arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public float getCurrentAnimatorScale() throws RemoteException {
+        return 0;
     }
 
     @Override
@@ -364,6 +367,11 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void setScreenCaptureDisabled(int userId, boolean disabled) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void updateRotation(boolean arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
     }
@@ -428,11 +436,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
-        return false;
-    }
-
-    @Override
     public IBinder asBinder() {
         // TODO Auto-generated method stub
         return null;
@@ -448,6 +451,11 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void keyguardGoingAway(boolean disableWindowAnimations,
+            boolean keyguardGoingToNotificationShade) throws RemoteException {
+    }
+
+    @Override
     public void lockNow(Bundle options) {
         // TODO Auto-generated method stub
     }
@@ -458,44 +466,26 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public IBinder getFocusedWindowToken() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setInputFilter(IInputFilter filter) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void getWindowFrame(IBinder token, Rect outFrame) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void setMagnificationCallbacks(IMagnificationCallbacks callbacks) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void setMagnificationSpec(MagnificationSpec spec) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean isRotationFrozen() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public void setTouchExplorationEnabled(boolean enabled) {
+    public void enableScreenIfNeeded() throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean clearWindowContentFrameStats(IBinder token) throws RemoteException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public WindowContentFrameStats getWindowContentFrameStats(IBinder token)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

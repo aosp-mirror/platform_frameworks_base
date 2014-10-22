@@ -1,4 +1,6 @@
 page.title=APK Expansion Files
+page.metaDescription=If your app needs more than the 50MB APK max, use free APK expansion files from Google Play.
+page.tags="apk size, apk max, large assets"
 @jd:body
 
 
@@ -525,17 +527,21 @@ are:</p>
     &lt;!-- Required to download files from Google Play -->
     &lt;uses-permission android:name="android.permission.INTERNET" />
 
-    &lt;!-- Required to keep CPU alive while downloading files (NOT to keep screen awake) -->
+    &lt;!-- Required to keep CPU alive while downloading files
+        (NOT to keep screen awake) -->
     &lt;uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    &lt;!-- Required to poll the state of the network connection and respond to changes -->
-    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    &lt;!-- Required to poll the state of the network connection
+        and respond to changes -->
+    &lt;uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     &lt;!-- Required to check whether Wi-Fi is enabled -->
     &lt;uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     &lt;!-- Required to read and write the expansion files on shared storage -->
-    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    &lt;uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     ...
 &lt;/manifest>
 </pre>
@@ -648,8 +654,8 @@ public class SampleAlarmReceiver extends BroadcastReceiver {
     &#64;Override
     public void onReceive(Context context, Intent intent) {
         try {
-            DownloaderClientMarshaller.startDownloadServiceIfRequired(context, intent,
-                    SampleDownloaderService.class);
+            DownloaderClientMarshaller.startDownloadServiceIfRequired(context,
+                intent, SampleDownloaderService.class);
         } catch (NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -691,16 +697,19 @@ versionCode)}</li>
     <p>For example, the sample app provided in the Apk Expansion package calls the
 following method in the activity's {@link android.app.Activity#onCreate onCreate()} method to check
 whether the expansion files already exist on the device:</p>
+
 <pre>
 boolean expansionFilesDelivered() {
     for (XAPKFile xf : xAPKS) {
-        String fileName = Helpers.getExpansionAPKFileName(this, xf.mIsBase, xf.mFileVersion);
+        String fileName = Helpers.getExpansionAPKFileName(this, xf.mIsBase,
+            xf.mFileVersion);
         if (!Helpers.doesFileExist(this, fileName, xf.mFileSize, false))
             return false;
     }
     return true;
 }
 </pre>
+
     <p>In this case, each {@code XAPKFile} object holds the version number and file size of a known
 expansion file and a boolean as to whether it's the main expansion file. (See the sample
 application's {@code SampleDownloaderActivity} class for details.)</p>
@@ -738,6 +747,7 @@ the Downloader Library begins the download and you should update your activity U
 display the download progress (see the next step). If the response <em>is</em> {@code
 NO_DOWNLOAD_REQUIRED}, then the files are available and your application can start.</p>
     <p>For example:</p>
+
 <pre>
 &#64;Override
 public void onCreate(Bundle savedInstanceState) {
@@ -752,11 +762,14 @@ public void onCreate(Bundle savedInstanceState) {
                 notifierIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Start the download service (if required)
-        int startResult = DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
+        int startResult =
+            DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
                         pendingIntent, SampleDownloaderService.class);
-        // If download has started, initialize this activity to show download progress
+        // If download has started, initialize this activity to show
+        // download progress
         if (startResult != DownloaderClientMarshaller.NO_DOWNLOAD_REQUIRED) {
-            // This is where you do set up to display the download progress (next step)
+            // This is where you do set up to display the download
+            // progress (next step)
             ...
             return;
         } // If the download wasn't necessary, fall through to start the app
@@ -764,6 +777,7 @@ public void onCreate(Bundle savedInstanceState) {
     startApp(); // Expansion files are available, start the app
 }
 </pre>
+
   </li>
   <li>When the {@code startDownloadServiceIfRequired()} method returns anything <em>other
 than</em> {@code NO_DOWNLOAD_REQUIRED}, create an instance of {@code IStub} by
@@ -781,9 +795,11 @@ android.app.Activity#onCreate onCreate()} method, after {@code startDownloadServ
 starts the download. </p>
     <p>For example, in the previous code sample for {@link android.app.Activity#onCreate
 onCreate()}, you can respond to the {@code startDownloadServiceIfRequired()} result like this:</p>
+
 <pre>
         // Start the download service (if required)
-        int startResult = DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
+        int startResult =
+            DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
                         pendingIntent, SampleDownloaderService.class);
         // If download has started, initialize activity to show progress
         if (startResult != DownloaderClientMarshaller.NO_DOWNLOAD_REQUIRED) {
@@ -890,7 +906,8 @@ others. By default, this flag is <em>not</em> enabled, so the user must be on Wi
 expansion files. You might want to provide a user preference to enable downloads over
 the cellular network. In which case, you can call:
 <pre>
-mRemoteService.setDownloadFlags(IDownloaderService.FLAGS_DOWNLOAD_OVER_CELLULAR);
+mRemoteService
+    .setDownloadFlags(IDownloaderService.FLAGS_DOWNLOAD_OVER_CELLULAR);
 </pre>
 </dd>
 </dl>
@@ -973,10 +990,12 @@ to both your expansion files:</p>
 // The shared path to all app expansion files
 private final static String EXP_PATH = "/Android/obb/";
 
-static String[] getAPKExpansionFiles(Context ctx, int mainVersion, int patchVersion) {
+static String[] getAPKExpansionFiles(Context ctx, int mainVersion,
+      int patchVersion) {
     String packageName = ctx.getPackageName();
     Vector&lt;String> ret = new Vector&lt;String>();
-    if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+    if (Environment.getExternalStorageState()
+          .equals(Environment.MEDIA_MOUNTED)) {
         // Build the full path to the app's expansion files
         File root = Environment.getExternalStorageDirectory();
         File expPath = new File(root.toString() + EXP_PATH + packageName);
@@ -1100,7 +1119,8 @@ following:</p>
 
 <pre>
 // Get a ZipResourceFile representing a merger of both the main and patch files
-ZipResourceFile expansionFile = APKExpansionSupport.getAPKExpansionZipFile(appContext,
+ZipResourceFile expansionFile =
+    APKExpansionSupport.getAPKExpansionZipFile(appContext,
         mainVersion, patchVersion);
 
 // Get an input stream for a known file inside the expansion file ZIPs
@@ -1188,28 +1208,18 @@ android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
 opens, it's important that you test this process to be sure your application can successfully query
 for the URLs, download the files, and save them to the device.</p>
 
-<p>To test your application's implementation of the manual download procedure, you must upload
-your application to Google Play as a "draft" to make your expansion files available for
-download:</p>
-
-<ol>
-  <li>Upload your APK and corresponding expansion files using the Google Play Developer
-Console.</li>
-  <li>Fill in the necessary application details (title, screenshots, etc.). You can come back and
-finalize these details before publishing your application.
-  <p>Click the <strong>Save</strong> button. <em>Do not click Publish.</em> This saves
-the application as a draft, such that your application is not published for Google Play users,
-but the expansion files are available for you to test the download process.</p></li>
-  <li>Install the application on your test device using the Eclipse tools or <a
-href="{@docRoot}tools/help/adb.html">{@code adb}</a>.</li>
-  <li>Launch the app.</li>
-</ol>
-
-<p>If everything works as expected, your application should begin downloading the expansion
+<p>To test your application's implementation of the manual download procedure,
+you can publish it to the alpha or beta channel, so it will only be available to
+authorized testers.
+If everything works as expected, your application should begin downloading the expansion
 files as soon as the main activity starts.</p>
 
-
-
+<p class="note"><strong>Note:</strong> Previously you could test an app by
+uploading an unpublished "draft" version. This functionality is no longer
+supported; instead, you must publish it to the alpha or beta distribution
+channel. For more information, see <a
+href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">Draft Apps
+are No Longer Supported</a>.
 
 <h2 id="Updating">Updating Your Application</h2>
 

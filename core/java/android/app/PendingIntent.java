@@ -16,6 +16,9 @@
 
 package android.app;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IIntentReceiver;
@@ -29,6 +32,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.AndroidException;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A description of an Intent and target action to perform with it.  Instances
@@ -86,6 +92,26 @@ import android.util.AndroidException;
 public final class PendingIntent implements Parcelable {
     private final IIntentSender mTarget;
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                    FLAG_ONE_SHOT,
+                    FLAG_NO_CREATE,
+                    FLAG_CANCEL_CURRENT,
+                    FLAG_UPDATE_CURRENT,
+
+                    Intent.FILL_IN_ACTION,
+                    Intent.FILL_IN_DATA,
+                    Intent.FILL_IN_CATEGORIES,
+                    Intent.FILL_IN_COMPONENT,
+                    Intent.FILL_IN_PACKAGE,
+                    Intent.FILL_IN_SOURCE_BOUNDS,
+                    Intent.FILL_IN_SELECTOR,
+                    Intent.FILL_IN_CLIP_DATA
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
     /**
      * Flag indicating that this PendingIntent can be used only once.
      * For use with {@link #getActivity}, {@link #getBroadcast}, and
@@ -95,8 +121,8 @@ public final class PendingIntent implements Parcelable {
      */
     public static final int FLAG_ONE_SHOT = 1<<30;
     /**
-     * Flag indicating that if the described PendingIntent already
-     * exists, then simply return null instead of creating it.
+     * Flag indicating that if the described PendingIntent does not
+     * already exist, then simply return null instead of creating it.
      * For use with {@link #getActivity}, {@link #getBroadcast}, and
      * {@link #getService}.
      */
@@ -222,7 +248,7 @@ public final class PendingIntent implements Parcelable {
      * supplied.
      */
     public static PendingIntent getActivity(Context context, int requestCode,
-            Intent intent, int flags) {
+            Intent intent, @Flags int flags) {
         return getActivity(context, requestCode, intent, flags, null);
     }
 
@@ -255,7 +281,7 @@ public final class PendingIntent implements Parcelable {
      * supplied.
      */
     public static PendingIntent getActivity(Context context, int requestCode,
-            Intent intent, int flags, Bundle options) {
+            @NonNull Intent intent, @Flags int flags, @Nullable Bundle options) {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
@@ -280,7 +306,7 @@ public final class PendingIntent implements Parcelable {
      * activity is started, not when the pending intent is created.
      */
     public static PendingIntent getActivityAsUser(Context context, int requestCode,
-            Intent intent, int flags, Bundle options, UserHandle user) {
+            @NonNull Intent intent, int flags, Bundle options, UserHandle user) {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
@@ -345,7 +371,7 @@ public final class PendingIntent implements Parcelable {
      * supplied.
      */
     public static PendingIntent getActivities(Context context, int requestCode,
-            Intent[] intents, int flags) {
+            @NonNull Intent[] intents, @Flags int flags) {
         return getActivities(context, requestCode, intents, flags, null);
     }
 
@@ -395,7 +421,7 @@ public final class PendingIntent implements Parcelable {
      * supplied.
      */
     public static PendingIntent getActivities(Context context, int requestCode,
-            Intent[] intents, int flags, Bundle options) {
+            @NonNull Intent[] intents, @Flags int flags, @Nullable Bundle options) {
         String packageName = context.getPackageName();
         String[] resolvedTypes = new String[intents.length];
         for (int i=0; i<intents.length; i++) {
@@ -421,7 +447,7 @@ public final class PendingIntent implements Parcelable {
      * activity is started, not when the pending intent is created.
      */
     public static PendingIntent getActivitiesAsUser(Context context, int requestCode,
-            Intent[] intents, int flags, Bundle options, UserHandle user) {
+            @NonNull Intent[] intents, int flags, Bundle options, UserHandle user) {
         String packageName = context.getPackageName();
         String[] resolvedTypes = new String[intents.length];
         for (int i=0; i<intents.length; i++) {
@@ -465,7 +491,7 @@ public final class PendingIntent implements Parcelable {
      * supplied.
      */
     public static PendingIntent getBroadcast(Context context, int requestCode,
-            Intent intent, int flags) {
+            Intent intent, @Flags int flags) {
         return getBroadcastAsUser(context, requestCode, intent, flags,
                 new UserHandle(UserHandle.myUserId()));
     }
@@ -519,7 +545,7 @@ public final class PendingIntent implements Parcelable {
      * supplied.
      */
     public static PendingIntent getService(Context context, int requestCode,
-            Intent intent, int flags) {
+            @NonNull Intent intent, @Flags int flags) {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
@@ -749,6 +775,7 @@ public final class PendingIntent implements Parcelable {
      * @return The package name of the PendingIntent, or null if there is
      * none associated with it.
      */
+    @Nullable
     public String getCreatorPackage() {
         try {
             return ActivityManagerNative.getDefault()
@@ -807,6 +834,7 @@ public final class PendingIntent implements Parcelable {
      * @return The user handle of the PendingIntent, or null if there is
      * none associated with it.
      */
+    @Nullable
     public UserHandle getCreatorUserHandle() {
         try {
             int uid = ActivityManagerNative.getDefault()
@@ -854,6 +882,20 @@ public final class PendingIntent implements Parcelable {
         try {
             return ActivityManagerNative.getDefault()
                 .getIntentForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     * Return descriptive tag for this PendingIntent.
+     */
+    public String getTag(String prefix) {
+        try {
+            return ActivityManagerNative.getDefault()
+                .getTagForIntentSender(mTarget, prefix);
         } catch (RemoteException e) {
             // Should never happen.
             return null;
@@ -922,8 +964,8 @@ public final class PendingIntent implements Parcelable {
      * @param sender The PendingIntent to write, or null.
      * @param out Where to write the PendingIntent.
      */
-    public static void writePendingIntentOrNullToParcel(PendingIntent sender,
-            Parcel out) {
+    public static void writePendingIntentOrNullToParcel(@Nullable PendingIntent sender,
+            @NonNull Parcel out) {
         out.writeStrongBinder(sender != null ? sender.mTarget.asBinder()
                 : null);
     }
@@ -938,7 +980,8 @@ public final class PendingIntent implements Parcelable {
      * @return Returns the Messenger read from the Parcel, or null if null had
      * been written.
      */
-    public static PendingIntent readPendingIntentOrNullFromParcel(Parcel in) {
+    @Nullable
+    public static PendingIntent readPendingIntentOrNullFromParcel(@NonNull Parcel in) {
         IBinder b = in.readStrongBinder();
         return b != null ? new PendingIntent(b) : null;
     }

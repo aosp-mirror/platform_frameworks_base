@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
@@ -31,5 +32,8 @@
     <instrumentation android:name="android.bluetooth.BluetoothTestRunner"
             android:targetPackage="com.android.bluetooth.tests"
             android:label="Bluetooth Tests" />
+    <instrumentation android:name="android.bluetooth.BluetoothInstrumentation"
+            android:targetPackage="com.android.bluetooth.tests"
+            android:label="Bluetooth Test Utils" />
 
 </manifest>

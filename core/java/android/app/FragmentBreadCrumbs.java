@@ -37,7 +37,10 @@ import android.widget.TextView;
  *
  * <p>The default style for this view is
  * {@link android.R.style#Widget_FragmentBreadCrumbs}.
+ *
+ * @deprecated This widget is no longer supported.
  */
+@Deprecated
 public class FragmentBreadCrumbs extends ViewGroup
         implements FragmentManager.OnBackStackChangedListener {
     Activity mActivity;
@@ -55,6 +58,8 @@ public class FragmentBreadCrumbs extends ViewGroup
     private OnBreadCrumbClickListener mOnBreadCrumbClickListener;
 
     private int mGravity;
+    private int mLayoutResId;
+    private int mTextColor;
 
     private static final int DEFAULT_GRAVITY = Gravity.START | Gravity.CENTER_VERTICAL;
 
@@ -81,17 +86,31 @@ public class FragmentBreadCrumbs extends ViewGroup
     }
 
     public FragmentBreadCrumbs(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.style.Widget_FragmentBreadCrumbs);
+        this(context, attrs, com.android.internal.R.attr.fragmentBreadCrumbsStyle);
     }
 
-    public FragmentBreadCrumbs(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public FragmentBreadCrumbs(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.FragmentBreadCrumbs, defStyle, 0);
+    /**
+     * @hide
+     */
+    public FragmentBreadCrumbs(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.FragmentBreadCrumbs, defStyleAttr, defStyleRes);
 
         mGravity = a.getInt(com.android.internal.R.styleable.FragmentBreadCrumbs_gravity,
                 DEFAULT_GRAVITY);
+        mLayoutResId = a.getResourceId(
+                com.android.internal.R.styleable.FragmentBreadCrumbs_itemLayout,
+                com.android.internal.R.layout.fragment_bread_crumb_item);
+        mTextColor = a.getColor(
+                com.android.internal.R.styleable.FragmentBreadCrumbs_itemColor,
+                0);
 
         a.recycle();
     }
@@ -300,12 +319,11 @@ public class FragmentBreadCrumbs extends ViewGroup
                 }
             }
             if (i >= numViews) {
-                final View item = mInflater.inflate(
-                        com.android.internal.R.layout.fragment_bread_crumb_item,
-                        this, false);
+                final View item = mInflater.inflate(mLayoutResId, this, false);
                 final TextView text = (TextView) item.findViewById(com.android.internal.R.id.title);
                 text.setText(bse.getBreadCrumbTitle());
                 text.setTag(bse);
+                text.setTextColor(mTextColor);
                 if (i == 0) {
                     item.findViewById(com.android.internal.R.id.left_icon).setVisibility(View.GONE);
                 }

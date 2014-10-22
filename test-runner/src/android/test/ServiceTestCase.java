@@ -18,14 +18,11 @@ package android.test;
 
 import android.app.Application;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.test.mock.MockApplication;
 
-import java.lang.reflect.Field;
 import java.util.Random;
 
 /**
@@ -263,6 +260,7 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
         }
         if (mServiceCreated) {
             mService.onDestroy();
+            mServiceCreated = false;
         }
     }
 

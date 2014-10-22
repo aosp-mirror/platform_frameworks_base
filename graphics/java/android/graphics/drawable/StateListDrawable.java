@@ -16,6 +16,8 @@
 
 package android.graphics.drawable;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -24,6 +26,7 @@ import java.util.Arrays;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 import android.util.StateSet;
 
@@ -54,8 +57,9 @@ import android.util.StateSet;
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class StateListDrawable extends DrawableContainer {
+    private static final String TAG = StateListDrawable.class.getSimpleName();
+
     private static final boolean DEBUG = false;
-    private static final String TAG = "StateListDrawable";
 
     /**
      * To be proper, we should have a getter for dither (and alpha, etc.)
@@ -68,7 +72,8 @@ public class StateListDrawable extends DrawableContainer {
      * to improve the quality at negligible cost.
      */
     private static final boolean DEFAULT_DITHER = true;
-    private final StateListState mStateListState;
+
+    private StateListState mStateListState;
     private boolean mMutated;
 
     public StateListDrawable() {
@@ -110,36 +115,30 @@ public class StateListDrawable extends DrawableContainer {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser,
-            AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
 
-        TypedArray a = r.obtainAttributes(attrs,
-                com.android.internal.R.styleable.StateListDrawable);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.StateListDrawable);
 
         super.inflateWithAttributes(r, parser, a,
-                com.android.internal.R.styleable.StateListDrawable_visible);
+                R.styleable.StateListDrawable_visible);
 
         mStateListState.setVariablePadding(a.getBoolean(
-                com.android.internal.R.styleable.StateListDrawable_variablePadding, false));
+                R.styleable.StateListDrawable_variablePadding, false));
         mStateListState.setConstantSize(a.getBoolean(
-                com.android.internal.R.styleable.StateListDrawable_constantSize, false));
+                R.styleable.StateListDrawable_constantSize, false));
         mStateListState.setEnterFadeDuration(a.getInt(
-                com.android.internal.R.styleable.StateListDrawable_enterFadeDuration, 0));
+                R.styleable.StateListDrawable_enterFadeDuration, 0));
         mStateListState.setExitFadeDuration(a.getInt(
-                com.android.internal.R.styleable.StateListDrawable_exitFadeDuration, 0));
+                R.styleable.StateListDrawable_exitFadeDuration, 0));
 
-        setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither,
-                               DEFAULT_DITHER));
-
-        setAutoMirrored(a.getBoolean(
-                com.android.internal.R.styleable.StateListDrawable_autoMirrored, false));
+        setDither(a.getBoolean(R.styleable.StateListDrawable_dither, DEFAULT_DITHER));
+        setAutoMirrored(a.getBoolean(R.styleable.StateListDrawable_autoMirrored, false));
 
         a.recycle();
 
-        int type;
-
         final int innerDepth = parser.getDepth() + 1;
+        int type;
         int depth;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && ((depth = parser.getDepth()) >= innerDepth
@@ -161,7 +160,7 @@ public class StateListDrawable extends DrawableContainer {
             for (i = 0; i < numAttrs; i++) {
                 final int stateResId = attrs.getAttributeNameResource(i);
                 if (stateResId == 0) break;
-                if (stateResId == com.android.internal.R.attr.drawable) {
+                if (stateResId == R.attr.drawable) {
                     drawableRes = attrs.getAttributeResourceValue(i, 0);
                 } else {
                     states[j++] = attrs.getAttributeBooleanValue(i, false)
@@ -171,9 +170,9 @@ public class StateListDrawable extends DrawableContainer {
             }
             states = StateSet.trimStateSet(states, j);
 
-            Drawable dr;
+            final Drawable dr;
             if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes);
+                dr = r.getDrawable(drawableRes, theme);
             } else {
                 while ((type = parser.next()) == XmlPullParser.TEXT) {
                 }
@@ -183,7 +182,7 @@ public class StateListDrawable extends DrawableContainer {
                                     + ": <item> tag requires a 'drawable' attribute or "
                                     + "child tag defining a drawable");
                 }
-                dr = Drawable.createFromXmlInner(r, parser, attrs);
+                dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
 
             mStateListState.addStateSet(states, dr);
@@ -233,10 +232,10 @@ public class StateListDrawable extends DrawableContainer {
     public Drawable getStateDrawable(int index) {
         return mStateListState.getChild(index);
     }
-    
+
     /**
      * Gets the index of the drawable with the provided state set.
-     * 
+     *
      * @param stateSet the state set to look up
      * @return the index of the provided state set, or -1 if not found
      * @hide pending API council
@@ -246,7 +245,7 @@ public class StateListDrawable extends DrawableContainer {
     public int getStateDrawableIndex(int[] stateSet) {
         return mStateListState.indexOfStateSet(stateSet);
     }
-    
+
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
@@ -274,7 +273,7 @@ public class StateListDrawable extends DrawableContainer {
         mStateListState.setLayoutDirection(layoutDirection);
     }
 
-    static final class StateListState extends DrawableContainerState {
+    static class StateListState extends DrawableContainerState {
         int[][] mStateSets;
 
         StateListState(StateListState orig, StateListDrawable owner, Resources res) {
@@ -293,7 +292,7 @@ public class StateListDrawable extends DrawableContainer {
             return pos;
         }
 
-        private int indexOfStateSet(int[] stateSet) {
+        int indexOfStateSet(int[] stateSet) {
             final int[][] stateSets = mStateSets;
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
@@ -323,11 +322,26 @@ public class StateListDrawable extends DrawableContainer {
         }
     }
 
+    void setConstantState(StateListState state) {
+        super.setConstantState(state);
+
+        mStateListState = state;
+    }
+
     private StateListDrawable(StateListState state, Resources res) {
-        StateListState as = new StateListState(state, this, res);
-        mStateListState = as;
-        setConstantState(as);
+        final StateListState newState = new StateListState(state, this, res);
+        setConstantState(newState);
         onStateChange(getState());
+    }
+
+    /**
+     * This constructor exists so subclasses can avoid calling the default
+     * constructor and setting up a StateListDrawable-specific constant state.
+     */
+    StateListDrawable(StateListState state) {
+        if (state != null) {
+            setConstantState(state);
+        }
     }
 }
 

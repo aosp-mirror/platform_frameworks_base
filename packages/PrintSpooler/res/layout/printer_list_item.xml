@@ -15,13 +15,13 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-        android:minHeight="?android:attr/listPreferredItemHeight"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical">
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:orientation="horizontal"
+    android:gravity="start|center_vertical">
 
     <ImageView
         android:id="@+id/icon"
@@ -31,7 +31,7 @@
         android:layout_marginEnd="8dip"
         android:duplicateParentState="true"
         android:contentDescription="@null"
-        android:visibility="gone">
+        android:visibility="invisible">
     </ImageView>
 
     <LinearLayout
@@ -49,7 +49,7 @@
             android:ellipsize="end"
             android:textIsSelectable="false"
             android:gravity="top|start"
-            android:textColor="@color/item_text_color"
+            android:textColor="?android:attr/textColorPrimary"
             android:duplicateParentState="true">
         </TextView>
 
@@ -62,7 +62,7 @@
             android:ellipsize="end"
             android:textIsSelectable="false"
             android:visibility="gone"
-            android:textColor="@color/print_option_title"
+            android:textColor="?android:attr/textColorPrimary"
             android:duplicateParentState="true">
         </TextView>
 

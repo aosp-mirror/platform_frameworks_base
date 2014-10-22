@@ -1,13 +1,14 @@
 page.title=Android Debug Bridge
 parent.title=Tools
 parent.link=index.html
-page.tags="adb"
+page.tags=adb
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
   <h2>In this document</h2>
 <ol>
+  <li><a href="#Enabling">Enabling adb Debugging</a></li>
   <li><a href="#issuingcommands">Syntax</a></li>
   <li><a href="#commandsummary">Commands</a></li>
   <li><a href="#devicestatus">Querying for Emulator/Device Instances</a></li>
@@ -72,6 +73,19 @@ instances and handles commands from multiple adb clients, you can control any em
 instance from any client (or from a script).</p>
 
 
+<h2 id="Enabling">Enabling adb Debugging</h2>
+
+<p>In order to use adb with a device connected over USB, you must enable
+<strong>USB debugging</strong> in the device system settings, under <strong>
+Developer options</strong>.</p>
+
+<p>On Android 4.2 and higher, the Developer options screen is
+hidden by default. To make it visible, go to
+<b>Settings &gt; About phone</b> and tap <b>Build number</b> seven times. Return to the previous
+screen to find <strong>Developer options</strong> at the bottom.</p>
+
+<p>On some devices, the Developer options screen may be located or named differently.</p>
+
 <p class="note"><strong>Note:</strong> When you connect a device running Android 4.2.2 or higher
 to your computer, the system shows a dialog asking whether to accept an RSA key that allows
 debugging through this computer. This security mechanism protects user devices because it ensures
@@ -79,6 +93,11 @@ that USB debugging and other adb commands cannot be executed unless you're able 
 device and acknowledge the dialog. This requires that you have adb version 1.0.31 (available with
 SDK Platform-tools r16.0.1 and higher) in order to debug on a device running Android 4.2.2 or
 higher.</p>
+
+<p>For more information about connecting to a device over USB, read
+<a href="{@docRoot}tools/device.html">Using Hardware Devices</a>.</p>
+
+
 
 
 <h2 id="issuingcommands">Syntax</h2>

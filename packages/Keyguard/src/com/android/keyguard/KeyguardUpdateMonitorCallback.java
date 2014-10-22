@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicy;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -27,7 +28,7 @@ import com.android.internal.telephony.IccCardConstants;
 /**
  * Callback for general information relevant to lock screen.
  */
-class KeyguardUpdateMonitorCallback {
+public class KeyguardUpdateMonitorCallback {
 
     private static final long VISIBILITY_CHANGED_COLLAPSE_MS = 1000;
     private long mVisibilityChangedCalled;
@@ -39,12 +40,12 @@ class KeyguardUpdateMonitorCallback {
      *
      * @param status current battery status
      */
-    void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) { }
+    public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) { }
 
     /**
      * Called once per minute or when the time changes.
      */
-    void onTimeChanged() { }
+    public void onTimeChanged() { }
 
     /**
      * Called when the carrier PLMN or SPN changes.
@@ -53,14 +54,14 @@ class KeyguardUpdateMonitorCallback {
      *   be displayed.
      * @param spn The service provider name.  May be null if it shouldn't be displayed.
      */
-    void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) { }
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) { }
 
     /**
      * Called when the ringer mode changes.
      * @param state the current ringer state, as defined in
      * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
      */
-    void onRingerModeChanged(int state) { }
+    public void onRingerModeChanged(int state) { }
 
     /**
      * Called when the phone state changes. String will be one of:
@@ -68,15 +69,15 @@ class KeyguardUpdateMonitorCallback {
      * {@link TelephonyManager@EXTRA_STATE_RINGING}
      * {@link TelephonyManager#EXTRA_STATE_OFFHOOK
      */
-    void onPhoneStateChanged(int phoneState) { }
+    public void onPhoneStateChanged(int phoneState) { }
 
     /**
      * Called when the visibility of the keyguard changes.
      * @param showing Indicates if the keyguard is now visible.
      */
-    void onKeyguardVisibilityChanged(boolean showing) { }
+    public void onKeyguardVisibilityChanged(boolean showing) { }
 
-    void onKeyguardVisibilityChangedRaw(boolean showing) {
+    public void onKeyguardVisibilityChangedRaw(boolean showing) {
         final long now = SystemClock.elapsedRealtime();
         if (showing == mShowing
                 && (now - mVisibilityChangedCalled) < VISIBILITY_CHANGED_COLLAPSE_MS) return;
@@ -86,47 +87,53 @@ class KeyguardUpdateMonitorCallback {
     }
 
     /**
+     * Called when the keyguard enters or leaves bouncer mode.
+     * @param bouncer if true, keyguard is now in bouncer mode.
+     */
+    public void onKeyguardBouncerChanged(boolean bouncer) { }
+
+    /**
      * Called when visibility of lockscreen clock changes, such as when
      * obscured by a widget.
      */
-    void onClockVisibilityChanged() { }
+    public void onClockVisibilityChanged() { }
 
     /**
      * Called when the device becomes provisioned
      */
-    void onDeviceProvisioned() { }
+    public void onDeviceProvisioned() { }
 
     /**
      * Called when the device policy changes.
      * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
      */
-    void onDevicePolicyManagerStateChanged() { }
+    public void onDevicePolicyManagerStateChanged() { }
 
     /**
      * Called when the user change begins.
      */
-    void onUserSwitching(int userId) { }
+    public void onUserSwitching(int userId) { }
 
     /**
      * Called when the user change is complete.
      */
-    void onUserSwitchComplete(int userId) { }
+    public void onUserSwitchComplete(int userId) { }
 
     /**
      * Called when the SIM state changes.
      * @param simState
      */
-    void onSimStateChanged(IccCardConstants.State simState) { }
+    public void onSimStateChanged(IccCardConstants.State simState) { }
 
     /**
      * Called when a user is removed.
      */
-    void onUserRemoved(int userId) { }
+    public void onUserRemoved(int userId) { }
 
     /**
      * Called when the user's info changed.
      */
-    void onUserInfoChanged(int userId) { }
+    public void onUserInfoChanged(int userId) { }
 
     /**
      * Called when boot completed.
@@ -134,24 +141,12 @@ class KeyguardUpdateMonitorCallback {
      * Note, this callback will only be received if boot complete occurs after registering with
      * KeyguardUpdateMonitor.
      */
-    void onBootCompleted() { }
-
-    /**
-     * Called when audio client attaches or detaches from AudioManager.
-     */
-    void onMusicClientIdChanged(int clientGeneration, boolean clearing, PendingIntent intent) { }
-
-    /**
-     * Called when the audio playback state changes.
-     * @param playbackState
-     * @param eventTime
-     */
-    public void onMusicPlaybackStateChanged(int playbackState, long eventTime) { }
+    public void onBootCompleted() { }
 
     /**
      * Called when the emergency call button is pressed.
      */
-    void onEmergencyCallAction() { }
+    public void onEmergencyCallAction() { }
 
     /**
      * Called when the transport background changes.
@@ -167,9 +162,40 @@ class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the screen turns off
-     * @param why {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER},
-     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT} or
-     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
+     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
+     * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or
+     * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
     public void onScreenTurnedOff(int why) { }
+
+    /**
+     * Called when trust changes for a user.
+     */
+    public void onTrustChanged(int userId) { }
+
+    /**
+     * Called when trust being managed changes for a user.
+     */
+    public void onTrustManagedChanged(int userId) { }
+
+    /**
+     * Called when the user has proved to a trust agent that they want to use the device.
+     */
+    public void onTrustInitiatedByUser(int userId) { }
+
+    /**
+     * Called when a fingerprint is recognized.
+     * @param userId
+     */
+    public void onFingerprintRecognized(int userId) { }
+
+    /**
+     * Called when fingerprint is acquired but not yet recognized
+     */
+    public void onFingerprintAcquired(int info) { }
+
+    /**
+     * Called when the state of face unlock changed.
+     */
+    public void onFaceUnlockStateChanged(boolean running, int userId) { }
 }

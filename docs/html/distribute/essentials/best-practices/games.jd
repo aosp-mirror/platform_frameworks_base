@@ -1,0 +1,259 @@
+page.title=Game Developer Best Practices
+page.image=/distribute/images/gp-games-practices.png
+page.metaDescription=Essential tips for launching successful games in Google Play.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Best Practices</h2>
+<ol>
+<li><a href="#users">Get Users</a></li>
+<li><a href="#engage">Engage and Retain</a></li>
+<li><a href="#beyond">Beyond the Basics</a></li>
+<li><a href="#related-resources">Related Resources</a></li>
+</ol>
+</div></div>
+
+<p>
+  The following best practices have enabled developers worldwide to build
+  great, successful games for Google Play.
+</p>
+
+<div class="headerLine">
+  <h2 id="users">
+  Get Users
+  </h2>
+
+
+</div>
+
+<h3>
+  1. Optimize for great ratings
+</h3>
+
+<ul>
+  <li>
+  <p>
+    <a href=
+    "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">Beta
+    test</a> to ensure your games are ready and poised for great ratings.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Optimize graphics, frame rates, and responsiveness with the <a href=
+    "http://android-developers.blogspot.com/2013/09/using-hardware-scaler-for-performance.html">
+    Hardware Scaler</a> and <a href=
+    "{@docRoot}training/graphics/opengl/index.html">OpenGL ES</a>.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Be sure your APK is small, then provide game content through over-the-air
+    downloads.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  2. Build buzz
+</h3>
+
+<ul>
+  <li>
+  <p>
+    Build a community with social media, <a href=
+    "{@docRoot}distribute/users/build-community.html">communities</a> to get
+    and keep users talking.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Promote your games with official <a href=
+    "{@docRoot}distribute/tools/promote/badges.html">Google Play badges</a>
+    and <a href="{@docRoot}distribute/tools/promote/linking.html">links to
+    your products</a> on Google Play.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    If you ship on multiple platforms, doing so at the same time can maximize
+    your marketing impact.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  3. Get Visibility
+</h3>
+
+<ul>
+  <li>
+  <p>
+    First impressions count: <a href=
+    "{@docRoot}distribute/users/your-listing.html">highlight</a> the game's
+    best features in screenshots, videos, and description.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Integrate Google Play Game Services, so your game is displayed in the
+    <a href=
+    "https://play.google.com/store/apps/details?id=com.google.android.play.games">
+    Google Play Games App</a>.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="engage">
+  Engage and Retain
+  </h2>
+
+
+</div>
+
+<h3>
+  1. Keep users coming back
+</h3>
+
+<ul>
+  <li>
+  <p>
+    <a href=
+    "https://developers.google.com/games/services/common/concepts/achievements">
+    Achievements</a>, <a href=
+    "https://developers.google.com/games/services/common/concepts/leaderboards">
+    leaderboards</a>, <a href=
+    "https://developers.google.com/games/services/common/concepts/realtimeMultiplayer">
+    multiplayer</a>, and <a href=
+    "https://developers.google.com/games/services/common/concepts/cloudsave">cloud
+    save</a> help engage users and bring them back.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Hold tournaments and offer promotions, then announce them through
+    <a href="{@docRoot}design/patterns/notifications.html">notifications</a>.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Sign in users early, then automatically. Before their first sign-in, save
+    progress locally.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  2. Give users a reason to invest their money
+</h3>
+
+<ul>
+  <li>
+  <p>
+    A majority of the top grossing games use in-app purchases. Use them to
+    unlock content and allow players to enhance their game play.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    <a href="{@docRoot}google/play/billing/index.html">Google Play In-app
+    Billing</a> makes purchasing easy with several forms of payment.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Provide content updates regularly to give users limited edition items to
+    win or purchase.
+  </p>
+  </li>
+</ul>
+
+<h3>
+  3. Earn players’ love
+</h3>
+
+<ul>
+  <li>
+  <p>
+    <a href=
+    "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html">
+    Measure</a> your campaigns to see what’s driving quality users to install
+    your games.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    <a href=
+    "{@docRoot}distribute/essentials/optimizing-your-app.html#measuring-analyzing-responding">
+    Analyze in-game use</a> to steer content updates and prolong the life of your
+    games.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    <a href=
+    "http://android-developers.blogspot.com/2013/05/all-google-play-developers-can-now.html">
+    Respond to reviews</a> and get valuable feedback from the community
+    you’ve built.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="beyond">
+  Beyond the Basics
+  </h2>
+
+
+</div>
+
+<ul>
+  <li>
+  <p>
+    After you've launched in your market of strength, <a href=
+    "{@docRoot}distribute/users/expand-to-new-markets.html">expand into other
+    markets</a> strategically and <a href=
+    "{@docRoot}distribute/tools/localization-checklist.html">localize</a>
+    your apps as you go.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Provide content <a href=
+    "{@docRoot}distribute/engage/app-updates.html">updates on a regular
+    basis</a> to keep users engaged.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Building educational games? See the <a href=
+    "{@docRoot}distribute/essentials/gpfe-guidelines.html">Education
+    Guidelines</a>.
+  </p>
+  </li>
+</ul>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/bestpractices/games"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3"
+  data-maxResults="6"></div>

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="ninepatch-prebuilt">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/ninepatch/ninepatch-prebuilt.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$ANDROID_SRC$/tools/base/ninepatch/src/main/java" />
+    </SOURCES>
+  </library>
+</component>

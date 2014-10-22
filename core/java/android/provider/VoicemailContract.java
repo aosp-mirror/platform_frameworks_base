@@ -188,6 +188,12 @@ public class VoicemailContract {
          */
         public static final String MIME_TYPE = "mime_type";
         /**
+         * The transcription of the voicemail entry. This will only be populated if the voicemail
+         * entry has a valid transcription.
+         * <P>Type: TEXT</P>
+         */
+        public static final String TRANSCRIPTION = "transcription";
+        /**
          * Path to the media content file. Internal only field.
          * @hide
          */

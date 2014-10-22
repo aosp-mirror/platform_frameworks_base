@@ -1,5 +1,5 @@
 page.title=Providing Up Navigation
-page.tags="up navigation","NavUtils","TaskStackBuilder"
+page.tags=up navigation,NavUtils,TaskStackBuilder
 
 trainingnavtop=true
 
@@ -133,7 +133,25 @@ android.support.v4.app.NavUtils} class's static method,
 navigateUpFromSameTask()}. When you call this method, it finishes the current activity and
 starts (or resumes) the appropriate parent activity.
 If the target parent activity is in the task's back stack, it is brought
-forward as defined by {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}.</p>
+forward. The way it is brought forward depends on whether the parent activity
+is able to handle an {@link
+android.app.Activity#onNewIntent onNewIntent()} call:</p>
+
+<ul>
+    <li>If the parent activity has launch mode <a
+    href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+    &lt;singleTop>}</a>, or the <code>up</code> intent contains {@link
+    android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}, the parent activity is
+    brought to the top of the stack, and receives the intent through its
+    {@link android.app.Activity#onNewIntent onNewIntent()} method.</li>
+
+    <li>If the parent activity has launch mode <a
+    href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+    &lt;standard>}</a>, and the <code>up</code> intent does not contain
+    {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}, the parent activity
+    is popped off the stack, and a new instance of that activity is created on
+    top of the stack to receive the intent.</li>
+</ul>
 
 <p>For example:</p>
 
@@ -156,7 +174,6 @@ task</strong> (that is, the user began this task from your app). If that's not t
 activity was started in a task that belongs to a different app, then
 navigating <em>Up</em> should create a new task that belongs to your app, which
 requires that you create a new back stack.</p>
-
 
 <h3 id="BuildBackStack">Navigate up with a new back stack</h3>
 

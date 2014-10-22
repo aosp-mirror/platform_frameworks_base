@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2014 Google Inc. All Rights Reserved. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/app_name"
+            style="@style/Title" />
+    <EditText
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textUri"
+            android:hint="@string/media_content_hint"
+            android:gravity="center"
+            android:textSize="24sp" />
+    <EditText
+            android:id="@+id/next_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            android:hint="@string/media_next_hint"
+            android:gravity="center"
+            android:textSize="24sp" />
+    <CheckBox
+            android:id="@+id/has_video"
+            android:layout_marginRight="8dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/has_video" />
+    <ImageView
+            android:id="@+id/art"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            />
+    <Button
+            android:id="@+id/art_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/art_picker"
+            />
+    <LinearLayout
+            android:id="@+id/controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+        <Button
+                android:id="@+id/start_button"
+                style="@style/BottomBarButton"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/start_button" />
+        <Button
+                android:id="@+id/play_button"
+                style="@style/BottomBarButton"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/play_button" />
+    </LinearLayout>
+    <Button
+            android:id="@+id/route_button"
+            style="@style/BottomBarButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/route_button" />
+    <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+</LinearLayout>

@@ -1,5 +1,5 @@
 page.title=Relative Layout
-page.tags="relativelayout"
+page.tags=relativelayout
 @jd:body
 
 <div id="qv-wrapper">
@@ -82,13 +82,13 @@ view declared in the hierarchy. The example below demonstrates such a scenario.<
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:paddingLeft="16dp"
     android:paddingRight="16dp" >
     &lt;EditText
         android:id="@+id/name"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/reminder" />
     &lt;Spinner

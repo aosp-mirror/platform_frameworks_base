@@ -89,6 +89,36 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_NV_PROFILING "debug.hwui.nv_profiling"
 
 /**
+ *  System property used to enable or disable hardware rendering profiling.
+ * The default value of this property is assumed to be false.
+ *
+ * When profiling is enabled, the adb shell dumpsys gfxinfo command will
+ * output extra information about the time taken to execute by the last
+ * frames.
+ *
+ * Possible values:
+ * "true", to enable profiling
+ * "visual_bars", to enable profiling and visualize the results on screen
+ * "false", to disable profiling
+ */
+#define PROPERTY_PROFILE "debug.hwui.profile"
+#define PROPERTY_PROFILE_VISUALIZE_BARS "visual_bars"
+
+/**
+ * System property used to specify the number of frames to be used
+ * when doing hardware rendering profiling.
+ * The default value of this property is #PROFILE_MAX_FRAMES.
+ *
+ * When profiling is enabled, the adb shell dumpsys gfxinfo command will
+ * output extra information about the time taken to execute by the last
+ * frames.
+ *
+ * Possible values:
+ * "60", to set the limit of frames to 60
+ */
+#define PROPERTY_PROFILE_MAXFRAMES "debug.hwui.profile.maxframes"
+
+/**
  * Used to enable/disable non-rectangular clipping debugging.
  *
  * The accepted values are:
@@ -146,6 +176,7 @@ enum DebugLevel {
 #define PROPERTY_RENDER_BUFFER_CACHE_SIZE "ro.hwui.r_buffer_cache_size"
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 #define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
+#define PROPERTY_VERTEX_CACHE_SIZE "ro.hwui.vertex_cache_size"
 #define PROPERTY_PATCH_CACHE_SIZE "ro.hwui.patch_cache_size"
 #define PROPERTY_DROP_SHADOW_CACHE_SIZE "ro.hwui.drop_shadow_cache_size"
 #define PROPERTY_FBO_CACHE_SIZE "ro.hwui.fbo_cache_size"
@@ -192,10 +223,11 @@ enum DebugLevel {
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
 #define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
 #define DEFAULT_PATH_CACHE_SIZE 10.0f
+#define DEFAULT_VERTEX_CACHE_SIZE 1.0f
 #define DEFAULT_PATCH_CACHE_SIZE 128 // in kB
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
-#define DEFAULT_FBO_CACHE_SIZE 16
+#define DEFAULT_FBO_CACHE_SIZE 0
 
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
 

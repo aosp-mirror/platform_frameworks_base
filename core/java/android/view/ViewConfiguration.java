@@ -80,7 +80,7 @@ public class ViewConfiguration {
      * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap.
      */
-    private static final int TAP_TIMEOUT = 180;
+    private static final int TAP_TIMEOUT = 100;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event
@@ -234,6 +234,7 @@ public class ViewConfiguration {
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
+    private final long mGlobalActionsKeyTimeout;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -261,6 +262,7 @@ public class ViewConfiguration {
         mOverscrollDistance = OVERSCROLL_DISTANCE;
         mOverflingDistance = OVERFLING_DISTANCE;
         mFadingMarqueeEnabled = true;
+        mGlobalActionsKeyTimeout = GLOBAL_ACTIONS_KEY_TIMEOUT;
     }
 
     /**
@@ -287,8 +289,6 @@ public class ViewConfiguration {
 
         mEdgeSlop = (int) (sizeAndDensity * EDGE_SLOP + 0.5f);
         mFadingEdgeLength = (int) (sizeAndDensity * FADING_EDGE_LENGTH + 0.5f);
-        mMinimumFlingVelocity = (int) (density * MINIMUM_FLING_VELOCITY + 0.5f);
-        mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
@@ -339,6 +339,13 @@ public class ViewConfiguration {
         mPagingTouchSlop = mTouchSlop * 2;
 
         mDoubleTapTouchSlop = mTouchSlop;
+
+        mMinimumFlingVelocity = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewMinFlingVelocity);
+        mMaximumFlingVelocity = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewMaxFlingVelocity);
+        mGlobalActionsKeyTimeout = res.getInteger(
+                com.android.internal.R.integer.config_globalActionsKeyTimeout);
     }
 
     /**
@@ -695,9 +702,23 @@ public class ViewConfiguration {
      *
      * @return how long a user needs to press the relevant key to bring up
      *   the global actions dialog.
+     * @deprecated This timeout should not be used by applications
      */
+    @Deprecated
     public static long getGlobalActionKeyTimeout() {
         return GLOBAL_ACTIONS_KEY_TIMEOUT;
+    }
+
+    /**
+     * The amount of time a user needs to press the relevant key to bring up
+     * the global actions dialog.
+     *
+     * @return how long a user needs to press the relevant key to bring up
+     *   the global actions dialog.
+     * @hide
+     */
+    public long getDeviceGlobalActionKeyTimeout() {
+        return mGlobalActionsKeyTimeout;
     }
 
     /**

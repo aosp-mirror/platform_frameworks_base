@@ -69,6 +69,8 @@ static jmethodID method_sessionStarted;
 static jmethodID method_sessionEnded;
 
 static jfieldID field_context;
+static jfieldID field_batteryLevel;
+static jfieldID field_batteryScale;
 
 // MtpPropertyList fields
 static jfieldID field_mCount;
@@ -526,68 +528,75 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
 
 MtpResponseCode MyMtpDatabase::getDevicePropertyValue(MtpDeviceProperty property,
                                             MtpDataPacket& packet) {
-    int         type;
-
-    if (!getDevicePropertyInfo(property, type))
-        return MTP_RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
-
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jint result = env->CallIntMethod(mDatabase, method_getDeviceProperty,
-                (jint)property, mLongBuffer, mStringBuffer);
-    if (result != MTP_RESPONSE_OK) {
+
+    if (property == MTP_DEVICE_PROPERTY_BATTERY_LEVEL) {
+        // special case - implemented here instead of Java
+        packet.putUInt8((uint8_t)env->GetIntField(mDatabase, field_batteryLevel));
+        return MTP_RESPONSE_OK;
+    } else {
+        int type;
+
+        if (!getDevicePropertyInfo(property, type))
+            return MTP_RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
+
+        jint result = env->CallIntMethod(mDatabase, method_getDeviceProperty,
+                    (jint)property, mLongBuffer, mStringBuffer);
+        if (result != MTP_RESPONSE_OK) {
+            checkAndClearExceptionFromCallback(env, __FUNCTION__);
+            return result;
+        }
+
+        jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
+        jlong longValue = longValues[0];
+        env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
+
+        switch (type) {
+            case MTP_TYPE_INT8:
+                packet.putInt8(longValue);
+                break;
+            case MTP_TYPE_UINT8:
+                packet.putUInt8(longValue);
+                break;
+            case MTP_TYPE_INT16:
+                packet.putInt16(longValue);
+                break;
+            case MTP_TYPE_UINT16:
+                packet.putUInt16(longValue);
+                break;
+            case MTP_TYPE_INT32:
+                packet.putInt32(longValue);
+                break;
+            case MTP_TYPE_UINT32:
+                packet.putUInt32(longValue);
+                break;
+            case MTP_TYPE_INT64:
+                packet.putInt64(longValue);
+                break;
+            case MTP_TYPE_UINT64:
+                packet.putUInt64(longValue);
+                break;
+            case MTP_TYPE_INT128:
+                packet.putInt128(longValue);
+                break;
+            case MTP_TYPE_UINT128:
+                packet.putInt128(longValue);
+                break;
+            case MTP_TYPE_STR:
+            {
+                jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
+                packet.putString(str);
+                env->ReleaseCharArrayElements(mStringBuffer, str, 0);
+                break;
+             }
+            default:
+                ALOGE("unsupported type in getDevicePropertyValue\n");
+                return MTP_RESPONSE_INVALID_DEVICE_PROP_FORMAT;
+        }
+
         checkAndClearExceptionFromCallback(env, __FUNCTION__);
-        return result;
+        return MTP_RESPONSE_OK;
     }
-
-    jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
-    jlong longValue = longValues[0];
-    env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
-
-    switch (type) {
-        case MTP_TYPE_INT8:
-            packet.putInt8(longValue);
-            break;
-        case MTP_TYPE_UINT8:
-            packet.putUInt8(longValue);
-            break;
-        case MTP_TYPE_INT16:
-            packet.putInt16(longValue);
-            break;
-        case MTP_TYPE_UINT16:
-            packet.putUInt16(longValue);
-            break;
-        case MTP_TYPE_INT32:
-            packet.putInt32(longValue);
-            break;
-        case MTP_TYPE_UINT32:
-            packet.putUInt32(longValue);
-            break;
-        case MTP_TYPE_INT64:
-            packet.putInt64(longValue);
-            break;
-        case MTP_TYPE_UINT64:
-            packet.putUInt64(longValue);
-            break;
-        case MTP_TYPE_INT128:
-            packet.putInt128(longValue);
-            break;
-        case MTP_TYPE_UINT128:
-            packet.putInt128(longValue);
-            break;
-        case MTP_TYPE_STR:
-        {
-            jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-            packet.putString(str);
-            env->ReleaseCharArrayElements(mStringBuffer, str, 0);
-            break;
-         }
-        default:
-            ALOGE("unsupported type in getDevicePropertyValue\n");
-            return MTP_RESPONSE_INVALID_DEVICE_PROP_FORMAT;
-    }
-
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    return MTP_RESPONSE_OK;
 }
 
 MtpResponseCode MyMtpDatabase::setDevicePropertyValue(MtpDeviceProperty property,
@@ -848,6 +857,7 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
                 result = malloc(exifdata->size);
                 if (result) {
                     memcpy(result, exifdata->data, exifdata->size);
+                    outThumbSize = exifdata->size;
                 }
             }
             exif_data_unref(exifdata);
@@ -922,6 +932,7 @@ static const PropertyTableEntry   kDevicePropertyTable[] = {
     {   MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,    MTP_TYPE_STR },
     {   MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,       MTP_TYPE_STR },
     {   MTP_DEVICE_PROPERTY_IMAGE_SIZE,                 MTP_TYPE_STR },
+    {   MTP_DEVICE_PROPERTY_BATTERY_LEVEL,              MTP_TYPE_UINT8 },
 };
 
 bool MyMtpDatabase::getObjectPropertyInfo(MtpObjectProperty property, int& type) {
@@ -989,6 +1000,22 @@ MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle,
 
 MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
                                             MtpObjectFormat format) {
+    static const int channelEnum[] = {
+                                        1,  // mono
+                                        2,  // stereo
+                                        3,  // 2.1
+                                        4,  // 3
+                                        5,  // 3.1
+                                        6,  // 4
+                                        7,  // 4.1
+                                        8,  // 5
+                                        9,  // 5.1
+                                    };
+    static const int bitrateEnum[] = {
+                                        1,  // fixed rate
+                                        2,  // variable rate
+                                     };
+
     MtpProperty* result = NULL;
     switch (property) {
         case MTP_PROPERTY_OBJECT_FORMAT:
@@ -1002,6 +1029,7 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
         case MTP_PROPERTY_STORAGE_ID:
         case MTP_PROPERTY_PARENT_OBJECT:
         case MTP_PROPERTY_DURATION:
+        case MTP_PROPERTY_AUDIO_WAVE_CODEC:
             result = new MtpProperty(property, MTP_TYPE_UINT32);
             break;
         case MTP_PROPERTY_OBJECT_SIZE:
@@ -1030,6 +1058,22 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
             // We allow renaming files and folders
             result = new MtpProperty(property, MTP_TYPE_STR, true);
             break;
+        case MTP_PROPERTY_BITRATE_TYPE:
+             result = new MtpProperty(property, MTP_TYPE_UINT16);
+            result->setFormEnum(bitrateEnum, sizeof(bitrateEnum)/sizeof(bitrateEnum[0]));
+            break;
+        case MTP_PROPERTY_AUDIO_BITRATE:
+            result = new MtpProperty(property, MTP_TYPE_UINT32);
+            result->setFormRange(1, 1536000, 1);
+            break;
+        case MTP_PROPERTY_NUMBER_OF_CHANNELS:
+            result = new MtpProperty(property, MTP_TYPE_UINT16);
+            result->setFormEnum(channelEnum, sizeof(channelEnum)/sizeof(channelEnum[0]));
+            break;
+        case MTP_PROPERTY_SAMPLE_RATE:
+            result = new MtpProperty(property, MTP_TYPE_UINT32);
+            result->setFormRange(8000, 48000, 1);
+            break;
     }
 
     return result;
@@ -1045,7 +1089,7 @@ MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
         case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
             writable = true;
             // fall through
-        case MTP_DEVICE_PROPERTY_IMAGE_SIZE:
+        case MTP_DEVICE_PROPERTY_IMAGE_SIZE: {
             result = new MtpProperty(property, MTP_TYPE_STR, writable);
 
             // get current value
@@ -1061,6 +1105,12 @@ MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
             } else {
                 ALOGE("unable to read device property, response: %04X", ret);
             }
+            break;
+        }
+        case MTP_DEVICE_PROPERTY_BATTERY_LEVEL:
+            result = new MtpProperty(property, MTP_TYPE_UINT8);
+            result->setFormRange(0, env->GetIntField(mDatabase, field_batteryScale), 1);
+            result->mCurrentValue.u.u8 = (uint8_t)env->GetIntField(mDatabase, field_batteryLevel);
             break;
     }
 
@@ -1231,6 +1281,16 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
     field_context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (field_context == NULL) {
         ALOGE("Can't find MtpDatabase.mNativeContext");
+        return -1;
+    }
+    field_batteryLevel = env->GetFieldID(clazz, "mBatteryLevel", "I");
+    if (field_batteryLevel == NULL) {
+        ALOGE("Can't find MtpDatabase.mBatteryLevel");
+        return -1;
+    }
+    field_batteryScale = env->GetFieldID(clazz, "mBatteryScale", "I");
+    if (field_batteryScale == NULL) {
+        ALOGE("Can't find MtpDatabase.mBatteryScale");
         return -1;
     }
 

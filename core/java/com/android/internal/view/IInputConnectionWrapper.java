@@ -54,6 +54,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_REPORT_FULLSCREEN_MODE = 100;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
+    private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
 
     private WeakReference<InputConnection> mInputConnection;
 
@@ -173,6 +174,12 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
 
     public void performPrivateCommand(String action, Bundle data) {
         dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
+    }
+
+    public void requestUpdateCursorAnchorInfo(int cursorUpdateMode, int seq,
+            IInputContextCallback callback) {
+        dispatchMessage(obtainMessageISC(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO, cursorUpdateMode,
+                seq, callback));
     }
 
     void dispatchMessage(Message msg) {
@@ -420,6 +427,22 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                         (Bundle)args.arg2);
                 return;
             }
+            case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
+                SomeArgs args = (SomeArgs)msg.obj;
+                try {
+                    InputConnection ic = mInputConnection.get();
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+                        args.callback.setRequestUpdateCursorAnchorInfoResult(false, args.seq);
+                        return;
+                    }
+                    args.callback.setRequestUpdateCursorAnchorInfoResult(
+                            ic.requestCursorUpdates(msg.arg1), args.seq);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Got RemoteException calling requestCursorAnchorInfo", e);
+                }
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -449,7 +472,15 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         args.seq = seq;
         return mH.obtainMessage(what, arg1, arg2, args);
     }
-    
+
+    Message obtainMessageOSC(int what, Object arg1, int seq, IInputContextCallback callback) {
+        SomeArgs args = new SomeArgs();
+        args.arg1 = arg1;
+        args.callback = callback;
+        args.seq = seq;
+        return mH.obtainMessage(what, 0, 0, args);
+    }
+
     Message obtainMessageIOSC(int what, int arg1, Object arg2, int seq,
             IInputContextCallback callback) {
         SomeArgs args = new SomeArgs();

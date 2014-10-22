@@ -1,0 +1,204 @@
+page.title=Setting Up a RequestQueue
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#network">Set Up a Network and Cache</a></li>
+  <li><a href="#singleton">Use a Singleton Pattern</a></li>
+</ol>
+
+</div>
+</div>
+
+<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<div>
+    <h3>Video</h3>
+    <p>Volley: Easy, Fast Networking for Android</p>
+</div>
+</a>
+
+
+<p>The previous lesson showed you how to use the convenience method
+<code>Volley.newRequestQueue</code> to set up a {@code RequestQueue}, taking advantage of
+Volley's default behaviors. This lesson walks you through the explicit steps of creating a
+{@code RequestQueue}, to allow you to supply your own custom behavior.</p>
+
+<p>This lesson also describes the recommended practice of creating a {@code RequestQueue}
+as a singleton, which makes the {@code RequestQueue} last the lifetime of your app.</p>
+
+<h2 id="network">Set Up a Network and Cache</h2>
+
+<p>A {@code RequestQueue} needs two things to do its job: a network to perform transport
+of the requests, and a cache to handle caching. There are standard implementations of these
+available in the Volley toolbox: {@code DiskBasedCache} provides a one-file-per-response
+cache with an in-memory index, and {@code BasicNetwork} provides a network transport based
+on your choice of {@link android.net.http.AndroidHttpClient} or {@link java.net.HttpURLConnection}.</p>
+
+<p>{@code BasicNetwork} is Volley's default network implementation. A {@code BasicNetwork}
+must be initialized with the HTTP client your app is using to connect to the network.
+Typically this is {@link android.net.http.AndroidHttpClient} or
+{@link java.net.HttpURLConnection}:</p>
+<ul>
+<li>Use {@link android.net.http.AndroidHttpClient} for apps targeting Android API levels
+lower than API Level 9 (Gingerbread). Prior to Gingerbread, {@link java.net.HttpURLConnection}
+was unreliable. For more discussion of this topic, see
+<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">
+Android's HTTP Clients</a>. </li>
+
+<li>Use {@link java.net.HttpURLConnection} for apps targeting Android API Level 9
+(Gingerbread) and higher.</li>
+</ul>
+<p>To create an app that runs on all versions of Android, you can check the version of
+Android the device is running and choose the appropriate HTTP client, for example:</p>
+
+<pre>
+HttpStack stack;
+...
+// If the device is running a version >= Gingerbread...
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+    // ...use HttpURLConnection for stack.
+} else {
+    // ...use AndroidHttpClient for stack.
+}
+Network network = new BasicNetwork(stack);
+</pre>
+
+<p>This snippet shows you the steps involved in setting up a
+{@code RequestQueue}:</p>
+
+<pre>
+RequestQueue mRequestQueue;
+
+// Instantiate the cache
+Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
+
+// Set up the network to use HttpURLConnection as the HTTP client.
+Network network = new BasicNetwork(new HurlStack());
+
+// Instantiate the RequestQueue with the cache and network.
+mRequestQueue = new RequestQueue(cache, network);
+
+// Start the queue
+mRequestQueue.start();
+
+String url ="http://www.myurl.com";
+
+// Formulate the request and handle the response.
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        new Response.Listener&lt;String&gt;() {
+    &#64;Override
+    public void onResponse(String response) {
+        // Do something with the response
+    }
+},
+    new Response.ErrorListener() {
+        &#64;Override
+        public void onErrorResponse(VolleyError error) {
+            // Handle error
+    }
+});
+
+// Add the request to the RequestQueue.
+mRequestQueue.add(stringRequest);
+...
+</pre>
+
+<p>If you just need to make a one-time request and don't want to leave the thread pool
+around, you can create the {@code RequestQueue} wherever you need it and call {@code stop()} on the
+{@code RequestQueue} once your response or error has come back, using the
+{@code Volley.newRequestQueue()} method described in <a href="simple.html">Sending a Simple
+Request</a>. But the more common use case is to create the {@code RequestQueue} as a
+singleton to keep it running for the lifetime of your app, as described in the next section.</p>
+
+
+<h2 id="singleton">Use a Singleton Pattern</h2>
+
+<p>If your application makes constant use of the network, it's probably most efficient to
+set up a single instance of {@code RequestQueue} that will last the lifetime of your app.
+You can achieve this in various ways. The recommended approach is to implement a singleton
+class that encapsulates {@code RequestQueue} and other Volley
+functionality. Another approach is to subclass {@link android.app.Application} and set up the
+{@code RequestQueue} in {@link android.app.Application#onCreate Application.onCreate()}.
+But this approach is <a href="{@docRoot}reference/android/app/Application.html">
+discouraged</a>; a static singleton can provide the same functionality in a more modular
+way. </p>
+
+<p>A key concept is that the {@code RequestQueue} must be instantiated with the
+{@link android.app.Application} context, not an {@link android.app.Activity} context. This
+ensures that the {@code RequestQueue} will last for the lifetime of your app, instead of
+being recreated every time the activity is recreated (for example, when the user
+rotates the device).
+
+<p>Here is an example of a singleton class that provides {@code RequestQueue} and
+{@code ImageLoader} functionality:</p>
+
+<pre>private static MySingleton mInstance;
+    private RequestQueue mRequestQueue;
+    private ImageLoader mImageLoader;
+    private static Context mCtx;
+
+    private MySingleton(Context context) {
+        mCtx = context;
+        mRequestQueue = getRequestQueue();
+
+        mImageLoader = new ImageLoader(mRequestQueue,
+                new ImageLoader.ImageCache() {
+            private final LruCache&lt;String, Bitmap&gt;
+                    cache = new LruCache&lt;String, Bitmap&gt;(20);
+
+            &#64;Override
+            public Bitmap getBitmap(String url) {
+                return cache.get(url);
+            }
+
+            &#64;Override
+            public void putBitmap(String url, Bitmap bitmap) {
+                cache.put(url, bitmap);
+            }
+        });
+    }
+
+    public static synchronized MySingleton getInstance(Context context) {
+        if (mInstance == null) {
+            mInstance = new MySingleton(context);
+        }
+        return mInstance;
+    }
+
+    public RequestQueue getRequestQueue() {
+        if (mRequestQueue == null) {
+            // getApplicationContext() is key, it keeps you from leaking the
+            // Activity or BroadcastReceiver if someone passes one in.
+            mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
+        }
+        return mRequestQueue;
+    }
+
+    public &lt;T&gt; void addToRequestQueue(Request&lt;T&gt; req) {
+        getRequestQueue().add(req);
+    }
+
+    public ImageLoader getImageLoader() {
+        return mImageLoader;
+    }
+}</pre>
+
+<p>Here are some examples of performing {@code RequestQueue} operations using the singleton
+class:</p>
+
+<pre>
+// Get a RequestQueue
+RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
+    getRequestQueue();
+...
+
+// Add a request (in this example, called stringRequest) to your RequestQueue.
+MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+</pre>

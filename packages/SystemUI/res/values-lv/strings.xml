@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nav paziņojumu"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Notiekošs"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Paziņojumi"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Pievienojiet uzlādes ierīci."</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Akumulators drīz izlādēsies."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Zems akumulatora enerģijas līmenis"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Atlicis: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Atlikuši <xliff:g id="NUMBER">%d%%</xliff:g>. Ir ieslēgts akumulatora enerģijas taupīšanas režīms."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB lādēšana netiek atbalstīta.\nIzmantojiet tikai komplektā iekļauto lādētāju."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Akumulatora lietojums"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"USB uzlāde netiek atbalstīta."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Izmantojiet tikai komplektā iekļauto lādētāju."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Iestatījumi"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Ieslēgt"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Ieslēgt akumulatora enerģijas taupīšanas režīmu"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Lai paildzinātu akumulatora darbības laiku, akumulatora enerģijas taupīšanas režīmā tiks pazemināta ierīces veiktspēja.\n\nAkumulatora enerģijas taupīšanas režīms tiks atspējots, kad ierīce tiks pievienota uzlādes avotam."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Iestatījumi"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Lidmašīnas režīms"</string>
@@ -61,15 +67,14 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Vienmēr atļaut no šī datora"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Tālumm., lai aizp. ekr."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stiepiet, lai aizp. ekr."</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Saderības tālummaiņa"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Ja lietotne ir paredzēta mazākam ekrānam, blakus pulkstenim tiks parādīta tālummaiņas vadīkla."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Saglabā ekrānuzņēmumu…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Notiek ekrānuzņēmuma saglabāšana..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Notiek ekrānuzņēmuma saglabāšana."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrānuzņēmums ir uzņemts."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Pieskarieties, lai skatītu ekrānuzņēmumu."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nevarēja uzņemt ekrānuzņēmumu."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Nevarēja saglabāt ekrānuzņēmumu. Iespējams, tiek izmantota atmiņa."</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB failu pārsūtīšanas opcijas"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pievienot kā multivides atskaņotāju (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Pievienot kā kameru (PTP)"</string>
@@ -78,6 +83,9 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Sākums"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Izvēlne"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Nesen izmantotās lietotnes"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Meklēt"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"Tālruņa numurs"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ievades metodes maiņas poga."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Saderības tālummaiņas poga."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Veikt tālummaiņu no mazāka ekrāna uz lielāku."</string>
@@ -119,6 +127,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Ieslēgts"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Izslēgts"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Savienojums ir izveidots."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Notiek savienojuma izveide..."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -153,23 +162,28 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Akumulatora statuss: <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Lidojuma režīma statuss: <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth statuss: <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Atrašanās vieta: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Signāls ir iestatīts uz: <xliff:g id="TIME">%s</xliff:g>."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G–3G dati atspējoti"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G dati atspējoti"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilie dati atspējoti"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dati atspējoti"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Ir sasniegts noteiktais datu lietošanas apjoma ierobežojums.\n\nJa atkārtoti iespējosiet datus, operators no jums var iekasēt maksu."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Atkārtoti iespējot datus"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Aizvērt paneli"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Ilgāk"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Mazāks laiks"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G–3G dati ir atslēgti"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G dati ir atslēgti"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobilie dati ir atslēgti"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Dati ir atslēgti"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Jūsu ierīcē tika atslēgta datu lietošana, jo tika sasniegts jūsu noteiktais ierobežojums.\n\nJa atkal ieslēgsiet datu lietošanu, iespējams, jūsu mobilo sakaru operators iekasēs maksu."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Ieslēgt datus"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nav interneta sav."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Izv. sav. ar Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Notiek GPS meklēšana..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS iestatītā atrašanās vieta"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Aktīvi atrašanās vietu pieprasījumi"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Notīrīt visus paziņojumus"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informācija par lietotni"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekrāns tiks pagriezts automātiski."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ekrāns tagad ir bloķēts ainavas orientācijā."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ekrāns tagad ir bloķēts portreta orientācijā."</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Saldo ēdienu stends"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Ekrānsaudzētājs"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Tīkls Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Lidojuma režīms"</string>
@@ -178,9 +192,12 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> ierīce(-es))"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth savienojums ir izslēgts."</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Nav pieejama neviena pārī savienota ierīce."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Spilgtums"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automātiska pagriešana"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Pagriešana bloķēta"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automātiska pagriešana"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Pagriešana bloķēta"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portrets"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Ainava"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Ievades metode"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Atrašanās vieta"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Atrašanās vieta izslēgta"</string>
@@ -190,16 +207,95 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Iestatījumi"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Laiks"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Es"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Lietotājs"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Jauns lietotājs"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nav izveidots savienojums"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nav tīkla"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ir izslēgts"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi displejs"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Bezvadu attēlošana"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Nav pieejams neviens saglabātais tīkls."</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Apraides ekrāns"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Notiek apraide…"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nenosaukta ierīce"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Gatavs apraidei"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Nav pieejamu ierīču."</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Spilgtums"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMĀTISKI"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Šeit tiek rādīti paziņojumi"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Piekļūstiet tiem jebkurā laikā, velkot uz leju.\nVēlreiz velciet, lai tiktu parādītas sistēmas vadīklas."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Velciet no ekrāna malas, lai piekļūtu joslai."</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Velciet no ekrāna malas, lai piekļūtu sistēmas joslai."</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Invertēt krāsas"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Krāsu korekcijas režīms"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Vairāk iestatījumu"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"Gatavs"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"Pievienota"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Notiek savienojuma izveide…"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Piesaiste"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Tīklājs"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Paziņojumi"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Zibspuldze"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobilie dati"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datu lietojums"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Atlikušie dati"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Pārsniegts ierobežojums"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Tiek izmantots: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ierobežojums: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> brīdinājums"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"Nav nesen izmantotu lietotņu"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informācija par lietojumprogrammu"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"fiksēt lietotni"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"Meklēt"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Akumulators uzlādēts"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Notiek uzlāde"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> līdz pilnam akumulatoram"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Nenotiek uzlāde"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Tīkls var\ntikt uzraudzīts"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Meklēt"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Velciet uz augšu, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Velciet pa kreisi, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"Bez pārtraukumiem, tostarp bez signāliem"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Nepārtraukt"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Tikai prioritārie pārtraukumi"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"Jūsu nākamā signāla laiks: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Jūsu nākamā signāla datums un laiks: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"Jūs nedzirdēsiet iestatīto signālu: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Mazāk steidzami paziņojumi tiek rādīti tālāk"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Pieskarieties vēlreiz, lai atvērtu"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Velciet uz augšu, lai atbloķētu"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Lai lietotu tālruni, velciet pa labi."</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Lai lietotu kameru, velciet pa kreisi."</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Uz nenoteiktu laiku"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Nav"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritāte"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Visi"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Notiek uzlāde (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> līdz pilnīgai uzlādei)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"Viesis"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+Viesis"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"Iziet no viesa režīma"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Vienu minūti"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Vienu stundu"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d h"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Ieslēgts akumulatora enerģijas taupīšanas režīms"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Ierīces veiktspēja ir pazemināta."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Atvērt akumulatora enerģijas taupīšanas režīma iestatījumus"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Saturs paslēpts"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sāks uzņemt visu, kas tiks rādīts jūsu ekrānā."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Vairs nerādīt"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Sākt tūlīt"</string>
 </resources>

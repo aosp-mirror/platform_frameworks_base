@@ -59,7 +59,6 @@ public class ExternalMediaFormatActivity extends AlertActivity implements Dialog
         Log.d("ExternalMediaFormatActivity", "onCreate!");
         // Set up the "dialog"
         final AlertController.AlertParams p = mAlertParams;
-        p.mIconId = com.android.internal.R.drawable.stat_sys_warning;
         p.mTitle = getString(com.android.internal.R.string.extmedia_format_title);
         p.mMessage = getString(com.android.internal.R.string.extmedia_format_message);
         p.mPositiveButtonText = getString(com.android.internal.R.string.extmedia_format_button_format);

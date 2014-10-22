@@ -61,7 +61,7 @@ public class CameraAccessException extends AndroidException {
      *
      * <p>The camera has failed to open or has failed at a later time
      * as a result of some non-user interaction. Refer to
-     * {@link CameraDevice.StateListener#onError} for the exact
+     * {@link CameraDevice.StateCallback#onError} for the exact
      * nature of the error.</p>
      *
      * <p>No further calls to the camera will succeed. Clean up
@@ -114,7 +114,10 @@ public class CameraAccessException extends AndroidException {
         mReason = problem;
     }
 
-    private static String getDefaultMessage(int problem) {
+    /**
+     * @hide
+     */
+    public static String getDefaultMessage(int problem) {
         switch (problem) {
             case CAMERA_IN_USE:
                 return "The camera device is in use already";

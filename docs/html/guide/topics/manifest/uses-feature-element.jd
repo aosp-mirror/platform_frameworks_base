@@ -1,5 +1,5 @@
 page.title=&lt;uses-feature&gt;
-page.tags="filtering","features","google play filters","permissions"
+page.tags=filtering,features,google play filters,permissions
 @jd:body
 
 <div id="qv-wrapper">
@@ -584,9 +584,14 @@ is sensitive to delays or lag in sound input or output.</td>
 </tr>
 <tr>
   <td><code>android.hardware.camera.any</code></td>
-  <td>The application uses at least one camera facing in any direction. Use this
-in preference to <code>android.hardware.camera</code> if a back-facing camera is
-not required.</td>
+  <td>The application uses at least one camera facing in any direction, or an
+external camera device if one is connected. Use this in preference to
+<code>android.hardware.camera</code> if a back-facing camera is not required.
+  </td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.external</code></td>
+  <td>The application uses an external camera device if one is connected.</td>
 </tr>
 
 <tr>
@@ -684,7 +689,7 @@ the device.</td>
   <td>The application requires landscape orientation.</td>
   <td rowspan="2">
      <p>For example, if your app requires portrait orientation, you should declare
-<code>&lt;uses-feature android:name="android.hardware.screen.portrait"/></code> so that only devices
+<code>&lt;uses-feature android:name="android.hardware.screen.portrait"/&gt;</code> so that only devices
 that support portrait orientation (whether always or by user choice) can install your app. If your
 application <em>supports</em> both orientations, then you don't need to declare either.</p>
     <p>Both orientations are assumed <em>not required</em>, by default, so your app may be installed

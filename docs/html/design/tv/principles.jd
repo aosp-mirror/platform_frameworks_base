@@ -1,0 +1,36 @@
+page.title=Creative Vision for TV
+@jd:body
+
+
+<p>Users bring a specific set of expectations when watching TV, versus interacting with a phone or
+  tablet. The Android User Experience Team has developed the following guidelines for creation of
+  the Android TV platform and the apps that run on it.
+</p>
+
+
+<h2>Casual Consumption</h2>
+
+<p>The TV is an entertainment interface, not a computer or mobile device. Optimize for
+  activities that put content at the center: from the casual posture of movie-watching, to
+  immersive gameplay, to hanging out with friends in a living room.</p>
+
+<p>Users expect immediate access to content when they turn on a TV. Get users into the action
+  fast, be it the big game, their favorite show, or a game with friends. The next piece of content
+  to watch or play should only be a click or two away.</p>
+
+
+<h2>Cinematic Experience</h2>
+
+<p>Create immersive experiences for the user. Design for as little user interface and as much
+  content as possible on each screen. Use visual imagery, movement, and sound to inform and delight
+  users. Avoid using on-screen text to convey information and purpose. Tell your story with pictures
+  and sound.</p>
+
+
+<h2>Simplicity</h2>
+
+<p>Android TV is simple and magical. It’s all about finding and enjoying content and
+  apps with the least amount of friction. Minimize the number of navigation steps required to
+  perform actions. Build apps with the fewest screens possible between app entry and content
+  immersion. Avoid making users enter text whenever possible, and use voice interfaces when you
+  require text input.</p>

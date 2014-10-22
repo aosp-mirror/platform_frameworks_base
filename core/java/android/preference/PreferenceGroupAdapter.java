@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.Preference.OnPreferenceChangeInternalListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 /**
@@ -45,8 +47,11 @@ import android.widget.ListView;
  * adapter, use {@link PreferenceCategoryAdapter} instead.
  * 
  * @see PreferenceCategoryAdapter
+ *
+ * @hide
  */
-class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeInternalListener {
+public class PreferenceGroupAdapter extends BaseAdapter
+        implements OnPreferenceChangeInternalListener {
     
     private static final String TAG = "PreferenceGroupAdapter";
 
@@ -87,6 +92,12 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
             syncMyPreferences();
         }
     };
+
+    private int mHighlightedPosition = -1;
+    private Drawable mHighlightedDrawable;
+
+    private static ViewGroup.LayoutParams sWrapperLayoutParams = new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
     private static class PreferenceLayout implements Comparable<PreferenceLayout> {
         private int resId;
@@ -207,6 +218,20 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
         return this.getItem(position).getId();
     }
 
+    /**
+     * @hide
+     */
+    public void setHighlighted(int position) {
+        mHighlightedPosition = position;
+    }
+
+    /**
+     * @hide
+     */
+    public void setHighlightedDrawable(Drawable drawable) {
+        mHighlightedDrawable = drawable;
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
         final Preference preference = this.getItem(position);
         // Build a PreferenceLayout to compare with known ones that are cacheable.
@@ -214,11 +239,19 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
 
         // If it's not one of the cached ones, set the convertView to null so that 
         // the layout gets re-created by the Preference.
-        if (Collections.binarySearch(mPreferenceLayouts, mTempPreferenceLayout) < 0) {
+        if (Collections.binarySearch(mPreferenceLayouts, mTempPreferenceLayout) < 0 ||
+                (getItemViewType(position) == getHighlightItemViewType())) {
             convertView = null;
         }
-
-        return preference.getView(convertView, parent);
+        View result = preference.getView(convertView, parent);
+        if (position == mHighlightedPosition && mHighlightedDrawable != null) {
+            ViewGroup wrapper = new FrameLayout(parent.getContext());
+            wrapper.setLayoutParams(sWrapperLayoutParams);
+            wrapper.setBackgroundDrawable(mHighlightedDrawable);
+            wrapper.addView(result);
+            result = wrapper;
+        }
+        return result;
     }
 
     @Override
@@ -248,8 +281,16 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
         return true;
     }
 
+    private int getHighlightItemViewType() {
+        return getViewTypeCount() - 1;
+    }
+
     @Override
     public int getItemViewType(int position) {
+        if (position == mHighlightedPosition) {
+            return getHighlightItemViewType();
+        }
+
         if (!mHasReturnedViewTypeCount) {
             mHasReturnedViewTypeCount = true;
         }
@@ -277,7 +318,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
             mHasReturnedViewTypeCount = true;
         }
         
-        return Math.max(1, mPreferenceLayouts.size());
+        return Math.max(1, mPreferenceLayouts.size()) + 1;
     }
 
 }

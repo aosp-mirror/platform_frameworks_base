@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"Dispositius d’entrada"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Teclat Android"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Anglès (RU)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Anglès (EUA)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Anglès (EUA), estil internacional"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Anglès (EUA), estil Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Anglès (EUA), estil Dvorak"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Alemany"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"Francès"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Francès (Canadà)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Rus"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Rus, estil Mac"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Espanyol"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"Francès suís"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Alemany suís"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belga"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Búlgar"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"Italià"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"Danès"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"Noruec"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"Suec"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Finès"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Croat"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"Txec"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Estonià"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Hongarès"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Islandès"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"Brasiler"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"Portuguès"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Eslovac"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Eslovè"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Turc"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ucraïnès"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Àrab"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Grec"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Hebreu"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Lituà"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Espanyol (llatí)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"Letó"</string>
+</resources>

@@ -113,6 +113,12 @@
         <group gid="loop_radio" />
     </permission>
 
+    <!-- Hotword training apps sometimes need a GID to talk with low-level
+         hardware; give them audio for now until full HAL support is added. -->
+    <permission name="android.permission.MANAGE_VOICE_KEYPHRASES">
+        <group gid="audio" />
+    </permission>
+
     <!-- ================================================================== -->
     <!-- ================================================================== -->
     <!-- ================================================================== -->
@@ -140,5 +146,9 @@
             file="/system/framework/android.test.runner.jar" />
     <library name="javax.obex"
             file="/system/framework/javax.obex.jar"/>
+
+    <!-- These are the standard packages that are white-listed to always have internet
+         access while in power save mode, even if they aren't in the foreground. -->
+    <allow-in-power-save package="com.android.providers.downloads" />
 
 </permissions>

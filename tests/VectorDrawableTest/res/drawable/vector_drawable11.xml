@@ -1,0 +1,35 @@
+<!--
+ Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="64dp"
+        android:width="64dp"
+        android:viewportHeight="80"
+        android:viewportWidth="40" >
+
+    <group>
+        <path
+            android:name="battery"
+            android:fillColor="#3388ff"
+            android:pathData="M 20.28125,2.0000002 C 17.352748,2.0000002 15,4.3527485 15,7.2812502 L 15,8.0000002 L 13.15625,8.0000002 C 9.7507553,8.0000002 7,10.750759 7,14.15625 L 7,39.84375 C 7,43.24924 9.7507558,46 13.15625,46 L 33.84375,46 C 37.249245,46 39.999999,43.24924 40,39.84375 L 40,14.15625 C 40,10.75076 37.249243,8.0000002 33.84375,8.0000002 L 32,8.0000002 L 32,7.2812502 C 32,4.3527485 29.647252,2.0000002 26.71875,2.0000002 L 20.28125,2.0000002 z"
+            android:strokeColor="#ff8833"
+            android:strokeWidth="1" />
+        <path
+            android:name="spark"
+            android:fillColor="#FFFF0000"
+            android:pathData="M 30,18.031528 L 25.579581,23.421071 L 29.370621,26.765348 L 20.096792,37 L 21.156922,28.014053 L 17,24.902844 L 20.880632,18 L 30,18.031528 z" />
+    </group>
+
+</vector>

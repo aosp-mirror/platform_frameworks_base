@@ -28,8 +28,18 @@ import android.os.WorkSource;
 public class BridgePowerManager implements IPowerManager {
 
     @Override
-    public boolean isScreenOn() throws RemoteException {
+    public boolean isInteractive() throws RemoteException {
         return true;
+    }
+
+    @Override
+    public boolean isPowerSaveMode() throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean setPowerSaveMode(boolean mode) throws RemoteException {
+        return false;
     }
 
     @Override
@@ -39,7 +49,7 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void acquireWakeLock(IBinder arg0, int arg1, String arg2, String arg2_5, WorkSource arg3)
+    public void acquireWakeLock(IBinder arg0, int arg1, String arg2, String arg2_5, WorkSource arg3, String arg4)
             throws RemoteException {
         // pass for now.
     }
@@ -51,12 +61,17 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
+    public void powerHint(int hintId, int data) {
+        // pass for now.
+    }
+
+    @Override
     public void crash(String arg0) throws RemoteException {
         // pass for now.
     }
 
     @Override
-    public void goToSleep(long arg0, int arg1) throws RemoteException {
+    public void goToSleep(long arg0, int arg1, int arg2) throws RemoteException {
         // pass for now.
     }
 
@@ -111,7 +126,7 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void updateWakeLockWorkSource(IBinder arg0, WorkSource arg1) throws RemoteException {
+    public void updateWakeLockWorkSource(IBinder arg0, WorkSource arg1, String arg2) throws RemoteException {
         // pass for now.
     }
 

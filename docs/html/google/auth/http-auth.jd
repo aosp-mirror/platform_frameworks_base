@@ -342,9 +342,9 @@ public class GetUsernameTask extends AsyncTask<Void, Void, Void>{
 "{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
 {@code GoogleAuthUtil.getToken()}</a>, you must provide the app {@link android.content.Context},
 the account name retrieved from the account picker, and the scope for your auth
-token request. The above sample code (and the attached sample) defines these arguments with
-class members that the host activity passes to
-the {@link android.os.AsyncTask} class constructor.</p>
+token request. The above sample code (and the attached sample) defines these
+arguments with class members that the host activity passes to the {@link android.os.AsyncTask} class constructor. For more information about setting the scope, see
+the <a href="#SpecifyingScopes">Specifying Scopes</a> section below. </p>
 
 <p class="note"><strong>Note:</strong>
 As shown by the {@code fetchToken()} method above, you must handle
@@ -397,8 +397,32 @@ the {@code isDeviceOnline()} method above), see the attached sample app or the
 "{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context,%20java.lang.String,%20java.lang.String)">
 {@code GoogleAuthUtil.getToken()}</a>.</p>
 
-
-
+<h3 id="SpecifyingScopes">Specifying scopes</h3>
+<p>The scope string is used to specify which Google services can be accessed by
+  an app using the requested auth token. An auth token can be associated with
+  multiple scopes.</p>
+<p>When specifying the scopes in your auth token request, prefix the
+  scope string with {@code "oauth2:"} followed by a list of one or more OAuth scope
+  values. Use a space to separate each scope value in the list. To see a list of
+  valid OAuth scope values for Google services, browse
+  the <a href="https://developers.google.com/oauthplayground/"
+  class="external-link">OAuth 2.0 Playground</a>.</p>
+<p class="note"><strong>Tip:</strong> Specify {@code "oauth2:&lt;scope&gt;"}
+  for a single scope. Specify
+  {@code "oauth2:&lt;scope1&gt; &lt;scope2&gt; &lt;scopeN&gt;"} for multiple
+  scopes (using a space to separate each scope).</p>
+<p>For example, to access the Google Books API, the scope is
+  {@code "oauth2:https://www.googleapis.com/auth/books"}. To add an additional
+  scope, say for Google+ login, your code might look like this:</p>
+<pre>
+private final static String BOOKS_API_SCOPE
+        = "https://www.googleapis.com/auth/books";
+private fina; static String GPLUS_SCOPE
+        = "https://www.googleapis.com/auth/plus.login";
+private final static String mScopes
+        = "oauth2:" + BOOKS_API_SCOPE + " " + GPLUS_SCOPE;
+String token = GoogleAuthUtil.getToken(mActivity, mEmail, mScopes);
+</pre>
 
 <h2 id="HandleExceptions">Handle Exceptions</h2>
 

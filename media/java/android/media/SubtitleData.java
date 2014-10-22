@@ -17,7 +17,6 @@
 package android.media;
 
 import android.os.Parcel;
-import android.util.Log;
 
 /**
  * @hide

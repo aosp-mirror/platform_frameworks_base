@@ -8,21 +8,21 @@ next.link=creating-project.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
-<h2>Dependencies and prerequisites</h2> 
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
 
 <ul>
   <li><a href="http://developer.android.com/sdk/index.html">Android SDK</a></li>
-  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> 20.0.0 or higher
+  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> 22.6.2 or higher
     (if you're using Eclipse)</li>
 </ul>
- 
-</div> 
-</div> 
- 
-<p>Welcome to Android application development!</p> 
+
+</div>
+</div>
+
+<p>Welcome to Android application development!</p>
 
 <p>This class teaches you how to build your first Android app. You’ll learn how to create an Android
 project and run a debuggable version of the app. You'll also learn some fundamentals of Android app
@@ -35,6 +35,10 @@ to:</p>
   <li>Install the ADT plugin for Eclipse (if you’ll use the Eclipse IDE).</li>
   <li>Download the latest SDK tools and platforms using the SDK Manager.</li>
 </ol>
+
+<p class="note"><strong>Note:</strong> Make sure you install the most recent versions of the ADT
+plugin and the Android SDK before you start this class. The procedures described in this class may
+not apply to earlier versions.</p>
 
 <p>If you haven't already done these tasks, start by downloading the
   <a href="{@docRoot}sdk/index.html">Android SDK</a> and following the install steps.

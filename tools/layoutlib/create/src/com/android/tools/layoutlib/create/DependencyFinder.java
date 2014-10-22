@@ -316,9 +316,7 @@ public class DependencyFinder {
 
             // Add it to the dependency set for the currently visited class, as needed.
             assert mCurrentDepSet != null;
-            if (mCurrentDepSet != null) {
-                mCurrentDepSet.add(className);
-            }
+            mCurrentDepSet.add(className);
         }
 
         /**
@@ -527,7 +525,8 @@ public class DependencyFinder {
             // field instruction
             @Override
             public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                // name is the field's name.
+                // owner is the class that declares the field.
+                considerName(owner);
                 // desc is the field's descriptor (see Type).
                 considerDesc(desc);
             }

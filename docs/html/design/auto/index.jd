@@ -1,0 +1,35 @@
+page.title=Android Auto
+@jd:body
+
+<style>
+.auto-img-container-cols {
+  position:relative;
+  margin-bottom:25px;
+  margin-top:25px;
+}
+.auto-img-frame-cols {
+  z-index:2;
+  position:relative;
+}
+.auto-img-shot-cols {
+  position:absolute;
+  top:5px;
+  left:2px;
+  z-index:1;
+}
+</style>
+
+<div class="auto-img-container-cols" style="float:right; margin:0 0 40px 40px;width:460px">
+  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png">
+  <img class="auto-img-shot-cols" src="/auto/images/assets/03_a_musict.png">
+</div>
+
+<p>Android Auto is <strong>coming soon</strong> and brings apps to the car,
+integrating with the vehicle's input controls and display.</p>
+
+<p>The future design guidelines provide templates that define the user interaction model for all apps and let you hook into a standard UI with touch and voice controls. The templates meet international best practices for reducing driver distraction while still letting you customize and brand them to properly deliver your content.</p>
+
+<p><a href="{@docRoot}auto/index.html">Learn more about Android Auto</a>.</p>
+
+
+

@@ -46,7 +46,7 @@ interface IWindowSession {
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets);
     void remove(IWindow window);
-    
+
     /**
      * Change the parameters of a window.  You supply the
      * new parameters, it returns the new frame of the window on screen (the
@@ -89,7 +89,7 @@ interface IWindowSession {
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
-            out Rect outContentInsets, out Rect outVisibleInsets,
+            out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Configuration outConfig, out Surface outSurface);
 
     /**
@@ -109,7 +109,7 @@ interface IWindowSession {
      * to optimize compositing of this part of the window.
      */
     void setTransparentRegion(IWindow window, in Region region);
-    
+
     /**
      * Tell the window manager about the content and visible insets of the
      * given window, which can be used to adjust the <var>outContentInsets</var>
@@ -122,20 +122,20 @@ interface IWindowSession {
      */
     void setInsets(IWindow window, int touchableInsets, in Rect contentInsets,
             in Rect visibleInsets, in Region touchableRegion);
-    
+
     /**
      * Return the current display size in which the window is being laid out,
      * accounting for screen decorations around it.
      */
     void getDisplayFrame(IWindow window, out Rect outDisplayFrame);
-    
+
     void finishDrawing(IWindow window);
-    
+
     void setInTouchMode(boolean showFocus);
     boolean getInTouchMode();
-    
+
     boolean performHapticFeedback(IWindow window, int effectId, boolean always);
-    
+
     /**
      * Allocate the drag's thumbnail surface.  Also assigns a token that identifies
      * the drag to the OS and passes that as the return value.  A return value of
@@ -150,11 +150,11 @@ interface IWindowSession {
     boolean performDrag(IWindow window, IBinder dragToken, float touchX, float touchY,
             float thumbCenterX, float thumbCenterY, in ClipData data);
 
-	/**
-	 * Report the result of a drop action targeted to the given window.
-	 * consumed is 'true' when the drop was accepted by a valid recipient,
-	 * 'false' otherwise.
-	 */
+   /**
+     * Report the result of a drop action targeted to the given window.
+     * consumed is 'true' when the drop was accepted by a valid recipient,
+     * 'false' otherwise.
+     */
 	void reportDropResult(IWindow window, boolean consumed);
 
     /**
@@ -174,12 +174,17 @@ interface IWindowSession {
      * how big the increment is from one screen to another.
      */
     void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
-    
+
     void wallpaperOffsetsComplete(IBinder window);
-    
+
+    /**
+     * Apply a raw offset to the wallpaper service when shown behind this window.
+     */
+    void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
+
     Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
-    
+
     void wallpaperCommandComplete(IBinder window, in Bundle result);
 
     void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
@@ -188,7 +193,7 @@ interface IWindowSession {
     /**
      * Notifies that a rectangle on the screen has been requested.
      */
-    void onRectangleOnScreenRequested(IBinder token, in Rect rectangle, boolean immediate);
+    void onRectangleOnScreenRequested(IBinder token, in Rect rectangle);
 
     IWindowId getWindowId(IBinder window);
 }

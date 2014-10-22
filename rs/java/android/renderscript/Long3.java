@@ -27,7 +27,7 @@ public class Long3 {
 
     public Long3() {
     }
-    
+
     /** @hide */
     public Long3(long i) {
         this.x = this.y = this.z = i;

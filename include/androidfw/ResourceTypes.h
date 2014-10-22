@@ -25,6 +25,7 @@
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
+#include <utils/KeyedVector.h>
 
 #include <utils/threads.h>
 
@@ -216,7 +217,8 @@ enum {
     // Chunk types in RES_TABLE_TYPE
     RES_TABLE_PACKAGE_TYPE      = 0x0200,
     RES_TABLE_TYPE_TYPE         = 0x0201,
-    RES_TABLE_TYPE_SPEC_TYPE    = 0x0202
+    RES_TABLE_TYPE_SPEC_TYPE    = 0x0202,
+    RES_TABLE_LIBRARY_TYPE      = 0x0203
 };
 
 /**
@@ -235,6 +237,7 @@ enum {
 #define Res_MAKEARRAY(entry) (0x02000000 | (entry&0xFFFF))
 
 #define Res_MAXPACKAGE 255
+#define Res_MAXTYPE 255
 
 /**
  * Representation of a value in a resource, supplying type
@@ -268,6 +271,9 @@ struct Res_value
         // The 'data' holds a complex number encoding a fraction of a
         // container.
         TYPE_FRACTION = 0x06,
+        // The 'data' holds a dynamic ResTable_ref, which needs to be
+        // resolved before it can be used like a TYPE_REFERENCE.
+        TYPE_DYNAMIC_REFERENCE = 0x07,
 
         // Beginning of integer flavors...
         TYPE_FIRST_INT = 0x10,
@@ -457,6 +463,7 @@ public:
     ResStringPool(const void* data, size_t size, bool copyData=false);
     ~ResStringPool();
 
+    void setToEmpty();
     status_t setTo(const void* data, size_t size, bool copyData=false);
 
     status_t getError() const;
@@ -502,6 +509,23 @@ private:
     uint32_t                    mStringPoolSize;    // number of uint16_t
     const uint32_t*             mStyles;
     uint32_t                    mStylePoolSize;    // number of uint32_t
+};
+
+/**
+ * Wrapper class that allows the caller to retrieve a string from
+ * a string pool without knowing which string pool to look.
+ */
+class StringPoolRef {
+public:
+    StringPoolRef();
+    StringPoolRef(const ResStringPool* pool, uint32_t index);
+
+    const char* string8(size_t* outLen) const;
+    const char16_t* string16(size_t* outLen) const;
+
+private:
+    const ResStringPool*        mPool;
+    uint32_t                    mIndex;
 };
 
 /** ********************************************************************
@@ -735,14 +759,16 @@ private:
     const void*                 mCurExt;
 };
 
+class DynamicRefTable;
+
 /**
  * Convenience class for accessing data in a ResXMLTree resource.
  */
 class ResXMLTree : public ResXMLParser
 {
 public:
+    ResXMLTree(const DynamicRefTable* dynamicRefTable);
     ResXMLTree();
-    ResXMLTree(const void* data, size_t size, bool copyData=false);
     ~ResXMLTree();
 
     status_t setTo(const void* data, size_t size, bool copyData=false);
@@ -755,6 +781,8 @@ private:
     friend class ResXMLParser;
 
     status_t validateNode(const ResXMLTree_node* node) const;
+
+    const DynamicRefTable* const mDynamicRefTable;
 
     status_t                    mError;
     void*                       mOwnedData;
@@ -825,6 +853,8 @@ struct ResTable_package
 
     // Last index into keyStrings that is for public use by others.
     uint32_t lastPublicKey;
+
+    uint32_t typeIdOffset;
 };
 
 // The most specific locale can consist of:
@@ -924,6 +954,7 @@ struct ResTable_config
         DENSITY_XHIGH = ACONFIGURATION_DENSITY_XHIGH,
         DENSITY_XXHIGH = ACONFIGURATION_DENSITY_XXHIGH,
         DENSITY_XXXHIGH = ACONFIGURATION_DENSITY_XXXHIGH,
+        DENSITY_ANY = ACONFIGURATION_DENSITY_ANY,
         DENSITY_NONE = ACONFIGURATION_DENSITY_NONE
     };
     
@@ -1044,6 +1075,7 @@ struct ResTable_config
         UI_MODE_TYPE_CAR = ACONFIGURATION_UI_MODE_TYPE_CAR,
         UI_MODE_TYPE_TELEVISION = ACONFIGURATION_UI_MODE_TYPE_TELEVISION,
         UI_MODE_TYPE_APPLIANCE = ACONFIGURATION_UI_MODE_TYPE_APPLIANCE,
+        UI_MODE_TYPE_WATCH = ACONFIGURATION_UI_MODE_TYPE_WATCH,
 
         // uiMode bits for the night switch.
         MASK_UI_MODE_NIGHT = 0x30,
@@ -1290,6 +1322,7 @@ struct ResTable_entry
 struct ResTable_map_entry : public ResTable_entry
 {
     // Resource identifier of the parent mapping, or 0 if there is none.
+    // This is always treated as a TYPE_DYNAMIC_REFERENCE.
     ResTable_ref parent;
     // Number of name/value pairs that follow for FLAG_COMPLEX.
     uint32_t count;
@@ -1385,6 +1418,71 @@ struct ResTable_map
 };
 
 /**
+ * A package-id to package name mapping for any shared libraries used
+ * in this resource table. The package-id's encoded in this resource
+ * table may be different than the id's assigned at runtime. We must
+ * be able to translate the package-id's based on the package name.
+ */
+struct ResTable_lib_header
+{
+    struct ResChunk_header header;
+
+    // The number of shared libraries linked in this resource table.
+    uint32_t count;
+};
+
+/**
+ * A shared library package-id to package name entry.
+ */
+struct ResTable_lib_entry
+{
+    // The package-id this shared library was assigned at build time.
+    // We use a uint32 to keep the structure aligned on a uint32 boundary.
+    uint32_t packageId;
+
+    // The package name of the shared library. \0 terminated.
+    char16_t packageName[128];
+};
+
+/**
+ * Holds the shared library ID table. Shared libraries are assigned package IDs at
+ * build time, but they may be loaded in a different order, so we need to maintain
+ * a mapping of build-time package ID to run-time assigned package ID.
+ *
+ * Dynamic references are not currently supported in overlays. Only the base package
+ * may have dynamic references.
+ */
+class DynamicRefTable
+{
+public:
+    DynamicRefTable(uint8_t packageId);
+
+    // Loads an unmapped reference table from the package.
+    status_t load(const ResTable_lib_header* const header);
+
+    // Adds mappings from the other DynamicRefTable
+    status_t addMappings(const DynamicRefTable& other);
+
+    // Creates a mapping from build-time package ID to run-time package ID for
+    // the given package.
+    status_t addMapping(const String16& packageName, uint8_t packageId);
+
+    // Performs the actual conversion of build-time resource ID to run-time
+    // resource ID.
+    inline status_t lookupResourceId(uint32_t* resId) const;
+    inline status_t lookupResourceValue(Res_value* value) const;
+
+    inline const KeyedVector<String16, uint8_t>& entries() const {
+        return mEntries;
+    }
+
+private:
+    const uint8_t                   mAssignedPackageId;
+    uint8_t                         mLookupTable[256];
+    KeyedVector<String16, uint8_t>  mEntries;
+};
+
+/**
  * Convenience class for accessing data in a ResTable resource.
  */
 class ResTable
@@ -1395,10 +1493,15 @@ public:
              bool copyData=false);
     ~ResTable();
 
-    status_t add(Asset* asset, const int32_t cookie, bool copyData,
-                 const void* idmap = NULL);
-    status_t add(const void *data, size_t size);
+    status_t add(const void* data, size_t size, const int32_t cookie=-1, bool copyData=false);
+    status_t add(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
+            const int32_t cookie=-1, bool copyData=false);
+
+    status_t add(Asset* asset, const int32_t cookie=-1, bool copyData=false);
+    status_t add(Asset* asset, Asset* idmapAsset, const int32_t cookie=-1, bool copyData=false);
+
     status_t add(ResTable* src);
+    status_t addEmpty(const int32_t cookie);
 
     status_t getError() const;
 
@@ -1417,6 +1520,8 @@ public:
     };
 
     bool getResourceName(uint32_t resID, bool allowUtf8, resource_name* outName) const;
+
+    bool getResourceFlags(uint32_t resID, uint32_t* outFlags) const;
 
     /**
      * Retrieve the value of a resource.  If the resource is found, returns a
@@ -1454,7 +1559,7 @@ public:
     };
     const char16_t* valueToString(const Res_value* value, size_t stringBlock,
                                   char16_t tmpBuffer[TMP_BUFFER_SIZE],
-                                  size_t* outLen);
+                                  size_t* outLen) const;
 
     struct bag_entry {
         ssize_t stringBlock;
@@ -1535,13 +1640,14 @@ public:
             uint32_t typeSpecFlags;
             Res_value value;
         };
+
         struct type_info {
             size_t numEntries;
             theme_entry* entries;
         };
+
         struct package_info {
-            size_t numTypes;
-            type_info types[];
+            type_info types[Res_MAXTYPE + 1];
         };
 
         void free_package(package_info* pi);
@@ -1583,6 +1689,8 @@ public:
     {
     public:
         inline virtual ~Accessor() { }
+
+        virtual const String16& getAssetsPackage() const = 0;
 
         virtual uint32_t getCustomResource(const String16& package,
                                            const String16& type,
@@ -1634,8 +1742,9 @@ public:
                               bool append = false);
 
     size_t getBasePackageCount() const;
-    const char16_t* getBasePackageName(size_t idx) const;
+    const String16 getBasePackageName(size_t idx) const;
     uint32_t getBasePackageId(size_t idx) const;
+    uint32_t getLastTypeIdForPackage(size_t idx) const;
 
     // Return the number of resource tables that the object contains.
     size_t getTableCount() const;
@@ -1646,6 +1755,8 @@ public:
     const ResStringPool* getTableStringBlock(size_t index) const;
     // Return unique cookie identifier for the given resource table.
     int32_t getTableCookie(size_t index) const;
+
+    const DynamicRefTable* getDynamicRefTableForCookie(int32_t cookie) const;
 
     // Return the configurations (ResTable_config) that we know about
     void getConfigurations(Vector<ResTable_config>* configs) const;
@@ -1663,13 +1774,15 @@ public:
             void** outData, size_t* outSize) const;
 
     enum {
-        IDMAP_HEADER_SIZE_BYTES = 3 * sizeof(uint32_t) + 2 * 256,
+        IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256,
     };
+
     // Retrieve idmap meta-data.
     //
     // This function only requires the idmap header (the first
     // IDMAP_HEADER_SIZE_BYTES) bytes of an idmap file.
     static bool getIdmapInfo(const void* idmap, size_t size,
+            uint32_t* pVersion,
             uint32_t* pTargetCrc, uint32_t* pOverlayCrc,
             String8* pTargetPath, String8* pOverlayPath);
 
@@ -1679,21 +1792,24 @@ public:
 private:
     struct Header;
     struct Type;
+    struct Entry;
     struct Package;
     struct PackageGroup;
     struct bag_set;
+    typedef Vector<Type*> TypeList;
 
-    status_t addInternal(const void* data, size_t size, const int32_t cookie,
-                 Asset* asset, bool copyData, const Asset* idmap);
+    status_t addInternal(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
+            const int32_t cookie, bool copyData);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;
-    ssize_t getEntry(
-        const Package* package, int typeIndex, int entryIndex,
+
+    status_t getEntry(
+        const PackageGroup* packageGroup, int typeIndex, int entryIndex,
         const ResTable_config* config,
-        const ResTable_type** outType, const ResTable_entry** outEntry,
-        const Type** outTypeClass) const;
+        Entry* outEntry) const;
+
     status_t parsePackage(
-        const ResTable_package* const pkg, const Header* const header, uint32_t idmap_id);
+        const ResTable_package* const pkg, const Header* const header);
 
     void print_value(const Package* pkg, const Res_value& value) const;
     
@@ -1712,6 +1828,8 @@ private:
     // Mapping from resource package IDs to indices into the internal
     // package array.
     uint8_t                     mPackageMap[256];
+
+    uint8_t                     mNextPackageId;
 };
 
 }   // namespace android

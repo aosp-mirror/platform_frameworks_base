@@ -57,8 +57,8 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
     
     private static String sPrependShortcutLabel;
 
-    public IconMenuItemView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs);
+    public IconMenuItemView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         if (sPrependShortcutLabel == null) {
             /*
@@ -68,10 +68,9 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
             sPrependShortcutLabel = getResources().getString(
                     com.android.internal.R.string.prepend_shortcut_label);
         }
-        
-        TypedArray a =
-            context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.MenuView, defStyle, 0);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.MenuView, defStyleAttr, defStyleRes);
 
         mDisabledAlpha = a.getFloat(
                 com.android.internal.R.styleable.MenuView_itemIconDisabledAlpha, 0.8f);
@@ -81,7 +80,11 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         
         a.recycle();
     }
-    
+
+    public IconMenuItemView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
     public IconMenuItemView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }

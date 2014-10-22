@@ -139,8 +139,8 @@ public final class GeofenceHardwareImpl {
     private void updateFusedHardwareAvailability() {
         boolean fusedSupported;
         try {
-            fusedSupported = mFusedService.isSupported();
-        } catch(RemoteException e) {
+            fusedSupported = (mFusedService != null ? mFusedService.isSupported() : false);
+        } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling LocationManagerService");
             fusedSupported = false;
         }
@@ -210,18 +210,20 @@ public final class GeofenceHardwareImpl {
         }
     }
 
-    public boolean addCircularFence(int geofenceId,  int monitoringType, double latitude,
-            double longitude, double radius, int lastTransition,int monitorTransitions,
-            int notificationResponsivenes, int unknownTimer, IGeofenceHardwareCallback callback) {
+    public boolean addCircularFence(
+            int monitoringType,
+            GeofenceHardwareRequestParcelable request,
+            IGeofenceHardwareCallback callback) {
+        int geofenceId = request.getId();
+
         // This API is not thread safe. Operations on the same geofence need to be serialized
         // by upper layers
         if (DEBUG) {
-            Log.d(TAG, "addCircularFence: GeofenceId: " + geofenceId + " Latitude: " + latitude +
-                    " Longitude: " + longitude + " Radius: " + radius + " LastTransition: "
-                    + lastTransition + " MonitorTransition: " + monitorTransitions +
-                    " NotificationResponsiveness: " + notificationResponsivenes +
-                    " UnKnown Timer: " + unknownTimer + " MonitoringType: " + monitoringType);
-
+            String message = String.format(
+                    "addCircularFence: monitoringType=%d, %s",
+                    monitoringType,
+                    request);
+            Log.d(TAG, message);
         }
         boolean result;
 
@@ -237,9 +239,15 @@ public final class GeofenceHardwareImpl {
             case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
                 if (mGpsService == null) return false;
                 try {
-                    result = mGpsService.addCircularHardwareGeofence(geofenceId, latitude,
-                            longitude, radius, lastTransition, monitorTransitions,
-                            notificationResponsivenes, unknownTimer);
+                    result = mGpsService.addCircularHardwareGeofence(
+                            request.getId(),
+                            request.getLatitude(),
+                            request.getLongitude(),
+                            request.getRadius(),
+                            request.getLastTransition(),
+                            request.getMonitorTransitions(),
+                            request.getNotificationResponsiveness(),
+                            request.getUnknownTimer());
                 } catch (RemoteException e) {
                     Log.e(TAG, "AddGeofence: Remote Exception calling LocationManagerService");
                     result = false;
@@ -249,20 +257,9 @@ public final class GeofenceHardwareImpl {
                 if(mFusedService == null) {
                     return false;
                 }
-                GeofenceHardwareRequest request = GeofenceHardwareRequest.createCircularGeofence(
-                        latitude,
-                        longitude,
-                        radius);
-                request.setUnknownTimer(unknownTimer);
-                request.setNotificationResponsiveness(notificationResponsivenes);
-                request.setMonitorTransitions(monitorTransitions);
-                request.setLastTransition(lastTransition);
-
-                GeofenceHardwareRequestParcelable parcelableRequest =
-                        new GeofenceHardwareRequestParcelable(geofenceId, request);
                 try {
                     mFusedService.addGeofences(
-                            new GeofenceHardwareRequestParcelable[] { parcelableRequest });
+                            new GeofenceHardwareRequestParcelable[] { request });
                     result = true;
                 } catch(RemoteException e) {
                     Log.e(TAG, "AddGeofence: RemoteException calling LocationManagerService");
@@ -471,12 +468,14 @@ public final class GeofenceHardwareImpl {
             int monitoringStatus,
             Location location,
             int source) {
-        // TODO: use the source if needed in the future
         setMonitorAvailability(monitoringType, monitoringStatus);
         acquireWakeLock();
-        Message message = mCallbacksHandler.obtainMessage(GEOFENCE_STATUS, location);
-        message.arg1 = monitoringStatus;
-        message.arg2 = monitoringType;
+        GeofenceHardwareMonitorEvent event = new GeofenceHardwareMonitorEvent(
+                monitoringType,
+                monitoringStatus,
+                source,
+                location);
+        Message message = mCallbacksHandler.obtainMessage(GEOFENCE_STATUS, event);
         message.sendToTarget();
     }
 
@@ -644,20 +643,17 @@ public final class GeofenceHardwareImpl {
 
             switch (msg.what) {
                 case GEOFENCE_STATUS:
-                    Location location = (Location) msg.obj;
-                    int val = msg.arg1;
-                    monitoringType = msg.arg2;
-                    boolean available;
-                    available = (val == GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE ?
-                            true : false);
-                    callbackList = mCallbacks[monitoringType];
+                    GeofenceHardwareMonitorEvent event = (GeofenceHardwareMonitorEvent) msg.obj;
+                    callbackList = mCallbacks[event.getMonitoringType()];
                     if (callbackList != null) {
-                        if (DEBUG) Log.d(TAG, "MonitoringSystemChangeCallback: GPS : " + available);
+                        if (DEBUG) Log.d(TAG, "MonitoringSystemChangeCallback: " + event);
 
-                        for (IGeofenceHardwareMonitorCallback c: callbackList) {
+                        for (IGeofenceHardwareMonitorCallback c : callbackList) {
                             try {
-                                c.onMonitoringSystemChange(monitoringType, available, location);
-                            } catch (RemoteException e) {}
+                                c.onMonitoringSystemChange(event);
+                            } catch (RemoteException e) {
+                                Log.d(TAG, "Error reporting onMonitoringSystemChange.", e);
+                            }
                         }
                     }
                     releaseWakeLock();

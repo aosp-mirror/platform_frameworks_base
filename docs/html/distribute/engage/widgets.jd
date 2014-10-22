@@ -1,0 +1,45 @@
+page.title=Build Useful Widgets
+page.metaDescription=Use home screen widgets to remind users about important information in your apps and games, even when your apps are closed.
+page.tags=""
+page.image=/images/gp-engage-0.jpg
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-engage-0.jpg" style="width:320px;">
+</div>
+<p>
+  <a href=
+  "/design/patterns/widgets.html">Widgets</a> are
+  an essential aspect of home screen customization. They are "at-a-glance"
+  views of an app's <strong>most important data and features</strong>,
+  instantly available from the user's home screen.
+</p>
+
+<p>
+  Use widgets to <strong>remind users</strong> about important information in
+  your apps and games, even when your apps are closed. For instance, if you
+  have a news app, showcase the latest headlines.
+</p>
+
+  <div class="sidebox" style="float:none;margin-left:0">
+  <p><strong>Tip:</strong>
+  Make your widgets useful &mdash; provide in-app information like news, game status,
+  or upcoming deadlines. Widgets should serve as more than a launcher icon.</p>
+  </div>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/engage/widgets"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+</div>

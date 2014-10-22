@@ -18,9 +18,6 @@ package com.android.vpndialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.net.IConnectivityManager;
 import android.os.Handler;
 import android.os.Message;
@@ -28,9 +25,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.app.AlertActivity;
@@ -87,13 +81,9 @@ public class ManageDialog extends AlertActivity implements
             mDataRowsHidden = true;
 
             if (mConfig.legacy) {
-                mAlertParams.mIconId = android.R.drawable.ic_dialog_info;
                 mAlertParams.mTitle = getText(R.string.legacy_title);
             } else {
-                PackageManager pm = getPackageManager();
-                ApplicationInfo app = pm.getApplicationInfo(mConfig.user, 0);
-                mAlertParams.mIcon = app.loadIcon(pm);
-                mAlertParams.mTitle = app.loadLabel(pm);
+                mAlertParams.mTitle = VpnConfig.getVpnLabel(this, mConfig.user);
             }
             if (mConfig.configureIntent != null) {
                 mAlertParams.mPositiveButtonText = getText(R.string.configure);

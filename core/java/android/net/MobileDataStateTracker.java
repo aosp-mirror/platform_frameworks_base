@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MobileDataStateTracker extends BaseNetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
     private PhoneConstants.DataState mMobileDataState;
@@ -66,7 +66,6 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     private Handler mTarget;
     private Context mContext;
     private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
     private boolean mDefaultRouteSet = false;
 
@@ -200,11 +199,11 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
         }
         mLinkProperties.setMtu(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_mobile_mtu));
-        mLinkCapabilities = intent.getParcelableExtra(
-                PhoneConstants.DATA_LINK_CAPABILITIES_KEY);
-        if (mLinkCapabilities == null) {
-            loge("CONNECTED event did not supply link capabilities.");
-            mLinkCapabilities = new LinkCapabilities();
+        mNetworkCapabilities = intent.getParcelableExtra(
+                PhoneConstants.DATA_NETWORK_CAPABILITIES_KEY);
+        if (mNetworkCapabilities == null) {
+            loge("CONNECTED event did not supply network capabilities.");
+            mNetworkCapabilities = new NetworkCapabilities();
         }
     }
 
@@ -306,20 +305,20 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
                     if (VDBG) {
                         Slog.d(TAG, "TelephonyMgr.DataConnectionStateChanged");
                         if (mNetworkInfo != null) {
-                            Slog.d(TAG, "NetworkInfo = " + mNetworkInfo.toString());
-                            Slog.d(TAG, "subType = " + String.valueOf(mNetworkInfo.getSubtype()));
+                            Slog.d(TAG, "NetworkInfo = " + mNetworkInfo);
+                            Slog.d(TAG, "subType = " + mNetworkInfo.getSubtype());
                             Slog.d(TAG, "subType = " + mNetworkInfo.getSubtypeName());
                         }
                         if (mLinkProperties != null) {
-                            Slog.d(TAG, "LinkProperties = " + mLinkProperties.toString());
+                            Slog.d(TAG, "LinkProperties = " + mLinkProperties);
                         } else {
                             Slog.d(TAG, "LinkProperties = " );
                         }
 
-                        if (mLinkCapabilities != null) {
-                            Slog.d(TAG, "LinkCapabilities = " + mLinkCapabilities.toString());
+                        if (mNetworkCapabilities != null) {
+                            Slog.d(TAG, mNetworkCapabilities.toString());
                         } else {
-                            Slog.d(TAG, "LinkCapabilities = " );
+                            Slog.d(TAG, "NetworkCapabilities = " );
                         }
                     }
 
@@ -457,11 +456,6 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
      */
     public boolean isReady() {
         return mDataConnectionTrackerAc != null;
-    }
-
-    @Override
-    public void captivePortalCheckComplete() {
-        // not implemented
     }
 
     @Override
@@ -705,15 +699,15 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
                 break;
             }
 
-            try {
-                if (enable) {
-                    return mPhoneService.enableApnType(apnType);
-                } else {
-                    return mPhoneService.disableApnType(apnType);
-                }
-            } catch (RemoteException e) {
-                if (retry == 0) getPhoneService(true);
-            }
+//            try {
+//                if (enable) {
+//                    return mPhoneService.enableApnType(apnType);
+//                } else {
+//                    return mPhoneService.disableApnType(apnType);
+//                }
+//            } catch (RemoteException e) {
+//                if (retry == 0) getPhoneService(true);
+//            }
         }
 
         loge("Could not " + (enable ? "enable" : "disable") + " APN type \"" + apnType + "\"");
@@ -740,6 +734,8 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
                 return PhoneConstants.APN_TYPE_CBS;
             case ConnectivityManager.TYPE_MOBILE_IA:
                 return PhoneConstants.APN_TYPE_IA;
+            case ConnectivityManager.TYPE_MOBILE_EMERGENCY:
+                return PhoneConstants.APN_TYPE_EMERGENCY;
             default:
                 sloge("Error mapping networkType " + netType + " to apnType.");
                 return null;
@@ -753,14 +749,6 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     @Override
     public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
-    }
-
-    /**
-     * @see android.net.NetworkStateTracker#getLinkCapabilities()
-     */
-    @Override
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mLinkCapabilities);
     }
 
     public void supplyMessenger(Messenger messenger) {

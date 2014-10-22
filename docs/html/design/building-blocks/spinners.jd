@@ -1,5 +1,5 @@
 page.title=Spinners
-page.tags="spinner","dropdown"
+page.tags=spinner,dropdown
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/spinner.html">

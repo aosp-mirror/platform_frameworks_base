@@ -22,100 +22,79 @@
 #include "Matrix.h"
 #include "Rect.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
 
 namespace android {
 namespace uirenderer {
 
-class VertexBuffer {
-public:
-    VertexBuffer():
-        mBuffer(0),
-        mVertexCount(0),
-        mCleanupMethod(NULL)
-    {}
-
-    ~VertexBuffer() {
-        if (mCleanupMethod) mCleanupMethod(mBuffer);
-    }
-
-    /**
-       This should be the only method used by the PathTessellator. Subsequent calls to alloc will
-       allocate space within the first allocation (useful if you want to eventually allocate
-       multiple regions within a single VertexBuffer, such as with PathTessellator::tesselateLines()
-     */
-    template <class TYPE>
-    TYPE* alloc(int vertexCount) {
-        if (mVertexCount) {
-            TYPE* reallocBuffer = (TYPE*)mReallocBuffer;
-            // already have allocated the buffer, re-allocate space within
-            if (mReallocBuffer != mBuffer) {
-                // not first re-allocation, leave space for degenerate triangles to separate strips
-                reallocBuffer += 2;
-            }
-            mReallocBuffer = reallocBuffer + vertexCount;
-            return reallocBuffer;
-        }
-        mVertexCount = vertexCount;
-        mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
-        mCleanupMethod = &(cleanup<TYPE>);
-
-        return (TYPE*)mBuffer;
-    }
-
-    template <class TYPE>
-    void copyInto(const VertexBuffer& srcBuffer, float xOffset, float yOffset) {
-        int verticesToCopy = srcBuffer.getVertexCount();
-
-        TYPE* dst = alloc<TYPE>(verticesToCopy);
-        TYPE* src = (TYPE*)srcBuffer.getBuffer();
-
-        for (int i = 0; i < verticesToCopy; i++) {
-            TYPE::copyWithOffset(&dst[i], src[i], xOffset, yOffset);
-        }
-    }
-
-    void* getBuffer() const { return mBuffer; } // shouldn't be const, since not a const ptr?
-    unsigned int getVertexCount() const { return mVertexCount; }
-
-    template <class TYPE>
-    void createDegenerateSeparators(int allocSize) {
-        TYPE* end = (TYPE*)mBuffer + mVertexCount;
-        for (TYPE* degen = (TYPE*)mBuffer + allocSize; degen < end; degen += 2 + allocSize) {
-            memcpy(degen, degen - 1, sizeof(TYPE));
-            memcpy(degen + 1, degen + 2, sizeof(TYPE));
-        }
-    }
-
-private:
-    template <class TYPE>
-    static void cleanup(void* buffer) {
-        delete[] (TYPE*)buffer;
-    }
-
-    void* mBuffer;
-    unsigned int mVertexCount;
-
-    void* mReallocBuffer; // used for multi-allocation
-
-    void (*mCleanupMethod)(void*);
-};
-
 class PathTessellator {
 public:
-    static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint, bool forceExpand);
+    /**
+     * Populates scaleX and scaleY with the 'tessellation scale' of the transform - the effective X
+     * and Y scales that tessellation will take into account when generating the 1.0 pixel thick
+     * ramp.
+     *
+     * Two instances of the same shape (size, paint, etc.) will only generate the same vertices if
+     * their tessellation scales are equal.
+     */
+    static void extractTessellationScales(const Matrix4& transform, float* scaleX, float* scaleY);
 
+    /**
+     * Populates a VertexBuffer with a tessellated approximation of the input convex path, as a single
+     * triangle strip. Note: joins are not currently supported.
+     *
+     * @param path The path to be approximated
+     * @param paint The paint the path will be drawn with, indicating AA, painting style
+     *        (stroke vs fill), stroke width, stroke cap & join style, etc.
+     * @param transform The transform the path is to be drawn with, used to drive stretch-aware path
+     *        vertex approximation, and correct AA ramp offsetting.
+     * @param vertexBuffer The output buffer
+     */
     static void tessellatePath(const SkPath& path, const SkPaint* paint,
-            const mat4 *transform, VertexBuffer& vertexBuffer);
+            const mat4& transform, VertexBuffer& vertexBuffer);
 
-    static void tessellatePoints(const float* points, int count, SkPaint* paint,
-            const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+    /**
+     * Populates a VertexBuffer with a tessellated approximation of points as a single triangle
+     * strip (with degenerate tris separating), respecting the shape defined by the paint cap.
+     *
+     * @param points The center vertices of the points to be drawn
+     * @param count The number of floats making up the point vertices
+     * @param paint The paint the points will be drawn with indicating AA, stroke width & cap
+     * @param transform The transform the points will be drawn with, used to drive stretch-aware path
+     *        vertex approximation, and correct AA ramp offsetting
+     * @param vertexBuffer The output buffer
+     */
+    static void tessellatePoints(const float* points, int count, const SkPaint* paint,
+            const mat4& transform, VertexBuffer& vertexBuffer);
 
-    static void tessellateLines(const float* points, int count, SkPaint* paint,
-            const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+    /**
+     * Populates a VertexBuffer with a tessellated approximation of lines as a single triangle
+     * strip (with degenerate tris separating).
+     *
+     * @param points Pairs of endpoints defining the lines to be drawn
+     * @param count The number of floats making up the line vertices
+     * @param paint The paint the lines will be drawn with indicating AA, stroke width & cap
+     * @param transform The transform the points will be drawn with, used to drive stretch-aware path
+     *        vertex approximation, and correct AA ramp offsetting
+     * @param vertexBuffer The output buffer
+     */
+    static void tessellateLines(const float* points, int count, const SkPaint* paint,
+            const mat4& transform, VertexBuffer& vertexBuffer);
+
+    /**
+     * Approximates a convex, CW outline into a Vector of 2d vertices.
+     *
+     * @param path The outline to be approximated
+     * @param thresholdSquared The threshold of acceptable error (in pixels) when approximating
+     * @param outputVertices An empty Vector which will be populated with the output
+     */
+    static bool approximatePathOutlineVertices(const SkPath &path, float thresholdSquared,
+            Vector<Vertex> &outputVertices);
 
 private:
     static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
-        float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex> &outputVertices);
+            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+            Vector<Vertex> &outputVertices);
 
 /*
   endpoints a & b,
@@ -125,8 +104,8 @@ private:
             float ax, float ay,
             float bx, float by,
             float cx, float cy,
-            float sqrInvScaleX, float sqrInvScaleY,
-            Vector<Vertex> &outputVertices);
+            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+            Vector<Vertex> &outputVertices, int depth = 0);
 
 /*
   endpoints p1, p2
@@ -137,8 +116,8 @@ private:
             float c1x, float c1y,
             float p2x, float p2y,
             float c2x, float c2y,
-            float sqrInvScaleX, float sqrInvScaleY,
-            Vector<Vertex> &outputVertices);
+            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+            Vector<Vertex> &outputVertices, int depth = 0);
 };
 
 }; // namespace uirenderer

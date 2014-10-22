@@ -1,5 +1,5 @@
 page.title=Lists
-page.tags="listview","layout"
+page.tags=listview,layout
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/layout/listview.html">

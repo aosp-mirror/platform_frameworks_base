@@ -19,11 +19,16 @@ package android.view.animation;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import com.android.internal.view.animation.HasNativeInterpolator;
+import com.android.internal.view.animation.NativeInterpolatorFactory;
+import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
+
 /**
  * An interpolator where the rate of change is constant
  *
  */
-public class LinearInterpolator implements Interpolator {
+@HasNativeInterpolator
+public class LinearInterpolator implements Interpolator, NativeInterpolatorFactory {
 
     public LinearInterpolator() {
     }
@@ -33,5 +38,11 @@ public class LinearInterpolator implements Interpolator {
     
     public float getInterpolation(float input) {
         return input;
+    }
+
+    /** @hide */
+    @Override
+    public long createNativeInterpolator() {
+        return NativeInterpolatorFactoryHelper.createLinearInterpolator();
     }
 }

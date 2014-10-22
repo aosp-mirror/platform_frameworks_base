@@ -18,43 +18,53 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.text.SpannableStringBuilder;
-import android.text.style.TextAppearanceSpan;
+import android.graphics.drawable.Drawable;
+import android.os.Debug;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 
-public class NumPadKey extends Button {
+public class NumPadKey extends ViewGroup {
     // list of "ABC", etc per digit, starting with '0'
     static String sKlondike[];
 
-    int mDigit = -1;
-    int mTextViewResId;
-    TextView mTextView = null;
-    boolean mEnableHaptics;
+    private int mDigit = -1;
+    private int mTextViewResId;
+    private PasswordTextView mTextView;
+    private TextView mDigitText;
+    private TextView mKlondikeText;
+    private boolean mEnableHaptics;
+    private PowerManager mPM;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
         public void onClick(View thisView) {
-            if (mTextView == null) {
-                if (mTextViewResId > 0) {
-                    final View v = NumPadKey.this.getRootView().findViewById(mTextViewResId);
-                    if (v != null && v instanceof TextView) {
-                        mTextView = (TextView) v;
-                    }
+            if (mTextView == null && mTextViewResId > 0) {
+                final View v = NumPadKey.this.getRootView().findViewById(mTextViewResId);
+                if (v != null && v instanceof PasswordTextView) {
+                    mTextView = (PasswordTextView) v;
                 }
             }
-            // check for time-based lockouts
             if (mTextView != null && mTextView.isEnabled()) {
-                mTextView.append(String.valueOf(mDigit));
+                mTextView.append(Character.forDigit(mDigit, 10));
             }
+            userActivity();
             doHapticKeyClick();
         }
     };
+
+    public void userActivity() {
+        mPM.userActivity(SystemClock.uptimeMillis(), false);
+    }
 
     public NumPadKey(Context context) {
         this(context, null);
@@ -66,10 +76,16 @@ public class NumPadKey extends Button {
 
     public NumPadKey(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        setFocusable(true);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
-        mDigit = a.getInt(R.styleable.NumPadKey_digit, mDigit);
-        setTextViewResId(a.getResourceId(R.styleable.NumPadKey_textView, 0));
+
+        try {
+            mDigit = a.getInt(R.styleable.NumPadKey_digit, mDigit);
+            mTextViewResId = a.getResourceId(R.styleable.NumPadKey_textView, 0);
+        } finally {
+            a.recycle();
+        }
 
         setOnClickListener(mListener);
         setOnHoverListener(new LiftToActivateListener(context));
@@ -77,26 +93,32 @@ public class NumPadKey extends Button {
 
         mEnableHaptics = new LockPatternUtils(context).isTactileFeedbackEnabled();
 
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        builder.append(String.valueOf(mDigit));
+        mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.keyguard_num_pad_key, this, true);
+
+        mDigitText = (TextView) findViewById(R.id.digit_text);
+        mDigitText.setText(Integer.toString(mDigit));
+        mKlondikeText = (TextView) findViewById(R.id.klondike_text);
+
         if (mDigit >= 0) {
             if (sKlondike == null) {
-                sKlondike = context.getResources().getStringArray(
-                        R.array.lockscreen_num_pad_klondike);
+                sKlondike = getResources().getStringArray(R.array.lockscreen_num_pad_klondike);
             }
             if (sKlondike != null && sKlondike.length > mDigit) {
-                final String extra = sKlondike[mDigit];
-                final int extraLen = extra.length();
-                if (extraLen > 0) {
-                    builder.append(" ");
-                    builder.append(extra);
-                    builder.setSpan(
-                        new TextAppearanceSpan(context, R.style.TextAppearance_NumPadKey_Klondike),
-                        builder.length()-extraLen, builder.length(), 0);
+                String klondike = sKlondike[mDigit];
+                final int len = klondike.length();
+                if (len > 0) {
+                    mKlondikeText.setText(klondike);
+                } else {
+                    mKlondikeText.setVisibility(View.INVISIBLE);
                 }
             }
         }
-        setText(builder);
+
+        setBackground(mContext.getDrawable(R.drawable.ripple_drawable));
+        setContentDescription(mDigitText.getText().toString() + mKlondikeText.getText().toString());
     }
 
     @Override
@@ -107,13 +129,32 @@ public class NumPadKey extends Button {
         ObscureSpeechDelegate.sAnnouncedHeadset = false;
     }
 
-    public void setTextView(TextView tv) {
-        mTextView = tv;
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        measureChildren(widthMeasureSpec, heightMeasureSpec);
     }
 
-    public void setTextViewResId(int resId) {
-        mTextView = null;
-        mTextViewResId = resId;
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        int digitHeight = mDigitText.getMeasuredHeight();
+        int klondikeHeight = mKlondikeText.getMeasuredHeight();
+        int totalHeight = digitHeight + klondikeHeight;
+        int top = getHeight() / 2 - totalHeight / 2;
+        int centerX = getWidth() / 2;
+        int left = centerX - mDigitText.getMeasuredWidth() / 2;
+        int bottom = top + digitHeight;
+        mDigitText.layout(left, top, left + mDigitText.getMeasuredWidth(), bottom);
+        top = (int) (bottom - klondikeHeight * 0.35f);
+        bottom = top + klondikeHeight;
+
+        left = centerX - mKlondikeText.getMeasuredWidth() / 2;
+        mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 
     // Cause a VIRTUAL_KEY vibration

@@ -1,0 +1,301 @@
+page.title=Build Buzz
+page.image=/distribute/images/build-buzz.jpg
+page.metaDescription=Generate interest and demand for your app. Here are some ways to help users find, download, and install your apps.
+page.tags="users, growth, promotion"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      Contents
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#link-to-your-apps">Link to Your Apps</a>
+      </li>
+      <li>
+        <a href="#use-the-google-play-badge">Use the Badge</a>
+      </li>
+      <li>
+        <a href="#cross-promote-from-your-other-apps">Cross-Promote Your Apps</a>
+      </li>
+      <li>
+        <a href="#hold-a-contest">Hold a Contest</a>
+      </li>
+      <li>
+        <a href="#leverage-pr">Leverage PR</a>
+      </li>
+      <li>
+        <a href="#use-social-media">Use Social Media</a>
+      </li>
+      <li>
+        <a href="#publish-youtube-videos">Publish YouTube Videos</a>
+      </li>
+      <li>
+        <a href="#advertise">Advertise</a>
+      </li>
+      <li>
+        <a href="#maximize-your-marketing-spend">Maximize Your Marketing
+        spend</a>
+      </li>
+      <li><a href="#related-resources">Related Resources</a></li>
+    </ol>
+  </div>
+</div>
+
+<div style="float:right;border 2px solid #ddd;">
+  <img src="{@docRoot}distribute/images/build-buzz.jpg" style=
+  "width:240px;margin:0 0 1.5em 1em;">
+</div>
+
+<p>
+  With more apps published each week in Google Play, building  buzz
+  around your own apps helps them get noticed and makes it easier for
+  users to find and download them.
+</p>
+
+<p>
+  Building buzz doesn’t have a single formula. The tools and techniques
+  described here have worked for other developers, but finding the right mix
+  will depend on your apps, your audience, and your competition. And don’t be
+  afraid to try something different or quirky, taking a risk could pay big
+  dividends.
+</p>
+
+<div class="headerLine">
+  <h2 id="link-to-your-apps">
+    Link to Your Apps in Google Play
+  </h2>
+
+
+</div>
+
+<p>
+  After publishing your apps, you can take Android users directly to your
+  app/games detail page on Google Play by <a href=
+  "{@docRoot}distribute/tools/promote/linking.html">providing links</a> in your
+  social network posts, ad campaigns, app reviews and articles, your website,
+  and more.
+</p>
+
+<p>
+  You can also link to:
+</p>
+
+<ul>
+  <li>A <a href=
+  "{@docRoot}distribute/tools/promote/linking.html#OpeningPublisher">list</a>
+  of all of your apps
+  </li>
+
+  <li>A Google Play <a href=
+  "{@docRoot}distribute/tools/promote/linking.html#PerformingSearch">search
+  result</a>
+  </li>
+
+  <li>A <a href=
+  "{@docRoot}distribute/tools/promote/linking.html#OpeningCollection">collection</a>
+  on Google Play
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="use-the-google-play-badge">
+    Use the Google Play Badge
+  </h2>
+
+
+</div>
+
+<div class="figure" style="margin:0 3em;">
+  <img src="{@docRoot}images/gp-build-buzz-uplift-1.png">
+</div>
+
+<p>
+  <a href="{@docRoot}distribute/tools/promote/badges.html">Google Play
+  badges</a> are an especially great way let Android users know that your apps
+  are available and link them directly to your Google Play page. Users are more
+  likely to download and trust your apps and games when the Google Play badge
+  is used.
+</p>
+
+<p>Badge your
+  websites, collateral, and ad campaigns. With the badge generator, they're
+  also easy to make and available in multiple languages.
+</p>
+
+<div class="headerLine" style="clear:both">
+  <h2 id="cross-promote-from-your-other-apps">
+    Cross-Promote from Your Other Apps
+  </h2>
+
+
+</div>
+
+<div class="figure-right">
+  <img src="{@docRoot}images/gp-buzz-1.jpg">
+  <p class="img-caption">
+    Cross-promoting related apps.
+  </p>
+</div>
+
+<p>
+  Cross promoting, or house ads, is a great cost effective way to get users to
+  try out new titles. Be sure that your house ad is unobtrusive and presented
+  at a time convenient for users to leave your apps and try out your new title.
+  Also, be sure to include logic that allows users to dismiss the ad and
+  control if they will be asked again later.
+</p>
+
+<p>
+  Consider using free AdMob <a href=
+  "https://support.google.com/admob/v2/answer/3210452?hl=en#subid=us-en-et-dac">
+  house ads</a> within your apps to create awareness and promote your entire
+  portfolio of apps. When launching new apps, an easy way to quickly attract
+  users is to promote directly to your existing customers.
+</p>
+
+<div class="headerLine">
+  <h2 id="hold-a-contest">
+    Hold a Contest
+  </h2>
+
+
+</div>
+
+<p>
+  Contests can be a great way to engage your users. If you have a game, hold a
+  tournament and promote it through your marketing channels. Use Google Play
+  Games APIs for leaderboards and achievements to stimulate competition. Some
+  app developers have provided prizes for creative uses of an app or social
+  engagement. For example, a photo app developer can hold a photo contest.
+</p>
+
+<p>
+  But be sure you’re complying with the appropriate legal requirements in your
+  country and provide a clear set of terms and conditions, accessible online.
+  Don’t let a lack of attention to detail spoil a great marketing opportunity.
+</p>
+
+<div class="headerLine">
+  <h2 id="leverage-pr">
+    Leverage PR
+  </h2>
+
+
+</div>
+
+<p>
+  Public Relations outreach can be a valuable marketing initiative. Many
+  developers use PR to announce new features in their apps or games, which, in
+  turn, builds demand for the updated release when it comes out. You can also
+  provide early copies of your app or game for the press to review, and publish
+  their reviews when the app or game launches.
+</p>
+
+<div class="headerLine">
+  <h2 id="use-social-media">
+    Use Social Media
+  </h2>
+
+
+</div>
+
+<p>
+  Social media is your opportunity to build promotion for your apps. Start with
+  your own channels: update users on your plans before launch, announce your
+  launch, and talk about progress after launch (downloads, new features, and
+  alike.) Then expand by encouraging your users to forward and share your
+  posts.
+</p>
+
+<p>
+  Take advantage of bloggers. Look for bloggers that cover Android and learn
+  what interest them. Remember to look locally as well as globally, gaining a
+  local following can be a great springboard to global success. When you’ve
+  selected a target group of bloggers focus on them by sending details of your
+  apps and free versions if the apps are priced. Follow up and ask them to
+  review your apps. A review on the right blog is a great promotion.
+</p>
+
+<div class="headerLine">
+  <h2 id="publish-youtube-videos">
+    Publish YouTube Videos
+  </h2>
+
+
+</div>
+
+<div class="center-img" style="padding-top:1em;">
+  <img src="{@docRoot}images/gp-build-buzz-yt.png">
+</div>
+
+<p>
+  YouTube videos are now an essential part of building buzz. Use them to
+  showcase your apps’ feature. Remember to do this before, at, and after
+  launch. Taking users on a journey through the development of your apps can be
+  a great way to drive downloads at launch.
+</p>
+
+<div class="headerLine">
+  <h2 id="advertise">
+    Advertise
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/google/gps-ads.png" style="width:340px">
+</div>
+
+<p>
+  Advertise your app in other apps to increase downloads. There are many tools
+  to help you target the right users for your apps and games. You can use
+  <a href=
+  "http://www.google.com/ads/admob/promote.html#subid=us-en-et-dac">AdMob</a>
+  to drive installs of your app at a target cost-per-acquisition (CPA). You
+  also get free house ads for your own app. <a href=
+  "https://apps.admob.com/admob/signup?subid=us-en-et-dac&amp;_adc=ww-ww-et-admob2&amp;hl=en">
+  Sign up for an AdMob account</a> to get started.
+</p>
+
+<div class="headerLine" style="clear:both">
+  <h2 id="maximize-your-marketing-spend">
+    Maximize your Marketing Spend
+  </h2>
+
+
+</div>
+
+<div class="figure" style="margin: 0 3em;">
+  <img src="{@docRoot}images/gp-build-buzz-uplift-2.png" style="">
+</div>
+
+<p>
+  Maximize buzz and leverage the halo effect of cross-platform, multimedia,
+  simultaneous launches.
+</p>
+
+<p><strong>Developers who launch on multiple platforms at
+  the same time have received a 10-20% uplift.</strong>If you’re spending money
+  to advertise your launch or spending effort on press, shipping on multiple
+  platforms simultaneously helps you maximize your return on investment.
+</p>
+
+<div class="headerLine" style="clear:both">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/buildbuzz"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+

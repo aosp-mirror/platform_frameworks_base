@@ -16,12 +16,6 @@
 
 package android.renderscript;
 
-
-import java.lang.reflect.Field;
-
-import android.graphics.ImageFormat;
-import android.util.Log;
-
 /**
  * <p>A Type describes the {@link android.renderscript.Element} and dimensions used for an {@link
  * android.renderscript.Allocation} or a parallel operation. Types are created through {@link
@@ -216,7 +210,6 @@ public class Type extends BaseObj {
     }
 
     /**
-     * @hide
      * Utility function for creating basic 1D types. The type is
      * created without mipmaps enabled.
      *
@@ -240,7 +233,6 @@ public class Type extends BaseObj {
     }
 
     /**
-     * @hide
      * Utility function for creating basic 2D types. The type is
      * created without mipmaps or cubemaps.
      *
@@ -266,7 +258,6 @@ public class Type extends BaseObj {
     }
 
     /**
-     * @hide
      * Utility function for creating basic 3D types. The type is
      * created without mipmaps.
      *

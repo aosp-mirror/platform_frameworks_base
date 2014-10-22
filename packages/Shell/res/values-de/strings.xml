@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Fehlerbericht erfasst"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Berühren, um Fehlerbericht zu teilen"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Wischen Sie nach links, um Ihren Fehlerbericht zu teilen."</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tippen, um Fehlerbericht zu teilen"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Fehlerberichte enthalten Daten aus verschiedenen Protokolldateien des Systems, darunter auch personenbezogene und private Daten. Teilen Sie Fehlerberichte nur mit Apps und Personen, denen Sie vertrauen."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Diese Nachricht nächstes Mal zeigen"</string>
 </resources>

@@ -18,7 +18,6 @@
 package android.os;
 
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.content.pm.UserInfo;
 import android.content.RestrictionEntry;
 import android.graphics.Bitmap;
@@ -28,19 +27,21 @@ import android.graphics.Bitmap;
  */
 interface IUserManager {
     UserInfo createUser(in String name, int flags);
+    UserInfo createProfileForUser(in String name, int flags, int userHandle);
+    void setUserEnabled(int userHandle);
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);
     void setUserIcon(int userHandle, in Bitmap icon);
     Bitmap getUserIcon(int userHandle);
     List<UserInfo> getUsers(boolean excludeDying);
+    List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
+    UserInfo getProfileParent(int userHandle);
     UserInfo getUserInfo(int userHandle);
     boolean isRestricted();
-    void setGuestEnabled(boolean enable);
-    boolean isGuestEnabled();
-    void wipeUser(int userHandle);
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);
     Bundle getUserRestrictions(int userHandle);
+    boolean hasUserRestriction(in String restrictionKey, int userHandle);
     void setUserRestrictions(in Bundle restrictions, int userHandle);
     void setApplicationRestrictions(in String packageName, in Bundle restrictions,
             int userHandle);
@@ -50,4 +51,7 @@ interface IUserManager {
     int checkRestrictionsChallenge(in String pin);
     boolean hasRestrictionsChallenge();
     void removeRestrictions();
+    void setDefaultGuestRestrictions(in Bundle restrictions);
+    Bundle getDefaultGuestRestrictions();
+    boolean markGuestForDeletion(int userHandle);
 }

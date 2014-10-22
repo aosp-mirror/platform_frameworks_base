@@ -1,0 +1,317 @@
+page.title=Creating a Notification
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Import">Import the Necessary Classes</a></li>
+  <li><a href="#NotificationBuilder">Create Notifications with the Notification Builder</a></li>
+  <li><a href="#ActionButtons">Add Action Buttons</a></li>
+  <li><a href="#SpecifyWearableOnlyActions">Specify Wearable-only Actions</a></li>
+  <li><a href="#BigView">Add a Big View</a></li>
+  <li><a href="#AddWearableFeatures">Add Wearable Features for a Notification</a></li>
+  <li><a href="#Deliver">Deliver the Notification</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>To build handheld notifications that are also sent to wearables, use
+{@link android.support.v4.app.NotificationCompat.Builder}. When you build
+notifications with this class, the system takes care of displaying
+notifications properly, whether they appear on a handheld or wearable.
+</p>
+
+<p class="note"><strong>Note:</strong>
+Notifications using {@link android.widget.RemoteViews} are stripped of custom
+layouts and the wearable only displays the text and icons. However, you can create
+<a href="{@docRoot}training/wearables/apps/layouts.html#CustomNotifications">create custom notifications</a>
+that use custom card layouts by creating a wearable app that runs on the wearable device.</p>
+</div>
+
+<h2 id="Import">Import the necessary classes</h2>
+
+<p>To import the necessary packages, add this line to your <code>build.gradle</code>file:</p>
+
+<pre>
+compile "com.android.support:support-v4:20.0.+"
+</pre>
+
+<p>Now that your project has access to the necessary packages, import the necessary classes from
+the support library:</p>
+
+<pre style="clear:right">
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.NotificationCompat.WearableExtender;
+</pre>
+
+<h2 id="NotificationBuilder">Create Notifications with the Notification Builder</h2>
+
+<p>The <a href="http://developer.android.com/tools/support-library/features.html#v4">v4
+support library</a> allows you to create notifications using the latest notification features
+such as action buttons and large icons, while remaining compatible with Android 1.6 (API level
+4) and higher.</p>
+
+<p>To create a notification with the support library, you create an instance of
+{@link android.support.v4.app.NotificationCompat.Builder} and issue the notification by
+passing it to {@link android.support.v4.app.NotificationManagerCompat#notify notify()}. For example:
+</p>
+
+<pre>
+int notificationId = 001;
+// Build intent for notification content
+Intent viewIntent = new Intent(this, ViewEventActivity.class);
+viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
+PendingIntent viewPendingIntent =
+        PendingIntent.getActivity(this, 0, viewIntent, 0);
+
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_event)
+        .setContentTitle(eventTitle)
+        .setContentText(eventLocation)
+        .setContentIntent(viewPendingIntent);
+
+// Get an instance of the NotificationManager service
+NotificationManagerCompat notificationManager =
+        NotificationManagerCompat.from(this);
+
+// Build the notification and issues it with notification manager.
+notificationManager.notify(notificationId, notificationBuilder.build());
+</pre>
+
+<p>When this notification appears on a handheld device, the user can invoke the
+{@link android.app.PendingIntent}
+specified by the {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+setContentIntent()} method by touching the notification. When this
+notification appears on an Android wearable, the user can swipe the notification to the left to
+reveal the <strong>Open</strong> action, which invokes the intent on the handheld device.</p>
+
+
+<img src="{@docRoot}wear/images/circle_email_action.png" height="200"
+  style="float:right;clear:right;margin:0 0 20px 60px" />
+
+<h2 id="ActionButtons">Add Action Buttons</h2>
+
+<p>In addition to the primary content action defined by
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+setContentIntent()}, you can add other actions by passing a {@link android.app.PendingIntent} to
+the {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()} method.</p>
+
+<p>For example, the following code shows the same type of notification from above, but adds an
+action to view the event location on a map.</p>
+
+<pre style="clear:right">
+// Build an intent for an action to view a map
+Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+Uri geoUri = Uri.parse("geo:0,0?q=" + Uri.encode(location));
+mapIntent.setData(geoUri);
+PendingIntent mapPendingIntent =
+        PendingIntent.getActivity(this, 0, mapIntent, 0);
+
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_event)
+        .setContentTitle(eventTitle)
+        .setContentText(eventLocation)
+        .setContentIntent(viewPendingIntent)
+        <b>.addAction(R.drawable.ic_map,
+                getString(R.string.map), mapPendingIntent);</b>
+</pre>
+
+<p>On a handheld, the action appears as an
+additional button attached to the notification. On a wearable, the action appears as
+a large button when the user swipes the notification to the left. When the user taps the action,
+the associated intent is invoked on the handheld.</p>
+
+<p class="note"><strong>Tip:</strong> If your notifications include a "Reply" action
+  (such as for a messaging app), you can enhance the behavior by enabling
+  voice input replies directly from the Android wearable. For more information, read
+  <a href="{@docRoot}training/wearables/notifications/voice-input.html">Receiving Voice Input from
+  a Notification</a>.
+</p>
+
+<h2 id="SpecifyWearableOnlyActions">Specify Wearable-only Actions</h2>
+
+<p>
+If you want the actions available on the wearable to be different from those on the handheld,
+then use {@link android.support.v4.app.NotificationCompat.WearableExtender#addAction WearableExtender.addAction()}.
+Once you add an action with this method, the wearable does not display any other actions added with
+{@link android.support.v4.app.NotificationCompat.Builder#addAction NotificationCompat.Builder.addAction()}.
+That is, only the actions added with {@link android.support.v4.app.NotificationCompat.WearableExtender#addAction WearableExtender.addAction()} appear on the wearable and they do not appear on the handheld.
+</p>
+
+<pre>
+// Create an intent for the reply action
+Intent actionIntent = new Intent(this, ActionActivity.class);
+PendingIntent actionPendingIntent =
+        PendingIntent.getActivity(this, 0, actionIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+// Create the action
+NotificationCompat.Action action =
+        new NotificationCompat.Action.Builder(R.drawable.ic_action,
+                getString(R.string.label), actionPendingIntent)
+                .build();
+
+// Build the notification and add the action via WearableExtender
+Notification notification =
+        new NotificationCompat.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .extend(new WearableExtender().addAction(action))
+                .build();
+</pre>
+<h2 id="BigView">Add a Big View</h2>
+
+<img src="{@docRoot}wear/images/06_images.png" height="200"
+  style="float:right;margin:0 0 20px 40px" />
+
+<p>You can insert extended text content
+to your notification by adding one of the "big view" styles to your notification. On a
+handheld device, users can see the big view content by expanding the notification. On
+a wearable device, the big view content is visible by default.</p>
+
+<p>To add the extended content to your notification, call {@link
+android.support.v4.app.NotificationCompat.Builder#setStyle setStyle()} on the {@link
+android.support.v4.app.NotificationCompat.Builder} object, passing it an instance of either
+{@link android.support.v4.app.NotificationCompat.BigTextStyle BigTextStyle} or
+{@link android.support.v4.app.NotificationCompat.InboxStyle InboxStyle}.</p>
+
+<p>For example, the following code adds an instance of
+{@link android.support.v4.app.NotificationCompat.BigTextStyle} to the event notification,
+in order to include the complete event description (which includes more text than can fit
+into the space provided for {@link android.support.v4.app.NotificationCompat.Builder#setContentText
+setContentText()}).</p>
+
+<pre style="clear:right">
+// Specify the 'big view' content to display the long
+// event description that may not fit the normal content text.
+BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+bigStyle.bigText(eventDescription);
+
+NotificationCompat.Builder notificationBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_event)
+        .setLargeIcon(BitmapFactory.decodeResource(
+                getResources(), R.drawable.notif_background))
+        .setContentTitle(eventTitle)
+        .setContentText(eventLocation)
+        .setContentIntent(viewPendingIntent)
+        .addAction(R.drawable.ic_map,
+                getString(R.string.map), mapPendingIntent)
+        <b>.setStyle(bigStyle);</b>
+</pre>
+
+<p>Notice that you can add a large icon image to any notification using the
+{@link android.support.v4.app.NotificationCompat.Builder#setLargeIcon setLargeIcon()}
+method. However, these icons appear as large background images on a wearable and do not look
+good as they are scaled up to fit the wearable screen. To add a wearable-specific background image
+to a notification, see <a href="#AddWearableFeatures">Add Wearable Features For a Notification</a>.
+For more information about designing notifications with large images, see the
+<a href="{@docRoot}design/wear/index.html">Design Principles of Android
+Wear</a>.</p>
+
+<h2 id="AddWearableFeatures">Add Wearable Features For a Notification</h2>
+
+<p>If you ever need to add wearable-specific options to a notification, such as specifying additional
+pages of content or letting users dictate a text response with voice input, you can use the
+{@link android.support.v4.app.NotificationCompat.WearableExtender} class to
+specify the options. To use this API:</p>
+
+<ol>
+  <li>Create an instance of a {@link android.support.v4.app.NotificationCompat.WearableExtender WearableExtender},
+  setting the wearable-specific options for the notication.</li>
+  <li>Create an instance of
+  {@link android.support.v4.app.NotificationCompat.Builder}, setting the
+  desired properties for your notification as described earlier in this lesson.</li>
+  <li>Call {@link android.support.v4.app.NotificationCompat.Builder#extend extend()} on
+  the notification and pass in the
+  {@link android.support.v4.app.NotificationCompat.WearableExtender WearableExtender}. This applies
+  the wearable options to the notification.</li>
+  <li>Call {@link android.support.v4.app.NotificationCompat.Builder#build} to build the notification.</li>
+</ol>
+
+<p>
+For example, the following code calls the
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintHideIcon setHintHideIcon()}
+method to remove the app icon from the notification card.
+</p>
+
+<pre>
+// Create a WearableExtender to add functionality for wearables
+NotificationCompat.WearableExtender wearableExtender =
+        new NotificationCompat.WearableExtender()
+        .setHintHideIcon(true)
+        .setBackground(mBitmap);
+
+// Create a NotificationCompat.Builder to build a standard notification
+// then extend it with the WearableExtender
+Notification notif = new NotificationCompat.Builder(mContext)
+        .setContentTitle("New mail from " + sender)
+        .setContentText(subject)
+        .setSmallIcon(R.drawable.new_mail);
+        .extend(wearableExtender)
+        .build();
+</pre>
+
+<p>The
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintHideIcon setHintHideIcon()}
+and {@link android.support.v4.app.NotificationCompat.WearableExtender#setBackground setBackground()}
+methods are just two examples of new notification features available with
+{@link android.support.v4.app.NotificationCompat.WearableExtender}.</p>
+
+<p class="note"><strong>Note:</strong> The bitmap that you use with
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setBackground setBackground()}
+should have a resolution of 400x400 for non-scrolling backgrounds and 640x400 for backgrounds
+that support parallax scrolling. Place these bitmap images in the <code>res/drawable-nodpi</code>
+directory of your handheld app. Place other non-bitmap resources for wearable notifications, such
+as those used with the
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setContentIcon setContentIcon()}
+method, in the <code>res/drawable-hdpi</code> directory of your handheld app.</p>
+
+<p>If you ever need to read wearable-specific options at a later time, use the corresponding get
+method for the option. This example calls the
+{@link android.support.v4.app.NotificationCompat.WearableExtender#getHintHideIcon()} method to
+get whether or not this notification hides the icon:
+<pre>
+NotificationCompat.WearableExtender wearableExtender =
+        new NotificationCompat.WearableExtender(notif);
+boolean hintHideIcon = wearableExtender.getHintHideIcon();
+</pre>
+
+
+<h2 id="Deliver">Deliver the Notification</h2>
+<p>When you want to deliver your notifications, always use the
+  {@link android.support.v4.app.NotificationManagerCompat} API instead of
+  {@link android.app.NotificationManager}:</p>
+
+<pre>
+// Get an instance of the NotificationManager service
+NotificationManagerCompat notificationManager =
+        NotificationManagerCompat.from(mContext);
+
+// Issue the notification with notification manager.
+notificationManager.notify(notificationId, notif);
+</pre>
+
+<p>If you use the framework's {@link android.app.NotificationManager}, some
+features from {@link android.support.v4.app.NotificationCompat.WearableExtender}
+do not work, so make sure to use {@link android.support.v4.app.NotificationCompat}.
+</p>
+
+<pre>
+NotificationCompat.WearableExtender wearableExtender =
+        new NotificationCompat.WearableExtender(notif);
+boolean hintHideIcon = wearableExtender.getHintHideIcon();
+ </pre>
+
+<p>The {@link android.support.v4.app.NotificationCompat.WearableExtender} APIs allow you to add
+additional pages to notifications, stack notifications, and more. Continue to the following lessons
+to learn about these features.
+</p>

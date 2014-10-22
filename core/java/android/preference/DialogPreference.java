@@ -64,12 +64,13 @@ public abstract class DialogPreference extends Preference implements
 
     /** Which button was clicked. */
     private int mWhichButtonClicked;
-    
-    public DialogPreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.DialogPreference, defStyle, 0);
+
+    public DialogPreference(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.DialogPreference, defStyleAttr, defStyleRes);
         mDialogTitle = a.getString(com.android.internal.R.styleable.DialogPreference_dialogTitle);
         if (mDialogTitle == null) {
             // Fallback on the regular title of the preference
@@ -83,13 +84,20 @@ public abstract class DialogPreference extends Preference implements
         mDialogLayoutResId = a.getResourceId(com.android.internal.R.styleable.DialogPreference_dialogLayout,
                 mDialogLayoutResId);
         a.recycle();
-        
+    }
+
+    public DialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public DialogPreference(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
-    
+
+    public DialogPreference(Context context) {
+        this(context, null);
+    }
+
     /**
      * Sets the title of the dialog. This will be shown on subsequent dialogs.
      * 
@@ -161,7 +169,7 @@ public abstract class DialogPreference extends Preference implements
      * @param dialogIconRes The icon, as a resource ID.
      */
     public void setDialogIcon(int dialogIconRes) {
-        mDialogIcon = getContext().getResources().getDrawable(dialogIconRes);
+        mDialogIcon = getContext().getDrawable(dialogIconRes);
     }
     
     /**

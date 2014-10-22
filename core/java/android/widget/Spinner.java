@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -48,14 +49,14 @@ import android.widget.PopupWindow.OnDismissListener;
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/controls/spinner.html">Spinners</a> guide.</p>
  *
- * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
  * @attr ref android.R.styleable#Spinner_dropDownSelector
- * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
  * @attr ref android.R.styleable#Spinner_dropDownWidth
  * @attr ref android.R.styleable#Spinner_gravity
  * @attr ref android.R.styleable#Spinner_popupBackground
  * @attr ref android.R.styleable#Spinner_prompt
  * @attr ref android.R.styleable#Spinner_spinnerMode
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
  */
 @Widget
 public class Spinner extends AbsSpinner implements OnClickListener {
@@ -130,18 +131,17 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
     /**
      * Construct a new spinner with the given context's theme, the supplied attribute set,
-     * and default style.
+     * and default style attribute.
      *
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public Spinner(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, MODE_THEME);
+    public Spinner(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0, MODE_THEME);
     }
 
     /**
@@ -152,20 +152,44 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      * @param mode Constant describing how the user will select choices from the spinner.
-     * 
+     *
      * @see #MODE_DIALOG
      * @see #MODE_DROPDOWN
      */
-    public Spinner(Context context, AttributeSet attrs, int defStyle, int mode) {
-        super(context, attrs, defStyle);
+    public Spinner(Context context, AttributeSet attrs, int defStyleAttr, int mode) {
+        this(context, attrs, defStyleAttr, 0, mode);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Spinner, defStyle, 0);
+    /**
+     * Construct a new spinner with the given context's theme, the supplied attribute set,
+     * and default style. <code>mode</code> may be one of {@link #MODE_DIALOG} or
+     * {@link #MODE_DROPDOWN} and determines how the user will select choices from the spinner.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     * @param mode Constant describing how the user will select choices from the spinner.
+     *
+     * @see #MODE_DIALOG
+     * @see #MODE_DROPDOWN
+     */
+    public Spinner(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes, int mode) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.Spinner, defStyleAttr, defStyleRes);
 
         if (mode == MODE_THEME) {
             mode = a.getInt(com.android.internal.R.styleable.Spinner_spinnerMode, MODE_DIALOG);
@@ -178,24 +202,13 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         case MODE_DROPDOWN: {
-            final DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
+            final DropdownPopup popup = new DropdownPopup(context, attrs, defStyleAttr, defStyleRes);
 
             mDropDownWidth = a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             popup.setBackgroundDrawable(a.getDrawable(
                     com.android.internal.R.styleable.Spinner_popupBackground));
-            final int verticalOffset = a.getDimensionPixelOffset(
-                    com.android.internal.R.styleable.Spinner_dropDownVerticalOffset, 0);
-            if (verticalOffset != 0) {
-                popup.setVerticalOffset(verticalOffset);
-            }
-
-            final int horizontalOffset = a.getDimensionPixelOffset(
-                    com.android.internal.R.styleable.Spinner_dropDownHorizontalOffset, 0);
-            if (horizontalOffset != 0) {
-                popup.setHorizontalOffset(horizontalOffset);
-            }
 
             mPopup = popup;
             mForwardingListener = new ForwardingListener(this) {
@@ -258,7 +271,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * @attr ref android.R.styleable#Spinner_popupBackground
      */
     public void setPopupBackgroundResource(int resId) {
-        setPopupBackgroundDrawable(getContext().getResources().getDrawable(resId));
+        setPopupBackgroundDrawable(getContext().getDrawable(resId));
     }
 
     /**
@@ -279,7 +292,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      *
      * @param pixels Vertical offset in pixels
      *
-     * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public void setDropDownVerticalOffset(int pixels) {
         mPopup.setVerticalOffset(pixels);
@@ -291,7 +304,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      *
      * @return Vertical offset in pixels
      *
-     * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public int getDropDownVerticalOffset() {
         return mPopup.getVerticalOffset();
@@ -303,7 +316,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      *
      * @param pixels Horizontal offset in pixels
      *
-     * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public void setDropDownHorizontalOffset(int pixels) {
         mPopup.setHorizontalOffset(pixels);
@@ -315,7 +328,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      *
      * @return Horizontal offset in pixels
      *
-     * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public int getDropDownHorizontalOffset() {
         return mPopup.getHorizontalOffset();
@@ -404,15 +417,27 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * {@link Adapter#getItemViewType(int) getItemViewType(int)} on the object
      * returned from {@link #getAdapter()} will always return 0. Calling
      * {@link Adapter#getViewTypeCount() getViewTypeCount()} will always return
-     * 1.
+     * 1. On API {@link Build.VERSION_CODES#LOLLIPOP} and above, attempting to set an
+     * adapter with more than one view type will throw an
+     * {@link IllegalArgumentException}.
+     *
+     * @param adapter the adapter to set
      *
      * @see AbsSpinner#setAdapter(SpinnerAdapter)
+     * @throws IllegalArgumentException if the adapter has more than one view
+     *         type
      */
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
 
         mRecycler.clear();
+
+        final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP
+                && adapter != null && adapter.getViewTypeCount() != 1) {
+            throw new IllegalArgumentException("Spinner adapter view type count must be 1");
+        }
 
         if (mPopup != null) {
             mPopup.setAdapter(new DropDownAdapter(adapter));
@@ -1033,8 +1058,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         private CharSequence mHintText;
         private ListAdapter mAdapter;
 
-        public DropdownPopup(Context context, AttributeSet attrs, int defStyleRes) {
-            super(context, attrs, 0, defStyleRes);
+        public DropdownPopup(
+                Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
 
             setAnchorView(Spinner.this);
             setModal(true);

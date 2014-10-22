@@ -1,6 +1,8 @@
 page.title=Developer Support
+page.type=about
 fullpage=1
-excludeFromSuggestions=true
+page.metaDescription=Resources available to help you report and resolve issues while you are developing apps for Android.
+page.image=/images/android-support-card.png
 @jd:body
 
 <div class="wrap" style="width:940px;">

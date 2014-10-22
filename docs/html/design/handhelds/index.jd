@@ -1,0 +1,149 @@
+page.title=Phones &amp; Tablets
+@jd:body
+
+<p>
+Android's system UI provides the framework on top of which you build your app,
+whether you're designing for phones, tablets, watches, or other form factors.
+Aspects of UI that are especially important for phones and tablets include
+the Home screen experience, global device navigation, and notifications.
+</p>
+
+<p>
+Your app will play an important part in keeping the overall Android experience
+consistent and enjoyable to use. This page introduces some of the main elements
+that can help you achieve this goal. The main Android Design topics listed on
+the left, after the Devices sections, provide detailed guidelines for phones
+and tablets.
+</p>
+
+<h2 id="home-all-apps-recents">Home, All Apps, and Recents</h2>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/ui_overview_home_screen.png">
+
+<h4>Home screen</h4>
+<p>Home is a customizable space that houses app shortcuts, folders and widgets. Navigate between
+different home screen panels by swiping left and right.</p>
+<p>The Favorites Tray at the bottom always keeps your most important shortcuts and folders in view
+regardless of which panel is currently showing.</p>
+<p>Access the entire collection of apps and widgets by touching the All Apps button at the center of
+the Favorites Tray.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/ui_overview_all_apps.png">
+
+<h4>All apps screen</h4>
+<p>The All Apps screen lets you browse the entire set of apps and widgets that are installed on your
+device.</p>
+<p>Users can drag an app or widget icon from the All Apps screen and place it in any empty location on
+any Home screen.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/ui_overview_recents.png">
+
+<h4>Recents screen</h4>
+<p>Recents provides an efficient way of switching between recently used applications. It provides a
+clear navigation path between multiple ongoing tasks.</p>
+<p>The Recents button at the right side of the navigation bar displays the apps that the user has
+interacted with most recently. They are organized in reverse chronological order with the most
+recently used app at the bottom.</p>
+<p>Switch to an app by touching it. Remove an item by swiping left or right.</p>
+
+  </div>
+</div>
+
+<h2 id="system-bars">System Bars</h2>
+
+<p>The system bars are screen areas dedicated to the display of notifications, communication of device
+status, and device navigation. Typically the system bars are displayed concurrently with your app.
+Apps that display immersive content, such as movies or images, can temporarily hide the system bars
+to allow the user to enjoy full screen content without distraction.</p>
+
+<img src="{@docRoot}design/media/ui_overview_system_ui.png">
+
+<div class="with-callouts">
+
+<ol>
+<li>
+<h4>Status Bar</h4>
+<p>Displays pending notifications on the left and status, such as time, battery level, or signal
+  strength, on the right. Swipe down from the status bar to show notification details.</p>
+</li>
+<li>
+<h4>Navigation Bar</h4>
+<p>New for phones in Android 4.0, the navigation bar is present only on devices that don't have
+  the traditional hardware keys. It houses the device navigation controls Back, Home, and
+  Recents, and also displays a menu for apps written for Android 2.3 or earlier.</p>
+</li>
+</ol>
+
+</div>
+
+<h2 id="notifications">Notifications</h2>
+
+<p>Notifications are brief messages that users can access at any time from the status bar. They
+provide updates, reminders, or information that's important, but not critical enough to warrant
+interrupting the user. Open the notifications drawer by swiping down on the status bar. Touching a
+notification opens the associated app. <a href="{@docRoot}design/patterns/notifications.html">More on Notifications</a></p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/ui_overview_notifications.png">
+
+  </div>
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/notifications_dismiss.png">
+
+<p>Notifications can be expanded to uncover more details and relevant actions. When collapsed, notifications
+  have a one-line title and a one-line message.The recommended layout for a notification includes two lines.
+  If necessary, you can add a third line.</p>
+<p>Swiping a notification right or left removes it from the notification drawer.</p>
+
+  </div>
+</div>
+
+
+<h2 id="app">Common App UI</h2>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/app_structure_drawer.png">
+
+  </div>
+  <div class="layout-content-col span-6 with-callouts">
+
+<p>A typical Android app uses action bars, and many apps will include a navigation drawer.</p>
+<ol>
+<li>
+<h4>Action Bar</h4>
+<p>The command and control center for your app. The action bar surfaces the most important actions
+  for the current view, and may include simple controls for switching between views.</p>
+<p><a href="{@docRoot}design/patterns/actionbar.html">More on the Action Bar</a></p>
+</li>
+<li>
+<h4>Navigation Drawer</h4>
+<p>If your app's structure is more complex, the navigation drawer can display the main navigation
+  options. The navigation drawer expands from the left edge of the screen, overlaying the content
+  area but not the action bar.</p>
+<p><a href="{@docRoot}design/patterns/navigation-drawer.html">More on the Navigation Drawer</a></p>
+</li>
+<li>
+<h4>Content Area</h4>
+<p>The space where the content of your app is displayed.</p>
+</li>
+</ol>
+
+  </div>
+</div>

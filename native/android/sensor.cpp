@@ -59,6 +59,19 @@ ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type
     return static_cast<SensorManager*>(manager)->getDefaultSensor(type);
 }
 
+ASensor const* ASensorManager_getDefaultSensorEx(ASensorManager* manager,
+        int type, bool wakeUp) {
+    Sensor const* const* sensorList;
+    size_t size = static_cast<SensorManager*>(manager)->getSensorList(&sensorList);
+    for (size_t i = 0; i < size; ++i) {
+        if (ASensor_getType(sensorList[i]) == type &&
+            ASensor_isWakeUpSensor(sensorList[i]) == wakeUp) {
+            return reinterpret_cast<ASensor const *>(sensorList[i]);
+       }
+    }
+    return NULL;
+}
+
 ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
         ALooper* looper, int ident, ALooper_callbackFunc callback, void* data)
 {
@@ -123,9 +136,12 @@ int ASensorEventQueue_hasEvents(ASensorEventQueue* queue)
 ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue,
                 ASensorEvent* events, size_t count)
 {
-    return static_cast<SensorEventQueue*>(queue)->read(events, count);
+    ssize_t actual = static_cast<SensorEventQueue*>(queue)->read(events, count);
+    if (actual > 0) {
+        static_cast<SensorEventQueue*>(queue)->sendAck(events, actual);
+    }
+    return actual;
 }
-
 
 /*****************************************************************************/
 
@@ -152,4 +168,29 @@ float ASensor_getResolution(ASensor const* sensor)
 int ASensor_getMinDelay(ASensor const* sensor)
 {
     return static_cast<Sensor const*>(sensor)->getMinDelay();
+}
+
+int ASensor_getFifoMaxEventCount(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->getFifoMaxEventCount();
+}
+
+int ASensor_getFifoReservedEventCount(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->getFifoReservedEventCount();
+}
+
+const char* ASensor_getStringType(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->getStringType().string();
+}
+
+int ASensor_getReportingMode(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->getReportingMode();
+}
+
+bool ASensor_isWakeUpSensor(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->isWakeUpSensor();
 }

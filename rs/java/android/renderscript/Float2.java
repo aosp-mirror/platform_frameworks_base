@@ -26,7 +26,7 @@ public  class Float2 {
 
     public Float2() {
     }
-    /** @hide */ 
+    /** @hide */
     public Float2(Float2 data) {
         this.x = data.x;
         this.y = data.y;

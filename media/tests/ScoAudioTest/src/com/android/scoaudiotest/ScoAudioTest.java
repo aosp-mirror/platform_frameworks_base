@@ -207,16 +207,25 @@ public class ScoAudioTest extends Activity {
             if (mForceScoOn != isChecked) {
                 mForceScoOn = isChecked;
                 AudioManager mngr = mAudioManager;
+                boolean useVirtualCall = false;
                 CheckBox box = (CheckBox) findViewById(R.id.useSecondAudioManager);
                 if (box.isChecked()) {
                     Log.i(TAG, "Using 2nd audio manager");
                     mngr = mAudioManager2;
                 }
+                box = (CheckBox) findViewById(R.id.useVirtualCallCheckBox);
+                useVirtualCall = box.isChecked();
 
                 if (mForceScoOn) {
-                    Log.e(TAG, "startBluetoothSco() IN");
-                    mngr.startBluetoothSco();
-                    Log.e(TAG, "startBluetoothSco() OUT");
+                    if (useVirtualCall) {
+                        Log.e(TAG, "startBluetoothScoVirtualCall() IN");
+                        mngr.startBluetoothScoVirtualCall();
+                        Log.e(TAG, "startBluetoothScoVirtualCall() OUT");
+                    } else {
+                        Log.e(TAG, "startBluetoothSco() IN");
+                        mngr.startBluetoothSco();
+                        Log.e(TAG, "startBluetoothSco() OUT");
+                    }
                 } else {
                     Log.e(TAG, "stopBluetoothSco() IN");
                     mngr.stopBluetoothSco();

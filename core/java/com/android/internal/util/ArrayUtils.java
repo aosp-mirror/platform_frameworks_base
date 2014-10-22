@@ -16,11 +16,14 @@
 
 package com.android.internal.util;
 
-import java.lang.reflect.Array;
+import android.util.ArraySet;
 
-// XXX these should be changed to reflect the actual memory allocator we use.
-// it looks like right now objects want to be powers of 2 minus 8
-// and the array size eats another 4 bytes
+import dalvik.system.VMRuntime;
+
+import libcore.util.EmptyArray;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
@@ -28,46 +31,42 @@ import java.lang.reflect.Array;
  */
 public class ArrayUtils
 {
-    private static Object[] EMPTY = new Object[0];
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
-    public static int idealByteArraySize(int need) {
-        for (int i = 4; i < 32; i++)
-            if (need <= (1 << i) - 12)
-                return (1 << i) - 12;
-
-        return need;
+    public static byte[] newUnpaddedByteArray(int minLen) {
+        return (byte[])VMRuntime.getRuntime().newUnpaddedArray(byte.class, minLen);
     }
 
-    public static int idealBooleanArraySize(int need) {
-        return idealByteArraySize(need);
+    public static char[] newUnpaddedCharArray(int minLen) {
+        return (char[])VMRuntime.getRuntime().newUnpaddedArray(char.class, minLen);
     }
 
-    public static int idealShortArraySize(int need) {
-        return idealByteArraySize(need * 2) / 2;
+    public static int[] newUnpaddedIntArray(int minLen) {
+        return (int[])VMRuntime.getRuntime().newUnpaddedArray(int.class, minLen);
     }
 
-    public static int idealCharArraySize(int need) {
-        return idealByteArraySize(need * 2) / 2;
+    public static boolean[] newUnpaddedBooleanArray(int minLen) {
+        return (boolean[])VMRuntime.getRuntime().newUnpaddedArray(boolean.class, minLen);
     }
 
-    public static int idealIntArraySize(int need) {
-        return idealByteArraySize(need * 4) / 4;
+    public static long[] newUnpaddedLongArray(int minLen) {
+        return (long[])VMRuntime.getRuntime().newUnpaddedArray(long.class, minLen);
     }
 
-    public static int idealFloatArraySize(int need) {
-        return idealByteArraySize(need * 4) / 4;
+    public static float[] newUnpaddedFloatArray(int minLen) {
+        return (float[])VMRuntime.getRuntime().newUnpaddedArray(float.class, minLen);
     }
 
-    public static int idealObjectArraySize(int need) {
-        return idealByteArraySize(need * 4) / 4;
+    public static Object[] newUnpaddedObjectArray(int minLen) {
+        return (Object[])VMRuntime.getRuntime().newUnpaddedArray(Object.class, minLen);
     }
 
-    public static int idealLongArraySize(int need) {
-        return idealByteArraySize(need * 8) / 8;
+    @SuppressWarnings("unchecked")
+    public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {
+        return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
     }
 
     /**
@@ -102,12 +101,13 @@ public class ArrayUtils
      * it will return the same empty array every time to avoid reallocation,
      * although this is not guaranteed.
      */
+    @SuppressWarnings("unchecked")
     public static <T> T[] emptyArray(Class<T> kind) {
         if (kind == Object.class) {
-            return (T[]) EMPTY;
+            return (T[]) EmptyArray.OBJECT;
         }
 
-        int bucket = ((System.identityHashCode(kind) / 8) & 0x7FFFFFFF) % CACHE_SIZE;
+        int bucket = (kind.hashCode() & 0x7FFFFFFF) % CACHE_SIZE;
         Object cache = sCache[bucket];
 
         if (cache == null || cache.getClass().getComponentType() != kind) {
@@ -118,6 +118,13 @@ public class ArrayUtils
         }
 
         return (T[]) cache;
+    }
+
+    /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static <T> boolean isEmpty(T[] array) {
+        return array == null || array.length == 0;
     }
 
     /**
@@ -135,6 +142,7 @@ public class ArrayUtils
      * not found.
      */
     public static <T> int indexOf(T[] array, T value) {
+        if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
             if (array[i] == null) {
                 if (value == null) return i;
@@ -158,7 +166,18 @@ public class ArrayUtils
     }
 
     public static boolean contains(int[] array, int value) {
+        if (array == null) return false;
         for (int element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean contains(long[] array, long value) {
+        if (array == null) return false;
+        for (long element : array) {
             if (element == value) {
                 return true;
             }
@@ -226,6 +245,14 @@ public class ArrayUtils
         return array;
     }
 
+    /**
+     * Appends a new value to a copy of the array and returns the copy.  If
+     * the value is already present, the original array is returned
+     * @param cur The original array, or null to represent an empty array.
+     * @param val The value to add.
+     * @return A new array that contains all of the values of the original array
+     * with the new value added, or the original array.
+     */
     public static int[] appendInt(int[] cur, int val) {
         if (cur == null) {
             return new int[] { val };
@@ -260,5 +287,101 @@ public class ArrayUtils
             }
         }
         return cur;
+    }
+
+    /**
+     * Appends a new value to a copy of the array and returns the copy.  If
+     * the value is already present, the original array is returned
+     * @param cur The original array, or null to represent an empty array.
+     * @param val The value to add.
+     * @return A new array that contains all of the values of the original array
+     * with the new value added, or the original array.
+     */
+    public static long[] appendLong(long[] cur, long val) {
+        if (cur == null) {
+            return new long[] { val };
+        }
+        final int N = cur.length;
+        for (int i = 0; i < N; i++) {
+            if (cur[i] == val) {
+                return cur;
+            }
+        }
+        long[] ret = new long[N + 1];
+        System.arraycopy(cur, 0, ret, 0, N);
+        ret[N] = val;
+        return ret;
+    }
+
+    public static long[] removeLong(long[] cur, long val) {
+        if (cur == null) {
+            return null;
+        }
+        final int N = cur.length;
+        for (int i = 0; i < N; i++) {
+            if (cur[i] == val) {
+                long[] ret = new long[N - 1];
+                if (i > 0) {
+                    System.arraycopy(cur, 0, ret, 0, i);
+                }
+                if (i < (N - 1)) {
+                    System.arraycopy(cur, i + 1, ret, i, N - i - 1);
+                }
+                return ret;
+            }
+        }
+        return cur;
+    }
+
+    public static long[] cloneOrNull(long[] array) {
+        return (array != null) ? array.clone() : null;
+    }
+
+    public static <T> ArraySet<T> add(ArraySet<T> cur, T val) {
+        if (cur == null) {
+            cur = new ArraySet<>();
+        }
+        cur.add(val);
+        return cur;
+    }
+
+    public static <T> ArraySet<T> remove(ArraySet<T> cur, T val) {
+        if (cur == null) {
+            return null;
+        }
+        cur.remove(val);
+        if (cur.isEmpty()) {
+            return null;
+        } else {
+            return cur;
+        }
+    }
+
+    public static <T> boolean contains(ArraySet<T> cur, T val) {
+        return (cur != null) ? cur.contains(val) : false;
+    }
+
+    public static <T> ArrayList<T> add(ArrayList<T> cur, T val) {
+        if (cur == null) {
+            cur = new ArrayList<>();
+        }
+        cur.add(val);
+        return cur;
+    }
+
+    public static <T> ArrayList<T> remove(ArrayList<T> cur, T val) {
+        if (cur == null) {
+            return null;
+        }
+        cur.remove(val);
+        if (cur.isEmpty()) {
+            return null;
+        } else {
+            return cur;
+        }
+    }
+
+    public static <T> boolean contains(ArrayList<T> cur, T val) {
+        return (cur != null) ? cur.contains(val) : false;
     }
 }

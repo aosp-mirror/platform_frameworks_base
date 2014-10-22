@@ -90,7 +90,7 @@ public class AsecTests extends AndroidTestCase {
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
         IMountService ms = getMs();
-        return ms.mountSecureContainer(fullId, key, android.os.Process.myUid());
+        return ms.mountSecureContainer(fullId, key, android.os.Process.myUid(), true);
     }
 
     private int renameContainer(String localId1, String localId2) throws Exception {

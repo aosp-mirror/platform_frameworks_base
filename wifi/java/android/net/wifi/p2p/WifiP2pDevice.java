@@ -126,7 +126,7 @@ public class WifiP2pDevice implements Parcelable {
         "config_methods=(0x[0-9a-fA-F]+) " +
         "dev_capab=(0x[0-9a-fA-F]+) " +
         "group_capab=(0x[0-9a-fA-F]+)" +
-        "( wfd_dev_info=0x000006([0-9a-fA-F]{12}))?"
+        "( wfd_dev_info=0x([0-9a-fA-F]{12}))?"
     );
 
     /** 2 token device address pattern
@@ -274,7 +274,7 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /** Updates details obtained from supplicant @hide */
-    void updateSupplicantDetails(WifiP2pDevice device) {
+    public void updateSupplicantDetails(WifiP2pDevice device) {
         if (device == null) {
             throw new IllegalArgumentException("device is null");
         }

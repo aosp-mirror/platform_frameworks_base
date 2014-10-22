@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputChannel;
@@ -37,6 +36,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.InputMethodSession;
+import android.view.inputmethod.CursorAnchorInfo;
 
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
@@ -47,6 +47,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_UPDATE_EXTRACTED_TEXT = 67;
     private static final int DO_UPDATE_SELECTION = 90;
     private static final int DO_UPDATE_CURSOR = 95;
+    private static final int DO_UPDATE_CURSOR_ANCHOR_INFO = 99;
     private static final int DO_APP_PRIVATE_COMMAND = 100;
     private static final int DO_TOGGLE_SOFT_INPUT = 105;
     private static final int DO_FINISH_SESSION = 110;
@@ -107,6 +108,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
             }
             case DO_UPDATE_CURSOR: {
                 mInputMethodSession.updateCursor((Rect)msg.obj);
+                return;
+            }
+            case DO_UPDATE_CURSOR_ANCHOR_INFO: {
+                mInputMethodSession.updateCursorAnchorInfo((CursorAnchorInfo)msg.obj);
                 return;
             }
             case DO_APP_PRIVATE_COMMAND: {
@@ -179,6 +184,12 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     public void updateCursor(Rect newCursor) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_UPDATE_CURSOR, newCursor));
+    }
+
+    @Override
+    public void updateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_UPDATE_CURSOR_ANCHOR_INFO, cursorAnchorInfo));
     }
 
     @Override

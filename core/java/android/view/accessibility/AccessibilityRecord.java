@@ -78,7 +78,7 @@ public class AccessibilityRecord {
     private boolean mIsInPool;
 
     boolean mSealed;
-    int mBooleanProperties = PROPERTY_IMPORTANT_FOR_ACCESSIBILITY;
+    int mBooleanProperties = 0;
     int mCurrentItemIndex = UNDEFINED;
     int mItemCount = UNDEFINED;
     int mFromIndex = UNDEFINED;
@@ -791,7 +791,7 @@ public class AccessibilityRecord {
      */
     void clear() {
         mSealed = false;
-        mBooleanProperties = PROPERTY_IMPORTANT_FOR_ACCESSIBILITY;
+        mBooleanProperties = 0;
         mCurrentItemIndex = UNDEFINED;
         mItemCount = UNDEFINED;
         mFromIndex = UNDEFINED;

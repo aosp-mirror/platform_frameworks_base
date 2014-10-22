@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -57,6 +58,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,6 +102,7 @@ public final class BridgeContext extends Context {
     private final ApplicationInfo mApplicationInfo;
     private final IProjectCallback mProjectCallback;
     private final WindowManager mWindowManager;
+    private final DisplayManager mDisplayManager;
 
     private Resources.Theme mTheme;
 
@@ -109,7 +112,7 @@ public final class BridgeContext extends Context {
     // maps for dynamically generated id representing style objects (StyleResourceValue)
     private Map<Integer, StyleResourceValue> mDynamicIdToStyleMap;
     private Map<StyleResourceValue, Integer> mStyleToDynamicIdMap;
-    private int mDynamicIdGenerator = 0x01030000; // Base id for framework R.style
+    private int mDynamicIdGenerator = 0x02030000; // Base id for R.style in custom namespace
 
     // cache for TypedArray generated from IStyleResourceValue object
     private Map<int[], Map<Integer, TypedArray>> mTypedArrayCache;
@@ -148,6 +151,7 @@ public final class BridgeContext extends Context {
         }
 
         mWindowManager = new WindowManagerImpl(mMetrics);
+        mDisplayManager = new DisplayManager(this);
     }
 
     /**
@@ -315,6 +319,11 @@ public final class BridgeContext extends Context {
             }
         }
 
+        // The base value for R.style is 0x01030000 and the custom style is 0x02030000.
+        // So, if the second byte is 03, it's probably a style.
+        if ((id >> 16 & 0xFF) == 0x03) {
+            return getStyleByDynamicId(id);
+        }
         return null;
     }
 
@@ -449,13 +458,20 @@ public final class BridgeContext extends Context {
             return new PowerManager(this, new BridgePowerManager(), new Handler());
         }
 
+        if (DISPLAY_SERVICE.equals(service)) {
+            return mDisplayManager;
+        }
+
         throw new UnsupportedOperationException("Unsupported Service: " + service);
     }
 
 
     @Override
     public final TypedArray obtainStyledAttributes(int[] attrs) {
-        return createStyleBasedTypedArray(mRenderResources.getCurrentTheme(), attrs);
+        // No style is specified here, so create the typed array based on the default theme
+        // and the styles already applied to it. A null value of style indicates that the default
+        // theme should be used.
+        return createStyleBasedTypedArray(null, attrs);
     }
 
     @Override
@@ -551,7 +567,7 @@ public final class BridgeContext extends Context {
         StyleResourceValue customStyleValues = null;
         if (customStyle != null) {
             ResourceValue item = mRenderResources.findResValue(customStyle,
-                    false /*forceFrameworkOnly*/);
+                    isPlatformFile /*forceFrameworkOnly*/);
 
             // resolve it in case it links to something else
             item = mRenderResources.resolveResValue(item);
@@ -582,8 +598,7 @@ public final class BridgeContext extends Context {
 
             if (item != null) {
                 // item is a reference to a style entry. Search for it.
-                item = mRenderResources.findResValue(item.getValue(),
-                        false /*forceFrameworkOnly*/);
+                item = mRenderResources.findResValue(item.getValue(), item.isFramework());
 
                 if (item instanceof StyleResourceValue) {
                     defStyleValues = (StyleResourceValue)item;
@@ -604,38 +619,36 @@ public final class BridgeContext extends Context {
             }
 
             if (value != null) {
-                if (value.getFirst() == ResourceType.STYLE) {
-                    // look for the style in the current theme, and its parent:
-                    ResourceValue item = mRenderResources.findItemInTheme(value.getSecond(),
+                if ((value.getFirst() == ResourceType.STYLE)) {
+                    // look for the style in all resources:
+                    StyleResourceValue item = mRenderResources.getStyle(value.getSecond(),
                             isFrameworkRes);
                     if (item != null) {
-                        if (item instanceof StyleResourceValue) {
-                            if (defaultPropMap != null) {
-                                defaultPropMap.put("style", item.getName());
-                            }
-
-                            defStyleValues = (StyleResourceValue)item;
+                        if (defaultPropMap != null) {
+                            defaultPropMap.put("style", item.getName());
                         }
+
+                        defStyleValues = item;
                     } else {
                         Bridge.getLog().error(null,
                                 String.format(
                                         "Style with id 0x%x (resolved to '%s') does not exist.",
                                         defStyleRes, value.getSecond()),
-                                null /*data*/);
+                                null);
                     }
                 } else {
                     Bridge.getLog().error(null,
                             String.format(
-                                    "Resouce id 0x%x is not of type STYLE (instead %s)",
+                                    "Resource id 0x%x is not of type STYLE (instead %s)",
                                     defStyleRes, value.getFirst().toString()),
-                            null /*data*/);
+                            null);
                 }
             } else {
                 Bridge.getLog().error(null,
                         String.format(
                                 "Failed to find style with id 0x%x in current theme",
                                 defStyleRes),
-                        null /*data*/);
+                        null);
             }
         }
 
@@ -723,11 +736,13 @@ public final class BridgeContext extends Context {
 
     /**
      * Creates a {@link BridgeTypedArray} by filling the values defined by the int[] with the
-     * values found in the given style.
+     * values found in the given style. If no style is specified, the default theme, along with the
+     * styles applied to it are used.
+     *
      * @see #obtainStyledAttributes(int, int[])
      */
-    private BridgeTypedArray createStyleBasedTypedArray(StyleResourceValue style, int[] attrs)
-            throws Resources.NotFoundException {
+    private BridgeTypedArray createStyleBasedTypedArray(@Nullable StyleResourceValue style,
+            int[] attrs) throws Resources.NotFoundException {
 
         List<Pair<String, Boolean>> attributes = searchAttrs(attrs);
 
@@ -740,8 +755,14 @@ public final class BridgeContext extends Context {
 
             if (attribute != null) {
                 // look for the value in the given style
-                ResourceValue resValue = mRenderResources.findItemInStyle(style,
-                        attribute.getFirst(), attribute.getSecond());
+                ResourceValue resValue;
+                if (style != null) {
+                    resValue = mRenderResources.findItemInStyle(style, attribute.getFirst(),
+                            attribute.getSecond());
+                } else {
+                    resValue = mRenderResources.findItemInTheme(attribute.getFirst(),
+                            attribute.getSecond());
+                }
 
                 if (resValue != null) {
                     // resolve it to make sure there are no references left.
@@ -755,7 +776,6 @@ public final class BridgeContext extends Context {
 
         return ta;
     }
-
 
     /**
      * The input int[] attrs is a list of attributes. The returns a list of information about
@@ -947,6 +967,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createApplicationContext(ApplicationInfo application, int flags)
+            throws PackageManager.NameNotFoundException {
+        return null;
+    }
+
+    @Override
     public boolean deleteDatabase(String arg0) {
         // pass
         return false;
@@ -1022,6 +1048,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getCodeCacheDir() {
+        // pass
+        return null;
+    }
+
+    @Override
     public File getExternalCacheDir() {
         // pass
         return null;
@@ -1055,6 +1087,12 @@ public final class BridgeContext extends Context {
 
     @Override
     public File getFilesDir() {
+        // pass
+        return null;
+    }
+
+    @Override
+    public File getNoBackupFilesDir() {
         // pass
         return null;
     }
@@ -1260,6 +1298,14 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
+            Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras) {
+        // pass
+    }
+
+    @Override
     public void sendStickyBroadcast(Intent arg0) {
         // pass
 
@@ -1431,6 +1477,12 @@ public final class BridgeContext extends Context {
 
     @Override
     public File[] getExternalCacheDirs() {
+        // pass
+        return new File[0];
+    }
+
+    @Override
+    public File[] getExternalMediaDirs() {
         // pass
         return new File[0];
     }

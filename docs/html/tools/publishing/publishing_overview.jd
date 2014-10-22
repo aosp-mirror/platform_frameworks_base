@@ -16,7 +16,7 @@ page.title=Publishing Overview
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}distribute/googleplay/publish/preparing.html">Publishing on Google Play</a></li>
+    <li><a href="{@docRoot}distribute/tools/launch-checklist.html">Publishing on Google Play</a></li>
   </ol>
 </div>
 </div>
@@ -35,7 +35,7 @@ publish an Android application you perform two main tasks:</p>
   </li>
 </ul>
 
-<p>Usually, you release your application through an application marketplace, such as <a href="{@docRoot}distribute/index.html">Google Play</a>.
+<p>Usually, you release your application through an application marketplace, such as <a href="{@docRoot}distribute/googleplay/index.html">Google Play</a>.
 However, you can also release applications by sending them directly to users or by letting users
 download them from your own website.</p>
 
@@ -157,7 +157,7 @@ marketplace for selling and buying Android applications.</p>
   </li>
 </ul>
 
-<p>For information complete information, see <a href="{@docRoot}distribute/index.html">Google Play</a>.</p>
+<p>For information complete information, see <a href="{@docRoot}distribute/googleplay/index.html">Google Play</a>.</p>
 
 
 <h3 id="publishing-email">Releasing your application through email</h3>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,74 +16,15 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.Context;
-import android.os.UserHandle;
-
-import com.android.internal.view.RotationPolicy;
-
-import java.util.concurrent.CopyOnWriteArrayList;
-
-public final class RotationLockController {
-    private final Context mContext;
-    private final CopyOnWriteArrayList<RotationLockControllerCallback> mCallbacks =
-            new CopyOnWriteArrayList<RotationLockControllerCallback>();
-
-    private final RotationPolicy.RotationPolicyListener mRotationPolicyListener =
-            new RotationPolicy.RotationPolicyListener() {
-        @Override
-        public void onChange() {
-            notifyChanged();
-        }
-    };
+public interface RotationLockController extends Listenable {
+    int getRotationLockOrientation();
+    boolean isRotationLockAffordanceVisible();
+    boolean isRotationLocked();
+    void setRotationLocked(boolean locked);
+    void addRotationLockControllerCallback(RotationLockControllerCallback callback);
+    void removeRotationLockControllerCallback(RotationLockControllerCallback callback);
 
     public interface RotationLockControllerCallback {
-        public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible);
-    }
-
-    public RotationLockController(Context context) {
-        mContext = context;
-        notifyChanged();
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            RotationPolicy.registerRotationPolicyListener(mContext,
-                    mRotationPolicyListener, UserHandle.USER_ALL);
-        }
-    }
-
-    public void addRotationLockControllerCallback(RotationLockControllerCallback callback) {
-        mCallbacks.add(callback);
-    }
-
-    public boolean isRotationLocked() {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            return RotationPolicy.isRotationLocked(mContext);
-        }
-        return false;
-    }
-
-    public void setRotationLocked(boolean locked) {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            RotationPolicy.setRotationLock(mContext, locked);
-        }
-    }
-
-    public boolean isRotationLockAffordanceVisible() {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            return RotationPolicy.isRotationLockToggleVisible(mContext);
-        }
-        return false;
-    }
-
-    public void release() {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            RotationPolicy.unregisterRotationPolicyListener(mContext,
-                    mRotationPolicyListener);
-        }
-    }
-
-    private void notifyChanged() {
-        for (RotationLockControllerCallback callback : mCallbacks) {
-            callback.onRotationLockStateChanged(RotationPolicy.isRotationLocked(mContext),
-                    RotationPolicy.isRotationLockToggleVisible(mContext));
-        }
+        void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible);
     }
 }

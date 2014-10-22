@@ -17,13 +17,17 @@
 package com.android.keyguard;
 
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
 import android.app.IUserSwitchObserver;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 
@@ -34,6 +38,7 @@ import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_HEALTH;
+
 import android.media.AudioManager;
 import android.media.IRemoteControlDisplay;
 import android.os.BatteryManager;
@@ -48,8 +53,13 @@ import android.provider.Settings;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 
+import android.service.fingerprint.FingerprintManager;
+import android.service.fingerprint.FingerprintManagerReceiver;
+import android.service.fingerprint.FingerprintUtils;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+
 import com.google.android.collect.Lists;
 
 import java.lang.ref.WeakReference;
@@ -65,13 +75,18 @@ import java.util.ArrayList;
  * the device, and {@link #getFailedUnlockAttempts()}, {@link #reportFailedAttempt()}
  * and {@link #clearFailedUnlockAttempts()}.  Maybe we should rename this 'KeyguardContext'...
  */
-public class KeyguardUpdateMonitor {
+public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static final String TAG = "KeyguardUpdateMonitor";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = DEBUG || false;
     private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
     private static final int LOW_BATTERY_THRESHOLD = 20;
+
+    private static final String ACTION_FACE_UNLOCK_STARTED
+            = "com.android.facelock.FACE_UNLOCK_STARTED";
+    private static final String ACTION_FACE_UNLOCK_STOPPED
+            = "com.android.facelock.FACE_UNLOCK_STOPPED";
 
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
@@ -86,14 +101,18 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_USER_SWITCHING = 310;
     private static final int MSG_USER_REMOVED = 311;
     private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
-    protected static final int MSG_BOOT_COMPLETED = 313;
+    private static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
     private static final int MSG_SET_CURRENT_CLIENT_ID = 315;
-    protected static final int MSG_SET_PLAYBACK_STATE = 316;
-    protected static final int MSG_USER_INFO_CHANGED = 317;
-    protected static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
+    private static final int MSG_SET_PLAYBACK_STATE = 316;
+    private static final int MSG_USER_INFO_CHANGED = 317;
+    private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
     private static final int MSG_SCREEN_TURNED_ON = 319;
     private static final int MSG_SCREEN_TURNED_OFF = 320;
+    private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
+    private static final int MSG_FINGERPRINT_PROCESSED = 323;
+    private static final int MSG_FINGERPRINT_ACQUIRED = 324;
+    private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 325;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -106,6 +125,7 @@ public class KeyguardUpdateMonitor {
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
+    private boolean mBouncer;
     private boolean mBootCompleted;
 
     // Device provisioning state
@@ -150,7 +170,7 @@ public class KeyguardUpdateMonitor {
                     handleRingerModeChange(msg.arg1);
                     break;
                 case MSG_PHONE_STATE_CHANGED:
-                    handlePhoneStateChanged((String)msg.obj);
+                    handlePhoneStateChanged((String) msg.obj);
                     break;
                 case MSG_CLOCK_VISIBILITY_CHANGED:
                     handleClockVisibilityChanged();
@@ -162,7 +182,7 @@ public class KeyguardUpdateMonitor {
                     handleDevicePolicyManagerStateChanged();
                     break;
                 case MSG_USER_SWITCHING:
-                    handleUserSwitching(msg.arg1, (IRemoteCallback)msg.obj);
+                    handleUserSwitching(msg.arg1, (IRemoteCallback) msg.obj);
                     break;
                 case MSG_USER_SWITCH_COMPLETE:
                     handleUserSwitchComplete(msg.arg1);
@@ -173,14 +193,11 @@ public class KeyguardUpdateMonitor {
                 case MSG_KEYGUARD_VISIBILITY_CHANGED:
                     handleKeyguardVisibilityChanged(msg.arg1);
                     break;
+                case MSG_KEYGUARD_BOUNCER_CHANGED:
+                    handleKeyguardBouncerChanged(msg.arg1);
+                    break;
                 case MSG_BOOT_COMPLETED:
                     handleBootCompleted();
-                    break;
-                case MSG_SET_CURRENT_CLIENT_ID:
-                    handleSetGenerationId(msg.arg1, msg.arg2 != 0, (PendingIntent) msg.obj);
-                    break;
-                case MSG_SET_PLAYBACK_STATE:
-                    handleSetPlaybackState(msg.arg1, msg.arg2, (Long) msg.obj);
                     break;
                 case MSG_USER_INFO_CHANGED:
                     handleUserInfoChanged(msg.arg1);
@@ -194,11 +211,143 @@ public class KeyguardUpdateMonitor {
                 case MSG_SCREEN_TURNED_ON:
                     handleScreenTurnedOn();
                     break;
+                case MSG_FINGERPRINT_ACQUIRED:
+                    handleFingerprintAcquired(msg.arg1);
+                    break;
+                case MSG_FINGERPRINT_PROCESSED:
+                    handleFingerprintProcessed(msg.arg1);
+                    break;
+                case MSG_FACE_UNLOCK_STATE_CHANGED:
+                    handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
+                    break;
             }
         }
     };
 
-    private AudioManager mAudioManager;
+    private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
+    private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
+    private SparseBooleanArray mUserFingerprintRecognized = new SparseBooleanArray();
+    private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
+
+    @Override
+    public void onTrustChanged(boolean enabled, int userId, boolean initiatedByUser) {
+        mUserHasTrust.put(userId, enabled);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustChanged(userId);
+                if (enabled && initiatedByUser) {
+                    cb.onTrustInitiatedByUser(userId);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onTrustManagedChanged(boolean managed, int userId) {
+        mUserTrustIsManaged.put(userId, managed);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustManagedChanged(userId);
+            }
+        }
+    }
+
+    private void onFingerprintRecognized(int userId) {
+        mUserFingerprintRecognized.put(userId, true);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFingerprintRecognized(userId);
+            }
+        }
+    }
+
+    private void handleFingerprintProcessed(int fingerprintId) {
+        if (fingerprintId == 0) return; // not a valid fingerprint
+
+        final int userId;
+        try {
+            userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get current user id: ", e);
+            return;
+        }
+        if (isFingerprintDisabled(userId)) {
+            Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
+            return;
+        }
+        final ContentResolver res = mContext.getContentResolver();
+        final int ids[] = FingerprintUtils.getFingerprintIdsForUser(res, userId);
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i] == fingerprintId) {
+                onFingerprintRecognized(userId);
+            }
+        }
+    }
+
+    private void handleFingerprintAcquired(int info) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFingerprintAcquired(info);
+            }
+        }
+    }
+
+    private void handleFaceUnlockStateChanged(boolean running, int userId) {
+        mUserFaceUnlockRunning.put(userId, running);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFaceUnlockStateChanged(running, userId);
+            }
+        }
+    }
+
+    public boolean isFaceUnlockRunning(int userId) {
+        return mUserFaceUnlockRunning.get(userId);
+    }
+
+    private boolean isTrustDisabled(int userId) {
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+                // TODO once UI is finalized
+                final boolean disabledByGlobalActions = false;
+                final boolean disabledBySettings = false;
+
+                // Don't allow trust agent if device is secured with a SIM PIN. This is here
+                // mainly because there's no other way to prompt the user to enter their SIM PIN
+                // once they get past the keyguard screen.
+                final boolean disabledBySimPin = isSimPinSecure();
+
+                final boolean disabledByDpm = (dpm.getKeyguardDisabledFeatures(null, userId)
+                        & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
+                return disabledByDpm || disabledByGlobalActions || disabledBySettings
+                        || disabledBySimPin;
+        }
+        return false;
+    }
+
+    private boolean isFingerprintDisabled(int userId) {
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
+                    & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0;
+    }
+
+    public boolean getUserHasTrust(int userId) {
+        return !isTrustDisabled(userId) && mUserHasTrust.get(userId)
+                || mUserFingerprintRecognized.get(userId);
+    }
+
+    public boolean getUserTrustIsManaged(int userId) {
+        return mUserTrustIsManaged.get(userId) && !isTrustDisabled(userId);
+    }
 
     static class DisplayClientState {
         public int clientGeneration;
@@ -209,49 +358,6 @@ public class KeyguardUpdateMonitor {
     }
 
     private DisplayClientState mDisplayClientState = new DisplayClientState();
-
-    /**
-     * This currently implements the bare minimum required to enable showing and hiding
-     * KeyguardTransportControl.  There's a lot of client state to maintain which is why
-     * KeyguardTransportControl maintains an independent connection while it's showing.
-     */
-    private final IRemoteControlDisplay.Stub mRemoteControlDisplay =
-                new IRemoteControlDisplay.Stub() {
-
-        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs,
-                long currentPosMs, float speed) {
-            Message msg = mHandler.obtainMessage(MSG_SET_PLAYBACK_STATE,
-                    generationId, state, stateChangeTimeMs);
-            mHandler.sendMessage(msg);
-        }
-
-        public void setMetadata(int generationId, Bundle metadata) {
-
-        }
-
-        public void setTransportControlInfo(int generationId, int flags, int posCapabilities) {
-
-        }
-
-        public void setArtwork(int generationId, Bitmap bitmap) {
-
-        }
-
-        public void setAllMetadata(int generationId, Bundle metadata, Bitmap bitmap) {
-
-        }
-
-        public void setEnabled(boolean enabled) {
-            // no-op: this RemoteControlDisplay is not subject to being disabled.
-        }
-
-        public void setCurrentClientId(int clientGeneration, PendingIntent mediaIntent,
-                boolean clearing) throws RemoteException {
-            Message msg = mHandler.obtainMessage(MSG_SET_CURRENT_CLIENT_ID,
-                        clientGeneration, (clearing ? 1 : 0), mediaIntent);
-            mHandler.sendMessage(msg);
-        }
-    };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -288,9 +394,6 @@ public class KeyguardUpdateMonitor {
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
-            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
-                    .equals(action)) {
-                mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
@@ -304,10 +407,38 @@ public class KeyguardUpdateMonitor {
 
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
+            if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(action)) {
+                mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
+            } else if (Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_INFO_CHANGED,
                         intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId()), 0));
+            } else if (ACTION_FACE_UNLOCK_STARTED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1,
+                        getSendingUserId()));
+            } else if (ACTION_FACE_UNLOCK_STOPPED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 0,
+                        getSendingUserId()));
+            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                    .equals(action)) {
+                mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
             }
+        }
+    };
+    private FingerprintManagerReceiver mFingerprintManagerReceiver =
+            new FingerprintManagerReceiver() {
+        @Override
+        public void onProcessed(int fingerprintId) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_PROCESSED, fingerprintId, 0).sendToTarget();
+        };
+
+        @Override
+        public void onAcquired(int info) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_ACQUIRED, info, 0).sendToTarget();
+        }
+
+        @Override
+        public void onError(int error) {
+            if (DEBUG) Log.w(TAG, "FingerprintManager reported error: " + error);
         }
     };
 
@@ -371,7 +502,7 @@ public class KeyguardUpdateMonitor {
         }
     }
 
-    /* package */ static class BatteryStatus {
+    public static class BatteryStatus {
         public final int status;
         public final int level;
         public final int plugged;
@@ -431,6 +562,7 @@ public class KeyguardUpdateMonitor {
     }
 
     protected void handleScreenTurnedOff(int arg1) {
+        clearFingerprintRecognized();
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -454,38 +586,6 @@ public class KeyguardUpdateMonitor {
         }
     }
 
-    protected void handleSetGenerationId(int clientGeneration, boolean clearing, PendingIntent p) {
-        mDisplayClientState.clientGeneration = clientGeneration;
-        mDisplayClientState.clearing = clearing;
-        mDisplayClientState.intent = p;
-        if (DEBUG)
-            Log.v(TAG, "handleSetGenerationId(g=" + clientGeneration + ", clear=" + clearing + ")");
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onMusicClientIdChanged(clientGeneration, clearing, p);
-            }
-        }
-    }
-
-    protected void handleSetPlaybackState(int generationId, int playbackState, long eventTime) {
-        if (DEBUG)
-            Log.v(TAG, "handleSetPlaybackState(gen=" + generationId
-                + ", state=" + playbackState + ", t=" + eventTime + ")");
-        mDisplayClientState.playbackState = playbackState;
-        mDisplayClientState.playbackEventTime = eventTime;
-        if (generationId == mDisplayClientState.clientGeneration) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onMusicPlaybackStateChanged(playbackState, eventTime);
-                }
-            }
-        } else {
-            Log.w(TAG, "Ignoring generation id " + generationId + " because it's not current");
-        }
-    }
-
     private void handleUserInfoChanged(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -497,7 +597,6 @@ public class KeyguardUpdateMonitor {
 
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
-
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -520,7 +619,6 @@ public class KeyguardUpdateMonitor {
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
@@ -529,8 +627,13 @@ public class KeyguardUpdateMonitor {
         bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, bootCompleteFilter);
 
-        final IntentFilter userInfoFilter = new IntentFilter(Intent.ACTION_USER_INFO_CHANGED);
-        context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, userInfoFilter,
+        final IntentFilter allUserFilter = new IntentFilter();
+        allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
+        allUserFilter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
+        allUserFilter.addAction(ACTION_FACE_UNLOCK_STARTED);
+        allUserFilter.addAction(ACTION_FACE_UNLOCK_STOPPED);
+        allUserFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
                 null, null);
 
         try {
@@ -545,7 +648,7 @@ public class KeyguardUpdateMonitor {
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
-                                    newUserId));
+                                    newUserId, 0));
                             mSwitchingUser = false;
                         }
                     });
@@ -553,6 +656,13 @@ public class KeyguardUpdateMonitor {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        TrustManager trustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
+        trustManager.registerTrustListener(this);
+
+        FingerprintManager fpm;
+        fpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
+        fpm.startListening(mFingerprintManagerReceiver);
     }
 
     private boolean isDeviceProvisionedInSettingsDb() {
@@ -634,7 +744,7 @@ public class KeyguardUpdateMonitor {
      * broadcast and hence not handle the event. This method is ultimately called by
      * PhoneWindowManager in this case.
      */
-    protected void dispatchBootCompleted() {
+    public void dispatchBootCompleted() {
         mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
     }
 
@@ -644,8 +754,6 @@ public class KeyguardUpdateMonitor {
     protected void handleBootCompleted() {
         if (mBootCompleted) return;
         mBootCompleted = true;
-        mAudioManager = new AudioManager(mContext);
-        mAudioManager.registerRemoteControlDisplay(mRemoteControlDisplay);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -821,6 +929,22 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
+     * Handle {@link #MSG_KEYGUARD_BOUNCER_CHANGED}
+     * @see #sendKeyguardBouncerChanged(boolean)
+     */
+    private void handleKeyguardBouncerChanged(int bouncer) {
+        if (DEBUG) Log.d(TAG, "handleKeyguardBouncerChanged(" + bouncer + ")");
+        boolean isBouncer = (bouncer == 1);
+        mBouncer = isBouncer;
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onKeyguardBouncerChanged(isBouncer);
+            }
+        }
+    }
+
+    /**
      * Handle {@link #MSG_REPORT_EMERGENCY_CALL_ACTION}
      */
     private void handleReportEmergencyCallAction() {
@@ -834,6 +958,13 @@ public class KeyguardUpdateMonitor {
 
     public boolean isKeyguardVisible() {
         return mKeyguardIsVisible;
+    }
+
+    /**
+     * @return if the keyguard is currently in bouncer mode.
+     */
+    public boolean isKeyguardBouncer() {
+        return mBouncer;
     }
 
     public boolean isSwitchingUser() {
@@ -940,18 +1071,22 @@ public class KeyguardUpdateMonitor {
         callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         callback.onClockVisibilityChanged();
         callback.onSimStateChanged(mSimState);
-        callback.onMusicClientIdChanged(
-                mDisplayClientState.clientGeneration,
-                mDisplayClientState.clearing,
-                mDisplayClientState.intent);
-        callback.onMusicPlaybackStateChanged(mDisplayClientState.playbackState,
-                mDisplayClientState.playbackEventTime);
     }
 
     public void sendKeyguardVisibilityChanged(boolean showing) {
         if (DEBUG) Log.d(TAG, "sendKeyguardVisibilityChanged(" + showing + ")");
         Message message = mHandler.obtainMessage(MSG_KEYGUARD_VISIBILITY_CHANGED);
         message.arg1 = showing ? 1 : 0;
+        message.sendToTarget();
+    }
+
+    /**
+     * @see #handleKeyguardBouncerChanged(int)
+     */
+    public void sendKeyguardBouncerChanged(boolean showingBouncer) {
+        if (DEBUG) Log.d(TAG, "sendKeyguardBouncerChanged(" + showingBouncer + ")");
+        Message message = mHandler.obtainMessage(MSG_KEYGUARD_BOUNCER_CHANGED);
+        message.arg1 = showingBouncer ? 1 : 0;
         message.sendToTarget();
     }
 
@@ -1015,6 +1150,10 @@ public class KeyguardUpdateMonitor {
     public void clearFailedUnlockAttempts() {
         mFailedAttempts = 0;
         mFailedBiometricUnlockAttempts = 0;
+    }
+
+    public void clearFingerprintRecognized() {
+        mUserFingerprintRecognized.clear();
     }
 
     public void reportFailedUnlockAttempt() {

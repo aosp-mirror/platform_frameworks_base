@@ -19,14 +19,8 @@
     <!-- Title of the PrintSpooler application. [CHAR LIMIT=50] -->
     <string name="app_label">Print Spooler</string>
 
-    <!-- Label of the print dialog's button for advanced printer settings. [CHAR LIMIT=25] -->
-    <string name="advanced_settings_button">Printer settings</string>
-
-    <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
-    <string name="print_button">Print</string>
-
-    <!-- Label of the print dialog's save button. [CHAR LIMIT=16] -->
-    <string name="save_button">Save</string>
+    <!-- Label of the print dialog's button for more print options. [CHAR LIMIT=25] -->
+    <string name="more_options_button">More options</string>
 
     <!-- Label of the destination widget. [CHAR LIMIT=20] -->
     <string name="label_destination">Destination</string>
@@ -34,8 +28,14 @@
     <!-- Label of the copies count widget. [CHAR LIMIT=20] -->
     <string name="label_copies">Copies</string>
 
+    <!-- Label of the copies count for the print options summary. [CHAR LIMIT=20] -->
+    <string name="label_copies_summary">Copies:</string>
+
     <!-- Label of the paper size widget. [CHAR LIMIT=20] -->
-    <string name="label_paper_size">Paper Size</string>
+    <string name="label_paper_size">Paper size</string>
+
+    <!-- Label of the paper size for the print options summary. [CHAR LIMIT=20] -->
+    <string name="label_paper_size_summary">Paper size:</string>
 
     <!-- Label of the color mode widget. [CHAR LIMIT=20] -->
     <string name="label_color">Color</string>
@@ -44,7 +44,13 @@
     <string name="label_orientation">Orientation</string>
 
     <!-- Label of the page selection widget. [CHAR LIMIT=20] -->
-    <string name="label_pages">Pages (<xliff:g id="page_count" example="5">%1$s</xliff:g>)</string>
+    <string name="label_pages">Pages</string>
+
+    <!-- Template for the all pages option in the page selection widget. [CHAR LIMIT=20] -->
+    <string name="template_all_pages">All <xliff:g id="page_count" example="100">%1$s</xliff:g></string>
+
+    <!-- Template for the page range option in the page selection widget. [CHAR LIMIT=20] -->
+    <string name="template_page_range">Range of <xliff:g id="page_count" example="100">%1$s</xliff:g></string>
 
     <!-- Page range exmple used as a hint of how to specify such. [CHAR LIMIT=20] -->
     <string name="pages_range_example">e.g. 1&#8212;5,8,11&#8212;13</string>
@@ -58,9 +64,6 @@
     <!-- Title of the message that the printing application crashed. [CHAR LIMIT=50] -->
     <string name="printing_app_crashed">Printing app crashed</string>
 
-    <!-- Title if the number of pages in a printed document is unknown. [CHAR LIMIT=20] -->
-    <string name="page_count_unknown">Pages</string>
-
     <!-- Title for the temporary dialog show while an app is generating a print job. [CHAR LIMIT=30] -->
     <string name="generating_print_job">Generating print job</string>
 
@@ -72,6 +75,36 @@
 
     <!-- Title for the print dialog announced to the user for accessibility. Not shown in the UI. [CHAR LIMIT=none] -->
     <string name="print_dialog">Print dialog</string>
+
+    <!-- Template for the message that shows the current page out of the total number of pages [CHAR LIMIT=none] -->
+    <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>
+        /<xliff:g id="page_count">%2$d</xliff:g></string>
+
+    <!-- Description of the current page - spoken to the user [CHAR LIMIT=none] -->
+    <string name="page_description_template">Page <xliff:g id="current_page" example="1">%1$d</xliff:g>
+        of <xliff:g id="page_count" example="100">%2$d</xliff:g></string>
+
+    <!-- Template for the message to announce the print options summary - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="summary_template">Summary, copies <xliff:g id="copies" example="1">%1$s</xliff:g>,
+        paper size <xliff:g id="paper_size" example="A4">%2$s</xliff:g></string>
+
+    <!-- Description for the handle to expand all print options - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="expand_handle">Expand handle</string>
+
+    <!-- Description for the handle to collapse all print options - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="collapse_handle">Collapse handle</string>
+
+    <!-- Description for the print button - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="print_button">Print</string>
+
+    <!-- Description for the save to PDF button - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="savetopdf_button">Save to PDF</string>
+
+    <!-- Message to announce print options are expanded - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="print_options_expanded">Print options expanded</string>
+
+    <!-- Message to announce print options are collapsed - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="print_options_collapsed">Print options collapsed</string>
 
     <!-- Select printer activity -->
 
@@ -118,19 +151,19 @@
 
     <!-- Notifications -->
 
-    <!-- Template for the notificaiton label for a printing print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a printing print job. [CHAR LIMIT=25] -->
     <string name="printing_notification_title_template">Printing <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a cancelling print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a cancelling print job. [CHAR LIMIT=25] -->
     <string name="cancelling_notification_title_template">Cancelling <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a failed print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a failed print job. [CHAR LIMIT=25] -->
     <string name="failed_notification_title_template">Printer error <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a blocked print job. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a blocked print job. [CHAR LIMIT=25] -->
     <string name="blocked_notification_title_template">Printer blocked <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
-    <!-- Template for the notificaiton label for a composite (multiple items) print jobs notification. [CHAR LIMIT=25] -->
+    <!-- Template for the notification label for a composite (multiple items) print jobs notification. [CHAR LIMIT=25] -->
     <plurals name="composite_notification_title_template">
         <item quantity="one"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print job</item>
         <item quantity="other"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print jobs</item>
@@ -139,7 +172,7 @@
     <!-- Label for the notification button for cancelling a print job. [CHAR LIMIT=25] -->
     <string name="cancel">Cancel</string>
 
-    <!-- Label for the notification button for restrating a filed print job. [CHAR LIMIT=25] -->
+    <!-- Label for the notification button for restarting a filed print job. [CHAR LIMIT=25] -->
     <string name="restart">Restart</string>
 
     <!-- Message that there is no connection to a printer. [CHAR LIMIT=40] -->
@@ -150,9 +183,6 @@
 
     <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
     <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
-
-    <!-- Default message of an alert dialog for app error while generating a print job. [CHAR LIMIT=50] -->
-    <string name="print_error_default_message">Couldn\'t generate print job</string>
 
     <!-- Arrays -->
 
@@ -170,14 +200,6 @@
         <item>Portrait</item>
         <!-- Orientation label: Landscape page orientation [CHAR LIMIT=30] -->
         <item>Landscape</item>
-    </string-array>
-
-    <!-- Page options labels. -->
-    <string-array name="page_options_labels">
-        <!-- Page range option label: Print all pages [CHAR LIMIT=30] -->
-        <item>All</item>
-        <!-- Page range option label: Print a page range [CHAR LIMIT=30] -->
-        <item>Range</item>
     </string-array>
 
     <!-- Permissions -->
@@ -199,5 +221,24 @@
     <string name="permdesc_startPrintServiceConfigActivity" translatable="false">Allows the
         holder to start the configuration activities of a print service. Should never be needed
         for normal apps.</string>
+
+    <!-- Error messages -->
+
+    <!-- Message for an error when trying to print to a PDF file. [CHAR LIMIT=50] -->
+    <string name="print_write_error_message">Couldn\'t write to file</string>
+
+    <!-- Default message for an error while generating a print job. [CHAR LIMIT=50] -->
+    <string name="print_error_default_message">Sorry, that didn\'t work. Try again.</string>
+
+    <!-- Label for the retry button in the error message. [CHAR LIMIT=50] -->
+    <string name="print_error_retry">Retry</string>
+
+    <!-- Message for the currently selected printer being unavailable. [CHAR LIMIT=100] -->
+    <string name="print_error_printer_unavailable">This printer isn\'t available right now.</string>
+
+    <!-- Long running operations -->
+
+    <!-- Message long running operation when preparing print preview. [CHAR LIMIT=50] -->
+    <string name="print_preparing_preview">Preparing preview\u2026</string>
 
 </resources>

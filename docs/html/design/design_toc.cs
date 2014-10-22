@@ -5,7 +5,38 @@
     <ul>
       <li><a href="<?cs var:toroot ?>design/get-started/creative-vision.html">Creative Vision</a></li>
       <li><a href="<?cs var:toroot ?>design/get-started/principles.html">Design Principles</a></li>
-      <li><a href="<?cs var:toroot ?>design/get-started/ui-overview.html">UI Overview</a></li>
+    </ul>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/material/index.html">Material Design</a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>design/devices.html">Devices</a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>design/handhelds/index.html">Phones &amp; Tablets</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>design/wear/index.html">Wear</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>design/wear/creative-vision.html">Creative Vision</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/principles.html">Design Principles</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/structure.html">App Structure</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/patterns.html">UI Patterns</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/style.html">Style</a></li>
+        </ul>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>design/tv/index.html">TV</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>design/tv/principles.html">Creative Vision</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/patterns.html">UI Patterns</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/style.html">Style</a></li>
+        </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>design/auto/index.html">Auto</a></li>
     </ul>
   </li>
 

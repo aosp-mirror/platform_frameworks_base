@@ -22,7 +22,6 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.filterfw.geometry.Point;

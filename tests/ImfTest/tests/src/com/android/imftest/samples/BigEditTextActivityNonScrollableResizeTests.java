@@ -24,14 +24,14 @@ import com.android.imftest.R;
 
 public class BigEditTextActivityNonScrollableResizeTests extends ImfBaseTestCase<BigEditTextActivityNonScrollableResize> {
 
-	public final String TAG = "BigEditTextActivityNonScrollableResizeTests";
-	
+    public final String TAG = "BigEditTextActivityNonScrollableResizeTests";
+    
     public BigEditTextActivityNonScrollableResizeTests() {
         super(BigEditTextActivityNonScrollableResize.class);
     }
-	
-	@LargeTest
-	public void testAppAdjustmentPanScan() {       // Give the IME 2 seconds to appear.
+    
+    @LargeTest
+    public void testAppAdjustmentPanScan() {       // Give the IME 2 seconds to appear.
         pause(2000);
         
         View rootView = ((BigEditTextActivityNonScrollableResize) mTargetActivity).getRootView();
@@ -43,6 +43,6 @@ public class BigEditTextActivityNonScrollableResizeTests extends ImfBaseTestCase
         destructiveCheckImeInitialState(rootView, servedView);
             
         verifyEditTextAdjustment(servedView, rootView.getMeasuredHeight());
-	}
-	
+    }
+    
 }

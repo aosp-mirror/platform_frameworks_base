@@ -16,9 +16,10 @@
 
 package android.hardware.location;
 
+import android.hardware.location.GeofenceHardwareMonitorEvent;
 import android.location.Location;
 
 /** @hide */
 oneway interface IGeofenceHardwareMonitorCallback {
-   void onMonitoringSystemChange(int monitoringType, boolean available, in Location location);
+    void onMonitoringSystemChange(in GeofenceHardwareMonitorEvent event);
 }

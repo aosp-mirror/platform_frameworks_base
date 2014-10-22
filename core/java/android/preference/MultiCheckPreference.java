@@ -40,12 +40,13 @@ public class MultiCheckPreference extends DialogPreference {
     private boolean[] mSetValues;
     private boolean[] mOrigValues;
     private String mSummary;
-    
-    public MultiCheckPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ListPreference, 0, 0);
+
+    public MultiCheckPreference(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ListPreference, defStyleAttr, defStyleRes);
         mEntries = a.getTextArray(com.android.internal.R.styleable.ListPreference_entries);
         if (mEntries != null) {
             setEntries(mEntries);
@@ -61,6 +62,14 @@ public class MultiCheckPreference extends DialogPreference {
                 com.android.internal.R.styleable.Preference, 0, 0);
         mSummary = a.getString(com.android.internal.R.styleable.Preference_summary);
         a.recycle();
+    }
+
+    public MultiCheckPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public MultiCheckPreference(Context context, AttributeSet attrs) {
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
 
     public MultiCheckPreference(Context context) {

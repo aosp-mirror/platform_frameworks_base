@@ -1,0 +1,14 @@
+.gradle
+local.properties
+.idea
+.DS_Store
+*.iml
+# We need the built .class files to load custom views and R class.
+# The only way to negate an exclusion is by including every single parent
+# and excluding all children of those parents.
+
+/build/*
+!/build/intermediates/
+
+/build/intermediates/*
+!/build/intermediates/classes/

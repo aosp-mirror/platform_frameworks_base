@@ -52,6 +52,22 @@ public final class DeviceAdminInfo implements Parcelable {
     static final String TAG = "DeviceAdminInfo";
 
     /**
+     * A type of policy that this device admin can use: device owner meta-policy
+     * for an admin that is designated as owner of the device.
+     *
+     * @hide
+     */
+    public static final int USES_POLICY_DEVICE_OWNER = -2;
+
+    /**
+     * A type of policy that this device admin can use: profile owner meta-policy
+     * for admins that have been installed as owner of some user profile.
+     *
+     * @hide
+     */
+    public static final int USES_POLICY_PROFILE_OWNER = -1;
+
+    /**
      * A type of policy that this device admin can use: limit the passwords
      * that the user can select, via {@link DevicePolicyManager#setPasswordQuality}
      * and {@link DevicePolicyManager#setPasswordMinimumLength}.

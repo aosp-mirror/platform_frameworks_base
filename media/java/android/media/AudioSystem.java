@@ -16,6 +16,7 @@
 
 package android.media;
 
+import java.util.ArrayList;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -27,11 +28,13 @@ package android.media;
  */
 public class AudioSystem
 {
-    /* These values must be kept in sync with AudioSystem.h */
+    /* These values must be kept in sync with system/audio.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
      */
+    /* The default audio stream */
+    public static final int STREAM_DEFAULT = -1;
     /* The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = 0;
     /* The audio stream for system sounds */
@@ -103,6 +106,9 @@ public class AudioSystem
     /** @deprecated */
     @Deprecated public static final int ROUTE_ALL               = 0xFFFFFFFF;
 
+    // Keep in sync with system/core/include/system/audio.h
+    public static final int AUDIO_SESSION_ALLOCATE = 0;
+
     /*
      * Checks whether the specified stream type is active.
      *
@@ -124,6 +130,11 @@ public class AudioSystem
      * return true if any recorder using this source is currently recording
      */
     public static native boolean isSourceActive(int source);
+
+    /*
+     * Returns a new unused audio session ID
+     */
+    public static native int newAudioSessionId();
 
     /*
      * Sets a group generic audio configuration parameters. The use of these parameters
@@ -196,6 +207,17 @@ public class AudioSystem
         }
     }
 
+    /*
+     * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
+     * Must be kept in sync with frameworks/base/core/jni/android_media_AudioErrors.h
+     */
+    public static final int SUCCESS            = 0;
+    public static final int ERROR              = -1;
+    public static final int BAD_VALUE          = -2;
+    public static final int INVALID_OPERATION  = -3;
+    public static final int PERMISSION_DENIED  = -4;
+    public static final int NO_INIT            = -5;
+    public static final int DEAD_OBJECT        = -6;
 
     /*
      * AudioPolicyService methods
@@ -205,6 +227,7 @@ public class AudioSystem
     // audio device definitions: must be kept in sync with values in system/core/audio.h
     //
 
+    public static final int DEVICE_NONE = 0x0;
     // reserved bits
     public static final int DEVICE_BIT_IN = 0x80000000;
     public static final int DEVICE_BIT_DEFAULT = 0x40000000;
@@ -220,11 +243,18 @@ public class AudioSystem
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES = 0x100;
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER = 0x200;
     public static final int DEVICE_OUT_AUX_DIGITAL = 0x400;
+    public static final int DEVICE_OUT_HDMI = DEVICE_OUT_AUX_DIGITAL;
     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
     public static final int DEVICE_OUT_USB_ACCESSORY = 0x2000;
     public static final int DEVICE_OUT_USB_DEVICE = 0x4000;
     public static final int DEVICE_OUT_REMOTE_SUBMIX = 0x8000;
+    public static final int DEVICE_OUT_TELEPHONY_TX = 0x10000;
+    public static final int DEVICE_OUT_LINE = 0x20000;
+    public static final int DEVICE_OUT_HDMI_ARC = 0x40000;
+    public static final int DEVICE_OUT_SPDIF = 0x80000;
+    public static final int DEVICE_OUT_FM = 0x100000;
+    public static final int DEVICE_OUT_AUX_LINE = 0x200000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -238,12 +268,18 @@ public class AudioSystem
                                               DEVICE_OUT_BLUETOOTH_A2DP |
                                               DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
                                               DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
-                                              DEVICE_OUT_AUX_DIGITAL |
+                                              DEVICE_OUT_HDMI |
                                               DEVICE_OUT_ANLG_DOCK_HEADSET |
                                               DEVICE_OUT_DGTL_DOCK_HEADSET |
                                               DEVICE_OUT_USB_ACCESSORY |
                                               DEVICE_OUT_USB_DEVICE |
                                               DEVICE_OUT_REMOTE_SUBMIX |
+                                              DEVICE_OUT_TELEPHONY_TX |
+                                              DEVICE_OUT_LINE |
+                                              DEVICE_OUT_HDMI_ARC |
+                                              DEVICE_OUT_SPDIF |
+                                              DEVICE_OUT_FM |
+                                              DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -253,6 +289,12 @@ public class AudioSystem
                                                   DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
     public static final int DEVICE_OUT_ALL_USB = (DEVICE_OUT_USB_ACCESSORY |
                                                   DEVICE_OUT_USB_DEVICE);
+    public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_AUX_LINE |
+                                                                DEVICE_OUT_HDMI_ARC |
+                                                                DEVICE_OUT_SPDIF);
+    public static final int DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER =
+            (DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO |
+             DEVICE_OUT_SPEAKER);
 
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = DEVICE_BIT_IN | 0x1;
@@ -261,13 +303,21 @@ public class AudioSystem
     public static final int DEVICE_IN_BLUETOOTH_SCO_HEADSET = DEVICE_BIT_IN | 0x8;
     public static final int DEVICE_IN_WIRED_HEADSET = DEVICE_BIT_IN | 0x10;
     public static final int DEVICE_IN_AUX_DIGITAL = DEVICE_BIT_IN | 0x20;
+    public static final int DEVICE_IN_HDMI = DEVICE_IN_AUX_DIGITAL;
     public static final int DEVICE_IN_VOICE_CALL = DEVICE_BIT_IN | 0x40;
+    public static final int DEVICE_IN_TELEPHONY_RX = DEVICE_IN_VOICE_CALL;
     public static final int DEVICE_IN_BACK_MIC = DEVICE_BIT_IN | 0x80;
     public static final int DEVICE_IN_REMOTE_SUBMIX = DEVICE_BIT_IN | 0x100;
     public static final int DEVICE_IN_ANLG_DOCK_HEADSET = DEVICE_BIT_IN | 0x200;
     public static final int DEVICE_IN_DGTL_DOCK_HEADSET = DEVICE_BIT_IN | 0x400;
     public static final int DEVICE_IN_USB_ACCESSORY = DEVICE_BIT_IN | 0x800;
     public static final int DEVICE_IN_USB_DEVICE = DEVICE_BIT_IN | 0x1000;
+    public static final int DEVICE_IN_FM_TUNER = DEVICE_BIT_IN | 0x2000;
+    public static final int DEVICE_IN_TV_TUNER = DEVICE_BIT_IN | 0x4000;
+    public static final int DEVICE_IN_LINE = DEVICE_BIT_IN | 0x8000;
+    public static final int DEVICE_IN_SPDIF = DEVICE_BIT_IN | 0x10000;
+    public static final int DEVICE_IN_BLUETOOTH_A2DP = DEVICE_BIT_IN | 0x20000;
+    public static final int DEVICE_IN_LOOPBACK = DEVICE_BIT_IN | 0x40000;
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
     public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
@@ -275,16 +325,24 @@ public class AudioSystem
                                              DEVICE_IN_BUILTIN_MIC |
                                              DEVICE_IN_BLUETOOTH_SCO_HEADSET |
                                              DEVICE_IN_WIRED_HEADSET |
-                                             DEVICE_IN_AUX_DIGITAL |
-                                             DEVICE_IN_VOICE_CALL |
+                                             DEVICE_IN_HDMI |
+                                             DEVICE_IN_TELEPHONY_RX |
                                              DEVICE_IN_BACK_MIC |
                                              DEVICE_IN_REMOTE_SUBMIX |
                                              DEVICE_IN_ANLG_DOCK_HEADSET |
                                              DEVICE_IN_DGTL_DOCK_HEADSET |
                                              DEVICE_IN_USB_ACCESSORY |
                                              DEVICE_IN_USB_DEVICE |
+                                             DEVICE_IN_FM_TUNER |
+                                             DEVICE_IN_TV_TUNER |
+                                             DEVICE_IN_LINE |
+                                             DEVICE_IN_SPDIF |
+                                             DEVICE_IN_BLUETOOTH_A2DP |
+                                             DEVICE_IN_LOOPBACK |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
+    public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
+                                                 DEVICE_IN_USB_DEVICE);
 
     // device states, must match AudioSystem::device_connection_state
     public static final int DEVICE_STATE_UNAVAILABLE = 0;
@@ -302,13 +360,20 @@ public class AudioSystem
     public static final String DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME = "bt_a2dp_hp";
     public static final String DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME = "bt_a2dp_spk";
     public static final String DEVICE_OUT_AUX_DIGITAL_NAME = "aux_digital";
+    public static final String DEVICE_OUT_HDMI_NAME = "hdmi";
     public static final String DEVICE_OUT_ANLG_DOCK_HEADSET_NAME = "analog_dock";
     public static final String DEVICE_OUT_DGTL_DOCK_HEADSET_NAME = "digital_dock";
     public static final String DEVICE_OUT_USB_ACCESSORY_NAME = "usb_accessory";
     public static final String DEVICE_OUT_USB_DEVICE_NAME = "usb_device";
     public static final String DEVICE_OUT_REMOTE_SUBMIX_NAME = "remote_submix";
+    public static final String DEVICE_OUT_TELEPHONY_TX_NAME = "telephony_tx";
+    public static final String DEVICE_OUT_LINE_NAME = "line";
+    public static final String DEVICE_OUT_HDMI_ARC_NAME = "hmdi_arc";
+    public static final String DEVICE_OUT_SPDIF_NAME = "spdif";
+    public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
+    public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
 
-    public static String getDeviceName(int device)
+    public static String getOutputDeviceName(int device)
     {
         switch(device) {
         case DEVICE_OUT_EARPIECE:
@@ -331,8 +396,8 @@ public class AudioSystem
             return DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME;
         case DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER:
             return DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME;
-        case DEVICE_OUT_AUX_DIGITAL:
-            return DEVICE_OUT_AUX_DIGITAL_NAME;
+        case DEVICE_OUT_HDMI:
+            return DEVICE_OUT_HDMI_NAME;
         case DEVICE_OUT_ANLG_DOCK_HEADSET:
             return DEVICE_OUT_ANLG_DOCK_HEADSET_NAME;
         case DEVICE_OUT_DGTL_DOCK_HEADSET:
@@ -343,11 +408,24 @@ public class AudioSystem
             return DEVICE_OUT_USB_DEVICE_NAME;
         case DEVICE_OUT_REMOTE_SUBMIX:
             return DEVICE_OUT_REMOTE_SUBMIX_NAME;
+        case DEVICE_OUT_TELEPHONY_TX:
+            return DEVICE_OUT_TELEPHONY_TX_NAME;
+        case DEVICE_OUT_LINE:
+            return DEVICE_OUT_LINE_NAME;
+        case DEVICE_OUT_HDMI_ARC:
+            return DEVICE_OUT_HDMI_ARC_NAME;
+        case DEVICE_OUT_SPDIF:
+            return DEVICE_OUT_SPDIF_NAME;
+        case DEVICE_OUT_FM:
+            return DEVICE_OUT_FM_NAME;
+        case DEVICE_OUT_AUX_LINE:
+            return DEVICE_OUT_AUX_LINE_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return "";
         }
     }
+
 
     // phone state, match audio_mode???
     public static final int PHONE_STATE_OFFCALL = 0;
@@ -367,7 +445,8 @@ public class AudioSystem
     public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_SYSTEM_ENFORCED = 11;
-    private static final int NUM_FORCE_CONFIG = 12;
+    public static final int FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
+    private static final int NUM_FORCE_CONFIG = 13;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use
@@ -376,7 +455,8 @@ public class AudioSystem
     public static final int FOR_RECORD = 2;
     public static final int FOR_DOCK = 3;
     public static final int FOR_SYSTEM = 4;
-    private static final int NUM_FORCE_USE = 5;
+    public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
+    private static final int NUM_FORCE_USE = 6;
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;
@@ -403,4 +483,17 @@ public class AudioSystem
 
     public static native int setLowRamDevice(boolean isLowRamDevice);
     public static native int checkAudioFlinger();
+
+    public static native int listAudioPorts(ArrayList<AudioPort> ports, int[] generation);
+    public static native int createAudioPatch(AudioPatch[] patch,
+                                            AudioPortConfig[] sources, AudioPortConfig[] sinks);
+    public static native int releaseAudioPatch(AudioPatch patch);
+    public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
+    public static native int setAudioPortConfig(AudioPortConfig config);
+
+    // must be kept in sync with value in include/system/audio.h
+    public static final int AUDIO_HW_SYNC_INVALID = 0;
+
+    public static native int getAudioHwSyncForSession(int sessionId);
 }
+

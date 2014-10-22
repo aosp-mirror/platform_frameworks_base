@@ -19,13 +19,13 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android">
     <objectAnimator 
         android:interpolator="@interpolator/decelerate_cubic"
-        android:valueFrom="0.8" android:valueTo="1.0"
+        android:valueFrom="0.95" android:valueTo="1.0"
         android:valueType="floatType"
         android:propertyName="scaleY"
         android:duration="300"/>
     <objectAnimator
         android:interpolator="@interpolator/decelerate_cubic"
-        android:valueFrom="0.8" android:valueTo="1.0"
+        android:valueFrom="0.95" android:valueTo="1.0"
         android:valueType="floatType"
         android:propertyName="scaleX"
         android:duration="300"/>

@@ -31,15 +31,19 @@ import android.util.AttributeSet;
  */
 public class YesNoPreference extends DialogPreference {
     private boolean mWasPositiveResult;
-    
-    public YesNoPreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+
+    public YesNoPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public YesNoPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public YesNoPreference(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.yesNoPreferenceStyle);
     }
-    
+
     public YesNoPreference(Context context) {
         this(context, null);
     }

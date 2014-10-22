@@ -340,9 +340,11 @@ public abstract class LauncherActivity extends ListActivity {
         super.onCreate(icicle);
         
         mPackageManager = getPackageManager();
-    
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setProgressBarIndeterminateVisibility(true);
+
+        if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+            setProgressBarIndeterminateVisibility(true);
+        }
         onSetContentView();
 
         mIconResizer = new IconResizer();
@@ -357,7 +359,9 @@ public abstract class LauncherActivity extends ListActivity {
         updateAlertTitle();
         updateButtonText();
 
-        setProgressBarIndeterminateVisibility(false);
+        if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            setProgressBarIndeterminateVisibility(false);
+        }
     }
 
     private void updateAlertTitle() {

@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="7164937344850004466">"Kerfisviðmót"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Hreinsa"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjarlægja af lista"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Upplýsingar um forrit"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Engin nýleg forrit"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Hunsa nýleg forrit"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"Eitt nýlegt forrit"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d nýleg forrit"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Engar tilkynningar"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Áframhaldandi"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Tilkynningar"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Rafhlaðan er að tæmast"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> eftir"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> eftir. Kveikt er á rafhlöðusparnaði."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB-hleðsla er ekki studd.\nNotaðu eingöngu hleðslutækið sem fylgdi."</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Ekki er stuðningur við USB-hleðslu."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Notaðu eingöngu hleðslutækið sem fylgir með."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Stillingar"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Kveikja á rafhlöðusparnaði?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Kveikja"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Kveikja á rafhlöðusparnaði"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Til að lengja endingartíma rafhlöðunnar minnkar rafhlöðusparnaðareiginleikinn afköst tækisins.\n\nSlökkt er á sparnaðareiginleikanum þegar tækið er sett í samband."</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Stillingar"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flugstilling"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Snúa skjá sjálfkrafa"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ÞAGGA"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"SJÁLFV"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Tilkynningar"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Tjóðrað um Bluetooth"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Setja upp innsláttaraðferðir"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Vélbúnaðarlyklaborð"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Veita forritinu <xliff:g id="APPLICATION">%1$s</xliff:g> aðgang að USB-tækinu?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Veita forritinu <xliff:g id="APPLICATION">%1$s</xliff:g> aðgang að USB-aukabúnaðinum?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Opna <xliff:g id="ACTIVITY">%1$s</xliff:g> þegar þetta USB-tæki er tengt?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Opna <xliff:g id="ACTIVITY">%1$s</xliff:g> þegar þessi USB-aukabúnaður er tengdur?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Engin uppsett forrit virka með þessum USB-aukabúnaði. Frekari upplýsingar eru á <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB-aukabúnaður"</string>
+    <string name="label_view" msgid="6304565553218192990">"Skoða"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Nota sjálfgefið fyrir þetta USB-tæki"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Nota sjálfgefið fyrir þennan USB-aukabúnað"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Leyfa USB-villuleit?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Fingrafar RSA-lykils tölvunnar er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Leyfa alltaf úr þessari tölvu"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"Fylla skjá með aðdrætti"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"Teygja yfir allan skjáinn"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Vistar skjámynd…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Vistar skjámynd…"</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Verið er að vista skjámynd."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skjámynd var tekin."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Snertu til að skoða skjámyndina."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Ekki tókst að taka skjámynd."</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
+    <string name="usb_preference_title" msgid="6551050377388882787">"Valkostir USB-skráaflutnings"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Tengja sem efnisspilara (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"Tengja sem myndavél (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Settu upp forritið Android File Transfer fyrir Mac"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"Til baka"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Heim"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"Valmynd"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"Nýleg forrit"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Leita"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Myndavél"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"Sími"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Hnappur til að skipta um innsláttaraðferð."</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Hnappur fyrir samhæfisaðdrátt."</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Aðlaga forrit fyrir lítinn skjá að stærri skjá."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth tengt."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth aftengt."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Engin rafhlaða."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Eitt strik á rafhlöðu."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Tvö strik á rafhlöðu."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Þrjú strik á rafhlöðu."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Rafhlaða fullhlaðin."</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"Ekkert símasamband."</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Styrkur símasambands er eitt strik."</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Styrkur símasambands er tvö strik."</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Styrkur símasambands er þrjú strik."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Fullur styrkur símasambands."</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"Engin gögn."</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Sendistyrkur gagnatengingar er eitt strik."</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Sendistyrkur gagnatengingar tvö strik."</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Sendistyrkur gagnatengingar er þrjú strik."</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Fullur sendistyrkur gagnatengingar."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Slökkt á Wi-Fi."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi ótengt."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi: Eitt strik."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi: Tvö strik."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi: Þrjú strik."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Fullur Wi-Fi sendistyrkur."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Engin WiMAX-tenging."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX: Eitt strik."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX: Tvö strik."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX: Þrjú strik."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Fullur WiMAX-sendistyrkur."</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"Ekkert merki."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Engin tenging."</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"Engin strik."</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"Eitt strik."</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"Tvö strik."</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"Þrjú strik."</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Fullur sendistyrkur."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Kveikt."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Slökkt."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Tenging virk."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Tengist."</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Reiki"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Ekkert SIM-kort."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tjóðrun með Bluetooth."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugstilling"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> prósent á rafhlöðu."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Kerfisstillingar."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Tilkynningar."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Hreinsa tilkynningu."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS virkt."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Tenging við GPS."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Fjarriti virkur."</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Titrar við hringingu."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Engin hringing."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> vísað frá."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Tilkynningu lokað."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Tilkynningasvæði."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Flýtistillingar."</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Nýleg forrit."</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Notandi: <xliff:g id="USER">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Farsímagögn: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Rafhlaða: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Flugstilling: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Staðsetning: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Vekjari stilltur á <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Loka glugga"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Meiri tími"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Minni tími"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Slökkt er á 2G- og 3G-gögnum"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Slökkt er á 4G-gögnum"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Slökkt er á farsímagögnum"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Slökkt er á gagnaflutningi"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Slökkt var á gagnaflutningi í tækinu vegna þess að hámarkinu sem þú valdir var náð.\n\nSímafyrirtækið þitt kann að taka gjald ef þú kveikir á honum aftur."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Kveikja á gagnaflutningi"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Engin nettenging"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tengt"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Leitar að GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Staðsetning valin með GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Staðsetningarbeiðnir virkar"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Hreinsa allar tilkynningar."</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Upplýsingar um forrit"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skjárinn snýst sjálfkrafa."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skjárinn er læstur í langsniði."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skjárinn er læstur í skammsniði."</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Eftirréttaborð"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"Skjávari"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Flugstilling"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Í hleðslu, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Fullhlaðið"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> tæki)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Slökkt á Bluetooth"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Engin pöruð tæki til staðar"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Birtustig"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Sjálfvirkur snúningur"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Snúningur læstur"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Skammsnið"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Langsnið"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Innsláttaraðferð"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Staðsetning"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Staðsetning óvirk"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Margmiðlunartæki"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Aðeins neyðarsímtöl"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Stillingar"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"Tími"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"Ég"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Notandi"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Nýr notandi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Engin tenging"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ekkert net"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Slökkt á Wi-Fi"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Engin vistuð net til staðar"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Útsendingarskjár"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Sendir út"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Ónefnt tæki"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Tilbúið í útsendingu"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Engin tæki til staðar"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Birtustig"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SJÁLFVIRKT"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Umsnúa litum"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Litaleiðrétting"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Fleiri stillingar"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"Lokið"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"Tengt"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Tengist..."</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tjóðrun"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Heitur reitur"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Tilkynningar"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Vasaljós"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Farsímagögn"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Gagnanotkun"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Gögn eftir"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Yfir mörkum"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> notuð"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> hámark"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> viðvörun"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"Engin nýleg forrit"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Forritsupplýsingar"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"forritslæsing"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"leita"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Fullhlaðin"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Í hleðslu"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> þar til fullri hleðslu er náð"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ekki í hleðslu"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Hugsanlega er\nfylgst með netinu"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Leita"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Strjúktu upp til að <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Strjúktu til vinstri til að <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"Engar truflanir, þ. á m. vekjarar"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Engin truflun"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Aðeins forgangstruflanir"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"Næsti vekjari er kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Næsti vekjari er <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"Ekki mun heyrast í vekjaranum kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Minna áríðandi tilkynningar fyrir neðan"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Ýttu aftur til að opna"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Strjúktu upp til að opna"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Strjúktu til hægri fyrir síma"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Strjúktu til vinstri fyrir myndavél"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Án tímatakmarkana"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Engar"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Forgangur"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Allar"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Í hleðslu (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> fram að fullri hleðslu)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"Gestur"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ Gestur"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"Loka gestastillingu"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Í eina mínútu"</item>
+    <item quantity="other" msgid="6924190729213550991">"Í %d mínútur"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Í eina klukkustund"</item>
+    <item quantity="other" msgid="5408537517529822157">"Í %d klukkustundir"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Kveikt er á rafhlöðusparnaði"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Þetta dregur úr afköstum tækisins."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Opna stillingar rafhlöðusparnaðar"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Innihald falið"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> mun fanga allt sem birtist á skjánum."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Ekki sýna þetta aftur"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Byrja núna"</string>
+</resources>

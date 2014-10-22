@@ -29,7 +29,7 @@ import android.os.Bundle;
 interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
-    AuthenticatorDescription[] getAuthenticatorTypes();
+    AuthenticatorDescription[] getAuthenticatorTypes(int userId);
     Account[] getAccounts(String accountType);
     Account[] getAccountsForPackage(String packageName, int uid);
     Account[] getAccountsByTypeForPackage(String type, String packageName);
@@ -38,6 +38,7 @@ interface IAccountManager {
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);
     boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
     void removeAccount(in IAccountManagerResponse response, in Account account);
+    void removeAccountAsUser(in IAccountManagerResponse response, in Account account, int userId);
     void invalidateAuthToken(String accountType, String authToken);
     String peekAuthToken(in Account account, String authTokenType);
     void setAuthToken(in Account account, String authTokenType, String authToken);
@@ -52,6 +53,9 @@ interface IAccountManager {
     void addAccount(in IAccountManagerResponse response, String accountType,
         String authTokenType, in String[] requiredFeatures, boolean expectActivityLaunch,
         in Bundle options);
+    void addAccountAsUser(in IAccountManagerResponse response, String accountType,
+        String authTokenType, in String[] requiredFeatures, boolean expectActivityLaunch,
+        in Bundle options, int userId);
     void updateCredentials(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
     void editProperties(in IAccountManagerResponse response, String accountType,
@@ -65,4 +69,10 @@ interface IAccountManager {
     boolean addSharedAccountAsUser(in Account account, int userId);
     Account[] getSharedAccountsAsUser(int userId);
     boolean removeSharedAccountAsUser(in Account account, int userId);
+
+    /* Account renaming. */
+    void renameAccount(in IAccountManagerResponse response, in Account accountToRename, String newName);
+    String getPreviousName(in Account account);
+    boolean renameSharedAccountAsUser(in Account accountToRename, String newName, int userId);
+
 }

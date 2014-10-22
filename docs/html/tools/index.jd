@@ -1,16 +1,16 @@
 page.title=Developer Tools
 @jd:body
 
-    
-<img src="{@docRoot}images/tools-home.png" style="float:right;" height="415" width="763" />
+
+<img src="{@docRoot}images/tools-home.png" style="float:right;" height="347" width="400" />
 
 <div style="position:relative;height:0">
-<div style="position:absolute;width:420px"> 
+<div style="position:absolute;width:420px">
   <p>The Android Developer Tools (ADT) plugin for Eclipse provides
     a professional-grade development environment for building
   Android apps. It's a full Java IDE with advanced features to help you build, test, debug,
   and package your Android apps. </p>
-  <p>Free, open-source, and runs on most major OS platforms.<br>To get started, 
+  <p>Free, open-source, and runs on most major OS platforms.<br>To get started,
   <a href="{@docRoot}sdk/index.html">download the Android SDK.</a></p>
 </div>
 </div>
@@ -21,11 +21,11 @@ page.title=Developer Tools
 <h3>Full Java IDE</h3>
 
   <ul>
-    <li>Android-specific refactoring, quick fixes, integrated navigation between Java and XML resources.</li> 
-    <li>Enhanced XML editors for Android XML resources.</li> 
-    <li>Static analysis tools to catch performance, usability, and correctness problems.</li> 
-    <li>Build support for complex projects, command-line support for CI through Ant. Includes ProGuard and app-signing. </li> 
-    <li>Template-based wizard to create standard Android projects and components.</li> 
+    <li>Android-specific refactoring, quick fixes, integrated navigation between Java and XML resources.</li>
+    <li>Enhanced XML editors for Android XML resources.</li>
+    <li>Static analysis tools to catch performance, usability, and correctness problems.</li>
+    <li>Build support for complex projects, command-line support for CI through Ant. Includes ProGuard and app-signing. </li>
+    <li>Template-based wizard to create standard Android projects and components.</li>
   </ul>
 </div>
 
@@ -34,7 +34,7 @@ page.title=Developer Tools
 
 <h3>Graphical UI Builders</h3>
   <ul>
-    <li>Build rich Android UI with drag and drop. 
+    <li>Build rich Android UI with drag and drop.
     <li>Visualize your UI on tablets, phones, and other devices. Switch themes, locales, even platform versions instantly, without building.</li>
     <li>Visual refactoring lets you extracts layout for inclusion, convert layouts, extract styles.</li>
     <li>Editor support for working with custom UI components.</li>
@@ -71,9 +71,9 @@ screen to find Developer options.</p>
 <h3>Develop on Hardware Devices</h3>
 
   <ul>
-    <li>Use any commercial Android hardware device or multiple devices.</li> 
-    <li>Deploy your app to connected devices directy from the IDE.</li> 
-    <li>Live, on-device debugging, testing, and profiling.</li> 
+    <li>Use any commercial Android hardware device or multiple devices.</li>
+    <li>Deploy your app to connected devices directy from the IDE.</li>
+    <li>Live, on-device debugging, testing, and profiling.</li>
   </ul>
 </div>
 
@@ -100,7 +100,7 @@ screen to find Developer options.</p>
   </ul>
 
 <h3>Testing</h3>
-    
+
   <ul>
     <li>Fully instrumentated, scriptable test environment.</li>
     <li>Integrated reports using standard test UI.</li>
@@ -108,7 +108,7 @@ screen to find Developer options.</p>
   </ul>
 
 <h3>Native Development</h3>
-    
+
   <ul>
     <li>Support for compiling and packaging existing code written in C or C++.</li>
     <li>Support for packaging multiple architectures in a single binary, for broad compatibility.</li>

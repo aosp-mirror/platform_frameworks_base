@@ -21,32 +21,36 @@
     android:gravity="center_vertical"
     android:paddingStart="16dip"
     android:paddingEnd="12dip"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall">
+    android:minHeight="?attr/listPreferredItemHeightSmall"
+    android:background="@color/transparent">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center_vertical">
+
         <TextView android:id="@android:id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="?attr/textColorAlertDialogListItem"
             android:gravity="center_vertical|start"
             android:singleLine="true"
-            android:ellipsize="marquee"
-        />
+            android:ellipsize="marquee" />
+        
         <TextView android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textColor="?attr/textColorAlertDialogListItem"
             android:gravity="center_vertical|start"
             android:singleLine="true"
-            android:ellipsize="marquee"
-        />
+            android:ellipsize="marquee" />
+        
     </LinearLayout>
+
     <RadioButton
         android:id="@+id/radio"
         android:layout_width="35dip"
@@ -54,6 +58,6 @@
         android:paddingEnd="12dip"
         android:gravity="center_vertical"
         android:focusable="false"
-        android:clickable="false"
-    />
+        android:clickable="false" />
+
 </LinearLayout>

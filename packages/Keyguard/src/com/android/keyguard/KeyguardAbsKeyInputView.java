@@ -17,20 +17,14 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -38,9 +32,8 @@ import com.android.internal.widget.LockPatternUtils;
  * Base class for PIN and password unlock screens.
  */
 public abstract class KeyguardAbsKeyInputView extends LinearLayout
-        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
+        implements KeyguardSecurityView {
     protected KeyguardSecurityCallback mCallback;
-    protected TextView mPasswordEntry;
     protected LockPatternUtils mLockPatternUtils;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
     protected View mEcaView;
@@ -68,18 +61,9 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         mEnableHaptics = mLockPatternUtils.isTactileFeedbackEnabled();
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (hasWindowFocus) {
-            reset();
-        }
-    }
-
     public void reset() {
         // start fresh
-        mPasswordEntry.setText("");
-        mPasswordEntry.requestFocus();
-
+        resetPasswordText(false /* animate */);
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline();
         if (shouldLockout(deadline)) {
@@ -100,46 +84,12 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     @Override
     protected void onFinishInflate() {
         mLockPatternUtils = new LockPatternUtils(mContext);
-
-        mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
-        mPasswordEntry.setOnEditorActionListener(this);
-        mPasswordEntry.addTextChangedListener(this);
-
-        // Set selected property on so the view can send accessibility events.
-        mPasswordEntry.setSelected(true);
-
-        // Poke the wakelock any time the text is selected or modified
-        mPasswordEntry.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                mCallback.userActivity(0); // TODO: customize timeout for text?
-            }
-        });
-
-        mPasswordEntry.addTextChangedListener(new TextWatcher() {
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void afterTextChanged(Editable s) {
-                if (mCallback != null) {
-                    mCallback.userActivity(0);
-                }
-            }
-        });
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
         if (bouncerFrameView != null) {
             mBouncerFrame = bouncerFrameView.getBackground();
         }
-    }
-
-    @Override
-    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
-        // send focus to the password field
-        return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
     }
 
     /*
@@ -152,27 +102,33 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected void verifyPasswordAndUnlock() {
-        String entry = mPasswordEntry.getText().toString();
+        String entry = getPasswordText();
         if (mLockPatternUtils.checkPassword(entry)) {
-            mCallback.reportSuccessfulUnlockAttempt();
+            mCallback.reportUnlockAttempt(true);
             mCallback.dismiss(true);
-        } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
-            // to avoid accidental lockout, only count attempts that are long enough to be a
-            // real password. This may require some tweaking.
-            mCallback.reportFailedUnlockAttempt();
-            if (0 == (mCallback.getFailedAttempts()
-                    % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
-                long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
-                handleAttemptLockout(deadline);
+        } else {
+            if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
+                // to avoid accidental lockout, only count attempts that are long enough to be a
+                // real password. This may require some tweaking.
+                mCallback.reportUnlockAttempt(false);
+                int attempts = KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
+                if (0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
+                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
+                    handleAttemptLockout(deadline);
+                }
             }
             mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
         }
-        mPasswordEntry.setText("");
+        resetPasswordText(true /* animate */);
     }
+
+    protected abstract void resetPasswordText(boolean animate);
+    protected abstract String getPasswordText();
+    protected abstract void setPasswordEntryEnabled(boolean enabled);
 
     // Prevent user from using the PIN/Password entry until scheduled deadline.
     protected void handleAttemptLockout(long elapsedRealtimeDeadline) {
-        mPasswordEntry.setEnabled(false);
+        setPasswordEntryEnabled(false);
         long elapsedRealtime = SystemClock.elapsedRealtime();
         new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
 
@@ -193,18 +149,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        mCallback.userActivity(0);
-        return false;
-    }
-
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        // Check if this was the result of hitting the enter key
-        if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
-                || actionId == EditorInfo.IME_ACTION_NEXT) {
-            verifyPasswordAndUnlock();
-            return true;
-        }
+        mCallback.userActivity();
         return false;
     }
 
@@ -228,21 +173,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         return mCallback;
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        if (mCallback != null) {
-            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
-        }
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-    }
-
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
         if (mEnableHaptics) {
@@ -262,6 +192,11 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     public void hideBouncer(int duration) {
         KeyguardSecurityViewHelper.
                 hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 }
 

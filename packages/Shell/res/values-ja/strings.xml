@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"シェル"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"バグレポートが記録されました"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"タップしてバグレポートを共有する"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"バグレポートを共有するには左にスワイプ"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"バグレポートを共有するにはタップします"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"バグレポートには、個人の非公開情報など、システムのさまざまなログファイルのデータが含まれます。共有する場合は信頼するアプリとユーザーのみを選択してください。"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"このメッセージを次回も表示する"</string>
 </resources>

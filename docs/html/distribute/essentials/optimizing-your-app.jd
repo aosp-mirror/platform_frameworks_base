@@ -1,0 +1,517 @@
+page.title=Optimize Your App
+page.metaDescription=A look at how to get the most visibility and the highest ratings possible for your app or game. Optimizing the quality of your apps is a key strategy.
+page.image=/distribute/images/gp-optimize-card.jpg
+
+@jd:body
+
+<div id="qv-wrapper">           
+  <div id="qv">
+    <h2>Strategies</h2>
+    <ol>
+      <li><a href="#listen-to-your-users">Listen to Your Users</a></li>
+      <li><a href="#measuring-analyzing-responding">Measuring, Analyzing, and Responding to User Behavior</a></li>
+      <li><a href="#improve-stability">Improve Stability and Eliminate Bugs</a></li>
+      <li><a href="#improve-ui">Improve UI Responsiveness</a></li>
+      <li><a href="#improve-usability">Improve Usability</a></li>
+      <li><a href="#professional-appearance">Professional Appearance and Aesthetics</a></li>
+      <li><a href="#deliver-features">Deliver the Right Set of Features</a></li>
+      <li><a href="#integrate">Integrate with the System and Third-Party Apps</a></li>
+      <li><a href="#related-resources">Related Resources</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float">
+  <img src="{@docRoot}images/gp-optimize.png" class="quality-top-image" style=
+  "width:239px;padding-left:1.5em;">
+</div>
+
+<p>
+  With thousands of new apps being published in Google Play every week, it's
+  important to look for ways to get the most visibility and the highest ratings
+  possible. Optimizing the quality of your apps is a key strategy.
+</p>
+
+<p>
+  A higher quality app can translate to higher user ratings, generally better
+  rankings, more downloads, and higher retention (longer install periods).
+  High-quality apps are much more likely to get positive publicity, such as
+  being featured in Google Play or generating social media buzz.
+</p>
+
+<p>
+  The quality of your apps is something you should consider addressing both
+  before and after launch. Gaining users after the launch of a poor quality app
+  can be hard and recovering costly. On the other hand, maintaining the ranking
+  of high-quality apps is made easier if there are continual improvements, a
+  practice that also fuels the impression-install-ranking cycle.
+</p>
+
+<p>
+  On this page you can find advice on a number of ways in which you can drive
+  improvements to your apps’ quality.
+</p>
+
+<div class="headerLine">
+  <h2 id="listen-to-your-users">
+    Listen to Your Users
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-optimizing-chat-bubbles.png">
+</div>
+
+<p>
+  Listening and hearing your users can be one of your best tools for success.
+  Start listening to your users before launching your apps and continue to
+  listen after launch.
+</p>
+
+<h3>
+  <strong>Listening before you launch</strong>
+</h3>
+
+<p>
+  You can listen to your users during the development of your apps. This
+  process can start with focus groups to review app features, continue into
+  user experience workshops, and onto alpha and beta releases. Listening at
+  these stages has two main benefits: <strong>you’ll build apps with features
+  users want</strong> and <strong>any issues they identify will be cheaper and
+  quicker to fix</strong> than they would be once the app is launched fully.
+</p>
+
+<p>
+  If the practicalities of focus groups and user workshops seem excessive in
+  relation to the development of a particular app, drawing on the feedback of
+  colleagues, friends, and family can be much more useful than getting no
+  feedback at all.
+</p>
+
+<p>
+  It's crucial to conduct user testing before releasing your apps to Google
+  Play. If you can only engage with colleagues, friends, and family you’re
+  already making a good start. For more extensive testing consider a public
+  alpha/beta test or creating your own trusted tester program. You can manage
+  app distribution yourself through email or your own website, or you can use
+  <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">beta-testing</a>
+  and <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#staged-rollouts">staged
+  rollouts</a> in conjunction with <a href=
+  "http://www.google.com/+/business/">Google+</a> or <a href=
+  "https://groups.google.com/forum/#!overview">Google Groups</a> to distribute
+  software and gather feedback to a subset of users. <strong>Users on alpha or
+  beta versions cannot leave reviews or ratings</strong>, so there is
+  <strong>no risk to your rating</strong> on Google Play.
+</p>
+
+<p>
+  Unless you have to, don’t restrict the users you involve in these stages in
+  the information they can share through their social networks and blogs -
+  users engaged in these early stages (and listened too) are likely to be great
+  ambassadors for your apps and will help create great social media buzz.
+</p>
+
+<h3>
+  Listening after launch
+</h3>
+
+<p>
+  Once you have launched, the most obvious way to listen to users is by reading
+  and addressing comments on Google Play. Although the comments aren't always
+  productive or constructive, some will provide valuable insight on aspects of
+  your apps. It's important to remember that users have the opportunity to
+  change their ratings and comments as much as they like.
+</p>
+
+<p>
+  There are more interactive ways you can reach users, help them address their
+  concerns, and gather more detailed feedback: by setting up support and
+  discussion forums. There are some great support tools out there that can put
+  you in touch with your users directly, from forums such as <a href=
+  "http://groups.google.com/">Google Groups</a> to comprehensive customer
+  support products and tools like UserVoice. Once you get set up with such a
+  tool, make sure to fill in the support link in your Google Play product
+  details page — users do click through to these.
+</p>
+
+<p>
+  Also don’t forget to use the <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">beta-testing</a>
+  and <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#staged-rollouts">staged
+  rollout</a> features of Google Play with app updates.
+</p>
+
+<div class="headerLine" id="measuring-analyzing-responding">
+  <h2>
+    Measuring, Analyzing, and Responding to User Behavior
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-optimize-analytics.png">
+</div>
+
+<p>
+  One of the best ways to spot issues to resolve is by measuring user behavior.
+  Optimizing your app becomes much easier when you analyze performance before
+  and after you launch. Drop off points, low ratings, and high percent of
+  uninstalls can be indicative that there’s a problem. Measuring and responding
+  to user-related metrics such as download sources, retention rates, and in-app
+  behavior regularly is critical to keeping and bringing back your hard earned
+  user base.
+</p>
+
+<p>
+  You can get data from tools in Google Play or third-parties to analyze user
+  behavior. You can identify details such as:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Where installs are coming from.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      The types of users you are acquiring.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      What is causing user churn and how to reduce it.
+    </p>
+  </li>
+</ul>
+
+<h3>
+  Statistics for analyzing installs and ratings
+</h3>
+
+<p>
+  Once you’ve published your app, Google Play makes it easy to see how it’s
+  doing. The <a href="https://play.google.com/apps/publish/">Developer
+  Console</a> gives you access to a variety of anonymized statistics and custom
+  charts that show you the app's installation performance and ratings.
+</p>
+
+<p>
+  You can view data and charts for active, daily, and total installs per unique
+  devices or users, as well as upgrades and uninstalls. You can also view the
+  app's daily average user rating and its cumulative user rating. To help you
+  analyze the data, you can view install and ratings statistics across a
+  variety of different dimensions such as Android version, device, country, app
+  version, and carrier.
+</p>
+
+<div>
+  <img class="border-img" src="{@docRoot}images/gp-dc-stats-mini.png">
+</div>
+
+<p>
+  You can see your app statistics on timeline charts, for all metrics and
+  dimensions. At a glance, the charts highlight your app’s installation and
+  ratings peaks and longer-term trends, which you can correlate to promotions,
+  app improvements, or other factors. You can even focus in on data inside a
+  dimension by highlighting specific data points (such as individual platform
+  versions or languages) on the timeline.
+</p>
+
+<p>
+  You can download all of your installation data as a CSV file for viewing in
+  the business program of your choice.
+</p>
+
+<h3>
+  Tracking and analyzing Marketing campaigns
+</h3>
+
+<p>
+  While you should consider monitoring user behavior data as a part of your
+  normal activities, it’s particularly important when you’re running any form
+  of marketing campaign, to make sure you’re getting the right users at the
+  lowest cost possible.
+</p>
+
+<p>
+  One way to track your marketing campaigns is to link <a href=
+  "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html">
+  Google Analytics with your Google Play account</a> to analyze activity from
+  source to install.
+</p>
+
+<div style="margin-top:1em;">
+  <img src="{@docRoot}images/gp-optimizing-image-4.jpg" class="border-img">
+</div>
+
+<p>
+  You can also use any of the variety of tools on the market to help track your
+marketing success and improvement ROI if you wish. There are also third parties
+who can help automate, measure, and optimize your mobile marketing.
+</p>
+
+<div class="headerLine">
+  <h2 id="improve-stability">
+    Improve Stability and Eliminate Bugs
+  </h2>
+
+
+</div>
+
+<p>
+  There are many tools and techniques for testing and profiling your app on
+  different devices and user scenarios.
+</p>
+
+<p>
+  One noteworthy and yet relatively underused tool for catching stability
+  issues such as crashes is the <a href=
+  "{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>
+  (Monkey). Monkey will send random UI events to your app's activities,
+  allowing you to trigger user flows that can uncover stability problems.
+</p>
+
+<p>
+  Also, with the Google error-reporting features built into most Android
+  devices, users have a way to report application crashes to you. The error
+  reports show up in aggregate in the Google Play Developer Console. Make sure
+  to read these reports often and act on them appropriately.
+</p>
+
+<p>
+  Last, keep an external bug and feature request tracker and let users know how
+  to find it. This will enable them to engage with the app at a closer level,
+  by following features and bugs that affect them. User frustration with app
+  problems can be effectively managed with diligent issue tracking and
+  communication. Several community support tools offer issue tracking features,
+  and if your project is open source, most popular repository hosting sites
+  offer this as well.
+</p>
+
+<div class="headerLine">
+  <h2 id="improve-ui">
+    Improve UI Responsiveness
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-optimize-speed.png">
+</div>
+
+<p>
+  One sure-fire way to lose your users is to give them a slow, unresponsive UI.
+  Research has shown that <a href=
+  "http://googleresearch.blogspot.com/2009/06/speed-matters.html">speed
+  matters</a>, for any interface, on mobile, web, or desktop. In fact, the
+  importance of speed is amplified on mobile devices since users often need
+  their information on the go and in a hurry.
+</p>
+
+<p>
+  You can improve your apps' UI responsiveness by moving long-running
+  operations off the main thread to worker threads. Android offers built-in
+  debugging facilities such as StrictMode for analyzing your app's performance
+  and activities on the main thread. See more recommendations in <a href=
+  "http://www.youtube.com/watch?v=c4znvD-7VDA">Writing Zippy Android Apps</a>,
+  a developer session from Google I/O 2010.
+</p>
+
+<p>
+  A great way to improve UI performance is to minimize the complexity of your
+  layouts. If you open up <a href=
+  "{@docRoot}tools/help/hierarchy-viewer.html">hierarchyviewer</a> and see that
+  your layouts are more than 5 levels deep, it may be time to simplify your
+  layout. Consider refactoring those deeply nested <a href=
+  "{@docRoot}reference/android/widget/LinearLayout.html">LinearLayouts</a> into
+  <a href="{@docRoot}guide/topics/ui/layout/relative.html">RelativeLayout</a>.
+  The impact of View objects is cumulative — each one costs about 1 to 2 KB of
+  memory, so large view hierarchies can be a recipe for disaster, causing
+  frequent VM garbage collection passes which block the main (UI) thread. You
+  can learn more from the Google I/O session <a href=
+  "http://www.youtube.com/watch?v=wDBM6wVEO70">World of ListView</a>.
+</p>
+
+<p>
+  Lastly, as pointed out in the blog post <a href=
+  "http://android-developers.blogspot.com/2010/10/traceview-war-story.html">Traceview
+  War Story</a>, tools like <a href=
+  "{@docRoot}tools/help/traceview.html">traceview and ddms</a> can be your best
+  friends in improving your app by profiling method calls and monitoring VM
+  memory allocations, respectively.
+</p>
+
+<div class="headerLine">
+  <h2 id="improve-usability">
+    Improve Usability
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      <strong>Tip:</strong> As you’re designing or evaluating your app's UI,
+      make sure to read and become familiar with the <a href=
+      "{@docRoot}design/index.html">Android Design</a> guidelines. Included are
+      many examples of UI patterns, styles, and building blocks, as well as
+      tools for the design process.
+    </p>
+  </div>
+</div>
+
+<p>
+  In usability and in app design too, you should listen carefully to your
+  users. Ask a handful of real Android device users (friends, family, etc.) to
+  try out your app and observe them as they interact with it. Look for cases
+  where they get confused, are unsure of how to proceed, or are surprised by
+  certain behaviors. Minimize these cases by rethinking some of the
+  interactions in your app. See the <a href=
+  "{@docRoot}design/patterns/index.html">Patterns section</a> for tips to
+  improve your design.
+</p>
+
+<p>
+  In the same vein, two problems that can plague some Android user interfaces
+  are small tap targets and excessively small font sizes. These are generally
+  easy to fix and can make a big impact on usability and user satisfaction. As
+  a general rule, optimize for ease of use and legibility, while minimizing, or
+  at least carefully balancing, information density.
+</p>
+
+<p>
+  Another way to incrementally improve usability, based on real-world data, is
+  to implement <a href=
+  "http://code.google.com/mobile/analytics/docs/">Analytics</a> throughout your
+  app to log the use of particular sections. Consider demoting infrequently
+  used sections to the overflow menu in the <a href=
+  "{@docRoot}design/patterns/actionbar.html">Action bar</a>, or removing them
+  altogether. For often-used sections and UI elements, make sure they're
+  immediately obvious and easily accessible in your app's UI so that users can
+  get to them quickly.
+</p>
+
+<div class="headerLine">
+  <h2 id="professional-appearance">
+    Professional Appearance and Aesthetics
+  </h2>
+
+
+</div>
+
+<p>
+  There's no substitute for a real user interface designer — ideally one who's
+  well-versed in mobile and Android, and handy with both interaction and visual
+  design. One popular venue to post openings for designers is <a href=
+  "http://jobs.smashingmagazine.com/">jobs.smashingmagazine.com</a>, and
+  leveraging social networks can also surface great talent.
+</p>
+
+<p>
+  If you don't have the luxury of working with a UI designer, there are some
+  ways in which you can improve your app's appearance yourself. You can use
+  Adobe Photoshop, Adobe Fireworks, GIMP, Inkscape or other image editing
+  tools. Mastering the art of the pixel in these apps takes time, but honing
+  this skill can help build polish across your interface designs. Also, master
+  the resources framework by studying the framework UI assets and layouts and
+  reading through the <a href=
+  "{@docRoot}guide/topics/resources/index.html">resources documentation</a>.
+  Techniques such as 9-patches and resource directory qualifiers are somewhat
+  unique to Android, and are crucial in building flexible yet aesthetic UIs.
+</p>
+
+<p>
+  Before you get too far in designing your app and writing the code, make sure
+  to visit the <a href="{@docRoot}design/index.html">Android Design section</a>
+  and learn about the vision, the building blocks, and the tools of designing
+  beautiful and inspiring user interfaces.
+</p>
+
+<div class="headerLine">
+  <h2 id="deliver-features">
+    Deliver the Right Set of Features
+  </h2>
+
+
+</div>
+
+<p>
+  Having the <em>right</em> set of features in your app is important. It's
+  often easy to fall into the trap of feature-creep, building as much
+  functionality into your app as possible. Providing instant gratification by
+  immediately showing the most important or relevant information is crucial on
+  mobile devices. Providing too much information can be as frustrating (or even
+  more so) than not providing enough of it.
+</p>
+
+<p>
+  Again, listen to your users by collecting and responding to feature requests.
+  Be careful, though, to take feature requests with a grain of salt. Requests
+  can be very useful in aggregate, to get a sense of what kinds of
+  functionality you should be working on, but not every feature request needs
+  to be implemented.
+</p>
+
+<div class="headerLine">
+  <h2 id="integrate">
+    Integrate with the System and Third-Party apps
+  </h2>
+
+
+</div>
+
+<p>
+  A great way to deliver a delightful user experience is to integrate tightly
+  with the operating system. Features like <a href=
+  "{@docRoot}guide/topics/appwidgets/index.html">Home screen widgets</a>,
+  <a href="{@docRoot}design/patterns/notifications.html">rich
+  notifications</a>, <a href="{@docRoot}guide/topics/search/index.html">global
+  search integration</a>, and <a href=
+  "{@docRoot}reference/android/widget/QuickContactBadge.html">Quick
+  Contacts</a> are fairly low-hanging fruit in this regard.
+</p>
+
+<p>
+  For some app categories, basic features like home screen widgets are
+  expected. Not including them is a sure-fire way to tarnish an otherwise
+  positive user experience. Some apps can achieve even tighter OS integration
+  with Android's contacts, accounts, and sync APIs.
+</p>
+
+<p>
+  Third-party integrations can provide even more user delight and give the user
+  a feeling of device cohesiveness. It's also a really nice way of adding
+  functionality to your app without writing any extra code (by leveraging other
+  apps' functionality). For example, if you're creating a camera app, you can
+  allow users to edit their photos in another app before saving them to their
+  collection, if they have that third-party application installed. More
+  information on this subject is available in the Android Training class
+  <a href="{@docRoot}training/basics/intents/index.html">Interacting with Other
+  Apps</a>.
+</p>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/optimizing, tag:addia"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="3"></div>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="tag:adia"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="3"></div>
+

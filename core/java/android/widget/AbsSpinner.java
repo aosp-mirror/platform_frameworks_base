@@ -64,12 +64,16 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         this(context, attrs, 0);
     }
 
-    public AbsSpinner(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public AbsSpinner(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public AbsSpinner(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initAbsSpinner();
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.AbsSpinner, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.AbsSpinner, defStyleAttr, defStyleRes);
 
         CharSequence[] entries = a.getTextArray(R.styleable.AbsSpinner_entries);
         if (entries != null) {

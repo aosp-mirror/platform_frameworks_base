@@ -32,7 +32,6 @@ import android.media.RemoteControlClient;
 import android.media.RemoteController;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.transition.ChangeBounds;
@@ -61,7 +60,7 @@ import java.util.TimeZone;
 public class KeyguardTransportControlView extends FrameLayout {
 
     private static final int RESET_TO_METADATA_DELAY = 5000;
-    protected static final boolean DEBUG = false;
+    protected static final boolean DEBUG = KeyguardConstants.DEBUG;
     protected static final String TAG = "TransportControlView";
 
     private static final boolean ANIMATE_TRANSITIONS = true;

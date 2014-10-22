@@ -32,7 +32,6 @@ import android.util.Log;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
-import android.widget.SpellChecker;
 
 import java.lang.ref.WeakReference;
 import java.text.BreakIterator;
@@ -384,8 +383,9 @@ public abstract class SpellCheckerService extends Service {
             while (wordStart <= end && wordEnd != BreakIterator.DONE
                     && wordStart != BreakIterator.DONE) {
                 if (wordEnd >= start && wordEnd > wordStart) {
-                    final String query = originalText.subSequence(wordStart, wordEnd).toString();
-                    final TextInfo ti = new TextInfo(query, cookie, query.hashCode());
+                    final CharSequence query = originalText.subSequence(wordStart, wordEnd);
+                    final TextInfo ti = new TextInfo(query, 0, query.length(), cookie,
+                            query.hashCode());
                     wordItems.add(new SentenceWordItem(ti, wordStart, wordEnd));
                     if (DBG) {
                         Log.d(TAG, "Adapter: word (" + (wordItems.size() - 1) + ") " + query);

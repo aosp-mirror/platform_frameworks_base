@@ -77,11 +77,18 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
     }
 
     public TabHost(Context context, AttributeSet attrs) {
+        this(context, attrs, com.android.internal.R.attr.tabWidgetStyle);
+    }
+
+    public TabHost(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public TabHost(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs);
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.TabWidget,
-                com.android.internal.R.attr.tabWidgetStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.TabWidget, defStyleAttr, defStyleRes);
 
         mTabLayoutId = a.getResourceId(R.styleable.TabWidget_tabLayout, 0);
         a.recycle();

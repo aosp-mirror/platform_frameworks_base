@@ -1,0 +1,181 @@
+page.title=Creating a 2D Picker
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#add-page-grid">Add a Page Grid</a></li>
+  <li><a href="#implement-adapter">Implement a Page Adapter</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a></li>
+</ul>
+</div>
+</div>
+
+<p>The <a href="{@docRoot}design/wear/structure.html#2DPicker">2D Picker</a> pattern in Android
+Wear allows users to navigate and choose from a set of items shown as pages. The Wearable UI
+Library lets you easily implement this pattern using a page grid, which is a layout manager
+that allows users to scroll vertically and horizontally through pages of data.</p>
+
+<p>To implement this pattern, you add a <code>GridViewPager</code> element to the layout
+of your activity and implement an adapter that provides a set of pages by extending
+the <code>FragmentGridPagerAdapter</code> class.</p>
+
+<p class="note"><strong>Note:</strong> The <em>GridViewPager</em> sample in the Android SDK
+demonstrates how to use the <code>GridViewPager</code> layout in your apps. This sample is
+located in the <code>android-sdk/samples/android-20/wearable/GridViewPager</code> directory.</p>
+
+
+<h2 id="add-page-grid">Add a Page Grid</h2>
+
+<p>Add a <code>GridViewPager</code> element to your layout definition as follows:</p>
+
+<pre>
+&lt;android.support.wearable.view.GridViewPager
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+</pre>
+
+<p>You can use any of the techniques described in
+<a href="{@docRoot}training/wearables/ui/layouts.html">Defining Layouts</a> to ensure that
+your 2D picker works on both round and square devices.</p>
+
+
+<h2 id="implement-adapter">Implement a Page Adapter</h2>
+
+<p>A page adapter provides a set of pages to populate a <code>GridViewPager</code> component. To
+implement this adapter, you extend the <code>FragmentGridPageAdapter</code> class from the
+Wearable UI Library</p>
+
+<p>For example, the <em>GridViewPager</em> sample in the Android SDK contains
+the following adapter implementation that provides a set of static cards with custom background
+images:</p>
+
+<pre>
+public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
+
+    private final Context mContext;
+
+    public SampleGridPagerAdapter(Context ctx, FragmentManager fm) {
+        super(fm);
+        mContext = ctx;
+    }
+
+    static final int[] BG_IMAGES = new int[] {
+            R.drawable.debug_background_1, ...
+            R.drawable.debug_background_5
+    };
+
+    // A simple container for static data in each page
+    private static class Page {
+        // static resources
+        int titleRes;
+        int textRes;
+        int iconRes;
+        ...
+    }
+
+    // Create a static set of pages in a 2D array
+    private final Page[][] PAGES = { ... };
+
+    // Override methods in FragmentGridPagerAdapter
+    ...
+}
+</pre>
+
+<p>The picker calls <code>getFragment</code> and <code>getBackground</code> to retrieve the content
+to display at each position of the grid:</p>
+
+<pre>
+// Obtain the UI fragment at the specified position
+&#64;Override
+public Fragment getFragment(int row, int col) {
+    Page page = PAGES[row][col];
+    String title =
+        page.titleRes != 0 ? mContext.getString(page.titleRes) : null;
+    String text =
+        page.textRes != 0 ? mContext.getString(page.textRes) : null;
+    CardFragment fragment = CardFragment.create(title, text, page.iconRes);
+
+    // Advanced settings (card gravity, card expansion/scrolling)
+    fragment.setCardGravity(page.cardGravity);
+    fragment.setExpansionEnabled(page.expansionEnabled);
+    fragment.setExpansionDirection(page.expansionDirection);
+    fragment.setExpansionFactor(page.expansionFactor);
+    return fragment;
+}
+
+// Obtain the background image for the page at the specified position
+&#64;Override
+public ImageReference getBackground(int row, int column) {
+    return ImageReference.forDrawable(BG_IMAGES[row % BG_IMAGES.length]);
+}
+</pre>
+
+<p>The <code>getRowCount</code> method tells the picker how many rows of content are
+available, and the <code>getColumnCount</code> method tells the picker how many columns
+of content are available for each of the rows.</p>
+
+<pre>
+// Obtain the number of pages (vertical)
+&#64;Override
+public int getRowCount() {
+    return PAGES.length;
+}
+
+// Obtain the number of pages (horizontal)
+&#64;Override
+public int getColumnCount(int rowNum) {
+    return PAGES[rowNum].length;
+}
+</pre>
+
+<p>The adapter implementation details depend on your particular set of pages. Each page provided
+by the adapter is of type <code>Fragment</code>. In this example, each page is a
+<code>CardFragment</code> instance that uses one of the default card layouts. However, you can
+combine different types of pages in the same 2D picker, such as cards, action icons, and custom
+layouts depending on your use cases.</p>
+
+<div style="float:right;margin-left:25px;width:250px">
+<img src="{@docRoot}wear/images/07_uilib.png" width="250" height="250" alt=""/>
+<p class="img-caption" style="text-align:center"><strong>Figure 1:</strong>
+The <em>GridViewPager</em> sample.</p>
+</div>
+
+<p>Not all rows need to have the same number of pages. Notice that in this example the number of
+colums is different for each row. You can also use a <code>GridViewPager</code> component to
+implement a 1D picker with only one row or only one column.</p>
+
+<p><code>GridViewPager</code> provides support for scrolling in cards whose content does not fit
+the device screen. This example configures each card to expand as required, so users can scroll
+through the card's content. When users reach the end of a scrollable card, a swipe in the same
+direction shows the next page on the grid, if one is available.</p>
+
+<p>You can specify a custom background for each page with the <code>getBackground()</code> method.
+When users swipe to navigate across pages, <code>GridViewPager</code> applies parallax
+and crossfade effects between different backgrounds automatically.</p>
+
+<h3>Assign an adapter instance to the page grid</h3>
+
+<p>In your activity, assign an instance of your adapter implementation to the
+<code>GridViewPager</code> component:</p>
+
+<pre>
+public class MainActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ...
+        final GridViewPager pager = (GridViewPager) findViewById(R.id.pager);
+        pager.setAdapter(new SampleGridPagerAdapter(this, getFragmentManager()));
+    }
+}
+</pre>

@@ -11,9 +11,23 @@ page.tags="IntentFilter"
         <span class="less" style="display:none">show less</span></a></h2>
 
 <ol id="tocIntents" class="hide-nested">
+  <li><a href="#Clock">Alarm Clock</a>
+    <ol>
+      <li><a href="#CreateAlarm">Create an alarm</a></li>
+      <li><a href="#CreateTimer">Create a timer</a></li>
+      <li><a href="#ShowAlarms">Show all alarms</a></li>
+    </ol>
+  </li>
+  <li><a href="#Calendar">Calendar</a>
+    <ol>
+      <li><a href="#AddEvent">Add a calendar event</a></li>
+    </ol>
+  </li>
   <li><a href="#Camera">Camera</a>
     <ol>
       <li><a href="#ImageCapture">Capture a picture or video and return it</a></li>
+      <li><a href="#CameraStill">Start a camera app in still image mode</a></li>
+      <li><a href="#CameraVideo">Start a camera app in video mode</a></li>
     </ol>
   </li>
   <li><a href="#Contacts">Contacts/People App</a>
@@ -36,6 +50,20 @@ page.tags="IntentFilter"
       <li><a href="#OpenFile">Open a specific type of file</a></li>
     </ol>
   </li>
+  <li><a href="#Fitness">Fitness</a>
+    <ol>
+      <li><a href="#TrackRide">Start/Stop a bike ride</a></li>
+      <li><a href="#TrackRun">Start/Stop a run</a></li>
+      <li><a href="#TrackWorkout">Start/Stop a workout</a></li>
+      <li><a href="#ShowHR">Show heart rate</a></li>
+      <li><a href="#ShowStepCount">Show step count</a></li>
+    </ol>
+  </li>
+  <li><a href="#Local">Local Actions</a>
+    <ol>
+      <li><a href="#CallCar">Call a car</a></li>
+    </ol>
+  </li>
   <li><a href="#Maps">Maps</a>
     <ol>
       <li><a href="#ViewMap">Show a location on a map</a></li>
@@ -44,6 +72,7 @@ page.tags="IntentFilter"
   <li><a href="#Music">Music or Video</a>
     <ol>
       <li><a href="#PlayMedia">Play a media file</a></li>
+      <li><a href="#PlaySearch">Play music based on a search query</a></li>
     </ol>
   </li>
   <li><a href="#Phone">Phone</a>
@@ -67,6 +96,8 @@ page.tags="IntentFilter"
       <li><a href="#SearchWeb">Perform a web search</a></li>
     </ol>
   </li>
+  <li><a href="#AdbIntents">Verify Intents with the Android Debug Bridge</a></li>
+  <li><a href="#Now">Intents Fired by Google Now</a></li>
 </ol>
 
   <h2>See also</h2>
@@ -77,6 +108,46 @@ Filters</a></li>
 </div>
 </div>
 
+<!-- Google Now box styles -->
+<style type="text/css">
+.now-box {
+  border-color: rgb(204,204,204);
+  border-style: solid;
+  border-width: 1px;
+  float: right;
+  margin: 0px 0px 20px 15px;
+  padding: 17px;
+  width: 200px;
+}
+.now-box li {
+  font-size: 13px;
+  font-style: italic;
+  margin-top: 0px;
+}
+.now-box ul {
+  margin-bottom: 0px;
+}
+.now-img {
+  width: 30px;
+  margin-bottom: 0px !important;
+}
+.now-img-cont {
+  float: left;
+  margin-right: 10px;
+}
+.now-title {
+  font-weight: bold;
+  margin-top: 7px;
+}
+.now-list {
+  font-size: 13px;
+  margin-bottom: 10px !important;
+  list-style-type: none;
+}
+.now-list li {
+  font-style: italic;
+}
+</style>
 
 <p>An intent allows you to start an activity in another app by describing a simple
 action you'd like to perform (such as "view a map" or "take a picture")
@@ -108,9 +179,327 @@ it's safe to call {@link android.content.Context#startActivity startActivity()}.
 null, you should not use the intent and, if possible, you should disable the feature that invokes
 the intent.</p>
 
-
 <p>If you're not familiar with how to create intents or intent filters, you should first read
 <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.</p>
+
+<p>To learn how to fire the intents listed on this page from your development host, see
+<a href="#AdbIntents">Verify Intents with the Android Debug Bridge</a>.</p>
+
+<h4>Google Now</h4>
+
+<p><a href="http://www.google.com/landing/now/">Google Now</a> fires some of the intents listed
+on this page in response to voice commands. For more information, see
+<a href="#Now">Intents Fired by Google Now</a>.</p>
+
+
+
+
+
+
+<h2 id="Clock">Alarm Clock</h2>
+
+
+<h3 id="CreateAlarm">Create an alarm</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"set an alarm for 7 am"</li>
+  </ul>
+</div>
+
+<p>To create a new alarm, use the {@link android.provider.AlarmClock#ACTION_SET_ALARM}
+action and specify alarm details such as the time and message using extras defined below.</p>
+
+<p class="note"><strong>Note:</strong> Only the hour, minutes, and message extras are available
+in Android 2.3 (API level 9) and higher. The other extras were added in later versions of the
+platform.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.AlarmClock#ACTION_SET_ALARM}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt>{@link android.provider.AlarmClock#EXTRA_HOUR}</dt>
+      <dd>The hour for the alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_MINUTES}</dt>
+      <dd>The minutes for the alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_MESSAGE}</dt>
+      <dd>A custom message to identify the alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_DAYS}</dt>
+      <dd>An {@link java.util.ArrayList} including each week day on which this alarm should
+      be repeated. Each day must be declared with an integer from the {@link java.util.Calendar}
+      class such as {@link java.util.Calendar#MONDAY}.
+      <p>For a one-time alarm, do not specify this extra.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_RINGTONE}</dt>
+      <dd>A {@code content:} URI specifying a ringtone to use with the alarm, or {@link
+      android.provider.AlarmClock#VALUE_RINGTONE_SILENT} for no ringtone.
+      <p>To use the default ringtone, do not specify this extra.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_VIBRATE}</dt>
+      <dd>A boolean specifying whether to vibrate for this alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_SKIP_UI}</dt>
+      <dd>A boolean specifying whether the responding app should skip its UI when setting the alarm.
+      If true, the app should bypass any confirmation UI and simply set the specified alarm.</dd>
+  </dl>
+</dd>
+
+
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void createAlarm(String message, int hour, int minutes) {
+    Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
+            .putExtra(AlarmClock.EXTRA_MESSAGE, message)
+            .putExtra(AlarmClock.EXTRA_HOUR, hour)
+            .putExtra(AlarmClock.EXTRA_MINUTES, minutes);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+<div class="note"><strong>Note:</strong>
+<p>In order to invoke the {@link
+android.provider.AlarmClock#ACTION_SET_ALARM} intent, your app must have the
+{@link android.Manifest.permission#SET_ALARM} permission:</p>
+<pre>
+&lt;uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+</pre>
+</div>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SET_ALARM" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+<h3 id="CreateTimer">Create a timer</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"set timer for 5 minutes"</li>
+  </ul>
+</div>
+
+<p>To create a countdown timer, use the {@link android.provider.AlarmClock#ACTION_SET_TIMER}
+action and specify timer details such as the duration using extras defined below.</p>
+
+<p class="note"><strong>Note:</strong> This intent was added
+in Android 4.4 (API level 19).</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.AlarmClock#ACTION_SET_TIMER}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt>{@link android.provider.AlarmClock#EXTRA_LENGTH}</dt>
+      <dd>The length of the timer in seconds.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_MESSAGE}</dt>
+      <dd>A custom message to identify the timer.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_SKIP_UI}</dt>
+      <dd>A boolean specifying whether the responding app should skip its UI when setting the timer.
+      If true, the app should bypass any confirmation UI and simply start the specified timer.</dd>
+  </dl>
+</dd>
+
+
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void startTimer(String message, int seconds) {
+    Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+            .putExtra(AlarmClock.EXTRA_MESSAGE, message)
+            .putExtra(AlarmClock.EXTRA_LENGTH, seconds)
+            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+<div class="note"><strong>Note:</strong>
+<p>In order to invoke the {@link
+android.provider.AlarmClock#ACTION_SET_TIMER} intent, your app must have the
+{@link android.Manifest.permission#SET_ALARM} permission:</p>
+<pre>
+&lt;uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+</pre>
+</div>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SET_TIMER" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+<h3 id="ShowAlarms">Show all alarms</h3>
+
+<p>To show the list of alarms, use the {@link android.provider.AlarmClock#ACTION_SHOW_ALARMS}
+action.</p>
+
+<p>Although not many apps will invoke this intent (it's primarily used by system apps),
+any app that behaves as an alarm clock should implement
+this intent filter and respond by showing the list of current alarms.</p>
+
+<p class="note"><strong>Note:</strong> This intent was added
+in Android 4.4 (API level 19).</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.AlarmClock#ACTION_SHOW_ALARMS}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None
+</dd>
+</dl>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SHOW_ALARMS" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+
+<h2 id="Calendar">Calendar</h2>
+
+
+<h3 id="AddEvent">Add a calendar event</h3>
+
+<p>To add a new event to the user's calendar, use the {@link android.content.Intent#ACTION_INSERT}
+action and specify the data URI with {@link android.provider.CalendarContract.Events#CONTENT_URI
+Events.CONTENT_URI}. You can then specify various event details using extras defined below.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.content.Intent#ACTION_INSERT}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>{@link android.provider.CalendarContract.Events#CONTENT_URI
+Events.CONTENT_URI}</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>{@code "vnd.android.cursor.dir/event"}
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY}</dt>
+      <dd>A boolean specifying whether this is an all-day event.</dd>
+    <dt>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME}</dt>
+      <dd>The start time of the event (milliseconds since epoch).</dd>
+    <dt>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME}</dt>
+      <dd>The end time of the event (milliseconds since epoch).</dd>
+    <dt>{@link android.provider.CalendarContract.EventsColumns#TITLE}</dt>
+      <dd>The event title.</dd>
+    <dt>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</dt>
+      <dd>The event description.</dd>
+    <dt>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</dt>
+      <dd>The event location.</dd>
+    <dt>{@link android.content.Intent#EXTRA_EMAIL}</dt>
+      <dd>A comma-separated list of email addresses that specify the invitees.</dd>
+  </dl>
+  <p>Many more event details can be specified using the constants defined in the
+  {@link android.provider.CalendarContract.EventsColumns} class.</p>
+</dd>
+
+
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void addEvent(String title, String location, Calendar begin, Calendar end) {
+    Intent intent = new Intent(Intent.ACTION_INSERT)
+            .setData(Events.CONTENT_URI)
+            .putExtra(Events.TITLE, title)
+            .putExtra(Events.EVENT_LOCATION, location)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin)
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.INSERT" />
+        &lt;data android:mimeType="vnd.android.cursor.dir/event" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+
+
+
 
 
 
@@ -207,6 +596,117 @@ then save the captured image or video at the location specified by that extra an
 android.app.Activity#setResult(int,Intent) setResult()} with an
 {@link android.content.Intent} that includes a compressed thumbnail
 in an extra named <code>"data"</code>.</p>
+
+
+
+<h3 id="CameraStill">Start a camera app in still image mode</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"take a picture"</li>
+  </ul>
+</div>
+
+<p>To open a camera app in still image mode, use the {@link
+android.provider.MediaStore#INTENT_ACTION_STILL_IMAGE_CAMERA} action.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.MediaStore#INTENT_ACTION_STILL_IMAGE_CAMERA}</dd>
+
+<dt><b>Data URI Scheme</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None</dd>
+
+<dt><b>Extras</b></dt>
+<dd>None</dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void capturePhoto() {
+    Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(intent);
+    }
+}
+</pre>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.media.action.STILL_IMAGE_CAMERA" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+<h3 id="CameraVideo">Start a camera app in video mode</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"record a video"</li>
+  </ul>
+</div>
+
+<p>To open a camera app in video mode, use the {@link
+android.provider.MediaStore#INTENT_ACTION_VIDEO_CAMERA} action.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.MediaStore#INTENT_ACTION_VIDEO_CAMERA}</dd>
+
+<dt><b>Data URI Scheme</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None</dd>
+
+<dt><b>Extras</b></dt>
+<dd>None</dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void capturePhoto() {
+    Intent intent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(intent);
+    }
+}
+</pre>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.media.action.VIDEO_CAMERA" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
 
 
 
@@ -368,10 +868,10 @@ action and specify the contact with a {@code content:} URI as the intent data.</
 <p>There are primarily two ways to initially retrieve the contact's URI:</p>
 <ul>
   <li>Use the contact URI returned by the {@link android.content.Intent#ACTION_PICK},
-  shown in the previous section (this does not require any app permissions).</li>
+  shown in the previous section (this approach does not require any app permissions).</li>
   <li>Access the list of all contacts directly, as described in <a
   href="{@docRoot}training/contacts-provider/retrieve-names.html">Retrieving a List of
-  Contacts</a> (this requires the {@link android.Manifest.permission#READ_CONTACTS}
+  Contacts</a> (this approach requires the {@link android.Manifest.permission#READ_CONTACTS}
   permission).</li>
 </ul>
 
@@ -409,10 +909,10 @@ constants in {@link android.provider.ContactsContract.Intents.Insert}.</p>
 <p>There are primarily two ways to initially retrieve the contact URI:</p>
 <ul>
   <li>Use the contact URI returned by the {@link android.content.Intent#ACTION_PICK},
-  shown in the previous section (this does not require any app permissions).</li>
+  shown in the previous section (this approach does not require any app permissions).</li>
   <li>Access the list of all contacts directly, as described in <a
   href="{@docRoot}training/contacts-provider/retrieve-names.html">Retrieving a List of
-  Contacts</a> (this requires the {@link android.Manifest.permission#READ_CONTACTS}
+  Contacts</a> (this approach requires the {@link android.Manifest.permission#READ_CONTACTS}
   permission).</li>
 </ul>
 
@@ -427,7 +927,7 @@ constants in {@link android.provider.ContactsContract.Intents.Insert}.</p>
 <dd>The type is inferred from contact URI.
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>One or more of the extras defined in {@link android.provider.ContactsContract.Intents.Insert}
 so you can populate fields of the contact details.
 </dd>
@@ -437,7 +937,7 @@ so you can populate fields of the contact details.
 <pre>
 public void editContact(Uri contactUri, String email) {
     Intent intent = new Intent(Intent.ACTION_EDIT);
-    intent.setDataAndType(contactUri, Contacts.CONTENT_TYPE);
+    intent.setData(contactUri);
     intent.putExtra(Intents.Insert.EMAIL, email);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
@@ -469,7 +969,7 @@ constants in {@link android.provider.ContactsContract.Intents.Insert}.
 <dt><b>MIME Type</b></dt>
 <dd>{@link android.provider.ContactsContract.Contacts#CONTENT_TYPE Contacts.CONTENT_TYPE}</dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>One or more of the extras defined in {@link android.provider.ContactsContract.Intents.Insert}.
 </dd>
 </dl>
@@ -502,7 +1002,6 @@ Contacts Using Intents</a>.</p>
 
 <h3 id="ComposeEmail">Compose an email with optional attachments</h3>
 
-
 <p>To compose an email, use one of the below actions based on whether you'll include attachments,
 and include email details such as the recipient and subject using the extra keys listed below.</p>
 
@@ -523,7 +1022,7 @@ and include email details such as the recipient and subject using the extra keys
   </dl>
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt>{@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</dt>
@@ -599,15 +1098,6 @@ public void composeEmail(String[] addresses, String subject) {
 
 
 
-
-
-
-
-
-
-
-
-
 <h2 id="Storage">File Storage</h2>
 
 
@@ -648,7 +1138,7 @@ object returned by {@link android.content.Intent#getClipData()}.</p>
 <dd>The MIME type corresponding to the file type the user should select.
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt>{@link android.content.Intent#EXTRA_ALLOW_MULTIPLE}
@@ -768,7 +1258,7 @@ primary MIME type in {@link android.content.Intent#setType setType()} to {@code 
 <dd>The MIME type corresponding to the file type the user should select.
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt>{@link android.content.Intent#EXTRA_MIME_TYPES}
@@ -848,6 +1338,410 @@ Framework</a> guide.</p>
 
 
 
+
+
+
+
+
+<h2 id="Fitness">Fitness</h2>
+
+<h3 id="TrackRide">Start/Stop a bike ride</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"start cycling"</li>
+    <li>"start my bike ride"</li>
+    <li>"stop cycling"</li>
+  </ul>
+</div>
+
+<p>To track a bike ride, use the <code>"vnd.google.fitness.TRACK"</code> action with the
+<code>"vnd.google.fitness.activity/biking"</code> MIME type and set the <code>"actionStatus"</code>
+extra to <code>"ActiveActionStatus"</code> when starting and to <code>"CompletedActionStatus"</code>
+when stopping.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><code>"vnd.google.fitness.TRACK"</code><dd>
+
+  <dt><b>Data URI</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd><code>"vnd.google.fitness.activity/biking"</code></dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>
+    <dl>
+      <dt><code>"actionStatus"</code></dt>
+      <dd>A string with the value <code>"ActiveActionStatus"</code> when starting and
+      <code>"CompletedActionStatus"</code> when stopping.</dd>
+    </dl>
+  </dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void startBikeRide() {
+    Intent intent = new Intent("vnd.google.fitness.TRACK")
+            .setType("vnd.google.fitness.activity/biking")
+            .putExtra("actionStatus", "ActiveActionStatus");
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="vnd.google.fitness.TRACK" />
+        &lt;data android:mimeType="vnd.google.fitness.activity/biking" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+<h3 id="TrackRun">Start/Stop a run</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"track my run"</li>
+    <li>"start running"</li>
+    <li>"stop running"</li>
+  </ul>
+</div>
+
+<p>To track a run, use the <code>"vnd.google.fitness.TRACK"</code> action with the
+<code>"vnd.google.fitness.activity/running"</code> MIME type and set the <code>"actionStatus"</code>
+extra to <code>"ActiveActionStatus"</code> when starting and to <code>"CompletedActionStatus"</code>
+when stopping.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><code>"vnd.google.fitness.TRACK"</code><dd>
+
+  <dt><b>Data URI</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd><code>"vnd.google.fitness.activity/running"</code></dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>
+    <dl>
+      <dt><code>"actionStatus"</code></dt>
+      <dd>A string with the value <code>"ActiveActionStatus"</code> when starting and
+      <code>"CompletedActionStatus"</code> when stopping.</dd>
+    </dl>
+  </dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void startRun() {
+    Intent intent = new Intent("vnd.google.fitness.TRACK")
+            .setType("vnd.google.fitness.activity/running")
+            .putExtra("actionStatus", "ActiveActionStatus");
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="vnd.google.fitness.TRACK" />
+        &lt;data android:mimeType="vnd.google.fitness.activity/running" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+<h3 id="TrackWorkout">Start/Stop a workout</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"start a workout"</li>
+    <li>"track my workout"</li>
+    <li>"stop workout"</li>
+  </ul>
+</div>
+
+<p>To track a workout, use the <code>"vnd.google.fitness.TRACK"</code> action with the
+<code>"vnd.google.fitness.activity/other"</code> MIME type and set the <code>"actionStatus"</code>
+extra to <code>"ActiveActionStatus"</code> when starting and to <code>"CompletedActionStatus"</code>
+when stopping.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><code>"vnd.google.fitness.TRACK"</code><dd>
+
+  <dt><b>Data URI</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd><code>"vnd.google.fitness.activity/other"</code></dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>
+    <dl>
+      <dt><code>"actionStatus"</code></dt>
+      <dd>A string with the value <code>"ActiveActionStatus"</code> when starting and
+      <code>"CompletedActionStatus"</code> when stopping.</dd>
+    </dl>
+  </dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void startWorkout() {
+    Intent intent = new Intent("vnd.google.fitness.TRACK")
+            .setType("vnd.google.fitness.activity/other")
+            .putExtra("actionStatus", "ActiveActionStatus");
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="vnd.google.fitness.TRACK" />
+        &lt;data android:mimeType="vnd.google.fitness.activity/other" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+<h3 id="ShowHeartRate">Show heart rate</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"what's my heart rate?"</li>
+    <li>"what's my bpm?"</li>
+  </ul>
+</div>
+
+<p>To show the user's heart rate, use the <code>"vnd.google.fitness.VIEW"</code> action with the
+<code>"vnd.google.fitness.data_type<br/>/com.google.heart_rate.bpm"</code> MIME type.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><code>"vnd.google.fitness.VIEW"</code><dd>
+
+  <dt><b>Data URI</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd><code>"vnd.google.fitness.data_type/com.google.heart_rate.bpm"</code></dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>None</dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void showHR() {
+    Intent intent = new Intent("vnd.google.fitness.VIEW")
+            .setType("vnd.google.fitness.data_type/com.google.heart_rate.bpm");
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="vnd.google.fitness.VIEW" />
+        &lt;data android:mimeType="vnd.google.fitness.data_type/com.google.heart_rate.bpm" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+<h3 id="ShowStepCount">Show step count</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"how many steps have I taken?"</li>
+    <li>"what's my step count?"</li>
+  </ul>
+</div>
+
+<p>To show the user's step count, use the <code>"vnd.google.fitness.VIEW"</code> action with the
+<code>"vnd.google.fitness.data_type<br/>/com.google.step_count.cumulative"</code> MIME type.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><code>"vnd.google.fitness.VIEW"</code><dd>
+
+  <dt><b>Data URI</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd><code>"vnd.google.fitness.data_type/com.google.step_count.cumulative"</code></dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>None</dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void showStepCount() {
+    Intent intent = new Intent("vnd.google.fitness.VIEW")
+            .setType("vnd.google.fitness.data_type/com.google.step_count.cumulative");
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="vnd.google.fitness.VIEW" />
+        &lt;data android:mimeType="vnd.google.fitness.data_type/com.google.step_count.cumulative" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+
+
+
+<h2 id="Local">Local Actions</h2>
+
+<h3 id="CallCar">Call a car</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"get me a taxi"</li>
+    <li>"call me a car"</li>
+  </ul>
+  <p style="font-size:13px;margin-bottom:0px;margin-top:10px">(Android Wear only)</p>
+</div>
+
+<p>To call a taxi, use the
+<a href="{@docRoot}com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a>
+action.</p>
+
+<p class="note"><strong>Note:</strong> Apps must ask for confirmation from the user
+before completing the action.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><a href="{@docRoot}com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a></dd>
+
+  <dt><b>Data URI</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd>None</dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>None</dd>
+</dl>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void callCar() {
+    Intent intent = new Intent(ReserveIntents.ACTION_RESERVE_TAXI_RESERVATION);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="com.google.android.gms.actions.RESERVE_TAXI_RESERVATION" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
 
 
 
@@ -988,8 +1882,240 @@ public void playMedia(Uri file) {
 </pre>
 
 
+<h3 id="PlaySearch">Play music based on a search query</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"play michael jackson billie jean"</li>
+  </ul>
+</div>
+
+<p>To play music based on a search query, use the
+{@link android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH} intent. An app may fire
+this intent in response to the user's voice command to play music. The receiving app for this
+intent performs a search within its inventory to match existing content to the given query and
+starts playing that content.</p>
+
+<p>This intent should include the {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS} string
+extra, which specifies the inteded search mode. For example, the search mode can specify whether
+the search is for an artist name or song name.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH}</dd>
+
+<dt><b>Data URI Scheme</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+<dl>
+<dt>{@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS MediaStore.EXTRA_MEDIA_FOCUS} (required)</dt>
+<dd>
+<p>Indicates the search mode (whether the user is looking for a particular artist, album, song,
+or playlist). Most search modes take additional extras. For example, if the user
+is interested in listening to a particular song, the intent might have three additional extras:
+the song title, the artist, and the album. This intent supports the following search modes for
+each value of {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS}:</p>
+<dl>
+<dt><p><em>Any</em> - <code>"vnd.android.cursor.item/*"</p></code></dt>
+<dd>
+<p>Play any music. The receiving app should play some music based on a smart choice, such
+as the last playlist the user listened to.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.app.SearchManager#QUERY} (required) - An empty string. This extra is always
+      provided for backward compatibility: existing apps that do not know about search modes can
+      process this intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Unstructured</em> - <code>"vnd.android.cursor.item/*"</code></p></dt>
+<dd>
+<p>Play a particular song, album or genre from an unstructured search query. Apps may generate
+an intent with this search mode when they can't identify the type of content the user wants to
+listen to. Apps should use more specific search modes when possible.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination
+      of: the artist, the album, the song name, or the genre.</li>
+</ul>
+</dd>
+<dt><p><em>Genre</em> -
+{@link android.provider.MediaStore.Audio.Genres#ENTRY_CONTENT_TYPE Audio.Genres.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play music of a particular genre.</p>
+<p>Additional extras:</p>
+<ul>
+  <li><code>"android.intent.extra.genre"</code> (required) - The genre.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - The genre. This extra is always provided
+      for backward compatibility: existing apps that do not know about search modes can process
+      this intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Artist</em> -
+{@link android.provider.MediaStore.Audio.Artists#ENTRY_CONTENT_TYPE Audio.Artists.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play music from a particular artist.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} (required) - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination of
+      the artist or the genre. This extra is always provided for backward compatibility:
+      existing apps that do not know about search modes can process this intent as an unstructured
+      search.</li>
+</ul>
+</dd>
+<dt><p><em>Album</em> -
+{@link android.provider.MediaStore.Audio.Albums#ENTRY_CONTENT_TYPE Audio.Albums.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play music from a particular album.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} (required) - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination of
+      the album or the artist. This extra is always provided for backward
+      compatibility: existing apps that do not know about search modes can process this intent as an
+      unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Song</em> - <code>"vnd.android.cursor.item/audio"</code></p></dt>
+<dd>
+<p>Play a particular song.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_TITLE} (required) - The song name.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination of:
+      the album, the artist, the genre, or the title. This extra is always provided for
+      backward compatibility: existing apps that do not know about search modes can process this
+      intent as an unstructured search.</li>
+</ul>
+</dd>
+<dt><p><em>Playlist</em> - {@link android.provider.MediaStore.Audio.Playlists#ENTRY_CONTENT_TYPE Audio.Playlists.ENTRY_CONTENT_TYPE}</p></dt>
+<dd>
+<p>Play a particular playlist or a playlist that matches some criteria specified
+by additional extras.</p>
+<p>Additional extras:</p>
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} - The album.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
+  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
+  <li><code>"android.intent.extra.playlist"</code> - The playlist.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_TITLE} - The song name that the playlist is
+      based on.</li>
+  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination
+      of: the album, the artist, the genre, the playlist, or the title. This extra is always
+      provided for backward compatibility: existing apps that do not know about search modes can
+      process this intent as an unstructured search.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
 
 
+
+<p><b>Example intent:</b></p>
+<p>If the user wants to listen to music from a particular artist, a search app may generate the
+following intent:</p>
+<pre>
+public void playSearchArtist(String artist) {
+    Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH);
+    intent.putExtra(MediaStore.EXTRA_MEDIA_FOCUS,
+                    MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE);
+    intent.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
+    intent.putExtra(SearchManager.QUERY, artist);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+<p>When handling this intent, your activity should check the value of the
+{@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS} extra in the incoming
+{@link android.content.Intent} to determine the search mode. Once your activity has identified
+the search mode, it should read the values of the additional extras for that particular search mode.
+With this information your app can then perform the search within its inventory to play the
+content that matches the search query. For example:</p>
+<pre>
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+    Intent intent = this.getIntent();
+    if (intent.getAction().compareTo(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH) == 0) {
+
+        String mediaFocus = intent.getStringExtra(MediaStore.EXTRA_MEDIA_FOCUS);
+        String query = intent.getStringExtra(SearchManager.QUERY);
+
+        // Some of these extras may not be available depending on the search mode
+        String album = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ALBUM);
+        String artist = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ARTIST);
+        String genre = intent.getStringExtra("android.intent.extra.genre");
+        String playlist = intent.getStringExtra("android.intent.extra.playlist");
+        String title = intent.getStringExtra(MediaStore.EXTRA_MEDIA_TITLE);
+
+        // Determine the search mode and use the corresponding extras
+        if (mediaFocus == null) {
+            // 'Unstructured' search mode (backward compatible)
+            playUnstructuredSearch(query);
+
+        } else if (mediaFocus.compareTo("vnd.android.cursor.item/*") == 0) {
+            if (query.isEmpty()) {
+                // 'Any' search mode
+                playResumeLastPlaylist();
+            } else {
+                // 'Unstructured' search mode
+                playUnstructuredSearch(query);
+            }
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Genre' search mode
+            playGenre(genre);
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Artist' search mode
+            playArtist(artist, genre);
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Album' search mode
+            playAlbum(album, artist);
+
+        } else if (mediaFocus.compareTo("vnd.android.cursor.item/audio") == 0) {
+            // 'Song' search mode
+            playSong(album, artist, genre, title);
+
+        } else if (mediaFocus.compareTo(MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE) == 0) {
+            // 'Playlist' search mode
+            playPlaylist(album, artist, genre, playlist, title);
+        }
+    }
+}
+</pre>
 
 
 
@@ -1004,13 +2130,49 @@ android.content.Intent#ACTION_DIAL} action and specify a phone number using
 the URI scheme defined below. When the phone app opens, it displays the phone number
 but the user must press the <em>Call</em> button to begin the phone call.</p>
 
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"call 555-5555"</li>
+    <li>"call bob"</li>
+    <li>"call voicemail"</li>
+  </ul>
+</div>
+
+<p>To place a phone call directly, use the {@link android.content.Intent#ACTION_CALL} action
+and specify a phone number using the URI scheme defined below. When the phone app opens, it
+begins the phone call; the user does not need to press the <em>Call</em> button.</p>
+
+<p>The {@link android.content.Intent#ACTION_CALL} action requires that you add the
+<code>CALL_PHONE</code> permission to your manifest file:</p>
+
+<pre style="margin-top:45px">
+&lt;uses-permission android:name="android.permission.CALL_PHONE" />
+</pre>
 
 <dl>
 <dt><b>Action</b></dt>
-<dd>{@link android.content.Intent#ACTION_DIAL}</dd>
+<dd>
+<ul>
+  <li>{@link android.content.Intent#ACTION_DIAL} - Opens the dialer or phone app.</li>
+  <li>{@link android.content.Intent#ACTION_CALL} - Places a phone call (requires the
+      <code>CALL_PHONE</code> permission)</li>
+</ul>
+</dd>
 
 <dt><b>Data URI Scheme</b></dt>
-<dd>{@code tel:&lt;phone-number>}</dd>
+<dd>
+<ul>
+  <li>{@code tel:&lt;phone-number>}</li>
+  <li>{@code voicemail:&lt;phone-number>}</li>
+</ul>
+</dd>
 
 <dt><b>MIME Type</b></dt>
 <dd>None</dd>
@@ -1043,9 +2205,6 @@ public void dialPhoneNumber(String phoneNumber) {
     }
 }
 </pre>
-
-
-
 
 
 
@@ -1139,7 +2298,7 @@ details such as the phone number, subject, and message body using the extra keys
   </dl>
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt><code>"subject"</code></dt>
@@ -1159,7 +2318,7 @@ android.net.Uri}s pointing to the images/videos to attach.</dd>
 <p><b>Example intent:</b></p>
 <pre>
 public void composeMmsMessage(String message, Uri attachment) {
-    Intent intent = new Intent(Intent.ACTION_SEND);
+    Intent intent = new Intent(Intent.ACTION_SENDTO);
     intent.setType(HTTP.PLAIN_TEXT_TYPE);
     intent.putExtra("sms_body", message);
     intent.putExtra(Intent.EXTRA_STREAM, attachment);
@@ -1215,6 +2374,19 @@ at {@link android.provider.Telephony}.</p>
 <h2 id="Browser">Web Browser</h2>
 
 <h3 id="ViewUrl">Load a web URL</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+    </a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"open example.com"</li>
+  </ul>
+</div>
 
 <p>To open a web page, use the {@link android.content.Intent#ACTION_VIEW} action
 and specify the web URL in the intent data.</p>
@@ -1314,3 +2486,200 @@ public void searchWeb(String query) {
 
 
 
+
+
+
+
+<h2 id="AdbIntents">Verify Intents with the Android Debug Bridge</h2>
+
+<p>To verify that your app responds to the intents that you want to support, you can use the
+<a href="{@docRoot}tools/help/adb.html"><code>adb</code></a> tool to fire specific intents:</p>
+
+<ol>
+<li>Set up an Android device for <a href="{@docRoot}tools/device.html#setting-up">development</a>,
+or use a <a href="{@docRoot}tools/devices/emulator.html#avds">virtual device</a>.</li>
+<li>Install a version of your app that handles the intents you want to support.</li>
+<li>Fire an intent using <code>adb</code>:
+<pre class="no-pretty-print">
+adb shell am start -a &lt;ACTION&gt; -t &lt;MIME_TYPE&gt; -d &lt;DATA&gt; \
+  -e &lt;EXTRA_NAME&gt; &lt;EXTRA_VALUE&gt; -n &lt;ACTIVITY&gt;
+</pre>
+<p>For example:</p>
+<pre class="no-pretty-print">
+adb shell am start -a android.intent.action.DIAL \
+  -d tel:555-5555 -n org.example.MyApp/.MyActivity
+</pre>
+<li>If you defined the required intent filters, your app should handle the intent.</li>
+</ol>
+
+
+<p>For more information, see
+<a href="{@docRoot}tools/help/adb.html#am">Using activity manager (am)</a>.</p>
+
+
+
+
+
+
+<h2 id="Now">Intents Fired by Google Now</h2>
+
+<p><a href="http://www.google.com/landing/now/">Google Now</a> recognizes many voice commands
+and fires intents for them. As such, users may launch your app with a Google Now voice command
+if your app declares the corresponding intent filter. For example, if your app can
+<a href="#CreateAlarm">set an alarm</a> and you add the corresponding intent filter to your
+manifest file, Google Now lets users choose your app when they request to set an alarm, as
+shown in figure 1.</p>
+
+<img src="{@docRoot}guide/components/images/google-action.png"
+     srcset="{@docRoot}guide/components/images/google-action_2x.png 2x"
+     width="700" height="241" alt=""/>
+<p class="img-caption"><strong>Figure 1.</strong> Google Now lets users choose from installed
+apps that support a given action.</p>
+
+<p>Google Now recognizes voice commands for the actions listed in table 1. For more information
+about declaring each intent filter, click on the action description.</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Voice commands recognized by Google Now
+(Google Search app v3.6).</p>
+<table>
+<tr>
+  <th>Category</th>
+  <th>Details and Examples</th>
+  <th>Action Name</th>
+</tr>
+<tr>
+  <td rowspan="2" style="vertical-align:middle">Alarm</td>
+  <td>
+    <p><a href="#CreateAlarm">Set alarm</a></p>
+    <ul class="now-list">
+      <li>"set an alarm for 7 am"</li>
+    </ul>
+  </td>
+  <td>{@link android.provider.AlarmClock#ACTION_SET_ALARM AlarmClock.ACTION_SET_ALARM}</td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#CreateTimer">Set timer</a></p>
+    <ul class="now-list">
+      <li>"set a timer for 5 minutes"</li>
+    </ul>
+  </td>
+  <td>{@link android.provider.AlarmClock#ACTION_SET_TIMER AlarmClock.ACTION_SET_TIMER}</td>
+</tr>
+<tr>
+  <td style="vertical-align:middle">Communication</td>
+  <td>
+    <p><a href="#DialPhone">Call a number</a></p>
+    <ul class="now-list">
+      <li>"call 555-5555"</li>
+      <li>"call bob"</li>
+      <li>"call voicemail"</li>
+    </ul>
+  </td>
+  <td>{@link android.content.Intent#ACTION_CALL Intent.ACTION_CALL}</td>
+</tr>
+<tr>
+  <td rowspan="5" style="vertical-align:middle">Fitness</td>
+  <td>
+    <p><a href="#TrackRide">Start/stop a bike ride</a></p>
+    <ul class="now-list">
+      <li>"start cycling"</li>
+      <li>"start my bike ride"</li>
+      <li>"stop cycling"</li>
+    </ul>
+  </td>
+  <td><code>"vnd.google.fitness.TRACK"</code></td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#TrackRun">Start/stop a run</a></p>
+    <ul class="now-list">
+      <li>"track my run"</li>
+      <li>"start running"</li>
+      <li>"stop running"</li>
+    </ul>
+  </td>
+  <td><code>"vnd.google.fitness.TRACK"</code></td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#TrackWorkout">Start/stop a workout</a></p>
+    <ul class="now-list">
+      <li>"start a workout"</li>
+      <li>"track my workout"</li>
+      <li>"stop workout"</li>
+    </ul>
+  </td>
+  <td><code>"vnd.google.fitness.TRACK"</code></td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#ShowHeartRate">Show heart rate</a></p>
+    <ul class="now-list">
+      <li>"what's my heart rate"</li>
+      <li>"what's my bpm"</li>
+    </ul>
+  </td>
+  <td><code>"vnd.google.fitness.VIEW"</code></td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#ShowStepCount">Show step count</a></p>
+    <ul class="now-list">
+      <li>"how many steps have I taken"</li>
+      <li>"what's my step count"</li>
+    </ul>
+  </td>
+  <td><code>"vnd.google.fitness.VIEW"</code></td>
+</tr>
+<tr>
+  <td style="vertical-align:middle">Local</td>
+  <td>
+    <p><a href="#CallCar">Book a car</a></p>
+    <ul class="now-list">
+      <li>"call me a car"</li>
+      <li>"book me a taxi"</li>
+    </ul>
+  </td>
+  <td><a href="{@docRoot}reference/com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION">
+      <code>ReserveIntents<br/>.ACTION_RESERVE_TAXI_RESERVATION</code></a></td>
+</tr>
+<tr>
+  <td rowspan="3" style="vertical-align:middle">Media</td>
+  <td>
+    <p><a href="#PlaySearch">Play music from search</a></p>
+    <ul class="now-list">
+      <li>"play michael jackson billie jean"</li>
+    </ul>
+  </td>
+  <td>{@link android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH MediaStore<br/>.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH}</td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#CameraStill">Take a picture</a></p>
+    <ul class="now-list">
+      <li>"take a picture"</li>
+    </ul>
+  </td>
+  <td>{@link android.provider.MediaStore#INTENT_ACTION_STILL_IMAGE_CAMERA MediaStore<br/>.INTENT_ACTION_STILL_IMAGE_CAMERA}</td>
+</tr>
+<tr>
+  <td>
+    <p><a href="#CameraVideo">Record a video</a></p>
+    <ul class="now-list">
+      <li>"record a video"</li>
+    </ul>
+  </td>
+  <td>{@link android.provider.MediaStore#INTENT_ACTION_VIDEO_CAMERA MediaStore<br/>.INTENT_ACTION_VIDEO_CAMERA}</td>
+</tr>
+<tr>
+  <td style="vertical-align:middle">Web browser</td>
+  <td>
+    <p><a href="#ViewUrl">Open URL</a></p>
+    <ul class="now-list">
+      <li>"open example.com"</li>
+    </ul>
+  </td>
+  <td>{@link android.content.Intent#ACTION_VIEW Intent.ACTION_VIEW}</td>
+</tr>
+</table>

@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Lupina"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Poročilo o napaki je posneto"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Dotaknite se, če želite deliti sporočilo o napaki z drugimi"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Povlecite v levo, če želite poslati sporočilo o napaki"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Dotaknite se, če želite deliti sporočilo o napaki z drugimi"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Poročila o napakah vsebujejo podatke iz različnih dnevniških datotek sistema, vključno z osebnimi in zasebnimi podatki. Poročila o napakah delite samo z aplikacijami in ljudmi, ki jim zaupate."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Pokaži to sporočilo naslednjič"</string>
 </resources>

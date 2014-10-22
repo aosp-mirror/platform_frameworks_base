@@ -18,41 +18,12 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <LinearLayout android:layout_width="match_parent"
+    <TextView android:id="@+id/warning"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="3mm">
-
-        <LinearLayout android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-            <ImageView android:id="@+id/icon"
-                    android:layout_width="@android:dimen/app_icon_size"
-                    android:layout_height="@android:dimen/app_icon_size"
-                    android:paddingRight="1mm"/>
-
-            <TextView android:id="@+id/prompt"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="18sp"/>
-        </LinearLayout>
-
-        <TextView android:id="@+id/warning"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="1mm"
-                android:paddingBottom="1mm"
-                android:text="@string/warning"
-                android:textSize="18sp"/>
-
-        <CheckBox android:id="@+id/check"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/accept"
-                android:textSize="20sp"
-                android:filterTouchesWhenObscured="true"
-                android:checked="false"/>
-    </LinearLayout>
+            android:textSize="18sp"
+            android:paddingTop="4mm"
+            android:paddingLeft="3mm"
+            android:paddingRight="3mm"
+            android:paddingBottom="4mm"/>
 </ScrollView>

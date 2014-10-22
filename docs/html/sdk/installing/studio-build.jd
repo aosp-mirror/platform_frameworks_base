@@ -1,0 +1,1071 @@
+page.title=Building Your Project with Gradle
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+    <li><a href="#overviewBuild">Overview of the Build System</a>
+        <ol>
+            <li><a href="#buildConf">Build configuration</a></li>
+            <li><a href="#buildConv">Build by convention</a></li>
+            <li><a href="#projectModules">Projects and modules</a></li>
+            <li><a href="#dependencies">Dependencies</a></li>
+            <li><a href="#buildTasks">Build tasks</a></li>
+            <li><a href="#gradleWrapper">The Gradle wrapper</a></li>
+        </ol>
+    </li>
+    <li><a href="#creatingBuilding">Create and Build a Project</a>
+        <ol>
+            <li><a href="#createProject">Create a project</a></li>
+            <li><a href="#projectStructure">Project structure</a></li>
+            <li><a href="#addLibModule">Add a library module</a></li>
+            <li><a href="#buildProject">Build the project</a></li>
+            <li><a href="#buildCmd">Build from the command line</a></li>
+            <li><a href="#buildRelease">Build a release version</a></li>
+        </ol>
+    </li>
+    <li><a href="#configBuild">Configure the Build</a>
+        <ol>
+            <li><a href="#buildFileBasics">Build file basics</a></li>
+            <li><a href="#declareDeps">Declare dependencies</a></li>
+            <li><a href="#runProguard">Run ProGuard</a></li>
+            <li><a href="#configureSigning">Configure signing settings</a></li>
+            <li><a href="#workBuildVariants">Work with build variants</a></li>
+        </ol>
+    </li>
+    <li><a href="#reference">Reference</a></li>
+</ol>
+<h2>See also</h2>
+<ul>
+<li><a href="{@docRoot}sdk/installing/studio.html">
+Getting Started with Android Studio</a></li>
+<li><a href="{@docRoot}sdk/installing/studio-tips.html">
+Android Studio Tips and Tricks</a></li>
+<li><a href="{@docRoot}sdk/installing/migrate.html">
+Migrating from Eclipse</a></li>
+</div>
+</div>
+
+<a class="notice-developers-video"
+href="https://developers.google.com/events/io/sessions/324603352">
+<div>
+    <h3>Video</h3>
+    <p>What's New in Android Developer Tools</p>
+</div>
+</a>
+
+<p>The Android Studio build system is the toolkit you use to build, test, run and package
+your apps. The build system is independent from Android Studio, so you can invoke it from Android
+Studio or from the command line. After you write your application, you can use the features
+of the build system to:</p>
+
+<ul>
+    <li>Customize, configure, and extend the build process.</li>
+    <li>Create multiple APKs for your app with different features using the same project.</li>
+    <li>Reuse code and resources.</li>
+</ul>
+
+<p>The flexibility of the Android Studio build system enables you to achieve all of this without
+modifying your app's core project files.</p>
+
+
+<h2 id="overviewBuild">Overview of the Build System</h2>
+
+<p>The Android Studio build system consists of an Android plugin for <em>Gradle</em>.
+<a href="http://www.gradle.org/">Gradle</a> is an advanced build toolkit that manages dependencies
+and allows you to define custom build logic. Many software projects use Gradle to manage their
+builds. The Android plugin for Gradle does not depend on Android Studio, although Android Studio
+is fully integrated with it. This means that:</p>
+
+<ul>
+    <li>You can build your Android apps from the command line on your machine or on machines
+        where Android Studio is not installed (such as continuous integration servers).</li>
+    <li>You can build your Android apps from Android Studio with the same custom build
+        configuration and logic as when you build from the command line.</li>
+</ul>
+
+<p>The output of the build is the same whether you are building a project from the command line,
+on a remote machine, or using Android Studio.</p>
+
+<h3 id="buildConf">Build configuration</h3>
+
+<p>The build configuration for your project is defined inside <em>Gradle build files</em>,
+which are plain text files that use the syntax and options from Gradle and the Android plugin
+to configure the following aspects of your build:</p>
+
+<ul>
+    <li><em>Build variants</em>. The build system can generate multiple APKs with different
+        configurations for the same project. This is useful when you want to build different
+        versions of your application without having to create a separate project for each of
+        them.</li>
+    <li><em>Dependencies</em>. The build system manages project dependencies and supports
+        dependencies from your local filesystem and from remote repositories. This prevents you
+        from having to search, download, and copy binary packages for your dependencies into your
+        project directory.</li>
+    <li><em>Manifest entries</em>. The build system enables you to specify values for some
+        elements of the manifest file in the build configuration. These new values override the
+        existing values in the manifest file. This is useful if you want to generate multiple APKs
+        for your project where each of them has a different package name, minimum SDK version, or
+        target SDK version.</li>
+    <li><em>Signing</em>. The build system enables you to specify signing settings in the build
+        configuration, and it can sign your APKs during the build process.</li>
+    <li><em>ProGuard</em>. The build system enables you to specify a different
+        <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> rules
+        file for each build variant. The build system can run ProGuard to obfuscate your classes
+        during the build process.</li>
+    <li><em>Testing</em>. The build system generates a test APK from the test sources in your
+        project, so you do not have to create a separate test project. The build system can run
+        your tests during the build process.</li>
+</ul>
+
+<p>Gradle build files use <em>Groovy</em> syntax.
+<a href="http://groovy.codehaus.org/">Groovy</a> is a dynamic language that you can use to
+define custom build logic and to interact with the Android-specific elements provided by the
+Android plugin for Gradle.</p>
+
+<h3 id="buildConv">Build by convention</h3>
+
+<p>The Android Studio build system assumes <em>sensible defaults</em> for the project structure
+and other build options. If your project adheres to these conventions, your Gradle build files are
+very simple. When some these conventions do not apply to your project, the flexibility of the
+build system allows you to configure almost every aspect of the build process. For example, if
+the sources for your project are located in a different directory than the default, you can
+specify this location in the build file.</p>
+
+<h3 id="projectModules">Projects and modules</h3>
+
+<p>A <em>project</em> in Android Studio represents a complete Android app. Android Studio
+projects consist of one or more modules. A <em>module</em> is a component of your app that you can
+build, test, or debug independently. Modules contain the source code and resources for your app.
+Android Studio projects contain three kinds of modules:</p>
+
+<ul>
+    <li><em>Java library modules</em> contain reusable code. The build system generates a
+        JAR package for Java library modules.</li>
+    <li><em>Android library modules</em> contain reusable Android-specific code and resources.
+        The build system generates an AAR (Android ARchive) package for library modules.</li>
+    <li><em>Android application modules</em> contain application code and may depend on library
+        modules, although many Android apps consists of only one application module. The build
+        system generates an APK package for application modules.</li>
+</ul>
+
+<p>Android Studio projects contain a top-level Gradle build file that lists all the modules in
+the project, and each module contains its own Gradle build file.</p>
+
+<h3 id="dependencies">Dependencies</h3>
+
+<p>The Android Studio build system manages project dependencies and supports module dependencies,
+local binary dependencies, and remote binary dependencies.</p>
+
+<dl>
+    <dt><em>Module Dependencies</em></dt>
+    <dd><p>A project module can include in its build file a list of other modules it depends on.
+        When you build this module, the build system assembles and includes the required
+        modules.</p></dd>
+    <dt><em>Local Dependencies</em></dt>
+    <dd><p>If you have binary archives in your local filesystem that a module depends on, such as
+        JAR files, you can declare these dependencies in the build file for that
+        module.</p></dd>
+    <dt><em>Remote Dependencies</em></dt>
+    <dd><p>When some of your dependencies are available in a remote repository, you do not have
+        to download them and copy them into your project. The Android Studio build system supports
+        remote <em>Maven</em> dependencies. <a href="http://maven.apache.org/">Maven</a> is a
+        popular software project management tool that helps organize project dependencies using
+        repositories.</p>
+        <p>Many popular software libraries and tools are available in public Maven repositories.
+        For these dependencies you only have to specify their Maven coordinates, which uniquely
+        identify each element in a remote repository. The format for Maven coordinates used in the
+        build system is <code>group:name:version</code>. For example, the Maven coordinates for
+        version 16.0.1 of the Google Guava libraries are
+        <code>com.google.guava:guava:16.0.1</code>.</p>
+        <p>The <a href="http://search.maven.org">Maven Central Repository</a> is widely used to
+        distribute many libraries and tools.</p>
+    </dd>
+</dl>
+
+<h3 id="buildTasks">Build tasks</h3>
+
+<p>The Android Studio build system defines a hierarchical set of build tasks: the top-level
+tasks invoke the tasks they depend on to produce the necessary outcomes. The build system
+provides project tasks to build your app and module tasks to build modules independently.</p>
+
+<p>You can view the list of available tasks and invoke any task from Android Studio and from
+the command line, as described in
+<a href="#buildProject">Build the project in Android Studio</a> and and
+<a href="#buildCmd">Build the project from the command line</a>.</p>
+
+<h3 id="gradleWrapper">The Gradle wrapper</h3>
+
+<p>Android Studio projects contain the <em>Gradle wrapper</em>, which consists of:</p>
+
+<ul>
+    <li>A JAR file</li>
+    <li>A properties file</li>
+    <li>A shell script for Windows platforms</li>
+    <li>A shell script for Mac and Linux platforms</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> You should submit all of these files to your source
+control system.</p>
+
+<p>Using the Gradle wrapper (instead of the local Gradle installation) ensures that
+you always run the version of Gradle defined in the properties file. To configure your project
+to use a newer version of Gradle, edit the properties file and specify the new version there.
+
+<p>Android Studio reads the properties file from the Gradle wrapper directory inside your project
+and runs the wrapper from this directory, so you can seamlessly work with multiple projects
+that require different versions of Gradle.</p>
+
+<p class="note"><strong>Note:</strong> Android Studio does not use the shell scripts, so any
+changes you make to them won't work when building from the IDE. You should define your custom
+logic inside Gradle build files instead.</p>
+
+<p>You can run the shell scripts to build your project from the command line on your development
+machine and on other machines where Android Studio is not installed.</p>
+
+
+<h2 id="creatingBuilding">Create and Build an Android Studio Project</h2>
+
+<p>This section builds on the concepts presented above and shows you how to:</p>
+
+<ul>
+    <li>Create projects and modules.</li>
+    <li>Work with the project structure.</li>
+    <li>Edit build files to configure the build process.</li>
+    <li>Build and run your app.</li>
+</ul>
+
+<h3 id="createProject">Create a project in Android Studio</h3>
+
+<p>To create a new project in Android Studio:</p>
+
+<ol>
+    <li>Click <strong>File</strong> and select <strong>New Project</strong>.</li>
+    <li>In the window that appears, enter "BuildSystemExample" in the <em>Application</em>
+        name field.</li>
+    <li>Leave the rest of the values unchanged and click <strong>Next</strong>.</li>
+    <li>Leave the default icon settings unchanged and click <strong>Next</strong>.</li>
+    <li>Select <em>Blank Activity</em> and click <strong>Next</strong>.</li>
+    <li>Leave the default activity and layout names unchanged and click
+        <strong>Finish</strong>.</li>
+</ol>
+
+<p>Figure 1 shows how the Android Studio window looks like after creating the project.</p>
+
+<img src="{@docRoot}images/tools/as-mainscreen.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> Previewing your app.</p>
+
+<h3 id="projectStructure">The project structure</h3>
+
+<p>Android Studio projects contain an application module by default (<code>app</code>).
+Table 1 lists where the main components of your app are located inside this module.</p>
+
+<p class="table-caption" id="table1">
+<strong>Table 1.</strong> Default location of the components in an application module.</p>
+<table>
+    <tr>
+        <th scope="col">Component</th>
+        <th scope="col">Location</th>
+    </tr>
+    <tr>
+        <td>Source files</td>
+        <td><code>app/src/main/java/&lt;package>/</code></td>
+    </tr>
+    <tr>
+        <td>Resource files</td>
+        <td><code>app/src/main/res/</code></td>
+    </tr>
+    <tr>
+        <td>Manifest file</td>
+        <td><code>app/src/main/AndroidManifest.xml</code></td>
+    </tr>
+    <tr>
+        <td>Build file</td>
+        <td><code>app/build.gradle</code></td>
+    </tr>
+</table>
+
+<p>When you add additional modules to your project, the directory structure for each module is
+similar to the one shown in table 1, replacing <code>app</code> by the name of the module.</p>
+
+<h3 id="addLibModule">Add a library module</h3>
+
+<p>This section shows you how to add a library module to your project and how to add this
+library as a dependency of an application module.</p>
+
+<h4>Create a new library module</h4>
+
+<p>It is good development practice to group functionality that you may reuse in other apps inside
+a library module. To create a library module inside the <code>BuildSystemExample</code>
+project:</p>
+
+<ol>
+    <li>Click <strong>File</strong> and select <strong>New Module</strong>.</li>
+    <li>On the window that appears, select <strong>Android Library</strong> and click
+        <strong>Next</strong>.</li>
+    <li>Leave the default module name (<code>lib</code>) unchanged and click
+        <strong>Next</strong>.</li>
+    <li>Select <em>Blank Activity</em> and click <strong>Next</strong>.</li>
+    <li>Type "LibActivity1" on the <em>Activity Name</em> field and click
+        <strong>Finish</strong>.</li>
+</ol>
+
+<p>The project now contains two modules, <code>app</code> and <code>lib</code>, with one activity
+in each module.</p>
+
+<h4 id="openActFromLib">Open an activity from a library module</h4>
+
+<p>Library modules contain activities and other logic that one or more application modules reuse.
+In this example, <code>MainActivity</code> in the app module opens <code>LibActivity1</code>
+from the <code>lib</code> module. To open <code>LibActivity1</code> from
+<code>MainActivity</code>:</p>
+
+<ol>
+    <li>
+        <p>Edit the layout file for <code>MainActivity</code> in the <code>app</code> module.
+        This file is located in <code>app/src/main/res/layout/activity_main.xml</code>. Replace
+        the contents of this file with the following:</p>
+        <p><pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.buildsystemexample.app.MainActivity">
+
+    &lt;Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button1"
+        android:onClick="onButton1Clicked"/>
+
+&lt;/LinearLayout>
+</pre></p>
+    </li>
+    <li>
+        In this layout file, click on the line that contains
+        <code>android:text="@string/button1"</code> and press <strong>Alt+Enter</strong>. Follow
+        the suggestion from Android Studio to add a string resource with the value
+        "Open LibActivity1".
+    </li>
+    <li>
+        In this layout file, click on the line that contains
+        <code>android:onClick="onButton1Clicked"</code> and press <strong>Alt+Enter</strong>.
+        Follow the suggestion from Android Studio to add the <code>onButton1Clicked</code>
+        method to <code>MainActivity</code>.
+    </li>
+    <li>
+        <p>Copy the following code inside the <code>onButton1Clicked</code> method in
+        <code>MainActivity</code>:</p>
+        <p><pre>
+public void onButton1Clicked(View view) {
+    Intent intent = new Intent(this, LibActivity1.class);
+    startActivity(intent);
+}</pre></p>
+    </li>
+    <li>
+        Click on <code>LibActivity1</code> in the first line inside the
+        <code>onButton1Clicked</code> method of <code>MainActivity</code> and press
+        <strong>Alt+Enter</strong>. Follow the suggestion from Android Studio to add an import
+        for <code>LibActivity1</code> from the lib module.
+    </li>
+</ol>
+
+<p>When the user taps the <strong>Open LibActivity1</strong> button on <code>MainActivity</code>
+(from the <code>app</code> module), <code>LibActivity1</code> (from the <code>lib</code> module)
+starts.</p>
+
+<h4>Add a dependency on a library module</h4>
+
+<p>The <code>app</code> module now depends on the <code>lib</code> module, but the build system
+does not know about this yet. Edit the build file for the <code>app</code> module (
+<code>app/build.gradle</code>) and add a dependency on the <code>lib</code> module:</p>
+
+<pre>
+...
+dependencies {
+    ...
+    compile project(":lib")
+}
+</pre>
+
+<p>The <code>lib</code> module can still be built and tested independently, and the build system
+creates an AAR package for it that you could reuse in other projects.</p>
+
+<h3 id="buildProject">Build the project in Android Studio</h3>
+
+<p>To build the project on Android Studio, click <strong>Build</strong> and select
+<strong>Make Project</strong>. The status bar at the bottom of the window shows the current
+progress of the build:</p>
+
+<p><code>Gradle: Executing tasks: [:app:assembleDebug, :lib:bundleDebug]</code></p>
+
+<p class="note">If your project uses product flavors, Android Studio invokes the task for the
+selected build variant. For more information, see <a href="#workBuildVariants">Work with build
+variants.</a></p>
+
+<p>Click <img src="{@docRoot}images/tools/as-gradlebutton.png" alt=""
+style="vertical-align:bottom;margin:0;"/> on the bottom
+right part of the window to show the <em>Gradle Console</em>, as shown in figure 2.</p>
+
+<img src="{@docRoot}images/tools/as-gradleconsole.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The Gradle Console in Android Studio.</p>
+
+<p>The Gradle Console shows the build tasks and subtasks that the build system runs for
+Android Studio. If the build fails, you can find more details on the console. To hide the Gradle
+Console, click <img src="{@docRoot}images/tools/as-gradlebutton.png" alt=""
+style="vertical-align:bottom;margin:0;"/> again.</p>
+
+<p>To view the list of all available build tasks in Android Studio, click <strong>Gradle</strong>
+on the right side of the IDE window. The <em>Gradle tasks</em> panel appears as shown in
+figure 3. Double-click any build task to run it in Android Studio. To hide the <em>Gradle tasks</em>
+panel, click <strong>Gradle</strong> again.</p>
+
+<img src="{@docRoot}images/tools/as-gradlepanel.png" alt="" />
+<p class="img-caption"><strong>Figure 3.</strong> The list of build tasks in Android Studio.</p>
+
+
+<h3 id="buildCmd">Build the project from the command line</h3>
+
+<p>To build the project from the command line, open a terminal window and navigate to the project
+root. On Windows platforms, type this command:</p>
+
+<pre>
+> gradlew.bat assembleDebug
+</pre>
+
+<p>On Mac OS and Linux platforms, type these commands:</p>
+
+<pre>
+$ chmod +x gradlew
+$ ./gradlew assembleDebug
+</pre>
+
+<p>The first command (<code>chmod</code>) adds the execution permission to the Gradle wrapper
+script and is only necessary the first time you build this project from the command line.</p>
+
+<p>The output of <code>gradlew</code> is similar to the output in the Gradle Console from
+figure 2.</p>
+
+<p>The <code>assembleDebug</code> build task builds the debug version of your app and signs it
+with the default local certificate, so that you can install it on the emulator and on real devices
+for debugging purposes.</p>
+
+<p>After you build the project, the output APK for the app module is located in
+<code>app/build/outputs/apk/</code>, and the output AAR for the lib module is located in
+<code>lib/build/outputs/libs/</code>.</p>
+
+<p>To see a list of all available build tasks for your project, type this command:</p>
+
+<pre>
+$ ./gradlew tasks
+</pre>
+
+
+<h3 id="buildRelease">Build a release version</h3>
+
+<p>You can build the release version of your application from the command line or using Android
+Studio. To build it from the command line, invoke the <code>assembleRelease</code> build task using
+the Gradle wrapper script (<code>gradlew assembleRelease</code>). To build it from Android
+Studio:</p>
+
+<ol>
+    <li>Click <strong>Gradle</strong> on the right side of the IDE window.</li>
+    <li>On the <em>All tasks</em> section of the sidebar that appears, expand
+        <strong>BuildSystemExample</strong>.</li>
+    <li>Expand <strong>:app</strong> and double-click <strong>assembleRelease</strong>.</li>
+</ol>
+
+<p>You can use this procedure to invoke any build task from Android Studio.</p>
+
+
+
+<h2 id="configBuild">Configure the Build</h2>
+
+<p>This section uses the <code>BuildSystemExample</code> project from the previous section and
+shows you how to:</p>
+
+<ul>
+    <li>Use the syntax from the Android plugin for Gradle in build files.</li>
+    <li>Declare dependencies.</li>
+    <li>Configure ProGuard settings.</li>
+    <li>Configure signing settings.</li>
+    <li>Work with build variants.</li>
+</ul>
+
+<h3 id="buildFileBasics">Build file basics</h3>
+
+<p>Android Studio projects contain a top-level build file and a build file for each module. The
+build files are called <code>build.gradle</code>, and they are plain text files that use
+<a href="http://groovy.codehaus.org">Groovy</a> syntax to configure the build with the elements
+provided by the Android plugin for Gradle. In most cases, you only need to edit the build files
+at the module level. For example, the build file for the app module in the
+<code>BuildSystemExample</code> project looks like this:</p>
+
+<pre>
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.0"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
+            'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile project(":lib")
+    compile 'com.android.support:appcompat-v7:19.0.1'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+</pre>
+
+<p><code>apply plugin: 'android'</code> applies the Android plugin for Gradle to this build.
+This adds Android-specific build tasks to the top-level build tasks and makes the
+<code>android {...}</code> element available to specify Android-specific build options.</p>
+
+<p><code>android {...}</code> configures all the Android-specific build options:</p>
+
+<ul>
+    <li>The <code>compileSdkVersion</code> property specifies the compilation target.</li>
+    <li><p>The <code>buildToolsVersion</code> property specifies what version of the build tools
+        to use. To install several versions of the build tools, use the SDK Manager.</p>
+        <p class="note"><strong>Note:</strong> Always use a build tools version whose major
+        revision number is higher or equal to that of your compilation target and target SDK.</p>
+    </li>
+    <li><p>The <code>defaultConfig</code> element configures core settings and
+        entries in the manifest file (<code>AndroidManifest.xml</code>) dynamically from the
+        build system. The values in <code>defaultConfig</code> override those in the manifest
+        file.</p>
+        <p>The configuration specified in the <code>defaultConfig</code> element applies
+        to all build variants, unless the configuration for a build variant overrides some
+        of these values.</p>
+    </li>
+    <li>The <code>buildTypes</code> element controls how to build and package your app.
+        By default, the build system defines two build types: <em>debug</em> and
+        <em>release</em>. The debug build type includes debugging symbols and is signed with
+        the debug key. The release build type is not signed by default.
+        In this example the build file configures the release version to use
+        ProGuard.</li>
+</ul>
+
+<p>The <code>dependencies</code> element is outside and after the <code>android</code> element.
+This element declares the dependencies for this module. Dependencies are covered in the following
+sections.</p>
+
+<p class="note"><strong>Note:</strong> When you make changes to the build files in your project,
+Android Studio requires a project sync to import the build configuration changes. Click
+<strong>Sync Now</strong> on the yellow notification bar that appears for Android Studio
+to import the changes.</p>
+
+<img src="{@docRoot}images/tools/as-gradlesync.png" alt="" />
+<p class="img-caption"><strong>Figure 4.</strong> Sync the project in Android Studio.</p>
+
+<h3 id="declareDeps">Declare dependencies</h3>
+
+<p>The <code>app</code> module in <code>BuildSystemExample</code> declares three
+dependencies:</p>
+
+<pre>
+...
+dependencies {
+    // Module dependency
+    compile project(":lib")
+
+    // Remote binary dependency
+    compile 'com.android.support:appcompat-v7:19.0.1'
+
+    // Local binary dependency
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+</pre>
+
+<p>Each of these dependencies is described below. The build system adds all the
+<code>compile</code> dependencies to the compilation classpath and includes them in the final
+package.</p>
+
+<h4>Module dependencies</h4>
+
+<p>The <code>app</code> module depends on the <code>lib</code> module, because
+<code>MainActivity</code> launches <code>LibActivity1</code> as described in
+<a href="#openActFromLib">Open an Activity from a Library Module</a>.</p>
+
+<p><code>compile project(":lib")</code> declares a dependency on the <code>lib</code>
+module of <code>BuildSystemExample</code>. When you build the <code>app</code> module,
+the build system assembles and includes the <code>lib</code> module.</p>
+
+<h4>Remote binary dependencies</h4>
+
+<p>The <code>app</code> and <code>lib</code> modules both use the <code>ActionBarActivity</code>
+class from the Android Support Library, so these modules depend on it.</p>
+
+<p><code>compile 'com.android.support:appcompat-v7:19.0.1'</code> declares a dependency on
+version 19.0.1 of the Android Support Library by specifying its Maven coordinates. The Android Support
+Library is available in the <em>Android Repository</em> package of the Android SDK. If your
+SDK installation does not have this package, download and install it using the SDK Manager.</p>
+
+Android Studio configures
+projects to use the Maven Central Repository by default. (This configuration is included in the
+top-level build file for the project.)</p>
+
+<h4>Local binary dependencies</h4>
+
+<p>The modules in <code>BuildSystemExample</code> do not use any binary dependencies from the
+local file system. If you have modules that require local binary dependencies, copy the JAR
+files for these dependencies into <code>&lt;moduleName>/libs</code> inside your project.</p>
+
+<p><code>compile fileTree(dir: 'libs', include: ['*.jar'])</code> tells the build system that any
+JAR file inside <code>app/libs</code> is a dependency and should be included in the compilation
+classpath and in the final package.</p>
+
+<p>For more information about dependencies in Gradle, see
+<a href="http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html">Dependency
+Management Basics</a> in the Gradle User Guide.</p>
+
+<h3 id="runProguard">Run ProGuard</h3>
+
+<p>The build system can run
+<a href="http://developer.android.com/tools/help/proguard.html">ProGuard</a> to obfuscate your
+classes during the build process. In <code>BuildSystemExample</code>, modify the build file for
+the app module to run ProGuard for the release build:</p>
+
+<pre>
+...
+android {
+    ...
+    buildTypes {
+        release {
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
+                          'proguard-rules.txt'
+        }
+    }
+}
+...
+</pre>
+
+<p><code>getDefaultProguardFile('proguard-android.txt')</code> obtains the default ProGuard
+settings from the Android SDK installation. Android Studio adds the module-specific rules file
+<code>proguard-rules.txt</code> at the root of the module, where you can add custom ProGuard
+rules.</p>
+
+<h3 id="configureSigning">Configure signing settings</h3>
+
+<p>The debug and the release versions of the app differ on whether the application can be
+debugged on secure devices and on how the APK is signed. The build system signs the debug
+version with a default key and certificate using known credentials to avoid a password prompt at
+build time. The build system does not sign the release version unless you explicitly define a
+signing configuration for this build.</p>
+
+<p>To sign the release version of <code>BuildSystemExample</code>:</p>
+
+<ol>
+    <li><p>Copy your release key to the root directory of the <code>app</code> module
+        (<code>app/</code>).</p>
+        <p>This ensures that the build system can find your key when you move the location of your
+        project or when you build the project on a different machine. If you do not have a release
+        key, you can generate one as described in
+        <a href="{@docRoot}tools/publishing/app-signing.html">Signing your Applications</a>.</p>
+    </li>
+    <li><p>Add the signing configuration to the build file for the <code>app</code> module:</p>
+        <p><pre>
+...
+android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+        release {
+            storeFile file("myreleasekey.keystore")
+            storePassword "password"
+            keyAlias "MyReleaseKey"
+            keyPassword "password"
+        }
+    }
+    buildTypes {
+        release {
+            ...
+            signingConfig signingConfigs.release
+        }
+    }
+}
+...
+</pre></p>
+    </li>
+    <li>Invoke the <code>assembleRelease</code> build task from Android Studio or from the command
+        line.</li>
+</ol>
+
+<p>The package in <code>app/build/apk/app-release.apk</code> is now signed with your release key.</p>
+
+<p class="note"><strong>Note:</strong> Including the passwords for your release key and keystore
+inside the build file is not a good security practice. Alternatively, you can configure the build
+file to obtain these passwords from environment variables or have the build process prompt you
+for these passwords.</p>
+
+<p>To obtain these passwords from environment variables:</p>
+
+<pre>
+storePassword System.getenv("KSTOREPWD")
+keyPassword System.getenv("KEYPWD")
+</pre>
+
+<p>To have the build process prompt you for these passwords if you are invoking the build from
+the command line:</p>
+
+<pre>
+storePassword System.console().readLine("\nKeystore password: ")
+keyPassword System.console().readLIne("\nKey password: ")
+</pre>
+
+<h3 id="workBuildVariants">Work with build variants</h3>
+
+<p>This section describes how the build system can help you create different versions of the same
+application from a single project. This is useful when you have a demo version and a paid version
+of your app, or if you want to distribute multiple APKs for different device configurations on
+Google Play.</p>
+
+<p>The build system uses <em>product flavors</em> to create different versions of your app. Each
+version of your app can have different features or device requirements. The build system generates
+a different APK for each version of your app.</p>
+
+<h4>Build variants</h4>
+
+<p>Each version of your app is represented in the build system by a <em>build variant</em>.
+Build variants are combinations of build types and product flavor configurations. Android Studio
+projects define two build types (<em>debug</em> and <em>release</em>) and no product flavors by
+default. These projects consists of two build variants, debug and release, and the build system
+generates an APK for each.</p>
+
+<p>The exercise in this section defines two product flavors, <em>demo</em> and <em>full</em>.
+This generates four build variants:</p>
+
+<ul>
+    <li>demo-debug</li>
+    <li>demo-release</li>
+    <li>full-debug</li>
+    <li>full-release</li>
+</ul>
+
+<p>In this case the build system creates four APKs, one for each of these build variants.</p>
+
+<p>Some projects have complex combinations of features along more than one dimension, but they
+still represent the same app. For example, in addition to having a demo and a full version of the
+app, some games may contain binaries specific to a particular CPU/ABI. The flexibility of
+the build system makes it possible to generate the following build variants for such a project:</p>
+
+<ul>
+    <li>x86-demo-debug</li>
+    <li>x86-demo-release</li>
+    <li>x86-full-debug</li>
+    <li>x86-full-release</li>
+    <li>arm-demo-debug</li>
+    <li>arm-demo-release</li>
+    <li>arm-full-debug</li>
+    <li>arm-full-release</li>
+    <li>mips-demo-debug</li>
+    <li>mips-demo-release</li>
+    <li>mips-full-debug</li>
+    <li>mips-full-release</li>
+</ul>
+
+<p>This project would consist of two build types (<em>debug</em> and <em>release</em>)
+and two <em>dimensions</em> of product flavors, one for app type (demo or full) and one for
+CPU/ABI (x86, ARM, or MIPS). For more information on flavor dimensions, see the
+<a href="http://tools.android.com/tech-docs/new-build-system/user-guide">Gradle Plugin User
+Guide</a>.</p>
+
+<h4>Source directories</h4>
+
+<p>To build each version of your app, the build system combines source code and
+resources from:</p>
+
+<ul>
+    <li><code>src/main/</code> - the main source directory (common to all variants)</li>
+    <li><code>src/&lt;buildType>/</code> - the build type source directory</li>
+    <li><code>src/&lt;flavorName>/</code> - the flavor source directory</li>
+</ul>
+
+<p>The number of flavor source directories used in the build depends on the flavor configuration
+of your project:</p>
+<ul>
+    <li><p>For projects that do not define any flavors, the build system does not use any
+        flavor source directories. For example, to generate the <em>release</em> build variant
+        in projects with no flavors, the build system uses:</p>
+        <ul>
+            <li><code>src/main/</code></li>
+            <li><code>src/release/</code> (build type)</li>
+        </ul>
+    </li>
+    <li><p>For projects that define a set of flavors, the build system uses one flavor source
+        directory. For example, to generate the <em>full-debug</em> build variant in the example
+        in this section, the build system uses:</p>
+        <ul>
+            <li><code>src/main/</code></li>
+            <li><code>src/debug/</code> (build type)</li>
+            <li><code>src/full/</code> (flavor)</li>
+        </ul>
+    </li>
+    <li><p>For projects that use flavor dimensions, the build system uses one flavor source
+        directory per dimension. For example, to generate the <em>arm-demo-release</em> build
+        variant in the previous example, the build system uses:</p>
+        <ul>
+            <li><code>src/main/</code></li>
+            <li><code>src/release/</code> (build type)</li>
+            <li><code>src/demo/</code> (flavor - app type dimension)</li>
+            <li><code>src/arm/</code> (flavor - ABI dimension)</li>
+        </ul>
+    </li>
+</ul>
+
+<p class="note"><strong>Note:</strong> The build type and flavor source directories are optional,
+and Android Studio does not create these directories for you. The build system does not use them
+if they are not present.</p>
+
+<p>The source code from these directories is used together to generate the output for a build
+variant. You can have classes with the same name in different directories as long as those
+directories are not used together in the same variant. The exercise in this section shows you
+how to create different versions of the same activity class in different variants.</p>
+
+<p>The build system merges all the manifests into a single manifest, so each build variant
+can define different components or permissions in the final manifest.</p>
+
+<p>The build system merges all the resources from the all the source directories. If different
+folders contain resources with the same name for a build variant, the priority order is the
+following: build type resources override those from the product flavor, which override the
+resources in the main source directory.</p>
+
+<p class="note"><strong>Note:</strong> Build variants enable you to reuse common activities,
+application logic, and resources across different versions of your app.</p>
+
+<h4>Product flavors in BuildSystemExample</h4>
+
+<p>To create different versions of your app:</p>
+
+<ol>
+    <li>Define product flavors in the build file.</li>
+    <li>Create additional source directories for each flavor.</li>
+    <li>Add the flavor-specific sources to your project.</li>
+</ol>
+
+<p>The rest of this section walks you through these steps in detail using the
+<code>BuildSystemExample</code> project. You create two flavors of the
+<code>BuildSystemExample</code> app, a demo flavor and a full flavor. Both flavors share
+<code>MainActivity</code>, to which you add a new button to launch a new activity,
+<code>SecondActivity</code>. This new activity is different for each flavor, so you simulate a
+situation where the new activity would have more features in the full flavor than in the demo
+flavor. At the end of the exercise, you end up with two different APKs, one for each flavor.</p>
+
+<h4>Define product flavors in the build file</h4>
+
+<p>To define two product flavors, edit the build file for the app module to add the following
+configuration:</p>
+
+<pre>
+...
+android {
+    ...
+    defaultConfig { ... }
+    signingConfigs { ... }
+    buildTypes { ... }
+    productFlavors {
+        demo {
+            applicationId "com.buildsystemexample.app.demo"
+            versionName "1.0-demo"
+        }
+        full {
+            applicationId "com.buildsystemexample.app.full"
+            versionName "1.0-full"
+        }
+    }
+}
+...
+</pre>
+
+<p>The product flavor definitions support the same properties as the <code>defaultConfig</code>
+element. The base configuration for all flavors is specified in <code>defaultConfig</code>, and each
+flavor can override any value. The build file above uses the <code>applicationId</code> property
+to assign a different package name to each flavor: since each flavor definition creates a
+different app, they each need a distinct package name.</p>
+
+<p class="note"><strong>Note:</strong> To distribute your app using
+<a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a> in
+Google Play, assign the same package name to all variants and give each variant a different
+<code>versionCode</code>. To distribute different variants of your app as separate apps in Google
+Play, assign a different package name to each variant.</p>
+
+<h4>Add additional source directories for each flavor</h4>
+
+<p>Now you create source folders and add a <code>SecondActivity</code> to each flavor. To create
+the source directory structure for the demo flavor:</p>
+
+<ol>
+    <li>On the <em>Project</em> panel, expand <strong>BuildSystemExample</strong>, and then expand
+        the <strong>app</strong> directory.</li>
+    <li>Right click the <strong>src</strong> directory under <em>app</em> and select
+        <strong>New</strong> > <strong>Directory</strong>.</li>
+    <li>Enter "demo" as the name of the new directory and click <strong>OK</strong>.</li>
+    <li><p>Similarly, create the following directories:</p>
+        <ul>
+            <li><code>app/src/demo/java</code></li>
+            <li><code>app/src/demo/res</code></li>
+            <li><code>app/src/demo/res/layout</code></li>
+            <li><code>app/src/demo/res/values</code></li>
+        </ul>
+    </li>
+</ol>
+
+<p>The resulting directory structure looks like figure 5.</p>
+
+<img src="{@docRoot}images/tools/as-demoflavordirs.png" alt="" />
+<p class="img-caption"><strong>Figure 5.</strong> New source directories for the demo flavor.</p>
+
+<h4>Add a new activity to each flavor</h4>
+
+<p>To add <code>SecondActivity</code> to the <code>demo</code> flavor:</p>
+
+<ol>
+    <li>On the <em>Project</em> panel, right click on the <strong>app</strong> module and select
+        <strong>New</strong> > <strong>Activity</strong>.</li>
+    <li>Select <strong>Blank Activity</strong> and click <strong>Next</strong>.</li>
+    <li>Enter "SecondActivity" as the activity name.</li>
+    <li>Enter "com.buildsystemexample.app" as the package name and click
+        <strong>Finish</strong>.</li>
+    <li>Right click on the <strong>java</strong> directory under <em>app/src/demo</em> and select
+        <strong>New</strong> > <strong>Package</strong>.</li>
+    <li>Enter "com.buildsystemexample.app" as the package name and click <strong>OK</strong>.</li>
+    <li>Drag <strong>SecondActivity</strong> and drop it under the new package in
+        <em>app/src/demo/java</em>.</li>
+    <li>Accept the default values and click <strong>Refactor</strong>.</li>
+</ol>
+
+<p>To add the layout for <code>SecondActivity</code> and a strings resource to the demo flavor:</p>
+
+<ol>
+    <li>Drag <strong>activity_second.xml</strong> from <em>app/src/main/res/layout</em> and drop it
+        inside <em>app/src/demo/res/layout</em>.</li>
+    <li>Accept the default values on the window that appears and click <code>OK</code>.</li>
+    <li>Copy <strong>strings.xml</strong> from <em>app/src/main/res</em> into
+        <em>app/src/demo/res</em>.</li>
+    <li><p>Replace the contents of the new copy of <code>strings.xml</code> with the
+        following:</p>
+        <p><pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello_world">Demo version only.&lt;/string>
+&lt;/resources>
+</pre></p>
+    </li>
+</ol>
+
+<p>Now you add source folders and <code>SecondActivity</code> to the full flavor by making a copy
+of the <code>demo</code> flavor:</p>
+
+<ol>
+    <li>On the <em>Project</em> panel, right click on the <strong>demo</strong> directory under
+        <em>app/src</em> and select <strong>Copy</strong>.</li>
+    <li>Right-click on the <strong>src/</strong> directory under <em>app/</em> and select
+        <strong>Paste</strong>.</li>
+    <li>On the window that appears, enter "full" as the new name and click <strong>OK</strong>.</li>
+    <li><p>Replace the contents of <strong>strings.xml</strong> under <em>src/full/res/values</em>
+        with the following:</p>
+        <p><pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello_world">This is the full version!&lt;/string>
+&lt;/resources>
+</pre></p>
+    </li>
+</ol>
+
+<p class="note"><strong>Note:</strong> From this point on, you could develop
+<code>SecondActivity</code> independently inside each
+flavor. You can add more features to this activity in the <code>full</code> flavor.</p>
+
+<p>To work on files from a particular flavor, click on <strong>Build Variants</strong> on the left
+of the IDE window and select the flavor you want to modify in the <em>Build Variants</em> panel,
+as shown in figure 5. Android Studio may show errors in source files from flavors other than the
+one selected in the <em>Build Variants</em> panel, but this does not affect the outcome of the
+build.</p>
+
+<img src="{@docRoot}images/tools/as-buildvariants.png" alt="" />
+<p class="img-caption"><strong>Figure 6.</strong> The Build Variants panel.</p>
+
+<h4>Launch a flavor-specific activity from the main activity</h4>
+
+<p>Since the flavor-specific activity (<code>SecondActivity</code>) has the same package name and
+activity name in both flavors, you can launch it from the main activity, which is common to all
+flavors. To modify the main activity:</p>
+
+<ol>
+    <li><p>Edit <code>activity_main.xml</code> and add a new button to
+        <code>MainActivity</code>:</p>
+        <p><pre>
+&lt;LinearLayout ...>
+    ...
+    &lt;Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button2"
+        android:onClick="onButton2Clicked"/>
+&lt;/LinearLayout>
+</pre></p>
+    </li>
+    <li>Click on the areas marked in red in the layout file and press <strong>Alt</strong>+
+        <strong>Enter</strong>. Follow the suggestions from Android Studio to add a new string
+        resource with value “Open Second Activity” and an <code>onButton2Clicked</code> method to
+        <code>MainActivity</code>.</li>
+    <li><p>Add the following code to the <code>onButton2Clicked</code> method of
+        <code>MainActivity</code>:</p>
+        <p><pre>
+public void onButton2Clicked(View view) {
+    Intent intent = new Intent(this, SecondActivity.class);
+    startActivity(intent);
+}
+</pre></p>
+    </li>
+    <li><p>Edit the app's manifest to include a reference to <code>SecondActivity</code>:</p>
+        <p><pre>
+&lt;manifest ...>
+    &lt;application ...>
+        ...
+        &lt;activity
+            android:name="com.buildsystemexample.app.SecondActivity"
+            android:label="@string/title_activity_second" >
+        &lt;/activity>
+    &lt;/application>
+&lt;/manifest>
+</pre></p>
+    </li>
+</ol>
+
+<h4>Build output</h4>
+
+<p>The <code>BuildSystemExample</code> app is now complete. To build it, invoke the
+<code>assemble</code> task from Android Studio or from the command line.</p>
+
+<p>The build generates an APK for each build variant:
+the <code>app/build/apk/</code> directory contains packages named
+<code>app-&lt;flavor>-&lt;buildtype>.apk</code>; for example, <code>app-full-release.apk</code> and
+<code>app-demo-debug.apk</code>.</p>
+
+
+<h2 id="reference">Reference</h2>
+
+<p>The build system is very flexible and has more features than those described here. For a
+complete reference, see the
+<a href="http://tools.android.com/tech-docs/new-build-system/user-guide">Android Plugin for Gradle
+User Guide</a>.</p>

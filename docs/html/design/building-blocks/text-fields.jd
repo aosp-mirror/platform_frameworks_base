@@ -1,5 +1,5 @@
 page.title=Text Fields
-page.tags="text","edittext","input"
+page.tags=text,edittext,input
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/text.html">

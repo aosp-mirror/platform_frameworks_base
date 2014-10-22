@@ -16,27 +16,20 @@
 
 package com.android.internal.app;
 
-import android.net.Uri;
-import android.os.ParcelFileDescriptor;
-import android.content.pm.ContainerEncryptionParams;
+import com.android.internal.os.IParcelFileDescriptorFactory;
 import android.content.pm.PackageInfoLite;
 import android.content.res.ObbInfo;
 
 interface IMediaContainerService {
-    String copyResourceToContainer(in Uri packageURI, String containerId, String key,
-            String resFileName, String publicResFileName, boolean isExternal,
-            boolean isForwardLocked, in String abiOverride);
-    int copyResource(in Uri packageURI, in ContainerEncryptionParams encryptionParams,
-            in ParcelFileDescriptor outStream);
-    PackageInfoLite getMinimalPackageInfo(in String packagePath, in int flags, in long threshold,
-            in String abiOverride);
-    boolean checkInternalFreeStorage(in Uri fileUri, boolean isForwardLocked, in long threshold);
-    boolean checkExternalFreeStorage(in Uri fileUri, boolean isForwardLocked, in String abiOverride);
-    ObbInfo getObbInfo(in String filename);
-    long calculateDirectorySize(in String directory);
+    String copyPackageToContainer(String packagePath, String containerId, String key,
+            boolean isExternal, boolean isForwardLocked, String abiOverride);
+    int copyPackage(String packagePath, in IParcelFileDescriptorFactory target);
+
+    PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, String abiOverride);
+    ObbInfo getObbInfo(String filename);
+    long calculateDirectorySize(String directory);
     /** Return file system stats: [0] is total bytes, [1] is available bytes */
-    long[] getFileSystemStats(in String path);
-    void clearDirectory(in String directory);
-    long calculateInstalledSize(in String packagePath, boolean isForwardLocked,
-            in String abiOverride);
+    long[] getFileSystemStats(String path);
+    void clearDirectory(String directory);
+    long calculateInstalledSize(String packagePath, boolean isForwardLocked, String abiOverride);
 }

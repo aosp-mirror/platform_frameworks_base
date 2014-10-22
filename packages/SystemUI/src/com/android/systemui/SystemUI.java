@@ -35,6 +35,9 @@ public abstract class SystemUI {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
     }
 
+    protected void onBootCompleted() {
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getComponent(Class<T> interfaceType) {
         return (T) (mComponents != null ? mComponents.get(interfaceType) : null);

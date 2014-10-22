@@ -71,24 +71,30 @@ accessibility service.</p>
 
 <h3 id="service-declaration">Accessibility service declaration</h3>
 
-<p>In order to be treated as an accessibility service, your application must include the
+<p>In order to be treated as an accessibility service, you must include a
 {@code service} element (rather than the {@code activity} element) within the {@code application}
-element in its manifest. In addition, within the {@code service} element, you must also include an
+element in your manifest. In addition, within the {@code service} element, you must also include an
 accessibility service intent filter. For compatiblity with Android 4.1 and higher, the manifest
 must also request the {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE} permission
 as shown in the following sample:</p>
 
 <pre>
-&lt;application&gt;
-  &lt;service android:name=&quot;.MyAccessibilityService&quot;
-      android:label=&quot;@string/accessibility_service_label&quot;
-      android:permission=&quot;android.permission.BIND_ACCESSIBILITY_SERVICE&quot&gt;
-    &lt;intent-filter&gt;
-      &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
-    &lt;/intent-filter&gt;
-  &lt;/service&gt;
-  &lt;uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" /&gt;
-&lt;/application&gt;
+&lt;manifest&gt;
+  ...
+  &lt;uses-permission ... /&gt;
+  ...
+  &lt;application&gt;
+    ...
+    &lt;service android:name=&quot;.MyAccessibilityService&quot;
+        android:label=&quot;@string/accessibility_service_label&quot;
+        android:permission=&quot;android.permission.BIND_ACCESSIBILITY_SERVICE&quot&gt;
+      &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
+      &lt;/intent-filter&gt;
+    &lt;/service&gt;
+    &lt;uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" /&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
 </pre>
 
 <p>These declarations are required for all accessibility services deployed on Android 1.6 (API Level

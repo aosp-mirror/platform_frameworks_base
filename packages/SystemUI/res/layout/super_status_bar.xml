@@ -20,32 +20,68 @@
 <!-- This is the combined status bar / notification panel window. -->
 <com.android.systemui.statusbar.phone.StatusBarWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:focusable="true"
-    android:descendantFocusability="afterDescendants"
     android:fitsSystemWindows="true"
-    android:background="@android:color/transparent"
-    >
+    android:descendantFocusability="afterDescendants">
+
+    <com.android.systemui.statusbar.BackDropView
+            android:id="@+id/backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            >
+        <ImageView android:id="@+id/backdrop_back"
+                   android:layout_width="match_parent"
+                   android:scaleType="centerCrop"
+                   android:layout_height="match_parent" />
+        <ImageView android:id="@+id/backdrop_front"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:scaleType="centerCrop"
+                   android:visibility="invisible" />
+    </com.android.systemui.statusbar.BackDropView>
+
+    <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_behind"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/status_bar_height"
-        />
+        android:layout_height="@dimen/status_bar_height" />
+
+    <FrameLayout android:id="@+id/brightness_mirror"
+                 android:layout_width="@dimen/notification_panel_width"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="@integer/notification_panel_layout_gravity"
+                 android:paddingLeft="@dimen/notification_side_padding"
+                 android:paddingRight="@dimen/notification_side_padding"
+                 android:visibility="gone">
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:elevation="2dp"
+                android:background="@drawable/brightness_mirror_background">
+            <include layout="@layout/quick_settings_brightness_dialog"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content" />
+        </FrameLayout>
+    </FrameLayout>
 
     <com.android.systemui.statusbar.phone.PanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
+        android:background="@color/transparent" >
         <include layout="@layout/status_bar_expanded"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
-        <ViewStub android:id="@+id/quick_settings_stub"
-            android:layout="@layout/quick_settings"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:visibility="gone" />
     </com.android.systemui.statusbar.phone.PanelHolder>
+
+    <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_in_front"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

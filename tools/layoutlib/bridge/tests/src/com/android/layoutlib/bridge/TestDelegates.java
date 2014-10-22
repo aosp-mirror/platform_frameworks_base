@@ -41,27 +41,29 @@ import junit.framework.TestCase;
  */
 public class TestDelegates extends TestCase {
 
+    private List<String> mErrors = new ArrayList<String>();
+
     public void testNativeDelegates() {
 
         final String[] classes = CreateInfo.DELEGATE_CLASS_NATIVES;
-        final int count = classes.length;
-        for (int i = 0 ; i < count ; i++) {
-            loadAndCompareClasses(classes[i], classes[i] + "_Delegate");
+        mErrors.clear();
+        for (String clazz : classes) {
+            loadAndCompareClasses(clazz, clazz + "_Delegate");
         }
+        assertTrue(getErrors(), mErrors.isEmpty());
     }
 
     public void testMethodDelegates() {
         final String[] methods = CreateInfo.DELEGATE_METHODS;
-        final int count = methods.length;
-        for (int i = 0 ; i < count ; i++) {
-            String methodName = methods[i];
-
+        mErrors.clear();
+        for (String methodName : methods) {
             // extract the class name
             String className = methodName.substring(0, methodName.indexOf('#'));
             String targetClassName = className.replace('$', '_') + "_Delegate";
 
             loadAndCompareClasses(className, targetClassName);
         }
+        assertTrue(getErrors(), mErrors.isEmpty());
     }
 
     private void loadAndCompareClasses(String originalClassName, String delegateClassName) {
@@ -73,9 +75,9 @@ public class TestDelegates extends TestCase {
 
             compare(originalClass, delegateClass);
         } catch (ClassNotFoundException e) {
-           fail("Failed to load class: " + e.getMessage());
+            mErrors.add("Failed to load class: " + e.getMessage());
         } catch (SecurityException e) {
-            fail("Failed to load class: " + e.getMessage());
+            mErrors.add("Failed to load class: " + e.getMessage());
         }
     }
 
@@ -121,27 +123,40 @@ public class TestDelegates extends TestCase {
                 Method delegateMethod = delegateClass.getDeclaredMethod(originalMethod.getName(),
                         parameters);
 
+                // check the return type of the methods match.
+                if (delegateMethod.getReturnType() != originalMethod.getReturnType()) {
+                    mErrors.add(
+                            String.format("Delegate method %1$s.%2$s does not match the " +
+                                    "corresponding framework method which returns %3$s",
+                            delegateClass.getName(),
+                            getMethodName(delegateMethod),
+                            originalMethod.getReturnType().getName()));
+                }
+
                 // check that the method has the annotation
-                assertNotNull(
-                        String.format(
-                                "Delegate method %1$s for class %2$s does not have the @LayoutlibDelegate annotation",
-                                delegateMethod.getName(),
-                                originalClass.getName()),
-                        delegateMethod.getAnnotation(LayoutlibDelegate.class));
+                if (delegateMethod.getAnnotation(LayoutlibDelegate.class) == null) {
+                    mErrors.add(
+                            String.format("Delegate method %1$s for class %2$s does not have the " +
+                                            "@LayoutlibDelegate annotation",
+                                    delegateMethod.getName(),
+                                    originalClass.getName()));
+                }
 
                 // check that the method is static
-                assertTrue(
-                        String.format(
-                                "Delegate method %1$s for class %2$s is not static",
-                                delegateMethod.getName(),
-                                originalClass.getName()),
-                        (delegateMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
+                if ((delegateMethod.getModifiers() & Modifier.STATIC) != Modifier.STATIC) {
+                    mErrors.add(
+                            String.format(
+                                    "Delegate method %1$s for class %2$s is not static",
+                                    delegateMethod.getName(),
+                                    originalClass.getName())
+                    );
+                }
 
                 // add the method as checked.
                 checkedDelegateMethods.add(delegateMethod);
             } catch (NoSuchMethodException e) {
                 String name = getMethodName(originalMethod, parameters);
-                fail(String.format("Missing %1$s.%2$s", delegateClass.getName(), name));
+                mErrors.add(String.format("Missing %1$s.%2$s", delegateClass.getName(), name));
             }
         }
 
@@ -158,12 +173,12 @@ public class TestDelegates extends TestCase {
                 continue;
             }
 
-            assertTrue(
-                    String.format(
-                            "Delegate method %1$s.%2$s is not used anymore and must be removed",
-                            delegateClass.getName(),
-                            getMethodName(delegateMethod)),
-                    checkedDelegateMethods.contains(delegateMethod));
+            if (!checkedDelegateMethods.contains(delegateMethod)) {
+                mErrors.add(String.format(
+                        "Delegate method %1$s.%2$s is not used anymore and must be removed",
+                        delegateClass.getName(),
+                        getMethodName(delegateMethod)));
+            }
         }
 
     }
@@ -193,5 +208,13 @@ public class TestDelegates extends TestCase {
         sb.append(")");
 
         return sb.toString();
+    }
+
+    private String getErrors() {
+        StringBuilder s = new StringBuilder();
+        for (String error : mErrors) {
+            s.append(error).append('\n');
+        }
+        return s.toString();
     }
 }

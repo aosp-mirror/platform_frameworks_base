@@ -20,8 +20,6 @@
         <attr name="keyCode" format="integer" />
         <!-- does this button generate longpress / repeat events? -->
         <attr name="keyRepeat" format="boolean" />
-        <!-- drawable to use for a swelling, glowing background on press -->
-        <attr name="glowBackground" format="reference" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />
@@ -42,10 +40,37 @@
         <attr name="decayTime" format="integer" />
         <attr name="orientation" />
     </declare-styleable>
-
+    <declare-styleable name="BatteryMeterView">
+        <attr name="frameColor" format="color" />
+    </declare-styleable>
+    <declare-styleable name="Clock">
+        <attr name="amPmStyle" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="small" value="1" />
+            <enum name="gone" value="2" />
+        </attr>
+    </declare-styleable>
     <attr name="orientation">
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />
     </attr>
+    <declare-styleable name="UserAvatarView">
+        <attr name="frameWidth" format="dimension" />
+        <attr name="framePadding" format="dimension" />
+        <attr name="activeFrameColor" format="color" />
+        <attr name="frameColor" />
+    </declare-styleable>
+    <declare-styleable name="UserDetailItemView">
+        <attr name="regularFontFamily" format="string" />
+        <attr name="activatedFontFamily" format="string" />
+    </declare-styleable>
+    <declare-styleable name="DateView">
+        <attr name="datePattern" format="string" />
+    </declare-styleable>
+    <declare-styleable name="PseudoGridView">
+        <attr name="numColumns" format="integer" />
+        <attr name="verticalSpacing" format="dimension" />
+        <attr name="horizontalSpacing" format="dimension" />
+    </declare-styleable>
 </resources>
 

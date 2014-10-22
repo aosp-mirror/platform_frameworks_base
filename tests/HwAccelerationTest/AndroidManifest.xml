@@ -216,6 +216,15 @@
         </activity>
 
         <activity
+                android:name="ClipOutlineActivity"
+                android:label="Clip/Outline">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="DisplayListLayersActivity"
                 android:label="Layers/Display Lists">
             <intent-filter>
@@ -227,6 +236,15 @@
         <activity
                 android:name="MatrixActivity"
                 android:label="Misc/Matrix">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="LooperAcceleration"
+                android:label="Misc/LooperAcceleration">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
@@ -322,7 +340,7 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
-        
+
         <activity
                 android:name="GLTextureViewActivity"
                 android:label="TextureView/OpenGL">
@@ -331,7 +349,7 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
-        
+
         <activity
                 android:name="BitmapMeshActivity"
                 android:label="Bitmaps/Mesh">
@@ -706,6 +724,15 @@
         </activity>
 
         <activity
+                android:name="ColorFiltersMutateActivity"
+                android:label="ColorFilters/Mutate Filters">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="LinesActivity"
                 android:label="Draw/Lines">
             <intent-filter>
@@ -843,6 +870,60 @@
         <activity
                 android:name="ViewLayerInvalidationActivity"
                 android:label="Layers/Invalidation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="ProjectionActivity"
+                android:label="Reordering/Projection">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".ProjectionClippingActivity"
+                android:label="Reordering/Projection Clipping">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".ZOrderingActivity"
+                android:label="Reordering/Z Ordering">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="GLDepthTestActivity"
+                android:label="Reordering/OpenGL Depth Test">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="CirclePropActivity"
+                android:label="Animation/Circle Props">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="RevealActivity"
+                android:label="Animation/Reveal Animation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />

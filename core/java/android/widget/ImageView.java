@@ -16,16 +16,20 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
@@ -41,6 +45,8 @@ import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,13 +79,19 @@ public class ImageView extends View {
     private int mMaxHeight = Integer.MAX_VALUE;
 
     // these are applied to the drawable
-    private ColorFilter mColorFilter;
+    private ColorFilter mColorFilter = null;
+    private boolean mHasColorFilter = false;
     private Xfermode mXfermode;
     private int mAlpha = 255;
     private int mViewAlphaScale = 256;
     private boolean mColorMod = false;
 
     private Drawable mDrawable = null;
+    private ColorStateList mDrawableTintList = null;
+    private PorterDuff.Mode mDrawableTintMode = null;
+    private boolean mHasDrawableTint = false;
+    private boolean mHasDrawableTintMode = false;
+
     private int[] mState = null;
     private boolean mMergeState = false;
     private int mLevel = 0;
@@ -119,12 +131,17 @@ public class ImageView extends View {
         this(context, attrs, 0);
     }
 
-    public ImageView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
         initImageView();
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ImageView, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ImageView, defStyleAttr, defStyleRes);
 
         Drawable d = a.getDrawable(com.android.internal.R.styleable.ImageView_src);
         if (d != null) {
@@ -147,17 +164,30 @@ public class ImageView extends View {
         setMaxHeight(a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ImageView_maxHeight, Integer.MAX_VALUE));
         
-        int index = a.getInt(com.android.internal.R.styleable.ImageView_scaleType, -1);
+        final int index = a.getInt(com.android.internal.R.styleable.ImageView_scaleType, -1);
         if (index >= 0) {
             setScaleType(sScaleTypeArray[index]);
         }
 
-        int tint = a.getInt(com.android.internal.R.styleable.ImageView_tint, 0);
-        if (tint != 0) {
-            setColorFilter(tint);
+        if (a.hasValue(R.styleable.ImageView_tint)) {
+            mDrawableTintList = a.getColorStateList(R.styleable.ImageView_tint);
+            mHasDrawableTint = true;
+
+            // Prior to L, this attribute would always set a color filter with
+            // blending mode SRC_ATOP. Preserve that default behavior.
+            mDrawableTintMode = PorterDuff.Mode.SRC_ATOP;
+            mHasDrawableTintMode = true;
         }
-        
-        int alpha = a.getInt(com.android.internal.R.styleable.ImageView_drawableAlpha, 255);
+
+        if (a.hasValue(R.styleable.ImageView_tintMode)) {
+            mDrawableTintMode = Drawable.parseTintMode(a.getInt(
+                    R.styleable.ImageView_tintMode, -1), mDrawableTintMode);
+            mHasDrawableTintMode = true;
+        }
+
+        applyImageTint();
+
+        final int alpha = a.getInt(com.android.internal.R.styleable.ImageView_drawableAlpha, 255);
         if (alpha != 255) {
             setAlpha(alpha);
         }
@@ -357,12 +387,12 @@ public class ImageView extends View {
     @android.view.RemotableViewMethod
     public void setImageResource(int resId) {
         if (mUri != null || mResource != resId) {
+            final int oldWidth = mDrawableWidth;
+            final int oldHeight = mDrawableHeight;
+
             updateDrawable(null);
             mResource = resId;
             mUri = null;
-
-            final int oldWidth = mDrawableWidth;
-            final int oldHeight = mDrawableHeight;
 
             resolveUri();
 
@@ -424,6 +454,79 @@ public class ImageView extends View {
                 requestLayout();
             }
             invalidate();
+        }
+    }
+
+    /**
+     * Applies a tint to the image drawable. Does not modify the current tint
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to {@link #setImageDrawable(Drawable)} will automatically
+     * mutate the drawable and apply the specified tint and tint mode using
+     * {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#ImageView_tint
+     * @see #getImageTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public void setImageTintList(@Nullable ColorStateList tint) {
+        mDrawableTintList = tint;
+        mHasDrawableTint = true;
+
+        applyImageTint();
+    }
+
+    /**
+     * @return the tint applied to the image drawable
+     * @attr ref android.R.styleable#ImageView_tint
+     * @see #setImageTintList(ColorStateList)
+     */
+    @Nullable
+    public ColorStateList getImageTintList() {
+        return mDrawableTintList;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setImageTintList(ColorStateList)}} to the image drawable. The default
+     * mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#ImageView_tintMode
+     * @see #getImageTintMode()
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public void setImageTintMode(@Nullable PorterDuff.Mode tintMode) {
+        mDrawableTintMode = tintMode;
+        mHasDrawableTintMode = true;
+
+        applyImageTint();
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the image drawable
+     * @attr ref android.R.styleable#ImageView_tintMode
+     * @see #setImageTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    public PorterDuff.Mode getImageTintMode() {
+        return mDrawableTintMode;
+    }
+
+    private void applyImageTint() {
+        if (mDrawable != null && (mHasDrawableTint || mHasDrawableTintMode)) {
+            mDrawable = mDrawable.mutate();
+
+            if (mHasDrawableTint) {
+                mDrawable.setTintList(mDrawableTintList);
+            }
+
+            if (mHasDrawableTintMode) {
+                mDrawable.setTintMode(mDrawableTintMode);
+            }
         }
     }
 
@@ -635,7 +738,7 @@ public class ImageView extends View {
 
         if (mResource != 0) {
             try {
-                d = rsrc.getDrawable(mResource);
+                d = mContext.getDrawable(mResource);
             } catch (Exception e) {
                 Log.w("ImageView", "Unable to find resource: " + mResource, e);
                 // Don't try again.
@@ -648,7 +751,7 @@ public class ImageView extends View {
                     // Load drawable through Resources, to get the source density information
                     ContentResolver.OpenResourceIdResult r =
                             mContext.getContentResolver().getResourceId(mUri);
-                    d = r.r.getDrawable(r.id);
+                    d = r.r.getDrawable(r.id, mContext.getTheme());
                 } catch (Exception e) {
                     Log.w("ImageView", "Unable to open content: " + mUri, e);
                 }
@@ -702,17 +805,20 @@ public class ImageView extends View {
             mDrawable.setCallback(null);
             unscheduleDrawable(mDrawable);
         }
+
         mDrawable = d;
+
         if (d != null) {
             d.setCallback(this);
+            d.setLayoutDirection(getLayoutDirection());
             if (d.isStateful()) {
                 d.setState(getDrawableState());
             }
-            d.setLevel(mLevel);
-            d.setLayoutDirection(getLayoutDirection());
             d.setVisible(getVisibility() == VISIBLE, true);
+            d.setLevel(mLevel);
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
+            applyImageTint();
             applyColorMod();
             configureBounds();
         } else {
@@ -1003,7 +1109,30 @@ public class ImageView extends View {
         }
     }
 
-    @Override 
+    @Override
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
+
+        if (mDrawable != null) {
+            mDrawable.setHotspot(x, y);
+        }
+    }
+
+    /** @hide */
+    public void animateTransform(Matrix matrix) {
+        if (matrix == null) {
+            mDrawable.setBounds(0, 0, getWidth(), getHeight());
+        } else {
+            mDrawable.setBounds(0, 0, mDrawableWidth, mDrawableHeight);
+            if (mDrawMatrix == null) {
+                mDrawMatrix = new Matrix();
+            }
+            mDrawMatrix.set(matrix);
+        }
+        invalidate();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
@@ -1160,6 +1289,7 @@ public class ImageView extends View {
     public void setColorFilter(ColorFilter cf) {
         if (mColorFilter != cf) {
             mColorFilter = cf;
+            mHasColorFilter = true;
             mColorMod = true;
             applyColorMod();
             invalidate();
@@ -1214,9 +1344,42 @@ public class ImageView extends View {
         // re-applied if the Drawable is changed.
         if (mDrawable != null && mColorMod) {
             mDrawable = mDrawable.mutate();
-            mDrawable.setColorFilter(mColorFilter);
+            if (mHasColorFilter) {
+                mDrawable.setColorFilter(mColorFilter);
+            }
             mDrawable.setXfermode(mXfermode);
             mDrawable.setAlpha(mAlpha * mViewAlphaScale >> 8);
+        }
+    }
+
+    @Override
+    public boolean isOpaque() {
+        return super.isOpaque() || mDrawable != null && mXfermode == null
+                && mDrawable.getOpacity() == PixelFormat.OPAQUE
+                && mAlpha * mViewAlphaScale >> 8 == 255
+                && isFilledByImage();
+    }
+
+    private boolean isFilledByImage() {
+        if (mDrawable == null) {
+            return false;
+        }
+
+        final Rect bounds = mDrawable.getBounds();
+        final Matrix matrix = mDrawMatrix;
+        if (matrix == null) {
+            return bounds.left <= 0 && bounds.top <= 0 && bounds.right >= getWidth()
+                    && bounds.bottom >= getHeight();
+        } else if (matrix.rectStaysRect()) {
+            final RectF boundsSrc = mTempSrc;
+            final RectF boundsDst = mTempDst;
+            boundsSrc.set(bounds);
+            matrix.mapRect(boundsDst, boundsSrc);
+            return boundsDst.left <= 0 && boundsDst.top <= 0 && boundsDst.right >= getWidth()
+                    && boundsDst.bottom >= getHeight();
+        } else {
+            // If the matrix doesn't map to a rectangle, assume the worst.
+            return false;
         }
     }
 

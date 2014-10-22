@@ -97,7 +97,7 @@ abstract public class CompareActivity extends Activity {
                 Log.d(LOG_TAG, "failure to access hardware layer");
                 return;
             }
-            Method copyInto = hardwareLayer.getClass().getSuperclass()
+            Method copyInto = hardwareLayer.getClass()
                     .getDeclaredMethod("copyInto", Bitmap.class);
             if (!copyInto.isAccessible())
                 copyInto.setAccessible(true);

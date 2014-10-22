@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Введіть PIN-код"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Введіть PUK-код і новий PIN-код"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-код"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Новий PIN-код"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Введіть PUK-код і новий PIN-код SIM-карти"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-код SIM-карти"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Новий PIN-код SIM-карти"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Торкніться, щоб ввести пароль"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Введіть пароль, щоб розблокувати"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Введіть PIN-код, щоб розблокувати"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Щоб розбл., натисн. меню та 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Перевищено максимальну кількість спроб розблокування за допомогою функції \"Фейсконтроль\""</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Заряджено"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Заряджається, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Заряджається"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Підключіть зарядний пристрій."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Натисніть Меню, щоб розблокувати."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Мережу заблоковано"</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Кнопка \"Призупинити\""</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Кнопка \"Відтворити\""</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Кнопка \"Зупинити\""</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Подобається"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Не подобається"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Рейтинг"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Розблокуйте, щоб продовжити"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Запуск скасовано"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Відпустіть <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>, щоб видалити."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> не буде видалено."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Введіть потрібний PIN-код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Підтвердьте потрібний PIN-код"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Розблокування SIM-карти…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неправильний PIN-код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Введіть PIN-код із 4–8 цифр."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-код має складатися зі щонайменше 8 цифр."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно введіть правильний PUK-код. Численні спроби назавжди вимкнуть SIM-карту."</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Вилучити"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неправильний PIN-код SIM-карти. Зв’яжіться зі своїм оператором, щоб розблокувати пристрій."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Неправильний PIN-код SIM-карти. У вас залишилась <xliff:g id="NUMBER">%d</xliff:g> спроба. Після цього потрібно буде зв’язатися з оператором, щоб розблокувати пристрій."</item>
+    <item quantity="other" msgid="2215723361575359486">"Неправильний PIN-код SIM-карти. У вас залишилося стільки спроб: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-карту заблоковано. Зв’яжіться з оператором."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Неправильний PUK-код SIM-карти. У вас залишилась <xliff:g id="NUMBER">%d</xliff:g> спроба. Після цього SIM-карту буде назавжди заблоковано."</item>
+    <item quantity="other" msgid="5477305226026342036">"Неправильний PUK-код SIM-карти. У вас залишилося стільки спроб: <xliff:g id="NUMBER">%d</xliff:g>. Після цього SIM-карту буде назавжди заблоковано."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Помилка введення PIN-коду SIM-карти."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Помилка введення PUK-коду SIM-карти."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Код прийнято."</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Кнопка \"Попередня композиція\""</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Кнопка \"Наступна композиція\""</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Кнопка \"Призупинити\""</string>

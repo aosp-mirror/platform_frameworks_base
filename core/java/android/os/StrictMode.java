@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
+import android.util.Slog;
 import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
@@ -40,6 +41,7 @@ import dalvik.system.VMDebug;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1449,7 +1451,11 @@ public final class StrictMode {
         if (policy.classInstanceLimit.size() == 0) {
             return;
         }
-        Runtime.getRuntime().gc();
+
+        System.gc();
+        System.runFinalization();
+        System.gc();
+
         // Note: classInstanceLimit is immutable, so this is lock-free
         for (Map.Entry<Class, Integer> entry : policy.classInstanceLimit.entrySet()) {
             Class klass = entry.getKey();
@@ -1684,7 +1690,13 @@ public final class StrictMode {
         } else {
             p.writeInt(violations.size());
             for (int i = 0; i < violations.size(); ++i) {
+                int start = p.dataPosition();
                 violations.get(i).writeToParcel(p, 0 /* unused flags? */);
+                int size = p.dataPosition()-start;
+                if (size > 10*1024) {
+                    Slog.d(TAG, "Wrote violation #" + i + " of " + violations.size() + ": "
+                            + (p.dataPosition()-start) + " bytes");
+                }
             }
             if (LOG_V) Log.d(TAG, "wrote violations to response parcel; num=" + violations.size());
             violations.clear(); // somewhat redundant, as we're about to null the threadlocal
@@ -1713,6 +1725,27 @@ public final class StrictMode {
         for (int i = 0; i < numViolations; ++i) {
             if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
             ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
+            if (info.crashInfo.stackTrace != null && info.crashInfo.stackTrace.length() > 10000) {
+                String front = info.crashInfo.stackTrace.substring(256);
+                // 10000 characters is way too large for this to be any sane kind of
+                // strict mode collection of stacks.  We've had a problem where we leave
+                // strict mode violations associated with the thread, and it keeps tacking
+                // more and more stacks on to the violations.  Looks like we're in this casse,
+                // so we'll report it and bail on all of the current strict mode violations
+                // we currently are maintaining for this thread.
+                // First, drain the remaining violations from the parcel.
+                while (i < numViolations) {
+                    info = new ViolationInfo(p, !currentlyGathering);
+                    i++;
+                }
+                // Next clear out all gathered violations.
+                clearGatheredViolations();
+                // Now report the problem.
+                Slog.wtfStack(TAG, "Stack is too large: numViolations=" + numViolations
+                        + " policy=#" + Integer.toHexString(policyMask)
+                        + " front=" + front);
+                return;
+            }
             info.crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
             BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
             if (policy instanceof AndroidBlockGuardPolicy) {
@@ -2005,7 +2038,10 @@ public final class StrictMode {
         // noticeably less responsive during orientation changes when activities are
         // being restarted.  Granted, it is only a problem when StrictMode is enabled
         // but it is annoying.
-        Runtime.getRuntime().gc();
+
+        System.gc();
+        System.runFinalization();
+        System.gc();
 
         long instances = VMDebug.countInstancesOfClass(klass, false);
         if (instances > limit) {
@@ -2169,6 +2205,7 @@ public final class StrictMode {
          */
         public void writeToParcel(Parcel dest, int flags) {
             crashInfo.writeToParcel(dest, flags);
+            int start = dest.dataPosition();
             dest.writeInt(policy);
             dest.writeInt(durationMillis);
             dest.writeInt(violationNumThisLoop);
@@ -2177,6 +2214,17 @@ public final class StrictMode {
             dest.writeLong(numInstances);
             dest.writeString(broadcastIntentAction);
             dest.writeStringArray(tags);
+            int total = dest.dataPosition()-start;
+            if (total > 10*1024) {
+                Slog.d(TAG, "VIO: policy=" + policy + " dur=" + durationMillis
+                        + " numLoop=" + violationNumThisLoop
+                        + " anim=" + numAnimationsRunning
+                        + " uptime=" + violationUptimeMillis
+                        + " numInst=" + numInstances);
+                Slog.d(TAG, "VIO: action=" + broadcastIntentAction);
+                Slog.d(TAG, "VIO: tags=" + Arrays.toString(tags));
+                Slog.d(TAG, "VIO: TOTAL BYTES WRITTEN: " + (dest.dataPosition()-start));
+            }
         }
 
 

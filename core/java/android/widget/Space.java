@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * Space is a lightweight View subclass that may be used to create gaps between components
@@ -30,11 +29,18 @@ public final class Space extends View {
     /**
      * {@inheritDoc}
      */
-    public Space(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public Space(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         if (getVisibility() == VISIBLE) {
             setVisibility(INVISIBLE);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Space(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     /**

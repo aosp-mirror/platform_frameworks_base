@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -30,8 +29,14 @@ import android.util.Log;
  * through one of the factory methods.
  */
 public final class Rating implements Parcelable {
-
     private final static String TAG = "Rating";
+
+    /**
+     * Indicates a rating style is not supported. A Rating will never have this
+     * type, but can be used by other classes to indicate they do not support
+     * Rating.
+     */
+    public final static int RATING_NONE = 0;
 
     /**
      * A rating style with a single degree of rating, "heart" vs "no heart". Can be used to
@@ -75,12 +80,8 @@ public final class Rating implements Parcelable {
         mRatingValue = rating;
     }
 
-
-    /**
-     * @hide
-     */
     @Override
-    public String toString () {
+    public String toString() {
         return "Rating:style=" + mRatingStyle + " rating="
                 + (mRatingValue < 0.0f ? "unrated" : String.valueOf(mRatingValue));
     }
@@ -103,9 +104,12 @@ public final class Rating implements Parcelable {
          * @param p    Parcel object to read the Rating from
          * @return a new Rating created from the data in the parcel
          */
+        @Override
         public Rating createFromParcel(Parcel p) {
             return new Rating(p.readInt(), p.readFloat());
         }
+
+        @Override
         public Rating[] newArray(int size) {
             return new Rating[size];
         }

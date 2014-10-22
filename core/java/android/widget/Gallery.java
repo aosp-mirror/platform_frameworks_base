@@ -196,14 +196,18 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         this(context, attrs, R.attr.galleryStyle);
     }
 
-    public Gallery(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public Gallery(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public Gallery(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         
         mGestureDetector = new GestureDetector(context, this);
         mGestureDetector.setIsLongpressEnabled(true);
-        
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.Gallery, defStyle, 0);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.Gallery, defStyleAttr, defStyleRes);
 
         int index = a.getInt(com.android.internal.R.styleable.Gallery_gravity, -1);
         if (index >= 0) {

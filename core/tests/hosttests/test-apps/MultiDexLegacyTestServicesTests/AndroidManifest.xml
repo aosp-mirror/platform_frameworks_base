@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.framework.multidexlegacytestservices.test"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="9" />
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.android.framework.multidexlegacytestservices" />
+
+    <application
+        android:label="multidexlegacytestservices.test" >
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>

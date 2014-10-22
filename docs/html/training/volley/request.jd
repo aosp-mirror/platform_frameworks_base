@@ -1,0 +1,281 @@
+page.title=Making a Standard Request
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#request-image">Request an Image</a></li>
+  <li><a href="#request-json">Request JSON</a></li>
+</ol>
+
+</div>
+</div>
+
+<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<div>
+    <h3>Video</h3>
+    <p>Volley: Easy, Fast Networking for Android</p>
+</div>
+</a>
+
+<p>
+This lesson describes how to use the common request types that Volley supports:</p>
+
+<ul>
+  <li>{@code StringRequest}. Specify a URL and receive a raw string in response. See
+  <a href="requestqueue.html">Setting Up a Request Queue</a> for an example.</li>
+  <li>{@code ImageRequest}. Specify a URL and receive an image in response.</li>
+  <li>{@code JsonObjectRequest} and {@code JsonArrayRequest} (both subclasses of
+  {@code JsonRequest}). Specify a URL and get a JSON object or array (respectively) in
+  response.</li>
+</ul>
+
+<p>If your expected response is one of these types, you probably won't have to implement a
+custom request. This lesson describes how to use these standard request types. For
+information on how to implement your own custom request, see <a href="requests-custom.html">
+Implementing a Custom Request</a>.</p>
+
+
+<h2 id="request-image">Request an Image</h2>
+
+<p>Volley offers the following classes for requesting images. These classes layer on top
+of each other to offer different levels of support for processing images:</p>
+
+<ul>
+  <li>{@code ImageRequest}&mdash;a canned request for getting an image at a given URL and
+  calling back with a decoded bitmap. It also provides convenience features like specifying
+  a size to resize to. Its main benefit is that Volley's thread scheduling ensures that
+  expensive image operations (decoding, resizing) automatically happen on a worker thread.</li>
+
+  <li>{@code ImageLoader}&mdash;a helper class that handles loading and caching images from
+  remote URLs. {@code ImageLoader} is a an orchestrator for large numbers of {@code ImageRequest}s,
+  for example when putting multiple thumbnails in a {@link android.widget.ListView}.
+  {@code ImageLoader} provides an in-memory cache to sit in front of the normal Volley
+  cache, which is important to prevent flickering. This makes it possible to achieve a
+  cache hit without blocking or deferring off the main thread, which is impossible when
+  using disk I/O. {@code ImageLoader} also does response coalescing, without which almost
+  every response handler would set a bitmap on a view and cause a layout pass per image.
+  Coalescing makes it possible to deliver multiple responses simultaneously, which improves
+  performance.</li>
+  <li>{@code NetworkImageView}&mdash;builds on {@code ImageLoader} and effectively replaces
+  {@link android.widget.ImageView} for situations where your image is being fetched over
+  the network via URL. {@code NetworkImageView} also manages canceling pending requests if
+  the view is detached from the hierarchy.</li>
+</ul>
+
+<h3>Use ImageRequest</h3>
+
+<p>Here is an example of using {@code ImageRequest}. It retrieves the image specified by
+the URL and displays it in the app. Note that this snippet interacts with the
+{@code RequestQueue} through a singleton class (see <a href="{@docRoot}
+training/volley/requestqueue.html#singleton">Setting Up a RequestQueue</a> for more discussion of
+this topic):</p>
+
+<pre>
+ImageView mImageView;
+String url = "http://i.imgur.com/7spzG.png";
+mImageView = (ImageView) findViewById(R.id.myImage);
+...
+
+// Retrieves an image specified by the URL, displays it in the UI.
+ImageRequest request = new ImageRequest(url,
+    new Response.Listener<Bitmap>() {
+        &#64;Override
+        public void onResponse(Bitmap bitmap) {
+            mImageView.setImageBitmap(bitmap);
+        }
+    }, 0, 0, null,
+    new Response.ErrorListener() {
+        public void onErrorResponse(VolleyError error) {
+            mImageView.setImageResource(R.drawable.image_load_error);
+        }
+    });
+// Access the RequestQueue through your singleton class.
+MySingleton.getInstance(this).addToRequestQueue(request);</pre>
+
+
+<h3>Use ImageLoader and NetworkImageView</h3>
+
+<p>You can use {@code ImageLoader} and {@code NetworkImageView} in concert to efficiently
+manage the display of multiple images, such as in a {@link android.widget.ListView}. In your
+layout XML file, you use {@code NetworkImageView} in much the same way you would use
+{@link android.widget.ImageView}, for example:</p>
+
+<pre>&lt;com.android.volley.toolbox.NetworkImageView
+        android:id=&quot;&#64;+id/networkImageView&quot;
+        android:layout_width=&quot;150dp&quot;
+        android:layout_height=&quot;170dp&quot;
+        android:layout_centerHorizontal=&quot;true&quot; /&gt;</pre>
+
+<p>You can use {@code ImageLoader} by itself to display an image, for example:</p>
+
+<pre>
+ImageLoader mImageLoader;
+ImageView mImageView;
+// The URL for the image that is being loaded.
+private static final String IMAGE_URL =
+    "http://developer.android.com/images/training/system-ui.png";
+...
+mImageView = (ImageView) findViewById(R.id.regularImageView);
+
+// Get the ImageLoader through your singleton class.
+mImageLoader = MySingleton.getInstance(this).getImageLoader();
+mImageLoader.get(IMAGE_URL, ImageLoader.getImageListener(mImageView,
+         R.drawable.def_image, R.drawable.err_image));
+</pre>
+
+<p>However, {@code NetworkImageView} can do this for you if all you're doing is populating
+an {@link android.widget.ImageView}. For example:</p>
+
+<pre>
+ImageLoader mImageLoader;
+NetworkImageView mNetworkImageView;
+private static final String IMAGE_URL =
+    "http://developer.android.com/images/training/system-ui.png";
+...
+
+// Get the NetworkImageView that will display the image.
+mNetworkImageView = (NetworkImageView) findViewById(R.id.networkImageView);
+
+// Get the ImageLoader through your singleton class.
+mImageLoader = MySingleton.getInstance(this).getImageLoader();
+
+// Set the URL of the image that should be loaded into this view, and
+// specify the ImageLoader that will be used to make the request.
+mNetworkImageView.setImageUrl(IMAGE_URL, mImageLoader);
+</pre>
+
+<p>The above snippets access the {@code RequestQueue} and the {@code ImageLoader}
+through a singleton class, as described in <a href="{@docRoot}training/volley/requestqueue.html#singleton">
+Setting Up a RequestQueue</a>. This approach ensures that your app creates single instances of
+these classes that last the lifetime of your app. The reason that this is important for
+{@code ImageLoader} (the helper class that handles loading and caching images) is that
+the main function of the in-memory cache is to allow for flickerless rotation. Using a
+singleton pattern allows the bitmap cache to outlive the activity. If instead you create the
+{@code ImageLoader} in an activity, the {@code ImageLoader} would be recreated along with
+the activity every time the user rotates the device. This would cause flickering.</p>
+
+<h4 id="lru-cache">Example LRU cache</h4>
+
+<p>The Volley toolbox provides a standard cache implementation via the
+{@code DiskBasedCache} class. This class caches files directly onto the hard disk in the
+specified directory. But to use {@code ImageLoader}, you should provide a custom
+in-memory LRU bitmap cache that implements the {@code ImageLoader.ImageCache} interface.
+You may want to set up your cache as a singleton; for more discussion of this topic, see
+<a href="{@docRoot}training/volley/requestqueue.html#singleton">
+Setting Up a RequestQueue</a>.</p>
+
+<p>Here is a sample implementation for an in-memory {@code LruBitmapCache} class.
+It extends the {@link android.support.v4.util.LruCache} class and implements the
+{@code ImageLoader.ImageCache} interface:</p>
+
+<pre>
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
+import android.util.DisplayMetrics;
+import com.android.volley.toolbox.ImageLoader.ImageCache;
+
+public class LruBitmapCache extends LruCache&lt;String, Bitmap&gt;
+        implements ImageCache {
+
+    public LruBitmapCache(int maxSize) {
+        super(maxSize);
+    }
+
+    public LruBitmapCache(Context ctx) {
+        this(getCacheSize(ctx));
+    }
+
+    &#64;Override
+    protected int sizeOf(String key, Bitmap value) {
+        return value.getRowBytes() * value.getHeight();
+    }
+
+    &#64;Override
+    public Bitmap getBitmap(String url) {
+        return get(url);
+    }
+
+    &#64;Override
+    public void putBitmap(String url, Bitmap bitmap) {
+        put(url, bitmap);
+    }
+
+    // Returns a cache size equal to approximately three screens worth of images.
+    public static int getCacheSize(Context ctx) {
+        final DisplayMetrics displayMetrics = ctx.getResources().
+                getDisplayMetrics();
+        final int screenWidth = displayMetrics.widthPixels;
+        final int screenHeight = displayMetrics.heightPixels;
+        // 4 bytes per pixel
+        final int screenBytes = screenWidth * screenHeight * 4;
+
+        return screenBytes * 3;
+    }
+}
+</pre>
+
+<p>Here is an example of how to instantiate an {@code ImageLoader} to use this
+cache:</p>
+
+<pre>
+RequestQueue mRequestQueue; // assume this exists.
+ImageLoader mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache(
+            LruBitmapCache.getCacheSize()));
+</pre>
+
+
+<h2 id="request-json">Request JSON</h2>
+
+<p>Volley provides the following classes for JSON requests:</p>
+
+<ul>
+  <li>{@code JsonArrayRequest}&mdash;A request for retrieving a
+  {@link org.json.JSONArray}
+  response body at a given URL.</li>
+  <li>{@code JsonObjectRequest}&mdash;A request for retrieving a
+  {@link org.json.JSONObject}
+  response body at a given URL, allowing for an optional
+  {@link org.json.JSONObject}
+  to be passed in as part of the request body.</li>
+</ul>
+
+<p>Both classes are based on the common base class {@code JsonRequest}. You use them
+following the same basic pattern you use for other types of requests. For example, this
+snippet fetches a JSON feed and displays it as text in the UI:</p>
+
+<pre>
+TextView mTxtDisplay;
+ImageView mImageView;
+mTxtDisplay = (TextView) findViewById(R.id.txtDisplay);
+String url = "http://my-json-feed";
+
+JsonObjectRequest jsObjRequest = new JsonObjectRequest
+        (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+    &#64;Override
+    public void onResponse(JSONObject response) {
+        mTxtDisplay.setText("Response: " + response.toString());
+    }
+}, new Response.ErrorListener() {
+
+    &#64;Override
+    public void onErrorResponse(VolleyError error) {
+        // TODO Auto-generated method stub
+
+    }
+});
+
+// Access the RequestQueue through your singleton class.
+MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+</pre>
+
+For an example of implementing a custom JSON request based on
+<a href="http://code.google.com/p/google-gson/">Gson</a>, see the next lesson,
+<a href="request-custom.html">Implementing a Custom Request</a>.

@@ -59,9 +59,10 @@ padding_extra(size_t n)
 BackupDataWriter::BackupDataWriter(int fd)
     :m_fd(fd),
      m_status(NO_ERROR),
-     m_pos(0),
      m_entityCount(0)
 {
+    m_pos = (ssize_t) lseek(fd, 0, SEEK_CUR);
+    if (DEBUG) ALOGI("BackupDataWriter(%d) @ %ld", fd, (long)m_pos);
 }
 
 BackupDataWriter::~BackupDataWriter()
@@ -184,10 +185,11 @@ BackupDataReader::BackupDataReader(int fd)
     :m_fd(fd),
      m_done(false),
      m_status(NO_ERROR),
-     m_pos(0),
      m_entityCount(0)
 {
     memset(&m_header, 0, sizeof(m_header));
+    m_pos = (ssize_t) lseek(fd, 0, SEEK_CUR);
+    if (DEBUG) ALOGI("BackupDataReader(%d) @ %ld", fd, (long)m_pos);
 }
 
 BackupDataReader::~BackupDataReader()

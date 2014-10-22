@@ -1,15 +1,9 @@
 page.title=Activities
-page.tags="activity","intent"
+page.tags=activity,intent
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Quickview</h2>
-<ul>
-  <li>An activity provides a user interface for a single screen in your application</li>
-  <li>Activities can move into the background and then be resumed with their state restored</li>
-</ul>
-
 <h2>In this document</h2>
 <ol>
   <li><a href="#Creating">Creating an Activity</a>

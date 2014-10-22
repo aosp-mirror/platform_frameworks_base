@@ -1,0 +1,169 @@
+page.title=Sending a Simple Request
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#manifest">Add the INTERNET Permission</a></li>
+  <li><a href="#simple">Use newRequestQueue</a></li>
+  <li><a href="#send">Send a Request</a></li>
+  <li><a href="#cancel">Cancel a Request</a></li>
+</ol>
+
+</div>
+</div>
+
+<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<div>
+    <h3>Video</h3>
+    <p>Volley: Easy, Fast Networking for Android</p>
+</div>
+</a>
+
+<p>At a high level, you use Volley by creating a {@code RequestQueue} and passing it
+{@code Request} objects. The {@code RequestQueue} manages worker threads for running the
+network operations, reading from and writing to the cache, and parsing responses. Requests
+do the parsing of raw responses and Volley takes care of dispatching the parsed response
+back to the main thread for delivery.</p>
+
+<p> This lesson describes how to send a request using the <code>Volley.newRequestQueue</code>
+convenience method, which sets up a {@code RequestQueue} for you.
+See the next lesson,
+<a href="requestqueue.html">Setting Up a RequestQueue</a>, for information on how to set
+up a {@code RequestQueue} yourself.</p>
+
+<p>This lesson also describes how to add a request to a {@code RequestQueue} and cancel a
+request.</p>
+
+<h2 id="manifest">Add the INTERNET Permission</h2>
+
+<p>To use Volley, you must add the
+{@link android.Manifest.permission#INTERNET android.permission.INTERNET} permission
+to your app's manifest. Without this, your app won't be able to connect to the network.</p>
+
+
+<h2 id="simple">Use newRequestQueue</h2>
+
+<p>Volley provides a convenience method <code>Volley.newRequestQueue</code> that sets up a
+{@code RequestQueue} for you, using default values, and starts the queue. For example:</p>
+
+<pre>
+final TextView mTextView = (TextView) findViewById(R.id.text);
+...
+
+// Instantiate the RequestQueue.
+RequestQueue queue = Volley.newRequestQueue(this);
+String url ="http://www.google.com";
+
+// Request a string response from the provided URL.
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+            new Response.Listener<String>() {
+    &#64;Override
+    public void onResponse(String response) {
+        // Display the first 500 characters of the response string.
+        mTextView.setText("Response is: "+ response.substring(0,500));
+    }
+}, new Response.ErrorListener() {
+    &#64;Override
+    public void onErrorResponse(VolleyError error) {
+        mTextView.setText("That didn't work!");
+    }
+});
+// Add the request to the RequestQueue.
+queue.add(stringRequest);
+</pre>
+
+<p>Volley always delivers parsed responses on the main thread. Running on the main thread
+is convenient for populating UI controls with received data, as you can freely modify UI
+controls directly from your response handler, but it's especially critical to many of the
+important semantics provided by the library, particularly related to canceling requests.
+</p>
+
+<p>See <a href="requestqueue.html">Setting Up a RequestQueue</a> for a
+description of how to set up a {@code RequestQueue} yourself, instead of using the
+<code>Volley.newRequestQueue</code> convenience method.</p>
+
+<h2 id="send">Send a Request</h2>
+
+<p>To send a request, you simply construct one and add it to the {@code RequestQueue} with
+{@code add()}, as shown above. Once you add the request it moves through the pipeline,
+gets serviced, and has its raw response parsed and delivered.</p>
+
+<p>When you call {@code add()}, Volley runs one cache processing thread and a pool of
+network dispatch threads. When you add a request to the queue, it is picked up by the cache
+thread and triaged: if the request can be serviced from cache, the cached response is
+parsed on the cache thread and the parsed response is delivered on the main thread. If the
+request cannot be serviced from cache, it is placed on the network queue. The first
+available network thread takes the request from the queue, performs the HTTP transaction,
+parsse the response on the worker thread, writes the response to cache, and posts the parsed
+response back to the main thread for delivery.</p>
+
+<p>Note that expensive operations like blocking I/O and parsing/decoding are done on worker
+threads. You can add a request from any thread, but responses are always delivered on the
+main thread.</p>
+
+<p>Figure 1 illustrates the life of a request:</p>
+
+ <img src="{@docRoot}images/training/volley-request.png"
+  alt="system bars">
+<p class="img-caption"><strong>Figure 1.</strong> Life of a request.</p>
+
+
+<h2 id="cancel">Cancel a Request</h2>
+
+<p>To cancel a request, call {@code cancel()} on your {@code Request} object. Once cancelled,
+Volley guarantees that your response handler will never be called. What this means in
+practice is that you can cancel all of your pending requests in your activity's
+{@link android.app.Activity#onStop onStop()} method and you don't have to litter your
+response handlers with checks for {@code getActivity() == null},
+whether {@code onSaveInstanceState()} has been called already, or other defensive
+boilerplate.</p>
+
+<p>To take advantage of this behavior, you would typically have to
+track all in-flight requests in order to be able to cancel them at the
+appropriate time. There is an easier way: you can associate a tag object with each
+request. You can then use this tag to provide a scope of requests to cancel. For
+example, you can tag all of your requests with the {@link android.app.Activity} they
+are being made on behalf of, and call {@code requestQueue.cancelAll(this)} from
+{@link android.app.Activity#onStop onStop()}.
+Similarly, you could tag all thumbnail image requests in a
+{@link android.support.v4.view.ViewPager} tab with their respective tabs and cancel on swipe
+to make sure that the new tab isn't being held up by requests from another one.</p>
+
+<p>Here is an example that uses a string value for the tag:</p>
+
+<ol>
+<li>Define your tag and add it to your requests.
+<pre>
+public static final String TAG = "MyTag";
+StringRequest stringRequest; // Assume this exists.
+RequestQueue mRequestQueue;  // Assume this exists.
+
+// Set the tag on the request.
+stringRequest.setTag(TAG);
+
+// Add the request to the RequestQueue.
+mRequestQueue.add(stringRequest);</pre>
+</li>
+
+<li>In your activity's {@link android.app.Activity#onStop onStop()} method, cancel all requests that have this tag.
+<pre>
+&#64;Override
+protected void onStop () {
+    super.onStop();
+    if (mRequestQueue != null) {
+        mRequestQueue.cancelAll(TAG);
+    }
+}
+</pre></li></ol>
+
+<p>Take care when canceling requests. If you are depending on your response handler to
+advance a state or kick off another process, you need to account for this. Again, the
+response handler will not be called.
+</p>

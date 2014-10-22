@@ -16,12 +16,17 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
+import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.PorterDuff.Mode;
 import android.os.SystemClock;
 import android.util.LayoutDirection;
 import android.util.SparseArray;
@@ -47,9 +52,12 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     private static final boolean DEFAULT_DITHER = true;
     private DrawableContainerState mDrawableContainerState;
+    private Rect mHotspotBounds;
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
-    private ColorFilter mColorFilter;
+
+    /** Whether setAlpha() has been called at least once. */
+    private boolean mHasAlpha;
 
     private int mCurIndex = -1;
     private boolean mMutated;
@@ -59,8 +67,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private long mEnterAnimationEnd;
     private long mExitAnimationEnd;
     private Drawable mLastDrawable;
-
-    private Insets mInsets = Insets.NONE;
 
     // overrides from Drawable
 
@@ -113,12 +119,23 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     @Override
     public Insets getOpticalInsets() {
-        return mInsets;
+        if (mCurrDrawable != null) {
+            return mCurrDrawable.getOpticalInsets();
+        }
+        return Insets.NONE;
+    }
+
+    @Override
+    public void getOutline(@NonNull Outline outline) {
+        if (mCurrDrawable != null) {
+            mCurrDrawable.getOutline(outline);
+        }
     }
 
     @Override
     public void setAlpha(int alpha) {
-        if (mAlpha != alpha) {
+        if (!mHasAlpha || mAlpha != alpha) {
+            mHasAlpha = true;
             mAlpha = alpha;
             if (mCurrDrawable != null) {
                 if (mEnterAnimationEnd == 0) {
@@ -147,10 +164,39 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setColorFilter(ColorFilter cf) {
-        if (mColorFilter != cf) {
-            mColorFilter = cf;
+        mDrawableContainerState.mHasColorFilter = (cf != null);
+
+        if (mDrawableContainerState.mColorFilter != cf) {
+            mDrawableContainerState.mColorFilter = cf;
+
             if (mCurrDrawable != null) {
                 mCurrDrawable.mutate().setColorFilter(cf);
+            }
+        }
+    }
+
+    @Override
+    public void setTintList(ColorStateList tint) {
+        mDrawableContainerState.mHasTintList = true;
+
+        if (mDrawableContainerState.mTintList != tint) {
+            mDrawableContainerState.mTintList = tint;
+
+            if (mCurrDrawable != null) {
+                mCurrDrawable.mutate().setTintList(tint);
+            }
+        }
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mDrawableContainerState.mHasTintMode = true;
+
+        if (mDrawableContainerState.mTintMode != tintMode) {
+            mDrawableContainerState.mTintMode = tintMode;
+
+            if (mCurrDrawable != null) {
+                mCurrDrawable.mutate().setTintMode(tintMode);
             }
         }
     }
@@ -190,9 +236,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setAutoMirrored(boolean mirrored) {
-        mDrawableContainerState.mAutoMirrored = mirrored;
-        if (mCurrDrawable != null) {
-            mCurrDrawable.mutate().setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+        if (mDrawableContainerState.mAutoMirrored != mirrored) {
+            mDrawableContainerState.mAutoMirrored = mirrored;
+            if (mCurrDrawable != null) {
+                mCurrDrawable.mutate().setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+            }
         }
     }
 
@@ -211,7 +259,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (mCurrDrawable != null) {
             mCurrDrawable.jumpToCurrentState();
-            mCurrDrawable.mutate().setAlpha(mAlpha);
+            if (mHasAlpha) {
+                mCurrDrawable.mutate().setAlpha(mAlpha);
+            }
         }
         if (mExitAnimationEnd != 0) {
             mExitAnimationEnd = 0;
@@ -223,6 +273,36 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (changed) {
             invalidateSelf();
+        }
+    }
+
+    @Override
+    public void setHotspot(float x, float y) {
+        if (mCurrDrawable != null) {
+            mCurrDrawable.setHotspot(x, y);
+        }
+    }
+
+    @Override
+    public void setHotspotBounds(int left, int top, int right, int bottom) {
+        if (mHotspotBounds == null) {
+            mHotspotBounds = new Rect(left, top, bottom, right);
+        } else {
+            mHotspotBounds.set(left, top, bottom, right);
+        }
+
+        if (mCurrDrawable != null) {
+            mCurrDrawable.setHotspotBounds(left, top, right, bottom);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void getHotspotBounds(Rect outRect) {
+        if (mHotspotBounds != null) {
+            outRect.set(mHotspotBounds);
+        } else {
+            super.getHotspotBounds(outRect);
         }
     }
 
@@ -319,6 +399,16 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mDrawableContainerState.getOpacity();
     }
 
+    /** @hide */
+    public void setCurrentIndex(int index) {
+        selectDrawable(index);
+    }
+
+    /** @hide */
+    public int getCurrentIndex() {
+        return mCurIndex;
+    }
+
     public boolean selectDrawable(int idx) {
         if (idx == mCurIndex) {
             return false;
@@ -350,27 +440,39 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable = d;
             mCurIndex = idx;
             if (d != null) {
-                mInsets = d.getOpticalInsets();
                 d.mutate();
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
-                } else {
+                } else if (mHasAlpha) {
                     d.setAlpha(mAlpha);
+                }
+                if (mDrawableContainerState.mHasColorFilter) {
+                    // Color filter always overrides tint.
+                    d.setColorFilter(mDrawableContainerState.mColorFilter);
+                } else {
+                    if (mDrawableContainerState.mHasTintList) {
+                        d.setTintList(mDrawableContainerState.mTintList);
+                    }
+                    if (mDrawableContainerState.mHasTintMode) {
+                        d.setTintMode(mDrawableContainerState.mTintMode);
+                    }
                 }
                 d.setVisible(isVisible(), true);
                 d.setDither(mDrawableContainerState.mDither);
-                d.setColorFilter(mColorFilter);
                 d.setState(getState());
                 d.setLevel(getLevel());
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
                 d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
-            } else {
-                mInsets = Insets.NONE;
+
+                final Rect hotspotBounds = mHotspotBounds;
+                if (hotspotBounds != null) {
+                    d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
+                            hotspotBounds.right, hotspotBounds.bottom);
+                }
             }
         } else {
             mCurrDrawable = null;
-            mInsets = Insets.NONE;
             mCurIndex = -1;
         }
 
@@ -395,6 +497,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     void animate(boolean schedule) {
+        mHasAlpha = true;
+
         final long now = SystemClock.uptimeMillis();
         boolean animating = false;
         if (mCurrDrawable != null) {
@@ -442,6 +546,16 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void applyTheme(Theme theme) {
+        mDrawableContainerState.applyTheme(theme);
+    }
+
+    @Override
+    public boolean canApplyTheme() {
+        return mDrawableContainerState.canApplyTheme();
+    }
+
+    @Override
     public ConstantState getConstantState() {
         if (mDrawableContainerState.canConstantState()) {
             mDrawableContainerState.mChangingConfigurations = getChangingConfigurations();
@@ -468,6 +582,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     public abstract static class DrawableContainerState extends ConstantState {
         final DrawableContainer mOwner;
         final Resources mRes;
+
+        Theme mTheme;
 
         SparseArray<ConstantStateFuture> mDrawableFutures;
 
@@ -507,6 +623,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
         boolean mAutoMirrored;
 
+        ColorFilter mColorFilter;
+        boolean mHasColorFilter;
+
+        ColorStateList mTintList;
+        Mode mTintMode;
+        boolean mHasTintList;
+        boolean mHasTintMode;
+
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
@@ -527,6 +651,12 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mEnterFadeDuration = orig.mEnterFadeDuration;
                 mExitFadeDuration = orig.mExitFadeDuration;
                 mAutoMirrored = orig.mAutoMirrored;
+                mColorFilter = orig.mColorFilter;
+                mHasColorFilter = orig.mHasColorFilter;
+                mTintList = orig.mTintList;
+                mTintMode = orig.mTintMode;
+                mHasTintList = orig.mHasTintList;
+                mHasTintMode = orig.mHasTintMode;
 
                 // Cloning the following values may require creating futures.
                 mConstantPadding = orig.getConstantPadding();
@@ -659,6 +789,41 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             }
 
             mLayoutDirection = layoutDirection;
+        }
+
+        final void applyTheme(Theme theme) {
+            // No need to call createAllFutures, since future drawables will
+            // apply the theme when they are prepared.
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i] != null) {
+                    drawables[i].applyTheme(theme);
+                }
+            }
+
+            mTheme = theme;
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                final Drawable d = drawables[i];
+                if (d != null) {
+                    if (d.canApplyTheme()) {
+                        return true;
+                    }
+                } else {
+                    final ConstantStateFuture future = mDrawableFutures.get(i);
+                    if (future != null && future.canApplyTheme()) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         final void mutate() {
@@ -879,8 +1044,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
              * @return a prepared Drawable
              */
             public Drawable get(DrawableContainerState state) {
-                final Drawable result = (state.mRes == null) ?
-                        mConstantState.newDrawable() : mConstantState.newDrawable(state.mRes);
+                final Drawable result;
+                if (state.mRes == null) {
+                    result = mConstantState.newDrawable();
+                } else if (state.mTheme == null) {
+                    result = mConstantState.newDrawable(state.mRes);
+                } else {
+                    result = mConstantState.newDrawable(state.mRes, state.mTheme);
+                }
                 result.setLayoutDirection(state.mLayoutDirection);
                 result.setCallback(state.mOwner);
 
@@ -889,6 +1060,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 }
 
                 return result;
+            }
+
+            /**
+             * Whether the constant state wrapped by this future can apply a
+             * theme.
+             */
+            public boolean canApplyTheme() {
+                return mConstantState.canApplyTheme();
             }
         }
     }

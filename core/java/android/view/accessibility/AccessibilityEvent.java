@@ -343,6 +343,23 @@ import java.util.List;
  * view.</br>
  * </p>
  * <p>
+ * <b>Windows changed</b> - represents the event of changes in the windows shown on
+ * the screen such as a window appeared, a window disappeared, a window size changed,
+ * a window layer changed, etc.</br>
+ * <em>Type:</em> {@link #TYPE_WINDOWS_CHANGED}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getEventTime()} - The event time.</li>
+ * </ul>
+ * <em>Note:</em> You can retrieve the {@link AccessibilityWindowInfo} for the window
+ * source of the event via {@link AccessibilityEvent#getSource()} to get the source
+ * node on which then call {@link AccessibilityNodeInfo#getWindow()
+ * AccessibilityNodeInfo.getWindow()} to get the window. Also all windows on the screen can
+ * be retrieved by a call to {@link android.accessibilityservice.AccessibilityService#getWindows()
+ * android.accessibilityservice.AccessibilityService.getWindows()}.
+ * </p>
+ * <p>
  * <b>NOTIFICATION TYPES</b></br>
  * </p>
  * <p>
@@ -662,6 +679,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_INTERACTION_END = 0x00200000;
 
     /**
+     * Represents the event change in the windows shown on the screen.
+     */
+    public static final int TYPE_WINDOWS_CHANGED = 0x00400000;
+
+    /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
      * The type of change is not defined.
      */
@@ -708,6 +730,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_GESTURE_DETECTION_END
      * @see #TYPE_TOUCH_INTERACTION_START
      * @see #TYPE_TOUCH_INTERACTION_END
+     * @see #TYPE_WINDOWS_CHANGED
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -722,7 +745,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     int mAction;
     int mContentChangeTypes;
 
-    private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
+    private ArrayList<AccessibilityRecord> mRecords;
 
     /*
      * Hide constructor from clients.
@@ -755,11 +778,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     @Override
     public void setSealed(boolean sealed) {
         super.setSealed(sealed);
-        List<AccessibilityRecord> records = mRecords;
-        final int recordCount = records.size();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = records.get(i);
-            record.setSealed(sealed);
+        final List<AccessibilityRecord> records = mRecords;
+        if (records != null) {
+            final int recordCount = records.size();
+            for (int i = 0; i < recordCount; i++) {
+                AccessibilityRecord record = records.get(i);
+                record.setSealed(sealed);
+            }
         }
     }
 
@@ -769,7 +794,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return The number of records.
      */
     public int getRecordCount() {
-        return mRecords.size();
+        return mRecords == null ? 0 : mRecords.size();
     }
 
     /**
@@ -781,6 +806,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public void appendRecord(AccessibilityRecord record) {
         enforceNotSealed();
+        if (mRecords == null) {
+            mRecords = new ArrayList<AccessibilityRecord>();
+        }
         mRecords.add(record);
     }
 
@@ -791,6 +819,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return The record at the specified index.
      */
     public AccessibilityRecord getRecord(int index) {
+        if (mRecords == null) {
+            throw new IndexOutOfBoundsException("Invalid index " + index + ", size is 0");
+        }
         return mRecords.get(index);
     }
 
@@ -964,11 +995,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         AccessibilityEvent eventClone = AccessibilityEvent.obtain();
         eventClone.init(event);
 
-        final int recordCount = event.mRecords.size();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = event.mRecords.get(i);
-            AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
-            eventClone.mRecords.add(recordClone);
+        if (event.mRecords != null) {
+            final int recordCount = event.mRecords.size();
+            eventClone.mRecords = new ArrayList<AccessibilityRecord>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                final AccessibilityRecord record = event.mRecords.get(i);
+                final AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
+                eventClone.mRecords.add(recordClone);
+            }
         }
 
         return eventClone;
@@ -1013,9 +1047,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mContentChangeTypes = 0;
         mPackageName = null;
         mEventTime = 0;
-        while (!mRecords.isEmpty()) {
-            AccessibilityRecord record = mRecords.remove(0);
-            record.recycle();
+        if (mRecords != null) {
+            while (!mRecords.isEmpty()) {
+                AccessibilityRecord record = mRecords.remove(0);
+                record.recycle();
+            }
         }
     }
 
@@ -1037,11 +1073,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
         // Read the records.
         final int recordCount = parcel.readInt();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = AccessibilityRecord.obtain();
-            readAccessibilityRecordFromParcel(record, parcel);
-            record.mConnectionId = mConnectionId;
-            mRecords.add(record);
+        if (recordCount > 0) {
+            mRecords = new ArrayList<AccessibilityRecord>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                AccessibilityRecord record = AccessibilityRecord.obtain();
+                readAccessibilityRecordFromParcel(record, parcel);
+                record.mConnectionId = mConnectionId;
+                mRecords.add(record);
+            }
         }
     }
 
@@ -1147,8 +1186,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             builder.append("; ContentChangeTypes: ").append(mContentChangeTypes);
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             builder.append("; mSourceNodeId: ").append(mSourceNodeId);
-            for (int i = 0; i < mRecords.size(); i++) {
-                AccessibilityRecord record = mRecords.get(i);
+            for (int i = 0; i < getRecordCount(); i++) {
+                final AccessibilityRecord record = getRecord(i);
                 builder.append("  Record ");
                 builder.append(i);
                 builder.append(":");
@@ -1348,6 +1387,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                         builder.append(", ");
                     }
                     builder.append("TYPE_TOUCH_INTERACTION_END");
+                    eventTypeCount++;
+                } break;
+                case TYPE_WINDOWS_CHANGED: {
+                    if (eventTypeCount > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append("TYPE_WINDOWS_CHANGED");
                     eventTypeCount++;
                 } break;
             }

@@ -19,6 +19,7 @@ package android.test;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.test.mock.MockContext;
 import android.test.mock.MockContentResolver;
@@ -138,11 +139,21 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
                 getContext(), // The context that file methods are delegated to
                 filenamePrefix);
         mProviderContext = new IsolatedContext(mResolver, targetContextWrapper);
-
-        mProvider = mProviderClass.newInstance();
-        mProvider.attachInfoForTesting(mProviderContext, null);
-        assertNotNull(mProvider);
+        mProvider = createProviderForTest(mProviderContext, mProviderClass, mProviderAuthority);
         mResolver.addProvider(mProviderAuthority, getProvider());
+    }
+
+    /**
+     * Creates and sets up a new instance of the provider.
+     */
+    static <T extends ContentProvider> T createProviderForTest(
+            Context context, Class<T> providerClass, String authority)
+            throws IllegalAccessException, InstantiationException {
+        T instance = providerClass.newInstance();
+        ProviderInfo providerInfo = new ProviderInfo();
+        providerInfo.authority = authority;
+        instance.attachInfoForTesting(context, providerInfo);
+        return instance;
     }
 
     /**
@@ -218,8 +229,7 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
         Context context = new IsolatedContext(resolver, targetContextWrapper);
         DatabaseUtils.createDbFromSqlStatements(context, databaseName, databaseVersion, sql);
 
-        T provider = providerClass.newInstance();
-        provider.attachInfoForTesting(context, null);
+        T provider = createProviderForTest(context, providerClass, authority);
         resolver.addProvider(authority, provider);
 
         return resolver;

@@ -29,12 +29,10 @@ public class DirectoryContainerView extends FrameLayout {
 
     public DirectoryContainerView(Context context) {
         super(context);
-        setClipChildren(false);
     }
 
     public DirectoryContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setClipChildren(false);
     }
 
     @Override

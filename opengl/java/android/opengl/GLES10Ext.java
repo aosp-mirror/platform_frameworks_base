@@ -22,7 +22,7 @@ package android.opengl;
 public class GLES10Ext {
     native private static void _nativeClassInit();
     static {
-	    _nativeClassInit();
+        _nativeClassInit();
     }
     
     // C function GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent )

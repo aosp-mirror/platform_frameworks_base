@@ -20,18 +20,21 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- Enable quick settings on tablets -->
-    <bool name="config_hasSettingsPanel">true</bool>
-
-    <!-- The number of columns in the QuickSettings -->
-    <integer name="quick_settings_num_columns">3</integer>
+    <!-- The maximum number of rows in the QuickSettings -->
+    <integer name="quick_settings_max_rows">4</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
-    <!-- Whether rotation lock shows up in quick settings or not -->
-    <bool name="quick_settings_show_rotation_lock">true</bool>
+    <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
+         card. -->
+    <integer name="keyguard_max_notification_count">5</integer>
 
-    <!-- Enable the "flip settings" panel -->
-    <bool name="config_hasFlipSettingsPanel">false</bool>
+    <!-- Set to true to enable the user switcher on the keyguard. -->
+    <bool name="config_keyguardUserSwitcher">true</bool>
+
+    <!-- Transposes the search bar layout in landscape. -->
+    <bool name="recents_has_transposed_search_bar">true</bool>
+    <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
+    <bool name="recents_has_transposed_nav_bar">false</bool>
 </resources>

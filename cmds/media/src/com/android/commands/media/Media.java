@@ -17,12 +17,19 @@
 
 package com.android.commands.media;
 
-import android.app.PendingIntent;
+import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.media.IAudioService;
-import android.media.IRemoteControlDisplay;
+import android.content.pm.ParceledListSlice;
+import android.media.MediaMetadata;
+import android.media.session.ISessionController;
+import android.media.session.ISessionControllerCallback;
+import android.media.session.ISessionManager;
+import android.media.session.MediaController;
+import android.media.session.ParcelableVolumeInfo;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -30,16 +37,17 @@ import android.util.AndroidException;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+
 import com.android.internal.os.BaseCommand;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.List;
 
 public class Media extends BaseCommand {
-
-    private IAudioService mAudioService;
+    private ISessionManager mSessionService;
 
     /**
      * Command-line entry point.
@@ -54,29 +62,35 @@ public class Media extends BaseCommand {
         out.println(
                 "usage: media [subcommand] [options]\n" +
                 "       media dispatch KEY\n" +
-                "       media remote-display\n" +
+                "       media list-sessions\n" +
+                "       media monitor <tag>\n" +
                 "\n" +
-                "media dispatch: dispatch a media key to the current media client.\n" +
+                "media dispatch: dispatch a media key to the system.\n" +
                 "                KEY may be: play, pause, play-pause, mute, headsethook,\n" +
-                "                stop, next, previous, rewind, recordm fast-forword.\n" +
-                "media remote-display: monitor remote display updates.\n"
+                "                stop, next, previous, rewind, record, fast-forword.\n" +
+                "media list-sessions: print a list of the current sessions.\n" +
+                        "media monitor: monitor updates to the specified session.\n" +
+                "                       Use the tag from list-sessions.\n"
         );
     }
 
     public void onRun() throws Exception {
-        mAudioService = IAudioService.Stub.asInterface(ServiceManager.checkService(
-                Context.AUDIO_SERVICE));
-        if (mAudioService == null) {
+        mSessionService = ISessionManager.Stub.asInterface(ServiceManager.checkService(
+                Context.MEDIA_SESSION_SERVICE));
+        if (mSessionService == null) {
             System.err.println(NO_SYSTEM_ERROR_CODE);
-            throw new AndroidException("Can't connect to audio service; is the system running?");
+            throw new AndroidException(
+                    "Can't connect to media session service; is the system running?");
         }
 
         String op = nextArgRequired();
 
         if (op.equals("dispatch")) {
             runDispatch();
-        } else if (op.equals("remote-display")) {
-            runRemoteDisplay();
+        } else if (op.equals("list-sessions")) {
+            runListSessions();
+        } else if (op.equals("monitor")) {
+            runMonitor();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -85,8 +99,39 @@ public class Media extends BaseCommand {
 
     private void sendMediaKey(KeyEvent event) {
         try {
-            mAudioService.dispatchMediaKeyEvent(event);
+            mSessionService.dispatchMediaKeyEvent(event, false);
         } catch (RemoteException e) {
+        }
+    }
+
+    private void runMonitor() throws Exception {
+        String id = nextArgRequired();
+        if (id == null) {
+            showError("Error: must include a session id");
+            return;
+        }
+        boolean success = false;
+        try {
+            List<IBinder> sessions = mSessionService
+                    .getSessions(null, ActivityManager.getCurrentUser());
+            for (IBinder session : sessions) {
+                ISessionController controller = ISessionController.Stub.asInterface(session);
+                try {
+                    if (controller != null && id.equals(controller.getTag())) {
+                        ControllerMonitor monitor = new ControllerMonitor(controller);
+                        monitor.run();
+                        success = true;
+                        break;
+                    }
+                } catch (RemoteException e) {
+                    // ignore
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("***Error monitoring session*** " + e.getMessage());
+        }
+        if (!success) {
+            System.out.println("No session found with id " + id);
         }
     }
 
@@ -127,65 +172,80 @@ public class Media extends BaseCommand {
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
 
-    class RemoteDisplayMonitor extends IRemoteControlDisplay.Stub {
-        RemoteDisplayMonitor() {
-        }
+    class ControllerMonitor extends ISessionControllerCallback.Stub {
+        private final ISessionController mController;
 
-
-        @Override
-        public void setCurrentClientId(int clientGeneration, PendingIntent clientMediaIntent,
-                boolean clearing) {
-            System.out.println("New client: id=" + clientGeneration
-                    + " intent=" + clientMediaIntent + " clearing=" + clearing);
+        public ControllerMonitor(ISessionController controller) {
+            mController = controller;
         }
 
         @Override
-        public void setEnabled(boolean enabled) {
-            System.out.println("New enable state= " + (enabled ? "enabled" : "disabled"));
+        public void onSessionDestroyed() {
+            System.out.println("onSessionDestroyed. Enter q to quit.");
+
         }
 
         @Override
-        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs,
-                long currentPosMs, float speed) {
-            System.out.println("New state: id=" + generationId + " state=" + state
-                    + " time=" + stateChangeTimeMs + " pos=" + currentPosMs + " speed=" + speed);
+        public void onEvent(String event, Bundle extras) {
+            System.out.println("onSessionEvent event=" + event + ", extras=" + extras);
         }
 
         @Override
-        public void setTransportControlInfo(int generationId, int transportControlFlags,
-                int posCapabilities) {
-            System.out.println("New control info: id=" + generationId
-                    + " flags=0x" + Integer.toHexString(transportControlFlags)
-                    + " cap=0x" + Integer.toHexString(posCapabilities));
+        public void onPlaybackStateChanged(PlaybackState state) {
+            System.out.println("onPlaybackStateChanged " + state);
         }
 
         @Override
-        public void setMetadata(int generationId, Bundle metadata) {
-            System.out.println("New metadata: id=" + generationId
-                    + " data=" + metadata);
+        public void onMetadataChanged(MediaMetadata metadata) {
+            String mmString = metadata == null ? null : "title=" + metadata
+                    .getDescription();
+            System.out.println("onMetadataChanged " + mmString);
         }
 
         @Override
-        public void setArtwork(int generationId, Bitmap artwork) {
-            System.out.println("New artwork: id=" + generationId
-                    + " art=" + artwork);
+        public void onQueueChanged(ParceledListSlice queue) throws RemoteException {
+            System.out.println("onQueueChanged, "
+                    + (queue == null ? "null queue" : " size=" + queue.getList().size()));
         }
 
         @Override
-        public void setAllMetadata(int generationId, Bundle metadata, Bitmap artwork) {
-            System.out.println("New metadata+artwork: id=" + generationId
-                    + " data=" + metadata + " art=" + artwork);
+        public void onQueueTitleChanged(CharSequence title) throws RemoteException {
+            System.out.println("onQueueTitleChange " + title);
+        }
+
+        @Override
+        public void onExtrasChanged(Bundle extras) throws RemoteException {
+            System.out.println("onExtrasChanged " + extras);
+        }
+
+        @Override
+        public void onVolumeInfoChanged(ParcelableVolumeInfo info) throws RemoteException {
+            System.out.println("onVolumeInfoChanged " + info);
         }
 
         void printUsageMessage() {
-            System.out.println("Monitoring remote control displays...  available commands:");
+            try {
+                System.out.println("V2Monitoring session " + mController.getTag()
+                        + "...  available commands: play, pause, next, previous");
+            } catch (RemoteException e) {
+                System.out.println("Error trying to monitor session!");
+            }
             System.out.println("(q)uit: finish monitoring");
         }
 
         void run() throws RemoteException {
             printUsageMessage();
-
-            mAudioService.registerRemoteControlDisplay(this, 0, 0);
+            HandlerThread cbThread = new HandlerThread("MediaCb") {
+                @Override
+                protected void onLooperPrepared() {
+                    try {
+                        mController.registerCallbackListener(ControllerMonitor.this);
+                    } catch (RemoteException e) {
+                        System.out.println("Error registering monitor callback");
+                    }
+                }
+            };
+            cbThread.start();
 
             try {
                 InputStreamReader converter = new InputStreamReader(System.in);
@@ -198,6 +258,14 @@ public class Media extends BaseCommand {
                         addNewline = false;
                     } else if ("q".equals(line) || "quit".equals(line)) {
                         break;
+                    } else if ("play".equals(line)) {
+                        mController.play();
+                    } else if ("pause".equals(line)) {
+                        mController.pause();
+                    } else if ("next".equals(line)) {
+                        mController.next();
+                    } else if ("previous".equals(line)) {
+                        mController.previous();
                     } else {
                         System.out.println("Invalid command: " + line);
                     }
@@ -209,17 +277,38 @@ public class Media extends BaseCommand {
                         printUsageMessage();
                     }
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                mAudioService.unregisterRemoteControlDisplay(this);
+                cbThread.getLooper().quit();
+                try {
+                    mController.unregisterCallbackListener(this);
+                } catch (Exception e) {
+                    // ignoring
+                }
             }
         }
     }
 
-    private void runRemoteDisplay() throws Exception {
-        RemoteDisplayMonitor monitor = new RemoteDisplayMonitor();
-        monitor.run();
+    private void runListSessions() {
+        System.out.println("Sessions:");
+        try {
+            List<IBinder> sessions = mSessionService
+                    .getSessions(null, ActivityManager.getCurrentUser());
+            for (IBinder session : sessions) {
+
+                ISessionController controller = ISessionController.Stub.asInterface(session);
+                if (controller != null) {
+                    try {
+                        System.out.println("  tag=" + controller.getTag()
+                                + ", package=" + controller.getPackageName());
+                    } catch (RemoteException e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("***Error listing sessions***");
+        }
     }
 }

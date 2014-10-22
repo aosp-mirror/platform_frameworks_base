@@ -50,7 +50,6 @@ import java.io.IOException;
  */
 public class KeyguardAccountView extends LinearLayout implements KeyguardSecurityView,
         View.OnClickListener, TextWatcher {
-    private static final int AWAKE_POKE_MILLIS = 30000;
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
     private static final String LOCK_PATTERN_CLASS = LOCK_PATTERN_PACKAGE + ".ChooseLockGeneric";
 
@@ -119,7 +118,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
 
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (mCallback != null) {
-            mCallback.userActivity(AWAKE_POKE_MILLIS);
+            mCallback.userActivity();
         }
     }
 
@@ -154,7 +153,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     }
 
     public void onClick(View v) {
-        mCallback.userActivity(0);
+        mCallback.userActivity();
         if (v == mOk) {
             asyncCheckPassword();
         }
@@ -177,14 +176,14 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivityAsUser(intent,
                             new UserHandle(mLockPatternUtils.getCurrentUser()));
-                    mCallback.reportSuccessfulUnlockAttempt();
+                    mCallback.reportUnlockAttempt(true);
 
                     // dismiss keyguard
                     mCallback.dismiss(true);
                 } else {
                     mSecurityMessageDisplay.setMessage(R.string.kg_login_invalid_input, true);
                     mPassword.setText("");
-                    mCallback.reportFailedUnlockAttempt();
+                    mCallback.reportUnlockAttempt(false);
                 }
             }
         });
@@ -258,7 +257,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     }
 
     private void asyncCheckPassword() {
-        mCallback.userActivity(AWAKE_POKE_MILLIS);
+        mCallback.userActivity();
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
         Account account = findIntendedAccount(login);
@@ -273,7 +272,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                 new AccountManagerCallback<Bundle>() {
             public void run(AccountManagerFuture<Bundle> future) {
                 try {
-                    mCallback.userActivity(AWAKE_POKE_MILLIS);
+                    mCallback.userActivity();
                     final Bundle result = future.getResult();
                     final boolean verified = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
                     postOnCheckPasswordResult(verified);
@@ -327,6 +326,16 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void hideBouncer(int duration) {
+    }
+
+    @Override
+    public void startAppearAnimation() {
+        // TODO.
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 }
 

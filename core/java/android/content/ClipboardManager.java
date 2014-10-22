@@ -22,8 +22,6 @@ import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ServiceManager;
-import android.os.StrictMode;
-import android.util.Log;
 
 import java.util.ArrayList;
 

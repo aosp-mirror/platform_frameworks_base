@@ -17,12 +17,8 @@
 package android.app;
 
 import android.content.Intent;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Bundle;
-
-import java.util.Map;
 
 /**
  * {@hide}

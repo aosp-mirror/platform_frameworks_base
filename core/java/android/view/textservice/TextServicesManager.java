@@ -90,6 +90,18 @@ public final class TextServicesManager {
     }
 
     /**
+     * Returns the language component of a given locale string.
+     */
+    private static String parseLanguageFromLocaleString(String locale) {
+        final int idx = locale.indexOf('_');
+        if (idx < 0) {
+            return locale;
+        } else {
+            return locale.substring(0, idx);
+        }
+    }
+
+    /**
      * Get a spell checker session for the specified spell checker
      * @param locale the locale for the spell checker. If {@code locale} is null and
      * referToSpellCheckerLanguageSettings is true, the locale specified in Settings will be
@@ -134,9 +146,8 @@ public final class TextServicesManager {
             }
             if (locale != null) {
                 final String subtypeLocale = subtypeInUse.getLocale();
-                final String inputLocale = locale.toString();
-                if (subtypeLocale.length() < 2 || inputLocale.length() < 2
-                        || !subtypeLocale.substring(0, 2).equals(inputLocale.substring(0, 2))) {
+                final String subtypeLanguage = parseLanguageFromLocaleString(subtypeLocale);
+                if (subtypeLanguage.length() < 2 || !locale.getLanguage().equals(subtypeLanguage)) {
                     return null;
                 }
             }
@@ -145,11 +156,12 @@ public final class TextServicesManager {
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype subtype = sci.getSubtypeAt(i);
                 final String tempSubtypeLocale = subtype.getLocale();
+                final String tempSubtypeLanguage = parseLanguageFromLocaleString(tempSubtypeLocale);
                 if (tempSubtypeLocale.equals(localeStr)) {
                     subtypeInUse = subtype;
                     break;
-                } else if (localeStr.length() >= 2 && tempSubtypeLocale.length() >= 2
-                        && localeStr.startsWith(tempSubtypeLocale)) {
+                } else if (tempSubtypeLanguage.length() >= 2 &&
+                        locale.getLanguage().equals(tempSubtypeLanguage)) {
                     subtypeInUse = subtype;
                 }
             }

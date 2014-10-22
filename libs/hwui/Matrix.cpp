@@ -89,8 +89,9 @@ uint8_t Matrix4::getType() const {
         float m01 = data[kSkewX];
         float m10 = data[kSkewY];
         float m11 = data[kScaleY];
+        float m32 = data[kTranslateZ];
 
-        if (m01 != 0.0f || m10 != 0.0f) {
+        if (m01 != 0.0f || m10 != 0.0f || m32 != 0.0f) {
             mType |= kTypeAffine;
         }
 
@@ -131,11 +132,13 @@ bool Matrix4::changesBounds() const {
 }
 
 bool Matrix4::isPureTranslate() const {
-    return getGeometryType() <= kTypeTranslate;
+    // NOTE: temporary hack to workaround ignoreTransform behavior with Z values
+    // TODO: separate this into isPure2dTranslate vs isPure3dTranslate
+    return getGeometryType() <= kTypeTranslate && (data[kTranslateZ] == 0.0f);
 }
 
 bool Matrix4::isSimple() const {
-    return getGeometryType() <= (kTypeScale | kTypeTranslate);
+    return getGeometryType() <= (kTypeScale | kTypeTranslate) && (data[kTranslateZ] == 0.0f);
 }
 
 bool Matrix4::isIdentity() const {
@@ -382,6 +385,19 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
     mType = kTypeTranslate | kTypeScale | kTypeRectToRect;
 }
 
+float Matrix4::mapZ(const Vector3& orig) const {
+    // duplicates logic for mapPoint3d's z coordinate
+    return orig.x * data[2] + orig.y * data[6] + orig.z * data[kScaleZ] + data[kTranslateZ];
+}
+
+void Matrix4::mapPoint3d(Vector3& vec) const {
+    //TODO: optimize simple case
+    const Vector3 orig(vec);
+    vec.x = orig.x * data[kScaleX] + orig.y * data[kSkewX] + orig.z * data[8] + data[kTranslateX];
+    vec.y = orig.x * data[kSkewY] + orig.y * data[kScaleY] + orig.z * data[9] + data[kTranslateY];
+    vec.z = orig.x * data[2] + orig.y * data[6] + orig.z * data[kScaleZ] + data[kTranslateZ];
+}
+
 #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
 
 void Matrix4::mapPoint(float& x, float& y) const {
@@ -401,6 +417,8 @@ void Matrix4::mapPoint(float& x, float& y) const {
 }
 
 void Matrix4::mapRect(Rect& r) const {
+    if (isIdentity()) return;
+
     if (isSimple()) {
         MUL_ADD_STORE(r.left, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(r.right, data[kScaleX], data[kTranslateX]);
@@ -466,8 +484,8 @@ void Matrix4::decomposeScale(float& sx, float& sy) const {
     sy = copysignf(sqrtf(len), data[mat4::kScaleY]);
 }
 
-void Matrix4::dump() const {
-    ALOGD("Matrix4[simple=%d, type=0x%x", isSimple(), getType());
+void Matrix4::dump(const char* label) const {
+    ALOGD("%s[simple=%d, type=0x%x", label ? label : "Matrix4", isSimple(), getType());
     ALOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[8], data[kTranslateX]);
     ALOGD("  %f %f %f %f", data[kSkewY], data[kScaleY], data[9], data[kTranslateY]);
     ALOGD("  %f %f %f %f", data[2], data[6], data[kScaleZ], data[kTranslateZ]);

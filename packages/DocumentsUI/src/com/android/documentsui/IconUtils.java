@@ -22,7 +22,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
-import android.util.Log;
+import android.util.TypedValue;
 
 import com.google.android.collect.Maps;
 
@@ -147,10 +147,6 @@ public class IconUtils {
 
         // Presentation
         icon = R.drawable.ic_doc_presentation;
-        add("application/vnd.ms-powerpoint", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.presentation", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.template", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.slideshow", icon);
         add("application/vnd.stardivision.impress", icon);
         add("application/vnd.sun.xml.impress", icon);
         add("application/vnd.sun.xml.impress.template", icon);
@@ -161,9 +157,6 @@ public class IconUtils {
         icon = R.drawable.ic_doc_spreadsheet;
         add("application/vnd.oasis.opendocument.spreadsheet", icon);
         add("application/vnd.oasis.opendocument.spreadsheet-template", icon);
-        add("application/vnd.ms-excel", icon);
-        add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", icon);
-        add("application/vnd.openxmlformats-officedocument.spreadsheetml.template", icon);
         add("application/vnd.stardivision.calc", icon);
         add("application/vnd.sun.xml.calc", icon);
         add("application/vnd.sun.xml.calc.template", icon);
@@ -175,9 +168,6 @@ public class IconUtils {
         add("application/vnd.oasis.opendocument.text-master", icon);
         add("application/vnd.oasis.opendocument.text-template", icon);
         add("application/vnd.oasis.opendocument.text-web", icon);
-        add("application/msword", icon);
-        add("application/vnd.openxmlformats-officedocument.wordprocessingml.document", icon);
-        add("application/vnd.openxmlformats-officedocument.wordprocessingml.template", icon);
         add("application/vnd.stardivision.writer", icon);
         add("application/vnd.stardivision.writer-global", icon);
         add("application/vnd.sun.xml.writer", icon);
@@ -190,6 +180,25 @@ public class IconUtils {
         icon = R.drawable.ic_doc_video;
         add("application/x-quicktimeplayer", icon);
         add("application/x-shockwave-flash", icon);
+
+        // Word
+        icon = R.drawable.ic_doc_word;
+        add("application/msword", icon);
+        add("application/vnd.openxmlformats-officedocument.wordprocessingml.document", icon);
+        add("application/vnd.openxmlformats-officedocument.wordprocessingml.template", icon);
+
+        // Excel
+        icon = R.drawable.ic_doc_excel;
+        add("application/vnd.ms-excel", icon);
+        add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", icon);
+        add("application/vnd.openxmlformats-officedocument.spreadsheetml.template", icon);
+
+        // Powerpoint
+        icon = R.drawable.ic_doc_powerpoint;
+        add("application/vnd.ms-powerpoint", icon);
+        add("application/vnd.openxmlformats-officedocument.presentationml.presentation", icon);
+        add("application/vnd.openxmlformats-officedocument.presentationml.template", icon);
+        add("application/vnd.openxmlformats-officedocument.presentationml.slideshow", icon);
     }
 
     public static Drawable loadPackageIcon(Context context, String authority, int icon) {
@@ -201,7 +210,7 @@ public class IconUtils {
                     return pm.getDrawable(info.packageName, icon, info.applicationInfo);
                 }
             } else {
-                return context.getResources().getDrawable(icon);
+                return context.getDrawable(icon);
             }
         }
         return null;
@@ -209,19 +218,17 @@ public class IconUtils {
 
     public static Drawable loadMimeIcon(
             Context context, String mimeType, String authority, String docId, int mode) {
-        final Resources res = context.getResources();
-
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             // TODO: eventually move these hacky assets into that package
             if ("com.android.providers.media.documents".equals(authority)
                     && docId.startsWith("album")) {
-                return res.getDrawable(R.drawable.ic_doc_album);
+                return context.getDrawable(R.drawable.ic_doc_album);
             }
 
             if (mode == DocumentsActivity.State.MODE_GRID) {
-                return res.getDrawable(R.drawable.ic_grid_folder);
+                return context.getDrawable(R.drawable.ic_grid_folder);
             } else {
-                return res.getDrawable(R.drawable.ic_root_folder);
+                return context.getDrawable(R.drawable.ic_doc_folder);
             }
         }
 
@@ -229,17 +236,14 @@ public class IconUtils {
     }
 
     public static Drawable loadMimeIcon(Context context, String mimeType) {
-        final Resources res = context.getResources();
-
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            // TODO: return a mipmap, since this is used for grid
-            return res.getDrawable(R.drawable.ic_root_folder);
+            return context.getDrawable(R.drawable.ic_doc_folder);
         }
 
         // Look for exact match first
         Integer resId = sMimeIcons.get(mimeType);
         if (resId != null) {
-            return res.getDrawable(resId);
+            return context.getDrawable(resId);
         }
 
         if (mimeType == null) {
@@ -250,15 +254,28 @@ public class IconUtils {
         // Otherwise look for partial match
         final String typeOnly = mimeType.split("/")[0];
         if ("audio".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_audio);
+            return context.getDrawable(R.drawable.ic_doc_audio);
         } else if ("image".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_image);
+            return context.getDrawable(R.drawable.ic_doc_image);
         } else if ("text".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_text);
+            return context.getDrawable(R.drawable.ic_doc_text);
         } else if ("video".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_video);
+            return context.getDrawable(R.drawable.ic_doc_video);
         } else {
-            return res.getDrawable(R.drawable.ic_doc_generic);
+            return context.getDrawable(R.drawable.ic_doc_generic);
         }
+    }
+
+    public static Drawable applyTintColor(Context context, int drawableId, int tintColorId) {
+        final Drawable icon = context.getDrawable(drawableId);
+        icon.mutate();
+        icon.setTintList(context.getResources().getColorStateList(tintColorId));
+        return icon;
+    }
+
+    public static Drawable applyTintAttr(Context context, int drawableId, int tintAttrId) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(tintAttrId, outValue, true);
+        return applyTintColor(context, drawableId, outValue.resourceId);
     }
 }

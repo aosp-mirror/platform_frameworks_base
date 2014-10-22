@@ -76,11 +76,13 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
         Collections.sort(users, mOrderAddedComparator);
 
         for (UserInfo user: users) {
-            KeyguardMultiUserAvatar uv = createAndAddUser(user);
-            if (user.id == activeUser.id) {
-                mActiveUserAvatar = uv;
+            if (user.supportsSwitchTo()) {
+                KeyguardMultiUserAvatar uv = createAndAddUser(user);
+                if (user.id == activeUser.id) {
+                    mActiveUserAvatar = uv;
+                }
+                uv.setActive(false, false, null);
             }
-            uv.setActive(false, false, null);
         }
         mActiveUserAvatar.lockPressed(true);
     }

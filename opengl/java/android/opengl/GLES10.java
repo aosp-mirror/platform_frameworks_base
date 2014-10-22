@@ -262,7 +262,7 @@ public class GLES10 {
 
     native private static void _nativeClassInit();
     static {
-	    _nativeClassInit();
+        _nativeClassInit();
     }
 
     private static Buffer _colorPointer;

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="7164937344850004466">"系統用戶介面"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"從清單中移除"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"應用程式資訊"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"沒有最近的應用程式"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"關閉最近使用的應用程式"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 個最近使用的應用程式"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d 個最近使用的應用程式"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"無通知"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"持續進行"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"電量低"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"剩餘 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"電量尚餘 <xliff:g id="NUMBER">%d%%</xliff:g>，省電模式已開啟。"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"不支援 USB 充電。\n僅能使用隨附的充電器。"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"不支援 USB 充電功能。"</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"僅限使用裝置隨附的充電器。"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"設定"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"啟動省電模式？"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"開始"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"啟動省電模式"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"省電模式可延長電池使用時間，但會降低裝置的效能。\n\n裝置充電時，省電模式會自動停用。"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"設定"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飛行模式"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"自動旋轉螢幕"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"關閉"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"自動"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"已經由藍牙進行網絡共享"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"設定輸入法"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"實體鍵盤"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式存取 USB 裝置嗎？"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式存取 USB 配件嗎？"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"連接這個 USB 裝置時啟用 <xliff:g id="ACTIVITY">%1$s</xliff:g> 嗎？"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"連接這個 USB 配件時啟用 <xliff:g id="ACTIVITY">%1$s</xliff:g> 嗎？"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"已安裝的應用程式均無法存取這個 USB 配件，如要進一步瞭解這個配件，請瀏覽 <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB 配件"</string>
+    <string name="label_view" msgid="6304565553218192990">"觀看"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"預設用於這個 USB 裝置"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"預設用於這個 USB 配件"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"允許 USB 除錯嗎？"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"這部電腦的 RSA 密鑰指紋如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"一律允許透過這部電腦進行"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取螢幕畫面。"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取螢幕畫面。"</string>
+    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
+    <skip />
+    <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"掛接為媒體播放器 (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"掛接為相機 (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"安裝 Mac 專用的「Android 檔案傳輸」應用程式"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"返回"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"首頁"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"選單"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"最近使用的應用程式"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"搜尋"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"相機"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"電話"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"藍牙連線已建立。"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"藍牙連線已中斷。"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"未安裝電池。"</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"電池電量為一格。"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"電池電量為兩格。"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"電池電量為三格。"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"電池已滿。"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"沒有電話訊號。"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"電話訊號強度為一格。"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"電話訊號強度為兩格。"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"電話訊號強度為三格。"</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"電話訊號滿格。"</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"沒有數據網絡。"</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"數據網絡訊號強度為一格。"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"數據網絡訊號強度為兩格。"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"數據網絡訊號強度為三格。"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"數據網絡訊號滿格。"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"WiFi 已關閉。"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WiFi 連線已中斷。"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WiFi 訊號強度為一格。"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WiFi 訊號強度為兩格。"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WiFi 訊號強度為三格。"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"WiFi 訊號已滿。"</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"沒有 WiMAX 訊號。"</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX 訊號強度一格。"</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX 訊號強度兩格。"</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX 訊號強度三格。"</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX 訊號滿格。"</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"沒有訊號。"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"未連線。"</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"訊號強度為零格。"</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"訊號強度為一格。"</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"訊號強度為兩格。"</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"訊號強度為三格。"</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"訊號已滿。"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"開啟。"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"關閉。"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"已連線。"</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"連線中。"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"漫遊"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"無 SIM 卡。"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網絡共享。"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛航模式。"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
+    <string name="accessibility_settings_button" msgid="799583911231893380">"系統設定"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"清除通知。"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS 已啟用。"</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"正在取得 GPS 訊號。"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter (TTY) 已啟用。"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"鈴聲震動。"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"鈴聲靜音。"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"「<xliff:g id="APP">%s</xliff:g>」已關閉。"</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"通知已關閉。"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知欄。"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快速設定。"</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"最近使用的應用程式"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用戶：<xliff:g id="USER">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>、<xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"流動數據連線：<xliff:g id="SIGNAL">%1$s</xliff:g>、<xliff:g id="TYPE">%2$s</xliff:g>、<xliff:g id="NETWORK">%3$s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"電池電量：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"飛航模式：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"藍牙：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"定位服務<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"鬧鐘已設定為：<xliff:g id="TIME">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"關閉面板"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"更多時間"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"較少時間"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G 數據連線已關閉"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G 數據連線已關閉"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"流動數據連線已關閉"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"數據連線已關閉"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"數據流量已達到您所設定的上限，因此裝置關閉了數據連線。\n\n若重新開啟數據連線，流動網絡供應商可能會向您收費。"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"開啟數據連線"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"沒有互聯網連線"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜尋 GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS 已定位"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"位置要求啟動中"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"應用程式資訊"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"螢幕會自動旋轉。"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"螢幕已鎖定為橫向模式。"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"螢幕已鎖定為垂直模式。"</string>
+    <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"飛行模式"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"充電中 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"充電完成"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"藍牙"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"藍牙 (<xliff:g id="NUMBER">%d</xliff:g> 部裝置)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"藍牙關閉"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"找不到配對的裝置"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動旋轉"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"輪流展示鎖定"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"直向"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"橫向"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"輸入法"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"位置"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置關閉"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"媒體裝置"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"只可撥打緊急電話"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"設定"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"時間"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"我"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"用戶"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"新用戶"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未連線"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"沒有網絡"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 關閉"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"找不到已儲存的網絡"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"放送螢幕"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"正在放送"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"未命名的裝置"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"放送準備完成"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"沒有可用裝置"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"反轉顏色"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"色彩校準模式"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"更多設定"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"完成"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"已連線"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"正在連線…"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網絡共享"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"熱點"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"閃光燈"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"流動數據"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"數據用量"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩餘資料"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"超過上限"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用 <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
+    <string name="recents_empty_message" msgid="7883614615463619450">"沒有最近使用的應用程式"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"應用程式鎖定"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後完成充電"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"非充電中"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"網絡可能會\n受到監控"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"不允許干擾 (包含鬧鐘)"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"不允許干擾"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"僅限優先干擾"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"下次鬧鐘時間：<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"下次鬧鐘時間：<xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"您不會聽到<xliff:g id="ALARM_TIME">%s</xliff:g> 的鬧鐘"</string>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"不太緊急的通知會在下方顯示"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"再次輕按即可開啟"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"向上快速滑動即可解鎖"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"向右快速滑動即可使用手機功能"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"向左快速滑動即可使用相機功能"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"無"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"優先順序"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"全部"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中 (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>後完成充電)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"訪客"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"新增訪客"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"結束訪客模式"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
+    <skip />
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1 分鐘"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d 分鐘"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1 小時"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d 小時"</item>
+  </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"省電模式已開啟"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"裝置效能已降低。"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"開啟省電設定"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"內容已隱藏"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取您的螢幕上顯示的內容。"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
+</resources>

@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.IBluetoothStateChangeCallback;
+import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothDevice;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
@@ -54,10 +55,11 @@ interface IBluetooth
     int getProfileConnectionState(int profile);
 
     BluetoothDevice[] getBondedDevices();
-    boolean createBond(in BluetoothDevice device);
+    boolean createBond(in BluetoothDevice device, in int transport);
     boolean cancelBondProcess(in BluetoothDevice device);
     boolean removeBond(in BluetoothDevice device);
     int getBondState(in BluetoothDevice device);
+    boolean isConnected(in BluetoothDevice device);
 
     String getRemoteName(in BluetoothDevice device);
     int getRemoteType(in BluetoothDevice device);
@@ -66,11 +68,17 @@ interface IBluetooth
     int getRemoteClass(in BluetoothDevice device);
     ParcelUuid[] getRemoteUuids(in BluetoothDevice device);
     boolean fetchRemoteUuids(in BluetoothDevice device);
+    boolean fetchRemoteMasInstances(in BluetoothDevice device);
 
     boolean setPin(in BluetoothDevice device, boolean accept, int len, in byte[] pinCode);
     boolean setPasskey(in BluetoothDevice device, boolean accept, int len, in byte[]
     passkey);
     boolean setPairingConfirmation(in BluetoothDevice device, boolean accept);
+
+    int getPhonebookAccessPermission(in BluetoothDevice device);
+    boolean setPhonebookAccessPermission(in BluetoothDevice device, int value);
+    int getMessageAccessPermission(in BluetoothDevice device);
+    boolean setMessageAccessPermission(in BluetoothDevice device, int value);
 
     void sendConnectionStateChange(in BluetoothDevice device, int profile, int state, int prevState);
 
@@ -82,4 +90,11 @@ interface IBluetooth
     ParcelFileDescriptor createSocketChannel(int type, in String serviceName, in ParcelUuid uuid, int port, int flag);
 
     boolean configHciSnoopLog(boolean enable);
+
+    boolean isMultiAdvertisementSupported();
+    boolean isOffloadedFilteringSupported();
+    boolean isOffloadedScanBatchingSupported();
+    boolean isActivityAndEnergyReportingSupported();
+    void getActivityEnergyInfoFromController();
+    BluetoothActivityEnergyInfo reportActivityInfo();
 }

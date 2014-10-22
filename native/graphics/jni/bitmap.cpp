@@ -34,17 +34,17 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
         info->stride    = bm->rowBytes();
         info->flags     = 0;
 
-        switch (bm->config()) {
-            case SkBitmap::kARGB_8888_Config:
+        switch (bm->colorType()) {
+            case kN32_SkColorType:
                 info->format = ANDROID_BITMAP_FORMAT_RGBA_8888;
                 break;
-            case SkBitmap::kRGB_565_Config:
+            case kRGB_565_SkColorType:
                 info->format = ANDROID_BITMAP_FORMAT_RGB_565;
                 break;
-            case SkBitmap::kARGB_4444_Config:
+            case kARGB_4444_SkColorType:
                 info->format = ANDROID_BITMAP_FORMAT_RGBA_4444;
                 break;
-            case SkBitmap::kA8_Config:
+            case kAlpha_8_SkColorType:
                 info->format = ANDROID_BITMAP_FORMAT_A_8;
                 break;
             default:

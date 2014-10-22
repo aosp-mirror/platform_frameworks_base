@@ -20,18 +20,19 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"የቁልፍ ጥበቃ"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"ፒን ኮድ ተይብ"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK እና አዲስ ፒን ተይብ"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"የPUK ኮድ"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"አዲስ Pin ኮድ"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"የሲም PUK እና አዲሱን ፒን ኮድ ይተይቡ"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"የሲም PUK ኮድ"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"አዲስ ሲም ፒን ኮድ"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"የይለፍ ቃል ለመተየብ ንካ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"ለመክፈት የይለፍ ቃል ተይብ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"ለመክፈት ፒን ተይብ"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ትክክል ያልሆነ PIN ኮድ።"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ትክክል ያልሆነ ፒን  ኮድ።"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"ለመክፈት፣ምናሌ ተጫን ከዛ 0"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"የመጨረሻውን  የገጽ ክፈት ሙከራዎችን አልፏል"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"ባትሪ ሞልቷል"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"ባትሪ በመሙላት ላይ፣ <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"ኃይል በመሙላት ላይ"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"የኃይል መሙያዎን ይሰኩ።"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"ለመክፈት ምናሌውን ይጫኑ።"</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"አውታረ መረብ ተቆልፏል"</string>
@@ -71,11 +72,18 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"ለአፍታ አቁም አዝራር"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"የአጫውት አዝራር"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"አቁም አዝራር"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"አሪፍ"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"ደባሪ"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"ልብ"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"ለመቀጠል ይክፈቱ"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"ማስጀመር ተሰርዟል"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"ለመሰረዝ <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>ን ጣል ያድርጉ።"</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> አይሰርዝም።"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ተወው"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ይቅር"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ሰርዝ"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ተከናውኗል"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ሞድ ለውጥ"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"የተፈለገውን የፒን ኮድ ያስገቡ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"የተፈለገውን የፒን ኮድ ያረጋግጡ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ሲም ካርዱን በመክፈት ላይ…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ትክክል ያልሆነ ፒን ኮድ።"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን ይተይቡ።"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"የPUK ኮድ 8 ወይም ከዚያ በላይ ቁጥሮች ሊኖረው ይገባል።"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"ትክክለኛውን የPUK ኮድ እንደገና ያስገቡ። ተደጋጋሚ ሙከራዎች ሲም ካርዱን እስከመጨረሻው ያሰናክሉታል።"</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ስልክዎን እንዲከፍቱ ይጠየቃሉ።\n\nእባክዎ ከ<xliff:g id="NUMBER_2">%d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"አስወግድ"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ልክ ያልሆነ የሲም ኮድ። አሁን መሳሪያዎን ለማስከፈት ድምጸ ተያያዥ ሞደምዎን ማግኘት አለብዎ።"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"ልክ ያልሆነ የሲም ፒን ኮድ፣ መሳሪያዎን ለማስከፈት ድምጸ ተያያዥ ሞደምዎን ማግኘት ግዴታዎ ሊሆን <xliff:g id="NUMBER">%d</xliff:g> ሙከራ ይቀርዎታል።"</item>
+    <item quantity="other" msgid="2215723361575359486">"ልክ ያልሆነ የሲም ፒን ኮድ፣ <xliff:g id="NUMBER">%d</xliff:g> ሙከራዎች ይቀሩዎታል።"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ሲሙ ጥቅም ላይ መዋል እይችልም። የእርስዎን ድምጸ ተያያዥ ሞደም ያግኙ።"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"ልክ ያልሆነ የሲም PUK ኮድ፣ ሲም ካርድዎ በቋሚነት ጥቅም ላይ መዋል የማይችል ሊሆን <xliff:g id="NUMBER">%d</xliff:g> ሙከራ ይቀርዎታል።"</item>
+    <item quantity="other" msgid="5477305226026342036">"ልክ ያልሆነ የሲም PUK ኮድ፣ ሲም ካርድዎ በቋሚነት ጥቅም ላይ መዋል የማይችል ሊሆን <xliff:g id="NUMBER">%d</xliff:g> ሙከራዎች ይቀሩዎታል።"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"የሲም ፒን ክወና አልተሳካም!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"የሲም PUK ክወና አልተሳካም!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"ኮዱ ተቀባይነት አግኝቷል!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"የቀዳሚ ትራክ አዝራር"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"የቀጣይ ትራክ አዝራር"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"ለአፍታ አቁም አዝራር"</string>

@@ -16,9 +16,6 @@
 
 package android.content;
 
-import android.app.Activity;
-import android.app.ActivityManagerNative;
-import android.app.LoadedApk;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -33,7 +30,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.DisplayAdjustments;
 import android.view.Display;
@@ -204,7 +200,12 @@ public class ContextWrapper extends Context {
     public File getFilesDir() {
         return mBase.getFilesDir();
     }
-    
+
+    @Override
+    public File getNoBackupFilesDir() {
+        return mBase.getNoBackupFilesDir();
+    }
+
     @Override
     public File getExternalFilesDir(String type) {
         return mBase.getExternalFilesDir(type);
@@ -231,6 +232,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public File getCodeCacheDir() {
+        return mBase.getCodeCacheDir();
+    }
+
+    @Override
     public File getExternalCacheDir() {
         return mBase.getExternalCacheDir();
     }
@@ -238,6 +244,11 @@ public class ContextWrapper extends Context {
     @Override
     public File[] getExternalCacheDirs() {
         return mBase.getExternalCacheDirs();
+    }
+
+    @Override
+    public File[] getExternalMediaDirs() {
+        return mBase.getExternalMediaDirs();
     }
 
     @Override
@@ -419,6 +430,16 @@ public class ContextWrapper extends Context {
             String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, resultReceiver,
+                scheduler, initialCode, initialData, initialExtras);
+    }
+
+    /** @hide */
+    @Override
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
+            Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras) {
+        mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
 
@@ -642,6 +663,12 @@ public class ContextWrapper extends Context {
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
         return mBase.createPackageContextAsUser(packageName, flags, user);
+    }
+
+    /** @hide */
+    public Context createApplicationContext(ApplicationInfo application,
+            int flags) throws PackageManager.NameNotFoundException {
+        return mBase.createApplicationContext(application, flags);
     }
 
     /** @hide */

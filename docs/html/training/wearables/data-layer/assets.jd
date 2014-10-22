@@ -1,0 +1,123 @@
+page.title=Transferring Assets
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#TransferAsset">Transfer an Asset</a></li>
+  <li><a href="#ReceiveAsset">Receive an Asset</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+To send large blobs of binary data over the Bluetooth transport, such as images, attach an
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html">Asset</a> to a
+data item and the put the data item into the replicated data store.
+</p>
+
+<p>Assets automatically handle caching of data to prevent retransmission and conserve Bluetooth bandwidth.
+A common pattern is for a handheld app to download an image, shrink it to an appropriate size
+for display on the wearable, and transmit it to the wearable app as an Asset. The following examples
+demonstrates this pattern.
+</p>
+
+<p class="note"><b>Note:</b> Although the size of data items are limited to 100KB,
+assets can be as large as desired. However, transferring large assets affect the
+user experience in many cases, so test your apps to ensure that they perform well
+if you're transferring large assets.
+<p>
+
+<h2 id="TransferAsset">Transfer an Asset</h2>
+<p>Create the asset using one of the <code>create...()</code> methods in the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html"><code>Asset</code></a> class.
+Here, we convert a bitmap to a byte stream and then call
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html#createFromBytes(byte[])"><code>createFromBytes()</code></a>
+to create the asset.
+</p>
+
+<pre>
+private static Asset createAssetFromBitmap(Bitmap bitmap) {
+    final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
+    return Asset.createFromBytes(byteStream.toByteArray());
+}
+</pre>
+
+<p>When you have an asset, attach it to a data item with the <code>putAsset()</code> method in
+
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html"><code>DataMap</code></a>
+or
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html"><code>PutDataRequest</code></a>
+and then put the data item into the data store with
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>putDataItem()</code></a>:
+</p>
+
+<p><b>Using PutDataRequest</b></p>
+<pre>
+Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image);
+Asset asset = createAssetFromBitmap(bitmap);
+PutDataRequest request = PutDataRequest.create("/image");
+request.putAsset("profileImage", asset);
+Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+</pre>
+
+<p><b>Using PutDataMapRequest</b></p>
+<pre>
+Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image);
+Asset asset = createAssetFromBitmap(bitmap);
+PutDataMapRequest dataMap = PutDataMapRequest.create("/image");
+dataMap.getDataMap().putAsset("profileImage", asset)
+PutDataRequest request = dataMap.asPutDataRequest();
+PendingResult&lt;DataApi.DataItemResult&gt; pendingResult = Wearable.DataApi
+        .putDataItem(mGoogleApiClient, request);
+</pre>
+
+<h2 id="ReceiveAsset">Receive assets</h2>
+
+<p>
+When an asset is created, you probably want to read and extract
+it on other side of the connection. Here's an example of how to implement the
+callback to detect an asset change and extract the Asset:
+</p>
+
+<pre>
+&#64;Override
+public void onDataChanged(DataEventBuffer dataEvents) {
+  for (DataEvent event : dataEvents) {
+    if (event.getType() == DataEvent.TYPE_CHANGED &&
+        event.getDataItem().getUri().getPath().equals("/image")) {
+      DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+      Asset profileAsset = dataMapItem.getDataMap().getAsset("profileImage");
+      Bitmap bitmap = loadBitmapFromAsset(profileAsset);
+      // Do something with the bitmap
+    }
+  }
+}
+
+public Bitmap loadBitmapFromAsset(Asset asset) {
+    if (asset == null) {
+        throw new IllegalArgumentException("Asset must be non-null");
+    }
+    ConnectionResult result =
+           mGoogleApiClient.blockingConnect(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+    if (!result.isSuccess()) {
+        return null;
+    }
+    // convert asset into a file descriptor and block until it's ready
+    InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+            mGoogleApiClient, asset).await().getInputStream();
+            mGoogleApiClient.disconnect();
+
+    if (assetInputStream == null) {
+        Log.w(TAG, "Requested an unknown Asset.");
+        return null;
+    }
+    // decode the stream into a bitmap
+    return BitmapFactory.decodeStream(assetInputStream);
+}
+</pre>

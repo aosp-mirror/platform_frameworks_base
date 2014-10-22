@@ -23,6 +23,10 @@ import com.android.tools.layoutlib.java.IntegralToString;
 import com.android.tools.layoutlib.java.Objects;
 import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Describes the work to be done by {@link AsmGenerator}.
  */
@@ -98,6 +102,17 @@ public final class CreateInfo implements ICreateInfo {
     public String[] getJavaPkgClasses() {
       return JAVA_PKG_CLASSES;
     }
+
+    public Set<String> getExcludedClasses() {
+        String[] refactoredClasses = getJavaPkgClasses();
+        int count = refactoredClasses.length / 2 + EXCLUDED_CLASSES.length;
+        Set<String> excludedClasses = new HashSet<String>(count);
+        for (int i = 0; i < refactoredClasses.length; i+=2) {
+            excludedClasses.add(refactoredClasses[i]);
+        }
+        excludedClasses.addAll(Arrays.asList(EXCLUDED_CLASSES));
+        return excludedClasses;
+    }
     //-----
 
     /**
@@ -125,22 +140,32 @@ public final class CreateInfo implements ICreateInfo {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         "android.content.res.Resources$Theme#obtainStyledAttributes",
         "android.content.res.Resources$Theme#resolveAttribute",
+        "android.content.res.Resources$Theme#resolveAttributes",
+        "android.content.res.AssetManager#newTheme",
+        "android.content.res.AssetManager#deleteTheme",
+        "android.content.res.AssetManager#applyThemeStyle",
         "android.content.res.TypedArray#getValueAt",
+        "android.content.res.TypedArray#obtain",
         "android.graphics.BitmapFactory#finishDecode",
+        "android.graphics.Typeface#getSystemFontConfigLocation",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
-        "android.os.Build#getString",
         "android.text.format.DateFormat#is24HourFormat",
+        "android.util.Xml#newPullParser",
         "android.view.Choreographer#getRefreshRate",
         "android.view.Display#updateDisplayInfoLocked",
+        "android.view.Display#getWindowManager",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#isInEditMode",
         "android.view.ViewRootImpl#isInTouchMode",
         "android.view.WindowManagerGlobal#getWindowManagerService",
         "android.view.inputmethod.InputMethodManager#getInstance",
+        "android.view.MenuInflater#registerMenu",
+        "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
+        "dalvik.system.VMRuntime#newUnpaddedArray"
     };
 
     /**
@@ -163,6 +188,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.DiscretePathEffect",
         "android.graphics.DrawFilter",
         "android.graphics.EmbossMaskFilter",
+        "android.graphics.FontFamily",
         "android.graphics.LayerRasterizer",
         "android.graphics.LightingColorFilter",
         "android.graphics.LinearGradient",
@@ -186,7 +212,9 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
         "android.os.SystemClock",
+        "android.os.SystemProperties",
         "android.text.AndroidBidi",
+        "android.text.StaticLayout",
         "android.text.format.Time",
         "android.view.Display",
         "libcore.icu.DateIntervalFormat",
@@ -227,6 +255,11 @@ public final class CreateInfo implements ICreateInfo {
             "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
+        };
+
+    private final static String[] EXCLUDED_CLASSES =
+        new String[] {
+            "org.kxml2.io.KXmlParser"
         };
 
     /**

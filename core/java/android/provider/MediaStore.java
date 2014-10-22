@@ -110,14 +110,18 @@ public final class MediaStore {
      * An intent to perform a search for music media and automatically play content from the
      * result when possible. This can be fired, for example, by the result of a voice recognition
      * command to listen to music.
-     * <p>
-     * Contains the {@link android.app.SearchManager#QUERY} extra, which is a string
-     * that can contain any type of unstructured music search, like the name of an artist,
-     * an album, a song, a genre, or any combination of these.
-     * <p>
-     * Because this intent includes an open-ended unstructured search string, it makes the most
-     * sense for apps that can support large-scale search of music, such as services connected
-     * to an online database of music which can be streamed and played on the device.
+     * <p>This intent always includes the {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS}
+     * and {@link android.app.SearchManager#QUERY} extras. The
+     * {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS} extra determines the search mode, and
+     * the value of the {@link android.app.SearchManager#QUERY} extra depends on the search mode.
+     * For more information about the search modes for this intent, see
+     * <a href="{@docRoot}guide/components/intents-common.html#PlaySearch">Play music based
+     * on a search query</a> in <a href="{@docRoot}guide/components/intents-common.html">Common
+     * Intents</a>.</p>
+     *
+     * <p>This intent makes the most sense for apps that can support large-scale search of music,
+     * such as services connected to an online database of music which can be streamed and played
+     * on the device.</p>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH =
@@ -169,6 +173,18 @@ public final class MediaStore {
      * The name of the Intent-extra used to define the song title
      */
     public static final String EXTRA_MEDIA_TITLE = "android.intent.extra.title";
+    /**
+     * The name of the Intent-extra used to define the genre.
+     */
+    public static final String EXTRA_MEDIA_GENRE = "android.intent.extra.genre";
+    /**
+     * The name of the Intent-extra used to define the playlist.
+     */
+    public static final String EXTRA_MEDIA_PLAYLIST = "android.intent.extra.playlist";
+    /**
+     * The name of the Intent-extra used to define the radio channel.
+     */
+    public static final String EXTRA_MEDIA_RADIO_CHANNEL = "android.intent.extra.radio_channel";
     /**
      * The name of the Intent-extra used to define the search focus. The search focus
      * indicates whether the search should be for things related to the artist, album
@@ -240,6 +256,11 @@ public final class MediaStore {
      * object in the extra field. This is useful for applications that only need a small image.
      * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
      * value of EXTRA_OUTPUT.
+     * As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this uri can also be supplied through
+     * {@link android.content.Intent#setClipData(ClipData)}. If using this approach, you still must
+     * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
+     * If you don't set a ClipData, it will be copied there for you when calling
+     * {@link Context#startActivity(Intent)}.
      * @see #EXTRA_OUTPUT
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -260,6 +281,11 @@ public final class MediaStore {
      * object in the extra field. This is useful for applications that only need a small image.
      * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
      * value of EXTRA_OUTPUT.
+     * As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this uri can also be supplied through
+     * {@link android.content.Intent#setClipData(ClipData)}. If using this approach, you still must
+     * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
+     * If you don't set a ClipData, it will be copied there for you when calling
+     * {@link Context#startActivity(Intent)}.
      *
      * @see #ACTION_IMAGE_CAPTURE
      * @see #EXTRA_OUTPUT
@@ -278,6 +304,11 @@ public final class MediaStore {
      * where the video is written. If EXTRA_OUTPUT is not present the video will be
      * written to the standard location for videos, and the Uri of that location will be
      * returned in the data field of the Uri.
+     * As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this uri can also be supplied through
+     * {@link android.content.Intent#setClipData(ClipData)}. If using this approach, you still must
+     * supply the uri through the EXTRA_OUTPUT field for compatibility with old applications.
+     * If you don't set a ClipData, it will be copied there for you when calling
+     * {@link Context#startActivity(Intent)}.
      * @see #EXTRA_OUTPUT
      * @see #EXTRA_VIDEO_QUALITY
      * @see #EXTRA_SIZE_LIMIT
@@ -1391,6 +1422,11 @@ public final class MediaStore {
             public static final String CONTENT_TYPE = "vnd.android.cursor.dir/audio";
 
             /**
+             * The MIME type for an audio track.
+             */
+            public static final String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/audio";
+
+            /**
              * The default sort order for this table
              */
             public static final String DEFAULT_SORT_ORDER = TITLE_KEY;
@@ -1860,6 +1896,16 @@ public final class MediaStore {
              * The default sort order for this table
              */
             public static final String DEFAULT_SORT_ORDER = ALBUM_KEY;
+        }
+
+        public static final class Radio {
+            /**
+             * The MIME type for entries in this table.
+             */
+            public static final String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/radio";
+
+            // Not instantiable.
+            private Radio() { }
         }
     }
 

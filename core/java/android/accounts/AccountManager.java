@@ -155,6 +155,8 @@ public class AccountManager {
 
     /** @hide */
     public static final int ERROR_CODE_USER_RESTRICTED = 100;
+    /** @hide */
+    public static final int ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE = 101;
 
     /**
      * Bundle key used for the {@link String} account name in results
@@ -359,7 +361,29 @@ public class AccountManager {
      */
     public AuthenticatorDescription[] getAuthenticatorTypes() {
         try {
-            return mService.getAuthenticatorTypes();
+            return mService.getAuthenticatorTypes(UserHandle.getCallingUserId());
+        } catch (RemoteException e) {
+            // will never happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @hide
+     * Lists the currently registered authenticators for a given user id.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>The caller has to be in the same user or have the permission
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @return An array of {@link AuthenticatorDescription} for every
+     *     authenticator known to the AccountManager service.  Empty (never
+     *     null) if no authenticators are known.
+     */
+    public AuthenticatorDescription[] getAuthenticatorTypesAsUser(int userId) {
+        try {
+            return mService.getAuthenticatorTypes(userId);
         } catch (RemoteException e) {
             // will never happen
             throw new RuntimeException(e);
@@ -381,6 +405,28 @@ public class AccountManager {
     public Account[] getAccounts() {
         try {
             return mService.getAccounts(null);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @hide
+     * Lists all accounts of any type registered on the device for a given
+     * user id. Equivalent to getAccountsByType(null).
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     *
+     * @return An array of {@link Account}, one for each account.  Empty
+     *     (never null) if no accounts have been added.
+     */
+    public Account[] getAccountsAsUser(int userId) {
+        try {
+            return mService.getAccountsAsUser(null, userId);
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -617,6 +663,72 @@ public class AccountManager {
     }
 
     /**
+     * Rename the specified {@link Account}.  This is equivalent to removing
+     * the existing account and adding a new renamed account with the old
+     * account's user data.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and have the same UID as the account's authenticator.
+     *
+     * @param account The {@link Account} to rename
+     * @param newName String name to be associated with the account.
+     * @param callback Callback to invoke when the request completes, null for
+     *     no callback
+     * @param handler {@link Handler} identifying the callback thread, null for
+     *     the main thread
+     * @return An {@link AccountManagerFuture} which resolves to the Account
+     *     after the name change. If successful the account's name will be the
+     *     specified new name.
+     */
+    public AccountManagerFuture<Account> renameAccount(
+            final Account account,
+            final String newName,
+            AccountManagerCallback<Account> callback,
+            Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null.");
+        if (TextUtils.isEmpty(newName)) {
+              throw new IllegalArgumentException("newName is empty or null.");
+        }
+        return new Future2Task<Account>(handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.renameAccount(mResponse, account, newName);
+            }
+            @Override
+            public Account bundleToResult(Bundle bundle) throws AuthenticatorException {
+                String name = bundle.getString(KEY_ACCOUNT_NAME);
+                String type = bundle.getString(KEY_ACCOUNT_TYPE);
+                return new Account(name, type);
+            }
+        }.start();
+    }
+
+    /**
+     * Gets the previous name associated with the account or {@code null}, if
+     * none. This is intended so that clients of {@link
+     * #LOGIN_ACCOUNTS_CHANGED_ACTION} broadcasts can determine if an
+     * authenticator has renamed an account.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * @param account The account to query for a previous name.
+     * @return The account's previous name, null if the account has never been
+     *         renamed.
+     */
+    public String getPreviousName(final Account account) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        try {
+            return mService.getPreviousName(account);
+        } catch (RemoteException e) {
+            // will never happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Removes an account from the AccountManager.  Does nothing if the account
      * does not exist.  Does not delete the account from the server.
      * The authenticator may have its own policies preventing account
@@ -634,8 +746,7 @@ public class AccountManager {
      * @param handler {@link Handler} identifying the callback thread,
      *     null for the main thread
      * @return An {@link AccountManagerFuture} which resolves to a Boolean,
-     *     true if the account has been successfully removed,
-     *     false if the authenticator forbids deleting this account.
+     *     true if the account has been successfully removed
      */
     public AccountManagerFuture<Boolean> removeAccount(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler) {
@@ -643,6 +754,28 @@ public class AccountManager {
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
                 mService.removeAccount(mResponse, account);
+            }
+            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
+                    throw new AuthenticatorException("no result in response");
+                }
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
+            }
+        }.start();
+    }
+
+    /**
+     * @see #removeAccount(Account, AccountManagerCallback, Handler)
+     * @hide
+     */
+    public AccountManagerFuture<Boolean> removeAccountAsUser(final Account account,
+            AccountManagerCallback<Boolean> callback, Handler handler,
+            final UserHandle userHandle) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (userHandle == null) throw new IllegalArgumentException("userHandle is null");
+        return new Future2Task<Boolean>(handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.removeAccountAsUser(mResponse, account, userHandle.getIdentifier());
             }
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
@@ -1139,7 +1272,8 @@ public class AccountManager {
      * <li> {@link AuthenticatorException} if no authenticator was registered for
      *      this account type or the authenticator failed to respond
      * <li> {@link OperationCanceledException} if the operation was canceled for
-     *      any reason, including the user canceling the creation process
+     *      any reason, including the user canceling the creation process or adding accounts
+     *      (of this type) has been disabled by policy
      * <li> {@link IOException} if the authenticator experienced an I/O problem
      *      creating a new account, usually because of network trouble
      * </ul>
@@ -1159,6 +1293,30 @@ public class AccountManager {
             public void doWork() throws RemoteException {
                 mService.addAccount(mResponse, accountType, authTokenType,
                         requiredFeatures, activity != null, optionsIn);
+            }
+        }.start();
+    }
+
+    /**
+     * @see #addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback, Handler)
+     * @hide
+     */
+    public AccountManagerFuture<Bundle> addAccountAsUser(final String accountType,
+            final String authTokenType, final String[] requiredFeatures,
+            final Bundle addAccountOptions, final Activity activity,
+            AccountManagerCallback<Bundle> callback, Handler handler, final UserHandle userHandle) {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
+        if (userHandle == null) throw new IllegalArgumentException("userHandle is null");
+        final Bundle optionsIn = new Bundle();
+        if (addAccountOptions != null) {
+            optionsIn.putAll(addAccountOptions);
+        }
+        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+
+        return new AmsTask(activity, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.addAccountAsUser(mResponse, accountType, authTokenType,
+                        requiredFeatures, activity != null, optionsIn, userHandle.getIdentifier());
             }
         }.start();
     }
@@ -1564,8 +1722,10 @@ public class AccountManager {
             }
 
             public void onError(int code, String message) {
-                if (code == ERROR_CODE_CANCELED || code == ERROR_CODE_USER_RESTRICTED) {
-                    // the authenticator indicated that this request was canceled, do so now
+                if (code == ERROR_CODE_CANCELED || code == ERROR_CODE_USER_RESTRICTED
+                        || code == ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
+                    // the authenticator indicated that this request was canceled or we were
+                    // forbidden to fulfill; cancel now
                     cancel(true /* mayInterruptIfRunning */);
                     return;
                 }
@@ -1624,7 +1784,10 @@ public class AccountManager {
             }
 
             public void onError(int code, String message) {
-                if (code == ERROR_CODE_CANCELED) {
+                if (code == ERROR_CODE_CANCELED || code == ERROR_CODE_USER_RESTRICTED
+                        || code == ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
+                    // the authenticator indicated that this request was canceled or we were
+                    // forbidden to fulfill; cancel now
                     cancel(true /* mayInterruptIfRunning */);
                     return;
                 }

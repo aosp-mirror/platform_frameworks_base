@@ -30,8 +30,8 @@ next.link=connectivity_patterns.html
 <p>The most fundamental way to reduce your downloads is to download only what you need. In terms of data, that means implementing REST APIs that allow you to specify query criteria that limit the returned data by using parameters such as the time of your last update.</p>
 
 <p>Similarly, when downloading images, it's good practice to reduce the size of the images server-side, rather than downloading full-sized images that are reduced on the client.</p>
- 
-<h2 id="LocalCache">Cache Files Locally</h2> 
+
+<h2 id="LocalCache">Cache Files Locally</h2>
 
 <p>Another important technique is to avoid downloading duplicate data. You can do this by aggressive caching. Always cache static resources, including on-demand downloads such as full size images, for as long as reasonably possible. On-demand resources should be stored separately to enable you to regularly flush your on-demand cache to manage its size.</p>
 
@@ -60,11 +60,11 @@ if (lastModified < lastUpdateTime) {
 
 <p>Alternatively, you can use the managed / secure application cache. Note that this internal cache may be flushed when the system is running low on available storage.</p>
 
-<pre>Context.getCache();</pre>
+<pre>Context.getCacheDir();</pre>
 
 <p>Files stored in either cache location will be erased when the application is uninstalled.</p>
 
-<h2 id="ResponseCache">Use the HttpURLConnection Response Cache</h2> 
+<h2 id="ResponseCache">Use the HttpURLConnection Response Cache</h2>
 
 <p>Android 4.0 added a response cache to {@code HttpURLConnection}. You can enable HTTP response caching on supported devices using reflection as follows:</p>
 

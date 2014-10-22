@@ -41,8 +41,8 @@ result, with cell borders displayed as dotted lines (added for visual effect). <
         <pre>
 &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:stretchColumns="1">
     &lt;TableRow>
         &lt;TextView
@@ -82,8 +82,8 @@ documentation for more details. </p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:stretchColumns="1">
 
     &lt;TableRow>

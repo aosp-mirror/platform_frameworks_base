@@ -5,19 +5,15 @@ page.title=Notifications
 <div id="qv">
 <h2>In this document</h2>
 <ol>
-  <li><a href="#NotificationUI">Notification Display Elements</a>
-    <ol>
-      <li><a href="#NormalNotify">Normal view</a></li>
-      <li><a href="#BigNotify">Big view</a></li>
-    </ol>
-  </li>
+  <li><a href="#Design">Design Considerations</a></li>
   <li><a href="#CreateNotification">Creating a Notification</a>
     <ol>
       <li><a href="#Required">Required notification contents</a></li>
       <li><a href="#Optional">Optional notification contents and settings</a></li>
       <li><a href="#Actions">Notification actions</a></li>
+      <li><a href="#Priority">Notification priority</a></li>
       <li><a href="#SimpleNotification">Creating a simple notification</a></li>
-      <li><a href="#ApplyStyle">Applying a big view style to a notification</a></li>
+      <li><a href="#ApplyStyle">Applying an expanded layout to a notification</a></li>
       <li><a href="#Compatibility">Handling compatibility</a></li>
     </ol>
   </li>
@@ -39,6 +35,13 @@ page.title=Notifications
       <li><a href="#ActivityIndicator">Displaying a continuing activity indicator</a></li>
     </ol>
   </li>
+  <li><a href="#metadata">Notification Metadata</a></li>
+  <li><a href="#Heads-up">Heads-up Notifications</a></li>
+  <li><a href="#lockscreenNotification">Lock Screen Notifications</a></li>
+    <ol>
+      <li><a href="#visibility">Setting Visibility</a></li>
+      <li><a href="#controllingMedia">Controlling Media Playback on the Lock Screen</a></li>
+    </ol>
   <li><a href="#CustomNotification">Custom Notification Layouts</a></li>
 </ol>
 
@@ -71,167 +74,41 @@ page.title=Notifications
 </p>
 <img
     id="figure1"
-    src="{@docRoot}images/ui/notifications/iconic_notification.png"
-    height="120" alt="" />
+    src="{@docRoot}images/ui/notifications/notification_area.png"
+    height="" alt="" />
 <p class="img-caption">
     <strong>Figure 1.</strong> Notifications in the notification area.
 </p>
-<img id="figure2" src="{@docRoot}images/ui/notifications/normal_notification.png"
-     height="293" alt="" />
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png"
+     width="280px" alt="" />
 <p class="img-caption">
     <strong>Figure 2.</strong> Notifications in the notification drawer.
 </p>
-<div class="note design">
-    <p>
-        <strong>Notification Design</strong>
-    </p>
-    <p>
-        Notifications, as an important part of the Android UI, have their own design guidelines. To
-        learn how to design notifications and their interactions, read the Android Design Guide
-        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> topic.
-    </p>
-</div>
-<p class="note">
-    <strong>Note:</strong> Except where noted, this guide refers to the
-    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} class
-    in the version 4 <a href="{@docRoot}tools/support-library/index.html">Support Library</a>.
-    The class {@link android.app.Notification.Builder Notification.Builder} was added in Android
-    3.0.
-</p>
-<!-- ------------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------------ -->
-<h2 id="NotificationUI">Notification Display Elements</h2>
-<p>
-    Notifications in the notification drawer can appear in one of two visual styles, depending on
-    the version and the state of the drawer:
-</p>
-<dl>
-    <dt>
-        Normal view
-    </dt>
-    <dd>
-        The standard view of the notifications in the notification drawer.
-    </dd>
-    <dt>
-        Big view
-    </dt>
-    <dd>
-        A large view that's visible when the notification is expanded. Big view is part of the
-        expanded notification feature available as of Android 4.1.
-    </dd>
-</dl>
-<p>
-    These styles are described in the following sections.
-</p>
-<!-- ------------------------------------------------------------------------------------------ -->
-<h3 id="NormalNotify">Normal view</h3>
-<p>
-    A notification in normal view appears in an area that's up to 64 dp tall. Even if you create a
-    notification with a big view style, it will appear in normal view until it's expanded. This
-    is an example of a normal view:
-</p>
-<img
-    src="{@docRoot}images/ui/notifications/normal_notification_callouts.png"
-    alt=""
-    height="153"
-    id="figure3" />
-<p class="img-caption">
-  <strong>Figure 3.</strong> Notification in normal view.
-</p>
-<p>
-    The callouts in the illustration refer to the following:
-</p>
-<ol>
-    <li>Content title</li>
-    <li>Large icon</li>
-    <li>Content text</li>
-    <li>Content info</li>
-    <li>Small icon</li>
-    <li>
-        Time that the notification was issued. You can set an explicit value with
-        {@link android.support.v4.app.NotificationCompat.Builder#setWhen setWhen()}; if you don't
-        it defaults to the time that the system received the notification.
-    </li>
-</ol>
-<!-- ------------------------------------------------------------------------------------------ -->
-<h3 id="BigNotify">Big view</h3>
-<p>
-    A notification's big view appears only when the notification is expanded, which happens when the
-    notification is at the top of the notification drawer, or when the user expands the
-    notification with a gesture. Expanded notifications are available starting with Android 4.1.
-</p>
-<p>
-    The following screenshot shows an inbox-style notification:
-</p>
-<img src="{@docRoot}images/ui/notifications/bigpicture_notification_callouts.png"
-    alt=""
-    height="240"
-    id="figure4" />
-<p class="img-caption">
-  <strong>Figure 4.</strong> Big view notification.
-</p>
-<p>
-    Notice that the big view shares most of its visual elements with the normal view. The
-    only difference is callout number 7, the details area. Each big view style sets this area in
-    a different way. The available styles are:
-</p>
-<dl>
-    <dt>
-        Big picture style
-    </dt>
-    <dd>
-        The details area contains a bitmap up to 256 dp tall in its detail section.
-    </dd>
-    <dt>
-        Big text style
-    </dt>
-    <dd>
-        Displays a large text block in the details section.
-    </dd>
-    <dt>
-        Inbox style
-    </dt>
-    <dd>
-        Displays lines of text in the details section.
-    </dd>
-</dl>
-<p>
-    All of the big view styles also have the following content options that aren't
-    available in normal view:
-</p>
-<dl>
-    <dt>
-        Big content title
-    </dt>
-    <dd>
-        Allows you to override the normal view's content title with a title that appears only in
-        the expanded view.
-    </dd>
-    <dt>
-        Summary text
-    </dt>
-    <dd>
-        Allows you to add a line of text below the details area.
-    </dd>
-</dl>
-<p>
-    Applying a big view style to a notification is described in the section
-    <a href="#ApplyStyle">Applying a big view style to a notification</a>.
-</p>
-<!-- ------------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------------ -->
+
+<p class="note"><strong>Note:</strong> Except where noted, this guide refers to the
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} class
+in the version 4 <a href="{@docRoot}tools/support-library/index.html">Support Library</a>.
+The class {@link android.app.Notification.Builder Notification.Builder} was added in Android
+3.0 (API level 11).</p>
+
+<h2 id="Design">Design Considerations</h2>
+
+<p>Notifications, as an important part of the Android user interface, have their own design guidelines.
+The material design changes introduced in Android 5.0 (API level 21) are of particular
+importance, and you should review the <a href="{@docRoot}training/material/index.html">Material Design</a>
+training for more information. To learn how to design notifications and their interactions, read the
+<a href="{@docRoot}design/patterns/notifications.html">Notifications</a> design guide.</p>
+
 <h2 id="CreateNotification">Creating a Notification</h2>
-<p>
-    You specify the UI information and actions for a notification in a
-    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} object.
-    To create the notification itself, you call
-    {@link android.support.v4.app.NotificationCompat.Builder#build
-    NotificationCompat.Builder.build()}, which returns a {@link android.app.Notification} object
-    containing your specifications.
-    To issue the notification, you pass the {@link android.app.Notification} object to the system
-    by calling {@link android.app.NotificationManager#notify NotificationManager.notify()}.
-</p>
-<!-- ------------------------------------------------------------------------------------------ -->
+
+<p>You specify the UI information and actions for a notification in a
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} object.
+To create the notification itself, you call
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()},
+which returns a {@link android.app.Notification} object containing your specifications. To issue the
+notification, you pass the {@link android.app.Notification} object to the system by calling
+{@link android.app.NotificationManager#notify NotificationManager.notify()}.</p>
+
 <h3 id="Required">Required notification contents</h3>
 <p>
     A {@link android.app.Notification} object <em>must</em> contain the following:
@@ -274,7 +151,8 @@ page.title=Notifications
 </p>
 <p>
     Inside a {@link android.app.Notification}, the action itself is defined by a
-    {@link android.app.PendingIntent} containing an {@link android.content.Intent} that starts
+    {@link android.app.PendingIntent} containing an
+    {@link android.content.Intent} that starts
     an {@link android.app.Activity} in your application. To associate the
     {@link android.app.PendingIntent} with a gesture, call the appropriate method of
     {@link android.support.v4.app.NotificationCompat.Builder}. For example, if you want to start
@@ -288,6 +166,26 @@ page.title=Notifications
     dismisses a notification. In Android 4.1 and later, you can start an
     {@link android.app.Activity} from an action button. To learn more, read the reference guide for
     {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">Notification priority</h3>
+<p>
+    If you wish, you can set the priority of a notification. The priority acts
+    as a hint to the device UI about how the notification should be displayed.
+    To set a notification's priority, call {@link
+    android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+    NotificationCompat.Builder.setPriority()} and pass in one of the {@link
+    android.support.v4.app.NotificationCompat} priority constants. There are
+    five priority levels, ranging from {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) to {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); if not set, the
+    priority defaults to {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
+</p>
+<p> For information about setting an appropriate priority level, see "Correctly
+    set and manage notification priority" in the <a
+    href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design
+    guide.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="SimpleNotification">Creating a simple notification</h3>
@@ -330,12 +228,12 @@ mNotificationManager.notify(mId, mBuilder.build());
 </pre>
 <p>That's it. Your user has now been notified.</p>
 <!-- ------------------------------------------------------------------------------------------ -->
-<h3 id="ApplyStyle">Applying a big view style to a notification</h3>
+<h3 id="ApplyStyle">Applying an expanded layout to a notification</h3>
 <p>
-    To have a notification appear in a big view when it's expanded, first create a
+    To have a notification appear in an expanded view, first create a
     {@link android.support.v4.app.NotificationCompat.Builder} object with the normal view options
     you want. Next, call {@link android.support.v4.app.NotificationCompat.Builder#setStyle
-    Builder.setStyle()} with a big view style object as its argument.
+    Builder.setStyle()} with an expanded layout object as its argument.
 </p>
 <p>
     Remember that expanded notifications are not available on platforms prior to Android 4.1. To
@@ -344,7 +242,7 @@ mNotificationManager.notify(mId, mBuilder.build());
 </p>
 <p>
     For example, the following code snippet demonstrates how to alter the notification created
-    in the previous snippet to use the Inbox big view style:
+    in the previous snippet to use the expanded layout:
 </p>
 <pre>
 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
@@ -354,20 +252,22 @@ NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
 NotificationCompat.InboxStyle inboxStyle =
         new NotificationCompat.InboxStyle();
 String[] events = new String[6];
-// Sets a title for the Inbox style big view
+// Sets a title for the Inbox in expanded layout
 inboxStyle.setBigContentTitle("Event tracker details:");
 ...
-// Moves events into the big view
+// Moves events into the expanded layout
 for (int i=0; i &lt; events.length; i++) {
 
     inboxStyle.addLine(events[i]);
 }
-// Moves the big view style object into the notification object.
+// Moves the expanded layout object into the notification object.
 mBuilder.setStyle(inBoxStyle);
 ...
 // Issue the notification here.
 </pre>
+
 <h3 id="Compatibility">Handling compatibility</h3>
+
 <p>
     Not all notification features are available for a particular version, even though
     the methods to set them are in the support library class
@@ -398,7 +298,8 @@ mBuilder.setStyle(inBoxStyle);
     <li>
         Ensure that all users can get to the functionality in the {@link android.app.Activity},
         by having it start when users click the notification. To do this,
-        create a {@link android.app.PendingIntent} for the {@link android.app.Activity}. Call
+        create a {@link android.app.PendingIntent}
+        for the {@link android.app.Activity}. Call
         {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
         setContentIntent()} to add the {@link android.app.PendingIntent} to the notification.
     </li>
@@ -408,6 +309,8 @@ mBuilder.setStyle(inBoxStyle);
         that starts when users click the notification.
     </li>
 </ol>
+
+
 <!-- ------------------------------------------------------------------------------------------ -->
 <!-- ------------------------------------------------------------------------------------------ -->
 <h2 id="Managing">Managing Notifications</h2>
@@ -423,7 +326,7 @@ mBuilder.setStyle(inBoxStyle);
     <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design guide.
 </p>
 <p class="note">
-    <strong>Note:</strong> This Gmail feature requires the "inbox" big view style, which is
+    <strong>Note:</strong> This Gmail feature requires the "inbox" expanded layout, which is
     part of the expanded notification feature available starting in Android 4.1.
 </p>
 <p>
@@ -432,8 +335,8 @@ mBuilder.setStyle(inBoxStyle);
 <h3 id="Updating">Updating notifications</h3>
 <p>
     To set up a notification so it can be updated, issue it with a notification ID by
-    calling {@link android.app.NotificationManager#notify(int, Notification)
-    NotificationManager.notify(ID, notification)}. To update this notification once you've issued
+    calling {@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.
+    To update this notification once you've issued
     it, update or create a {@link android.support.v4.app.NotificationCompat.Builder} object,
     build a {@link android.app.Notification} object from it, and issue the
     {@link android.app.Notification} with the same ID you used previously. If
@@ -466,17 +369,7 @@ numMessages = 0;
             mNotifyBuilder.build());
 ...
 </pre>
-<p>
-    This produces a notification that looks like this:
-</p>
-<img
-    id="figure5"
-    src="{@docRoot}images/ui/notifications/updated_notification.png"
-    alt=""
-    height="118"/>
-<p class="img-caption">
-  <strong>Figure 5.</strong> Updated notification displayed in the notification drawer.
-</p>
+
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="Removing">Removing notifications</h3>
 <p>
@@ -878,18 +771,7 @@ new Thread(
 // Starts the thread by calling the run() method in its Runnable
 ).start();
 </pre>
-<p>
-    The resulting notifications are shown in figure 6. On the left side is a snapshot of the
-    notification during the operation; on the right side is a snapshot of it after the operation
-    has finished.
-</p>
-<img
-    id="figure6"
-    src="{@docRoot}images/ui/notifications/progress_bar_summary.png"
-    height="84"
-    alt="" />
-<p class="img-caption">
-<strong>Figure 6.</strong> The progress bar during and after the operation.</p>
+
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="ActivityIndicator">Displaying a continuing activity indicator</h3>
 <p>
@@ -925,19 +807,123 @@ mBuilder.setProgress(0, 0, true);
 // Issues the notification
 mNotifyManager.notify(0, mBuilder.build());
 </pre>
-<p>
-    The resulting indicator is shown in figure 7:
-</p>
-<img
-    id="figure7"
-    src="{@docRoot}images/ui/notifications/activity_indicator.png"
-    height="99"
-    alt="" />
-<p class="img-caption"><strong>Figure 7.</strong> An ongoing activity indicator.</p>
 
-<!-- ------------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="metadata">Notification Metadata</h2>
+
+<p>Notifications may be sorted according to metadata that you assign with the
+following {@link android.support.v4.app.NotificationCompat.Builder} methods:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()}
+    tells the system how to handle your app notifications when the device is in Priority mode
+    (for example, if your notification represents an incoming call, instant message, or alarm).</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} causes
+    notifications with the priority field set to {@code PRIORITY_MAX} or {@code PRIORITY_HIGH} to
+    appear in a small floating window if the notification also has sound or vibration.</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()}
+    allows you to add a list of people to a notification. Your app can use this to signal to the
+    system that it should group together notifications from the specified people, or rank notifications
+    from these people as being more important.</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png"
+    alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>Figure 3.</strong> Fullscreen activity showing a heads-up notification
+  </p>
+</div>
+
+<h2 id="Heads-up">Heads-up Notifications</h2>
+
+<p>With Android 5.0 (API level 21), notifications can appear in a small floating window
+(also called a <em>heads-up notification</em>) when the device is active
+(that is, the device is unlocked and its screen is on). These notifications
+appear similar to the compact form of your notification, except that the
+heads-up notification also shows action buttons. Users can act on, or dismiss,
+a heads-up notification without leaving the current app.</p>
+
+<p>Examples of conditions that may trigger heads-up notifications include:</p>
+
+<ul>
+  <li>The user's activity is in fullscreen mode (the app uses
+{@link android.app.Notification#fullScreenIntent}), or</li>
+  <li>The notification has high priority and uses ringtones or
+    vibrations</li>
+</ul>
+
+<h2 id="lockscreenNotification">Lock Screen Notifications</h2>
+
+<p>With the release of Android 5.0 (API level 21), notifications may now appear on the lock
+screen. Your app can use this functionality to provide media playback controls and other common
+actions. Users can choose via Settings whether to display notifications on the lock screen, and
+you can designate whether a notification from your app is visible on the lock screen.</p>
+
+<h3 id="visibility">Setting Visibility</h3>
+
+<p>Your app can control the level of detail visible in notifications displayed on a secure
+lock screen. You call {@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()}
+and specify one of the following values:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} shows the notification's
+    full content.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET} doesn't show any part of
+    this notification on the lock screen.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} shows basic information,
+    such as the notification's icon and the content title, but hides the notification's full content.</li>
+</ul>
+
+<p>When {@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} is set, you can also
+provide an alternate version of the notification content which hides certain details. For example,
+an SMS app might display a notification that shows <em>You have 3 new text messages</em>, but hides the
+message contents and senders. To provide this alternative notification, first create the replacement
+notification using {@link android.support.v4.app.NotificationCompat.Builder}. When you create the
+private notification object, attach the replacement notification to it through the
+{@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}
+method.</p>
+
+<h3 id="controllingMedia">Controlling Media Playback on the Lock Screen</h3>
+
+<p>In Android 5.0 (API level 21) the lock screen no longer displays media controls
+based on the {@link android.media.RemoteControlClient}, which is now deprecated. Instead, use the
+{@link android.app.Notification.MediaStyle} template with the
+{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+method, which converts actions into clickable icons.</p>
+
+<p class="note"><strong>Note:</strong> The template and the {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+method are not included in the support library, so these features run in Android 5.0 and higher
+only.</p>
+
+<p>To display media playback controls on the lock screen in Android 5.0, set the visibility
+to {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, as described above. Then add
+the actions and set the {@link android.app.Notification.MediaStyle} template, as described in the
+following sample code:</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>Note:</strong> The deprecation of {@link android.media.RemoteControlClient}
+has further implications for controlling media. See
+<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">Media Playback Control</a>
+for more information about the new APIs for managing the media session and controlling playback.</p>
+
 
 <!-- ------------------------------------------------------------------------------------------ -->
 <h2 id="CustomNotification">Custom Notification Layouts</h2>

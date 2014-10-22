@@ -5,14 +5,6 @@ parent.link=activities.html
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Quickview</h2>
-<ul>
-  <li>All activities belong to a task</li>
-  <li>A task contains a collection of activities in the order in which the user interacts with
-them</li>
-  <li>Tasks can move to the background and retain the state of each activity in order for users
-to perform other tasks without losing their work</li>
-</ul>
 
 <h2>In this document</h2>
 <ol>
@@ -29,7 +21,8 @@ to perform other tasks without losing their work</li>
 
 <h2>Articles</h2>
 <ol>
-  <li><a href="http://android-developers.blogspot.com/2010/04/multitasking-android-way.html">Multitasking the Android Way</a></li>
+  <li><a href="http://android-developers.blogspot.com/2010/04/multitasking-android-way.html">
+  Multitasking the Android Way</a></li>
 </ol>
 
 <h2>See also</h2>
@@ -39,6 +32,7 @@ Navigation</a></li>
   <li><a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;} manifest
 element</a></li>
+  <li><a href="{@docRoot}guide/components/recents.html">Overview Screen</a></li>
 </ol>
 </div>
 </div>
@@ -47,12 +41,12 @@ element</a></li>
 <p>An application usually contains multiple <a
 href="{@docRoot}guide/components/activities.html">activities</a>. Each activity
 should be designed around a specific kind of action the user can perform and can start other
-activities. For example, an email application might have one activity to show a list of new email.
-When the user selects an email, a new activity opens to view that email.</p>
+activities. For example, an email application might have one activity to show a list of new messages.
+When the user selects a message, a new activity opens to view that message.</p>
 
 <p>An activity can even start activities that exist in other applications on the device. For
-example, if your application wants to send an email, you can define an intent to perform a "send"
-action and include some data, such as an email address and a message. An activity from another
+example, if your application wants to send an email message, you can define an intent to perform a
+"send" action and include some data, such as an email address and a message. An activity from another
 application that declares itself to handle this kind of intent then opens. In this case, the intent
 is to send an email, so an email application's "compose" activity starts (if multiple activities
 support the same intent, then the system lets the user select which one to use). When the email is
@@ -61,8 +55,8 @@ though the activities may be from different applications, Android maintains this
 experience by keeping both activities in the same <em>task</em>.</p>
 
 <p>A task is a collection of activities that users interact with
-when performing a certain job. The activities are arranged in a stack (the "back stack"), in the
-order in which each activity is opened.</p>
+when performing a certain job. The activities are arranged in a stack (the <em>back stack</em>), in
+the order in which each activity is opened.</p>
 
 <!-- SAVE FOR WHEN THE FRAGMENT DOC IS ADDED
 <div class="sidebox-wrapper">
@@ -142,7 +136,8 @@ started Task A. Now, Task A comes to the
 foreground&mdash;all three activities in its stack are intact and the activity at the top of the
 stack resumes. At
 this point, the user can also switch back to Task B by going Home and selecting the application icon
-that started that task (or by selecting the app's task from the <em>recent apps</em> screen).
+that started that task (or by selecting the app's task from the
+<a href="{@docRoot}guide/components/recents.html">overview screen</a>).
 This is an example of multitasking on Android.</p>
 
 <p class="note"><strong>Note:</strong> Multiple tasks can be held in the background at once.
@@ -203,8 +198,8 @@ system memory. When this happens, information about the activity state is lost. 
 system still
 knows that the activity has a place in the back stack, but when the activity is brought to the
 top of the stack the system must recreate it (rather than resume it). In order to
-avoid losing the user's work, you should proactively retain it by implementing the {@link
-android.app.Activity#onSaveInstanceState onSaveInstanceState()} callback
+avoid losing the user's work, you should proactively retain it by implementing the
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} callback
 methods in your activity.</p>
 
 <p>For more information about how to save your activity state, see the <a
@@ -226,27 +221,26 @@ instance on top of the back stack); or, you want your back stack to be cleared o
 activities except for the root activity when the user leaves the task.</p>
 
 <p>You can do these things and more, with attributes in the
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> manifest element and with flags in the intent that you pass to {@link
-android.app.Activity#startActivity startActivity()}.</p>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+manifest element and with flags in the intent that you pass to
+{@link android.app.Activity#startActivity startActivity()}.</p>
 
-<p>In this regard, the principal <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
-attributes you can use are:</p>
+<p>In this regard, the principal <a href="{@docRoot}guide/topics/manifest/activity-element.html">
+{@code &lt;activity&gt;}</a> attributes you can use are:</p>
 
 <ul class="nolist">
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code
-taskAffinity}</a></li>
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
-launchMode}</a></li>
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">{@code
-allowTaskReparenting}</a></li>
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">{@code
-clearTaskOnLaunch}</a></li>
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#always">{@code
-alwaysRetainTaskState}</a></li>
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code
-finishOnTaskLaunch}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">
+  {@code taskAffinity}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">
+  {@code launchMode}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+  {@code allowTaskReparenting}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">
+  {@code clearTaskOnLaunch}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+  {@code alwaysRetainTaskState}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">
+  {@code finishOnTaskLaunch}</a></li>
 </ul>
 
 <p>And the principal intent flags you can use are:</p>
@@ -258,15 +252,18 @@ finishOnTaskLaunch}</a></li>
 </ul>
 
 <p>In the following sections, you'll see how you can use these manifest attributes and intent
-flags to define how activities are associated with tasks and how the behave in the back stack.</p>
+flags to define how activities are associated with tasks and how they behave in the back stack.</p>
 
+<p>Also, discussed separately are the considerations for how tasks and activites may be represented
+and managed in the overview screen. See <a href="{@docRoot}guide/components/recents.html">Overview Screen</a>
+for more information. Normally you should allow the system to define how your task and
+activities are represented in the overview screen, and you don't need to modify this behavior.</p>
 
 <p class="caution"><strong>Caution:</strong> Most applications should not interrupt the default
 behavior for activities and tasks. If you determine that it's necessary for your activity to modify
 the default behaviors, use caution and be sure to test the usability of the activity during
 launch and when navigating back to it from other activities and tasks with the <em>Back</em> button.
-Be sure 
-to test for navigation behaviors that might conflict with the user's expected behavior.</p>
+Be sure to test for navigation behaviors that might conflict with the user's expected behavior.</p>
 
 
 <h3 id="TaskLaunchModes">Defining launch modes</h3>
@@ -397,7 +394,7 @@ default behavior are:</p>
   <dt>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</dt>
     <dd>Start the activity in a new task. If a task is already running for the activity you are now
 starting, that task is brought to the foreground with its last state restored and the activity
-receives the new intent in {@link android.app.Activity#onNewIntent onNewIntent()}. 
+receives the new intent in {@link android.app.Activity#onNewIntent onNewIntent()}.
     <p>This produces the same behavior as the {@code "singleTask"} <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> value,
 discussed in the previous section.</p></dd>
@@ -416,11 +413,13 @@ through {@link android.app.Activity#onNewIntent onNewIntent()}).
     <p>There is no value for the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
 attribute that produces this behavior.</p>
-    <p>{@code FLAG_ACTIVITY_CLEAR_TOP} is most often used in conjunction with {@code
-FLAG_ACTIVITY_NEW_TASK}.  When used together, these flags are a way of locating an existing activity
+    <p>{@code FLAG_ACTIVITY_CLEAR_TOP} is most often used in conjunction with
+    {@code FLAG_ACTIVITY_NEW_TASK}.
+When used together, these flags are a way of locating an existing activity
 in another task and putting it in a position where it can respond to the intent. </p>
-    <p class="note"><strong>Note:</strong> If the launch mode of the designated activity is {@code
-"standard"}, it too is removed from the stack and a new instance is launched in its place to handle
+    <p class="note"><strong>Note:</strong> If the launch mode of the designated activity is
+    {@code "standard"},
+it too is removed from the stack and a new instance is launched in its place to handle
 the incoming intent.  That's because a new instance is always created for a new intent when the
 launch mode is {@code "standard"}. </p>
 </dd>
@@ -447,21 +446,23 @@ element.</p>
 <p>The <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
 attribute takes a string value, which must be unique from the default package name
-declared in the <a href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code
-&lt;manifest&gt;}</a> element, because the system uses that name to identify the default task
+declared in the <a href="{@docRoot}guide/topics/manifest/manifest-element.html">
+{@code &lt;manifest&gt;}
+</a> element, because the system uses that name to identify the default task
 affinity for the application.</p>
 
 <p>The affinity comes into play in two circumstances:</p>
 <ul>
-  <li>When the intent that launches an activity contains the {@link
-android.content.Intent#FLAG_ACTIVITY_NEW_TASK} flag.
+  <li>When the intent that launches an activity contains the
+  {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+  flag.
 
 <p>A new activity is, by default, launched into the task of the activity
 that called {@link android.app.Activity#startActivity startActivity()}. It's pushed onto the same
-back stack as the caller.  However, if the intent passed to {@link
-android.app.Activity#startActivity startActivity()} contains the {@link
-android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
-flag, the system looks for a different task to house the new activity. Often, it's a new task. 
+back stack as the caller.  However, if the intent passed to
+{@link android.app.Activity#startActivity startActivity()}
+contains the {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+flag, the system looks for a different task to house the new activity. Often, it's a new task.
 However, it doesn't have to be.  If there's already an existing task with the same affinity as the
 new activity, the activity is launched into that task.  If not, it begins a new task.</p>
 
@@ -469,17 +470,17 @@ new activity, the activity is launched into that task.  If not, it begins a new 
 to leave
 it, there must be some way for the user to navigate back to the task. Some entities (such as the
 notification manager) always start activities in an external task, never as part of their own, so
-they always put {@code FLAG_ACTIVITY_NEW_TASK} in the intents they pass to {@link
-android.app.Activity#startActivity startActivity()}.  If you have an activity that can be invoked by
+they always put {@code FLAG_ACTIVITY_NEW_TASK} in the intents they pass to
+{@link android.app.Activity#startActivity startActivity()}.
+If you have an activity that can be invoked by
 an external entity that might use this flag, take care that the user has a independent way to get
 back to the task that's started, such as with a launcher icon (the root activity of the task
 has a {@link android.content.Intent#CATEGORY_LAUNCHER} intent filter; see the <a
 href="#Starting">Starting a task</a> section below).</p>
 </li>
 
-  <li>When an activity has its <a
-href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">{@code
-allowTaskReparenting}</a> attribute set to {@code "true"}.
+  <li>When an activity has its <a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+{@code allowTaskReparenting}</a> attribute set to {@code "true"}.
   <p>In this case, the activity can move from the task it starts to the task it has an affinity
 for, when that task comes to the foreground.</p>
   <p>For example, suppose that an activity that reports weather conditions in selected cities is
@@ -519,9 +520,9 @@ The task retains all activities in its stack even after a long period.</dd>
 href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
 <dd>If this attribute is set to {@code "true"} in the root activity of a task,
 the stack is cleared down to the root activity whenever the user leaves the task
-and returns to it.  In other words, it's the opposite of <a
-href="{@docRoot}guide/topics/manifest/activity-element.html#always">{@code
-alwaysRetainTaskState}</a>.  The user always returns to the task in its
+and returns to it.  In other words, it's the opposite of
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+{@code alwaysRetainTaskState}</a>. The user always returns to the task in its
 initial state, even after a leaving the task for only a moment.</dd>
 
 <dt><code><a
@@ -542,8 +543,9 @@ leaves and then returns to the task, it is no longer present.</dd>
 <h3 id="Starting">Starting a task</h3>
 
 <p>You can set up an activity as the entry point for a task by giving it an intent filter with
-{@code "android.intent.action.MAIN"} as the specified action and {@code
-"android.intent.category.LAUNCHER"} as the specified category. For example:</p>
+{@code "android.intent.action.MAIN"} as the specified action and
+{@code "android.intent.category.LAUNCHER"}
+as the specified category. For example:</p>
 
 <pre>
 &lt;activity ... &gt;
@@ -561,27 +563,25 @@ to return to the task that it creates any time after it has been launched.
 </p>
 
 <p>This second ability is important: Users must be able to leave a task and then come back to it
-later using this activity launcher.  For this reason, the two <a href="#LaunchModes">launch
-modes</a> that mark activities as always initiating a task, {@code "singleTask"} and "{@code
-"singleInstance"}, should be used only when the activity has an {@link
-android.content.Intent#ACTION_MAIN}
-and a {@link android.content.Intent#CATEGORY_LAUNCHER}
-filter. Imagine, for example, what could happen if the filter is missing: An intent launches a
-{@code "singleTask"} activity, initiating a new task, and the user spends some time working in
-that task.  The user then presses the <em>Home</em> button. The task is now sent to the background
-and is
-not visible. Now the user has no way to return to the task, because it is not represented in the
-application launcher.
-</p>
+later using this activity launcher. For this reason, the two <a href="#LaunchModes">launch
+modes</a> that mark activities as always initiating a task, {@code "singleTask"} and
+{@code "singleInstance"}, should be used only when the activity has an
+{@link android.content.Intent#ACTION_MAIN}
+and a {@link android.content.Intent#CATEGORY_LAUNCHER} filter. Imagine, for example, what could
+happen if the filter is missing: An intent launches a {@code "singleTask"} activity, initiating a
+new task, and the user spends some time working in that task. The user then presses the <em>Home</em>
+button. The task is now sent to the background and is not visible. Now the user has no way to return
+to the task, because it is not represented in the application launcher.</p>
 
 <p>For those cases where you don't want the user to be able to return to an activity, set the
-  <code><a
-href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element's
-<a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code
-finishOnTaskLaunch}</a> to {@code "true"} (see <a
-href="#Clearing">Clearing the stack</a>).</p>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+element's
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
+to {@code "true"} (see <a href="#Clearing">Clearing the stack</a>).</p>
 
-
+<p>Further information about how tasks and activites are represented and managed in
+the overview screen is available in <a href="{@docRoot}guide/components/recents.html">
+Overview Screen</a>.</p>
 
 <!--
 <h2>Beginner's Path</h2>

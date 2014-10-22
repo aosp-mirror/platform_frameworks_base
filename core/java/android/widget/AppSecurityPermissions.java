@@ -322,7 +322,7 @@ public class AppSecurityPermissions {
             CharSequence grpName, CharSequence description, boolean dangerous) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        Drawable icon = context.getResources().getDrawable(dangerous
+        Drawable icon = context.getDrawable(dangerous
                 ? R.drawable.ic_bullet_key_permission : R.drawable.ic_text_dot);
         return getPermissionItemViewOld(context, inflater, grpName,
                 description, dangerous, icon);

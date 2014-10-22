@@ -67,6 +67,8 @@ public class TransitionManager {
 
     private static Transition sDefaultTransition = new AutoTransition();
 
+    private static final String[] EMPTY_STRINGS = new String[0];
+
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
             new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
@@ -180,11 +182,15 @@ public class TransitionManager {
 
         final ViewGroup sceneRoot = scene.getSceneRoot();
 
-        Transition transitionClone = transition.clone();
-        transitionClone.setSceneRoot(sceneRoot);
+        Transition transitionClone = null;
+        if (transition != null) {
+            transitionClone = transition.clone();
+            transitionClone.setSceneRoot(sceneRoot);
+        }
 
         Scene oldScene = Scene.getCurrentScene(sceneRoot);
-        if (oldScene != null && oldScene.isCreatedFromLayoutResource()) {
+        if (oldScene != null && transitionClone != null &&
+                oldScene.isCreatedFromLayoutResource()) {
             transitionClone.setCanRemoveViews(true);
         }
 
@@ -253,7 +259,7 @@ public class TransitionManager {
             ArrayList<Transition> runningTransitions = getRunningTransitions().get(mSceneRoot);
             if (runningTransitions != null && runningTransitions.size() > 0) {
                 for (Transition runningTransition : runningTransitions) {
-                    runningTransition.resume();
+                    runningTransition.resume(mSceneRoot);
                 }
             }
             mTransition.clearValues(true);
@@ -286,7 +292,7 @@ public class TransitionManager {
             mTransition.captureValues(mSceneRoot, false);
             if (previousRunningTransitions != null) {
                 for (Transition runningTransition : previousRunningTransitions) {
-                    runningTransition.resume();
+                    runningTransition.resume(mSceneRoot);
                 }
             }
             mTransition.playTransition(mSceneRoot);
@@ -302,7 +308,7 @@ public class TransitionManager {
 
         if (runningTransitions != null && runningTransitions.size() > 0) {
             for (Transition runningTransition : runningTransitions) {
-                runningTransition.pause();
+                runningTransition.pause(sceneRoot);
             }
         }
 
@@ -329,7 +335,6 @@ public class TransitionManager {
         // Auto transition if there is no transition declared for the Scene, but there is
         // a root or parent view
         changeScene(scene, getTransition(scene));
-
     }
 
     /**

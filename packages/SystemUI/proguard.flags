@@ -1,11 +1,15 @@
 -keep class com.android.systemui.statusbar.policy.KeyButtonView {
   public float getDrawingAlpha();
+  public void setDrawingAlpha(float);
+}
+
+-keep class com.android.systemui.statusbar.policy.KeyButtonRipple {
   public float getGlowAlpha();
   public float getGlowScale();
-  public void setDrawingAlpha(float);
   public void setGlowAlpha(float);
   public void setGlowScale(float);
 }
 
 -keep class com.android.systemui.statusbar.phone.PhoneStatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
+-keep class com.android.systemui.recents.*

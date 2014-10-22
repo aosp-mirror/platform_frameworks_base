@@ -45,6 +45,7 @@ public:
     };
 
     void setArgv0(const char* argv0);
+    void addOption(const char* optionString, void* extra_info = NULL);
 
     /**
      * Register a set of methods in the specified class.
@@ -62,8 +63,6 @@ public:
      * "package/class" or "package.class".
      */
     static jclass findClass(JNIEnv* env, const char* className);
-
-    int addVmArguments(int argc, const char* const argv[]);
 
     void start(const char *classname, const Vector<String8>& options);
 
@@ -114,9 +113,11 @@ public:
     /** return a new string corresponding to 'className' with all '.'s replaced by '/'s. */
     static char* toSlashClassName(const char* className);
 
+    /** Create a Java string from an ASCII or Latin-1 string */
+    static jstring NewStringLatin1(JNIEnv* env, const char* bytes);
+
 private:
     static int startReg(JNIEnv* env);
-    void addOption(const char* optionString, void* extra_info = NULL);
     bool parseRuntimeOption(const char* property,
                             char* buffer,
                             const char* runtimeArg,

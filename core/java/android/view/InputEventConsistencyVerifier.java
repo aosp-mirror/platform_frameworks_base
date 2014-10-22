@@ -113,7 +113,7 @@ public final class InputEventConsistencyVerifier {
      * @param flags Flags to the verifier, or 0 if none.
      */
     public InputEventConsistencyVerifier(Object caller, int flags) {
-        this(caller, flags, InputEventConsistencyVerifier.class.getSimpleName());
+        this(caller, flags, null);
     }
 
     /**

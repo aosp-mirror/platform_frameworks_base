@@ -27,6 +27,7 @@
 using android::INVALID_OPERATION;
 using android::Surface;
 using android::IGraphicBufferProducer;
+using android::IMediaHTTPService;
 using android::MediaPlayerBase;
 using android::OK;
 using android::Parcel;
@@ -57,6 +58,7 @@ class Player: public MediaPlayerBase
     virtual bool        hardwareOutput() {return true;}
 
     virtual status_t    setDataSource(
+            const sp<IMediaHTTPService> &httpService,
             const char *url,
             const KeyedVector<String8, String8> *) {
         ALOGV("setDataSource %s", url);

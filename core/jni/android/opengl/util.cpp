@@ -27,7 +27,7 @@
 #include <GLES/gl.h>
 #include <ETC1/etc1.h>
 
-#include <core/SkBitmap.h>
+#include <SkBitmap.h>
 
 #include "android_runtime/AndroidRuntime.h"
 
@@ -562,18 +562,18 @@ void setTracingLevel(JNIEnv *env, jclass clazz, jint level)
     setGLDebugLevel(level);
 }
 
-static int checkFormat(SkBitmap::Config config, int format, int type)
+static int checkFormat(SkColorType colorType, int format, int type)
 {
-    switch(config) {
-        case SkBitmap::kIndex8_Config:
+    switch(colorType) {
+        case kIndex_8_SkColorType:
             if (format == GL_PALETTE8_RGBA8_OES)
                 return 0;
-        case SkBitmap::kARGB_8888_Config:
-        case SkBitmap::kA8_Config:
+        case kN32_SkColorType:
+        case kAlpha_8_SkColorType:
             if (type == GL_UNSIGNED_BYTE)
                 return 0;
-        case SkBitmap::kARGB_4444_Config:
-        case SkBitmap::kRGB_565_Config:
+        case kARGB_4444_SkColorType:
+        case kRGB_565_SkColorType:
             switch (type) {
                 case GL_UNSIGNED_SHORT_4_4_4_4:
                 case GL_UNSIGNED_SHORT_5_6_5:
@@ -590,36 +590,36 @@ static int checkFormat(SkBitmap::Config config, int format, int type)
     return -1;
 }
 
-static int getInternalFormat(SkBitmap::Config config)
+static int getInternalFormat(SkColorType colorType)
 {
-    switch(config) {
-        case SkBitmap::kA8_Config:
+    switch(colorType) {
+        case kAlpha_8_SkColorType:
             return GL_ALPHA;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             return GL_RGBA;
-        case SkBitmap::kARGB_8888_Config:
+        case kN32_SkColorType:
             return GL_RGBA;
-        case SkBitmap::kIndex8_Config:
+        case kIndex_8_SkColorType:
             return GL_PALETTE8_RGBA8_OES;
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             return GL_RGB;
         default:
             return -1;
     }
 }
 
-static int getType(SkBitmap::Config config)
+static int getType(SkColorType colorType)
 {
-    switch(config) {
-        case SkBitmap::kA8_Config:
+    switch(colorType) {
+        case kAlpha_8_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             return GL_UNSIGNED_SHORT_4_4_4_4;
-        case SkBitmap::kARGB_8888_Config:
+        case kN32_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case SkBitmap::kIndex8_Config:
+        case kIndex_8_SkColorType:
             return -1; // No type for compressed data.
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
         default:
             return -1;
@@ -631,9 +631,7 @@ static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
 {
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
-    const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.config();
-    return getInternalFormat(config);
+    return getInternalFormat(nativeBitmap->colorType());
 }
 
 static jint util_getType(JNIEnv *env, jclass clazz,
@@ -641,9 +639,7 @@ static jint util_getType(JNIEnv *env, jclass clazz,
 {
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
-    const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.config();
-    return getType(config);
+    return getType(nativeBitmap->colorType());
 }
 
 static jint util_texImage2D(JNIEnv *env, jclass clazz,
@@ -653,14 +649,14 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.config();
+    SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
-        internalformat = getInternalFormat(config);
+        internalformat = getInternalFormat(colorType);
     }
     if (type < 0) {
-        type = getType(config);
+        type = getType(colorType);
     }
-    int err = checkFormat(config, internalformat, type);
+    int err = checkFormat(colorType, internalformat, type);
     if (err)
         return err;
     bitmap.lockPixels();
@@ -702,13 +698,13 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.config();
+    SkColorType colorType = bitmap.colorType();
     if (format < 0) {
-        format = getInternalFormat(config);
+        format = getInternalFormat(colorType);
         if (format == GL_PALETTE8_RGBA8_OES)
             return -1; // glCompressedTexSubImage2D() not supported
     }
-    int err = checkFormat(config, format, type);
+    int err = checkFormat(colorType, format, type);
     if (err)
         return err;
     bitmap.lockPixels();

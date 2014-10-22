@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN-Code eingeben"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK und neuen PIN-Code eingeben"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-Code"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Neuer PIN-Code"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Geben Sie den PUK-Code der SIM-Karte und den neuen PIN-Code ein."</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-Code der SIM-Karte"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Neuer PIN-Code der SIM-Karte"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Zur Passworteingabe berühren"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Passwort zum Entsperren eingeben"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"PIN zum Entsperren eingeben"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Drücken Sie zum Entsperren die Menütaste und dann auf \"0\"."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Die maximal zulässige Anzahl an Face Unlock-Versuchen wurde überschritten."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Aufgeladen"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Akku wird aufgeladen (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Wird aufgeladen"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Bitte Ladegerät anschließen"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Zum Entsperren die Menütaste drücken"</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Netzwerk gesperrt"</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Schaltfläche für Pause"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Schaltfläche für Wiedergabe"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Schaltfläche für Stopp"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Mag ich"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Mag ich nicht"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Herz"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Zum Fortfahren entsperren"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Start abgebrochen"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Legen Sie <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> zum Löschen ab."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> wird nicht gelöscht."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -79,7 +87,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Entsperren"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Gewünschten PIN-Code eingeben"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Gewünschten PIN-Code bestätigen"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-Karte wird entsperrt…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Falscher PIN-Code"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Geben Sie eine 4- bis 8-stellige PIN ein."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Der PUK-Code muss mindestens 8 Ziffern betragen."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Geben Sie den richtigen PUK-Code ein. Bei wiederholten Versuchen wird die SIM-Karte dauerhaft deaktiviert."</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Entfernen"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Falscher PIN-Code der SIM-Karte. Bitte wenden Sie sich an Ihren Mobilfunkanbieter, damit er Ihr Gerät entsperrt."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Falscher PIN-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuch, bevor Sie das Gerät von Ihrem Mobilfunkanbieter entsperren lassen müssen."</item>
+    <item quantity="other" msgid="2215723361575359486">"Falscher PIN-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuche."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Die SIM-Karte kann nicht verwendet werden. Bitte wenden Sie sich an Ihren Mobilfunkanbieter."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Falscher PUK-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuch, bevor Ihre SIM-Karte endgültig gesperrt wird."</item>
+    <item quantity="other" msgid="5477305226026342036">"Falscher PUK-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuche, bevor Ihre SIM-Karte endgültig gesperrt wird."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Fehler beim Entsperren mit der PIN der SIM-Karte"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Fehler beim Entsperren mithilfe des PUK-Codes der SIM-Karte"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Code akzeptiert"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Schaltfläche für vorherigen Titel"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Schaltfläche für nächsten Titel"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Schaltfläche für Pause"</string>

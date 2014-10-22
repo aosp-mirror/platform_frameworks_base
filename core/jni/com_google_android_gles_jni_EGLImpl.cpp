@@ -107,7 +107,7 @@ static bool validAttribList(JNIEnv *_env, jintArray attrib_list) {
 
 static jint* beginNativeAttribList(JNIEnv *_env, jintArray attrib_list) {
     if (attrib_list != NULL) {
-        return (jint *)_env->GetPrimitiveArrayCritical(attrib_list, (jboolean *)0);
+        return _env->GetIntArrayElements(attrib_list, (jboolean *)0);
     } else {
         return(jint*) gNull_attrib_base;
     }
@@ -115,7 +115,7 @@ static jint* beginNativeAttribList(JNIEnv *_env, jintArray attrib_list) {
 
 static void endNativeAttributeList(JNIEnv *_env, jintArray attrib_list, jint* attrib_base) {
     if (attrib_list != NULL) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list, attrib_base, JNI_ABORT);
+        _env->ReleaseIntArrayElements(attrib_list, attrib_base, 0);
     }
 }
 
@@ -136,7 +136,7 @@ static jboolean jni_eglInitialize(JNIEnv *_env, jobject _this, jobject display,
             jint* base = (jint *)_env->GetPrimitiveArrayCritical(major_minor, (jboolean *)0);
             if (len >= 1) base[0] = 1;
             if (len >= 2) base[1] = 0;
-            _env->ReleasePrimitiveArrayCritical(major_minor, base, JNI_ABORT);
+            _env->ReleasePrimitiveArrayCritical(major_minor, base, 0);
         }
     }
     return EglBoolToJBool(success);
@@ -154,9 +154,9 @@ static jboolean jni_eglQueryContext(JNIEnv *_env, jobject _this, jobject display
     EGLBoolean success = EGL_FALSE;
     int len = _env->GetArrayLength(value);
     if (len) {
-        jint* base = (jint *)_env->GetPrimitiveArrayCritical(value, (jboolean *)0);
+        jint* base = _env->GetIntArrayElements(value, (jboolean *)0);
         success = eglQueryContext(dpy, ctx, attribute, base);
-        _env->ReleasePrimitiveArrayCritical(value, base, JNI_ABORT);
+        _env->ReleaseIntArrayElements(value, base, 0);
     }
     return EglBoolToJBool(success);
 }
@@ -174,9 +174,9 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
     EGLBoolean success = EGL_FALSE;
     int len = _env->GetArrayLength(value);
     if (len) {
-        jint* base = (jint *)_env->GetPrimitiveArrayCritical(value, (jboolean *)0);
+        jint* base = _env->GetIntArrayElements(value, (jboolean *)0);
         success = eglQuerySurface(dpy, sur, attribute, base);
-        _env->ReleasePrimitiveArrayCritical(value, base, JNI_ABORT);
+        _env->ReleaseIntArrayElements(value, base, 0);
     }
     return EglBoolToJBool(success);
 }
@@ -257,13 +257,13 @@ static jlong jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject di
     return reinterpret_cast<jlong>(sur);
 }
 
-static PixelFormat convertPixelFormat(SkBitmap::Config format)
+static PixelFormat convertPixelFormat(SkColorType format)
 {
     switch (format) {
-    case SkBitmap::kARGB_8888_Config:   return PIXEL_FORMAT_RGBA_8888;
-    case SkBitmap::kARGB_4444_Config:   return PIXEL_FORMAT_RGBA_4444;
-    case SkBitmap::kRGB_565_Config:     return PIXEL_FORMAT_RGB_565;
-    default:                            return PIXEL_FORMAT_NONE;
+    case kN32_SkColorType:         return PIXEL_FORMAT_RGBA_8888;
+    case kARGB_4444_SkColorType:   return PIXEL_FORMAT_RGBA_4444;
+    case kRGB_565_SkColorType:     return PIXEL_FORMAT_RGB_565;
+    default:                       return PIXEL_FORMAT_NONE;
     }
 }
 
@@ -297,7 +297,7 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
     pixmap.width  = nativeBitmap->width();
     pixmap.height = nativeBitmap->height();
     pixmap.stride = nativeBitmap->rowBytes() / nativeBitmap->bytesPerPixel();
-    pixmap.format = convertPixelFormat(nativeBitmap->config());
+    pixmap.format = convertPixelFormat(nativeBitmap->colorType());
     pixmap.data   = (uint8_t*)ref->pixels();
 
     base = beginNativeAttribList(_env, attrib_list);

@@ -8,3 +8,4 @@ option java_package android.webkit;
 # 70103- used by the browser app itself
 
 70150 browser_snap_center
+70151 exp_det_attempt_to_call_object_getclass (app_signature|3)

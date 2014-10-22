@@ -1,5 +1,5 @@
 page.title=Implementing GCM Client
-page.tags="cloud","push","messaging"
+page.tags=cloud,push,messaging
 @jd:body
 
 <div id="qv-wrapper">
@@ -246,7 +246,8 @@ private boolean checkPlayServices() {
 <h3 id="sample-register">Register for GCM</h3>
 <p>An Android application needs to register with GCM servers before it can receive
 messages. When an app registers, it receives a registration ID, which it can then
-store for future use. In the following snippet the {@code onCreate()} method in the sample app's
+store for future use (note that registration IDs must be kept secret). In the
+following snippet the {@code onCreate()} method in the sample app's
 main activity checks to see if the app is already registered with GCM and with
 the server:</p>
 

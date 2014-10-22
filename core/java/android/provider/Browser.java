@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BrowserContract.Bookmarks;
 import android.provider.BrowserContract.Combined;
 import android.provider.BrowserContract.History;
@@ -155,8 +156,8 @@ public class Browser {
      *  @param title    Title for the bookmark. Can be null or empty string.
      *  @param url      Url for the bookmark. Can be null or empty string.
      */
-    public static final void saveBookmark(Context c, 
-                                          String title, 
+    public static final void saveBookmark(Context c,
+                                          String title,
                                           String url) {
         Intent i = new Intent(Intent.ACTION_INSERT, Browser.BOOKMARKS_URI);
         i.putExtra("title", title);
@@ -233,10 +234,10 @@ public class Browser {
      *
      *  @param cr   The ContentResolver used to access the database.
      */
-    public static final Cursor getAllBookmarks(ContentResolver cr) throws 
+    public static final Cursor getAllBookmarks(ContentResolver cr) throws
             IllegalStateException {
         return cr.query(Bookmarks.CONTENT_URI,
-                new String[] { Bookmarks.URL }, 
+                new String[] { Bookmarks.URL },
                 Bookmarks.IS_FOLDER + " = 0", null, null);
     }
 
@@ -397,19 +398,17 @@ public class Browser {
         // TODO make a single request to the provider to do this in a single transaction
         Cursor cursor = null;
         try {
-            
+
             // Select non-bookmark history, ordered by date
             cursor = cr.query(History.CONTENT_URI,
                     new String[] { History._ID, History.URL, History.DATE_LAST_VISITED },
                     null, null, History.DATE_LAST_VISITED + " ASC");
 
             if (cursor.moveToFirst() && cursor.getCount() >= MAX_HISTORY_COUNT) {
-                final WebIconDatabase iconDb = WebIconDatabase.getInstance();
                 /* eliminate oldest history items */
                 for (int i = 0; i < TRUNCATE_N_OLDEST; i++) {
                     cr.delete(ContentUris.withAppendedId(History.CONTENT_URI, cursor.getLong(0)),
-                            null, null);
-                    iconDb.releaseIconForPageUrl(cursor.getString(1));
+                        null, null);
                     if (!cursor.moveToNext()) break;
                 }
             }
@@ -469,13 +468,6 @@ public class Browser {
             cursor = cr.query(History.CONTENT_URI, new String[] { History.URL }, whereClause,
                     null, null);
             if (cursor.moveToFirst()) {
-                final WebIconDatabase iconDb = WebIconDatabase.getInstance();
-                do {
-                    // Delete favicons
-                    // TODO don't release if the URL is bookmarked
-                    iconDb.releaseIconForPageUrl(cursor.getString(0));
-                } while (cursor.moveToNext());
-
                 cr.delete(History.CONTENT_URI, whereClause, null);
             }
         } catch (IllegalStateException e) {
@@ -520,7 +512,7 @@ public class Browser {
      * @param cr    The ContentResolver used to access the database.
      * @param url   url to remove.
      */
-    public static final void deleteFromHistory(ContentResolver cr, 
+    public static final void deleteFromHistory(ContentResolver cr,
                                                String url) {
         cr.delete(History.CONTENT_URI, History.URL + "=?", new String[] { url });
     }
@@ -554,7 +546,7 @@ public class Browser {
             Log.e(LOGTAG, "clearSearches", e);
         }
     }
-    
+
     /**
      *  Request all icons from the database.  This call must either be called
      *  in the main thread or have had Looper.prepare() invoked in the calling
@@ -563,12 +555,12 @@ public class Browser {
      *  @param  cr The ContentResolver used to access the database.
      *  @param  where Clause to be used to limit the query from the database.
      *          Must be an allowable string to be passed into a database query.
-     *  @param  listener IconListener that gets the icons once they are 
+     *  @param  listener IconListener that gets the icons once they are
      *          retrieved.
      */
     public static final void requestAllIcons(ContentResolver cr, String where,
             WebIconDatabase.IconListener listener) {
-        WebIconDatabase.getInstance().bulkRequestIconForPageUrl(cr, where, listener);
+        // Do nothing: this is no longer used.
     }
 
     /**

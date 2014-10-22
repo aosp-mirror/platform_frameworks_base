@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="UNIT">%2$s</xliff:g><xliff:g id="NUMBER">%1$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dae"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> uur"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> uur"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> uur"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> u. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> u. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minute"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s."</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s."</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sekondes"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sekonde"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Titelloos&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -50,6 +61,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Voer \'n PUK van 8 syfers of langer in."</string>
     <string name="needPuk" msgid="919668385956251611">"Jou SIM-kaart is PUK-gesluit. Voer die PUK-kode in om dit te ontsluit."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Sleutel PUK2 in om SIM-kaart oop te sluit."</string>
+    <string name="enablePin" msgid="209412020907207950">"Onsuksesvol, aktiveer SIM-/RUIM-slot."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat SIM gesluit word."</item>
+    <item quantity="other" msgid="7530597808358774740">"Jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings voordat SIM gesluit word."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Inkomender beller-ID"</string>
@@ -130,6 +146,7 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkroniseer"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Te veel <xliff:g id="CONTENT_TYPE">%s</xliff:g> uitgevee."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Horlosieberging is vol! Vee \'n paar lêers uit om plek te maak."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Foon se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan dalk gemonitor word"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Deur \'n onbekende derde party"</string>
@@ -147,6 +164,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Luitoestel aan"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Sit tans af…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Jou tablet gaan nou afskakel."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Jou horlosie gaan nou afskakel."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Jou foon gaan nou afsit."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Wil jy afskakel?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Herlaai na veilige modus"</string>
@@ -166,9 +184,13 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegtuigmodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegtuigmodus is AAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegtuigmodus is AF"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Instellings"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Sluit nou"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Veiligmodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-stelsel"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Persoonlike programme"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Werk"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dienste wat jou geld kos"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Doen dinge wat jou geld kan kos."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
@@ -251,7 +273,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"deïnstalleer kortpaaie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Laat die program toe om Tuisskerm-kortpaaie te verwyder sonder gebruikerinmenging."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"herlei uitgaande oproepe"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Laat die program toe om uitgaande oproepe te verwerk en die nommer wat geskakel moet word te verander. Hierdie toestemming laat die program toe om uitgaande oproepe te monitor, herlei, of te voorkom."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Laat die program toe om te sien watter nommer tydens \'n uitgaande oproep geskakel word, met die opsie om die oproep na \'n ander nommer te herlei of die oproep heeltemal te beëindig."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ontvang teksboodskappe (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Laat die program toe om SMS-boodskappe te ontvang en te verwerk. Dit beteken dat die program boodskappe wat na jou toestel gestuur is, kan monitor of uitvee, sonder dat jy dit gesien het."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ontvang teksboodskappe (MMS)"</string>
@@ -272,8 +294,14 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Laat die program toe om SMS-boodskappe te skryf wat op jou foon of SIM-kaart gestoor is. Kwaadwillige programme kan dalk jou boodskappe uitvee."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ontvang teksboodskappe (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Laat die program toe om WAP-boodskappe te ontvang en te verwerk. Hierdie toestemming sluit ook in dat boodskappe wat na jou toestel gestuur is, gemonitor of uitgevee kan word, sonder dat jy dit gesien het."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ontvang Bluetooth-boodskappe (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Laat die program toe om Bluetooth-MAP-boodskappe te ontvang en te verwerk. Dit beteken dat die program boodskappe wat na jou toestel gestuur word, kan monitor of uitvee sonder dat jy dit gesien het."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"haal lopende programme op"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Laat die program toe om inligting oor die huidig- en onlangslopende take op te haal. Dit kan moontlik die program toelaat om inligting oor watter programme op die toestel gebruik word, te ontdek."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interaksie tussen gebruikers"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Laat die program toe om aksies vir verskillende gebruikers op die toestel uit te voer. Kwaadwillige programme kan dit gebruik om die beskerming tussen gebruikers te skend."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"volle lisensie vir interaksie tussen gebruikers"</string>
@@ -310,12 +338,12 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Laat die program toe om die inhoud van die aktiewe venster op te haal. Kwaadwillige programme kan die hele venster se inhoud ophaal, en al die teks ondersoek, behalwe wagwoorde."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktiveer toeganklikheid tydelik"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Laat \'n program toe om toeganklikheid tydelik op die toestel te aktiveer. Kwaadwillige programme kan sonder die toestemming van die gebruiker toeganklikheid verkry."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"haal vensterinligting op"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Laat \'n program toe om inligting oor vensters vanaf die vensterbestuurder op te haal. Kwaadwillige programme kan moontlik inligting ophaal wat vir interne stelselgebruik bedoel is."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"haal vensterteken"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Laat \'n program toe om die vensterteken te gaan haal. Kwaadwillige programme kan dalk ongemagtigde interaksie met die programvenster uitvoer deur die stelsel te verpersoonlik."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"haal raamstatistiek"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Laat \'n program toe om raamstatistiek in te samel. Kwaadwillige programme kan dalk die raamstatistiek van vensters van ander programme af naboots."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filter gebeure"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Laat \'n program toe om \'n invoerfilter te registreer wat die stroom van alle gebruikergebeure filter voordat dit versend word. Kwaadwillige programme kan moontlik die stelsel-UI beheer sonder gebruikers se tussentrede."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"vergroot skerm"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Laat \'n program toe om die inhoud van \'n skerm te vergroot. Kwaadwillige programme kan die skerminhoud so omskep dat die toestel onbruikbaar word."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelike afskakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plaas die aktiwiteitbestuurder in \'n afsluitingstatus. Doen nie \'n volledige afsluiting nie."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"verhoed program-oorskakelings"</string>
@@ -377,10 +405,20 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n VPN-diens te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind aan \'n muurpapier"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n muurpapier te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"verbind met \'n steminteraksiediens"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Laat die houer toe om met die topvlak-koppelvlak van \'n steminteraksiediens te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"bestuur stemsleutelfrases"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Laat die houer toe om die sleutelfrases vir aktiveerwoordbespeuring met stem te bestuur. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"koppel aan \'n afstandskerm"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Dit laat die houer toe om aan die top-koppelvlak van \'n afstandskerm te koppel. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind aan \'n legstukdiens"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n legstuk-diens te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"bind aan \'n roeteverskafferdiens"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Laat die houer toe om aan enige geregistreerde roeteverskaffers te bind. Behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"skakel met \'n toestel-admin"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Laat die houer toe om bedoelings na \'n toesteladministrateur te stuur. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"bind aan \'n TV-invoer"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Laat die houer toe om aan die topvlak-koppelvlak van \'n TV-invoer te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"voeg \'n toesteladministrateur by of verwyder een"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Laat die houer aktiewe toesteladministrateurs byvoeg of verwyder. Behoort nooit nodig te wees vir normale programme nie."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"verander skermoriëntasie"</string>
@@ -416,6 +454,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Laat die program toe om enige geïnstalleer mediadekodeerder te gebruik om te kan dekodeer vir terugspeel."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"bestuur vertroude eiebewyse"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Laat die program CA-sertifikate as vertroude eiebewyse installeer en deïnstalleer."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"laat loop die program se geskeduleerde agtergrondwerk"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Hierdie toestemming laat die Android-stelsel toe om die program in die agtergrond te laat loop wanneer dit versoek word."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Laat die program toe om na enige hulpbron wat deur die diag-groep besit word, te skryf, byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en sekuriteit affekteer. Dit moet NET gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>
@@ -453,6 +493,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Laat die program toe om persoonlike profielinligting  wat op jou toestel gestoor is, soos jou naam en kontakbesonderhede, te lees. Dit beteken dat die program jou kan identifiseer en jou profielinligting moontlik aan ander mense kan stuur."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"verander jou eie kontakkaart"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Laat die program toe om persoonlike profielinligting, soos jou naam en kontakinligting, wat op jou toestel gestoor is, te verander of daarby te voeg. Dit beteken dat die program jou kan identifiseer en moontlik jou profielinligting na ander mense kan stuur."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"liggaamsensors (soos hartklopmonitors)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Laat die program toe om toegang tot data te verkry vanaf sensors wat jy gebruik om te meet wat binne jou liggaam aangaan, soos hartklop."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lees jou sosiale stroom"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Laat die program toe om toegang tot sosiale opdaterings van jou en jou vriende te verkry en dit te sinkroniseer. Wees versigtig wanneer jy inligting deel -- dit laat die program toe om kommunikasie tussen jou en jou vriende op sosiale netwerke te lees, ongeag vertroulikheid. Let wel: hierdie toestemming mag dalk nie op alle sosiale netwerke afgedwing word nie."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skryf aan jou sosiale stroom"</string>
@@ -466,7 +508,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"kamma liggingbronne vir toetsing"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Skep skynliggingsbronne vir toetsing of installeer \'n nuwe liggingsverskaffer. Die program kan dan die ligging en/of status wat deurgegee is deur ander liggingsbronne, soos GPS of liggingsverskaffers, oorheers."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Kry toegang tot ekstra liggingverskaffer-bevele"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Laat die program toe om ekstra liggingverskaffer-bevele te gebruik. Die programme kan dit moontlik gebruik om met die werking van die GPS of ander liggingsbronne in te meng."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"toestemming om \'n liggingverskaffer te installeer"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Skep skynliggingsbronne vir toetsing of installeer \'n nuwe liggingsverskaffer. Die program kan dan die ligging en/of status wat deurgegee is deur ander liggingsbronne, soos GPS of liggingsverskaffers, oorheers."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presiese ligging (GPS en netwerkgebaseer)"</string>
@@ -477,6 +519,8 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Laat die program toe om SurfaceFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lees raambuffer"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Laat die program toe om die inhoud van die raambuffer te lees."</string>
+    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"kry toegang tot InputFlinger"</string>
+    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Laat die program toe om InputFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"stel Wi-Fi-skerms op"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Laat die program toe om Wi-Fi-skerms op te stel en daaraan te koppel."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"beheer Wi-Fi-skerms"</string>
@@ -485,6 +529,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Laat die program oudio-uitset vasvang en herlei."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Aktiveerwoord-opsporing"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Laat die program toe om oudio vir Aktiveerwoord-opsporing op te neem. Die opname kan in die agtergrond plaasvind, maar verhoed nie dat ander oudio opgeneem word nie (bv. Kameraopnemer)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Oudio-versending"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Laat die program toe om oudio-versending direk te beheer en oudio-beleidsbesluite ter syde te stel."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"vang video-uitset vas"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Laat die program video-uitset vasvang en herlei."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"vang veilige video-uitset vas"</string>
@@ -495,6 +541,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"neem klank op"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Laat die program toe om klank met die mikrofoon op te neem. Hierdie toestemming laat die program toe om klank te eniger tyd, sonder jou bevestiging, op te neem."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-kommunikasie"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Laat die program toe om bevele na die SIM te stuur. Dit is baie gevaarlik."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"neem foto\'s en video\'s"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Laat die program toe om foto\'s en video\'s met die kamera te neem. Hierdie toestemming laat die program toe om die kamera te eniger tyd sonder jou bevestiging te gebruik."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"deaktiveer LED wat oordrag aandui wanneer kamera gebruik word"</string>
@@ -550,6 +598,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Laat die program toe om die foonkenmerke van die toestel te beheer. \'n Program met hierdie toestemming kan tussen netwerke wissel, die foonradio aan en af skakel, en dies meer, sonder om jou ooit te laat weet."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lees foonstatus en identiteit"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lees presiese foonstate"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Gee die program toegang tot presiese foonstate. Hierdie toestemming laat die program toe om die werklike oproepstatus te bepaal, of \'n oproep aktief is en of dit in die agtergrond is. Dit kan ook mislukte oproepe, presiese dataverbindingstatus en mislukte dataverbindings bepaal."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"verhoed dat tablet slaap"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"verhoed foon om te slaap"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Laat die program toe om die tablet te keer om te slaap."</string>
@@ -617,6 +667,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Verander WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Laat die program toe om die tablet aan WiMAX-netwerke te koppel en daarvan te ontkoppel."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Laat die program toe om die foon aan WiMAX-netwerke te koppel en daarvan te ontkoppel."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"gee telling vir netwerke"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Laat die program toe om netwerke te gradeer en beïnvloed watter netwerke die tablet moet verkies."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Laat die program toe om netwerke te gradeer en beïnvloed watter netwerke die foon moet verkies."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"bind saam met Bluetooth-toestelle"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Laat die program toe om die opstelling van Bluetooth op die tablet te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Laat die program toe om die opstelling van die Bluetooth op die foon te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
@@ -664,16 +717,26 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Laat die program toe om netwerkbeleide te bestuur en program-spesifieke reëls te definieer."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verander verrekening van netwerkgebruik"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Laat die program toe om te verander hoe netwerkgebruik teenoor programme gemeet word. Nie vir gebruik deur normale programme nie."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"wysig sokmerke"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Laat die program toe om sokmerke vir roetering te wysig"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"kry toegang tot kennisgewings"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Laat die program toe om kennisgewings op te haal, te bestudeer en te verwyder, insluitende die kennisgewings wat deur ander programme geplaas is."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bind aan \'n kennisgewingluisteraardiens"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Laat die houer toe om aan die top-koppelvlak van \'n kennisgewingluisteraardiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"verbind met \'n toestandverskafferdiens"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Laat die houer toe om met die topvlak-koppelvlak van \'n toestandverskafferdiens te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"bind aan \'n mediaroetediens"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Laat die houer toe om aan die topvlakkoppelvlak van \'n mediaroetediens te bind. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"bind aan \'n droomdiens"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Laat die houer toe om aan die topvlak-koppelvlak van \'n droomdiens te bind. Behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"roep die opstellingprogram op wat deur die diensverskaffer voorsien is"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Laat die houer toe om die opstellingsprogram wat deur die diensverskaffer voorsien word, op te roep. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"luister vir waarnemings oor netwerktoestande"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Laat \'n program luister vir waarnemings oor netwerktoestande. Behoort nooit nodig te wees vir normale programme nie."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"verander invoertoestelkalibrasie"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Laat die program toe om die kalibrasieparameters van die raakskerm te wysig. Dit behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"gaan in by DRM-sertifikate"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Laat \'n program toe om DRM-sertifikate op te stel en te gebruik. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Ontvang Android Straal-oordragstatus"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Laat hierdie program toe om inligting oor huidige Android Straal-oordragte te ontvang."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Beheer lengte en watter karakters wat in die skermontsluit-wagwoorde gebruik word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>
@@ -809,6 +872,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Tuis"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Werk"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Ander"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Geen program gekry om hierdie kontak te bekyk nie."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Voer PIN-kode in"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Voer PUK en nuwe PIN-kode in"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
@@ -946,8 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Laat die program toe om die blaaier se geskiedenis of boekmerke wat op jou foon gestoor is, te verander. Dit kan moontlik die program toelaat om blaaierdata uit te vee of te verander. Let wel: hierdie toestemming mag dalk nie deur derdeparty-blaaiers of ander programme met webblaaivermoëns afgedwing word nie."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stel \'n wekker"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Laat die program toe om \'n alarm in \'n geïnstalleerde wekkerprogram te stel. Sommige wekkerprogramme werk dalk nie met hierdie funksie nie."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skryf stemposse"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Laat die program toe om boodskappe uit jou stemposinkassie te wysig en te verwyder."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"voeg stemboodskap by"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Laat die program toe om boodskappe by te voeg by jou stempos-inkassie."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"lees stempos"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Laat die program toe om jou stemposse te lees."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"verander blaaier se geoligging-toestemmings"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Laat die program toe om die blaaier se geoligging-toestemmings te verander. Kwaadwillige programme kan dit gebruik om hulle toe te laat om ligginginligting aan enige webwerf te stuur."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verifieer pakkies"</string>
@@ -1115,6 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"AAN"</string>
     <string name="capital_off" msgid="6815870386972805832">"AF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Voltooi handeling met"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Voltooi handeling met gebruik van %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Maak oop met"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Maak oop met %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Redigeer met"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redigeer met %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Deel met"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Deel met %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Kies \'n tuisprogram"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gebruik hierdie aksie by verstek."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vee die verstek instelling uit in Stelselinstellings &gt; Programme &gt; Afgelaai."</string>
@@ -1217,10 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Laat altyd toe"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Moet nooit toelaat nie"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart verwyder"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Die mobielnetwerk sal nie beskikbaar wees nie totdat jy weer begin met \'n geldige SIM-kaart."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Die sellulêre netwerk sal onbeskikbaar wees totdat jy herbegin met \'n geldige SIM-kaart ingesit."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Klaar"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kaart bygevoeg"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Herbegin jou toestel om toegang tot die mobiele netwerk te kry."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Herbegin jou toestel om toegang tot die sellulêre netwerk te verkry."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Herbegin"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stel tyd"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Stel datum"</string>
@@ -1305,6 +1380,18 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Laat \'n program toe om toegang tot keyguard se veilige berging te kry."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Beheer wys en versteek van keyguard"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Laat \'n program toe om keyguard te beheer."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Luister na vertrouenstaatveranderinge."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Laat \'n program toe om vir veranderinge in vertrouenstaat te luister."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Voorsien \'n vertroude agent."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Laat \'n program toe om \'n vertroude agent te voorsien."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Begin instellingskieslys vir vertrouensagent"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Laat \'n program toe om \'n aktiwiteit te begin wat die vertrouensagentgedrag verander."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Verbind met \'n vertrouensagentdiens"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Laat \'n program toe om met \'n vertrouensagentdiens te verbind."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Tree in wisselwerking met opdatering- en terugstellingstelsel"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Laat \'n program met die terugstellingstelsel en stelselopdaterings in wisselwerking tree."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Skep mediaprojeksiesessies"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Laat \'n program toe om mediaprojeksiesessies te skep. Hierdie sessies kan programme die vermoë gee om skerm- en oudio-inhoud vas te vang. Behoort nooit nodig te wees vir normale programme nie."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gaan"</string>
@@ -1329,6 +1416,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Muurpapier"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Verander muurpapier"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Kennisgewingluisteraar"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Toestandverskaffer"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN geaktiveer"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN is geaktiveer deur <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Raak om die netwerk te bestuur."</string>
@@ -1348,10 +1436,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Terug"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Volgende"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Slaan oor"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Hoë mobiele dataverbruik"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Raak om meer te wete te kom oor mobiele datagebruik."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Mobiele datalimiet oorskry"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Raak om meer te wete te kom oor mobiele datagebruik."</string>
     <string name="no_matches" msgid="8129421908915840737">"Geen passings nie"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Vind op bladsy"</string>
   <plurals name="matches_found">
@@ -1414,18 +1498,10 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invoersleutel"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Kies \'n program"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Kon <xliff:g id="APPLICATION_NAME">%s</xliff:g> nie begin nie"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Deel met"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Deel met <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skyfievatsel. Raak en hou."</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Gly op vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Gly af vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Gly links vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Gly regs vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Ontsluit"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Stil"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Klank aan"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Soek"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Sleep om te ontsluit."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Prop \'n kopfoon in om te hoor hoe wagwoordsleutels hardop gesê word."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punt."</string>
@@ -1440,14 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redigeer"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Dataverbruik-waarskuwing"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Raak gebruik/instellings te sien."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G-data gedeaktiveer"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-data gedeaktiveer"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobieldata gedeaktiveer"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi-data gedeaktiveer"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Raak om te aktiveer."</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G-data is af"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-data is af"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Sellulêre data is af"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-data is af"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Limiet bereik"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-datalimiet oorskry"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-datalimiet oorskry"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiele datalimiet oorskry"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Sellulêredata-limiet oorskry"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi se datalimiet oorskry"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> oor gespesifiseerde limiet."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Agtergronddata is beperk"</string>
@@ -1483,8 +1559,13 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Stelsel"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-oudio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Draadlose skerm"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Klaar"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Media-uitvoer"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Koppel aan toestel"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Saai skerm uit na toestel"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Soek tans vir toestelle…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Instellings"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Ontkoppel"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skandeer tans..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Koppel tans..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Beskikbaar"</string>
@@ -1495,8 +1576,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Oorlegger #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", veilig"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Draadlose skerm is gekoppel"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Hierdie skerm word op \'n ander toestel gewys"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Skerm word tans uitgesaai"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Koppel tans aan <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Skerm word tans uitgesaai"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Gekoppel aan <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Ontkoppel"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Noodoproep"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Het jy die patroon vergeet?"</string>
@@ -1514,7 +1597,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ontsluit tans SIM-kaart…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Verkeerde PIN-kode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Tik \'n PIN in wat 4 tot 8 syfers lank is."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-kode moet 8 of meer syfers wees."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK-kode moet 8 syfers wees."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Voer weer die korrekte PUK-kode in. Herhaalde pogings sal die SIM permanent deaktiveer."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kodes stem nie ooreen nie"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogings"</string>
@@ -1649,5 +1732,29 @@
     <item quantity="other" msgid="4730868920742952817">"Probeer weer oor <xliff:g id="COUNT">%d</xliff:g> sekondes"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Probeer later weer"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Sleep van bo af na onder om volskerm te verlaat."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Swiep van bo af na onder om volskerm te verlaat."</string>
+    <string name="done_label" msgid="2093726099505892398">"Klaar"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Ure se sirkelglyer"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Minute se sirkelglyer"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Kies ure"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Kies minute"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Maandrooster van dae"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Jaarlys"</string>
+    <string name="select_day" msgid="7774759604701773332">"Kies maand en dag"</string>
+    <string name="select_year" msgid="7952052866994196170">"Kies jaar"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> gekies"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> uitgevee"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Jy is in sluit-na-program-modus. Raak en hou die knoppie vir onlangse programme om uit te gaan"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Jy is in Sluit-na-program-modus."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Gebruik Sluit-na-program?"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Sluit-na-program sluit die skerm in \'n enkele program.\n\nRaak en hou die knoppie vir onlangse programme om uit te gaan."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"NEE, DANKIE"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"BEGIN"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Gesluit na program"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Nie meer gesluit na program nie"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Vra om %1$s voordat uitgegaan word"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ontsluitpatroon"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"wagwoord"</string>
 </resources>

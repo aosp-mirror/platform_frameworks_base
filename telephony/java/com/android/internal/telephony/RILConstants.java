@@ -57,6 +57,7 @@ public interface RILConstants {
                                                  retries needed */
     int MISSING_RESOURCE = 16;                /* no logical channel available */
     int NO_SUCH_ELEMENT = 17;                 /* application not found on SIM */
+    int SUBSCRIPTION_NOT_SUPPORTED = 26;      /* Subscription not supported */
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
     int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */
@@ -72,7 +73,7 @@ public interface RILConstants {
                                             AVAILABLE Application Settings menu*/
     int NETWORK_MODE_LTE_CDMA_EVDO  = 8; /* LTE, CDMA and EvDo */
     int NETWORK_MODE_LTE_GSM_WCDMA  = 9; /* LTE, GSM/WCDMA */
-    int NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */
+    int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */
     int NETWORK_MODE_LTE_ONLY       = 11; /* LTE Only mode. */
     int NETWORK_MODE_LTE_WCDMA      = 12; /* LTE/WCDMA */
     int PREFERRED_NETWORK_MODE      = NETWORK_MODE_WCDMA_PREF;
@@ -84,6 +85,8 @@ public interface RILConstants {
     int GSM_PHONE = 1;
     int CDMA_PHONE = 2;
     int SIP_PHONE  = 3;
+    int THIRD_PARTY_PHONE = 4;
+    int IMS_PHONE = 5;
 
     int LTE_ON_CDMA_UNKNOWN = -1;
     int LTE_ON_CDMA_FALSE = 0;
@@ -113,6 +116,11 @@ public interface RILConstants {
     int DEACTIVATE_REASON_NONE = 0;
     int DEACTIVATE_REASON_RADIO_OFF = 1;
     int DEACTIVATE_REASON_PDP_RESET = 2;
+
+    /* NV config radio reset types. */
+    int NV_CONFIG_RELOAD_RESET = 1;
+    int NV_CONFIG_ERASE_RESET = 2;
+    int NV_CONFIG_FACTORY_RESET = 3;
 
 /*
 cat include/telephony/ril.h | \
@@ -271,6 +279,19 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SIM_OPEN_CHANNEL = 115;
     int RIL_REQUEST_SIM_CLOSE_CHANNEL = 116;
     int RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL = 117;
+    int RIL_REQUEST_NV_READ_ITEM = 118;
+    int RIL_REQUEST_NV_WRITE_ITEM = 119;
+    int RIL_REQUEST_NV_WRITE_CDMA_PRL = 120;
+    int RIL_REQUEST_NV_RESET_CONFIG = 121;
+    int RIL_REQUEST_SET_UICC_SUBSCRIPTION = 122;
+    int RIL_REQUEST_ALLOW_DATA = 123;
+    int RIL_REQUEST_GET_HARDWARE_CONFIG = 124;
+    int RIL_REQUEST_SIM_AUTHENTICATION = 125;
+    int RIL_REQUEST_GET_DC_RT_INFO = 126;
+    int RIL_REQUEST_SET_DC_RT_INFO_RATE = 127;
+    int RIL_REQUEST_SET_DATA_PROFILE = 128;
+    int RIL_REQUEST_SHUTDOWN = 129;
+
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
     int RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED = 1001;
@@ -310,4 +331,7 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_VOICE_RADIO_TECH_CHANGED = 1035;
     int RIL_UNSOL_CELL_INFO_LIST = 1036;
     int RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED = 1037;
+    int RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED = 1038;
+    int RIL_UNSOL_SRVCC_STATE_NOTIFY = 1039;
+    int RIL_UNSOL_HARDWARE_CONFIG_CHANGED = 1040;
 }

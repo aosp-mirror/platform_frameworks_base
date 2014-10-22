@@ -1,17 +1,10 @@
 page.title=Processes and Threads
-page.tags="lifecycle","background"
+page.tags=lifecycle,background
 
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Quickview</h2>
-<ul>
-  <li>Every application runs in its own process and all components of the application run in that
-process, by default</li>
-  <li>Any slow, blocking operations in an activity should be done in a new thread, to avoid slowing
-down the user interface</li>
-</ul>
 
 <h2>In this document</h2>
 <ol>

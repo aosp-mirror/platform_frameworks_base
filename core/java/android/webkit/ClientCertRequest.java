@@ -27,7 +27,7 @@ import java.security.cert.X509Certificate;
  * such as the host name and the port number requesting the cert, the acceptable
  * key types and the principals.
  *
- * The user should call one of the interface methods to indicate how to deal
+ * The user should call one of the class methods to indicate how to deal
  * with the client certificate request. All methods should be called on
  * UI thread.
  *
@@ -36,45 +36,46 @@ import java.security.cert.X509Certificate;
  * host/port pair. The user can clear the cached data using
  * {@link WebView#clearClientCertPreferences}.
  *
- * TODO(sgurun) unhide
- * @hide
  */
-public interface ClientCertRequest {
+public abstract class ClientCertRequest {
+
+    public ClientCertRequest() { }
+
     /**
      * Returns the acceptable types of asymmetric keys (can be null).
      */
-    public String[] getKeyTypes();
+    public abstract String[] getKeyTypes();
 
     /**
      * Returns the acceptable certificate issuers for the certificate
      *            matching the private key (can be null).
      */
-    public Principal[] getPrincipals();
+    public abstract Principal[] getPrincipals();
 
     /**
      * Returns the host name of the server requesting the certificate.
      */
-    public String getHost();
+    public abstract String getHost();
 
     /**
      * Returns the port number of the server requesting the certificate.
      */
-    public int getPort();
+    public abstract int getPort();
 
     /**
      * Proceed with the specified private key and client certificate chain.
      * Remember the user's positive choice and use it for future requests.
      */
-    public void proceed(PrivateKey privateKey, X509Certificate[] chain);
+    public abstract void proceed(PrivateKey privateKey, X509Certificate[] chain);
 
     /**
      * Ignore the request for now. Do not remember user's choice.
      */
-    public void ignore();
+    public abstract void ignore();
 
     /**
      * Cancel this request. Remember the user's choice and use it for
      * future requests.
      */
-    public void cancel();
+    public abstract void cancel();
 }

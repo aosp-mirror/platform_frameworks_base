@@ -134,11 +134,16 @@ public class GestureOverlayView extends FrameLayout {
         this(context, attrs, com.android.internal.R.attr.gestureOverlayViewStyle);
     }
 
-    public GestureOverlayView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public GestureOverlayView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.GestureOverlayView, defStyle, 0);
+    public GestureOverlayView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.GestureOverlayView, defStyleAttr, defStyleRes);
 
         mGestureStrokeWidth = a.getFloat(R.styleable.GestureOverlayView_gestureStrokeWidth,
                 mGestureStrokeWidth);

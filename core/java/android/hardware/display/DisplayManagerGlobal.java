@@ -18,6 +18,8 @@ package android.hardware.display;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.media.projection.MediaProjection;
+import android.media.projection.IMediaProjection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -368,8 +370,9 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public VirtualDisplay createVirtualDisplay(Context context, String name,
-            int width, int height, int densityDpi, Surface surface, int flags) {
+    public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
+            String name, int width, int height, int densityDpi, Surface surface, int flags,
+            VirtualDisplay.Callback callback, Handler handler) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("name must be non-null and non-empty");
         }
@@ -377,15 +380,13 @@ public final class DisplayManagerGlobal {
             throw new IllegalArgumentException("width, height, and densityDpi must be "
                     + "greater than 0");
         }
-        if (surface == null) {
-            throw new IllegalArgumentException("surface must not be null");
-        }
 
-        Binder token = new Binder();
+        VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
+        IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
-            displayId = mDm.createVirtualDisplay(token, context.getPackageName(),
-                    name, width, height, densityDpi, surface, flags);
+            displayId = mDm.createVirtualDisplay(callbackWrapper, projectionToken,
+                    context.getPackageName(), name, width, height, densityDpi, surface, flags);
         } catch (RemoteException ex) {
             Log.e(TAG, "Could not create virtual display: " + name, ex);
             return null;
@@ -399,15 +400,32 @@ public final class DisplayManagerGlobal {
             Log.wtf(TAG, "Could not obtain display info for newly created "
                     + "virtual display: " + name);
             try {
-                mDm.releaseVirtualDisplay(token);
+                mDm.releaseVirtualDisplay(callbackWrapper);
             } catch (RemoteException ex) {
             }
             return null;
         }
-        return new VirtualDisplay(this, display, token);
+        return new VirtualDisplay(this, display, callbackWrapper, surface);
     }
 
-    public void releaseVirtualDisplay(IBinder token) {
+    public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
+        try {
+            mDm.setVirtualDisplaySurface(token, surface);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to set virtual display surface.", ex);
+        }
+    }
+
+    public void resizeVirtualDisplay(IVirtualDisplayCallback token,
+            int width, int height, int densityDpi) {
+        try {
+            mDm.resizeVirtualDisplay(token, width, height, densityDpi);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to resize virtual display.", ex);
+        }
+    }
+
+    public void releaseVirtualDisplay(IVirtualDisplayCallback token) {
         try {
             mDm.releaseVirtualDisplay(token);
         } catch (RemoteException ex) {
@@ -453,6 +471,66 @@ public final class DisplayManagerGlobal {
                     break;
                 case EVENT_DISPLAY_REMOVED:
                     mListener.onDisplayRemoved(msg.arg1);
+                    break;
+            }
+        }
+    }
+
+    private final static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
+        private VirtualDisplayCallbackDelegate mDelegate;
+
+        public VirtualDisplayCallback(VirtualDisplay.Callback callback, Handler handler) {
+            if (callback != null) {
+                mDelegate = new VirtualDisplayCallbackDelegate(callback, handler);
+            }
+        }
+
+        @Override // Binder call
+        public void onPaused() {
+            if (mDelegate != null) {
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_PAUSED);
+            }
+        }
+
+        @Override // Binder call
+        public void onResumed() {
+            if (mDelegate != null) {
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_RESUMED);
+            }
+        }
+
+        @Override // Binder call
+        public void onStopped() {
+            if (mDelegate != null) {
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_STOPPED);
+            }
+        }
+    }
+
+    private final static class VirtualDisplayCallbackDelegate extends Handler {
+        public static final int MSG_DISPLAY_PAUSED = 0;
+        public static final int MSG_DISPLAY_RESUMED = 1;
+        public static final int MSG_DISPLAY_STOPPED = 2;
+
+        private final VirtualDisplay.Callback mCallback;
+
+        public VirtualDisplayCallbackDelegate(VirtualDisplay.Callback callback,
+                Handler handler) {
+            super(handler != null ? handler.getLooper() : Looper.myLooper(), null, true /*async*/);
+            mCallback = callback;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_DISPLAY_PAUSED:
+                    mCallback.onPaused();
+                    break;
+                case MSG_DISPLAY_RESUMED:
+                    mCallback.onResumed();
+                    break;
+                case MSG_DISPLAY_STOPPED:
+                    mCallback.onStopped();
                     break;
             }
         }

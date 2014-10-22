@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionOverflowButtonStyle">@style/DarkerOverflow</item>
-        <item name="android:windowBackground">@*android:drawable/dialog_full_holo_light</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@*android:style/Animation.Holo.Dialog</item>
-    </style>
+
+    <style name="DialogWhenReallyLarge" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.FixedSize" />
+
 </resources>

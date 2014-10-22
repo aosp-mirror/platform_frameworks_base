@@ -40,6 +40,7 @@ public class InputConnectionWrapper implements InputConnection {
         public CharSequence mSelectedText;
         public ExtractedText mExtractedText;
         public int mCursorCapsMode;
+        public boolean mRequestUpdateCursorAnchorInfoResult;
         
         // A 'pool' of one InputContextCallback.  Each ICW request will attempt to gain
         // exclusive access to this object.
@@ -152,7 +153,20 @@ public class InputConnectionWrapper implements InputConnection {
                 }
             }
         }
-        
+
+        public void setRequestUpdateCursorAnchorInfoResult(boolean result, int seq) {
+            synchronized (this) {
+                if (seq == mSeq) {
+                    mRequestUpdateCursorAnchorInfoResult = result;
+                    mHaveValue = true;
+                    notifyAll();
+                } else {
+                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
+                            + ") in setCursorAnchorInfoRequestResult, ignoring.");
+                }
+            }
+        }
+
         /**
          * Waits for a result for up to {@link #MAX_WAIT_TIME_MILLIS} milliseconds.
          * 
@@ -412,5 +426,23 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    public boolean requestCursorUpdates(int cursorUpdateMode) {
+        boolean result = false;
+        try {
+            InputContextCallback callback = InputContextCallback.getInstance();
+            mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode, callback.mSeq, callback);
+            synchronized (callback) {
+                callback.waitForResultLocked();
+                if (callback.mHaveValue) {
+                    result = callback.mRequestUpdateCursorAnchorInfoResult;
+                }
+            }
+            callback.dispose();
+        } catch (RemoteException e) {
+            return false;
+        }
+        return result;
     }
 }

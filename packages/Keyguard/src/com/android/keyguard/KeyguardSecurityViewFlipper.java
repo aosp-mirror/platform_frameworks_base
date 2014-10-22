@@ -38,7 +38,7 @@ import com.android.internal.widget.LockPatternUtils;
  */
 public class KeyguardSecurityViewFlipper extends ViewFlipper implements KeyguardSecurityView {
     private static final String TAG = "KeyguardSecurityViewFlipper";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
     private Rect mTempRect = new Rect();
 
@@ -155,6 +155,24 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
                 KeyguardSecurityView ksv = (KeyguardSecurityView) child;
                 ksv.hideBouncer(ksv == active ? duration : 0);
             }
+        }
+    }
+
+    @Override
+    public void startAppearAnimation() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.startAppearAnimation();
+        }
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            return ksv.startDisappearAnimation(finishRunnable);
+        } else {
+            return false;
         }
     }
 

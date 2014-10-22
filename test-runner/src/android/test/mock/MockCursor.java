@@ -24,8 +24,6 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 
-import java.util.Map;
-
 /**
  * <P>
  * A mock {@link android.database.Cursor} class that isolates the test code from real

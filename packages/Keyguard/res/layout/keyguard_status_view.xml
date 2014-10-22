@@ -18,43 +18,47 @@
 -->
 
 <!-- This is a view that shows general status information in Keyguard. -->
-<com.android.keyguard.KeyguardWidgetFrame
+<com.android.keyguard.KeyguardStatusView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_status_view"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width"
     androidprv:layout_maxHeight="@dimen/keyguard_security_height"
-    android:gravity="center">
-
-    <com.android.keyguard.KeyguardStatusView
-        android:id="@+id/keyguard_status_view_face_palm"
-        android:orientation="vertical"
+    android:gravity="center_horizontal|top">
+    <LinearLayout
+        android:id="@+id/keyguard_clock_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal|top"
-        android:contentDescription="@string/keyguard_accessibility_status">
-        <LinearLayout
-            android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|top"
+        android:orientation="vertical" >
+        <TextClock
+            android:id="@+id/clock_view"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|top"
-            android:orientation="vertical"
-            android:focusable="true">
-            <TextClock
-                android:id="@+id/clock_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:textColor="@color/clock_white"
-                android:singleLine="true"
-                style="@style/widget_big_thin"
-                android:format12Hour="@string/keyguard_widget_12_hours_format"
-                android:format24Hour="@string/keyguard_widget_24_hours_format"
-                android:baselineAligned="true"
-                android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/clock_white"
+            android:singleLine="true"
+            style="@style/widget_big_thin"
+            android:format12Hour="@string/keyguard_widget_12_hours_format"
+            android:format24Hour="@string/keyguard_widget_24_hours_format"
+            android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
 
-            <include layout="@layout/keyguard_status_area" />
-        </LinearLayout>
-    </com.android.keyguard.KeyguardStatusView>
-</com.android.keyguard.KeyguardWidgetFrame>
+        <include layout="@layout/keyguard_status_area" />
+        <TextView
+            android:id="@+id/owner_info"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/date_owner_info_margin"
+            android:layout_gravity="center_horizontal"
+            android:textColor="#ccffffff"
+            android:textSize="@dimen/widget_label_font_size"
+            android:ellipsize="marquee"
+            android:singleLine="true" />
+
+    </LinearLayout>
+</com.android.keyguard.KeyguardStatusView>

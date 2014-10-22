@@ -69,14 +69,9 @@ static struct {
 } gRectClassInfo;
 
 static struct {
-    jfieldID mFinalizer;
-    jfieldID mNativeCanvas;
     jfieldID mSurfaceFormat;
+    jmethodID setNativeBitmap;
 } gCanvasClassInfo;
-
-static struct {
-    jfieldID mNativeCanvas;
-} gCanvasFinalizerClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -100,6 +95,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
                 env->GetLongField(surfaceObj, gSurfaceClassInfo.mNativeObject));
         env->MonitorExit(lock);
     }
+    env->DeleteLocalRef(lock);
     return sur;
 }
 
@@ -177,27 +173,18 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong n
     return value;
 }
 
-static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
+static inline SkColorType convertPixelFormat(PixelFormat format) {
     /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
-        we can map to SkBitmap::kARGB_8888_Config, and optionally call
+        we can map to kN32_SkColorType, and optionally call
         bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
         (as an accelerator)
     */
     switch (format) {
-    case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGB_565:      return SkBitmap::kRGB_565_Config;
-    default:                        return SkBitmap::kNo_Config;
+    case PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
+    case PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
+    case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
+    default:                        return kUnknown_SkColorType;
     }
-}
-
-static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
-  jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
-  SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-          env->GetLongField(canvasObj, gCanvasClassInfo.mNativeCanvas));
-  env->SetLongField(canvasObj, gCanvasClassInfo.mNativeCanvas, (jlong)newCanvas);
-  env->SetLongField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (jlong)newCanvas);
-  SkSafeUnref(previousCanvas);
 }
 
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
@@ -233,12 +220,16 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     // Associate a SkCanvas object to this surface
     env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, outBuffer.format);
 
+    SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
+                                         convertPixelFormat(outBuffer.format),
+                                         kPremul_SkAlphaType);
+    if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
+        info.fAlphaType = kOpaque_SkAlphaType;
+    }
+
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-    bitmap.setConfig(convertPixelFormat(outBuffer.format), outBuffer.width, outBuffer.height, bpr);
-    if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
-        bitmap.setAlphaType(kOpaque_SkAlphaType);
-    }
+    bitmap.setInfo(info, bpr);
     if (outBuffer.width > 0 && outBuffer.height > 0) {
         bitmap.setPixels(outBuffer.bits);
     } else {
@@ -246,10 +237,11 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         bitmap.setPixels(NULL);
     }
 
-    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
-    swapCanvasPtr(env, canvasObj, nativeCanvas);
+    env->CallVoidMethod(canvasObj, gCanvasClassInfo.setNativeBitmap,
+                        reinterpret_cast<jlong>(&bitmap));
 
     if (dirtyRectPtr) {
+        SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
         nativeCanvas->clipRect( SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)) );
     }
 
@@ -276,14 +268,23 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 
     // detach the canvas from the surface
-    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
-    swapCanvasPtr(env, canvasObj, nativeCanvas);
+    env->CallVoidMethod(canvasObj, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     // unlock surface
     status_t err = surface->unlockAndPost();
     if (err < 0) {
         doThrowIAE(env);
     }
+}
+
+static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
+        jlong nativeObject) {
+    sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
+    if (!isSurfaceValid(surface)) {
+        return;
+    }
+
+    surface->allocateBuffers();
 }
 
 // ----------------------------------------------------------------------------
@@ -366,6 +367,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeLockCanvas },
     {"nativeUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)V",
             (void*)nativeUnlockCanvasAndPost },
+    {"nativeAllocateBuffers", "(J)V",
+            (void*)nativeAllocateBuffers },
     {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
     {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
@@ -388,12 +391,8 @@ int register_android_view_Surface(JNIEnv* env)
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(J)V");
 
     clazz = env->FindClass("android/graphics/Canvas");
-    gCanvasClassInfo.mFinalizer = env->GetFieldID(clazz, "mFinalizer", "Landroid/graphics/Canvas$CanvasFinalizer;");
-    gCanvasClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "J");
     gCanvasClassInfo.mSurfaceFormat = env->GetFieldID(clazz, "mSurfaceFormat", "I");
-
-    clazz = env->FindClass("android/graphics/Canvas$CanvasFinalizer");
-    gCanvasFinalizerClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "J");
+    gCanvasClassInfo.setNativeBitmap = env->GetMethodID(clazz, "setNativeBitmap", "(J)V");
 
     clazz = env->FindClass("android/graphics/Rect");
     gRectClassInfo.left = env->GetFieldID(clazz, "left", "I");

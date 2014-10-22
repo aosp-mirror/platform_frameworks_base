@@ -27,9 +27,15 @@ namespace uirenderer {
 // Constructors
 ///////////////////////////////////////////////////////////////////////////////
 
-Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
-        invisible(false), empty(false), alpha(1.0f) {
-
+Snapshot::Snapshot()
+        : flags(0)
+        , previous(NULL)
+        , layer(NULL)
+        , fbo(0)
+        , invisible(false)
+        , empty(false)
+        , alpha(1.0f)
+        , roundRectClipState(NULL) {
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
     region = NULL;
@@ -40,11 +46,17 @@ Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
  * Copies the specified snapshot/ The specified snapshot is stored as
  * the previous snapshot.
  */
-Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
-        flags(0), previous(s), layer(s->layer), fbo(s->fbo),
-        invisible(s->invisible), empty(false),
-        viewport(s->viewport), height(s->height), alpha(s->alpha) {
-
+Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
+        : flags(0)
+        , previous(s)
+        , layer(s->layer)
+        , fbo(s->fbo)
+        , invisible(s->invisible)
+        , empty(false)
+        , alpha(s->alpha)
+        , roundRectClipState(s->roundRectClipState)
+        , mViewportData(s->mViewportData)
+        , mRelativeLightCenter(s->mRelativeLightCenter) {
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
         mTransformRoot.load(*s->transform);
         transform = &mTransformRoot;
@@ -189,8 +201,65 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Snapshot::resetTransform(float x, float y, float z) {
+    // before resetting, map current light pos with inverse of current transform
+    Vector3 center = mRelativeLightCenter;
+    mat4 inverse;
+    inverse.loadInverse(*transform);
+    inverse.mapPoint3d(center);
+    mRelativeLightCenter = center;
+
     transform = &mTransformRoot;
     transform->loadTranslate(x, y, z);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Clipping round rect
+///////////////////////////////////////////////////////////////////////////////
+
+void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds,
+        float radius, bool highPriority) {
+    if (bounds.isEmpty()) {
+        clipRect->setEmpty();
+        return;
+    }
+
+    if (roundRectClipState && roundRectClipState->highPriority) {
+        // ignore, don't replace, already have a high priority clip
+        return;
+    }
+
+    RoundRectClipState* state = new (allocator) RoundRectClipState;
+
+    state->highPriority = highPriority;
+
+    // store the inverse drawing matrix
+    Matrix4 roundRectDrawingMatrix;
+    roundRectDrawingMatrix.load(getOrthoMatrix());
+    roundRectDrawingMatrix.multiply(*transform);
+    state->matrix.loadInverse(roundRectDrawingMatrix);
+
+    // compute area under rounded corners - only draws overlapping these rects need to be clipped
+    for (int i = 0 ; i < 4; i++) {
+        state->dangerRects[i] = bounds;
+    }
+    state->dangerRects[0].bottom = state->dangerRects[1].bottom = bounds.top + radius;
+    state->dangerRects[0].right = state->dangerRects[2].right = bounds.left + radius;
+    state->dangerRects[1].left = state->dangerRects[3].left = bounds.right - radius;
+    state->dangerRects[2].top = state->dangerRects[3].top = bounds.bottom - radius;
+    for (int i = 0; i < 4; i++) {
+        transform->mapRect(state->dangerRects[i]);
+
+        // round danger rects out as though they are AA geometry (since they essentially are)
+        state->dangerRects[i].snapGeometryToPixelBoundaries(true);
+    }
+
+    // store RR area
+    state->innerRect = bounds;
+    state->innerRect.inset(radius);
+    state->radius = radius;
+
+    // store as immutable so, for this frame, pointer uniquely identifies this bundle of shader info
+    roundRectClipState = state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,7 +272,7 @@ bool Snapshot::isIgnored() const {
 
 void Snapshot::dump() const {
     ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
-            this, flags, previous.get(), height, isIgnored(), clipRegion && !clipRegion->isEmpty());
+            this, flags, previous.get(), getViewportHeight(), isIgnored(), clipRegion && !clipRegion->isEmpty());
     ALOGD("  ClipRect (at %p) %.1f %.1f %.1f %.1f",
             clipRect, clipRect->left, clipRect->top, clipRect->right, clipRect->bottom);
     ALOGD("  Transform (at %p):", transform);

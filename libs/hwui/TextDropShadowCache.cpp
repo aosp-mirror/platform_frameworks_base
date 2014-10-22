@@ -147,7 +147,7 @@ void TextDropShadowCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) {
+void TextDropShadowCache::operator()(ShadowText&, ShadowTexture*& texture) {
     if (texture) {
         mSize -= texture->bitmapSize;
 
@@ -168,7 +168,7 @@ void TextDropShadowCache::clear() {
     mCache.clear();
 }
 
-ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32_t len,
+ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, uint32_t len,
         int numGlyphs, float radius, const float* positions) {
     ShadowText entry(paint, radius, len, text, positions);
     ShadowTexture* texture = mCache.get(entry);

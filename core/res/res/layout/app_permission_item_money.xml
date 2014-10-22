@@ -27,8 +27,8 @@
 
     <ImageView
         android:id="@+id/perm_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:scaleType="fitCenter" />
@@ -57,6 +57,8 @@
             android:layout_alignParentStart="true"
             android:layout_alignBottom="@+id/perm_money_label"
             android:scaleType="fitCenter"
+            android:tint="@color/perms_costs_money"
+            android:tintMode="src_in"
             android:src="@android:drawable/ic_coins_s" />
         <TextView
             android:id="@+id/perm_money_label"

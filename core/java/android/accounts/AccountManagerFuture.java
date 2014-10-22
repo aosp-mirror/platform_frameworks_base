@@ -15,10 +15,7 @@
  */
 package android.accounts;
 
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
 /**
@@ -87,7 +84,8 @@ public interface AccountManagerFuture<V> {
      * will be thrown rather than the call returning normally.
      * @return the actual result
      * @throws android.accounts.OperationCanceledException if the request was canceled for any
-     * reason
+     * reason (including if it is forbidden
+     * by policy to modify an account (of that type))
      * @throws android.accounts.AuthenticatorException if there was an error communicating with
      * the authenticator or if the authenticator returned an invalid response
      * @throws java.io.IOException if the authenticator returned an error response that indicates

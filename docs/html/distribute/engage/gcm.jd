@@ -1,0 +1,51 @@
+page.title=Integrate Google Cloud Messaging
+page.metaDescription=Keep your users in sync with your latest content by delivering lightweight messages over Google's infrastructure.
+page.tags="gcm"
+page.image=/images/gcm/gcm-logo.png
+
+@jd:body
+
+<div class="figure" style="width:330px">
+  <img src="{@docRoot}images/gcm/gcm-logo.png">
+</div>
+
+<p>
+  Keeping app content fresh is important to retaining users. And it’s easy with
+  the popular <a href="{@docRoot}google/gcm/index.html">Google Cloud
+  Messaging</a> for Android, by sending lightweight messages to your apps
+  installed on Android devices anywhere in the world.
+</p>
+
+<p>
+  Push messages from your backend servers to tell your apps that there's new
+  content for the user, or other data to sync.
+</p>
+
+<p>
+  You can use Google Cloud Messaging for two way messaging too. Another
+  possibility is to improve the experience for users with multiple devices, by
+  syncing content through the cloud so users have the same content on all their
+  devices.
+</p>
+
+<p>
+  Google Cloud Messaging lets your users stay in sync with your service without
+  draining the user’s battery, as there's no need for your apps poll a server
+  to discover new content. Best of all, Google Cloud Messaging is available for
+  free and there are no quotas.
+</p>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/engage/gcm"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+</div>

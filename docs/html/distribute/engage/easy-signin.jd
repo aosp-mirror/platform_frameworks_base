@@ -1,0 +1,105 @@
+page.title=Make Signing In Easy
+page.metaDescription=Increase conversion rates while helping users minimize typing by letting users sign in with Google+.
+page.tags="google+"
+page.image=/images/google/gps-googleplus.png
+
+
+@jd:body
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox" style="width:360px;">
+    <p>
+      <strong>Tip:</strong> For game developers, Google+ signin is already
+      included as part of Google Play game services.
+    </p>
+  </div>
+</div>
+
+<p>
+  Increase conversion rates while helping users minimize typing by letting
+  users sign in with Google+. The <a href=
+  "{@docRoot}google/play-services/plus.html">Google+ platform for Android</a>
+  authenticates users with their Google credentials safely and securely. With
+  your <a href="https://developers.google.com/+/mobile/android/sign-in">users
+  signing in with Google</a>, you can create more engaging experiences and
+  drive the use of your apps .
+</p>
+
+<div style="width:450px;">
+  <img src="{@docRoot}images/google/gps-googleplus.png" style="padding-top:1em;">
+</div>
+
+<p>
+  Use the Google+ social graph to welcome users by name, display their
+  pictures, connect them with friends and more. Users authenticate once and
+  then are signed-in automatically when they come back, eliminating the need to
+  remember and type names and passwords.
+</p>
+
+<div class="headerLine">
+  <h2>
+    And Spreading the Word a Snap
+  </h2>
+
+
+</div>
+
+
+<div class="figure" style="float:right;">
+  <img src="{@docRoot}images/gp-engage-share-plus.png" style=
+  "width:160px;padding-top:1em;">
+  <p class="img-caption">
+    Easy sharing through Google+
+  </p>
+</div>
+
+
+<p>
+  Using Google+ can help users spread the word about your apps to their
+  friends, attracting them to your apps, right from within your apps:
+</p>
+
+<p>
+  Google+ is also a great way to build a community of loyal fans that will help
+  you with <a href=
+  "https://support.google.com/googleplay/android-developer/answer/3131213">beta
+  testing</a>.
+</p>
+
+<ul>
+  <li>Using a <a href=
+  "https://developers.google.com/+/mobile/android/recommend">native +1
+  button</a> to let users make a recommendation for your apps or their content.
+  </li>
+
+  <li>
+    <a href="https://developers.google.com/+/mobile/android/share/">Share rich
+    content</a> to the Google+ stream, including text, photos, URL attachments,
+    and location.
+  </li>
+
+  <li>Create <a href=
+  "https://developers.google.com/+/mobile/android/share/interactive-post">Interactive
+  posts</a> to share your website or apps, users can even invite friends to
+  "listen," "RSVP," "check-in," or one of over 100 actions.
+  </li>
+</ul>
+
+<p style="clear:both">
+</p>
+  <div class="headerLine">
+    <h2 id="related-resources">
+      Related Resources
+    </h2>
+
+
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/engage/gplus"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+  </div>
+</div>
+

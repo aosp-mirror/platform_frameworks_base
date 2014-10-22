@@ -20,10 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Bloqueio do teclado"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Insira o código PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Insira o PUK e o novo código PIN"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Código PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Novo código PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Digite o PUK do SIM e o novo código PIN."</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Código PUK do SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Novo código PIN do SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Toque para inserir a senha"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Digite a senha para desbloquear"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Insira o PIN para desbloquear"</string>
@@ -31,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, pressione Menu e, em seguida, 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Carregado"</string>
-    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Carregando, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Carregando"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Conecte seu carregador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Pressione \"Menu\" para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Rede bloqueada"</string>
@@ -71,6 +72,13 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Botão \"Pausar\""</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Botão \"Reproduzir\""</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Botão \"Parar\""</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Gostei"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Não gostei"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Coração"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Desbloqueie para continuar"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Inicialização cancelada"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Solte <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> para excluir."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> não será excluído."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -105,7 +113,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Digite o código PIN desejado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirme o código PIN desejado"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando o cartão SIM…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Código PIN incorreto."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Digite um PIN com quatro a oito números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"O código PUK deve ter 8 números ou mais."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Introduza novamente o código PUK correto. Muitas tentativas malsucedidas desativarão permanentemente o SIM."</string>
@@ -129,6 +136,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear.\n\n Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Código PIN do SIM incorreto. Entre em contato com a operadora para desbloquear o dispositivo."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Código PIN do SIM incorreto. Tentativas restantes: <xliff:g id="NUMBER">%d</xliff:g>. Caso o código correto não seja digitado, será necessário entrar em contato com a operadora para desbloquear o dispositivo."</item>
+    <item quantity="other" msgid="2215723361575359486">"Código PIN do SIM incorreto. Tentativas restantes: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"O SIM está inutilizável. Entre em contato com a operadora."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Código PUK do SIM incorreto. Tentativas restantes: <xliff:g id="NUMBER">%d</xliff:g> Caso o código correto não seja digitado, o SIM se tornará permanentemente inutilizável."</item>
+    <item quantity="other" msgid="5477305226026342036">"Código PUK do SIM incorreto. Tentativas restantes: <xliff:g id="NUMBER">%d</xliff:g>. Caso o código correto não seja digitado, o SIM se tornará permanentemente inutilizável."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Falha na operação de PIN do SIM."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Falha na operação de PUK do SIM."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceito."</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Botão \"Faixa anterior\""</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Botão \"Próxima faixa\""</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Botão \"Pausar\""</string>

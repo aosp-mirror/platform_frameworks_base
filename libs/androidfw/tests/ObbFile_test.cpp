@@ -34,20 +34,18 @@ namespace android {
 class ObbFileTest : public testing::Test {
 protected:
     sp<ObbFile> mObbFile;
-    char* mExternalStorage;
-    char* mFileName;
+    String8 mFileName;
 
     virtual void SetUp() {
         mObbFile = new ObbFile();
-        mExternalStorage = getenv("EXTERNAL_STORAGE");
+        char* externalStorage = getenv("EXTERNAL_STORAGE");
 
-        const int totalLen = strlen(mExternalStorage) + strlen(TEST_FILENAME) + 1;
-        mFileName = new char[totalLen];
-        snprintf(mFileName, totalLen, "%s%s", mExternalStorage, TEST_FILENAME);
+        mFileName.append(externalStorage);
+        mFileName.append(TEST_FILENAME);
 
-        int fd = ::open(mFileName, O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        int fd = ::open(mFileName.string(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
-            FAIL() << "Couldn't create " << mFileName << " for tests";
+            FAIL() << "Couldn't create " << mFileName.string() << " for tests";
         }
     }
 
@@ -71,12 +69,12 @@ TEST_F(ObbFileTest, WriteThenRead) {
     EXPECT_TRUE(mObbFile->setSalt(salt, SALT_SIZE))
             << "Salt should be successfully set";
 
-    EXPECT_TRUE(mObbFile->writeTo(mFileName))
+    EXPECT_TRUE(mObbFile->writeTo(mFileName.string()))
             << "couldn't write to fake .obb file";
 
     mObbFile = new ObbFile();
 
-    EXPECT_TRUE(mObbFile->readFrom(mFileName))
+    EXPECT_TRUE(mObbFile->readFrom(mFileName.string()))
             << "couldn't read from fake .obb file";
 
     EXPECT_EQ(versionNum, mObbFile->getVersion())
@@ -91,7 +89,7 @@ TEST_F(ObbFileTest, WriteThenRead) {
     EXPECT_EQ(sizeof(salt), saltLen)
             << "salt sizes were not the same";
 
-    for (int i = 0; i < sizeof(salt); i++) {
+    for (size_t i = 0; i < sizeof(salt); i++) {
         EXPECT_EQ(salt[i], newSalt[i])
                 << "salt character " << i << " should be equal";
     }

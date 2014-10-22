@@ -1,9 +1,26 @@
 page.title=New in Android
-page.tags="KitKat", "Android 4.4"
+page.tags=KitKat,Android 4.4
 @jd:body
 
 
-<p>A quick look at the new patterns and styles you can use to build beautiful Android apps&hellip; 
+<p>A quick look at the new patterns and styles you can use to build beautiful Android apps&hellip;
+
+
+<h2 id="Android5">Android 5.0 Lollipop</h2>
+
+<h3>Material design</h3>
+
+<p><a href="{@docRoot}design/material/index.html">Material design</a> is a comprehensive guide for
+visual, motion, and interaction design across platforms and devices. Android 5.0 provides a new
+theme, new widgets for complex views, and new APIs for shadows and animations that help you
+implement material design patterns in your apps.</p>
+
+<h3>Notifications</h3>
+
+<p><a href="{@docRoot}design/patterns/notifications.html">Notifications</a> receive important
+updates in Android 5.0, with material design visual changes, notification availability in the
+lockscreen, priority notifications, and cloud-synced notifications.</p>
+
 
 <h2 id="kitkat">Android 4.4 KitKat</h2>
 
@@ -30,7 +47,7 @@ page.tags="KitKat", "Android 4.4"
   see it in every screen of your app.
 </p>
 <p>
-  <a href="{@docRoot}design/style/branding.html">Your Branding</a> highlights 
+  <a href="{@docRoot}design/style/branding.html">Your Branding</a> highlights
   these and other pointers on how to incorporate elements of your brand into your
   app's visual language &mdash; highly encouraged!
 </p>
@@ -60,7 +77,7 @@ page.tags="KitKat", "Android 4.4"
 <img src="{@docRoot}design/media/touch_feedback_reaction_response.png" style="padding-top:1em;">
 
 <h3>
-  Full screen 
+  Full screen
 </h3>
 
 <p>
@@ -73,7 +90,7 @@ page.tags="KitKat", "Android 4.4"
 <img src="{@docRoot}design/media/fullscreen_landing.png" style="margin:1em auto 2em auto;">
 
 <h3>
-  Gestures 
+  Gestures
 </h3>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">

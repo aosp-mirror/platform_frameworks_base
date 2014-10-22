@@ -15,9 +15,6 @@
 
 package android.os;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * {@hide}
  */
@@ -30,10 +27,24 @@ public class BatteryProperties implements Parcelable {
     public boolean batteryPresent;
     public int batteryLevel;
     public int batteryVoltage;
-    public int batteryCurrentNow;
-    public int batteryChargeCounter;
     public int batteryTemperature;
     public String batteryTechnology;
+
+    public BatteryProperties() {
+    }
+
+    public void set(BatteryProperties other) {
+        chargerAcOnline = other.chargerAcOnline;
+        chargerUsbOnline = other.chargerUsbOnline;
+        chargerWirelessOnline = other.chargerWirelessOnline;
+        batteryStatus = other.batteryStatus;
+        batteryHealth = other.batteryHealth;
+        batteryPresent = other.batteryPresent;
+        batteryLevel = other.batteryLevel;
+        batteryVoltage = other.batteryVoltage;
+        batteryTemperature = other.batteryTemperature;
+        batteryTechnology = other.batteryTechnology;
+    }
 
     /*
      * Parcel read/write code must be kept in sync with
@@ -49,8 +60,6 @@ public class BatteryProperties implements Parcelable {
         batteryPresent = p.readInt() == 1 ? true : false;
         batteryLevel = p.readInt();
         batteryVoltage = p.readInt();
-        batteryCurrentNow = p.readInt();
-        batteryChargeCounter = p.readInt();
         batteryTemperature = p.readInt();
         batteryTechnology = p.readString();
     }
@@ -64,8 +73,6 @@ public class BatteryProperties implements Parcelable {
         p.writeInt(batteryPresent ? 1 : 0);
         p.writeInt(batteryLevel);
         p.writeInt(batteryVoltage);
-        p.writeInt(batteryCurrentNow);
-        p.writeInt(batteryChargeCounter);
         p.writeInt(batteryTemperature);
         p.writeString(batteryTechnology);
     }

@@ -1,28 +1,13 @@
 page.title=Downloads
-page tags="Icons", "stencils", "color swatches"
+page.tags=Icons,stencils,color swatches
 @jd:body
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-9">
 
-<p>Want everything? We've bundled all the downloads available on Android Design, except for the
-  <a href="#roboto">Roboto</a> font family, into a single ZIP file. You can also download
-  individual files listed below.</p>
+<p>You may use these materials without restriction to facilitate your app design
+and implementation.</p>
 
-<p>You may use these materials without restriction in your apps and to develop your apps.</p>
 
-  </div>
-  <div class="layout-content-col span-4">
-
-<p>
-  <a class="download-button" onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'All Design Assets']);"
-    href="{@docRoot}downloads/design/Android_Design_Downloads_20131106.zip">Download All</a>
-</p>
-
-  </div>
-</div>
-
-<h2 id="stencils">Stencils and Sources</h2>
+<h2 id="stencils">Phone &amp; Tablet Stencils</h2>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
@@ -41,18 +26,23 @@ available.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <!--<a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Fireworks Stencil']);"
+  <!--<a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Fireworks Stencil');"
     href="{@docRoot}downloads/design/Android_Design_Fireworks_Stencil_20120814.png">Adobe&reg; Fireworks&reg; PNG Stencil</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Illustrator Stencil']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Illustrator Stencil');"
     href="{@docRoot}downloads/design/Android_Design_Illustrator_Vectors_20120814.ai">Adobe&reg; Illustrator&reg; Stencil</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'OmniGraffle Stencil']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'OmniGraffle Stencil');"
     href="{@docRoot}downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle">Omni&reg; OmniGraffle&reg; Stencil</a>-->
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Photoshop Sources']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Photoshop Sources');"
     href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Photoshop&reg; Stencils and Sources</a>
 </p>
 
   </div>
 </div>
+
+
+
+
+
 
 <h2 id="action-bar-icon-pack">Action Bar Icon Pack</h2>
 
@@ -74,12 +64,83 @@ modify to match your theme, plus source files.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Action Bar Icons');"
     href="{@docRoot}downloads/design/Android_Design_Icons_20131106.zip">Action Bar Icon Pack</a>
 </p>
 
   </div>
 </div>
+
+
+
+
+
+<h2 id="Wear">Android Wear Materials</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>UI toolkit</h4>
+<p>The toolkit contains detailed specs and measurements of all of the primary Android Wear UI components. Available in PDF and Illustrator formats.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_toolkit.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Toolkit AI');"
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
+
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Toolkit PDF');"
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.pdf">PDF Toolkit</a>
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Sample user flow patterns</h4>
+<p>Examples of how to chain together simple Android Wear UI components into common user flow patterns, from simple notifications to complex interactions involving full screen activities.
+</p>
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_flows.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear App Patterns AI');"
+    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140722.ai">Adobe&reg; Illustrator&reg; App Patterns</a>
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear App Patterns PDF');"
+    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140722.pdf">PDF App Patterns</a>
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Sample app design mocks</h4>
+<p>Stream cards and UI elements for some example apps in fully editable PSD format.
+</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_psds.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Sample PSD Mocks');"
+    href="{@docRoot}downloads/design/Android_Wear_Sample_Assets.zip">Adobe&reg; Photoshop&reg; mocks</a>
+  </div>
+</div>
+
+
+
+
+
+
 
 <h2 id="style">Style</h2>
 
@@ -89,6 +150,7 @@ modify to match your theme, plus source files.</p>
 <h4 id="roboto">Roboto</h4>
 <p>Ice Cream Sandwich introduced a new type family named Roboto, created specifically for the
 requirements of UI and high-resolution screens.</p>
+<p>For Android Wear, Roboto Condensed is the system font and the Regular and Light variants should be used by all Wear apps.</p>
 <p><a href="{@docRoot}design/style/typography.html">More on Roboto</a></p>
 <p><a href="http://www.google.com/fonts/specimen/Roboto" class="external-link">Roboto on Google Fonts</a></p>
 <p><a href="http://www.google.com/fonts/specimen/Roboto+Condensed" class="external-link">Roboto Condensed on Google Fonts</a></p>
@@ -102,9 +164,9 @@ requirements of UI and high-resolution screens.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Roboto ZIP');"
     href="{@docRoot}downloads/design/roboto-1.2.zip">Roboto</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specemin Book']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Roboto Specemin Book');"
     href="{@docRoot}downloads/design/Roboto_Specimen_Book_20131031.pdf">Specimen Book</a>
 </p>
 
@@ -128,7 +190,7 @@ shade that can be used as a complement when needed.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Color Swatches']);"
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Color Swatches');"
     href="{@docRoot}downloads/design/Android_Design_Color_Swatches_20120229.zip">Color Swatches</a>
 </p>
 

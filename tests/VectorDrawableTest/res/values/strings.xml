@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+
+    <string name="twoLinePathData">"M 0,0 v 100 M 0,0 h 100"</string>
+    <string name="triangle"> "M300,70 l 0,-70 70,70 0,0   -70,70z"</string>
+    <string name="rectangle">"M300,70 l 0,-70 70,0  0,140 -70,0 z"</string>
+    <string name="rectangle2">"M300,70 l 0,-70 70,0  0,70z M300,70  l 70,0 0,70 -70,0z"</string>
+    <string name="equal2">    "M300,35 l 0,-35 70,0  0,35z M300,105 l 70,0 0,35 -70,0z"</string>
+    <string name="round_box">"m2.10001,-6c-1.9551,0 -0.5,0.02499 -2.10001,0.02499c-1.575,0 0.0031,-0.02499 -1.95,-0.02499c-2.543,0 -4,2.2816 -4,4.85001c0,3.52929 0.25,6.25 5.95,6.25c5.7,0 6,-2.72071 6,-6.25c0,-2.56841 -1.35699,-4.85001 -3.89999,-4.85001"</string>
+    <string name="heart">    "m4.5,-7c-1.95509,0 -3.83009,1.26759 -4.5,3c-0.66991,-1.73241 -2.54691,-3 -4.5,-3c-2.543,0 -4.5,1.93159 -4.5,4.5c0,3.5293 3.793,6.2578 9,11.5c5.207,-5.2422 9,-7.9707 9,-11.5c0,-2.56841 -1.957,-4.5 -4.5,-4.5"</string>
+    <string name="rectangle200">"M 0,0 l 200,0 l 0, 200 l -200, 0 z"</string>
+</resources>

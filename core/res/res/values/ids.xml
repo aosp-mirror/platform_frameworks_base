@@ -23,6 +23,7 @@
   <item type="id" name="empty" />
   <item type="id" name="hint" />
   <item type="id" name="icon" />
+  <item type="id" name="icon_badge" />
   <item type="id" name="icon1" />
   <item type="id" name="icon2" />
   <item type="id" name="input" />
@@ -82,4 +83,10 @@
   <item type="id" name="action_bar_spinner" />
   <item type="id" name="current_scene" />
   <item type="id" name="scene_layoutid_cache" />
+  <item type="id" name="mask" />
+  <item type="id" name="transitionPosition" />
+  <item type="id" name="transitionTransform" />
+  <item type="id" name="parentMatrix" />
+  <item type="id" name="statusBarBackground" />
+  <item type="id" name="navigationBarBackground" />
 </resources>

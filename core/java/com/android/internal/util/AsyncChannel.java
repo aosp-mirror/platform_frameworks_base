@@ -450,6 +450,7 @@ public class AsyncChannel {
     public void disconnect() {
         if ((mConnection != null) && (mSrcContext != null)) {
             mSrcContext.unbindService(mConnection);
+            mConnection = null;
         }
         try {
             // Send the DISCONNECTED, although it may not be received
@@ -463,10 +464,12 @@ public class AsyncChannel {
         // Tell source we're disconnected.
         if (mSrcHandler != null) {
             replyDisconnected(STATUS_SUCCESSFUL);
+            mSrcHandler = null;
         }
         // Unlink only when bindService isn't used
         if (mConnection == null && mDstMessenger != null && mDeathMonitor!= null) {
             mDstMessenger.getBinder().unlinkToDeath(mDeathMonitor, 0);
+            mDeathMonitor = null;
         }
     }
 

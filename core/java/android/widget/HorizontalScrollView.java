@@ -146,12 +146,17 @@ public class HorizontalScrollView extends FrameLayout {
         this(context, attrs, com.android.internal.R.attr.horizontalScrollViewStyle);
     }
 
-    public HorizontalScrollView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public HorizontalScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public HorizontalScrollView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initScrollView();
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                android.R.styleable.HorizontalScrollView, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, android.R.styleable.HorizontalScrollView, defStyleAttr, defStyleRes);
 
         setFillViewport(a.getBoolean(android.R.styleable.HorizontalScrollView_fillViewport, false));
 
@@ -611,12 +616,14 @@ public class HorizontalScrollView extends FrameLayout {
                     if (canOverscroll) {
                         final int pulledToX = oldX + deltaX;
                         if (pulledToX < 0) {
-                            mEdgeGlowLeft.onPull((float) deltaX / getWidth());
+                            mEdgeGlowLeft.onPull((float) deltaX / getWidth(),
+                                    1.f - ev.getY(activePointerIndex) / getHeight());
                             if (!mEdgeGlowRight.isFinished()) {
                                 mEdgeGlowRight.onRelease();
                             }
                         } else if (pulledToX > range) {
-                            mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                            mEdgeGlowRight.onPull((float) deltaX / getWidth(),
+                                    ev.getY(activePointerIndex) / getHeight());
                             if (!mEdgeGlowLeft.isFinished()) {
                                 mEdgeGlowLeft.onRelease();
                             }

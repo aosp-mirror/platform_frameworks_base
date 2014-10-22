@@ -16,11 +16,13 @@
 
 package mock_android.widget;
 
+import mock_android.util.EmptyArray;
 import mock_android.view.ViewGroup;
 
 public class LinearLayout extends ViewGroup {
 
-    public class LayoutParams extends mock_android.view.ViewGroup.LayoutParams {
+    Object[] mObjects = EmptyArray.OBJECT;
+    public class LayoutParams extends MarginLayoutParams {
 
     }
 

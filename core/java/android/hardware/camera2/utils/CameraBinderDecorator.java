@@ -19,6 +19,7 @@ package android.hardware.camera2.utils;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISABLED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISCONNECTED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+import static android.hardware.camera2.CameraAccessException.CAMERA_ERROR;
 import static android.hardware.camera2.CameraAccessException.MAX_CAMERAS_IN_USE;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DEPRECATED_HAL;
 
@@ -28,7 +29,7 @@ import android.os.RemoteException;
 import java.lang.reflect.Method;
 
 /**
- * Translate camera service status_t return values into exceptions.
+ * Translate camera device status_t return values into exceptions.
  *
  * @see android.hardware.camera2.utils.CameraBinderDecorator#newInstance
  * @hide
@@ -40,12 +41,16 @@ public class CameraBinderDecorator {
     public static final int ALREADY_EXISTS = -17;
     public static final int BAD_VALUE = -22;
     public static final int DEAD_OBJECT = -32;
+    public static final int INVALID_OPERATION = -38;
+    public static final int TIMED_OUT = -110;
 
     /**
      * TODO: add as error codes in Errors.h
      * - POLICY_PROHIBITS
      * - RESOURCE_BUSY
      * - NO_SUCH_DEVICE
+     * - NOT_SUPPORTED
+     * - TOO_MANY_USERS
      */
     public static final int EACCES = -13;
     public static final int EBUSY = -16;
@@ -53,7 +58,8 @@ public class CameraBinderDecorator {
     public static final int EOPNOTSUPP = -95;
     public static final int EUSERS = -87;
 
-    private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
+
+    static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
         @Override
         public void onBeforeInvocation(Method m, Object[] args) {
@@ -64,47 +70,7 @@ public class CameraBinderDecorator {
             // int return type => status_t => convert to exception
             if (m.getReturnType() == Integer.TYPE) {
                 int returnValue = (Integer) result;
-
-                switch (returnValue) {
-                    case NO_ERROR:
-                        return;
-                    case PERMISSION_DENIED:
-                        throw new SecurityException("Lacking privileges to access camera service");
-                    case ALREADY_EXISTS:
-                        // This should be handled at the call site. Typically this isn't bad,
-                        // just means we tried to do an operation that already completed.
-                        return;
-                    case BAD_VALUE:
-                        throw new IllegalArgumentException("Bad argument passed to camera service");
-                    case DEAD_OBJECT:
-                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                                CAMERA_DISCONNECTED));
-                    case EACCES:
-                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                                CAMERA_DISABLED));
-                    case EBUSY:
-                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                                CAMERA_IN_USE));
-                    case EUSERS:
-                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                                MAX_CAMERAS_IN_USE));
-                    case ENODEV:
-                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                                CAMERA_DISCONNECTED));
-                    case EOPNOTSUPP:
-                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                                CAMERA_DEPRECATED_HAL));
-                }
-
-                /**
-                 * Trap the rest of the negative return values. If we have known
-                 * error codes i.e. ALREADY_EXISTS that aren't really runtime
-                 * errors, then add them to the top switch statement
-                 */
-                if (returnValue < 0) {
-                    throw new UnsupportedOperationException(String.format("Unknown error %d",
-                            returnValue));
-                }
+                throwOnError(returnValue);
             }
         }
 
@@ -112,10 +78,9 @@ public class CameraBinderDecorator {
         public boolean onCatchException(Method m, Object[] args, Throwable t) {
 
             if (t instanceof DeadObjectException) {
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_DISCONNECTED,
+                throw new CameraRuntimeException(CAMERA_DISCONNECTED,
                         "Process hosting the camera service has died unexpectedly",
-                        t));
+                        t);
             } else if (t instanceof RemoteException) {
                 throw new UnsupportedOperationException("An unknown RemoteException was thrown" +
                         " which should never happen.", t);
@@ -128,6 +93,54 @@ public class CameraBinderDecorator {
         public void onFinally(Method m, Object[] args) {
         }
 
+    }
+
+    /**
+     * Throw error codes returned by the camera service as exceptions.
+     *
+     * @param errorFlag error to throw as an exception.
+     */
+    public static void throwOnError(int errorFlag) {
+        switch (errorFlag) {
+            case NO_ERROR:
+                return;
+            case PERMISSION_DENIED:
+                throw new SecurityException("Lacking privileges to access camera service");
+            case ALREADY_EXISTS:
+                // This should be handled at the call site. Typically this isn't bad,
+                // just means we tried to do an operation that already completed.
+                return;
+            case BAD_VALUE:
+                throw new IllegalArgumentException("Bad argument passed to camera service");
+            case DEAD_OBJECT:
+                throw new CameraRuntimeException(CAMERA_DISCONNECTED);
+            case TIMED_OUT:
+                throw new CameraRuntimeException(CAMERA_ERROR,
+                        "Operation timed out in camera service");
+            case EACCES:
+                throw new CameraRuntimeException(CAMERA_DISABLED);
+            case EBUSY:
+                throw new CameraRuntimeException(CAMERA_IN_USE);
+            case EUSERS:
+                throw new CameraRuntimeException(MAX_CAMERAS_IN_USE);
+            case ENODEV:
+                throw new CameraRuntimeException(CAMERA_DISCONNECTED);
+            case EOPNOTSUPP:
+                throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
+            case INVALID_OPERATION:
+                throw new CameraRuntimeException(CAMERA_ERROR,
+                        "Illegal state encountered in camera service.");
+        }
+
+        /**
+         * Trap the rest of the negative return values. If we have known
+         * error codes i.e. ALREADY_EXISTS that aren't really runtime
+         * errors, then add them to the top switch statement
+         */
+        if (errorFlag < 0) {
+            throw new UnsupportedOperationException(String.format("Unknown error %d",
+                    errorFlag));
+        }
     }
 
     /**

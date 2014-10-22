@@ -77,6 +77,67 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 21.0.0</a> <em>(October 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>General Notes:</dt>
+      <dd>
+        <ul>
+          <li>Added support for Android 5.0 (API level 21).</li>
+          <li>RenderScript now supports seamless 32/64-bit operation for API level 21 and higher.</li>
+          <li>Fixed issue with the Gradle build system when using the JaCoCo plugin.
+          (<a href="http://b.android.com/69174">Issue 69174</a>)</li>
+          <li>Added an <em>input-list</em> option for use with long command lines on Windows.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 20.0.0</a> <em>(June 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>General Notes:</dt>
+      <dd>
+        <ul>
+          <li>Added support for Android Wear.</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 19.1.0</a> <em>(May 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>General Notes:</dt>
+      <dd>
+        <ul>
+          <li>Added <code>zipalign</code> to the Build Tools.</li>
+          <li>Modified <code>aapt</code> to ignore XML files that fail to compile.</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.0.3</a> <em>(March 2014)</em>
   </p>
   <div class="toggle-content-toggleme">

@@ -619,7 +619,7 @@ public class MainActivity extends FragmentActivity {
                 android:name="com.example.android.datasync.SyncService"
                 android:exported="true"
                 android:process=":sync"&gt;
-            &lt;intent-filter&gt;com.example.android.datasync.provider
+            &lt;intent-filter&gt;
                 &lt;action android:name="android.content.SyncAdapter"/&gt;
             &lt;/intent-filter&gt;
             &lt;meta-data android:name="android.content.SyncAdapter"

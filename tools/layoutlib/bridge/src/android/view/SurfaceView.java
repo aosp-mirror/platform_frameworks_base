@@ -45,6 +45,10 @@ public class SurfaceView extends MockView {
         super(context, attrs, defStyle);
     }
 
+    public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
     public SurfaceHolder getHolder() {
         return mSurfaceHolder;
     }

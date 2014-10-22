@@ -22,9 +22,6 @@ import android.os.Looper;
 import android.os.Message;
 
 public class HandlerCaller {
-
-    public final Context mContext;
-
     final Looper mMainLooper;
     final Handler mH;
 
@@ -47,7 +44,6 @@ public class HandlerCaller {
 
     public HandlerCaller(Context context, Looper looper, Callback callback,
             boolean asyncHandler) {
-        mContext = context;
         mMainLooper = looper != null ? looper : context.getMainLooper();
         mH = new MyHandler(mMainLooper, asyncHandler);
         mCallback = callback;
@@ -85,7 +81,27 @@ public class HandlerCaller {
     public void sendMessage(Message msg) {
         mH.sendMessage(msg);
     }
-    
+
+    public SomeArgs sendMessageAndWait(Message msg) {
+        if (Looper.myLooper() == mH.getLooper()) {
+            throw new IllegalStateException("Can't wait on same thread as looper");
+        }
+        SomeArgs args = (SomeArgs)msg.obj;
+        args.mWaitState = SomeArgs.WAIT_WAITING;
+        mH.sendMessage(msg);
+        synchronized (args) {
+            while (args.mWaitState == SomeArgs.WAIT_WAITING) {
+                try {
+                    args.wait();
+                } catch (InterruptedException e) {
+                    return null;
+                }
+            }
+        }
+        args.mWaitState = SomeArgs.WAIT_NONE;
+        return args;
+    }
+
     public Message obtainMessage(int what) {
         return mH.obtainMessage(what);
     }
@@ -136,6 +152,14 @@ public class HandlerCaller {
         return mH.obtainMessage(what, arg1, 0, args);
     }
     
+    public Message obtainMessageIOOO(int what, int arg1, Object arg2, Object arg3, Object arg4) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = arg2;
+        args.arg2 = arg3;
+        args.arg3 = arg4;
+        return mH.obtainMessage(what, arg1, 0, args);
+    }
+
     public Message obtainMessageOO(int what, Object arg1, Object arg2) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = arg1;
@@ -161,6 +185,17 @@ public class HandlerCaller {
         return mH.obtainMessage(what, 0, 0, args);
     }
     
+    public Message obtainMessageOOOOO(int what, Object arg1, Object arg2,
+            Object arg3, Object arg4, Object arg5) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = arg1;
+        args.arg2 = arg2;
+        args.arg3 = arg3;
+        args.arg4 = arg4;
+        args.arg5 = arg5;
+        return mH.obtainMessage(what, 0, 0, args);
+    }
+
     public Message obtainMessageIIII(int what, int arg1, int arg2,
             int arg3, int arg4) {
         SomeArgs args = SomeArgs.obtain();

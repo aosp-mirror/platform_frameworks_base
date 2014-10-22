@@ -1,5 +1,8 @@
 fullpage=true
-page.title=Develop
+page.title=Develop Apps
+page.viewport_width=970
+meta.tags="develop, getstarted, sdk, appquality, landing"
+section.landing=true
 header.hide=1
 carousel=1
 tabbedList=1
@@ -31,6 +34,28 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
        <a href="" class="slideshow-next">Next</a>
        <div class="frame">
            <ul>
+
+              <li class="item carousel-home">
+                 <div class="col-8">
+                   <img 
+                   style="max-height: 250px; margin-top:5px;
+                   margin-left: 30px; max-width: 451px;"
+src="{@docRoot}design/tv/images/focus.png"
+class="play no-shadow no-transform" />
+                 </div>
+                <div class="content-right col-6">
+                  <h2>Create Quality Apps for TV</h2>
+                  <p>Now that the Android platform has
+                  extended to TVs, your apps on Google Play have
+                  a new opportunity for engagement in the
+                  living room. To provide the best
+                  "leanback" experience on the couch, follow
+                  this quality checklist.</p>
+                  <p><a
+href="{@docRoot}distribute/essentials/quality/tv.html" class="button">Read
+more</a></p>
+                </div>            
+              </li>
 
               <li class="item carousel-home">
                  <div class="col-8">

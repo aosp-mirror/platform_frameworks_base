@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  * Cache of known storage backends and their roots.
  */
 public class RootsCache {
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
 
     public static final Uri sNotificationUri = Uri.parse(
             "content://com.android.documentsui.roots/");
@@ -103,8 +103,9 @@ public class RootsCache {
         // Special root for recents
         mRecentsRoot.authority = null;
         mRecentsRoot.rootId = null;
-        mRecentsRoot.icon = R.drawable.ic_root_recent;
-        mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE;
+        mRecentsRoot.derivedIcon = R.drawable.ic_root_recent;
+        mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE
+                | Root.FLAG_SUPPORTS_IS_CHILD;
         mRecentsRoot.title = mContext.getString(R.string.root_recent);
         mRecentsRoot.availableBytes = -1;
 
@@ -115,9 +116,6 @@ public class RootsCache {
      * Gather roots from storage providers belonging to given package name.
      */
     public void updatePackageAsync(String packageName) {
-        // Need at least first load, since we're going to be using previously
-        // cached values for non-matching packages.
-        waitForFirstLoad();
         new UpdateTask(packageName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -181,6 +179,12 @@ public class RootsCache {
         @Override
         protected Void doInBackground(Void... params) {
             final long start = SystemClock.elapsedRealtime();
+
+            if (mFilterPackage != null) {
+                // Need at least first load, since we're going to be using
+                // previously cached values for non-matching packages.
+                waitForFirstLoad();
+            }
 
             mTaskRoots.put(mRecentsRoot.authority, mRecentsRoot);
 
@@ -349,12 +353,15 @@ public class RootsCache {
         final List<RootInfo> matching = Lists.newArrayList();
         for (RootInfo root : roots) {
             final boolean supportsCreate = (root.flags & Root.FLAG_SUPPORTS_CREATE) != 0;
+            final boolean supportsIsChild = (root.flags & Root.FLAG_SUPPORTS_IS_CHILD) != 0;
             final boolean advanced = (root.flags & Root.FLAG_ADVANCED) != 0;
             final boolean localOnly = (root.flags & Root.FLAG_LOCAL_ONLY) != 0;
             final boolean empty = (root.flags & Root.FLAG_EMPTY) != 0;
 
             // Exclude read-only devices when creating
             if (state.action == State.ACTION_CREATE && !supportsCreate) continue;
+            // Exclude roots that don't support directory picking
+            if (state.action == State.ACTION_OPEN_TREE && !supportsIsChild) continue;
             // Exclude advanced devices when not requested
             if (!state.showAdvanced && advanced) continue;
             // Exclude non-local devices when local only

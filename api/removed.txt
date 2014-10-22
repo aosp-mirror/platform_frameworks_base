@@ -1,0 +1,46 @@
+package android.media {
+
+  public class AudioFormat {
+    ctor public AudioFormat();
+  }
+
+}
+
+package android.os {
+
+  public final class PowerManager {
+    method public void goToSleep(long);
+    method public deprecated void userActivity(long, boolean);
+    method public void wakeUp(long);
+  }
+
+  public class UserManager {
+    method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
+    method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
+  }
+
+}
+
+package android.view {
+
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method protected void initializeFadingEdge(android.content.res.TypedArray);
+    method protected void initializeScrollbars(android.content.res.TypedArray);
+  }
+
+  public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
+    field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
+  }
+
+}
+
+package android.widget {
+
+  public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
+    method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
+    method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
+  }
+
+}
+

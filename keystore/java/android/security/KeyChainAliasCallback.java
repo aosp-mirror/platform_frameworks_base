@@ -15,10 +15,6 @@
  */
 package android.security;
 
-import android.content.Intent;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-
 /**
  * The KeyChainAliasCallback is the callback for {@link
  * KeyChain#choosePrivateKeyAlias}.

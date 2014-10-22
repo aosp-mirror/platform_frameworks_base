@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2014 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<com.android.systemui.statusbar.phone.KeyguardBottomAreaView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/keyguard_bottom_area"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    >
+
+    <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+        android:id="@+id/keyguard_indication_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
+        android:layout_gravity="bottom|center_horizontal"
+        android:textStyle="italic"
+        android:textColor="#ffffff"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <FrameLayout
+        android:id="@+id/preview_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
+
+    <com.android.systemui.statusbar.KeyguardAffordanceView
+        android:id="@+id/camera_button"
+        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_width="@dimen/keyguard_affordance_width"
+        android:layout_gravity="bottom|end"
+        android:tint="#ffffffff"
+        android:src="@drawable/ic_camera_alt_24dp"
+        android:scaleType="center"
+        android:contentDescription="@string/accessibility_camera_button" />
+
+    <com.android.systemui.statusbar.KeyguardAffordanceView
+        android:id="@+id/phone_button"
+        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_width="@dimen/keyguard_affordance_width"
+        android:layout_gravity="bottom|start"
+        android:tint="#ffffffff"
+        android:src="@drawable/ic_phone_24dp"
+        android:scaleType="center"
+        android:contentDescription="@string/accessibility_phone_button" />
+
+    <com.android.systemui.statusbar.KeyguardAffordanceView
+        android:id="@+id/lock_icon"
+        android:layout_width="@dimen/keyguard_affordance_width"
+        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_gravity="bottom|center_horizontal"
+        android:src="@drawable/ic_lock_24dp"
+        android:scaleType="center"
+        android:tint="#ffffffff"
+        android:contentDescription="@string/accessibility_unlock_button" />
+
+</com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

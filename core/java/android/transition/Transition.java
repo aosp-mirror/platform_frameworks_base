@@ -19,20 +19,32 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.util.ArrayMap;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
+import android.view.InflateException;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOverlay;
+import android.view.WindowId;
+import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
+
+import com.android.internal.R;
 
 /**
  * A Transition holds information about animations that will be run on its
@@ -59,9 +71,21 @@ import java.util.List;
  * <p>Transitions can be declared in XML resource files inside the <code>res/transition</code>
  * directory. Transition resources consist of a tag name for one of the Transition
  * subclasses along with attributes to define some of the attributes of that transition.
- * For example, here is a minimal resource file that declares a {@link ChangeBounds} transition:</p>
+ * For example, here is a minimal resource file that declares a {@link ChangeBounds} transition:
  *
  * {@sample development/samples/ApiDemos/res/transition/changebounds.xml ChangeBounds}
+ *
+ * <p>This TransitionSet contains {@link android.transition.Explode} for visibility,
+ * {@link android.transition.ChangeBounds}, {@link android.transition.ChangeTransform},
+ * and {@link android.transition.ChangeClipBounds} and
+ * {@link android.transition.ChangeImageTransform}:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/transition/explode_move_together.xml MultipleTransform}
+ *
+ * <p>Custom transition classes may be instantiated with a <code>transition</code> tag:</p>
+ * <pre>&lt;transition class="my.app.transition.CustomTransition"/></pre>
+ * <p>Custom transition classes loaded from XML must have a public nullary (no argument)
+ * constructor.</p>
  *
  * <p>Note that attributes for the transition are not required, just as they are
  * optional when declared in code; Transitions created from XML resources will use
@@ -78,7 +102,9 @@ import java.util.List;
  * transition uses a fadingMode of {@link Fade#OUT} instead of the default
  * out-in behavior. Finally, note the use of the <code>targets</code> sub-tag, which
  * takes a set of {@link android.R.styleable#TransitionTarget target} tags, each
- * of which lists a specific <code>targetId</code> which this transition acts upon.
+ * of which lists a specific <code>targetId</code>, <code>targetClass</code>,
+ * <code>targetName</code>, <code>excludeId</code>, <code>excludeClass</code>, or
+ * <code>excludeName</code>, which this transition acts upon.
  * Use of targets is optional, but can be used to either limit the time spent checking
  * attributes on unchanging views, or limiting the types of animations run on specific views.
  * In this case, we know that only the <code>grayscaleContainer</code> will be
@@ -86,13 +112,65 @@ import java.util.List;
  *
  * Further information on XML resource descriptions for transitions can be found for
  * {@link android.R.styleable#Transition}, {@link android.R.styleable#TransitionSet},
- * {@link android.R.styleable#TransitionTarget}, and {@link android.R.styleable#Fade}.
+ * {@link android.R.styleable#TransitionTarget}, {@link android.R.styleable#Fade},
+ * {@link android.R.styleable#Slide}, and {@link android.R.styleable#ChangeTransform}.
  *
  */
 public abstract class Transition implements Cloneable {
 
     private static final String LOG_TAG = "Transition";
     static final boolean DBG = false;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by View instance.
+     */
+    public static final int MATCH_INSTANCE = 0x1;
+    private static final int MATCH_FIRST = MATCH_INSTANCE;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by
+     * {@link android.view.View#getTransitionName()}. Null names will not be matched.
+     */
+    public static final int MATCH_NAME = 0x2;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by
+     * {@link android.view.View#getId()}. Negative IDs will not be matched.
+     */
+    public static final int MATCH_ID = 0x3;
+
+    /**
+     * With {@link #setMatchOrder(int...)}, chooses to match by the {@link android.widget.Adapter}
+     * item id. When {@link android.widget.Adapter#hasStableIds()} returns false, no match
+     * will be made for items.
+     */
+    public static final int MATCH_ITEM_ID = 0x4;
+
+    private static final int MATCH_LAST = MATCH_ITEM_ID;
+
+    private static final String MATCH_INSTANCE_STR = "instance";
+    private static final String MATCH_NAME_STR = "name";
+    /** To be removed before L release */
+    private static final String MATCH_VIEW_NAME_STR = "viewName";
+    private static final String MATCH_ID_STR = "id";
+    private static final String MATCH_ITEM_ID_STR = "itemId";
+
+    private static final int[] DEFAULT_MATCH_ORDER = {
+        MATCH_NAME,
+        MATCH_INSTANCE,
+        MATCH_ID,
+        MATCH_ITEM_ID,
+    };
+
+    private static final PathMotion STRAIGHT_PATH_MOTION = new PathMotion() {
+        @Override
+        public Path getPath(float startX, float startY, float endX, float endY) {
+            Path path = new Path();
+            path.moveTo(startX, startY);
+            path.lineTo(endX, endY);
+            return path;
+        }
+    };
 
     private String mName = getClass().getName();
 
@@ -101,15 +179,21 @@ public abstract class Transition implements Cloneable {
     TimeInterpolator mInterpolator = null;
     ArrayList<Integer> mTargetIds = new ArrayList<Integer>();
     ArrayList<View> mTargets = new ArrayList<View>();
+    ArrayList<String> mTargetNames = null;
+    ArrayList<Class> mTargetTypes = null;
     ArrayList<Integer> mTargetIdExcludes = null;
     ArrayList<View> mTargetExcludes = null;
     ArrayList<Class> mTargetTypeExcludes = null;
+    ArrayList<String> mTargetNameExcludes = null;
     ArrayList<Integer> mTargetIdChildExcludes = null;
     ArrayList<View> mTargetChildExcludes = null;
     ArrayList<Class> mTargetTypeChildExcludes = null;
     private TransitionValuesMaps mStartValues = new TransitionValuesMaps();
     private TransitionValuesMaps mEndValues = new TransitionValuesMaps();
     TransitionSet mParent = null;
+    private int[] mMatchOrder = DEFAULT_MATCH_ORDER;
+    ArrayList<TransitionValues> mStartValuesList; // only valid after playTransition starts
+    ArrayList<TransitionValues> mEndValuesList; // only valid after playTransitions starts
 
     // Per-animator information used for later canceling when future transitions overlap
     private static ThreadLocal<ArrayMap<Animator, AnimationInfo>> sRunningAnimators =
@@ -148,6 +232,21 @@ public abstract class Transition implements Cloneable {
     // to be run in runAnimators()
     ArrayList<Animator> mAnimators = new ArrayList<Animator>();
 
+    // The function for calculating the Animation start delay.
+    TransitionPropagation mPropagation;
+
+    // The rectangular region for Transitions like Explode and TransitionPropagations
+    // like CircularPropagation
+    EpicenterCallback mEpicenterCallback;
+
+    // For Fragment shared element transitions, linking views explicitly by mismatching
+    // transitionNames.
+    ArrayMap<String, String> mNameOverrides;
+
+    // The function used to interpolate along two-dimensional points. Typically used
+    // for adding curves to x/y View motion.
+    private PathMotion mPathMotion = STRAIGHT_PATH_MOTION;
+
     /**
      * Constructs a Transition object with no target objects. A transition with
      * no targets defaults to running on all target objects in the scene hierarchy
@@ -155,6 +254,66 @@ public abstract class Transition implements Cloneable {
      * objects passed down from its parent (if it is in a TransitionSet).
      */
     public Transition() {}
+
+    /**
+     * Perform inflation from XML and apply a class-specific base style from a
+     * theme attribute or style resource. This constructor of Transition allows
+     * subclasses to use their own base style when they are inflating.
+     *
+     * @param context The Context the transition is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the transition.
+     */
+    public Transition(Context context, AttributeSet attrs) {
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Transition);
+        long duration = a.getInt(R.styleable.Transition_duration, -1);
+        if (duration >= 0) {
+            setDuration(duration);
+        }
+        long startDelay = a.getInt(R.styleable.Transition_startDelay, -1);
+        if (startDelay > 0) {
+            setStartDelay(startDelay);
+        }
+        final int resID = a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
+        if (resID > 0) {
+            setInterpolator(AnimationUtils.loadInterpolator(context, resID));
+        }
+        String matchOrder = a.getString(R.styleable.Transition_matchOrder);
+        if (matchOrder != null) {
+            setMatchOrder(parseMatchOrder(matchOrder));
+        }
+        a.recycle();
+    }
+
+    private static int[] parseMatchOrder(String matchOrderString) {
+        StringTokenizer st = new StringTokenizer(matchOrderString, ",");
+        int matches[] = new int[st.countTokens()];
+        int index = 0;
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken().trim();
+            if (MATCH_ID_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_ID;
+            } else if (MATCH_INSTANCE_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_INSTANCE;
+            } else if (MATCH_NAME_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_NAME;
+            } else if (MATCH_VIEW_NAME_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_NAME;
+            } else if (MATCH_ITEM_ID_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_ITEM_ID;
+            } else if (token.isEmpty()) {
+                int[] smallerMatches = new int[matches.length - 1];
+                System.arraycopy(matches, 0, smallerMatches, 0, index);
+                matches = smallerMatches;
+                index--;
+            } else {
+                throw new InflateException("Unknown match type in matchOrder: '" + token + "'");
+            }
+            index++;
+        }
+        return matches;
+    }
 
     /**
      * Sets the duration of this transition. By default, there is no duration
@@ -314,6 +473,199 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
+     * Sets the order in which Transition matches View start and end values.
+     * <p>
+     * The default behavior is to match first by {@link android.view.View#getTransitionName()},
+     * then by View instance, then by {@link android.view.View#getId()} and finally
+     * by its item ID if it is in a direct child of ListView. The caller can
+     * choose to have only some or all of the values of {@link #MATCH_INSTANCE},
+     * {@link #MATCH_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}. Only
+     * the match algorithms supplied will be used to determine whether Views are the
+     * the same in both the start and end Scene. Views that do not match will be considered
+     * as entering or leaving the Scene.
+     * </p>
+     * @param matches A list of zero or more of {@link #MATCH_INSTANCE},
+     *                {@link #MATCH_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}.
+     *                If none are provided, then the default match order will be set.
+     */
+    public void setMatchOrder(int... matches) {
+        if (matches == null || matches.length == 0) {
+            mMatchOrder = DEFAULT_MATCH_ORDER;
+        } else {
+            for (int i = 0; i < matches.length; i++) {
+                int match = matches[i];
+                if (!isValidMatch(match)) {
+                    throw new IllegalArgumentException("matches contains invalid value");
+                }
+                if (alreadyContains(matches, i)) {
+                    throw new IllegalArgumentException("matches contains a duplicate value");
+                }
+            }
+            mMatchOrder = matches.clone();
+        }
+    }
+
+    private static boolean isValidMatch(int match) {
+        return (match >= MATCH_FIRST && match <= MATCH_LAST);
+    }
+
+    private static boolean alreadyContains(int[] array, int searchIndex) {
+        int value = array[searchIndex];
+        for (int i = 0; i < searchIndex; i++) {
+            if (array[i] == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Match start/end values by View instance. Adds matched values to mStartValuesList
+     * and mEndValuesList and removes them from unmatchedStart and unmatchedEnd.
+     */
+    private void matchInstances(ArrayMap<View, TransitionValues> unmatchedStart,
+            ArrayMap<View, TransitionValues> unmatchedEnd) {
+        for (int i = unmatchedStart.size() - 1; i >= 0; i--) {
+            View view = unmatchedStart.keyAt(i);
+            TransitionValues end = unmatchedEnd.remove(view);
+            if (end != null) {
+                TransitionValues start = unmatchedStart.removeAt(i);
+                mStartValuesList.add(start);
+                mEndValuesList.add(end);
+            }
+        }
+    }
+
+    /**
+     * Match start/end values by Adapter item ID. Adds matched values to mStartValuesList
+     * and mEndValuesList and removes them from unmatchedStart and unmatchedEnd, using
+     * startItemIds and endItemIds as a guide for which Views have unique item IDs.
+     */
+    private void matchItemIds(ArrayMap<View, TransitionValues> unmatchedStart,
+            ArrayMap<View, TransitionValues> unmatchedEnd,
+            LongSparseArray<View> startItemIds, LongSparseArray<View> endItemIds) {
+        int numStartIds = startItemIds.size();
+        for (int i = 0; i < numStartIds; i++) {
+            View startView = startItemIds.valueAt(i);
+            if (startView != null) {
+                View endView = endItemIds.get(startItemIds.keyAt(i));
+                if (endView != null) {
+                    TransitionValues startValues = unmatchedStart.get(startView);
+                    TransitionValues endValues = unmatchedEnd.get(endView);
+                    if (startValues != null && endValues != null) {
+                        mStartValuesList.add(startValues);
+                        mEndValuesList.add(endValues);
+                        unmatchedStart.remove(startView);
+                        unmatchedEnd.remove(endView);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Match start/end values by Adapter view ID. Adds matched values to mStartValuesList
+     * and mEndValuesList and removes them from unmatchedStart and unmatchedEnd, using
+     * startIds and endIds as a guide for which Views have unique IDs.
+     */
+    private void matchIds(ArrayMap<View, TransitionValues> unmatchedStart,
+            ArrayMap<View, TransitionValues> unmatchedEnd,
+            SparseArray<View> startIds, SparseArray<View> endIds) {
+        int numStartIds = startIds.size();
+        for (int i = 0; i < numStartIds; i++) {
+            View startView = startIds.valueAt(i);
+            if (startView != null && isValidTarget(startView)) {
+                View endView = endIds.get(startIds.keyAt(i));
+                if (endView != null && isValidTarget(endView)) {
+                    TransitionValues startValues = unmatchedStart.get(startView);
+                    TransitionValues endValues = unmatchedEnd.get(endView);
+                    if (startValues != null && endValues != null) {
+                        mStartValuesList.add(startValues);
+                        mEndValuesList.add(endValues);
+                        unmatchedStart.remove(startView);
+                        unmatchedEnd.remove(endView);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Match start/end values by Adapter transitionName. Adds matched values to mStartValuesList
+     * and mEndValuesList and removes them from unmatchedStart and unmatchedEnd, using
+     * startNames and endNames as a guide for which Views have unique transitionNames.
+     */
+    private void matchNames(ArrayMap<View, TransitionValues> unmatchedStart,
+            ArrayMap<View, TransitionValues> unmatchedEnd,
+            ArrayMap<String, View> startNames, ArrayMap<String, View> endNames) {
+        int numStartNames = startNames.size();
+        for (int i = 0; i < numStartNames; i++) {
+            View startView = startNames.valueAt(i);
+            if (startView != null && isValidTarget(startView)) {
+                View endView = endNames.get(startNames.keyAt(i));
+                if (endView != null && isValidTarget(endView)) {
+                    TransitionValues startValues = unmatchedStart.get(startView);
+                    TransitionValues endValues = unmatchedEnd.get(endView);
+                    if (startValues != null && endValues != null) {
+                        mStartValuesList.add(startValues);
+                        mEndValuesList.add(endValues);
+                        unmatchedStart.remove(startView);
+                        unmatchedEnd.remove(endView);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds all values from unmatchedStart and unmatchedEnd to mStartValuesList and mEndValuesList,
+     * assuming that there is no match between values in the list.
+     */
+    private void addUnmatched(ArrayMap<View, TransitionValues> unmatchedStart,
+            ArrayMap<View, TransitionValues> unmatchedEnd) {
+        // Views that only exist in the start Scene
+        for (int i = 0; i < unmatchedStart.size(); i++) {
+            mStartValuesList.add(unmatchedStart.valueAt(i));
+            mEndValuesList.add(null);
+        }
+
+        // Views that only exist in the end Scene
+        for (int i = 0; i < unmatchedEnd.size(); i++) {
+            mEndValuesList.add(unmatchedEnd.valueAt(i));
+            mStartValuesList.add(null);
+        }
+    }
+
+    private void matchStartAndEnd(TransitionValuesMaps startValues,
+            TransitionValuesMaps endValues) {
+        ArrayMap<View, TransitionValues> unmatchedStart =
+                new ArrayMap<View, TransitionValues>(startValues.viewValues);
+        ArrayMap<View, TransitionValues> unmatchedEnd =
+                new ArrayMap<View, TransitionValues>(endValues.viewValues);
+
+        for (int i = 0; i < mMatchOrder.length; i++) {
+            switch (mMatchOrder[i]) {
+                case MATCH_INSTANCE:
+                    matchInstances(unmatchedStart, unmatchedEnd);
+                    break;
+                case MATCH_NAME:
+                    matchNames(unmatchedStart, unmatchedEnd,
+                            startValues.nameValues, endValues.nameValues);
+                    break;
+                case MATCH_ID:
+                    matchIds(unmatchedStart, unmatchedEnd,
+                            startValues.idValues, endValues.idValues);
+                    break;
+                case MATCH_ITEM_ID:
+                    matchItemIds(unmatchedStart, unmatchedEnd,
+                            startValues.itemIdValues, endValues.itemIdValues);
+                    break;
+            }
+        }
+        addUnmatched(unmatchedStart, unmatchedEnd);
+    }
+
+    /**
      * This method, essentially a wrapper around all calls to createAnimator for all
      * possible target views, is called with the entire set of start/end
      * values. The implementation in Transition iterates through these lists
@@ -325,183 +677,106 @@ public abstract class Transition implements Cloneable {
      * @hide
      */
     protected void createAnimators(ViewGroup sceneRoot, TransitionValuesMaps startValues,
-            TransitionValuesMaps endValues) {
+            TransitionValuesMaps endValues, ArrayList<TransitionValues> startValuesList,
+            ArrayList<TransitionValues> endValuesList) {
         if (DBG) {
             Log.d(LOG_TAG, "createAnimators() for " + this);
         }
-        ArrayMap<View, TransitionValues> endCopy =
-                new ArrayMap<View, TransitionValues>(endValues.viewValues);
-        SparseArray<TransitionValues> endIdCopy =
-                new SparseArray<TransitionValues>(endValues.idValues.size());
-        for (int i = 0; i < endValues.idValues.size(); ++i) {
-            int id = endValues.idValues.keyAt(i);
-            endIdCopy.put(id, endValues.idValues.valueAt(i));
-        }
-        LongSparseArray<TransitionValues> endItemIdCopy =
-                new LongSparseArray<TransitionValues>(endValues.itemIdValues.size());
-        for (int i = 0; i < endValues.itemIdValues.size(); ++i) {
-            long id = endValues.itemIdValues.keyAt(i);
-            endItemIdCopy.put(id, endValues.itemIdValues.valueAt(i));
-        }
-        // Walk through the start values, playing everything we find
-        // Remove from the end set as we go
-        ArrayList<TransitionValues> startValuesList = new ArrayList<TransitionValues>();
-        ArrayList<TransitionValues> endValuesList = new ArrayList<TransitionValues>();
-        for (View view : startValues.viewValues.keySet()) {
-            TransitionValues start = null;
-            TransitionValues end = null;
-            boolean isInListView = false;
-            if (view.getParent() instanceof ListView) {
-                isInListView = true;
-            }
-            if (!isInListView) {
-                int id = view.getId();
-                start = startValues.viewValues.get(view) != null ?
-                        startValues.viewValues.get(view) : startValues.idValues.get(id);
-                if (endValues.viewValues.get(view) != null) {
-                    end = endValues.viewValues.get(view);
-                    endCopy.remove(view);
-                } else if (id != View.NO_ID) {
-                    end = endValues.idValues.get(id);
-                    View removeView = null;
-                    for (View viewToRemove : endCopy.keySet()) {
-                        if (viewToRemove.getId() == id) {
-                            removeView = viewToRemove;
-                        }
-                    }
-                    if (removeView != null) {
-                        endCopy.remove(removeView);
-                    }
-                }
-                endIdCopy.remove(id);
-                if (isValidTarget(view, id)) {
-                    startValuesList.add(start);
-                    endValuesList.add(end);
-                }
-            } else {
-                ListView parent = (ListView) view.getParent();
-                if (parent.getAdapter().hasStableIds()) {
-                    int position = parent.getPositionForView(view);
-                    long itemId = parent.getItemIdAtPosition(position);
-                    start = startValues.itemIdValues.get(itemId);
-                    endItemIdCopy.remove(itemId);
-                    // TODO: deal with targetIDs for itemIDs for ListView items
-                    startValuesList.add(start);
-                    endValuesList.add(end);
-                }
-            }
-        }
-        int startItemIdCopySize = startValues.itemIdValues.size();
-        for (int i = 0; i < startItemIdCopySize; ++i) {
-            long id = startValues.itemIdValues.keyAt(i);
-            if (isValidTarget(null, id)) {
-                TransitionValues start = startValues.itemIdValues.get(id);
-                TransitionValues end = endValues.itemIdValues.get(id);
-                endItemIdCopy.remove(id);
-                startValuesList.add(start);
-                endValuesList.add(end);
-            }
-        }
-        // Now walk through the remains of the end set
-        for (View view : endCopy.keySet()) {
-            int id = view.getId();
-            if (isValidTarget(view, id)) {
-                TransitionValues start = startValues.viewValues.get(view) != null ?
-                        startValues.viewValues.get(view) : startValues.idValues.get(id);
-                TransitionValues end = endCopy.get(view);
-                endIdCopy.remove(id);
-                startValuesList.add(start);
-                endValuesList.add(end);
-            }
-        }
-        int endIdCopySize = endIdCopy.size();
-        for (int i = 0; i < endIdCopySize; ++i) {
-            int id = endIdCopy.keyAt(i);
-            if (isValidTarget(null, id)) {
-                TransitionValues start = startValues.idValues.get(id);
-                TransitionValues end = endIdCopy.get(id);
-                startValuesList.add(start);
-                endValuesList.add(end);
-            }
-        }
-        int endItemIdCopySize = endItemIdCopy.size();
-        for (int i = 0; i < endItemIdCopySize; ++i) {
-            long id = endItemIdCopy.keyAt(i);
-            // TODO: Deal with targetIDs and itemIDs
-            TransitionValues start = startValues.itemIdValues.get(id);
-            TransitionValues end = endItemIdCopy.get(id);
-            startValuesList.add(start);
-            endValuesList.add(end);
-        }
         ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
-        for (int i = 0; i < startValuesList.size(); ++i) {
+        long minStartDelay = Long.MAX_VALUE;
+        int minAnimator = mAnimators.size();
+        SparseLongArray startDelays = new SparseLongArray();
+        int startValuesListCount = startValuesList.size();
+        for (int i = 0; i < startValuesListCount; ++i) {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
+            if (start != null && !start.targetedTransitions.contains(this)) {
+                start = null;
+            }
+            if (end != null && !end.targetedTransitions.contains(this)) {
+                end = null;
+            }
+            if (start == null && end == null) {
+                continue;
+            }
             // Only bother trying to animate with values that differ between start/end
-            if (start != null || end != null) {
-                if (start == null || !start.equals(end)) {
-                    if (DBG) {
-                        View view = (end != null) ? end.view : start.view;
-                        Log.d(LOG_TAG, "  differing start/end values for view " +
-                                view);
-                        if (start == null || end == null) {
-                            Log.d(LOG_TAG, "    " + ((start == null) ?
-                                    "start null, end non-null" : "start non-null, end null"));
-                        } else {
-                            for (String key : start.values.keySet()) {
-                                Object startValue = start.values.get(key);
-                                Object endValue = end.values.get(key);
-                                if (startValue != endValue && !startValue.equals(endValue)) {
-                                    Log.d(LOG_TAG, "    " + key + ": start(" + startValue +
-                                            "), end(" + endValue +")");
-                                }
+            boolean isChanged = start == null || end == null || areValuesChanged(start, end);
+            if (isChanged) {
+                if (DBG) {
+                    View view = (end != null) ? end.view : start.view;
+                    Log.d(LOG_TAG, "  differing start/end values for view " + view);
+                    if (start == null || end == null) {
+                        Log.d(LOG_TAG, "    " + ((start == null) ?
+                                "start null, end non-null" : "start non-null, end null"));
+                    } else {
+                        for (String key : start.values.keySet()) {
+                            Object startValue = start.values.get(key);
+                            Object endValue = end.values.get(key);
+                            if (startValue != endValue && !startValue.equals(endValue)) {
+                                Log.d(LOG_TAG, "    " + key + ": start(" + startValue +
+                                        "), end(" + endValue + ")");
                             }
-                        }
-                    }
-                    // TODO: what to do about targetIds and itemIds?
-                    Animator animator = createAnimator(sceneRoot, start, end);
-                    if (animator != null) {
-                        // Save animation info for future cancellation purposes
-                        View view = null;
-                        TransitionValues infoValues = null;
-                        if (end != null) {
-                            view = end.view;
-                            String[] properties = getTransitionProperties();
-                            if (view != null && properties != null && properties.length > 0) {
-                                infoValues = new TransitionValues();
-                                infoValues.view = view;
-                                TransitionValues newValues = endValues.viewValues.get(view);
-                                if (newValues != null) {
-                                    for (int j = 0; j < properties.length; ++j) {
-                                        infoValues.values.put(properties[j],
-                                                newValues.values.get(properties[j]));
-                                    }
-                                }
-                                int numExistingAnims = runningAnimators.size();
-                                for (int j = 0; j < numExistingAnims; ++j) {
-                                    Animator anim = runningAnimators.keyAt(j);
-                                    AnimationInfo info = runningAnimators.get(anim);
-                                    if (info.values != null && info.view == view &&
-                                            ((info.name == null && getName() == null) ||
-                                            info.name.equals(getName()))) {
-                                        if (info.values.equals(infoValues)) {
-                                            // Favor the old animator
-                                            animator = null;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            view = (start != null) ? start.view : null;
-                        }
-                        if (animator != null) {
-                            AnimationInfo info = new AnimationInfo(view, getName(), infoValues);
-                            runningAnimators.put(animator, info);
-                            mAnimators.add(animator);
                         }
                     }
                 }
+                // TODO: what to do about targetIds and itemIds?
+                Animator animator = createAnimator(sceneRoot, start, end);
+                if (animator != null) {
+                    // Save animation info for future cancellation purposes
+                    View view = null;
+                    TransitionValues infoValues = null;
+                    if (end != null) {
+                        view = end.view;
+                        String[] properties = getTransitionProperties();
+                        if (view != null && properties != null && properties.length > 0) {
+                            infoValues = new TransitionValues();
+                            infoValues.view = view;
+                            TransitionValues newValues = endValues.viewValues.get(view);
+                            if (newValues != null) {
+                                for (int j = 0; j < properties.length; ++j) {
+                                    infoValues.values.put(properties[j],
+                                            newValues.values.get(properties[j]));
+                                }
+                            }
+                            int numExistingAnims = runningAnimators.size();
+                            for (int j = 0; j < numExistingAnims; ++j) {
+                                Animator anim = runningAnimators.keyAt(j);
+                                AnimationInfo info = runningAnimators.get(anim);
+                                if (info.values != null && info.view == view &&
+                                        ((info.name == null && getName() == null) ||
+                                                info.name.equals(getName()))) {
+                                    if (info.values.equals(infoValues)) {
+                                        // Favor the old animator
+                                        animator = null;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        view = (start != null) ? start.view : null;
+                    }
+                    if (animator != null) {
+                        if (mPropagation != null) {
+                            long delay = mPropagation
+                                    .getStartDelay(sceneRoot, this, start, end);
+                            startDelays.put(mAnimators.size(), delay);
+                            minStartDelay = Math.min(delay, minStartDelay);
+                        }
+                        AnimationInfo info = new AnimationInfo(view, getName(), this,
+                                sceneRoot.getWindowId(), infoValues);
+                        runningAnimators.put(animator, info);
+                        mAnimators.add(animator);
+                    }
+                }
+            }
+        }
+        if (minStartDelay != 0) {
+            for (int i = 0; i < startDelays.size(); i++) {
+                int index = startDelays.keyAt(i);
+                Animator animator = mAnimators.get(index);
+                long delay = startDelays.valueAt(i) - minStartDelay + animator.getStartDelay();
+                animator.setStartDelay(delay);
             }
         }
     }
@@ -516,7 +791,8 @@ public abstract class Transition implements Cloneable {
      * is not checked (this is in the case of ListView items, where the
      * views are ignored and only the ids are used).
      */
-    boolean isValidTarget(View target, long targetId) {
+    boolean isValidTarget(View target) {
+        int targetId = target.getId();
         if (mTargetIdExcludes != null && mTargetIdExcludes.contains(targetId)) {
             return false;
         }
@@ -532,19 +808,25 @@ public abstract class Transition implements Cloneable {
                 }
             }
         }
-        if (mTargetIds.size() == 0 && mTargets.size() == 0) {
-            return true;
-        }
-        if (mTargetIds.size() > 0) {
-            for (int i = 0; i < mTargetIds.size(); ++i) {
-                if (mTargetIds.get(i) == targetId) {
-                    return true;
-                }
+        if (mTargetNameExcludes != null && target != null && target.getTransitionName() != null) {
+            if (mTargetNameExcludes.contains(target.getTransitionName())) {
+                return false;
             }
         }
-        if (target != null && mTargets.size() > 0) {
-            for (int i = 0; i < mTargets.size(); ++i) {
-                if (mTargets.get(i) == target) {
+        if (mTargetIds.size() == 0 && mTargets.size() == 0 &&
+                (mTargetTypes == null || mTargetTypes.isEmpty()) &&
+                (mTargetNames == null || mTargetNames.isEmpty())) {
+            return true;
+        }
+        if (mTargetIds.contains(targetId) || mTargets.contains(target)) {
+            return true;
+        }
+        if (mTargetNames != null && mTargetNames.contains(target.getTransitionName())) {
+            return true;
+        }
+        if (mTargetTypes != null) {
+            for (int i = 0; i < mTargetTypes.size(); ++i) {
+                if (mTargetTypes.get(i).isInstance(target)) {
                     return true;
                 }
             }
@@ -563,7 +845,7 @@ public abstract class Transition implements Cloneable {
 
     /**
      * This is called internally once all animations have been set up by the
-     * transition hierarchy. \
+     * transition hierarchy.
      *
      * @hide
      */
@@ -690,6 +972,65 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
+     * Adds the transitionName of a target view that this Transition is interested in
+     * animating. By default, there are no targetNames, and a Transition will
+     * listen for changes on every view in the hierarchy below the sceneRoot
+     * of the Scene being transitioned into. Setting targetNames constrains
+     * the Transition to only listen for, and act on, views with these transitionNames.
+     * Views with different transitionNames, or no transitionName whatsoever, will be ignored.
+     *
+     * <p>Note that transitionNames should be unique within the view hierarchy.</p>
+     *
+     * @see android.view.View#getTransitionName()
+     * @param targetName The transitionName of a target view, must be non-null.
+     * @return The Transition to which the target transitionName is added.
+     * Returning the same object makes it easier to chain calls during
+     * construction, such as
+     * <code>transitionSet.addTransitions(new Fade()).addTarget(someName);</code>
+     */
+    public Transition addTarget(String targetName) {
+        if (targetName != null) {
+            if (mTargetNames == null) {
+                mTargetNames = new ArrayList<String>();
+            }
+            mTargetNames.add(targetName);
+        }
+        return this;
+    }
+
+    /**
+     * Adds the Class of a target view that this Transition is interested in
+     * animating. By default, there are no targetTypes, and a Transition will
+     * listen for changes on every view in the hierarchy below the sceneRoot
+     * of the Scene being transitioned into. Setting targetTypes constrains
+     * the Transition to only listen for, and act on, views with these classes.
+     * Views with different classes will be ignored.
+     *
+     * <p>Note that any View that can be cast to targetType will be included, so
+     * if targetType is <code>View.class</code>, all Views will be included.</p>
+     *
+     * @see #addTarget(int)
+     * @see #addTarget(android.view.View)
+     * @see #excludeTarget(Class, boolean)
+     * @see #excludeChildren(Class, boolean)
+     *
+     * @param targetType The type to include when running this transition.
+     * @return The Transition to which the target class was added.
+     * Returning the same object makes it easier to chain calls during
+     * construction, such as
+     * <code>transitionSet.addTransitions(new Fade()).addTarget(ImageView.class);</code>
+     */
+    public Transition addTarget(Class targetType) {
+        if (targetType != null) {
+            if (mTargetTypes == null) {
+                mTargetTypes = new ArrayList<Class>();
+            }
+            mTargetTypes.add(targetType);
+        }
+        return this;
+    }
+
+    /**
      * Removes the given targetId from the list of ids that this Transition
      * is interested in animating.
      *
@@ -702,6 +1043,23 @@ public abstract class Transition implements Cloneable {
     public Transition removeTarget(int targetId) {
         if (targetId > 0) {
             mTargetIds.remove(targetId);
+        }
+        return this;
+    }
+
+    /**
+     * Removes the given targetName from the list of transitionNames that this Transition
+     * is interested in animating.
+     *
+     * @param targetName The transitionName of a target view, must not be null.
+     * @return The Transition from which the targetName is removed.
+     * Returning the same object makes it easier to chain calls during
+     * construction, such as
+     * <code>transitionSet.addTransitions(new Fade()).removeTargetName(someName);</code>
+     */
+    public Transition removeTarget(String targetName) {
+        if (targetName != null && mTargetNames != null) {
+            mTargetNames.remove(targetName);
         }
         return this;
     }
@@ -728,7 +1086,35 @@ public abstract class Transition implements Cloneable {
      * @return This transition object.
      */
     public Transition excludeTarget(int targetId, boolean exclude) {
-        mTargetIdExcludes = excludeId(mTargetIdExcludes, targetId, exclude);
+        if (targetId >= 0) {
+            mTargetIdExcludes = excludeObject(mTargetIdExcludes, targetId, exclude);
+        }
+        return this;
+    }
+
+    /**
+     * Whether to add the given transitionName to the list of target transitionNames to exclude
+     * from this transition. The <code>exclude</code> parameter specifies whether the target
+     * should be added to or removed from the excluded list.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded by their
+     * id, their instance reference, their transitionName, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeTarget(View, boolean)
+     * @see #excludeTarget(int, boolean)
+     * @see #excludeTarget(Class, boolean)
+     *
+     * @param targetName The name of a target to ignore when running this transition.
+     * @param exclude Whether to add the target to or remove the target from the
+     * current list of excluded targets.
+     * @return This transition object.
+     */
+    public Transition excludeTarget(String targetName, boolean exclude) {
+        mTargetNameExcludes = excludeObject(mTargetNameExcludes, targetName, exclude);
         return this;
     }
 
@@ -758,23 +1144,10 @@ public abstract class Transition implements Cloneable {
      * @return This transition object.
      */
     public Transition excludeChildren(int targetId, boolean exclude) {
-        mTargetIdChildExcludes = excludeId(mTargetIdChildExcludes, targetId, exclude);
-        return this;
-    }
-
-    /**
-     * Utility method to manage the boilerplate code that is the same whether we
-     * are excluding targets or their children.
-     */
-    private ArrayList<Integer> excludeId(ArrayList<Integer> list, int targetId, boolean exclude) {
-        if (targetId > 0) {
-            if (exclude) {
-                list = ArrayListManager.add(list, targetId);
-            } else {
-                list = ArrayListManager.remove(list, targetId);
-            }
+        if (targetId >= 0) {
+            mTargetIdChildExcludes = excludeObject(mTargetIdChildExcludes, targetId, exclude);
         }
-        return list;
+        return this;
     }
 
     /**
@@ -799,7 +1172,7 @@ public abstract class Transition implements Cloneable {
      * @return This transition object.
      */
     public Transition excludeTarget(View target, boolean exclude) {
-        mTargetExcludes = excludeView(mTargetExcludes, target, exclude);
+        mTargetExcludes = excludeObject(mTargetExcludes, target, exclude);
         return this;
     }
 
@@ -825,7 +1198,7 @@ public abstract class Transition implements Cloneable {
      * @return This transition object.
      */
     public Transition excludeChildren(View target, boolean exclude) {
-        mTargetChildExcludes = excludeView(mTargetChildExcludes, target, exclude);
+        mTargetChildExcludes = excludeObject(mTargetChildExcludes, target, exclude);
         return this;
     }
 
@@ -833,7 +1206,7 @@ public abstract class Transition implements Cloneable {
      * Utility method to manage the boilerplate code that is the same whether we
      * are excluding targets or their children.
      */
-    private ArrayList<View> excludeView(ArrayList<View> list, View target, boolean exclude) {
+    private static <T> ArrayList<T> excludeObject(ArrayList<T> list, T target, boolean exclude) {
         if (target != null) {
             if (exclude) {
                 list = ArrayListManager.add(list, target);
@@ -866,7 +1239,7 @@ public abstract class Transition implements Cloneable {
      * @return This transition object.
      */
     public Transition excludeTarget(Class type, boolean exclude) {
-        mTargetTypeExcludes = excludeType(mTargetTypeExcludes, type, exclude);
+        mTargetTypeExcludes = excludeObject(mTargetTypeExcludes, type, exclude);
         return this;
     }
 
@@ -893,23 +1266,8 @@ public abstract class Transition implements Cloneable {
      * @return This transition object.
      */
     public Transition excludeChildren(Class type, boolean exclude) {
-        mTargetTypeChildExcludes = excludeType(mTargetTypeChildExcludes, type, exclude);
+        mTargetTypeChildExcludes = excludeObject(mTargetTypeChildExcludes, type, exclude);
         return this;
-    }
-
-    /**
-     * Utility method to manage the boilerplate code that is the same whether we
-     * are excluding targets or their children.
-     */
-    private ArrayList<Class> excludeType(ArrayList<Class> list, Class type, boolean exclude) {
-        if (type != null) {
-            if (exclude) {
-                list = ArrayListManager.add(list, type);
-            } else {
-                list = ArrayListManager.remove(list, type);
-            }
-        }
-        return list;
     }
 
     /**
@@ -961,9 +1319,27 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Returns the array of target IDs that this transition limits itself to
-     * tracking and animating. If the array is null for both this method and
-     * {@link #getTargets()}, then this transition is
+     * Removes the given target from the list of targets that this Transition
+     * is interested in animating.
+     *
+     * @param target The type of the target view, must be non-null.
+     * @return Transition The Transition from which the target is removed.
+     * Returning the same object makes it easier to chain calls during
+     * construction, such as
+     * <code>transitionSet.addTransitions(new Fade()).removeTarget(someType);</code>
+     */
+    public Transition removeTarget(Class target) {
+        if (target != null) {
+            mTargetTypes.remove(target);
+        }
+        return this;
+    }
+
+    /**
+     * Returns the list of target IDs that this transition limits itself to
+     * tracking and animating. If the list is null or empty for
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetTypes()} then this transition is
      * not limited to specific views, and will handle changes to any views
      * in the hierarchy of a scene change.
      *
@@ -974,9 +1350,10 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Returns the array of target views that this transition limits itself to
-     * tracking and animating. If the array is null for both this method and
-     * {@link #getTargetIds()}, then this transition is
+     * Returns the list of target views that this transition limits itself to
+     * tracking and animating. If the list is null or empty for
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetTypes()} then this transition is
      * not limited to specific views, and will handle changes to any views
      * in the hierarchy of a scene change.
      *
@@ -984,6 +1361,42 @@ public abstract class Transition implements Cloneable {
      */
     public List<View> getTargets() {
         return mTargets;
+    }
+
+    /**
+     * Returns the list of target transitionNames that this transition limits itself to
+     * tracking and animating. If the list is null or empty for
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetTypes()} then this transition is
+     * not limited to specific views, and will handle changes to any views
+     * in the hierarchy of a scene change.
+     *
+     * @return the list of target transitionNames
+     */
+    public List<String> getTargetNames() {
+        return mTargetNames;
+    }
+
+    /**
+     * To be removed before L release.
+     * @hide
+     */
+    public List<String> getTargetViewNames() {
+        return mTargetNames;
+    }
+
+    /**
+     * Returns the list of target transitionNames that this transition limits itself to
+     * tracking and animating. If the list is null or empty for
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetTypes()} then this transition is
+     * not limited to specific views, and will handle changes to any views
+     * in the hierarchy of a scene change.
+     *
+     * @return the list of target Types
+     */
+    public List<Class> getTargetTypes() {
+        return mTargetTypes;
     }
 
     /**
@@ -995,54 +1408,104 @@ public abstract class Transition implements Cloneable {
      */
     void captureValues(ViewGroup sceneRoot, boolean start) {
         clearValues(start);
-        if (mTargetIds.size() > 0 || mTargets.size() > 0) {
-            if (mTargetIds.size() > 0) {
-                for (int i = 0; i < mTargetIds.size(); ++i) {
-                    int id = mTargetIds.get(i);
-                    View view = sceneRoot.findViewById(id);
-                    if (view != null) {
-                        TransitionValues values = new TransitionValues();
-                        values.view = view;
-                        if (start) {
-                            captureStartValues(values);
-                        } else {
-                            captureEndValues(values);
-                        }
-                        if (start) {
-                            mStartValues.viewValues.put(view, values);
-                            if (id >= 0) {
-                                mStartValues.idValues.put(id, values);
-                            }
-                        } else {
-                            mEndValues.viewValues.put(view, values);
-                            if (id >= 0) {
-                                mEndValues.idValues.put(id, values);
-                            }
-                        }
+        if ((mTargetIds.size() > 0 || mTargets.size() > 0)
+                && (mTargetNames == null || mTargetNames.isEmpty())
+                && (mTargetTypes == null || mTargetTypes.isEmpty())) {
+            for (int i = 0; i < mTargetIds.size(); ++i) {
+                int id = mTargetIds.get(i);
+                View view = sceneRoot.findViewById(id);
+                if (view != null) {
+                    TransitionValues values = new TransitionValues();
+                    values.view = view;
+                    if (start) {
+                        captureStartValues(values);
+                    } else {
+                        captureEndValues(values);
+                    }
+                    values.targetedTransitions.add(this);
+                    capturePropagationValues(values);
+                    if (start) {
+                        addViewValues(mStartValues, view, values);
+                    } else {
+                        addViewValues(mEndValues, view, values);
                     }
                 }
             }
-            if (mTargets.size() > 0) {
-                for (int i = 0; i < mTargets.size(); ++i) {
-                    View view = mTargets.get(i);
-                    if (view != null) {
-                        TransitionValues values = new TransitionValues();
-                        values.view = view;
-                        if (start) {
-                            captureStartValues(values);
-                        } else {
-                            captureEndValues(values);
-                        }
-                        if (start) {
-                            mStartValues.viewValues.put(view, values);
-                        } else {
-                            mEndValues.viewValues.put(view, values);
-                        }
-                    }
+            for (int i = 0; i < mTargets.size(); ++i) {
+                View view = mTargets.get(i);
+                TransitionValues values = new TransitionValues();
+                values.view = view;
+                if (start) {
+                    captureStartValues(values);
+                } else {
+                    captureEndValues(values);
+                }
+                values.targetedTransitions.add(this);
+                capturePropagationValues(values);
+                if (start) {
+                    addViewValues(mStartValues, view, values);
+                } else {
+                    addViewValues(mEndValues, view, values);
                 }
             }
         } else {
             captureHierarchy(sceneRoot, start);
+        }
+        if (!start && mNameOverrides != null) {
+            int numOverrides = mNameOverrides.size();
+            ArrayList<View> overriddenViews = new ArrayList<View>(numOverrides);
+            for (int i = 0; i < numOverrides; i++) {
+                String fromName = mNameOverrides.keyAt(i);
+                overriddenViews.add(mStartValues.nameValues.remove(fromName));
+            }
+            for (int i = 0; i < numOverrides; i++) {
+                View view = overriddenViews.get(i);
+                if (view != null) {
+                    String toName = mNameOverrides.valueAt(i);
+                    mStartValues.nameValues.put(toName, view);
+                }
+            }
+        }
+    }
+
+    static void addViewValues(TransitionValuesMaps transitionValuesMaps,
+            View view, TransitionValues transitionValues) {
+        transitionValuesMaps.viewValues.put(view, transitionValues);
+        int id = view.getId();
+        if (id >= 0) {
+            if (transitionValuesMaps.idValues.indexOfKey(id) >= 0) {
+                // Duplicate IDs cannot match by ID.
+                transitionValuesMaps.idValues.put(id, null);
+            } else {
+                transitionValuesMaps.idValues.put(id, view);
+            }
+        }
+        String name = view.getTransitionName();
+        if (name != null) {
+            if (transitionValuesMaps.nameValues.containsKey(name)) {
+                // Duplicate transitionNames: cannot match by transitionName.
+                transitionValuesMaps.nameValues.put(name, null);
+            } else {
+                transitionValuesMaps.nameValues.put(name, view);
+            }
+        }
+        if (view.getParent() instanceof ListView) {
+            ListView listview = (ListView) view.getParent();
+            if (listview.getAdapter().hasStableIds()) {
+                int position = listview.getPositionForView(view);
+                long itemId = listview.getItemIdAtPosition(position);
+                if (transitionValuesMaps.itemIdValues.indexOfKey(itemId) >= 0) {
+                    // Duplicate item IDs: cannot match by item ID.
+                    View alreadyMatched = transitionValuesMaps.itemIdValues.get(itemId);
+                    if (alreadyMatched != null) {
+                        alreadyMatched.setHasTransientState(false);
+                        transitionValuesMaps.itemIdValues.put(itemId, null);
+                    }
+                } else {
+                    view.setHasTransientState(true);
+                    transitionValuesMaps.itemIdValues.put(itemId, view);
+                }
+            }
         }
     }
 
@@ -1056,10 +1519,14 @@ public abstract class Transition implements Cloneable {
             mStartValues.viewValues.clear();
             mStartValues.idValues.clear();
             mStartValues.itemIdValues.clear();
+            mStartValues.nameValues.clear();
+            mStartValuesList = null;
         } else {
             mEndValues.viewValues.clear();
             mEndValues.idValues.clear();
             mEndValues.itemIdValues.clear();
+            mEndValues.nameValues.clear();
+            mEndValuesList = null;
         }
     }
 
@@ -1077,24 +1544,7 @@ public abstract class Transition implements Cloneable {
         if (view == null) {
             return;
         }
-        boolean isListViewItem = false;
-        if (view.getParent() instanceof ListView) {
-            isListViewItem = true;
-        }
-        if (isListViewItem && !((ListView) view.getParent()).getAdapter().hasStableIds()) {
-            // ignore listview children unless we can track them with stable IDs
-            return;
-        }
-        int id = View.NO_ID;
-        long itemId = View.NO_ID;
-        if (!isListViewItem) {
-            id = view.getId();
-        } else {
-            ListView listview = (ListView) view.getParent();
-            int position = listview.getPositionForView(view);
-            itemId = listview.getItemIdAtPosition(position);
-            view.setHasTransientState(true);
-        }
+        int id = view.getId();
         if (mTargetIdExcludes != null && mTargetIdExcludes.contains(id)) {
             return;
         }
@@ -1109,30 +1559,20 @@ public abstract class Transition implements Cloneable {
                 }
             }
         }
-        TransitionValues values = new TransitionValues();
-        values.view = view;
-        if (start) {
-            captureStartValues(values);
-        } else {
-            captureEndValues(values);
-        }
-        if (start) {
-            if (!isListViewItem) {
-                mStartValues.viewValues.put(view, values);
-                if (id >= 0) {
-                    mStartValues.idValues.put((int) id, values);
-                }
+        if (view.getParent() instanceof ViewGroup) {
+            TransitionValues values = new TransitionValues();
+            values.view = view;
+            if (start) {
+                captureStartValues(values);
             } else {
-                mStartValues.itemIdValues.put(itemId, values);
+                captureEndValues(values);
             }
-        } else {
-            if (!isListViewItem) {
-                mEndValues.viewValues.put(view, values);
-                if (id >= 0) {
-                    mEndValues.idValues.put((int) id, values);
-                }
+            values.targetedTransitions.add(this);
+            capturePropagationValues(values);
+            if (start) {
+                addViewValues(mStartValues, view, values);
             } else {
-                mEndValues.itemIdValues.put(itemId, values);
+                addViewValues(mEndValues, view, values);
             }
         }
         if (view instanceof ViewGroup) {
@@ -1143,7 +1583,7 @@ public abstract class Transition implements Cloneable {
             if (mTargetChildExcludes != null && mTargetChildExcludes.contains(view)) {
                 return;
             }
-            if (mTargetTypeChildExcludes != null && view != null) {
+            if (mTargetTypeChildExcludes != null) {
                 int numTypes = mTargetTypeChildExcludes.size();
                 for (int i = 0; i < numTypes; ++i) {
                     if (mTargetTypeChildExcludes.get(i).isInstance(view)) {
@@ -1169,20 +1609,44 @@ public abstract class Transition implements Cloneable {
             return mParent.getTransitionValues(view, start);
         }
         TransitionValuesMaps valuesMaps = start ? mStartValues : mEndValues;
-        TransitionValues values = valuesMaps.viewValues.get(view);
-        if (values == null) {
-            int id = view.getId();
-            if (id >= 0) {
-                values = valuesMaps.idValues.get(id);
+        return valuesMaps.viewValues.get(view);
+    }
+
+    /**
+     * Find the matched start or end value for a given View. This is only valid
+     * after playTransition starts. For example, it will be valid in
+     * {@link #createAnimator(android.view.ViewGroup, TransitionValues, TransitionValues)}, but not
+     * in {@link #captureStartValues(TransitionValues)}.
+     *
+     * @param view The view to find the match for.
+     * @param viewInStart Is View from the start values or end values.
+     * @return The matching TransitionValues for view in either start or end values, depending
+     * on viewInStart or null if there is no match for the given view.
+     */
+    TransitionValues getMatchedTransitionValues(View view, boolean viewInStart) {
+        if (mParent != null) {
+            return mParent.getMatchedTransitionValues(view, viewInStart);
+        }
+        ArrayList<TransitionValues> lookIn = viewInStart ? mStartValuesList : mEndValuesList;
+        if (lookIn == null) {
+            return null;
+        }
+        int count = lookIn.size();
+        int index = -1;
+        for (int i = 0; i < count; i++) {
+            TransitionValues values = lookIn.get(i);
+            if (values == null) {
+                return null;
             }
-            if (values == null && view.getParent() instanceof ListView) {
-                ListView listview = (ListView) view.getParent();
-                int position = listview.getPositionForView(view);
-                long itemId = listview.getItemIdAtPosition(position);
-                values = valuesMaps.itemIdValues.get(itemId);
+            if (values.view == view) {
+                index = i;
+                break;
             }
-            // TODO: Doesn't handle the case where a view was parented to a
-            // ListView (with an itemId), but no longer is
+        }
+        TransitionValues values = null;
+        if (index >= 0) {
+            ArrayList<TransitionValues> matchIn = viewInStart ? mEndValuesList : mStartValuesList;
+            values = matchIn.get(index);
         }
         return values;
     }
@@ -1194,13 +1658,19 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
-    public void pause() {
+    public void pause(View sceneRoot) {
         if (!mEnded) {
             ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
             int numOldAnims = runningAnimators.size();
-            for (int i = numOldAnims - 1; i >= 0; i--) {
-                Animator anim = runningAnimators.keyAt(i);
-                anim.pause();
+            if (sceneRoot != null) {
+                WindowId windowId = sceneRoot.getWindowId();
+                for (int i = numOldAnims - 1; i >= 0; i--) {
+                    AnimationInfo info = runningAnimators.valueAt(i);
+                    if (info.view != null && windowId != null && windowId.equals(info.windowId)) {
+                        Animator anim = runningAnimators.keyAt(i);
+                        anim.pause();
+                    }
+                }
             }
             if (mListeners != null && mListeners.size() > 0) {
                 ArrayList<TransitionListener> tmpListeners =
@@ -1221,14 +1691,18 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
-    public void resume() {
+    public void resume(View sceneRoot) {
         if (mPaused) {
             if (!mEnded) {
                 ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
                 int numOldAnims = runningAnimators.size();
+                WindowId windowId = sceneRoot.getWindowId();
                 for (int i = numOldAnims - 1; i >= 0; i--) {
-                    Animator anim = runningAnimators.keyAt(i);
-                    anim.resume();
+                    AnimationInfo info = runningAnimators.valueAt(i);
+                    if (info.view != null && windowId != null && windowId.equals(info.windowId)) {
+                        Animator anim = runningAnimators.keyAt(i);
+                        anim.resume();
+                    }
                 }
                 if (mListeners != null && mListeners.size() > 0) {
                     ArrayList<TransitionListener> tmpListeners =
@@ -1249,42 +1723,24 @@ public abstract class Transition implements Cloneable {
      * runAnimations() to actually start the animations.
      */
     void playTransition(ViewGroup sceneRoot) {
+        mStartValuesList = new ArrayList<TransitionValues>();
+        mEndValuesList = new ArrayList<TransitionValues>();
+        matchStartAndEnd(mStartValues, mEndValues);
+
         ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
         int numOldAnims = runningAnimators.size();
+        WindowId windowId = sceneRoot.getWindowId();
         for (int i = numOldAnims - 1; i >= 0; i--) {
             Animator anim = runningAnimators.keyAt(i);
             if (anim != null) {
                 AnimationInfo oldInfo = runningAnimators.get(anim);
-                if (oldInfo != null && oldInfo.view != null &&
-                        oldInfo.view.getContext() == sceneRoot.getContext()) {
-                    boolean cancel = false;
+                if (oldInfo != null && oldInfo.view != null && oldInfo.windowId == windowId) {
                     TransitionValues oldValues = oldInfo.values;
                     View oldView = oldInfo.view;
-                    TransitionValues newValues = mEndValues.viewValues != null ?
-                            mEndValues.viewValues.get(oldView) : null;
-                    if (newValues == null) {
-                        newValues = mEndValues.idValues.get(oldView.getId());
-                    }
-                    if (oldValues != null) {
-                        // if oldValues null, then transition didn't care to stash values,
-                        // and won't get canceled
-                        if (newValues != null) {
-                            for (String key : oldValues.values.keySet()) {
-                                Object oldValue = oldValues.values.get(key);
-                                Object newValue = newValues.values.get(key);
-                                if (oldValue != null && newValue != null &&
-                                        !oldValue.equals(newValue)) {
-                                    cancel = true;
-                                    if (DBG) {
-                                        Log.d(LOG_TAG, "Transition.playTransition: " +
-                                                "oldValue != newValue for " + key +
-                                                ": old, new = " + oldValue + ", " + newValue);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    TransitionValues startValues = getTransitionValues(oldView, true);
+                    TransitionValues endValues = getMatchedTransitionValues(oldView, true);
+                    boolean cancel = (startValues != null || endValues != null) &&
+                            oldInfo.transition.areValuesChanged(oldValues, endValues);
                     if (cancel) {
                         if (anim.isRunning() || anim.isStarted()) {
                             if (DBG) {
@@ -1302,8 +1758,57 @@ public abstract class Transition implements Cloneable {
             }
         }
 
-        createAnimators(sceneRoot, mStartValues, mEndValues);
+        createAnimators(sceneRoot, mStartValues, mEndValues, mStartValuesList, mEndValuesList);
         runAnimators();
+    }
+
+    boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
+        boolean valuesChanged = false;
+        // if oldValues null, then transition didn't care to stash values,
+        // and won't get canceled
+        if (oldValues != null && newValues != null) {
+            String[] properties = getTransitionProperties();
+            if (properties != null) {
+                int count = properties.length;
+                for (int i = 0; i < count; i++) {
+                    if (isValueChanged(oldValues, newValues, properties[i])) {
+                        valuesChanged = true;
+                        break;
+                    }
+                }
+            } else {
+                for (String key : oldValues.values.keySet()) {
+                    if (isValueChanged(oldValues, newValues, key)) {
+                        valuesChanged = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return valuesChanged;
+    }
+
+    private static boolean isValueChanged(TransitionValues oldValues, TransitionValues newValues,
+            String key) {
+        Object oldValue = oldValues.values.get(key);
+        Object newValue = newValues.values.get(key);
+        boolean changed;
+        if (oldValue == null && newValue == null) {
+            // both are null
+            changed = false;
+        } else if (oldValue == null || newValue == null) {
+            // one is null
+            changed = true;
+        } else {
+            // neither is null
+            changed = !oldValue.equals(newValue);
+        }
+        if (DBG && changed) {
+            Log.d(LOG_TAG, "Transition.playTransition: " +
+                    "oldValue != newValue for " + key +
+                    ": old, new = " + oldValue + ", " + newValue);
+        }
+        return changed;
     }
 
     /**
@@ -1325,7 +1830,7 @@ public abstract class Transition implements Cloneable {
                 animator.setDuration(getDuration());
             }
             if (getStartDelay() >= 0) {
-                animator.setStartDelay(getStartDelay());
+                animator.setStartDelay(getStartDelay() + animator.getStartDelay());
             }
             if (getInterpolator() != null) {
                 animator.setInterpolator(getInterpolator());
@@ -1386,17 +1891,15 @@ public abstract class Transition implements Cloneable {
                 }
             }
             for (int i = 0; i < mStartValues.itemIdValues.size(); ++i) {
-                TransitionValues tv = mStartValues.itemIdValues.valueAt(i);
-                View v = tv.view;
-                if (v.hasTransientState()) {
-                    v.setHasTransientState(false);
+                View view = mStartValues.itemIdValues.valueAt(i);
+                if (view != null) {
+                    view.setHasTransientState(false);
                 }
             }
             for (int i = 0; i < mEndValues.itemIdValues.size(); ++i) {
-                TransitionValues tv = mEndValues.itemIdValues.valueAt(i);
-                View v = tv.view;
-                if (v.hasTransientState()) {
-                    v.setHasTransientState(false);
+                View view = mEndValues.itemIdValues.valueAt(i);
+                if (view != null) {
+                    view.setHasTransientState(false);
                 }
             }
             mEnded = true;
@@ -1458,6 +1961,177 @@ public abstract class Transition implements Cloneable {
         return this;
     }
 
+    /**
+     * Sets the callback to use to find the epicenter of a Transition. A null value indicates
+     * that there is no epicenter in the Transition and onGetEpicenter() will return null.
+     * Transitions like {@link android.transition.Explode} use a point or Rect to orient
+     * the direction of travel. This is called the epicenter of the Transition and is
+     * typically centered on a touched View. The
+     * {@link android.transition.Transition.EpicenterCallback} allows a Transition to
+     * dynamically retrieve the epicenter during a Transition.
+     * @param epicenterCallback The callback to use to find the epicenter of the Transition.
+     */
+    public void setEpicenterCallback(EpicenterCallback epicenterCallback) {
+        mEpicenterCallback = epicenterCallback;
+    }
+
+    /**
+     * Returns the callback used to find the epicenter of the Transition.
+     * Transitions like {@link android.transition.Explode} use a point or Rect to orient
+     * the direction of travel. This is called the epicenter of the Transition and is
+     * typically centered on a touched View. The
+     * {@link android.transition.Transition.EpicenterCallback} allows a Transition to
+     * dynamically retrieve the epicenter during a Transition.
+     * @return the callback used to find the epicenter of the Transition.
+     */
+    public EpicenterCallback getEpicenterCallback() {
+        return mEpicenterCallback;
+    }
+
+    /**
+     * Returns the epicenter as specified by the
+     * {@link android.transition.Transition.EpicenterCallback} or null if no callback exists.
+     * @return the epicenter as specified by the
+     * {@link android.transition.Transition.EpicenterCallback} or null if no callback exists.
+     * @see #setEpicenterCallback(android.transition.Transition.EpicenterCallback)
+     */
+    public Rect getEpicenter() {
+        if (mEpicenterCallback == null) {
+            return null;
+        }
+        return mEpicenterCallback.onGetEpicenter(this);
+    }
+
+    /**
+     * Sets the algorithm used to calculate two-dimensional interpolation.
+     * <p>
+     *     Transitions such as {@link android.transition.ChangeBounds} move Views, typically
+     *     in a straight path between the start and end positions. Applications that desire to
+     *     have these motions move in a curve can change how Views interpolate in two dimensions
+     *     by extending PathMotion and implementing
+     *     {@link android.transition.PathMotion#getPath(float, float, float, float)}.
+     * </p>
+     * <p>
+     *     When describing in XML, use a nested XML tag for the path motion. It can be one of
+     *     the built-in tags <code>arcMotion</code> or <code>patternPathMotion</code> or it can
+     *     be a custom PathMotion using <code>pathMotion</code> with the <code>class</code>
+     *     attributed with the fully-described class name. For example:</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
+     * &lt;/changeBounds>
+     * }
+     * </pre>
+     * <p>or</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     *     android:minimumVerticalAngle="0" android:maximumAngle="90"/>
+     * &lt;/changeBounds>
+     * }
+     * </pre>
+     *
+     * @param pathMotion Algorithm object to use for determining how to interpolate in two
+     *                   dimensions. If null, a straight-path algorithm will be used.
+     * @see android.transition.ArcMotion
+     * @see PatternPathMotion
+     * @see android.transition.PathMotion
+     */
+    public void setPathMotion(PathMotion pathMotion) {
+        if (pathMotion == null) {
+            mPathMotion = STRAIGHT_PATH_MOTION;
+        } else {
+            mPathMotion = pathMotion;
+        }
+    }
+
+    /**
+     * Returns the algorithm object used to interpolate along two dimensions. This is typically
+     * used to determine the View motion between two points.
+     *
+     * <p>
+     *     When describing in XML, use a nested XML tag for the path motion. It can be one of
+     *     the built-in tags <code>arcMotion</code> or <code>patternPathMotion</code> or it can
+     *     be a custom PathMotion using <code>pathMotion</code> with the <code>class</code>
+     *     attributed with the fully-described class name. For example:</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
+     * &lt;/changeBounds>}
+     * </pre>
+     * <p>or</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     *              android:minimumVerticalAngle="0"
+     *              android:maximumAngle="90"/>
+     * &lt;/changeBounds>}
+     * </pre>
+     *
+     * @return The algorithm object used to interpolate along two dimensions.
+     * @see android.transition.ArcMotion
+     * @see PatternPathMotion
+     * @see android.transition.PathMotion
+     */
+    public PathMotion getPathMotion() {
+        return mPathMotion;
+    }
+
+    /**
+     * Sets the method for determining Animator start delays.
+     * When a Transition affects several Views like {@link android.transition.Explode} or
+     * {@link android.transition.Slide}, there may be a desire to have a "wave-front" effect
+     * such that the Animator start delay depends on position of the View. The
+     * TransitionPropagation specifies how the start delays are calculated.
+     * @param transitionPropagation The class used to determine the start delay of
+     *                              Animators created by this Transition. A null value
+     *                              indicates that no delay should be used.
+     */
+    public void setPropagation(TransitionPropagation transitionPropagation) {
+        mPropagation = transitionPropagation;
+    }
+
+    /**
+     * Returns the {@link android.transition.TransitionPropagation} used to calculate Animator start
+     * delays.
+     * When a Transition affects several Views like {@link android.transition.Explode} or
+     * {@link android.transition.Slide}, there may be a desire to have a "wave-front" effect
+     * such that the Animator start delay depends on position of the View. The
+     * TransitionPropagation specifies how the start delays are calculated.
+     * @return the {@link android.transition.TransitionPropagation} used to calculate Animator start
+     * delays. This is null by default.
+     */
+    public TransitionPropagation getPropagation() {
+        return mPropagation;
+    }
+
+    /**
+     * Captures TransitionPropagation values for the given view and the
+     * hierarchy underneath it.
+     */
+    void capturePropagationValues(TransitionValues transitionValues) {
+        if (mPropagation != null && !transitionValues.values.isEmpty()) {
+            String[] propertyNames = mPropagation.getPropagationProperties();
+            if (propertyNames == null) {
+                return;
+            }
+            boolean containsAll = true;
+            for (int i = 0; i < propertyNames.length; i++) {
+                if (!transitionValues.values.containsKey(propertyNames[i])) {
+                    containsAll = false;
+                    break;
+                }
+            }
+            if (!containsAll) {
+                mPropagation.captureValues(transitionValues);
+            }
+        }
+    }
+
     Transition setSceneRoot(ViewGroup sceneRoot) {
         mSceneRoot = sceneRoot;
         return this;
@@ -1466,6 +2140,27 @@ public abstract class Transition implements Cloneable {
     void setCanRemoveViews(boolean canRemoveViews) {
         mCanRemoveViews = canRemoveViews;
     }
+
+    public boolean canRemoveViews() {
+        return mCanRemoveViews;
+    }
+
+    /**
+     * Sets the shared element names -- a mapping from a name at the start state to
+     * a different name at the end state.
+     * @hide
+     */
+    public void setNameOverrides(ArrayMap<String, String> overrides) {
+        mNameOverrides = overrides;
+    }
+
+    /** @hide */
+    public ArrayMap<String, String> getNameOverrides() {
+        return mNameOverrides;
+    }
+
+    /** @hide */
+    public void forceVisibility(int visibility, boolean isStartValue) {}
 
     @Override
     public String toString() {
@@ -1480,6 +2175,8 @@ public abstract class Transition implements Cloneable {
             clone.mAnimators = new ArrayList<Animator>();
             clone.mStartValues = new TransitionValuesMaps();
             clone.mEndValues = new TransitionValuesMaps();
+            clone.mStartValuesList = null;
+            clone.mEndValuesList = null;
         } catch (CloneNotSupportedException e) {}
 
         return clone;
@@ -1629,16 +2326,22 @@ public abstract class Transition implements Cloneable {
      * animation should be canceled or a new animation noop'd. The structure holds
      * information about the state that an animation is going to, to be compared to
      * end state of a new animation.
+     * @hide
      */
-    private static class AnimationInfo {
-        View view;
+    public static class AnimationInfo {
+        public View view;
         String name;
         TransitionValues values;
+        WindowId windowId;
+        Transition transition;
 
-        AnimationInfo(View view, String name, TransitionValues values) {
+        AnimationInfo(View view, String name, Transition transition,
+                WindowId windowId, TransitionValues values) {
             this.view = view;
             this.name = name;
             this.values = values;
+            this.windowId = windowId;
+            this.transition = transition;
         }
     }
 
@@ -1688,4 +2391,28 @@ public abstract class Transition implements Cloneable {
         }
     }
 
+    /**
+     * Class to get the epicenter of Transition. Use
+     * {@link #setEpicenterCallback(android.transition.Transition.EpicenterCallback)} to
+     * set the callback used to calculate the epicenter of the Transition. Override
+     * {@link #getEpicenter()} to return the rectangular region in screen coordinates of
+     * the epicenter of the transition.
+     * @see #setEpicenterCallback(android.transition.Transition.EpicenterCallback)
+     */
+    public static abstract class EpicenterCallback {
+
+        /**
+         * Implementers must override to return the epicenter of the Transition in screen
+         * coordinates. Transitions like {@link android.transition.Explode} depend upon
+         * an epicenter for the Transition. In Explode, Views move toward or away from the
+         * center of the epicenter Rect along the vector between the epicenter and the center
+         * of the View appearing and disappearing. Some Transitions, such as
+         * {@link android.transition.Fade} pay no attention to the epicenter.
+         *
+         * @param transition The transition for which the epicenter applies.
+         * @return The Rect region of the epicenter of <code>transition</code> or null if
+         * there is no epicenter.
+         */
+        public abstract Rect onGetEpicenter(Transition transition);
+    }
 }

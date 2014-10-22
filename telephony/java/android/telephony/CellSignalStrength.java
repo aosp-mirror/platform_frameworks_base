@@ -16,9 +16,6 @@
 
 package android.telephony;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Abstract base class for cell phone signal strength related information.
  */

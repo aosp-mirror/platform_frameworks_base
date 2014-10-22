@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -92,6 +93,11 @@ public class GlowPadView extends View {
     private static final float TARGET_SCALE_COLLAPSED = 0.8f;
     private static final float RING_SCALE_EXPANDED = 1.0f;
     private static final float RING_SCALE_COLLAPSED = 0.5f;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     private ArrayList<TargetDrawable> mTargetDrawables = new ArrayList<TargetDrawable>();
     private AnimationBundle mWaveAnimations = new AnimationBundle();
@@ -234,8 +240,12 @@ public class GlowPadView extends View {
         mMagneticTargets = a.getBoolean(R.styleable.GlowPadView_magneticTargets, mMagneticTargets);
 
         int pointId = getResourceId(a, R.styleable.GlowPadView_pointDrawable);
-        Drawable pointDrawable = pointId != 0 ? res.getDrawable(pointId) : null;
+        Drawable pointDrawable = pointId != 0 ? context.getDrawable(pointId) : null;
         mGlowRadius = a.getDimension(R.styleable.GlowPadView_glowRadius, 0.0f);
+
+        mPointCloud = new PointCloud(pointDrawable);
+        mPointCloud.makePointCloud(mInnerRadius, mOuterRadius);
+        mPointCloud.glowManager.setRadius(mGlowRadius);
 
         TypedValue outValue = new TypedValue();
 
@@ -272,10 +282,6 @@ public class GlowPadView extends View {
         setVibrateEnabled(mVibrationDuration > 0);
 
         assignDefaultsIfNeeded();
-
-        mPointCloud = new PointCloud(pointDrawable);
-        mPointCloud.makePointCloud(mInnerRadius, mOuterRadius);
-        mPointCloud.glowManager.setRadius(mGlowRadius);
     }
 
     private int getResourceId(TypedArray a, int id) {
@@ -564,7 +570,7 @@ public class GlowPadView extends View {
                 mContext.getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 1,
                 UserHandle.USER_CURRENT) != 0;
         if (mVibrator != null && hapticEnabled) {
-            mVibrator.vibrate(mVibrationDuration);
+            mVibrator.vibrate(mVibrationDuration, VIBRATION_ATTRIBUTES);
         }
     }
 

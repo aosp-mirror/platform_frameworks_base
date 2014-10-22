@@ -1,0 +1,80 @@
+page.title=Monetize Freemium Apps
+page.image=/distribute/images/freemium.jpg
+page.metaDescription=Use Google Play In-app Billing and other tools to monetize your free apps.
+page.tags="in-app", "billing", "iap", "monetizing"
+@jd:body
+
+<p>
+  Users are more likely to download free apps and games compared to priced
+  ones. However, we provide you with a number of ways to monetize free apps,
+  using <a href="{@docRoot}google/play/billing/index.html">In-app
+  Billing</a>. With this tool you can sell digital goods that are:
+</p>
+
+<ul>
+  <li>Durable &mdash; once purchased the item will always be available to the
+  user, such as additional app features.
+  </li>
+
+  <li>Consumable &mdash; items that might be used progressively or expire after
+  a period of time, such as a game booster or news subscription.
+  </li>
+</ul>
+
+<p>
+  A basic approach is to offer a free download with limited features or full
+  features for a limited time. Then use an in-app purchase to unlock the full,
+  unlimited app.
+</p>
+
+<div class="center-img" style="width:620px">
+<div style="float:right; width:300px; padding-left:1em;">
+  <img src="{@docRoot}images/gp-freemium-1.jpg" class="border-img">
+  <p class="img-caption">
+  Consumable product purchase
+  </p>
+</div>
+
+<div style="width:300px;float:left;">
+  <img src="{@docRoot}images/gp-freemium-0.jpg" class="border-img">
+  <p class="img-caption">
+  Durable goods purchase
+  </p>
+</div>
+</div>
+
+<p class="clearfloat">
+  A more advanced approach is to offer a range of features and content items
+  through in-app purchases. For example, in games you can offer users new
+  levels, playing pieces, or other game features. In apps you can offer
+  features or functionality that enhance the user experience either by
+  extending existing features or offering new ones. Using this approach you can
+  generate a continuing revenue stream from each app install.
+</p>
+
+<p>
+  Any item offered as an in-app purchase can also be offered as a subscription.
+</p>
+
+<p>
+  To get started with In-app Billing you need to set-up a Google Wallet
+  <a href="{@docRoot}distribute/googleplay/start.html#merchant-account">Merchant
+  Account</a> from Developer Console. You then define <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#in-app-products">in-app
+  products</a> in the Developer Console, integrate the In-app Billing API into
+  your apps, and add the mechanisms to unlock features or deliver content.
+</p>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+  Related Resources
+  </h2>
+
+
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/freemium"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3,6x3,6x3"
+  data-maxResults="6"></div>

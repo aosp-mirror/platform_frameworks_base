@@ -19,7 +19,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
         omx_jpeg_decoder.cpp \
         jpeg_decoder_bench.cpp \
-        SkOmxPixelRef.cpp \
         StreamSource.cpp
 
 LOCAL_SHARED_LIBRARIES := \
@@ -34,11 +33,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_C_INCLUDES := \
     $(TOP)/external/jpeg \
-    $(TOP)/external/skia/include/config \
-    $(TOP)/external/skia/include/core \
-    $(TOP)/external/skia/include/images \
-    $(TOP)/external/skia/include/utils \
-    $(TOP)/external/skia/include/effects \
     $(TOP)/frameworks/base/media/libstagefright \
     $(TOP)/frameworks/base/include/ \
     $(TOP)/frameworks/base/ \

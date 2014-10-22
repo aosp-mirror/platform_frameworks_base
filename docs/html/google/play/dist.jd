@@ -49,4 +49,12 @@ page.title=Google Play Distribution
     <p>Protect your revenue streams and integrate policies for usage into your app.
     </p><a href="{@docRoot}google/play/licensing/index.html">Learn more &raquo;</a>
   </div>
+  <div class="layout-content-col span-6">
+    <h4>
+      Google Play Developer API
+    </h4>
+    <p>Integrate your publishing operations with your release-management
+      process.
+    </p><a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Learn more &raquo;</a>
+  </div>
 </div>

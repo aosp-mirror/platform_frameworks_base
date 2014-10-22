@@ -54,13 +54,13 @@ static void usage(const char* pname)
     );
 }
 
-static SkBitmap::Config flinger2skia(PixelFormat f)
+static SkColorType flinger2skia(PixelFormat f)
 {
     switch (f) {
         case PIXEL_FORMAT_RGB_565:
-            return SkBitmap::kRGB_565_Config;
+            return kRGB_565_SkColorType;
         default:
-            return SkBitmap::kARGB_8888_Config;
+            return kN32_SkColorType;
     }
 }
 
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 
     ScreenshotClient screenshot;
     sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
-    if (display != NULL && screenshot.update(display) == NO_ERROR) {
+    if (display != NULL && screenshot.update(display, Rect(), false) == NO_ERROR) {
         base = screenshot.getPixels();
         w = screenshot.getWidth();
         h = screenshot.getHeight();
@@ -192,9 +192,10 @@ int main(int argc, char** argv)
 
     if (base) {
         if (png) {
+            const SkImageInfo info = SkImageInfo::Make(w, h, flinger2skia(f),
+                                                       kPremul_SkAlphaType);
             SkBitmap b;
-            b.setConfig(flinger2skia(f), w, h, s*bytesPerPixel(f));
-            b.setPixels((void*)base);
+            b.installPixels(info, const_cast<void*>(base), s*bytesPerPixel(f));
             SkDynamicMemoryWStream stream;
             SkImageEncoder::EncodeStream(&stream, b,
                     SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality);

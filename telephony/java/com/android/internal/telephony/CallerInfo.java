@@ -24,6 +24,7 @@ import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
@@ -37,6 +38,7 @@ import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
 import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import android.telephony.SubscriptionManager;
 
 import java.util.Locale;
 
@@ -93,9 +95,18 @@ public class CallerInfo {
     public String numberLabel;
 
     public int photoResource;
-    public long person_id;
+
+    // Contact ID, which will be 0 if a contact comes from the corp CP2.
+    public long contactIdOrZero;
     public boolean needUpdate;
     public Uri contactRefUri;
+    public String lookupKey;
+
+    /**
+     * Contact display photo URI.  If a contact has no display photo but a thumbnail, it'll be
+     * the thumbnail URI instead.
+     */
+    public Uri contactDisplayPhotoUri;
 
     // fields to hold individual contact preference data,
     // including the send to voicemail flag and the ringtone
@@ -206,14 +217,33 @@ public class CallerInfo {
                 // Look for the person_id.
                 columnIndex = getColumnIndexForPersonId(contactRef, cursor);
                 if (columnIndex != -1) {
-                    info.person_id = cursor.getLong(columnIndex);
-                    if (VDBG) Rlog.v(TAG, "==> got info.person_id: " + info.person_id);
+                    final long contactId = cursor.getLong(columnIndex);
+                    if (contactId != 0 && !Contacts.isEnterpriseContactId(contactId)) {
+                        info.contactIdOrZero = contactId;
+                        if (VDBG) {
+                            Rlog.v(TAG, "==> got info.contactIdOrZero: " + info.contactIdOrZero);
+                        }
+                    }
                 } else {
                     // No valid columnIndex, so we can't look up person_id.
-                    Rlog.w(TAG, "Couldn't find person_id column for " + contactRef);
+                    Rlog.w(TAG, "Couldn't find contact_id column for " + contactRef);
                     // Watch out: this means that anything that depends on
                     // person_id will be broken (like contact photo lookups in
                     // the in-call UI, for example.)
+                }
+
+                // Contact lookupKey
+                columnIndex = cursor.getColumnIndex(PhoneLookup.LOOKUP_KEY);
+                if (columnIndex != -1) {
+                    info.lookupKey = cursor.getString(columnIndex);
+                }
+
+                // Display photo URI.
+                columnIndex = cursor.getColumnIndex(PhoneLookup.PHOTO_URI);
+                if ((columnIndex != -1) && (cursor.getString(columnIndex) != null)) {
+                    info.contactDisplayPhotoUri = Uri.parse(cursor.getString(columnIndex));
+                } else {
+                    info.contactDisplayPhotoUri = null;
                 }
 
                 // look for the custom ringtone, create from the string stored
@@ -233,6 +263,7 @@ public class CallerInfo {
                 info.contactExists = true;
             }
             cursor.close();
+            cursor = null;
         }
 
         info.needUpdate = false;
@@ -253,7 +284,8 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, Uri contactRef) {
 
         return getCallerInfo(context, contactRef,
-                context.getContentResolver().query(contactRef, null, null, null, null));
+                CallerInfoAsyncQuery.getCurrentProfileContentResolver(context)
+                        .query(contactRef, null, null, null, null));
     }
 
     /**
@@ -269,6 +301,23 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getCallerInfo() based on number...");
 
+        long subId = SubscriptionManager.getDefaultSubId();
+        return getCallerInfo(context, number, subId);
+    }
+
+    /**
+     * getCallerInfo given a phone number and subscription, look up in the call-log database
+     * for the matching caller id info.
+     * @param context the context used to get the ContentResolver
+     * @param number the phone number used to lookup caller id
+     * @param subId the subscription for checking for if voice mail number or not
+     * @return the CallerInfo which contains the caller id for the given
+     * number. The returned CallerInfo is null if no number is supplied. If
+     * a matching number is not found, then a generic caller info is returned,
+     * with all relevant fields empty or null.
+     */
+    public static CallerInfo getCallerInfo(Context context, String number, long subId) {
+
         if (TextUtils.isEmpty(number)) {
             return null;
         }
@@ -276,13 +325,14 @@ public class CallerInfo {
         // Change the callerInfo number ONLY if it is an emergency number
         // or if it is the voicemail number.  If it is either, take a
         // shortcut and skip the query.
-        if (PhoneNumberUtils.isLocalEmergencyNumber(number, context)) {
+        if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
             return new CallerInfo().markAsEmergency(context);
-        } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
+        } else if (PhoneNumberUtils.isVoiceMailNumber(subId, number)) {
             return new CallerInfo().markAsVoiceMail();
         }
 
-        Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
+        Uri contactUri = Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
+                Uri.encode(number));
 
         CallerInfo info = getCallerInfo(context, contactUri);
         info = doSecondaryLookupIfNecessary(context, number, info);
@@ -313,44 +363,11 @@ public class CallerInfo {
             String username = PhoneNumberUtils.getUsernameFromUriNumber(number);
             if (PhoneNumberUtils.isGlobalPhoneNumber(username)) {
                 previousResult = getCallerInfo(context,
-                        Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+                        Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
                                 Uri.encode(username)));
             }
         }
         return previousResult;
-    }
-
-    /**
-     * getCallerId: a convenience method to get the caller id for a given
-     * number.
-     *
-     * @param context the context used to get the ContentResolver.
-     * @param number a phone number.
-     * @return if the number belongs to a contact, the contact's name is
-     * returned; otherwise, the number itself is returned.
-     *
-     * TODO NOTE: This MAY need to refer to the Asynchronous Query API
-     * [startQuery()], instead of getCallerInfo, but since it looks like
-     * it is only being used by the provider calls in the messaging app:
-     *   1. android.provider.Telephony.Mms.getDisplayAddress()
-     *   2. android.provider.Telephony.Sms.getDisplayAddress()
-     * We may not need to make the change.
-     */
-    public static String getCallerId(Context context, String number) {
-        CallerInfo info = getCallerInfo(context, number);
-        String callerID = null;
-
-        if (info != null) {
-            String name = info.name;
-
-            if (!TextUtils.isEmpty(name)) {
-                callerID = name;
-            } else {
-                callerID = number;
-            }
-        }
-
-        return callerID;
     }
 
     // Accessors
@@ -400,10 +417,17 @@ public class CallerInfo {
     // TODO: As in the emergency number handling, we end up writing a
     // string in the phone number field.
     /* package */ CallerInfo markAsVoiceMail() {
+
+        long subId = SubscriptionManager.getDefaultSubId();
+        return markAsVoiceMail(subId);
+
+    }
+
+    /* package */ CallerInfo markAsVoiceMail(long subId) {
         mIsVoiceMail = true;
 
         try {
-            String voiceMailLabel = TelephonyManager.getDefault().getVoiceMailAlphaTag();
+            String voiceMailLabel = TelephonyManager.getDefault().getVoiceMailAlphaTag(subId);
 
             phoneNumber = voiceMailLabel;
         } catch (SecurityException se) {
@@ -608,10 +632,10 @@ public class CallerInfo {
                     .append("\nnumberType: " + numberType)
                     .append("\nnumberLabel: " + numberLabel)
                     .append("\nphotoResource: " + photoResource)
-                    .append("\nperson_id: " + person_id)
+                    .append("\ncontactIdOrZero: " + contactIdOrZero)
                     .append("\nneedUpdate: " + needUpdate)
-                    .append("\ncontactRefUri: " + contactRefUri)
-                    .append("\ncontactRingtoneUri: " + contactRefUri)
+                    .append("\ncontactRingtoneUri: " + contactRingtoneUri)
+                    .append("\ncontactDisplayPhotoUri: " + contactDisplayPhotoUri)
                     .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
                     .append("\ncachedPhoto: " + cachedPhoto)
                     .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)

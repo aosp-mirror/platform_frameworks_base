@@ -57,7 +57,7 @@ public interface KeyListener {
     
     /**
      * If the key listener wants to handle this key, return true,
-     * otherwise return false and the caller (i.e. the widget host)
+     * otherwise return false and the caller (i.e.&nbsp;the widget host)
      * will handle the key.
      */
     public boolean onKeyDown(View view, Editable text,
@@ -65,7 +65,7 @@ public interface KeyListener {
 
     /**
      * If the key listener wants to handle this key release, return true,
-     * otherwise return false and the caller (i.e. the widget host)
+     * otherwise return false and the caller (i.e.&nbsp;the widget host)
      * will handle the key.
      */
     public boolean onKeyUp(View view, Editable text,
@@ -73,7 +73,7 @@ public interface KeyListener {
     
     /**
      * If the key listener wants to other kinds of key events, return true,
-     * otherwise return false and the caller (i.e. the widget host)
+     * otherwise return false and the caller (i.e.&nbsp;the widget host)
      * will handle the key.
      */
     public boolean onKeyOther(View view, Editable text, KeyEvent event);

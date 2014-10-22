@@ -17,7 +17,6 @@
 package android.net.dhcp;
 
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 /**

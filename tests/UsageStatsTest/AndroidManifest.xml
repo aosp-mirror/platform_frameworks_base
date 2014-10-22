@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.tests.usagestats">
+
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
+    <application android:label="Usage Access Test">
+        <activity android:name=".UsageStatsActivity"
+                  android:label="Device Usage History">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".UsageLogActivity" />
+    </application>
+</manifest>

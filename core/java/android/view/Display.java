@@ -26,6 +26,8 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.util.Arrays;
+
 /**
  * Provides information about the size and density of a logical display.
  * <p>
@@ -202,6 +204,50 @@ public final class Display {
      * @hide
      */
     public static final int TYPE_VIRTUAL = 5;
+
+    /**
+     * Display state: The display state is unknown.
+     *
+     * @see #getState
+     */
+    public static final int STATE_UNKNOWN = 0;
+
+    /**
+     * Display state: The display is off.
+     *
+     * @see #getState
+     */
+    public static final int STATE_OFF = 1;
+
+    /**
+     * Display state: The display is on.
+     *
+     * @see #getState
+     */
+    public static final int STATE_ON = 2;
+
+    /**
+     * Display state: The display is dozing in a low power state; it is still
+     * on but is optimized for showing system-provided content while the
+     * device is non-interactive.
+     *
+     * @see #getState
+     * @see android.os.PowerManager#isInteractive
+     */
+    public static final int STATE_DOZE = 3;
+
+    /**
+     * Display state: The display is dozing in a suspended low power state; it is still
+     * on but is optimized for showing static system-provided content while the device
+     * is non-interactive.  This mode may be used to conserve even more power by allowing
+     * the hardware to stop applying frame buffer updates from the graphics subsystem or
+     * to take over the display and manage it autonomously to implement low power always-on
+     * display functionality.
+     *
+     * @see #getState
+     * @see android.os.PowerManager#isInteractive
+     */
+    public static final int STATE_DOZE_SUSPEND = 4;
 
     /**
      * Internal method to create a display.
@@ -528,6 +574,7 @@ public final class Display {
      * 90 degrees clockwise and thus the returned value here will be
      * {@link Surface#ROTATION_90 Surface.ROTATION_90}.
      */
+    @Surface.Rotation
     public int getRotation() {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -540,6 +587,7 @@ public final class Display {
      * @return orientation of this display.
      */
     @Deprecated
+    @Surface.Rotation
     public int getOrientation() {
         return getRotation();
     }
@@ -563,6 +611,51 @@ public final class Display {
         synchronized (this) {
             updateDisplayInfoLocked();
             return mDisplayInfo.refreshRate;
+        }
+    }
+
+    /**
+     * Get the supported refresh rates of this display in frames per second.
+     */
+    public float[] getSupportedRefreshRates() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            final float[] refreshRates = mDisplayInfo.supportedRefreshRates;
+            return Arrays.copyOf(refreshRates, refreshRates.length);
+        }
+    }
+
+    /**
+     * Gets the app VSYNC offset, in nanoseconds.  This is a positive value indicating
+     * the phase offset of the VSYNC events provided by Choreographer relative to the
+     * display refresh.  For example, if Choreographer reports that the refresh occurred
+     * at time N, it actually occurred at (N - appVsyncOffset).
+     * <p>
+     * Apps generally do not need to be aware of this.  It's only useful for fine-grained
+     * A/V synchronization.
+     */
+    public long getAppVsyncOffsetNanos() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.appVsyncOffsetNanos;
+        }
+    }
+
+    /**
+     * This is how far in advance a buffer must be queued for presentation at
+     * a given time.  If you want a buffer to appear on the screen at
+     * time N, you must submit the buffer before (N - presentationDeadline).
+     * <p>
+     * The desired presentation time for GLES rendering may be set with
+     * {@link android.opengl.EGLExt#eglPresentationTimeANDROID}.  For video decoding, use
+     * {@link android.media.MediaCodec#releaseOutputBuffer(int, long)}.  Times are
+     * expressed in nanoseconds, using the system monotonic clock
+     * ({@link System#nanoTime}).
+     */
+    public long getPresentationDeadlineNanos() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.presentationDeadlineNanos;
         }
     }
 
@@ -624,6 +717,19 @@ public final class Display {
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
                     mDisplayAdjustments.getActivityToken());
+        }
+    }
+
+    /**
+     * Gets the state of the display, such as whether it is on or off.
+     *
+     * @return The state of the display: one of {@link #STATE_OFF}, {@link #STATE_ON},
+     * {@link #STATE_DOZE}, {@link #STATE_DOZE_SUSPEND}, or {@link #STATE_UNKNOWN}.
+     */
+    public int getState() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mIsValid ? mDisplayInfo.state : STATE_UNKNOWN;
         }
     }
 
@@ -718,5 +824,33 @@ public final class Display {
                 return Integer.toString(type);
         }
     }
-}
 
+    /**
+     * @hide
+     */
+    public static String stateToString(int state) {
+        switch (state) {
+            case STATE_UNKNOWN:
+                return "UNKNOWN";
+            case STATE_OFF:
+                return "OFF";
+            case STATE_ON:
+                return "ON";
+            case STATE_DOZE:
+                return "DOZE";
+            case STATE_DOZE_SUSPEND:
+                return "DOZE_SUSPEND";
+            default:
+                return Integer.toString(state);
+        }
+    }
+
+    /**
+     * Returns true if display updates may be suspended while in the specified
+     * display power state.
+     * @hide
+     */
+    public static boolean isSuspendedState(int state) {
+        return state == STATE_OFF || state == STATE_DOZE_SUSPEND;
+    }
+}

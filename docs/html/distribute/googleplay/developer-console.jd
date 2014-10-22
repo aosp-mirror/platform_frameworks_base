@@ -1,0 +1,603 @@
+page.title=Developer Console
+page.metaDescription=Learn about the Developer Console, your home for app publishing on Google Play.
+page.image=/distribute/images/developer-console.jpg
+Xnonavpage=true
+
+@jd:body
+    
+    <div id="qv-wrapper">           
+  <div id="qv">
+    <h2>Publishing Features</h2>
+    <ol>
+      <li><a href="#allapps">All Applications</a></li>
+      <li><a href="#account-details">Your Account Details</a></li>
+      <li><a href="#merchant-account">Linking Your Merchant Account</a></li>
+      <li><a href="#multiple-user-accounts">Multiple User Accounts</a></li>
+      <li><a href="#alpha-beta">Alpha and Beta Testing</a></li>
+      <li><a href="#staged-rollouts">Staged Rollouts</a></li>
+      <li><a href="#multiple-apk">Multiple APK Support</a></li>
+      <li><a href="#selling-pricing-your-products">Selling and Pricing</a></li>
+      <li><a href="#in-app-products">In-App Products</a></li>
+      <li><a href="#distribution-controls">Distribution Controls</a></li>
+      <li><a href="#reviews-reports">User Reviews, Crash Reports</a></li>
+      <li><a href="#app-stats">App Stats</a></li>
+      <li><a href="#related-resources">Related Resources</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  The <a href="https://play.google.com/apps/publish/">Google Play Developer
+  Console</a> is your home for publishing operations and tools.
+</p>
+<!-- <img src="{@docRoot}images/gp-dc-startscreen.jpg" style="width:480px;" /> -->
+<img src="{@docRoot}images/gp-devconsole-home.png" style="width:480px;">
+<p>
+  Upload apps, build your product pages, configure prices and distribution, and
+  publish. You can manage all phases of publishing on Google Play through the
+  Developer Console, from any web browser.
+</p>
+
+<p>
+  Once you've <a href=
+  "{@docRoot}distribute/googleplay/start.html">registered</a> and received
+  verification by email, you can sign in to your Google Play Developer Console.
+</p>
+
+<div class="headerLine">
+  <h2 id="allapps">
+    All Applications
+  </h2>
+
+
+</div>
+
+<p>
+  Start in All Applications, which gives you a quick overview of your apps,
+  lets you jump to stats, reviews, and product details, or upload a new app.
+</p>
+
+<div style="padding:1em 0em 0em 0em;">
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine" style="margin-top:-6px">
+  <h2 id="account-details">
+    Your Account Details
+  </h2>
+
+
+</div>
+
+<p>
+  Specify basic developer profile information about yourself or your company on
+  the accounts detail page. This identifies you to Google Play and your
+  customers. You can go back at any time to edit the information and change
+  your settings.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-profile.png" class="frame">
+</div>
+
+<p>
+  Your developer profile contains:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Developer name &mdash; displayed on your store listing page and elsewhere
+      on Google Play.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Contact information &mdash; used by Google only, it isn't seen by your
+      customers.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Web site URL &mdash; displayed on your store listing page.
+    </p>
+  </li>
+</ul>
+
+<p>
+  On the account details page you can also add restricted access for marketers
+  and other teams, register for a merchant account, or set up test accounts for
+  Google Play licensing.
+</p>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Linking Your Merchant Account
+  </h2>
+
+
+</div>
+
+<p>
+  If you want to sell apps or in-app products, link your Google Wallet Merchant
+  Account to your developer profile. Google Play uses the linked merchant
+  account for financial and tax identification, as well as for monthly payouts
+  from sales.
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-user-accounts">
+    Multiple User Accounts
+  </h2>
+
+
+</div>
+
+<p>
+  Set up user accounts for other team members to access different parts of your
+  Developer Console.
+</p>
+
+<div style="width:550px;">
+  <img src="{@docRoot}images/gp-dc-invite.png" class="frame">
+</div>
+
+<p>
+  The first account registered is the <em>account owner</em>, with full access
+  to all parts of the console. The owner can add <em>user accounts</em> and
+  manage console access.
+</p>
+
+<p>
+  For example, an owner can grant users access to publishing and app
+  configuration, but not to financial reports. Learn how to <a href=
+  "https://support.google.com/googleplay/android-developer/answer/2528691">set
+  up multiple accounts</a> now.
+</p>
+
+<div class="headerLine">
+  <h2 id="store-listing-details">
+    Store Listing Details
+  </h2>
+
+
+</div>
+
+<p>
+  Use the Developer Console to set up a <em>Store Listing page</em>. This is
+  the home for your app in Google Play. It's the page users see on their mobile
+  phones or on the web to learn about your app and download it.
+</p>
+
+<p>
+  Upload custom brand assets, screenshots, and videos to highlight what's great
+  about your app. Provide a localized description, add notes about the latest
+  version, and more. You can update your store listing at any time.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-details.png" class="frame">
+</div>
+
+<div class="headerLine">
+  <h2 id="upload-instantly-publish">
+    Upload and Instantly Publish
+  </h2>
+
+
+</div>
+
+<p>
+  From the Developer Console you can quickly upload and publish a release-ready
+  Android application package file. The app is a <em>draft</em> until you
+  publish it, at which time Google Play makes your store listing page and app
+  available to users&mdash;your app appears in the store listings within hours,
+  not weeks.
+</p>
+
+<p>
+  Once your app is published, you can update it as often as you want: Change
+  prices, configuration, and distribution options at any time, without needing
+  to update your app binary.
+</p>
+
+<p>
+  As you add features or address code issues, you can publish an updated binary
+  at any time. The new version is available almost immediately and existing
+  customers are notified that an update is ready for download. Users can also
+  accept automatic updates to your app, so that your updates are delivered and
+  installed as soon as you publish them. You can unpublish your apps app at any
+  time.
+</p>
+
+<div class="headerLine">
+  <h2 id="alpha-beta">
+    Alpha and Beta Testing
+  </h2>
+
+
+</div>
+
+<p>
+  It's always valuable to get real-world feedback from users, especially before
+  launch. Google Play makes it easy to distribute pre-release versions of your
+  app to alpha and beta test groups anywhere in the world.
+</p>
+
+<p>
+  In the <strong>APK</strong> section of your Google Play Developer Console
+  you’ll find the <strong>Alpha Testing</strong> and <strong>Beta
+  Testing</strong> tabs. Here you can upload versions of your apps’ APK files
+  and define a list of testers as a <a href=
+  "https://support.google.com/groups/answer/46601">Google Group</a> or <a href=
+  "https://support.google.com/plus/topic/2888488">Google+ Community</a>. Once
+  this is done you’ll receive a URL that you forward to your testers, from
+  which they can opt-in to the testing program.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-ab.png" class="frame">
+</div>
+
+<p>
+  After opting-in, your testers then go to your app’s product page and when
+  they download the app Google Play will deliver them the alpha or beta version
+  as appropriate. Incidentally, if a user happens to be opted-in to both your
+  testing groups, Google Play will always deliver them the alpha test version.
+</p>
+
+<p>
+  Note that users cannot provide feedback and reviews on alpha and beta
+  versions of your apps. To gather feedback you could used the <a href=
+  "https://support.google.com/groups/answer/46601">Google Group</a> or <a href=
+  "https://support.google.com/plus/topic/2888488">Google+ Community</a>, or
+  setup an email address or your own website.
+</p>
+
+<p>
+  You can use these testing programs to <a href=
+  "{@docRoot}distribute/essentials/optimizing-your-app.html">optimize your
+  apps</a>, help with <a href=
+  "{@docRoot}distribute/users/expand-to-new-markets.html">rollout to new
+  markets</a>, and start <a href=
+  "{@docRoot}distribute/users/build-community.html">building your
+  community</a>. There is also more information on using beta test in the
+  <a href="{@docRoot}distribute/tools/launch-checklist.html">Launch
+  Checklist</a> and <a href=
+  "{@docRoot}distribute/tools/localization-checklist.html">Localization
+  Checklist</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="staged-rollouts">
+    Staged Rollouts
+  </h2>
+
+
+</div>
+
+<p>
+  You can also stage the rollout of your apps using the Production tab in the
+  APK section of your Google Play Developer Console. Here you can define the
+  percentage of user who’ll be able to download your app.
+</p>
+
+<p>
+  Staging your rollout will help limit the impact of unexpected bugs or server
+  load and enable you to gauge user feedback with an unbiased sample of users.
+  Users can rate and review your apps during staged roll outs, so if you’re
+  hesitant, start your rollout to a small percentage of users. Be sure to watch
+  for and respond to any negative reviews.
+</p>
+
+<p>
+  Note that rollbacks aren’t supported due to the <a href=
+  "{@docRoot}tools/publishing/versioning.html">app versioning requirements</a>
+  of the Android platform. If you need to rollback, consider launching a
+  previous APK with a new version number. However, this practice should be used
+  only as a last resort, as users will lose access to new features and your old
+  app may not be forward-compatible with your server changes or data formats,
+  so be sure to run <a href="#alpha-beta">alpha and beta tests</a> of your
+  updates.
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-apk">
+    Multiple APK Support
+  </h2>
+
+
+</div>
+
+<p>
+  In most cases, a single app package (APK) is all you need, and it’s usually
+  the easiest way to manage and maintain the app. However, if you need to
+  deliver a different APK to different devices, Google Play provides a way to
+  do that.
+</p>
+
+<p>
+  <em>Multiple APK support</em> lets you create multiple app packages that use
+  the same package name but differ in their OpenGL texture compression formats,
+  screen-size support, or Android platform versions supported. You can simply
+  upload all the APKs under a single product listing and Google Play selects
+  the best ones to deliver to users, based on the characteristics of their
+  devices.
+</p>
+
+<p>
+  You can also upload up to two secondary downloads for each published APK,
+  including multiple APKs, using the <em>APK Expansion Files</em> option. Each
+  expansion file can be up to 2GB and contain any type of code or assets.
+  Google Play hosts them for free and handles the download of the files as part
+  of the normal app installation.
+</p>
+
+<div class="headerLine">
+  <h2 id="selling-pricing-your-products">
+    Selling and Pricing Your Products
+  </h2>
+
+
+</div>
+
+<div class="figure-right">
+  <img src="{@docRoot}images/gp-buyer-currency.png" class="frame">
+</div>
+
+<p>
+  You have tools to set prices for your apps and in-app products. Your app can
+  be free to download or priced, requiring payment before download.
+</p>
+
+<ul>
+  <li>If you publish your app as free, it must <strong>remain free for the life
+  of the app</strong>. Free apps can be downloaded by all users in Google Play.
+  </li>
+
+  <li>If you publish it as priced, you can later change it to free. Priced apps
+  can be purchased and downloaded only by users who have registered a form of
+  payment in Google Play.
+  </li>
+</ul>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      See <a href=
+      "http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294&amp;topic=2365624&amp;ctx=topic">
+      Supported locations for distributing applications</a> for a list of
+      countries where you can distribute or sell your apps.
+    </p>
+  </div>
+</div>
+
+<p>
+  You can also offer in-app products and subscriptions, whether the app is free
+  or priced. Set prices separately for priced apps, in-app products, and
+  subscriptions.
+</p>
+
+<p>
+  When users browse your app product pages or initiate a purchase, Google Play
+  shows them the price they’ll be charged in their local currency.
+</p>
+
+<p>
+  For each product, you initially set a default price in your own currency. If
+  you do no more, Google Play will automatically set local prices once a month
+  based on the US-Dollar price for your app.
+</p>
+
+<p>
+  However, Google Play gives you complete control over how you price your
+  products in each country. To start you can manually set fixed local prices
+  from the default price, using the <strong>auto-convert prices now</strong>
+  feature. You can then review these prices and set new ones for any countries
+  you wish &mdash; the price for each country is independent, so you can adjust
+  one price without affecting others. For most countries, the price you set is
+  the final price charged to users, including taxes.
+</p>
+
+<p>
+  For more on pricing your apps, see <a href=
+  "{@docRoot}distribute/users/expand-to-new-markets.html#localize-your-google-play-listing">
+  Expand into New Markets</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="in-app-products">
+    In-app Products
+  </h2>
+
+
+</div>
+
+<p>
+  You can sell in-app products and subscriptions using <a href=
+  "{@docRoot}google/play/billing/index.html">Google Play In-app Billing</a> as
+  a way to monetize your apps. In-app products are one-time purchases, while
+  subscriptions are recurring charges on a monthly or annual basis.
+</p>
+
+<p>
+  In the <strong>In-app Products</strong> section for a specific published or
+  draft APK you:
+</p>
+
+<ul>
+  <li>Create product lists for in-app products and subscriptions.
+  </li>
+
+  <li>Set prices.
+  </li>
+
+  <li>Publish the products with the app or withdraw obsolete products.
+  </li>
+</ul>
+
+<p>
+  For details on how to implement In-app Billing, see the <a href=
+  "{@docRoot}google/play/billing/index.html">In-app Billing</a> developer
+  documentation. You make use of in-app products in the <a href=
+  "{@docRoot}distribute/monetize/premium.html">Premium</a>, <a href=
+  "{@docRoot}distribute/monetize/freemium.html">Freemium</a>, and <a href=
+  "{@docRoot}distribute/monetize/subscriptions.html">Subscription</a>
+  monetization models
+</p>
+
+<div class="headerLine">
+  <h2 id="distribution-controls">
+    Distribution Controls
+  </h2>
+
+
+</div>
+
+<p>
+  Manage which countries and territories your apps will distribute to. For some
+  countries, you can choose which carriers you want to target. You can also see
+  the list of devices your app is available for, based on any distribution
+  rules declared in its manifest file.
+</p>
+
+<h3 id="geotargeting">
+  Geographic targeting
+</h3>
+
+<p>
+  You can use controls in the Google Play Developer Console to easily manage
+  the geographic distribution of your apps, without any changes in your
+  application binary. You can specify which countries and territories you want
+  to distribute to, and even which carriers (for some countries).
+</p>
+
+<p>
+  When users visit the store, Google Play makes sure that they are in one of
+  your targeted countries before downloading your app. You can change your
+  country and carrier targeting at any time just by saving changes in the
+  Google Play Developer Console.
+</p>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-supported-dev-requirements.png" class="frame">
+</div>
+
+<p>
+  To help you market to users around the world, you can <a href=
+  "{@docRoot}distribute/tools/launch-checklist.html#start-localization">localize
+  your store listing</a>, including app details and description, promotional
+  graphics, screenshots, and more.
+</p>
+
+<h3 id="captargeting">
+  Capabilities targeting
+</h3>
+
+<p>
+  Google Play also lets you control distribution according to device features
+  or capabilities that your app depends on. There are several types of
+  dependencies that the app can define in its manifest, such as hardware
+  features, OpenGL texture compression formats, libraries, Android platform
+  versions, and others.
+</p>
+
+<p>
+  When you upload your app, Google Play reads the dependencies and sets up any
+  necessary distribution rules. For technical information about declaring
+  dependencies, read <a href="{@docRoot}google/play/filters.html">Filters on
+  Google Play</a>.
+</p>
+
+<p>
+  For pinpoint control over distribution, Google Play lets you see all of the
+  devices your app is available to based on its dependencies (if any). From the
+  Google Play Developer Console, you can list the supported devices and even
+  exclude specific devices if needed.
+</p>
+
+<div class="headerLine">
+  <h2 id="reviews-reports">
+    User Reviews and Crash Reports
+  </h2>
+
+
+</div>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-dc-reviews.png" class="frame">
+  <p class="img-caption">
+    The User reviews section gives you access to user reviews for a specific
+    app. You can filter reviews in a number of ways to locate issues more
+    easily and support your customers more effectively.
+  </p>
+</div>
+
+<p>
+  Google Play makes it easy for users to submit reviews of your app for the
+  benefit of other users. The reviews give you usability feedback, support
+  requests, and details of important functionality issues direct from your
+  customers.
+</p>
+
+<p>
+  Use crash reports for debugging and improving your app. You can see crash
+  reports with stack trace and other data, submitted automatically from Android
+  devices.
+</p>
+
+<div class="headerLine">
+  <h2 id="app-stats">
+    App Statistics
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:500px">
+  <img src="{@docRoot}images/gp-dc-stats.png">
+  <p class="img-caption">
+    <b>App statistics page</b>: Shows you a variety of statistics about a
+    specific app's installation performance.
+  </p>
+</div>
+
+<p>
+  You get detailed statistics on the install performance of your app.
+</p>
+
+<p>
+  See installation metrics measured by unique users as well as by unique
+  devices. View active installs, total installs, upgrades, daily installs and
+  uninstalls, and metrics about ratings.
+</p>
+
+<p>
+  Zoom into the installation numbers by metric, including Android platform
+  version, device, country, language, app version, and carrier. View the
+  installation data for each dimension on timeline charts.
+</p>
+
+<p>
+  These charts highlight your app’s installation peaks and longer-term trends.
+  They help you learn your user’s adoption behavior, correlate statistics to
+  promotions, see the effect of app improvements, and other factors. Focus in
+  on data inside a dimension by adding specific points to the timeline.
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/developerconsole"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

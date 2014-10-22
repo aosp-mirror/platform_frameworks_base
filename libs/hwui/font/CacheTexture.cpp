@@ -114,7 +114,7 @@ CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint3
             mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount),
             mCaches(Caches::getInstance()) {
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
+            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE);
 
     // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
     // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
@@ -143,7 +143,7 @@ void CacheTexture::init() {
     // reset, then create a new remainder space to start again
     reset();
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
+            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE);
 }
 
 void CacheTexture::releaseMesh() {

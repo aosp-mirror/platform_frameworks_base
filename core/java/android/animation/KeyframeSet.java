@@ -21,6 +21,7 @@ import java.util.Arrays;
 import android.animation.Keyframe.IntKeyframe;
 import android.animation.Keyframe.FloatKeyframe;
 import android.animation.Keyframe.ObjectKeyframe;
+import android.graphics.Path;
 import android.util.Log;
 
 /**
@@ -28,7 +29,7 @@ import android.util.Log;
  * values between those keyframes for a given animation. The class internal to the animation
  * package because it is an implementation detail of how Keyframes are stored and used.
  */
-class KeyframeSet {
+class KeyframeSet implements Keyframes {
 
     int mNumKeyframes;
 
@@ -46,6 +47,18 @@ class KeyframeSet {
         mFirstKeyframe = mKeyframes.get(0);
         mLastKeyframe = mKeyframes.get(mNumKeyframes - 1);
         mInterpolator = mLastKeyframe.getInterpolator();
+    }
+
+    /**
+     * If subclass has variables that it calculates based on the Keyframes, it should reset them
+     * when this method is called because Keyframe contents might have changed.
+     */
+    @Override
+    public void invalidateCache() {
+    }
+
+    public ArrayList<Keyframe> getKeyframes() {
+        return mKeyframes;
     }
 
     public static KeyframeSet ofInt(int... values) {
@@ -137,6 +150,14 @@ class KeyframeSet {
         return new KeyframeSet(keyframes);
     }
 
+    public static PathKeyframes ofPath(Path path) {
+        return new PathKeyframes(path);
+    }
+
+    public static PathKeyframes ofPath(Path path, float error) {
+        return new PathKeyframes(path, error);
+    }
+
     /**
      * Sets the TypeEvaluator to be used when calculating animated values. This object
      * is required only for KeyframeSets that are not either IntKeyframeSet or FloatKeyframeSet,
@@ -147,6 +168,11 @@ class KeyframeSet {
      */
     public void setEvaluator(TypeEvaluator evaluator) {
         mEvaluator = evaluator;
+    }
+
+    @Override
+    public Class getType() {
+        return mFirstKeyframe.getType();
     }
 
     @Override

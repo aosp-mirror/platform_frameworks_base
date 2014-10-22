@@ -1,0 +1,37 @@
+page.title=Devices
+page.viewport_width=970
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 410px;
+  width: 340px;
+
+}
+#hero-image {
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    <p itemprop="description">The device-centric UI principles, overviews, and detailed guidelines
+      described here build on the core <a href="{@docRoot}design/get-started/principles.html">Android Design Principles</a>
+      to provide more specific design guidance for different form factors.
+    </p>
+    <p>
+    <a href="{@docRoot}design/handhelds/index.html" class="landing-page-link">Phones &amp; Tablets</a></p>
+  </div>
+  <a id="hero-image" href="{@docRoot}design/handhelds/index.html">
+    <img src="{@docRoot}design/media/device_family.png">
+  </a>
+</div>
+

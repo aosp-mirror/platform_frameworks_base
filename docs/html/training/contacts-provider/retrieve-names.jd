@@ -102,9 +102,9 @@ trainingnavtop=true
 <p>
     To display the search results in a {@link android.widget.ListView}, you need a main layout file
     that defines the entire UI including the {@link android.widget.ListView}, and an item layout
-    file that defines one line of the {@link android.widget.ListView}. For example, you can define
-    the main layout file <code>res/layout/contacts_list_view.xml</code> that contains the
-    following XML:
+    file that defines one line of the {@link android.widget.ListView}. For example, you could create
+    the main layout file <code>res/layout/contacts_list_view.xml</code> with
+    the following XML:
 </p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -250,7 +250,8 @@ public class ContactsFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         // Inflate the fragment layout
-        return inflater.inflate(R.layout.contacts_list_layout, container, false);
+        return inflater.inflate(R.layout.contact_list_fragment,
+            container, false);
     }
 </pre>
 <h3 id="DefineAdapter">Set up the CursorAdapter for the ListView</h3>
@@ -268,7 +269,8 @@ public class ContactsFragment extends Fragment implements
         super.onActivityCreated(savedInstanceState);
         ...
         // Gets the ListView from the View list of the parent activity
-        mContactsList = (ListView) getActivity().findViewById(R.layout.contact_list_view);
+        mContactsList =
+            (ListView) getActivity().findViewById(R.layout.contact_list_view);
         // Gets a CursorAdapter
         mCursorAdapter = new SimpleCursorAdapter(
                 getActivity(),

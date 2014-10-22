@@ -1,9 +1,16 @@
-page.title=Design Principles
+page.title=Android Design Principles
 @jd:body
 
-<p>These design principles were developed by and for the Android User Experience Team to keep users'
-best interests in mind. Consider them as you apply your own creativity and design thinking. Deviate
-with purpose.</p>
+<p>These design principles were developed by and for the Android
+User Experience Team to keep users' best interests in mind.
+For Android developers and designers, they continue to
+underlie the more  detailed design guidelines for different
+types of devices.</p>
+
+<p>
+Consider these principles as you apply your own
+creativity and design thinking. Deviate with purpose.
+</p>
 
 <h2 id="enchant-me">Enchant Me</h2>
 

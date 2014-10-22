@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PİN kodu daxil edin"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK və yeni PİN kod daxil edin"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kod"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Yeni PIN kodu"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Şifrə daxil etmək üçün toxunun"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Kilidi açmaq üçün parol yazın"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Kilidi açmaq üçün PIN daxil edin"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Yanlış PIN kodu."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmaq üçün Menyu, sonra 0 basın."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Sifət kilidi cəhdləriniz bitdi"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Dolmuş"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Dolur, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Elektrikə qoşun."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Kilidi açmaq üçün Menyu düyməsinə baxın."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Şəbəkə kilidləndi"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SİM kart yoxdur"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Planşetdə SİM kart yoxdur.."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Telefonda SİM kart yoxdu."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"SIM kartı daxil edin."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SİM kart yoxdur və ya oxuna bilinmir. SİM kart daxil edin."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Yararsız SIM kart."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Sizin SİM kartınız daimi olaraq deaktivləşib.\n Başqa SİM kart üçün simsiz xidmət provayderinizə müraciət edin."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM kart kilidlənib."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SİM kart PUK ilə kilidlənib."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SİM kartın kilidi açılır..."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d of %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Widget əlavə edin."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Boş"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Kilidi açma sahəsi genişləndi."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Kilidi açma sahəsi çökdü."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> vidcet."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"İstifadəçi selektoru"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Media kontrolları"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Yenidən sıralama vidceti başladıldı."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Vidcetin təkrar sifarişi sona çatdı."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Vidcet <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> silindi."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Kilidi açma sahəsini genişləndir."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Sürüşdürmə kilidi."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Kild açma modeli."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Sifət Kilidi"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin kilid açması."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Şifrə kilidi."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Model sahəsi."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Sürüşdürmə sahəsi."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Əvvəlki izləmə düyməsi"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Növbəti izləmə düyməsi"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pauza düyməsi"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Oxutma düyməsi"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Dayandırma düyməsi"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Ləğv et"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Sil"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Hazırdır"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Rejim dəyişikliyi"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Daxil olun"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Kilidi aç"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Səssiz"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Səs açıqdır"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Axtar"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün yuxarı sürüşdürün."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün aşağı sürüşdürün."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün sola sürüşdür."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün sağa sürüşdür."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Cari istifadəçi <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Təcili zəng"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Şablonu unutmuşam"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Yanlış Model"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Yanlış Şifrə"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN səhvdir"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> saniyə sonra yenidən cəhd edin."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Şablonunuzu çəkin"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN kodu daxil edin"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PİN kodu daxil edin"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Parol daxil edin"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM indi deaktivdir. Davam etmək üçün PUK kodu daxil edin. Əlavə məlumat üçün operatora müraciət edin."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"İstədiyiniz PİN kodu daxil edin"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"İstədiyiniz PIN kodu təsdiqləyin"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SİM kartın kilidi açılır..."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Yanlış PİN kod."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4-dən 8-ə qədər rəqəmi olan PIN yazın."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kod 8 rəqəm və ya daha çox olmalıdır."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Düzgün PUK kodu yenidən daxil edin. Təkrarlanan cəhdlər SIM\'i birdəfəlik sıradan çıxaracaq."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodları uyğun deyil"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Həddindən çox cəhd edildi!"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Kilidi açmaq üçün Google hesabınız ilə daxil olun."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"İstifadəçi adı (e-poçt)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Şifrə"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Daxil ol"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Yanlış istifadəçi adı və ya parol."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"İstifadəçi adınızı və ya parolunuzu unutmusunuz?\n "<b>"google.com/accounts/recovery"</b>" linkinə daxil olun."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Hesab yoxlanılır..."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodunuzu <xliff:g id="NUMBER_0">%d</xliff:g> dəfə yanlış daxil etdiniz.\n\n <xliff:g id="NUMBER_1">%d</xliff:g> saniyə ərzində yenidən yoxlayın"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Şifrənizi <xliff:g id="NUMBER_0">%d</xliff:g> dəfə yanlış daxil etdiniz. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> saniyə ərzində yenidən yoxlayın."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Modelinizi <xliff:g id="NUMBER_0">%d</xliff:g> dəfə yanlış çəkmisiniz.\n\n <xliff:g id="NUMBER_1">%d</xliff:g> saniyə ərzində yenidən yoxlayın"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Siz planşet kilidini açmaq üçün <xliff:g id="NUMBER_0">%d</xliff:g> dəfə uğursuz cəhd etmisiniz. <xliff:g id="NUMBER_1">%d</xliff:g> dəfə də uğursuz cəhd etsəniz, planşet fabrik ayarlarına sıfırlanacaq və bütün məlumatlarınız itəcək."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Siz telefon kilidini açmaq üçün <xliff:g id="NUMBER_0">%d</xliff:g> dəfə uğursuz cəhd etmisiniz. <xliff:g id="NUMBER_1">%d</xliff:g> dəfə də uğursuz cəhd etsəniz, telefon fabrik ayarlarına sıfırlanacaq və bütün məlumatlarınız itəcək."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Siz planşet kilidini açmaq üçün <xliff:g id="NUMBER">%d</xliff:g> dəfə uğursuz cəhd etmisiniz. Planşet fabrik ayarlarına sıfırlanacaq."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Siz telefonun kilidini açmaq üçün <xliff:g id="NUMBER">%d</xliff:g> yanlış cəhd etmisiniz. Telefon artıq defolt zavod halına sıfırlanacaq."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz kilidi açmaq üçün şablonu <xliff:g id="NUMBER_0">%d</xliff:g> dəfə səhv çəkdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> daha uğursuz cəhddən sonra planşetinizin kilidini e-poçt hesabınızla açmaq tələb olunacaq.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> saniyə ərzində bir daha yoxlayın."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz artıq modeli <xliff:g id="NUMBER_0">%d</xliff:g> dəfə yanlış daxil etmisiniz.<xliff:g id="NUMBER_1">%d</xliff:g> dəfə də yanlış daxil etsəniz, telefonun kilidinin açılması üçün elektron poçt ünvanınız tələb olunacaq.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> saniyə ərzində yenidən cəhd edin."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Yığışdır"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Əvvəlki izləmə düyməsi"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Növbəti izləmə düyməsi"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Pauza düyməsi"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Oxutma düyməsi"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Dayandırma düyməsi"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Xidmət yoxdur."</string>
+</resources>

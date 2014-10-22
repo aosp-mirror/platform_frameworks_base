@@ -38,18 +38,18 @@
 #include <utils/Log.h>
 
 static bool getColor(const SkBitmap& bitmap, int x, int y, SkColor* c) {
-    switch (bitmap.getConfig()) {
-        case SkBitmap::kARGB_8888_Config:
+    switch (bitmap.colorType()) {
+        case kN32_SkColorType:
             *c = SkUnPreMultiply::PMColorToColor(*bitmap.getAddr32(x, y));
             break;
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             *c = SkPixel16ToPixel32(*bitmap.getAddr16(x, y));
             break;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             *c = SkUnPreMultiply::PMColorToColor(
                                 SkPixel4444ToPixel32(*bitmap.getAddr16(x, y)));
             break;
-        case SkBitmap::kIndex8_Config: {
+        case kIndex_8_SkColorType: {
             SkColorTable* ctable = bitmap.getColorTable();
             *c = SkUnPreMultiply::PMColorToColor(
                                             (*ctable)[*bitmap.getAddr8(x, y)]);

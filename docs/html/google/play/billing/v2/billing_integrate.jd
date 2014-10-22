@@ -2,7 +2,28 @@ page.title=Implementing In-app Billing <span style="font-size:16px;">(IAB Versio
 excludeFromSuggestions=true
 @jd:body
 
-<div style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">In-app Billing Version 2 is superseded. Please <a href="{@docRoot}google/play/billing/billing_overview.html#migration">migrate to Version 3</a> at your earliest convenience.</div>
+<p class="caution" style=
+"background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">
+  The <strong>In-app Billing Version 2 API</strong> has been deprecated in
+  favor of the Version 3 API. If your app is using In-app Billing, please
+  <strong>make sure that it is using the Version 3 API</strong>. If your app is
+  still using the Version 2 API, you must <strong>migrate to the Version 3 API
+  as soon as possible</strong>.<br>
+  <br>
+  We plan to turn off the In-app Billing Version 2 service on <strong>January
+  27, 2015</strong>, after which time users will <strong>no longer be able to
+  purchase in-app items and subscriptions through the Version 2 API</strong>.
+  We strongly encourage and recommend you migrate your apps to use Version 3
+  API by November 2014, to provide ample time for users to update their apps to
+  the new version.<br>
+  <br>
+  For more information, please see the <a href=
+  "http://support.google.com/googleplay/android-developer/answer/6090268">Help Center
+  article</a>. For common questions about transitioning your implementation to
+  In-app Billing Version 3, please see <a href=
+  "{@docRoot}google/play/billing/billing_overview.html#migration">Migration
+  Considerations</a>.
+</p>
     <div id="qv-wrapper" style="margin-top:0;">
 <div id="qv">
   <h2>In this document</h2>
@@ -208,6 +229,14 @@ following:</p>
 a draft to the Google Play Developer Console. You also need to create a product list for the in-app
 items that are available for purchase in the sample application. The following instructions show you
 how to do this.</p>
+
+<p class="caution"><strong>Caution:</strong> Draft applications are no longer
+supported. To test an application, publish it in the <a
+href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">alpha
+or beta channels</a>. For more information, see <a
+href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">Draft Apps
+are No Longer Supported</a>.</p>
+
 <ol>
   <li><strong>Upload the release version of the sample application to Google Play.</strong>
     <p>Do not publish the sample application; leave it as an unpublished draft application. The
@@ -928,10 +957,12 @@ public class BillingReceiver extends BroadcastReceiver {
   // Intent actions that we receive in the BillingReceiver from Google Play.
   // These are defined by Google Play and cannot be changed.
   // The sample application defines these in the Consts.java file.
-  public static final String ACTION_NOTIFY = "com.android.vending.billing.IN_APP_NOTIFY";
-  public static final String ACTION_RESPONSE_CODE = "com.android.vending.billing.RESPONSE_CODE";
+  public static final String ACTION_NOTIFY =
+      "com.android.vending.billing.IN_APP_NOTIFY";
+  public static final String ACTION_RESPONSE_CODE =
+      "com.android.vending.billing.RESPONSE_CODE";
   public static final String ACTION_PURCHASE_STATE_CHANGED =
-    "com.android.vending.billing.PURCHASE_STATE_CHANGED";
+      "com.android.vending.billing.PURCHASE_STATE_CHANGED";
 
   // The intent extras that are passed in an intent from Google Play.
   // These are defined by Google Play and cannot be changed.
@@ -962,7 +993,8 @@ public class BillingReceiver extends BroadcastReceiver {
       Log.w(TAG, "unexpected action: " + action);
     }
   }
-  // Perform other processing here, such as forwarding intent messages to your local service.
+  // Perform other processing here, such as forwarding intent messages
+  // to your local service.
 }
 </pre>
 

@@ -87,7 +87,7 @@ public class ClassPathPackageInfoSource {
                 // We get errors in the emulator if we don't use the caller's class loader.
                 topLevelClasses.add(Class.forName(className, false,
                         (classLoader != null) ? classLoader : CLASS_LOADER));
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | NoClassDefFoundError e) {
                 // Should not happen unless there is a generated class that is not included in
                 // the .apk.
                 Log.w("ClassPathPackageInfoSource", "Cannot load class. "

@@ -1,0 +1,37 @@
+<!--
+ Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="64dp"
+        android:width="64dp"
+        android:viewportHeight="400"
+        android:viewportWidth="600" >
+
+    <group>
+        <path
+            android:name="pie1"
+            android:fillColor="#ffffffff"
+            android:pathData="M300,200 h-150 a150,150 0 1,0 150,-150 z"
+            android:strokeColor="#FF00FF00"
+            android:strokeWidth="1" />
+        <path
+            android:name="half"
+            android:fillColor="#FFFF0000"
+            android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
+            android:strokeColor="#FF0000FF"
+            android:strokeWidth="5" />
+    </group>
+
+</vector>

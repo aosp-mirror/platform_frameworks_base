@@ -55,17 +55,21 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
     private int mCurrentPreferenceOrder = 0;
 
     private boolean mAttachedToActivity = false;
-    
-    public PreferenceGroup(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+
+    public PreferenceGroup(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         mPreferenceList = new ArrayList<Preference>();
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.PreferenceGroup, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.PreferenceGroup, defStyleAttr, defStyleRes);
         mOrderingAsAdded = a.getBoolean(com.android.internal.R.styleable.PreferenceGroup_orderingFromXml,
                 mOrderingAsAdded);
         a.recycle();
+    }
+
+    public PreferenceGroup(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public PreferenceGroup(Context context, AttributeSet attrs) {

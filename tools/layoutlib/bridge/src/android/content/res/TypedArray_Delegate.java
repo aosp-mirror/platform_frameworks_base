@@ -27,4 +27,9 @@ public class TypedArray_Delegate {
         // pass
         return false;
     }
+
+    @LayoutlibDelegate
+    /*package*/ static TypedArray obtain(Resources res, int len) {
+        return BridgeTypedArray.obtain(res, len);
+    }
 }

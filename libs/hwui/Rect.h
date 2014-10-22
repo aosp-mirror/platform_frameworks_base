@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_RECT_H
 
 #include <cmath>
+#include <SkRect.h>
 
 #include <utils/Log.h>
 
@@ -26,9 +27,11 @@
 namespace android {
 namespace uirenderer {
 
-#define RECT_STRING "%7.2f %7.2f %7.2f %7.2f"
+#define RECT_STRING "%5.2f %5.2f %5.2f %5.2f"
 #define RECT_ARGS(r) \
     (r).left, (r).top, (r).right, (r).bottom
+#define SK_RECT_ARGS(r) \
+    (r).left(), (r).top(), (r).right(), (r).bottom()
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structs
@@ -66,6 +69,13 @@ public:
             top(0.0f),
             right(width),
             bottom(height) {
+    }
+
+    inline Rect(const SkRect& rect):
+            left(rect.fLeft),
+            top(rect.fTop),
+            right(rect.fRight),
+            bottom(rect.fBottom) {
     }
 
     friend int operator==(const Rect& a, const Rect& b) {
@@ -165,11 +175,22 @@ public:
         bottom += dy;
     }
 
+    void inset(float delta) {
+        outset(-delta);
+    }
+
     void outset(float delta) {
         left -= delta;
         top -= delta;
         right += delta;
         bottom += delta;
+    }
+
+    void outset(float xdelta, float ydelta) {
+        left -= xdelta;
+        top -= ydelta;
+        right += xdelta;
+        bottom += ydelta;
     }
 
     /**
@@ -190,19 +211,19 @@ public:
              * from this inset will only incur similarly small errors in output, due to transparency
              * in extreme outside of the geometry.
              */
-            left = floorf(left + Vertex::gGeometryFudgeFactor);
-            top = floorf(top + Vertex::gGeometryFudgeFactor);
-            right = ceilf(right - Vertex::gGeometryFudgeFactor);
-            bottom = ceilf(bottom - Vertex::gGeometryFudgeFactor);
+            left = floorf(left + Vertex::GeometryFudgeFactor());
+            top = floorf(top + Vertex::GeometryFudgeFactor());
+            right = ceilf(right - Vertex::GeometryFudgeFactor());
+            bottom = ceilf(bottom - Vertex::GeometryFudgeFactor());
         } else {
             /* For other geometry, we do the regular rounding in order to snap, but also outset the
              * bounds by a fudge factor. This ensures that ambiguous geometry (e.g. a non-AA Rect
              * with top left at (0.5, 0.5)) will err on the side of a larger damage rect.
              */
-            left = floorf(left + 0.5f - Vertex::gGeometryFudgeFactor);
-            top = floorf(top + 0.5f - Vertex::gGeometryFudgeFactor);
-            right = floorf(right + 0.5f + Vertex::gGeometryFudgeFactor);
-            bottom = floorf(bottom + 0.5f + Vertex::gGeometryFudgeFactor);
+            left = floorf(left + 0.5f - Vertex::GeometryFudgeFactor());
+            top = floorf(top + 0.5f - Vertex::GeometryFudgeFactor());
+            right = floorf(right + 0.5f + Vertex::GeometryFudgeFactor());
+            bottom = floorf(bottom + 0.5f + Vertex::GeometryFudgeFactor());
         }
     }
 
@@ -213,8 +234,22 @@ public:
         bottom = floorf(bottom + 0.5f);
     }
 
-    void dump() const {
-        ALOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
+    void roundOut() {
+        left = floorf(left);
+        top = floorf(top);
+        right = ceilf(right);
+        bottom = ceilf(bottom);
+    }
+
+    void expandToCoverVertex(float x, float y) {
+        left = fminf(left, x);
+        top = fminf(top, y);
+        right = fmaxf(right, x);
+        bottom = fmaxf(bottom, y);
+    }
+
+    void dump(const char* label = NULL) const {
+        ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
     }
 
 private:

@@ -49,11 +49,7 @@ private:
     sp<MediaSource> getDecoder(OMXClient* client, const sp<MediaSource>& source);
     bool decodeSource(sp<MediaSource> decoder, const sp<MediaSource>& source,
             SkBitmap* bm);
-    void installPixelRef(MediaBuffer* buffer, sp<MediaSource> decoder,
-            SkBitmap* bm);
-    void configBitmapSize(SkBitmap* bm, SkBitmap::Config pref, int width,
-            int height);
-    SkBitmap::Config getColorSpaceConfig(SkBitmap::Config pref);
+    void configBitmapSize(SkBitmap* bm, SkColorType, int width, int height);
 
     OMXClient mClient;
 };

@@ -56,6 +56,9 @@ public class DdmHandleViewDebug extends ChunkHandler {
     /** Capture View Layers. */
     private static final int VURT_CAPTURE_LAYERS = 2;
 
+    /** Dump View Theme. */
+    private static final int VURT_DUMP_THEME = 3;
+
     /**
      * Generic View Operation, first parameter in the packet should be one of the
      * VUOP_* constants below.
@@ -131,6 +134,8 @@ public class DdmHandleViewDebug extends ChunkHandler {
                 return dumpHierarchy(rootView, in);
             else if (op == VURT_CAPTURE_LAYERS)
                 return captureLayers(rootView);
+            else if (op == VURT_DUMP_THEME)
+                return dumpTheme(rootView);
             else
                 return createFailChunk(ERR_INVALID_OP, "Unknown view root operation: " + op);
         }
@@ -252,6 +257,22 @@ public class DdmHandleViewDebug extends ChunkHandler {
             } catch (IOException e) {
                 // ignore
             }
+        }
+
+        byte[] data = b.toByteArray();
+        return new Chunk(CHUNK_VURT, data, 0, data.length);
+    }
+
+    /**
+     * Returns the Theme dump of the provided view.
+     */
+    private Chunk dumpTheme(View rootView) {
+        ByteArrayOutputStream b = new ByteArrayOutputStream(1024);
+        try {
+            ViewDebug.dumpTheme(rootView, b);
+        } catch (IOException e) {
+            return createFailChunk(1, "Unexpected error while dumping the theme: "
+                    + e.getMessage());
         }
 
         byte[] data = b.toByteArray();

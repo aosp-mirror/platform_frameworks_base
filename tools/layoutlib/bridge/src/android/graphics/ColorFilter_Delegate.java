@@ -19,6 +19,8 @@ package android.graphics;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import java.awt.Graphics2D;
+
 /**
  * Delegate implementing the native methods of android.graphics.ColorFilter
  *
@@ -50,13 +52,21 @@ public abstract class ColorFilter_Delegate {
         return sManager.getDelegate(nativeShader);
     }
 
-    public abstract boolean isSupported();
     public abstract String getSupportMessage();
+
+    public boolean isSupported() {
+        return false;
+    }
+
+    public void applyFilter(Graphics2D g, int width, int height) {
+        // This should never be called directly. If supported, the sub class should override this.
+        assert false;
+    }
 
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(long native_instance, long nativeColorFilter) {
+    /*package*/ static void destroyFilter(long native_instance) {
         sManager.removeJavaReferenceFor(native_instance);
     }
 

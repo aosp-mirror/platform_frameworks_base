@@ -110,6 +110,11 @@
         <!-- Dim inverse text color. This does not differentiate the disabled state. -->
         <attr name="textColorSecondaryInverseNoDisable" format="reference|color" />
 
+        <!-- Bright text color for use over activated backgrounds. -->
+        <attr name="textColorPrimaryActivated" format="reference|color" />
+        <!-- Dim text color for use over activated backgrounds. -->
+        <attr name="textColorSecondaryActivated" format="reference|color" />
+
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
 
@@ -245,6 +250,8 @@
 
         <!-- The preferred TextAppearance for the primary text of list items. -->
         <attr name="textAppearanceListItem" format="reference" />
+        <!-- The preferred TextAppearance for the secondary text of list items. -->
+        <attr name="textAppearanceListItemSecondary" format="reference" />
         <!-- The preferred TextAppearance for the primary text of small list items. -->
         <attr name="textAppearanceListItemSmall" format="reference" />
 
@@ -306,6 +313,10 @@
                   null so it will not be drawn.
              </ul> -->
         <attr name="windowBackground" format="reference" />
+        <!-- Drawable to draw selectively within the inset areas when the windowBackground
+             has been set to null. This protects against seeing visual garbage in the
+             surface when the app has not drawn any content into this area. -->
+        <attr name="windowBackgroundFallback" format="reference" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
@@ -352,10 +363,6 @@
         <!-- Flag indicating whether action modes should overlay window content
              when there is not reserved space for their UI (such as an Action Bar). -->
         <attr name="windowActionModeOverlay" format="boolean" />
-
-        <!-- Flag indicating that the action bar should be split to provide more
-             room for elements. -->
-        <attr name="windowSplitActionBar" format="boolean" />
 
         <!-- Defines the default soft input state that this window would
              like when it is displayed.  Corresponds
@@ -446,6 +453,95 @@
         <!-- Flag indicating whether this window requests a translucent navigation bar.  Corresponds
              to {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION}. -->
         <attr name="windowTranslucentNavigation" format="boolean" />
+
+        <!-- Flag to indicate that a window can be swiped away to be dismissed.
+             Corresponds to {@link android.view.Window#FEATURE_SWIPE_TO_DISMISS} -->
+        <attr name="windowSwipeToDismiss" format="boolean" />
+
+        <!-- Flag indicating whether this window requests that content changes be performed
+             as scene changes with transitions. Corresponds to
+             {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS}. -->
+        <attr name="windowContentTransitions" format="boolean" />
+
+        <!-- Reference to a TransitionManager XML resource defining the desired
+             transitions between different window content. -->
+        <attr name="windowContentTransitionManager" format="reference" />
+
+        <!-- Flag indicating whether this window allows Activity Transitions.
+             Corresponds to {@link android.view.Window#FEATURE_ACTIVITY_TRANSITIONS}. -->
+        <attr name="windowActivityTransitions" format="boolean" />
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views into the initial Window's content Scene. Corresponds to
+             {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
+        <attr name="windowEnterTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views out of the scene when the Window is
+             preparing to close. Corresponds to
+             {@link android.view.Window#setReturnTransition(android.transition.Transition)}. -->
+        <attr name="windowReturnTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views out of the Window's content Scene when launching a new Activity.
+             Corresponds to
+             {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
+        <attr name="windowExitTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views in to the scene when returning from a previously-started Activity.
+             Corresponds to
+             {@link android.view.Window#setReenterTransition(android.transition.Transition)}. -->
+        <attr name="windowReenterTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move shared elements transferred into the Window's initial content Scene.
+             Corresponds to {@link android.view.Window#setSharedElementEnterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementEnterTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReturnTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReturnTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used when starting a new Activity to move shared elements prior to transferring
+             to the called Activity.
+             Corresponds to {@link android.view.Window#setSharedElementExitTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementExitTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used for shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReenterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReenterTransition" format="reference"/>
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the calling Activity. Corresponds to
+             {@link android.view.Window#setAllowEnterTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowEnterTransitionOverlap" format="boolean"/>
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the called Activity when the called Activity
+             finishes. Corresponds to
+             {@link android.view.Window#setAllowReturnTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowReturnTransitionOverlap" format="boolean"/>
+
+        <!-- Indicates whether or not shared elements should use an overlay
+             during transitions. The default value is true. -->
+        <attr name="windowSharedElementsUseOverlay" format="boolean"/>
+
+        <!-- Internal layout used internally for window decor -->
+        <attr name="windowActionBarFullscreenDecorLayout" format="reference" />
+
+        <!-- The duration, in milliseconds, of the window background fade duration
+             when transitioning into or away from an Activity when called with an
+             Activity Transition. Corresponds to
+             {@link android.view.Window#setTransitionBackgroundFadeDuration(long)}. -->
+        <attr name="windowTransitionBackgroundFadeDuration" format="integer"/>
 
         <!-- ============ -->
         <!-- Alert Dialog styles -->
@@ -608,6 +704,10 @@
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
 
+        <!-- Default style for the FragmentBreadCrumbs widget. This widget is deprecated
+             starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
+        <attr name="fragmentBreadCrumbsStyle" format="reference" />
+
         <!-- NumberPicker style. -->
         <attr name="numberPickerStyle" format="reference" />
 
@@ -617,11 +717,20 @@
         <!-- The TimePicker style. -->
         <attr name="timePickerStyle" format="reference" />
 
+        <!-- The TimePicker dialog theme. -->
+        <attr name="timePickerDialogTheme" format="reference" />
+
         <!-- The DatePicker style. -->
         <attr name="datePickerStyle" format="reference" />
 
+        <!-- The DatePicker dialog theme. -->
+        <attr name="datePickerDialogTheme" format="reference" />
+
         <!-- Default ActivityChooserView style. -->
         <attr name="activityChooserViewStyle" format="reference" />
+
+        <!-- Default Toolbar style. -->
+        <attr name="toolbarStyle" format="reference" />
 
         <!-- Fast scroller styles -->
         <eat-comment />
@@ -641,6 +750,7 @@
         <attr name="fastScrollOverlayPosition">
             <enum name="floating" value="0" />
             <enum name="atThumb" value="1" />
+            <enum name="aboveThumb" value="2" />
         </attr>
         <!-- Text color for the fast scroll index overlay. Make sure it
              plays nicely with fastScrollPreviewBackground[Left|Right]. -->
@@ -655,6 +765,10 @@
         <attr name="actionBarTabBarStyle" format="reference" />
         <attr name="actionBarTabTextStyle" format="reference" />
         <attr name="actionOverflowButtonStyle" format="reference" />
+        <attr name="actionOverflowMenuStyle" format="reference" />
+        <!-- Reference to a theme that should be used to inflate popups
+             shown by widgets in the action bar. -->
+        <attr name="actionBarPopupTheme" format="reference" />
         <!-- Reference to a style for the Action Bar -->
         <attr name="actionBarStyle" format="reference" />
         <!-- Reference to a style for the split Action Bar. This style
@@ -662,6 +776,10 @@
              buttons. actionBarStyle is still used for the primary
              bar. -->
         <attr name="actionBarSplitStyle" format="reference" />
+        <!-- Reference to a theme that should be used to inflate the
+             action bar. This will be inherited by any widget inflated
+             into the action bar. -->
+        <attr name="actionBarTheme" format="reference" />
         <!-- Reference to a theme that should be used to inflate widgets
              and layouts destined for the action bar. Most of the time
              this will be a reference to the current theme, but when
@@ -723,6 +841,8 @@
 
         <!-- Default style for PreferenceScreen. -->
         <attr name="preferenceScreenStyle" format="reference" />
+        <!-- Default style for the PreferenceActivity. -->
+        <attr name="preferenceActivityStyle" format="reference" />
         <!-- Default style for Headers pane in PreferenceActivity. -->
         <attr name="preferenceFragmentStyle" format="reference" />
         <!-- Default style for PreferenceCategory. -->
@@ -755,6 +875,8 @@
         <attr name="preferenceFragmentPaddingSide" format="dimension" />
         <!-- Default style for switch preferences. -->
         <attr name="switchPreferenceStyle" format="reference" />
+        <!-- Default style for seekbar preferences. -->
+        <attr name="seekBarPreferenceStyle" format="reference" />
 
         <!-- ============================ -->
         <!-- Text selection handle styles -->
@@ -813,41 +935,33 @@
         <!-- Style for buttons within button bars -->
         <attr name="buttonBarButtonStyle" format="reference" />
 
+        <!-- Style for the "positive" buttons within button bars -->
+        <attr name="buttonBarPositiveButtonStyle" format="reference" />
+
+        <!-- Style for the "negative" buttons within button bars -->
+        <attr name="buttonBarNegativeButtonStyle" format="reference" />
+
+        <!-- Style for the "neutral" buttons within button bars -->
+        <attr name="buttonBarNeutralButtonStyle" format="reference" />
+
+        <!-- Style for the search query widget. -->
+        <attr name="searchViewStyle" format="reference" />
+
         <!-- Style for segmented buttons - a container that houses several buttons
              with the appearance of a singel button broken into segments. -->
         <attr name="segmentedButtonStyle" format="reference" />
 
-        <!-- Background drawable for standalone items that need focus/pressed states. -->
+        <!-- Background drawable for bordered standalone items that need focus/pressed states. -->
         <attr name="selectableItemBackground" format="reference" />
+
+        <!-- Background drawable for borderless standalone items that need focus/pressed states. -->
+        <attr name="selectableItemBackgroundBorderless" format="reference" />
 
         <!-- Style for buttons without an explicit border, often used in groups. -->
         <attr name="borderlessButtonStyle" format="reference" />
 
         <!-- Background to use for toasts -->
         <attr name="toastFrameBackground" format="reference" />
-
-        <!-- ============================ -->
-        <!-- SearchView styles and assets -->
-        <!-- ============================ -->
-        <eat-comment />
-        <!-- SearchView dropdown background -->
-        <attr name="searchDropdownBackground" format="reference" />
-        <!-- SearchView close button icon -->
-        <attr name="searchViewCloseIcon" format="reference" />
-        <!-- SearchView Go button icon -->
-        <attr name="searchViewGoIcon" format="reference" />
-        <!-- SearchView Search icon -->
-        <attr name="searchViewSearchIcon" format="reference" />
-        <!-- SearchView Voice button icon -->
-        <attr name="searchViewVoiceIcon" format="reference" />
-        <!-- SearchView query refinement icon -->
-        <attr name="searchViewEditQuery" format="reference" />
-        <!-- SearchView query refinement icon background -->
-        <attr name="searchViewEditQueryBackground" format="reference" />
-        <!-- SearchView text field background for the left section -->
-        <attr name="searchViewTextField" format="reference" />
-        <!-- SearchView text field background for the right section -->
-        <attr name="searchViewTextFieldRight" format="reference" />
 
         <!-- Theme to use for Search Dialogs -->
         <attr name="searchDialogTheme" format="reference" />
@@ -881,6 +995,60 @@
         <!-- Drawable for WebView find-on-page dialogue's "previous" button. @hide -->
         <attr name="findOnPagePreviousDrawable" format="reference" />
 
+        <!-- ============= -->
+        <!-- Color palette -->
+        <!-- ============= -->
+        <eat-comment />
+
+        <!-- The primary branding color for the app. By default, this is the color applied to the
+             action bar background. -->
+        <attr name="colorPrimary" format="color" />
+
+        <!-- Dark variant of the primary branding color. By default, this is the color applied to
+             the status bar (via statusBarColor) and navigation bar (via navigationBarColor). -->
+        <attr name="colorPrimaryDark" format="color" />
+
+        <!-- Bright complement to the primary branding color. By default, this is the color applied
+             to framework controls (via colorControlActivated). -->
+        <attr name="colorAccent" format="color" />
+
+        <!-- The color applied to framework controls in their normal state. -->
+        <attr name="colorControlNormal" format="color" />
+
+        <!-- The color applied to framework controls in their activated (ex. checked) state. -->
+        <attr name="colorControlActivated" format="color" />
+
+        <!-- The color applied to framework control highlights (ex. ripples, list selectors). -->
+        <attr name="colorControlHighlight" format="color" />
+
+        <!-- The color applied to framework buttons in their normal state. -->
+        <attr name="colorButtonNormal" format="color" />
+
+        <!-- The color applied to framework switch thumbs in their normal state. -->
+        <attr name="colorSwitchThumbNormal" format="color" />
+
+        <!-- The color applied to the edge effect on scrolling containers. -->
+        <attr name="colorEdgeEffect" format="color" />
+
+        <!-- =================== -->
+        <!-- Lighting properties -->
+        <!-- =================== -->
+        <eat-comment />
+
+        <!-- @hide The default Y position of the light used to project view shadows. -->
+        <attr name="lightY" format="dimension" />
+
+        <!-- @hide The default Z position of the light used to project view shadows. -->
+        <attr name="lightZ" format="dimension" />
+
+        <!-- @hide The default radius of the light used to project view shadows. -->
+        <attr name="lightRadius" format="dimension" />
+
+        <!-- Alpha value of the ambient shadow projected by elevated views, between 0 and 1. -->
+        <attr name="ambientShadowAlpha" format="float" />
+
+        <!-- Alpha value of the spot shadow projected by elevated views, between 0 and 1. -->
+        <attr name="spotShadowAlpha" format="float" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -1567,6 +1735,43 @@
         <enum name="KEYCODE_BRIGHTNESS_DOWN" value="220" />
         <enum name="KEYCODE_BRIGHTNESS_UP" value="221" />
         <enum name="KEYCODE_MEDIA_AUDIO_TRACK" value="222" />
+        <enum name="KEYCODE_MEDIA_SLEEP" value="223" />
+        <enum name="KEYCODE_MEDIA_WAKEUP" value="224" />
+        <enum name="KEYCODE_PAIRING" value="225" />
+        <enum name="KEYCODE_MEDIA_TOP_MENU" value="226" />
+        <enum name="KEYCODE_11" value="227" />
+        <enum name="KEYCODE_12" value="228" />
+        <enum name="KEYCODE_LAST_CHANNEL" value="229" />
+        <enum name="KEYCODE_TV_DATA_SERVICE" value="230" />
+        <enum name="KEYCODE_VOICE_ASSIST" value="231" />
+        <enum name="KEYCODE_TV_RADIO_SERVICE" value="232" />
+        <enum name="KEYCODE_TV_TELETEXT" value="233" />
+        <enum name="KEYCODE_TV_NUMBER_ENTRY" value="234" />
+        <enum name="KEYCODE_TV_TERRESTRIAL_ANALOG" value="235" />
+        <enum name="KEYCODE_TV_TERRESTRIAL_DIGITAL" value="236" />
+        <enum name="KEYCODE_TV_SATELLITE" value="237" />
+        <enum name="KEYCODE_TV_SATELLITE_BS" value="238" />
+        <enum name="KEYCODE_TV_SATELLITE_CS" value="239" />
+        <enum name="KEYCODE_TV_SATELLITE_SERVICE" value="240" />
+        <enum name="KEYCODE_TV_NETWORK" value="241" />
+        <enum name="KEYCODE_TV_ANTENNA_CABLE" value="242" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_1" value="243" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_2" value="244" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_3" value="245" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_4" value="246" />
+        <enum name="KEYCODE_TV_INPUT_COMPOSITE_1" value="247" />
+        <enum name="KEYCODE_TV_INPUT_COMPOSITE_2" value="248" />
+        <enum name="KEYCODE_TV_INPUT_COMPONENT_1" value="249" />
+        <enum name="KEYCODE_TV_INPUT_COMPONENT_2" value="250" />
+        <enum name="KEYCODE_TV_INPUT_VGA_1" value="251" />
+        <enum name="KEYCODE_TV_AUDIO_DESCRIPTION" value="252" />
+        <enum name="KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP" value="253" />
+        <enum name="KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN" value="254" />
+        <enum name="KEYCODE_TV_ZOOM_MODE" value="255" />
+        <enum name="KEYCODE_TV_CONTENTS_MENU" value="256" />
+        <enum name="KEYCODE_TV_MEDIA_CONTEXT_MENU" value="257" />
+        <enum name="KEYCODE_TV_TIMER_PROGRAMMING" value="258" />
+        <enum name="KEYCODE_HELP" value="259" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -1581,6 +1786,7 @@
     <!-- The set of attributes that describe a Windows's theme. -->
     <declare-styleable name="Window">
         <attr name="windowBackground" />
+        <attr name="windowBackgroundFallback" />
         <attr name="windowContentOverlay" />
         <attr name="windowFrame" />
         <attr name="windowNoTitle" />
@@ -1599,11 +1805,16 @@
         <attr name="windowActionBar" />
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
-        <attr name="windowSplitActionBar" />
         <attr name="windowEnableSplitTouch" />
         <attr name="windowCloseOnTouchOutside" />
         <attr name="windowTranslucentStatus" />
         <attr name="windowTranslucentNavigation" />
+        <attr name="windowSwipeToDismiss" />
+        <attr name="windowContentTransitions" />
+        <attr name="windowActivityTransitions" />
+        <attr name="windowContentTransitionManager" />
+        <attr name="windowActionBarFullscreenDecorLayout" />
+
         <!-- The minimum width the window is allowed to be, along the major
              axis of the screen.  That is, when in landscape.  Can be either
              an absolute dimension or a fraction of the screen size in that
@@ -1632,6 +1843,110 @@
              that is, when in portrait. Can be either an absolute dimension
              or a fraction of the screen size in that dimension. -->
         <attr name="windowFixedHeightMajor" format="dimension|fraction" />
+        <attr name="windowOutsetBottom" format="dimension" />
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views into the initial Window's content Scene. Corresponds to
+             {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
+        <attr name="windowEnterTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views out of the scene when the Window is
+             preparing to close. Corresponds to
+             {@link android.view.Window#setReturnTransition(android.transition.Transition)}. -->
+        <attr name="windowReturnTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views out of the Window's content Scene when launching a new Activity.
+             Corresponds to
+             {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
+        <attr name="windowExitTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views in to the scene when returning from a previously-started Activity.
+             Corresponds to
+             {@link android.view.Window#setReenterTransition(android.transition.Transition)}. -->
+        <attr name="windowReenterTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move shared elements transferred into the Window's initial content Scene.
+             Corresponds to {@link android.view.Window#setSharedElementEnterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementEnterTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReturnTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReturnTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used when starting a new Activity to move shared elements prior to transferring
+             to the called Activity.
+             Corresponds to {@link android.view.Window#setSharedElementExitTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementExitTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used for shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReenterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReenterTransition"/>
+
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the calling Activity. Corresponds to
+             {@link android.view.Window#setAllowEnterTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowEnterTransitionOverlap"/>
+
+        <!-- Flag indicating whether this Window's transition should overlap with
+             the exiting transition of the called Activity when the called Activity
+             finishes. Corresponds to
+             {@link android.view.Window#setAllowReturnTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowReturnTransitionOverlap"/>
+
+        <!-- Indicates whether or not shared elements should use an overlay
+             during transitions. The default value is true. -->
+        <attr name="windowSharedElementsUseOverlay"/>
+
+        <!-- Flag indicating whether this Window is responsible for drawing the background for the
+             system bars. If true and the window is not floating, the system bars are drawn with a
+             transparent background and the corresponding areas in this window are filled with the
+             colors specified in {@link android.R.attr#statusBarColor} and
+             {@link android.R.attr#navigationBarColor}. Corresponds to
+             {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS}. -->
+        <attr name="windowDrawsSystemBarBackgrounds" format="boolean" />
+
+        <!-- The color for the status bar. If the color is not opaque, consider setting
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+             For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the status bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentStatus}.
+             Corresponds to {@link android.view.Window#setStatusBarColor(int)}. -->
+        <attr name="statusBarColor" format="color" />
+
+        <!-- The color for the navigation bar. If the color is not opaque, consider setting
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+             {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
+             For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentNavigation}.
+             Corresponds to {@link android.view.Window#setNavigationBarColor(int)}. -->
+        <attr name="navigationBarColor" format="color" />
+
+        <!-- The duration, in milliseconds, of the window background fade duration
+             when transitioning into or away from an Activity when called with an
+             Activity Transition. Corresponds to
+             {@link android.view.Window#setTransitionBackgroundFadeDuration(long)}. -->
+        <attr name="windowTransitionBackgroundFadeDuration" />
+
+        <!-- Elevation to use for the window. -->
+        <attr name="windowElevation" format="dimension" />
+
+        <!-- Whether to clip window content to the outline of the window background. -->
+        <attr name="windowClipToOutline" format="boolean" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -1647,12 +1962,15 @@
         <attr name="bottomMedium" format="reference|color" />
         <attr name="centerMedium" format="reference|color" />
         <attr name="layout" />
+        <attr name="buttonPanelSideLayout" format="reference" />
         <attr name="listLayout" format="reference" />
         <attr name="multiChoiceItemLayout" format="reference" />
         <attr name="singleChoiceItemLayout" format="reference" />
         <attr name="listItemLayout" format="reference" />
         <attr name="progressLayout" format="reference" />
         <attr name="horizontalProgressLayout" format="reference" />
+        <!-- @hide Whether fullDark, etc. should use default values if null. -->
+        <attr name="needsDefaultBackgrounds" format="boolean" />
     </declare-styleable>
 
     <!-- Fragment animation class attributes. -->
@@ -1694,6 +2012,14 @@
         <!--  When opening an activity in a new task, this is the animation that is
               run on the activity of the old task (which is exiting the screen). -->
         <attr name="taskOpenExitAnimation" format="reference" />
+        <!--  When opening an activity in a new task using Intent/FLAG_ACTIVITY_LAUNCH_BEHIND,
+              this is the animation that is run on the activity of the new task (which is
+              entering the screen and then leaving). -->
+        <attr name="launchTaskBehindTargetAnimation" format="reference" />
+        <!--  When opening an activity in a new task using Intent.FLAG_ACTIVITY_LAUNCH_BEHIND,
+              this is the animation that is run on the activity of the old task (which is
+              already on the screen and then stays on). -->
+        <attr name="launchTaskBehindSourceAnimation" format="reference" />
         <!--  When closing the last activity of a task, this is the animation that is
               run on the activity of the next task (which is entering the screen). -->
         <attr name="taskCloseEnterAnimation" format="reference" />
@@ -2063,13 +2389,19 @@
              (completely opaque). -->
         <attr name="alpha" format="float" />
 
+        <!-- base z depth of the view -->
+        <attr name="elevation" format="dimension" />
+
         <!-- translation in x of the view. This value is added post-layout to the left
              property of the view, which is set by its layout. -->
         <attr name="translationX" format="dimension" />
 
-        <!-- translation in y of the view. This value is added post-layout to the left
+        <!-- translation in y of the view. This value is added post-layout to the top
              property of the view, which is set by its layout. -->
         <attr name="translationY" format="dimension" />
+
+        <!-- translation in z of the view. This value is added to its elevation. -->
+        <attr name="translationZ" format="dimension" />
 
         <!-- x location of the pivot point around which the view will rotate and scale.
              This xml attribute sets the pivotX property of the View. -->
@@ -2213,8 +2545,69 @@
              accessibility purposes. For example, a TextView before an EditText in
              the UI usually specifies what infomation is contained in the EditText.
              Hence, the TextView is a label for the EditText. -->
-        <attr name="labelFor" format="integer" />
+        <attr name="labelFor" format="reference" />
 
+        <!-- Specifies a theme override for a view. When a theme override is set, the
+             view will be inflated using a {@link android.content.Context} themed with
+             the specified resource. During XML inflation, any child views under the
+             view with a theme override will inherit the themed context. -->
+        <attr name="theme" />
+
+        <!-- Names a View such that it can be identified for Transitions. Names should be
+             unique in the View hierarchy. -->
+        <attr name="transitionName" format="string" />
+
+        <!-- Specifies that this view should permit nested scrolling within a compatible
+             ancestor view. -->
+        <attr name="nestedScrollingEnabled" format="boolean" />
+
+        <!-- Sets the state-based animator for the View. -->
+        <attr name="stateListAnimator" format="reference"/>
+
+        <!-- Tint to apply to the background. -->
+        <attr name="backgroundTint" format="color" />
+
+        <!-- Blending mode used to apply the background tint. -->
+        <attr name="backgroundTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+
+        <!-- ViewOutlineProvider used to determine the View's Outline. -->
+        <attr name="outlineProvider">
+            <!-- Default, background drawable-driven outline. -->
+            <enum name="background" value="0" />
+            <!-- No outline provider. -->
+            <enum name="none" value="1" />
+            <!-- Generates an opaque outline for the bounds of the view. -->
+            <enum name="bounds" value="2" />
+            <!-- Generates an opaque outline for the padded bounds of the view. -->
+            <enum name="paddedBounds" value="3" />
+        </attr>
+
+    </declare-styleable>
+
+    <!-- Attributes that can be assigned to a tag for a particular View. -->
+    <declare-styleable name="ViewTag">
+        <!-- Specifies the key identifying a tag. This must be a resource reference. -->
+        <attr name="id" />
+        <!-- Specifies the value with which to tag the view. -->
+        <attr name="value" />
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2279,6 +2672,9 @@
             <enum name="blocksDescendants" value="2" />
         </attr>
 
+        <!-- Set to true if this ViewGroup blocks focus in the presence of a touchscreen. -->
+        <attr name="touchscreenBlocksFocus" format="boolean" />
+
         <!-- Sets whether this ViewGroup should split MotionEvents
              to separate child views during touch event dispatch.
              If false (default), touch events will be dispatched to
@@ -2298,6 +2694,15 @@
             <!-- Use the children's optical bounds when laying out this container. -->
             <enum name="opticalBounds" value="1" />
         </attr>
+
+        <!-- Sets whether or not this ViewGroup should be treated as a single entity
+             when doing an Activity transition. Typically, the elements inside a
+             ViewGroup are each transitioned from the scene individually. The default
+             for a ViewGroup is false unless it has a background. See
+             {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.app.Activity,
+             android.view.View, String)} for more information. Corresponds to
+             {@link android.view.ViewGroup#setTransitionGroup(boolean)}.-->
+        <attr name="transitionGroup" format="boolean" />
     </declare-styleable>
 
     <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts
@@ -2406,7 +2811,7 @@
         <!-- Set to true if this input method supports ways to switch to
              a next input method (e.g. a globe key.). When this is true and
              InputMethodManager#shouldOfferSwitchingToNextInputMethod() returns true,
-             the IME has to offer ways to to invoke InputMethodManager#switchToNextInputMethod()
+             the IME has to offer ways to invoke InputMethodManager#switchToNextInputMethod()
              accordingly.
              <p> Note that the system determines the most appropriate next input method
              and subtype in order to provide the consistent user experience in switching
@@ -2573,6 +2978,8 @@
             <flag name="flagReportViewIds" value="0x00000010" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_FILTER_KEY_EVENTS} -->
             <flag name="flagRequestFilterKeyEvents" value="0x00000020" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} -->
+            <flag name="flagRetrieveInteractiveWindows" value="0x00000040" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
@@ -2681,6 +3088,14 @@
         <attr name="name" />
     </declare-styleable>
 
+    <!-- Specify one or more <code>aid-prefix-filter</code> elements inside a
+         <code>aid-group</code> element to specify an ISO7816 Application ID (AID)
+         prefix your service can handle. -->
+    <declare-styleable name="AidPrefixFilter">
+        <!-- The ISO7816 Application ID. This attribute is mandatory. -->
+        <attr name="name" />
+    </declare-styleable>
+
     <declare-styleable name="ActionMenuItemView">
         <attr name="minWidth" />
     </declare-styleable>
@@ -2725,6 +3140,8 @@
         <!-- Enables the fast scroll thumb that can be dragged to quickly scroll through
              the list. -->
         <attr name="fastScrollEnabled" format="boolean" />
+        <!-- Specifies the style of the fast scroll decorations. -->
+        <attr name="fastScrollStyle" format="reference" />
         <!-- When set to true, the list will use a more refined calculation
              method based on the pixels height of the items visible on screen. This
              property is set to true by default but should be set to false if your adapter
@@ -2783,15 +3200,102 @@
         <!-- Indicates the initial checked state of this button. -->
         <attr name="checked" format="boolean" />
         <!-- Drawable used for the button graphic (e.g. checkbox, radio button, etc). -->
-        <attr name="button" format="reference"/>
+        <attr name="button" format="reference" />
+        <!-- Tint to apply to the button graphic. -->
+        <attr name="buttonTint" format="color" />
+        <!-- Blending mode used to apply the button graphic tint. -->
+        <attr name="buttonTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="CheckedTextView">
         <!-- Indicates the initial checked state of this text. -->
         <attr name="checked" />
         <!-- Drawable used for the check mark graphic. -->
         <attr name="checkMark" format="reference"/>
+        <!-- Tint to apply to the check mark. -->
+        <attr name="checkMarkTint" format="color" />
+        <!-- Blending mode used to apply the check mark tint. -->
+        <attr name="checkMarkTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Gravity for aligning a CheckedTextView's checkmark to one side or the other. -->
+        <attr name="checkMarkGravity">
+            <!-- Push object to the left of its container, not changing its size. -->
+            <flag name="left" value="0x03" />
+            <!-- Push object to the right of its container, not changing its size. -->
+            <flag name="right" value="0x05" />
+            <!-- Push object to the beginning of its container, not changing its size. -->
+            <flag name="start" value="0x00800003" />
+            <!-- Push object to the end of its container, not changing its size. -->
+            <flag name="end" value="0x00800005" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="EditText">
+    </declare-styleable>
+    <declare-styleable name="FastScroll">
+        <!-- Drawable used for the scroll bar thumb. -->
+        <attr name="thumbDrawable" format="reference" />
+        <!-- Minimum width of the thumb. -->
+        <attr name="thumbMinWidth" format="dimension" />
+        <!-- Minimum height of the thumb. -->
+        <attr name="thumbMinHeight" format="dimension" />
+        <!-- Drawable used for the scroll bar track. -->
+        <attr name="trackDrawable" format="reference" />
+        <!-- Drawable used for the section header preview when right-aligned. -->
+        <attr name="backgroundRight" format="reference" />
+        <!-- Drawable used for the section header preview when left-aligned. -->
+        <attr name="backgroundLeft" format="reference" />
+        <!-- Position of section header preview. -->
+        <attr name="position">
+            <!-- Floating at the top of the content. -->
+            <enum name="floating" value="0" />
+            <!-- Pinned alongside the thumb. -->
+            <enum name="atThumb" value="1" />
+            <!-- Pinned above the thumb. -->
+            <enum name="aboveThumb" value="2" />
+        </attr>
+        <attr name="textAppearance" />
+        <attr name="textColor" />
+        <attr name="textSize" />
+        <!-- Minimum width of the section header preview. -->
+        <attr name="minWidth" />
+        <!-- Minimum height of the section header preview. -->
+        <attr name="minHeight" />
+        <!-- Padding for the section header preview. -->
+        <attr name="padding" />
     </declare-styleable>
     <declare-styleable name="FrameLayout">
         <!-- Defines the drawable to draw over the content. This can be used as an overlay.
@@ -2838,6 +3342,28 @@
         <!-- Determines whether to measure all children or just those in
              the VISIBLE or INVISIBLE state when measuring. Defaults to false. -->
         <attr name="measureAllChildren" format="boolean" />
+        <!-- Tint to apply to the foreground. -->
+        <attr name="foregroundTint" format="color" />
+        <!-- Blending mode used to apply the foreground tint. -->
+        <attr name="foregroundTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="ExpandableListView">
         <!-- Indicator shown beside the group View. This can be a stateful Drawable. -->
@@ -2930,7 +3456,7 @@
         <!-- An optional argument to supply a maximum height for this view.
              See {see android.widget.ImageView#setMaxHeight} for details. -->
         <attr name="maxHeight" format="dimension" />
-        <!-- Set a tinting color for the image. -->
+        <!-- Set a tinting color for the image. By default, the tint will blend using SRC_ATOP mode. -->
         <attr name="tint" format="color" />
         <!-- If true, the image view will be baseline aligned with based on its
              bottom edge. -->
@@ -2943,6 +3469,8 @@
         <!-- @hide The alpha value (0-255) set on the ImageView's drawable. Equivalent
              to calling ImageView.setAlpha(int), not the same as View.setAlpha(float). -->
         <attr name="drawableAlpha" format="integer" />
+        <!-- Blending mode used to apply the image tint. -->
+        <attr name="tintMode" />
     </declare-styleable>
     <declare-styleable name="ToggleButton">
         <!-- The text for the button when it is checked. -->
@@ -3133,6 +3661,98 @@
         <!-- Defines if the associated drawables need to be mirrored when in RTL mode.
              Default is false -->
         <attr name="mirrorForRtl" format="boolean" />
+        <!-- Tint to apply to the progress indicator. -->
+        <attr name="progressTint" format="color" />
+        <!-- Blending mode used to apply the progress indicator tint. -->
+        <attr name="progressTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Tint to apply to the progress indicator background. -->
+        <attr name="progressBackgroundTint" format="color" />
+        <!-- Blending mode used to apply the progress indicator background tint. -->
+        <attr name="progressBackgroundTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Tint to apply to the secondary progress indicator. -->
+        <attr name="secondaryProgressTint" format="color" />
+        <!-- Blending mode used to apply the secondary progress indicator tint. -->
+        <attr name="secondaryProgressTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Tint to apply to the indeterminate progress indicator. -->
+        <attr name="indeterminateTint" format="color" />
+        <!-- Blending mode used to apply the indeterminate progress indicator tint. -->
+        <attr name="indeterminateTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Tint to apply to the background. -->
+        <attr name="backgroundTint" />
+        <!-- Blending mode used to apply the background tint. -->
+        <attr name="backgroundTintMode" />
     </declare-styleable>
 
     <declare-styleable name="SeekBar">
@@ -3140,6 +3760,30 @@
         <attr name="thumb" format="reference" />
         <!-- An offset for the thumb that allows it to extend out of the range of the track. -->
         <attr name="thumbOffset" format="dimension" />
+        <!-- Whether to split the track and leave a gap for the thumb drawable. -->
+        <attr name="splitTrack" format="boolean" />
+        <!-- Tint to apply to the button graphic. -->
+        <attr name="thumbTint" format="color" />
+        <!-- Blending mode used to apply the button graphic tint. -->
+        <attr name="thumbTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="StackView">
@@ -3227,14 +3871,24 @@
         <attr name="textColorLink" />
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" format="boolean" />
-        <!-- Place a shadow of the specified color behind the text. -->
+        <!-- Place a blurred shadow of text underneath the text, drawn with the
+             specified color. The text shadow produced does not interact with
+             properties on View that are responsible for real time shadows,
+             {@link android.R.styleable#View_elevation elevation} and
+             {@link android.R.styleable#View_translationZ translationZ}. -->
         <attr name="shadowColor" format="color" />
-        <!-- Horizontal offset of the shadow. -->
+        <!-- Horizontal offset of the text shadow. -->
         <attr name="shadowDx" format="float" />
-        <!-- Vertical offset of the shadow. -->
+        <!-- Vertical offset of the text shadow. -->
         <attr name="shadowDy" format="float" />
-        <!-- Radius of the shadow. -->
+        <!-- Blur radius of the text shadow. -->
         <attr name="shadowRadius" format="float" />
+        <!-- Elegant text height, especially for less compacted complex script text. -->
+        <attr name="elegantTextHeight" format="boolean" />
+        <!-- Text letter-spacing. -->
+        <attr name="letterSpacing" format="float" />
+        <!-- Font feature settings. -->
+        <attr name="fontFeatureSettings" format="string" />
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -3368,13 +4022,17 @@
         <!-- Set an input filter to constrain the text length to the
              specified number. -->
         <attr name="maxLength" format="integer" min="0" />
-        <!-- Place a shadow of the specified color behind the text. -->
+        <!-- Place a blurred shadow of text underneath the text, drawn with the
+             specified color. The text shadow produced does not interact with
+             properties on View that are responsible for real time shadows,
+             {@link android.R.styleable#View_elevation elevation} and
+             {@link android.R.styleable#View_translationZ translationZ}. -->
         <attr name="shadowColor" />
-        <!-- Horizontal offset of the shadow. -->
+        <!-- Horizontal offset of the text shadow. -->
         <attr name="shadowDx" />
-        <!-- Vertical offset of the shadow. -->
+        <!-- Vertical offset of the text shadow. -->
         <attr name="shadowDy" />
-        <!-- Radius of the shadow. -->
+        <!-- Blur radius of the text shadow. -->
         <attr name="shadowRadius" />
         <attr name="autoLink" />
         <!-- If set to false, keeps the movement method from being set
@@ -3526,6 +4184,12 @@
         <attr name="textIsSelectable" />
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" />
+        <!-- Elegant text height, especially for less compacted complex script text. -->
+        <attr name="elegantTextHeight" />
+        <!-- Text letter-spacing. -->
+        <attr name="letterSpacing" />
+        <!-- Font feature settings. -->
+        <attr name="fontFeatureSettings" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
@@ -3556,10 +4220,6 @@
         <attr name="completionThreshold" format="integer" min="1" />
         <!-- Selector in a drop down list. -->
         <attr name="dropDownSelector" format="reference|color" />
-        <!-- Amount of pixels by which the drop down should be offset vertically. -->
-        <attr name="dropDownVerticalOffset" format="dimension" />
-        <!-- Amount of pixels by which the drop down should be offset horizontally. -->
-        <attr name="dropDownHorizontalOffset" format="dimension" />
         <!-- View to anchor the auto-complete dropdown to. If not specified, the text view itself
              is used. -->
         <attr name="dropDownAnchor" format="reference" />
@@ -3598,8 +4258,20 @@
         <attr name="inputType" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
+        <!-- The background to use for the popup window. -->
         <attr name="popupBackground" format="reference|color" />
+        <!-- Window elevation to use for the popup window. -->
+        <attr name="popupElevation" format="dimension" />
+        <!-- The animation style to use for the popup window. -->
         <attr name="popupAnimationStyle" format="reference" />
+        <!-- Whether the popup window should overlap its anchor view. -->
+        <attr name="overlapAnchor" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="ListPopupWindow">
+        <!-- Amount of pixels by which the drop down should be offset vertically. -->
+        <attr name="dropDownVerticalOffset" format="dimension" />
+        <!-- Amount of pixels by which the drop down should be offset horizontally. -->
+        <attr name="dropDownHorizontalOffset" format="dimension" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
         <!-- Identifier for the animation to use when a view is shown. -->
@@ -3657,12 +4329,8 @@
         <attr name="dropDownSelector" />
         <!-- Background drawable to use for the dropdown in spinnerMode="dropdown". -->
         <attr name="popupBackground" />
-        <!-- Vertical offset from the spinner widget for positioning the dropdown in
-             spinnerMode="dropdown". -->
-        <attr name="dropDownVerticalOffset" />
-        <!-- Horizontal offset from the spinner widget for positioning the dropdown
-             in spinnerMode="dropdown". -->
-        <attr name="dropDownHorizontalOffset" />
+        <!-- Window elevation to use for the dropdown in spinnerMode="dropdown". -->
+        <attr name="popupElevation" />
         <!-- Width of the dropdown in spinnerMode="dropdown". -->
         <attr name="dropDownWidth" />
         <!-- Reference to a layout to use for displaying a prompt in the dropdown for
@@ -3678,12 +4346,10 @@
 
     <declare-styleable name="DatePicker">
         <!-- The first year (inclusive), for example "1940".
-             {@deprecated Use minDate instead.}
-         -->
+             {@deprecated Use minDate instead.} -->
         <attr name="startYear" format="integer" />
         <!-- The last year (inclusive), for example "2010".
-             {@deprecated Use maxDate instead.}
-         -->
+             {@deprecated Use maxDate instead.} -->
         <attr name="endYear" format="integer" />
         <!-- Whether the spinners are shown. -->
         <attr name="spinnersShown" format="boolean" />
@@ -3693,8 +4359,47 @@
         <attr name="minDate" format="string" />
         <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
+        <!-- The first day of week according to {@link java.util.Calendar}. -->
+        <attr name="firstDayOfWeek" />
         <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />
+        <!-- @hide The layout of the legacy DatePicker. -->
+        <attr name="legacyLayout" />
+        <!-- The background color for the date selector 's day of week. -->
+        <attr name="dayOfWeekBackground" format="color|reference" />
+        <!-- The text color for the date selector's day of week. -->
+        <attr name="dayOfWeekTextAppearance" format="reference" />
+        <!-- The month's text appearance in the date selector. -->
+        <attr name="headerMonthTextAppearance" format="reference" />
+        <!-- The day of month's text appearance in the date selector. -->
+        <attr name="headerDayOfMonthTextAppearance" format="reference" />
+        <!-- The year's text appearance in the date selector. -->
+        <attr name="headerYearTextAppearance" format="reference" />
+        <!-- The background for the date selector. -->
+        <attr name="headerBackground" />
+        <!-- @hide The selected text color for the date selector. Used as a
+             backup if the text appearance does not explicitly have a color
+             set for the selected state. -->
+        <attr name="headerSelectedTextColor" />
+        <!-- The list year's text appearance in the list. -->
+        <attr name="yearListItemTextAppearance" format="reference" />
+        <!-- The list year's selected circle color in the list. -->
+        <attr name="yearListSelectorColor" format="color" />
+        <!-- The text color list of the calendar. -->
+        <attr name="calendarTextColor" format="color" />
+        <!-- @hide The selected text color for the calendar. Used as a backup
+             if the text color does not explicitly have a color set for the
+             selected state. -->
+        <attr name="calendarSelectedTextColor" format="color" />
+        <!-- Defines the look of the widget. Prior to the L release, the only choice was
+             spinner. As of L, with the Material theme selected, the default layout is calendar,
+             but this attribute can be used to force spinner to be used instead. -->
+        <attr name="datePickerMode">
+            <!-- Date picker with spinner controls to select the date. -->
+            <enum name="spinner" value="1" />
+            <!-- Date picker with calendar to select the date. -->
+            <enum name="calendar" value="2" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -3796,11 +4501,14 @@
         <!-- The row boundary delimiting the top of the group of cells
         occupied by this view. -->
         <attr name="layout_row" format="integer" />
-        <!-- The row span: the difference between the bottom and top
+        <!-- The row span: the difference between the top and bottom
         boundaries delimiting the group of cells occupied by this view.
         The default is one.
         See {@link android.widget.GridLayout.Spec}. -->
         <attr name="layout_rowSpan" format="integer" min="1" />
+        <!-- The relative proportion of vertical space that should be allocated to this view
+        during excess space distribution. -->
+        <attr name="layout_rowWeight" format="float" />
         <!-- The column boundary delimiting the left of the group of cells
         occupied by this view. -->
         <attr name="layout_column" />
@@ -3809,6 +4517,9 @@
         The default is one.
         See {@link android.widget.GridLayout.Spec}. -->
         <attr name="layout_columnSpan" format="integer" min="1" />
+        <!-- The relative proportion of horizontal space that should be allocated to this view
+        during excess space distribution. -->
+        <attr name="layout_columnWeight" format="float" />
         <!-- Gravity specifies how a component should be placed in its group of cells.
         The default is LEFT | BASELINE.
         See {@link android.widget.GridLayout.LayoutParams#setGravity(int)}. -->
@@ -3953,11 +4664,48 @@
         <attr name="internalLayout" />
         <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
         <attr name="virtualButtonPressedDrawable" format="reference"/>
+        <!-- @hide If true then the selector wheel is hidden until the picker has focus. -->
+        <attr name="hideWheelUntilFocused" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="TimePicker">
+        <!-- @hide The layout of the legacy time picker. -->
+        <attr name="legacyLayout" format="reference" />
         <!-- @hide The layout of the time picker. -->
         <attr name="internalLayout" />
+        <!-- The text appearance for the AM/PM header. -->
+        <attr name="headerAmPmTextAppearance" format="reference" />
+        <!-- The text appearance for the time header. -->
+        <attr name="headerTimeTextAppearance" format="reference" />
+        <!-- @hide The text color for selected time header of the TimePicker.
+             This will override the value from the text appearance if it does
+             not explicitly have a color set for the selected state. -->
+        <attr name="headerSelectedTextColor" format="color" />
+        <!-- The background for the header containing the currently selected time. -->
+        <attr name="headerBackground" />
+        <!-- The color for the hours/minutes numbers. -->
+        <attr name="numbersTextColor" format="color" />
+        <!-- The background color for the hours/minutes numbers. -->
+        <attr name="numbersBackgroundColor" format="color" />
+        <!-- The color for the AM/PM selectors. -->
+        <attr name="amPmTextColor" format="color" />
+        <!-- The background color state list for the AM/PM selectors. -->
+        <attr name="amPmBackgroundColor" format="color" />
+        <!-- @hide The background color for the AM/PM selectors of the
+             TimePicker when selected. Used if the background color does not
+             explicitly have a color set for the selected state. -->
+        <attr name="amPmSelectedBackgroundColor" format="color" />
+        <!-- The color for the hours/minutes selector. -->
+        <attr name="numbersSelectorColor" format="color" />
+        <!-- Defines the look of the widget. Prior to the L release, the only choice was
+             spinner. As of L, with the Material theme selected, the default layout is clock,
+             but this attribute can be used to force spinner to be used instead. -->
+        <attr name="timePickerMode">
+            <!-- Time picker with spinner controls to select the time. -->
+            <enum name="spinner" value="1" />
+            <!-- Time picker with clock face to select the time. -->
+            <enum name="clock" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- ========================= -->
@@ -4007,6 +4755,58 @@
         <attr name="autoMirrored"/>
     </declare-styleable>
 
+    <!-- Drawable used to render several states with animated transitions. Each state
+         is represented by a child drawable with an optional keyframe ID. -->
+    <declare-styleable name="AnimatedStateListDrawable">
+        <!-- Indicates whether the drawable should be initially visible. -->
+        <attr name="visible" />
+        <!-- If true, allows the drawable's padding to change based on the
+             current state that is selected.  If false, the padding will
+             stay the same (based on the maximum padding of all the states).
+             Enabling this feature requires that the owner of the drawable
+             deal with performing layout when the state changes, which is
+             often not supported. -->
+        <attr name="variablePadding" />
+        <!-- If true, the drawable's reported internal size will remain
+             constant as the state changes; the size is the maximum of all
+             of the states.  If false, the size will vary based on the
+             current state. -->
+        <attr name="constantSize" />
+        <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
+             same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
+             an RGB 565 screen). -->
+        <attr name="dither" />
+        <!-- Amount of time (in milliseconds) to fade in a new state drawable. -->
+        <attr name="enterFadeDuration" />
+        <!-- Amount of time (in milliseconds) to fade out an old state drawable. -->
+        <attr name="exitFadeDuration" />
+        <!-- Indicates if the drawable needs to be mirrored when its layout direction is
+             RTL (right-to-left). -->
+        <attr name="autoMirrored"/>
+    </declare-styleable>
+
+    <!-- Transition used to animate between states with keyframe IDs. -->
+    <declare-styleable name="AnimatedStateListDrawableItem">
+        <!-- Reference to a drawable resource to use for the frame.  If not
+             given, the drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+        <!-- Keyframe identifier for use in specifying transitions. -->
+        <attr name="id" />
+    </declare-styleable>
+
+    <!-- Transition used to animate between states with keyframe IDs. -->
+    <declare-styleable name="AnimatedStateListDrawableTransition">
+        <!-- Keyframe identifier for the starting state. -->
+        <attr name="fromId" format="reference" />
+        <!-- Keyframe identifier for the ending state. -->
+        <attr name="toId" format="reference" />
+        <!-- Reference to a animation drawable resource to use for the frame.  If not
+             given, the animation drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+        <!-- Whether this transition is reversible. -->
+        <attr name="reversible" format="boolean" />
+    </declare-styleable>
+
     <!-- Drawable used to render several animated frames. -->
     <declare-styleable name="AnimationDrawable">
         <attr name="visible" />
@@ -4024,6 +4824,11 @@
         <!-- Reference to a drawable resource to use for the frame.  If not
              given, the drawable must be defined by the first child tag. -->
         <attr name="drawable" format="reference" />
+    </declare-styleable>
+
+    <!-- Attributes that can be assigned to a StateListAnimator item. -->
+    <declare-styleable name="StateListAnimatorItem">
+        <attr name="animation"/>
     </declare-styleable>
 
     <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->
@@ -4159,6 +4964,14 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
+        <!-- Indicates how layer padding should affect the bounds of subsequent layers.
+             The default padding mode value is nest. -->
+        <attr name="paddingMode">
+            <!-- Nest each layer inside the padding of the previous layer. -->
+            <enum name="nest" value="0" />
+            <!-- Stack each layer directly atop the previous layer. -->
+            <enum name="stack" value="1" />
+        </attr>
     </declare-styleable>
 
     <!-- Describes an item (or child) of a LayerDrawable. -->
@@ -4174,7 +4987,7 @@
         <!-- Drawable used to render the layer. -->
         <attr name="drawable" />
         <!-- Identifier of the layer. This can be used to retrieve the layer
-             from a drawbable container. -->
+             from a drawable container. -->
         <attr name="id" />
     </declare-styleable>
 
@@ -4205,9 +5018,20 @@
         <attr name="drawable" />
     </declare-styleable>
 
+    <!-- Drawable used to render the Material progress indicator. -->
+    <declare-styleable name="MaterialProgressDrawable">
+        <attr name="visible" />
+        <attr name="thickness" />
+        <attr name="innerRadius" />
+        <attr name="width" />
+        <attr name="height" />
+        <attr name="color" />
+    </declare-styleable>
+
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
+        <attr name="inset"  format="dimension"/>
         <attr name="insetLeft" format="dimension" />
         <attr name="insetRight" format="dimension" />
         <attr name="insetTop" format="dimension" />
@@ -4244,6 +5068,32 @@
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>
+        <!-- Defines the horizontal tile mode. When the tile mode is enabled, the bitmap is repeated.
+             Gravity is ignored when the tile mode is enabled. Default value is "disabled". -->
+        <attr name="tileModeX">
+            <!-- Do not tile the bitmap. This is the default value. -->
+            <enum name="disabled" value="-1" />
+            <!-- Replicates the edge color. -->
+            <enum name="clamp" value="0" />
+            <!-- Repeats the bitmap horizontally. -->
+            <enum name="repeat" value="1" />
+            <!-- Repeats the shader's image horizontally, alternating
+                 mirror images so that adjacent images always seam. -->
+            <enum name="mirror" value="2" />
+        </attr>
+        <!-- Defines the vertical tile mode. When the tile mode is enabled, the bitmap is repeated.
+             Gravity is ignored when the tile mode is enabled. Default value is "disabled". -->
+        <attr name="tileModeY">
+            <!-- Do not tile the bitmap. This is the default value. -->
+            <enum name="disabled" value="-1" />
+            <!-- Replicates the edge color. -->
+            <enum name="clamp" value="0" />
+            <!-- Repeats the bitmap vertically. -->
+            <enum name="repeat" value="1" />
+            <!-- Repeats the shader's image vertically, alternating
+                 mirror images so that adjacent images always seam. -->
+            <enum name="mirror" value="2" />
+        </attr>
         <!-- Enables or disables the mipmap hint. See
             {@link android.graphics.Bitmap#setHasMipMap(boolean)} for more information.
             Default value is false. -->
@@ -4251,6 +5101,32 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Specifies the alpha multiplier to apply to the base drawable. -->
+        <attr name="alpha" />
     </declare-styleable>
 
     <!-- Drawable used to draw 9-patches. -->
@@ -4264,11 +5140,25 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
+        <!-- Specifies the alpha multiplier to apply to the base drawable. -->
+        <attr name="alpha" />
     </declare-styleable>
 
     <!-- Drawable used to draw a single color. -->
     <declare-styleable name="ColorDrawable">
         <!-- The color to use. -->
+        <attr name="color" />
+    </declare-styleable>
+
+    <!-- Drawable used to show animated touch feedback. -->
+    <declare-styleable name="RippleDrawable">
+        <!-- The color to use for ripple effects. This attribute is required. -->
         <attr name="color" />
     </declare-styleable>
 
@@ -4362,6 +5252,130 @@
         <attr name="height" />
         <!-- Enables or disables dithering. -->
         <attr name="dither" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
+    </declare-styleable>
+
+    <!-- ========================== -->
+    <!--   VectorDrawable class   -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <!-- Drawable used to draw vector paths. -->
+    <declare-styleable name="VectorDrawable">
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
+        <!-- Indicates if the drawable needs to be mirrored when its layout direction is
+             RTL (right-to-left). -->
+        <attr name="autoMirrored" />
+        <!-- The intrinsic width of the Vector Drawable. -->
+        <attr name="width" />
+        <!-- The intrinsic height of the Vector Drawable. -->
+        <attr name="height" />
+        <!-- The width of the canvas the drawing is on. -->
+        <attr name="viewportWidth" format="float"/>
+        <!-- The height of the canvas the drawing is on. -->
+        <attr name="viewportHeight" format="float"/>
+        <!-- The name of this vector drawable -->
+        <attr name="name" />
+        <!-- The opacity of the whole vector drawable, as a value between 0
+             (completely transparent) and 1 (completely opaque). -->
+        <attr name="alpha" />
+    </declare-styleable>
+
+    <!-- Defines the group used in VectorDrawables. -->
+    <declare-styleable name="VectorDrawableGroup">
+        <!-- The name of this group -->
+        <attr name="name" />
+        <!-- The amount to rotate the group -->
+        <attr name="rotation" />
+        <!-- The X coordinate of the center of rotation of a group -->
+        <attr name="pivotX" />
+        <!-- The Y coordinate of the center of rotation of a group -->
+        <attr name="pivotY" />
+        <!-- The amount to translate the group on X coordinate -->
+        <attr name="translateX" format="float"/>
+        <!-- The amount to translate the group on Y coordinate -->
+        <attr name="translateY" format="float"/>
+        <!-- The amount to scale the group on X coordinate -->
+        <attr name="scaleX" />
+        <!-- The amount to scale the group on X coordinate -->
+        <attr name="scaleY" />
+    </declare-styleable>
+
+    <!-- Defines the path used in VectorDrawables. -->
+    <declare-styleable name="VectorDrawablePath">
+        <!-- The name of this path -->
+        <attr name="name" />
+        <!-- The width a path stroke -->
+        <attr name="strokeWidth" format="float" />
+        <!-- The color to stroke the path if not defined implies no stroke-->
+        <attr name="strokeColor" format="color" />
+        <!-- The opacity of a path stroke, as a value between 0 (completely transparent)
+             and 1 (completely opaque) -->
+        <attr name="strokeAlpha" format="float" />
+        <!-- The color to fill the path if not defined implies no fill-->
+        <attr name="fillColor" format="color" />
+        <!-- The alpha of the path fill, as a value between 0 (completely transparent)
+             and 1 (completely opaque)-->
+        <attr name="fillAlpha" format="float" />
+        <!-- The specification of the operations that define the path  -->
+        <attr name="pathData" format="string" />
+        <!-- The fraction of the path to trim from the start from 0 to 1 -->
+        <attr name="trimPathStart" format="float" />
+        <!-- The fraction of the path to trim from the end from 0 to 1  -->
+        <attr name="trimPathEnd" format="float" />
+        <!-- Shift trim region (allows visible region to include the start and end) from 0 to 1  -->
+        <attr name="trimPathOffset" format="float" />
+        <!-- sets the linecap for a stroked path -->
+        <attr name="strokeLineCap" format="enum">
+            <enum name="butt" value="0"/>
+            <enum name="round" value="1"/>
+            <enum name="square" value="2"/>
+        </attr>
+        <!-- sets the lineJoin for a stroked path -->
+        <attr name="strokeLineJoin" format="enum">
+            <enum name="miter" value="0"/>
+            <enum name="round" value="1"/>
+            <enum name="bevel" value="2"/>
+        </attr>
+        <!-- sets the Miter limit for a stroked path -->
+        <attr name="strokeMiterLimit" format="float"/>
+    </declare-styleable>
+
+    <!-- Defines the clip path used in VectorDrawables. -->
+    <declare-styleable name="VectorDrawableClipPath">
+        <!-- The Name of this path -->
+        <attr name="name" />
+        <!-- The specification of the operations that define the path  -->
+        <attr name="pathData"/>
+    </declare-styleable>
+
+    <!-- ========================== -->
+    <!--   AnimatedVectorDrawable class   -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <!-- Define the AnimatedVectorDrawable. -->
+    <declare-styleable name="AnimatedVectorDrawable">
+        <!-- The static vector drawable. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
+    <!-- Defines the target used in the AnimatedVectorDrawable. -->
+    <declare-styleable name="AnimatedVectorDrawableTarget">
+        <!-- The name of the target path, group or vector drawable -->
+        <attr name="name" />
+        <!-- The animation for the target path, group or vector drawable -->
+        <attr name="animation" />
     </declare-styleable>
 
     <!-- ========================== -->
@@ -4538,6 +5552,21 @@
         <attr name="extraTension" format="float" />
     </declare-styleable>
 
+    <declare-styleable name="PathInterpolator">
+        <!-- The x coordinate of the first control point of the cubic Bezier -->
+        <attr name="controlX1" format="float" />
+        <!-- The y coordinate of the first control point of the cubic Bezier -->
+        <attr name="controlY1" format="float" />
+        <!-- The x coordinate of the second control point of the cubic Bezier -->
+        <attr name="controlX2" format="float" />
+        <!-- The y coordinate of the second control point of the cubic Bezier -->
+        <attr name="controlY2" format="float" />
+        <!-- The control points defined as a path.
+             When pathData is defined, then both of the control points of the
+             cubic Bezier will be ignored. -->
+        <attr name="pathData"/>
+    </declare-styleable>
+
     <!-- ========================== -->
     <!-- Transition attributes -->
     <!-- ========================== -->
@@ -4545,7 +5574,7 @@
 
     <!-- Use specific transition subclass names as the root tag of the XML resource that
          describes a {@link android.transition.Transition Transition},
-         such as <code>move</code>, <code>fade</code>, and <code>set</code>. -->
+         such as <code>changeBounds</code>, <code>fade</code>, and <code>transitionSet</code>. -->
     <declare-styleable name="Transition">
         <!-- Amount of time (in milliseconds) that the transition should run. -->
         <attr name="duration" />
@@ -4553,6 +5582,15 @@
         <attr name="startDelay" format="integer" />
         <!-- Interpolator to be used in the animations spawned by this transition. -->
         <attr name="interpolator" />
+        <!-- The match order to use for the transition. This is a comma-separated
+             list of values, containing one or more of the following:
+             id, itemId, name, instance. These correspond to
+             {@link android.transition.Transition#MATCH_ID},
+             {@link android.transition.Transition#MATCH_ITEM_ID},
+             {@link android.transition.Transition#MATCH_NAME}, and
+             {@link android.transition.Transition#MATCH_INSTANCE}, respectively.
+             This corresponds to {@link android.transition.Transition#setMatchOrder(int...)}. -->
+        <attr name="matchOrder" format="string" />
     </declare-styleable>
 
     <!-- Use <code>fade</code>as the root tag of the XML resource that
@@ -4561,6 +5599,8 @@
          resource are available in addition to the specific attributes of Fade
          described here. -->
     <declare-styleable name="Fade">
+        <!-- Equivalent to <code>transitionVisibilityMode</code>, fadingMode works only
+             with the Fade transition. -->
         <attr name="fadingMode">
             <!-- Fade will only fade appearing items in. -->
             <enum name="fade_in" value="1" />
@@ -4571,6 +5611,37 @@
         </attr>
     </declare-styleable>
 
+    <!-- Use <code>slide</code>as the root tag of the XML resource that
+         describes a {@link android.transition.Slide Slide} transition.
+         The attributes of the {@link android.R.styleable#Transition Transition}
+         resource are available in addition to the specific attributes of Slide
+         described here. -->
+    <declare-styleable name="Slide">
+        <attr name="slideEdge">
+            <!-- Slide to and from the left edge of the Scene. -->
+            <enum name="left" value="0x03" />
+            <!-- Slide to and from the top edge of the Scene. -->
+            <enum name="top" value="0x30" />
+            <!-- Slide to and from the right edge of the Scene. -->
+            <enum name="right" value="0x05" />
+            <!-- Slide to and from the bottom edge of the Scene. -->
+            <enum name="bottom" value="0x50" />
+        </attr>
+    </declare-styleable>
+
+    <!-- Use with {@link android.transition.Visibility} transitions, such as
+         <code>slide</code>, <code>explode</code>, and <code>fade</code> to mark which
+         views are supported. -->
+    <declare-styleable name="VisibilityTransition">
+        <!-- Changes whether the transition supports appearing and/or disappearing Views.
+             Corresponds to {@link android.transition.Visibility#setMode(int)}. -->
+        <attr name="transitionVisibilityMode">
+            <!-- Only appearing Views will be supported. -->
+            <flag name="mode_in" value="1" />
+            <!-- Only disappearing Views will be supported. -->
+            <flag name="mode_out" value="2" />
+        </attr>
+    </declare-styleable>
     <!-- Use <code>target</code> as the root tag of the XML resource that
      describes a {@link android.transition.Transition#addTarget(int)
      targetId} of a transition. There can be one or more targets inside
@@ -4580,6 +5651,16 @@
     <declare-styleable name="TransitionTarget">
         <!-- The id of a target on which this transition will animate changes. -->
         <attr name="targetId" format="reference" />
+        <!-- The id of a target to exclude from this transition. -->
+        <attr name="excludeId" format="reference" />
+        <!-- The fully-qualified name of the Class to include in this transition. -->
+        <attr name="targetClass" />
+        <!-- The fully-qualified name of the Class to exclude from this transition. -->
+        <attr name="excludeClass" format="string" />
+        <!-- The transitionName of the target on which this transition will animation changes. -->
+        <attr name="targetName" format="string" />
+        <!-- The transitionName of the target to exclude from this transition. -->
+        <attr name="excludeName" format="string" />
     </declare-styleable>
 
     <!-- Use <code>set</code> as the root tag of the XML resource that
@@ -4595,6 +5676,19 @@
         </attr>
     </declare-styleable>
 
+    <!-- Use <code>changeTransform</code> as the root tag of the XML resource that
+         describes a {@link android.transition.ChangeTransform} transition. -->
+    <declare-styleable name="ChangeTransform">
+        <!-- A parent change should use an overlay or affect the transform of the
+             transitionining View. Default is true. Corresponds to
+             {@link android.transition.ChangeTransform#setReparentWithOverlay(boolean)}. -->
+        <attr name="reparentWithOverlay" format="boolean"/>
+
+        <!-- Tells ChangeTransform to track parent changes. Default is true. Corresponds to
+             {@link android.transition.ChangeTransform#setReparent(boolean)}. -->
+        <attr name="reparent" format="boolean"/>
+    </declare-styleable>
+
     <!-- Use <code>transitionManager</code> as the root tag of the XML resource that
          describes a {@link android.transition.TransitionManager
          TransitionManager}. -->
@@ -4605,6 +5699,28 @@
         <attr name="fromScene" format="reference" />
         <!-- The destination scene in this scene change. -->
         <attr name="toScene" format="reference" />
+    </declare-styleable>
+
+    <!-- Use <code>arcMotion</code> as the root tag of the XML resource that
+         describes a {@link android.transition.ArcMotion}. This must be used
+         within a transition with which the PathMotion should be associated. -->
+    <declare-styleable name="ArcMotion">
+        <!-- The minimum arc angle in degrees between the start and end points when
+             they are close to horizontal. -->
+        <attr name="minimumHorizontalAngle" format="float" />
+        <!-- The minimum arc angle in degrees between the start and end points when
+             they are close to vertical. -->
+        <attr name="minimumVerticalAngle" format="float" />
+        <!-- The maximum arc angle in degrees between the start and end points. -->
+        <attr name="maximumAngle" format="float" />
+    </declare-styleable>
+
+    <!-- Use <code>patternPathMotion</code> as the root tag of the XML resource that
+         describes a {@link android.transition.PatternPathMotion}. This must be used
+         within a transition with which the PathMotion should be associated. -->
+    <declare-styleable name="PatternPathMotion">
+        <!-- The path string describing the pattern to use for the PathPathMotion. -->
+        <attr name="patternPathData" format="string" />
     </declare-styleable>
 
     <!-- ========================== -->
@@ -4625,9 +5741,9 @@
              greater than 0 or infinite. The default value is restart. -->
         <attr name="repeatMode"/>
         <!-- Value the animation starts from. -->
-        <attr name="valueFrom" format="float|integer|color|dimension"/>
+        <attr name="valueFrom" format="float|integer|color|dimension|string"/>
         <!-- Value the animation animates to. -->
-        <attr name="valueTo" format="float|integer|color|dimension"/>
+        <attr name="valueTo" format="float|integer|color|dimension|string"/>
         <!-- The type of valueFrom and valueTo. -->
         <attr name="valueType">
             <!-- valueFrom and valueTo are floats. This is the default value is valueType is
@@ -4637,6 +5753,9 @@
             <enum name="floatType" value="0" />
             <!-- valueFrom and valueTo are integers. -->
             <enum name="intType"   value="1" />
+            <!-- valueFrom and valueTo are paths defined as strings.
+                 This type is used for path morphing in AnimatedVectorDrawable. -->
+            <enum name="pathType"   value="2" />
         </attr>
     </declare-styleable>
 
@@ -4648,6 +5767,12 @@
     <declare-styleable name="PropertyAnimator">
         <!-- Name of the property being animated. -->
         <attr name="propertyName" format="string"/>
+        <!-- Name of the property being animated as the X coordinate of the pathData. -->
+        <attr name="propertyXName" format="string"/>
+        <!-- Name of the property being animated as the Y coordinate of the pathData. -->
+        <attr name="propertyYName" format="string"/>
+        <!-- The path used to animate the properties in the ObjectAnimator -->
+        <attr name="pathData"/>
     </declare-styleable>
 
 
@@ -5360,6 +6485,9 @@
         <attr name="imeExtractExitAnimation" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="VoiceInteractionSession">
+    </declare-styleable>
+
     <declare-styleable name="KeyboardView">
         <!-- Default KeyboardView style. -->
         <attr name="keyboardViewStyle" format="reference" />
@@ -5501,11 +6629,12 @@
             <flag name="vertical" value="0x2" />
         </attr>
         <!-- Optional parameter which indicates where this widget can be shown,
-             ie. home screen, keyguard or both.
-             resized. Supports combined values using | operator. -->
+             ie. home screen, keyguard, search bar or any combination thereof.
+             Supports combined values using | operator. -->
         <attr name="widgetCategory" format="integer">
             <flag name="home_screen" value="0x1" />
             <flag name="keyguard" value="0x2" />
+            <flag name="searchbox" value="0x4" />
         </attr>
     </declare-styleable>
 
@@ -5557,6 +6686,53 @@
              IDs (through the android:id attribute) instead of tags because
              they are faster and allow for compile-time type checking. -->
         <attr name="tag" />
+
+        <!-- The Transition that will be used to move Views out of the scene when the
+             fragment is removed, hidden, or detached when not popping the back stack.
+             Corresponds to {@link android.app.Fragment#setExitTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentExitTransition" format="reference"/>
+
+        <!-- The Transition that will be used to move Views into the initial scene.
+             Corresponds to {@link android.app.Fragment#setEnterTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentEnterTransition" format="reference"/>
+
+        <!-- The Transition that will be used for shared elements transferred into the content
+             Scene.
+             Corresponds to {@link android.app.Fragment#setSharedElementEnterTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentSharedElementEnterTransition" format="reference"/>
+
+        <!-- The Transition that will be used to move Views out of the scene when the Fragment is
+             preparing to be removed, hidden, or detached because of popping the back stack.
+             Corresponds to {@link android.app.Fragment#setReturnTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentReturnTransition" format="reference"/>
+
+        <!-- The Transition that will be used for shared elements transferred back during a
+             pop of the back stack. This Transition acts in the leaving Fragment.
+             Corresponds to {@link android.app.Fragment#setSharedElementReturnTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentSharedElementReturnTransition" format="reference"/>
+
+        <!-- The Transition that will be used to move Views in to the scene when returning due
+             to popping a back stack.
+             Corresponds to {@link android.app.Fragment#setReenterTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentReenterTransition" format="reference"/>
+
+        <!-- Sets whether the enter and exit transitions should overlap when transitioning
+             forward.
+             Corresponds to {@link android.app.Fragment#setAllowEnterTransitionOverlap(
+             boolean)} -->
+        <attr name="fragmentAllowEnterTransitionOverlap" format="reference"/>
+
+        <!-- Sets whether the enter and exit transitions should overlap when transitioning
+             because of popping the back stack.
+             Corresponds to {@link android.app.Fragment#setAllowReturnTransitionOverlap(
+             boolean)} -->
+        <attr name="fragmentAllowReturnTransitionOverlap" format="reference"/>
     </declare-styleable>
 
     <!-- Use <code>device-admin</code> as the root tag of the XML resource that
@@ -5605,6 +6781,22 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this dream. -->
         <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- @SystemApi Use <code>trust-agent</code> as the root tag of the XML resource that
+         describes an {@link android.service.trust.TrustAgentService}, which is
+         referenced from its {@link android.service.trust.TrustAgentService#TRUST_AGENT_META_DATA}
+         meta-data entry.  Described here are the attributes that can be included in that tag.
+         @hide -->
+    <declare-styleable name="TrustAgent">
+        <!-- @SystemApi Component name of an activity that allows the user to modify
+             the settings for this trust agent. @hide -->
+        <attr name="settingsActivity" />
+        <!-- @SystemApi Title for a preference that allows that user to launch the
+             activity to modify trust agent settings. @hide -->
+        <attr name="title" />
+        <!-- @SystemApi Summary for the same preference as the title. @hide -->
+        <attr name="summary" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -5715,16 +6907,16 @@
     <eat-comment />
     <declare-styleable name="GlowPadView">
         <!-- Reference to an array resource that be shown as targets around a circle. -->
-        <attr name="targetDrawables"/>
+        <attr name="targetDrawables" format="reference" />
 
         <!-- Reference to an array resource that be used as description for the targets around the circle. -->
-        <attr name="targetDescriptions"/>
+        <attr name="targetDescriptions" format="reference" />
 
         <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
-        <attr name="directionDescriptions"/>
+        <attr name="directionDescriptions" format="reference" />
 
         <!-- Sets a drawable as the center. -->
-        <attr name="handleDrawable"/>
+        <attr name="handleDrawable" format="reference" />
 
         <!-- Drawable to use for wave ripple animation. -->
         <attr name="outerRingDrawable" format="reference"/>
@@ -5736,22 +6928,22 @@
         <attr name="innerRadius"/>
 
         <!-- Outer radius of glow area. Target icons will be drawn on this circle. -->
-        <attr name="outerRadius"/>
+        <attr name="outerRadius" format="dimension" />
 
         <!-- Radius of glow under finger. -->
         <attr name="glowRadius" format="dimension" />
 
         <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
-        <attr name="vibrationDuration"/>
+        <attr name="vibrationDuration" format="integer" />
 
         <!-- How close we need to be before snapping to a target. -->
-        <attr name="snapMargin"/>
+        <attr name="snapMargin" format="dimension" />
 
         <!-- Number of waves/chevrons to show in animation. -->
-        <attr name="feedbackCount"/>
+        <attr name="feedbackCount" format="integer" />
 
         <!-- Used when the handle shouldn't wait to be hit before following the finger -->
-        <attr name="alwaysTrackFinger"/>
+        <attr name="alwaysTrackFinger" format="boolean" />
 
         <!-- Location along the circle of the first item, in degrees.-->
         <attr name="firstItemOffset" format="float" />
@@ -5765,45 +6957,6 @@
             by its parent. If this is set to false, no scaling will occur. If this is set to true
             scaling will occur to fit for any axis in which gravity is set to center. -->
         <attr name="allowScaling" format="boolean" />
-    </declare-styleable>
-
-    <!-- =============================== -->
-    <!-- MultiWaveView class attributes -->
-    <!-- =============================== -->
-    <eat-comment />
-    <declare-styleable name="MultiWaveView">
-        <!-- Reference to an array resource that be shown as targets around a circle. -->
-        <attr name="targetDrawables" format="reference"/>
-
-        <!-- Reference to an array resource that be used as description for the targets around the circle. -->
-        <attr name="targetDescriptions" format="reference"/>
-
-        <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
-        <attr name="directionDescriptions" format="reference"/>
-
-        <!-- Sets a drawable as the drag center. -->
-        <attr name="handleDrawable" format="reference" />
-
-        <!-- Drawables to use for chevron animations. May be null. -->
-        <attr name="chevronDrawables" format="reference"/>
-
-        <!-- Drawable to use for wave ripple animation. -->
-        <attr name="waveDrawable" format="reference" />
-
-        <!-- Outer radius of target circle. Icons will be drawn on this circle. -->
-        <attr name="outerRadius" format="dimension" />
-
-        <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
-        <attr name="vibrationDuration" format="integer"/>
-
-        <!-- How close we need to be before snapping to a target. -->
-        <attr name="snapMargin" format="dimension" />
-
-        <!-- Number of waves/chevrons to show in animation. -->
-        <attr name="feedbackCount" format="integer" />
-
-        <!-- Used when the handle shouldn't wait to be hit before following the finger -->
-        <attr name="alwaysTrackFinger" format="boolean" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -5849,14 +7002,58 @@
         <!-- Aspect to use when drawing LockPatternView. Choices are "square"(default), "lock_width"
              or "lock_height" -->
         <attr name="aspect" format="string" />
+        <!-- Color to use when drawing LockPatternView paths. -->
+        <attr name="pathColor" format="color|reference" />
+        <!-- The regular pattern color -->
+        <attr name="regularColor" format="color|reference" />
+        <!-- The error color -->
+        <attr name="errorColor" format="color|reference" />
+        <!-- The success color -->
+        <attr name="successColor" format="color|reference"/>
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
-         describes a {@link android.speech.RecognitionService}, which is reference from
+         describes a {@link android.speech.RecognitionService}, which is referenced from
          its {@link android.speech.RecognitionService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="RecognitionService">
         <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- Use <code>voice-interaction-service</code> as the root tag of the XML resource that
+         describes a {@link android.service.voice.VoiceInteractionService}, which is referenced from
+         its {@link android.service.voice.VoiceInteractionService#SERVICE_META_DATA} meta-data entry.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="VoiceInteractionService">
+        <!-- The service that hosts active voice interaction sessions.  This is required. -->
+        <attr name="sessionService" format="string" />
+        <!-- The service that provides voice recognition.  This is required.  When the user
+             selects this voice interaction service, they will also be implicitly selecting
+             the component here for their recognition service. -->
+        <attr name="recognitionService" format="string" />
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- Use <code>voice-enrollment-application</code>
+         as the root tag of the XML resource that escribes the supported keyphrases (hotwords)
+         by the enrollment application.
+         Described here are the attributes that can be included in that tag.
+         @hide
+         @SystemApi -->
+    <declare-styleable name="VoiceEnrollmentApplication">
+        <!-- A globally unique ID for the keyphrase. @hide @SystemApi -->
+        <attr name="searchKeyphraseId" format="integer" />
+        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide @SystemApi -->
+        <attr name="searchKeyphrase" format="string" />
+        <!-- A comma separated list of BCP-47 language tag for locales that are supported
+             for this keyphrase, or empty if not locale dependent. @hide @SystemApi -->
+        <attr name="searchKeyphraseSupportedLocales" format="string" />
+        <!-- Flags for supported recognition modes. @hide @SystemApi -->
+        <attr name="searchKeyphraseRecognitionFlags">
+            <flag name="none" value="0" />
+            <flag name="voiceTrigger" value="0x1" />
+            <flag name="userIdentification" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes used to style the Action Bar. -->
@@ -5912,9 +7109,30 @@
         <attr name="indeterminateProgressStyle" format="reference" />
         <!-- Specifies the horizontal padding on either end for an embedded progress bar. -->
         <attr name="progressBarPadding" format="dimension" />
+        <!-- Up navigation glyph -->
+        <attr name="homeAsUpIndicator" />
         <!-- Specifies padding that should be applied to the left and right sides of
              system-provided items in the bar. -->
         <attr name="itemPadding" format="dimension" />
+        <!-- Set true to hide the action bar on a vertical nested scroll of content. -->
+        <attr name="hideOnContentScroll" format="boolean" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
+        <attr name="contentInsetStart" format="dimension" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
+        <attr name="contentInsetEnd" format="dimension" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
+        <attr name="contentInsetLeft" format="dimension" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
+        <attr name="contentInsetRight" format="dimension" />
+        <!-- Elevation for the action bar itself -->
+        <attr name="elevation" />
+        <!-- Reference to a theme that should be used to inflate popups
+             shown by widgets in the action bar. -->
+        <attr name="popupTheme" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">
@@ -5928,12 +7146,16 @@
         <attr name="backgroundSplit" />
         <!-- Specifies a fixed height for the action mode bar. -->
         <attr name="height" />
+        <!-- Specifies a layout to use for the "close" item at the starting edge. -->
+        <attr name="closeItemLayout" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="SearchView">
+        <!-- The layout to use for the search view. -->
+        <attr name="layout" />
         <!-- The default state of the SearchView. If true, it will be iconified when not in
              use and expanded when clicked. -->
-        <attr name="iconifiedByDefault" format="boolean"/>
+        <attr name="iconifiedByDefault" format="boolean" />
         <!-- An optional maximum width of the SearchView. -->
         <attr name="maxWidth" />
         <!-- An optional query hint string to be displayed in the empty query field. -->
@@ -5942,10 +7164,23 @@
         <attr name="imeOptions" />
         <!-- The input type to set on the query text field. -->
         <attr name="inputType" />
-    </declare-styleable>
-
-    <declare-styleable name="ActionBar_LayoutParams">
-        <attr name="layout_gravity" />
+        <!-- Close button icon -->
+        <attr name="closeIcon" format="reference" />
+        <!-- Go button icon -->
+        <attr name="goIcon" format="reference" />
+        <!-- Search icon -->
+        <attr name="searchIcon" format="reference" />
+        <!-- Voice button icon -->
+        <attr name="voiceIcon" format="reference" />
+        <!-- Commit icon shown in the query suggestion row -->
+        <attr name="commitIcon" format="reference" />
+        <!-- Layout for query suggestion rows -->
+        <attr name="suggestionRowLayout" format="reference" />
+        <!-- Background for the section containing the search query -->
+        <attr name="queryBackground" format="reference" />
+        <!-- Background for the section containing the action (e.g. voice search) -->
+        <attr name="submitBackground" format="reference" />
+        <attr name="focusable" />
     </declare-styleable>
 
     <declare-styleable name="Switch">
@@ -5965,6 +7200,10 @@
         <attr name="switchMinWidth" format="dimension" />
         <!-- Minimum space between the switch and caption text -->
         <attr name="switchPadding" format="dimension" />
+        <!-- Whether to split the track and leave a gap for the thumb drawable. -->
+        <attr name="splitTrack" />
+        <!-- Whether to draw on/off text. -->
+        <attr name="showText" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="Pointer">
@@ -5982,9 +7221,9 @@
         <!-- Drawable to use as the icon bitmap. -->
         <attr name="bitmap" format="reference" />
         <!-- X coordinate of the icon hot spot. -->
-        <attr name="hotSpotX" format="float" />
+        <attr name="hotSpotX" format="dimension" />
         <!-- Y coordinate of the icon hot spot. -->
-        <attr name="hotSpotY" format="float" />
+        <attr name="hotSpotY" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="Storage">
@@ -6025,6 +7264,27 @@
         <!-- The state (true for on, or false for off) that causes dependents to be disabled. By default,
              dependents will be disabled when this is unchecked, so the value of this preference is false. -->
         <attr name="disableDependentsState" />
+    </declare-styleable>
+
+    <declare-styleable name="SeekBarPreference">
+        <attr name="layout" />
+    </declare-styleable>
+
+    <!-- Base attributes available to PreferenceFragment. -->
+    <declare-styleable name="PreferenceFragment">
+        <!-- The layout for the PreferenceFragment. This should rarely need to be changed. -->
+        <attr name="layout" />
+    </declare-styleable>
+
+    <!-- Base attributes available to PreferenceActivity. -->
+    <declare-styleable name="PreferenceActivity">
+        <!-- The layout for the Preference Activity. This should rarely need to be changed. -->
+        <attr name="layout" />
+        <!-- The layout for the Preference Header. This should rarely need to be changed. -->
+        <attr name="headerLayout" format="reference" />
+        <!-- true if the Icon view will be removed when there is none and thus not showing
+             the fixed margins. -->
+        <attr name="headerRemoveIconIfEmpty" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>tts-engine</code> as the root tag of the XML resource that
@@ -6128,6 +7388,8 @@
     tags. -->
     <declare-styleable name="FragmentBreadCrumbs">
         <attr name="gravity" />
+        <attr name="itemLayout" format="reference" />
+        <attr name="itemColor" format="color|reference" />
     </declare-styleable>
 
     <declare-styleable name="MultiPaneChallengeLayout">
@@ -6151,9 +7413,134 @@
         <attr name="layout_maxHeight" />
     </declare-styleable>
 
-    <declare-styleable name="NumPadKey">
-        <attr name="digit" format="integer" />
-        <attr name="textView" format="reference" />
+    <declare-styleable name="Toolbar">
+        <attr name="titleTextAppearance" format="reference" />
+        <attr name="subtitleTextAppearance" format="reference" />
+        <attr name="title" />
+        <attr name="subtitle" />
+        <attr name="gravity" />
+        <attr name="titleMargins" format="dimension" />
+        <attr name="titleMarginStart" format="dimension" />
+        <attr name="titleMarginEnd" format="dimension" />
+        <attr name="titleMarginTop" format="dimension" />
+        <attr name="titleMarginBottom" format="dimension" />
+        <attr name="contentInsetStart" />
+        <attr name="contentInsetEnd" />
+        <attr name="contentInsetLeft" />
+        <attr name="contentInsetRight" />
+        <attr name="maxButtonHeight" format="dimension" />
+        <attr name="navigationButtonStyle" format="reference" />
+        <attr name="buttonGravity">
+            <!-- Push object to the top of its container, not changing its size. -->
+            <flag name="top" value="0x30" />
+            <!-- Push object to the bottom of its container, not changing its size. -->
+            <flag name="bottom" value="0x50" />
+        </attr>
+        <attr name="collapseIcon" format="reference" />
+        <!-- Reference to a theme that should be used to inflate popups
+             shown by widgets in the toolbar. -->
+        <attr name="popupTheme" format="reference" />
+        <!-- Icon drawable to use for the navigation button located at
+             the start of the toolbar. -->
+        <attr name="navigationIcon" format="reference" />
+        <!-- Text to set as the content description for the navigation button
+             located at the start of the toolbar. -->
+        <attr name="navigationContentDescription" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="Toolbar_LayoutParams">
+        <attr name="layout_gravity" />
+    </declare-styleable>
+
+    <declare-styleable name="ActionBar_LayoutParams">
+        <attr name="layout_gravity" />
+    </declare-styleable>
+
+    <!-- Used as a filter array on the theme to pull out only the EdgeEffect-relevant bits. -->
+    <declare-styleable name="EdgeEffect">
+        <attr name="colorEdgeEffect" />
+    </declare-styleable>
+
+    <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes a
+         {@link android.media.tv.TvInputService}, which is referenced from its
+         {@link android.media.tv.TvInputService#SERVICE_META_DATA} meta-data entry.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="TvInputService">
+        <!-- Component name of an activity for setup of this service.
+             The setup includes scanning channels and registering EPG data. -->
+        <attr name="setupActivity" format="string" />
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
+         XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},
+         which is referenced from its
+         {@link android.media.tv.TvInputManager#META_DATA_CONTENT_RATING_SYSTEMS}. -->
+    <declare-styleable name="RatingSystemDefinition">
+        <!-- The unique name of the content rating system. -->
+        <attr name="name" />
+        <!-- The title of the content rating system which is shown to the user. -->
+        <attr name="title" />
+        <!-- The short description of the content rating system. -->
+        <attr name="description" />
+        <!-- The country code associated with the content rating system, which consists of two
+             uppercase letters that conform to the ISO 3166 standard. -->
+        <attr name="country" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes that can be used with <code>rating-definition</code> tags inside of the XML
+         resource that describes TV content rating of a {@link android.media.tv.TvInputService},
+         which is referenced from its
+         {@link android.media.tv.TvInputManager#META_DATA_CONTENT_RATING_SYSTEMS}. -->
+    <declare-styleable name="RatingDefinition">
+        <!-- The unique name of the content rating. -->
+        <attr name="name" />
+        <!-- The title of the content rating which is shown to the user. -->
+        <attr name="title" />
+        <!-- The short description of the content rating. -->
+        <attr name="description" />
+        <!-- The age associated with the content rating. The content of this rating is suitable for
+             people of this age or above. -->
+        <attr name="contentAgeHint" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="ResolverDrawerLayout">
+        <attr name="maxWidth" />
+        <attr name="maxCollapsedHeight" format="dimension" />
+        <attr name="maxCollapsedHeightSmall" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ResolverDrawerLayout_LayoutParams">
+        <attr name="layout_alwaysShow" format="boolean" />
+        <attr name="layout_ignoreOffset" format="boolean" />
+        <attr name="layout_gravity" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="Lighting">
+        <attr name="lightY" />
+        <attr name="lightZ" />
+        <attr name="lightRadius" />
+        <attr name="ambientShadowAlpha" />
+        <attr name="spotShadowAlpha" />
+    </declare-styleable>
+
+    <declare-styleable name="RestrictionEntry">
+        <attr name="key" />
+        <attr name="restrictionType">
+            <enum name="hidden" value="0" />
+            <enum name="bool" value="1" />
+            <enum name="choice" value="2" />
+            <enum name="multi-select" value="4" />
+            <enum name="integer" value="5" />
+            <enum name="string" value="6" />
+        </attr>
+        <attr name="title" />
+        <attr name="description" />
+        <attr name="defaultValue" />
+        <attr name="entries" />
+        <attr name="entryValues" />
+    </declare-styleable>
 </resources>

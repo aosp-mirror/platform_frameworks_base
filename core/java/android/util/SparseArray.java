@@ -17,6 +17,9 @@
 package android.util;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 /**
  * SparseArrays map integers to Objects.  Unlike a normal array of Objects,
@@ -70,12 +73,11 @@ public class SparseArray<E> implements Cloneable {
      */
     public SparseArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = ContainerHelpers.EMPTY_INTS;
-            mValues = ContainerHelpers.EMPTY_OBJECTS;
+            mKeys = EmptyArray.INT;
+            mValues = EmptyArray.OBJECT;
         } else {
-            initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
-            mKeys = new int[initialCapacity];
-            mValues = new Object[initialCapacity];
+            mValues = ArrayUtils.newUnpaddedObjectArray(initialCapacity);
+            mKeys = new int[mValues.length];
         }
         mSize = 0;
     }
@@ -215,28 +217,8 @@ public class SparseArray<E> implements Cloneable {
                 i = ~ContainerHelpers.binarySearch(mKeys, mSize, key);
             }
 
-            if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealIntArraySize(mSize + 1);
-
-                int[] nkeys = new int[n];
-                Object[] nvalues = new Object[n];
-
-                // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
-                System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-                System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-                mKeys = nkeys;
-                mValues = nvalues;
-            }
-
-            if (mSize - i != 0) {
-                // Log.e("SparseArray", "move " + (mSize - i));
-                System.arraycopy(mKeys, i, mKeys, i + 1, mSize - i);
-                System.arraycopy(mValues, i, mValues, i + 1, mSize - i);
-            }
-
-            mKeys[i] = key;
-            mValues[i] = value;
+            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+            mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);
             mSize++;
         }
     }
@@ -368,24 +350,9 @@ public class SparseArray<E> implements Cloneable {
             gc();
         }
 
-        int pos = mSize;
-        if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealIntArraySize(pos + 1);
-
-            int[] nkeys = new int[n];
-            Object[] nvalues = new Object[n];
-
-            // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
-            System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-            System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-            mKeys = nkeys;
-            mValues = nvalues;
-        }
-
-        mKeys[pos] = key;
-        mValues[pos] = value;
-        mSize = pos + 1;
+        mKeys = GrowingArrayUtils.append(mKeys, mSize, key);
+        mValues = GrowingArrayUtils.append(mValues, mSize, value);
+        mSize++;
     }
 
     /**

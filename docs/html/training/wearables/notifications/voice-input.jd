@@ -1,0 +1,175 @@
+page.title=Receiving Voice Input in a Notification
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#VoiceInput">Define the Voice Input</a></li>
+  <li><a href="#AddAction">Add the Voice Input as a Notification Action</li>
+  <li><a href="#ReceiveInput">Receiving the Voice Input as a String</a>
+</ol>
+
+</div>
+</div>
+
+<p>If you have handheld notifications that include an action to input text,
+such as reply to an email, it should normally launch an activity
+on the handheld device to input the text. However, when your notification appears on a wearable,
+there is no keyboard input, so you can let users dictate a reply or provide pre-defined text messages
+using {@link android.support.v4.app.RemoteInput}.
+</p>
+
+<p>When users reply with voice or select one of the available
+messages, the system attaches the text response to the {@link android.content.Intent} you specified
+for the notification action and sends that intent to your handheld app.</p>
+
+<img src="{@docRoot}wear/images/13_voicereply.png" height="200" width="169"
+style="float:right;margin:0 0 20px 40px;clear:right" />
+<img src="{@docRoot}wear/images/03_actions.png" height="200" width="169"
+style="float:right;margin:0 0 20px 40px" />
+
+<p class="note"><strong>Note:</strong> The Android emulator does not support voice input. When
+using the emulator for a wearable device, enable <b>Hardware keyboard present</b> in the AVD settings
+so you can type replies instead.</p>
+
+<h2 id="VoiceInput">Define the Voice Input</h2>
+
+<p>To create an action that supports voice input, create an instance of 
+  {@link android.support.v4.app.RemoteInput.Builder} that you can add to your notification action.
+  This class's constructor accepts a string that the system uses as
+  the key for the voice input, which you'll later use to retrieve the text of the
+  input in your handheld app.</p>
+
+<p>For example, here's how to create a
+{@link android.support.v4.app.RemoteInput} object that provides a custom
+label for the voice input prompt:</p>
+
+<pre class="prettyprint">
+// Key for the string that's delivered in the action's intent
+private static final String EXTRA_VOICE_REPLY = "extra_voice_reply";
+
+String replyLabel = getResources().getString(R.string.reply_label);
+
+RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+
+
+<h3>Add Pre-defined Text Responses</h3>
+
+<img src="{@docRoot}wear/images/12_voicereply.png" height="200"
+style="float:right;margin:0 0 20px 40px" />
+
+<p>In addition to allowing voice input, you can
+    provide up to five text responses that the user can select for quick replies. Call
+ {@link android.support.v4.app.RemoteInput.Builder#setChoices setChoices()} and pass it a string array.</p>
+
+<p>For example, you can define some responses in a resource array:</p>
+
+<p class="code-caption">res/values/strings.xml</code>
+<pre class="prettyprint">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string-array name="reply_choices">
+        &lt;item>Yes&lt;/item>
+        &lt;item>No&lt;/item>
+        &lt;item>Maybe&lt;/item>
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+
+<p>Then, inflate the string array and add it to the
+ {@link android.support.v4.app.RemoteInput}:</p>
+
+<pre>
+public static final EXTRA_VOICE_REPLY = "extra_voice_reply";
+...
+String replyLabel = getResources().getString(R.string.reply_label);
+String[] replyChoices = getResources().getStringArray(R.array.reply_choices);
+
+RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
+        .setLabel(replyLabel)
+        .setChoices(replyChoices)
+        .build();
+</pre>
+
+<h2 id="AddAction">Add the Voice Input as a Notification Action</h2>
+
+<p>
+To set the voice input, attach your
+{@link android.support.v4.app.RemoteInput} object to an action using
+{@link android.support.v4.app.NotificationCompat.Action.Builder#addRemoteInput addRemoteInput()}.
+You can then apply the action to the notification. For example:
+</p>
+
+<pre>
+// Create an intent for the reply action
+Intent replyIntent = new Intent(this, ReplyActivity.class);
+PendingIntent replyPendingIntent =
+        PendingIntent.getActivity(this, 0, replyIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+// Create the reply action and add the remote input
+NotificationCompat.Action action =
+        new NotificationCompat.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label, replyPendingIntent))
+                .addRemoteInput(remoteInput)
+                .build();
+
+// Build the notification and add the action via WearableExtender
+Notification notification =
+        new NotificationCompat.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .extend(new WearableExtender().addAction(action))
+                .build();
+
+// Issue the notification
+NotificationManagerCompat notificationManager =
+        NotificationManagerCompat.from(mContext);
+notificationManager.notify(notificationId, notification);
+</pre>
+<p>
+When you issue this notification, users can swipe to the left to see the "Reply" action button.
+</p>
+
+<h2 id="ReceiveInput">Receiving the Voice Input as a String</h2>
+<p>
+To receive the user's transcribed message in the activity you declared in the reply action's intent,
+call {@link android.support.v4.app.RemoteInput#getResultsFromIntent getResultsFromIntent()},
+passing in the "Reply" action's intent. This method returns a {@link android.os.Bundle} that
+contains the text response. You can then query the {@link android.os.Bundle} to obtain the response.
+
+<p class="note"><b>Note:</b> Do not use {@link android.content.Intent#getExtras Intent.getExtras()}
+to obtain the voice result, because the voice input is stored as
+{@link android.content.ClipData}. The {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+getResultsFromIntent()} method provides a convenient way to receive a character sequence without
+having to process the {@link android.content.ClipData} yourself.
+</p>
+
+<p>
+The following code shows a method that accepts an intent and returns the voice response,
+which is referenced by the <code>EXTRA_VOICE_REPLY</code> key that is used in the previous examples:
+</p>
+
+<pre>
+/**
+ * Obtain the intent that started this activity by calling
+ * Activity.getIntent() and pass it into this method to
+ * get the associated voice input string.
+ */
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+        if (remoteInput != null) {
+            return remoteInput.getCharSequence(EXTRA_VOICE_REPLY);
+        }
+    }
+    return null;
+}
+</pre>

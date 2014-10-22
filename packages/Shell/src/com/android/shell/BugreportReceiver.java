@@ -84,14 +84,17 @@ public class BugreportReceiver extends BroadcastReceiver {
         }
         notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        final Notification.Builder builder = new Notification.Builder(context);
-        builder.setSmallIcon(com.android.internal.R.drawable.stat_sys_adb);
-        builder.setContentTitle(context.getString(R.string.bugreport_finished_title));
-        builder.setTicker(context.getString(R.string.bugreport_finished_title));
-        builder.setContentText(context.getString(R.string.bugreport_finished_text));
-        builder.setContentIntent(PendingIntent.getActivity(
-                context, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-        builder.setAutoCancel(true);
+        final Notification.Builder builder = new Notification.Builder(context)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setContentTitle(context.getString(R.string.bugreport_finished_title))
+                .setTicker(context.getString(R.string.bugreport_finished_title))
+                .setContentText(context.getString(R.string.bugreport_finished_text))
+                .setContentIntent(PendingIntent.getActivity(
+                        context, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT))
+                .setAutoCancel(true)
+                .setColor(context.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
+
         NotificationManager.from(context).notify(TAG, 0, builder.build());
 
         // Clean up older bugreports in background

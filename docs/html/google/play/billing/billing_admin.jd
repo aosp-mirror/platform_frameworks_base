@@ -66,7 +66,8 @@ storing and delivering the digital content that you sell in your applications.</
 </p>
 </div>
 
-<p>You can create a product list for any published application or any draft application that's been
+<p>You can create a product list for any published application, or any
+application in the alpha or beta channels, that's been
 uploaded and saved to the Developer Console. However, you must have a Google Wallet merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
@@ -74,6 +75,13 @@ existing items in the product list but you will not be able to add new items to 
 information about this permission, see
 <a href="{@docRoot}google/play/billing/billing_integrate.html#billing-permission">Updating Your
 Application's Manifest</a>.</p>
+
+<p class="note"><strong>Note:</strong> Previously you could test an app by
+uploading an unpublished "draft" version. This functionality is no longer
+supported; instead, you must publish it to the alpha or beta distribution
+channel. For more information, see <a
+href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">Draft Apps
+are No Longer Supported</a>.
 
 <p>In addition, an application package can have only one product list. If you create a product
 list for an application, and you use the <a

@@ -18,6 +18,7 @@ package com.android.tools.layoutlib.create;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,6 @@ import java.util.Set;
 public class Main {
 
     public static class Options {
-        public boolean generatePublicAccess = true;
         public boolean listAllDeps = false;
         public boolean listOnlyMissingDeps = false;
     }
@@ -64,7 +64,7 @@ public class Main {
         String[] osDestJar = { null };
 
         if (!processArgs(log, args, osJarPath, osDestJar)) {
-            log.error("Usage: layoutlib_create [-v] [-p] output.jar input.jar ...");
+            log.error("Usage: layoutlib_create [-v] output.jar input.jar ...");
             log.error("Usage: layoutlib_create [-v] [--list-deps|--missing-deps] input.jar ...");
             System.exit(1);
         }
@@ -88,7 +88,7 @@ public class Main {
 
         try {
             CreateInfo info = new CreateInfo();
-            Set<String> excludeClasses = getExcludedClasses(info);
+            Set<String> excludeClasses = info.getExcludedClasses();
             AsmGenerator agen = new AsmGenerator(log, osDestJar, info);
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
@@ -114,6 +114,9 @@ public class Main {
                         "android.os.*",  // for android.os.Handler
                         "android.database.ContentObserver", // for Digital clock
                         "com.android.i18n.phonenumbers.*",  // for TextView with autolink attribute
+                        "android.app.DatePickerDialog",     // b.android.com/28318
+                        "android.app.TimePickerDialog",     // b.android.com/61515
+                        "com.android.internal.view.menu.ActionMenu",
                     },
                     excludeClasses,
                     new String[] {
@@ -154,16 +157,6 @@ public class Main {
         return 1;
     }
 
-    private static Set<String> getExcludedClasses(CreateInfo info) {
-        String[] refactoredClasses = info.getJavaPkgClasses();
-        Set<String> excludedClasses = new HashSet<String>(refactoredClasses.length);
-        for (int i = 0; i < refactoredClasses.length; i+=2) {
-            excludedClasses.add(refactoredClasses[i]);
-        }
-        return excludedClasses;
-
-    }
-
     private static int listDeps(ArrayList<String> osJarPath, Log log) {
         DependencyFinder df = new DependencyFinder(log);
         try {
@@ -190,12 +183,9 @@ public class Main {
     private static boolean processArgs(Log log, String[] args,
             ArrayList<String> osJarPath, String[] osDestJar) {
         boolean needs_dest = true;
-        for (int i = 0; i < args.length; i++) {
-            String s = args[i];
+        for (String s : args) {
             if (s.equals("-v")) {
                 log.setVerbose(true);
-            } else if (s.equals("-p")) {
-                sOptions.generatePublicAccess = false;
             } else if (s.equals("--list-deps")) {
                 sOptions.listAllDeps = true;
                 needs_dest = false;
@@ -209,7 +199,7 @@ public class Main {
                     osJarPath.add(s);
                 }
             } else {
-                log.error("Unknow argument: %s", s);
+                log.error("Unknown argument: %s", s);
                 return false;
             }
         }
@@ -222,8 +212,6 @@ public class Main {
             log.error("Missing parameter: path to output jar");
             return false;
         }
-
-        sOptions.generatePublicAccess = false;
 
         return true;
     }

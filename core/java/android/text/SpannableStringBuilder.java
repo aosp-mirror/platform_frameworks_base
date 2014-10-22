@@ -21,6 +21,9 @@ import android.graphics.Paint;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+
+import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
 
@@ -29,6 +32,7 @@ import java.lang.reflect.Array;
  */
 public class SpannableStringBuilder implements CharSequence, GetChars, Spannable, Editable,
         Appendable, GraphicsOperations {
+    private final static String TAG = "SpannableStringBuilder";
     /**
      * Create a new SpannableStringBuilder with empty contents
      */
@@ -53,19 +57,17 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         if (srclen < 0) throw new StringIndexOutOfBoundsException();
 
-        int len = ArrayUtils.idealCharArraySize(srclen + 1);
-        mText = new char[len];
+        mText = ArrayUtils.newUnpaddedCharArray(GrowingArrayUtils.growSize(srclen));
         mGapStart = srclen;
-        mGapLength = len - srclen;
+        mGapLength = mText.length - srclen;
 
         TextUtils.getChars(text, start, end, mText, 0);
 
         mSpanCount = 0;
-        int alloc = ArrayUtils.idealIntArraySize(0);
-        mSpans = new Object[alloc];
-        mSpanStarts = new int[alloc];
-        mSpanEnds = new int[alloc];
-        mSpanFlags = new int[alloc];
+        mSpans = EmptyArray.OBJECT;
+        mSpanStarts = EmptyArray.INT;
+        mSpanEnds = EmptyArray.INT;
+        mSpanFlags = EmptyArray.INT;
 
         if (text instanceof Spanned) {
             Spanned sp = (Spanned) text;
@@ -129,12 +131,14 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
     private void resizeFor(int size) {
         final int oldLength = mText.length;
-        final int newLength = ArrayUtils.idealCharArraySize(size + 1);
-        final int delta = newLength - oldLength;
-        if (delta == 0) return;
+        if (size + 1 <= oldLength) {
+            return;
+        }
 
-        char[] newText = new char[newLength];
+        char[] newText = ArrayUtils.newUnpaddedCharArray(GrowingArrayUtils.growSize(size));
         System.arraycopy(mText, 0, newText, 0, mGapStart);
+        final int newLength = newText.length;
+        final int delta = newLength - oldLength;
         final int after = oldLength - (mGapStart + mGapLength);
         System.arraycopy(mText, oldLength - after, newText, newLength - after, after);
         mText = newText;
@@ -245,6 +249,21 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     public SpannableStringBuilder append(CharSequence text) {
         int length = length();
         return replace(length, length, text, 0, text.length());
+    }
+
+    /**
+     * Appends the character sequence {@code text} and spans {@code what} over the appended part.
+     * See {@link Spanned} for an explanation of what the flags mean.
+     * @param text the character sequence to append.
+     * @param what the object to be spanned over the appended text.
+     * @param flags see {@link Spanned}.
+     * @return this {@code SpannableStringBuilder}.
+     */
+    public SpannableStringBuilder append(CharSequence text, Object what, int flags) {
+        int start = length();
+        append(text);
+        setSpan(what, start, length(), flags);
+        return this;
     }
 
     // Documentation from interface
@@ -499,7 +518,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         // Span watchers need to be called after text watchers, which may update the layout
         sendToSpanWatchers(start, end, newLen - origLen);
 
-        return this; 
+        return this;
     }
 
     private static boolean hasNonExclusiveExclusiveSpanAt(CharSequence text, int offset) {
@@ -613,8 +632,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         // 0-length Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         if (flagsStart == POINT && flagsEnd == MARK && start == end) {
-            if (send) Log.e("SpannableStringBuilder",
-                    "SPAN_EXCLUSIVE_EXCLUSIVE spans cannot have a zero length");
+            if (send) {
+                Log.e(TAG, "SPAN_EXCLUSIVE_EXCLUSIVE spans cannot have a zero length");
+            }
             // Silently ignore invalid spans when they are created from this class.
             // This avoids the duplication of the above test code before all the
             // calls to setSpan that are done in this class
@@ -661,28 +681,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             }
         }
 
-        if (mSpanCount + 1 >= mSpans.length) {
-            int newsize = ArrayUtils.idealIntArraySize(mSpanCount + 1);
-            Object[] newspans = new Object[newsize];
-            int[] newspanstarts = new int[newsize];
-            int[] newspanends = new int[newsize];
-            int[] newspanflags = new int[newsize];
-
-            System.arraycopy(mSpans, 0, newspans, 0, mSpanCount);
-            System.arraycopy(mSpanStarts, 0, newspanstarts, 0, mSpanCount);
-            System.arraycopy(mSpanEnds, 0, newspanends, 0, mSpanCount);
-            System.arraycopy(mSpanFlags, 0, newspanflags, 0, mSpanCount);
-
-            mSpans = newspans;
-            mSpanStarts = newspanstarts;
-            mSpanEnds = newspanends;
-            mSpanFlags = newspanflags;
-        }
-
-        mSpans[mSpanCount] = what;
-        mSpanStarts[mSpanCount] = start;
-        mSpanEnds[mSpanCount] = end;
-        mSpanFlags[mSpanCount] = flags;
+        mSpans = GrowingArrayUtils.append(mSpans, mSpanCount, what);
+        mSpanStarts = GrowingArrayUtils.append(mSpanStarts, mSpanCount, start);
+        mSpanEnds = GrowingArrayUtils.append(mSpanEnds, mSpanCount, end);
+        mSpanFlags = GrowingArrayUtils.append(mSpanFlags, mSpanCount, flags);
         mSpanCount++;
 
         if (send) sendSpanAdded(what, nstart, nend);
@@ -758,7 +760,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             }
         }
 
-        return 0; 
+        return 0;
     }
 
     /**
@@ -1130,20 +1132,20 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * {@hide}
      */
     public void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, Paint p) {
+            float x, float y, boolean isRtl, Paint p) {
         checkRange("drawTextRun", start, end);
 
         int contextLen = contextEnd - contextStart;
         int len = end - start;
         if (contextEnd <= mGapStart) {
-            c.drawTextRun(mText, start, len, contextStart, contextLen, x, y, flags, p);
+            c.drawTextRun(mText, start, len, contextStart, contextLen, x, y, isRtl, p);
         } else if (contextStart >= mGapStart) {
             c.drawTextRun(mText, start + mGapLength, len, contextStart + mGapLength,
-                    contextLen, x, y, flags, p);
+                    contextLen, x, y, isRtl, p);
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
-            c.drawTextRun(buf, start - contextStart, len, 0, contextLen, x, y, flags, p);
+            c.drawTextRun(buf, start - contextStart, len, 0, contextLen, x, y, isRtl, p);
             TextUtils.recycle(buf);
         }
     }
@@ -1200,7 +1202,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
-    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
+    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, boolean isRtl,
             float[] advances, int advancesPos, Paint p) {
 
         float ret;
@@ -1210,15 +1212,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         if (end <= mGapStart) {
             ret = p.getTextRunAdvances(mText, start, len, contextStart, contextLen,
-                    flags, advances, advancesPos);
+                    isRtl, advances, advancesPos);
         } else if (start >= mGapStart) {
             ret = p.getTextRunAdvances(mText, start + mGapLength, len,
-                    contextStart + mGapLength, contextLen, flags, advances, advancesPos);
+                    contextStart + mGapLength, contextLen, isRtl, advances, advancesPos);
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
             ret = p.getTextRunAdvances(buf, start - contextStart, len,
-                    0, contextLen, flags, advances, advancesPos);
+                    0, contextLen, isRtl, advances, advancesPos);
             TextUtils.recycle(buf);
         }
 
@@ -1241,7 +1243,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      *
      * @param contextStart the start index of the context
      * @param contextEnd the (non-inclusive) end index of the context
-     * @param flags either DIRECTION_RTL or DIRECTION_LTR
+     * @param dir either DIRECTION_RTL or DIRECTION_LTR
      * @param offset the cursor position to move from
      * @param cursorOpt how to move the cursor, one of CURSOR_AFTER,
      * CURSOR_AT_OR_AFTER, CURSOR_BEFORE,
@@ -1251,7 +1253,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * @deprecated This is an internal method, refrain from using it in your code
      */
     @Deprecated
-    public int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
+    public int getTextRunCursor(int contextStart, int contextEnd, int dir, int offset,
             int cursorOpt, Paint p) {
 
         int ret;
@@ -1259,15 +1261,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         int contextLen = contextEnd - contextStart;
         if (contextEnd <= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart, contextLen,
-                    flags, offset, cursorOpt);
+                    dir, offset, cursorOpt);
         } else if (contextStart >= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart + mGapLength, contextLen,
-                    flags, offset + mGapLength, cursorOpt) - mGapLength;
+                    dir, offset + mGapLength, cursorOpt) - mGapLength;
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
             ret = p.getTextRunCursor(buf, 0, contextLen,
-                    flags, offset - contextStart, cursorOpt) + contextStart;
+                    dir, offset - contextStart, cursorOpt) + contextStart;
             TextUtils.recycle(buf);
         }
 

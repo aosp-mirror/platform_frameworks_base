@@ -24,12 +24,15 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
-import android.content.pm.IPackageInstallObserver;
+import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
@@ -73,6 +76,9 @@ interface IPackageManager {
 
     ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
 
+    boolean activitySupportsIntent(in ComponentName className, in Intent intent,
+            String resolvedType);
+
     ActivityInfo getReceiverInfo(in ComponentName className, int flags, int userId);
 
     ServiceInfo getServiceInfo(in ComponentName className, int flags, int userId);
@@ -105,7 +111,13 @@ interface IPackageManager {
 
     int getFlagsForUid(int uid);
 
+    boolean isUidPrivileged(int uid);
+
+    String[] getAppOpPermissionPackages(String permissionName);
+
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
+
+    boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
     List<ResolveInfo> queryIntentActivities(in Intent intent, 
             String resolvedType, int flags, int userId);
@@ -182,22 +194,28 @@ interface IPackageManager {
     List<InstrumentationInfo> queryInstrumentation(
             String targetPackage, int flags);
 
-    /**
-     * Install a package.
-     *
-     * @param packageURI The location of the package file to install.
-     * @param observer a callback to use to notify when the package installation in finished.
-     * @param flags - possible values: {@link #FORWARD_LOCK_PACKAGE},
-     * {@link #REPLACE_EXISITING_PACKAGE}
-     * @param installerPackageName Optional package name of the application that is performing the
-     * installation. This identifies which market the package came from.
-     */
-    void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags,
-            in String installerPackageName);
+    void installPackage(in String originPath,
+            in IPackageInstallObserver2 observer,
+            int flags,
+            in String installerPackageName,
+            in VerificationParams verificationParams,
+            in String packageAbiOverride);
+
+    void installPackageAsUser(in String originPath,
+            in IPackageInstallObserver2 observer,
+            int flags,
+            in String installerPackageName,
+            in VerificationParams verificationParams,
+            in String packageAbiOverride,
+            int userId);
 
     void finishPackageInstall(int token);
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
+
+    /** @deprecated rawr, don't call AIDL methods directly! */
+    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
+            int userId, int flags);
 
     /**
      * Delete a package for a specific user.
@@ -207,8 +225,7 @@ interface IPackageManager {
      * @param userId the id of the user for whom to delete the package
      * @param flags - possible values: {@link #DONT_DELETE_DATA}
      */
-    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
-            int userId, int flags);
+    void deletePackage(in String packageName, IPackageDeleteObserver2 observer, int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
 
@@ -230,12 +247,21 @@ interface IPackageManager {
             in ComponentName[] set, in ComponentName activity, int userId);
 
     void replacePreferredActivity(in IntentFilter filter, int match,
-            in ComponentName[] set, in ComponentName activity);
+            in ComponentName[] set, in ComponentName activity, int userId);
 
     void clearPackagePreferredActivities(String packageName);
 
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
+
+    void addPersistentPreferredActivity(in IntentFilter filter, in ComponentName activity, int userId);
+
+    void clearPackagePersistentPreferredActivities(String packageName, int userId);
+
+    void addCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
+            int ownerUserId, int sourceUserId, int targetUserId, int flags);
+
+    void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage, int ownerUserId);
 
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
@@ -371,10 +397,18 @@ interface IPackageManager {
 
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given
-     * package, if it already hasn't done mode.  Only does this if running
-     * in the special development "no pre-dexopt" mode.
+     * package and for the given instruction set if it already hasn't done
+     * so.
+     *
+     * If the supplied instructionSet is null, the package manager will use
+     * the packages default instruction set.
+     *
+     * In most cases, apps are dexopted in advance and this function will
+     * be a no-op.
      */
-    boolean performDexOpt(String packageName);
+    boolean performDexOptIfNeeded(String packageName, String instructionSet);
+
+    void forceDexOpt(String packageName);
 
     /**
      * Update status of external media on the package manager to scan and
@@ -393,21 +427,6 @@ interface IPackageManager {
     boolean setInstallLocation(int loc);
     int getInstallLocation();
 
-    void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
-            int flags, in String installerPackageName, in Uri verificationURI,
-            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
-
-    void installPackageWithVerificationAndEncryption(in Uri packageURI,
-            in IPackageInstallObserver observer, int flags, in String installerPackageName,
-            in VerificationParams verificationParams,
-            in ContainerEncryptionParams encryptionParams);
-
-    void installPackageWithVerificationEncryptionAndAbiOverride(in Uri packageURI,
-            in IPackageInstallObserver observer, int flags, in String installerPackageName,
-            in VerificationParams verificationParams,
-            in ContainerEncryptionParams encryptionParams,
-	    in String packageAbiOverride);
-
     int installExistingPackageAsUser(String packageName, int userId);
 
     void verifyPendingInstall(int id, int verificationCode);
@@ -424,6 +443,16 @@ interface IPackageManager {
     /** Reflects current DeviceStorageMonitorService state */
     boolean isStorageLow();
 
-    boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked, int userId);
-    boolean getApplicationBlockedSettingAsUser(String packageName, int userId);
+    boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden, int userId);
+    boolean getApplicationHiddenSettingAsUser(String packageName, int userId);
+
+    IPackageInstaller getPackageInstaller();
+
+    boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);
+    boolean getBlockUninstallForUser(String packageName, int userId);
+
+    KeySet getKeySetByAlias(String packageName, String alias);
+    KeySet getSigningKeySet(String packageName);
+    boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
+    boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
 }

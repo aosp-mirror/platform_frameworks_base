@@ -32,10 +32,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.InflateException;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.io.File;
 
@@ -125,10 +121,11 @@ public final class BridgeInflater extends LayoutInflater {
     }
 
     @Override
-    public View createViewFromTag(View parent, String name, AttributeSet attrs) {
+    public View createViewFromTag(View parent, String name, AttributeSet attrs,
+            boolean inheritContext) {
         View view = null;
         try {
-            view = super.createViewFromTag(parent, name, attrs);
+            view = super.createViewFromTag(parent, name, attrs, inheritContext);
         } catch (InflateException e) {
             // try to load the class from using the custom view loader
             try {
@@ -154,6 +151,9 @@ public final class BridgeInflater extends LayoutInflater {
     @Override
     public View inflate(int resource, ViewGroup root) {
         Context context = getContext();
+        while (context instanceof ContextThemeWrapper) {
+            context = ((ContextThemeWrapper) context).getBaseContext();
+        }
         if (context instanceof BridgeContext) {
             BridgeContext bridgeContext = (BridgeContext)context;
 
@@ -216,43 +216,16 @@ public final class BridgeInflater extends LayoutInflater {
     }
 
     private void setupViewInContext(View view, AttributeSet attrs) {
-        if (getContext() instanceof BridgeContext) {
-            BridgeContext bc = (BridgeContext) getContext();
-            if (attrs instanceof BridgeXmlBlockParser) {
-                BridgeXmlBlockParser parser = (BridgeXmlBlockParser) attrs;
-
-                // get the view key
-                Object viewKey = parser.getViewCookie();
-
-                if (viewKey == null) {
-                    int currentDepth = parser.getDepth();
-
-                    // test whether we are in an included file or in a adapter binding view.
-                    BridgeXmlBlockParser previousParser = bc.getPreviousParser();
-                    if (previousParser != null) {
-                        // looks like we inside an embedded layout.
-                        // only apply the cookie of the calling node (<include>) if we are at the
-                        // top level of the embedded layout. If there is a merge tag, then
-                        // skip it and look for the 2nd level
-                        int testDepth = mIsInMerge ? 2 : 1;
-                        if (currentDepth == testDepth) {
-                            viewKey = previousParser.getViewCookie();
-                            // if we are in a merge, wrap the cookie in a MergeCookie.
-                            if (viewKey != null && mIsInMerge) {
-                                viewKey = new MergeCookie(viewKey);
-                            }
-                        }
-                    } else if (mResourceReference != null && currentDepth == 1) {
-                        // else if there's a resource reference, this means we are in an adapter
-                        // binding case. Set the resource ref as the view cookie only for the top
-                        // level view.
-                        viewKey = mResourceReference;
-                    }
-                }
-
-                if (viewKey != null) {
-                    bc.addViewKey(view, viewKey);
-                }
+        Context context = getContext();
+        while (context instanceof ContextThemeWrapper) {
+            context = ((ContextThemeWrapper) context).getBaseContext();
+        }
+        if (context instanceof BridgeContext) {
+            BridgeContext bc = (BridgeContext) context;
+            // get the view key
+            Object viewKey = getViewKeyFromParser(attrs, bc, mResourceReference, mIsInMerge);
+            if (viewKey != null) {
+                bc.addViewKey(view, viewKey);
             }
         }
     }
@@ -268,5 +241,45 @@ public final class BridgeInflater extends LayoutInflater {
     @Override
     public LayoutInflater cloneInContext(Context newContext) {
         return new BridgeInflater(this, newContext);
+    }
+
+    /*package*/ static Object getViewKeyFromParser(AttributeSet attrs, BridgeContext bc,
+            ResourceReference resourceReference, boolean isInMerge) {
+
+        if (!(attrs instanceof BridgeXmlBlockParser)) {
+            return null;
+        }
+        BridgeXmlBlockParser parser = ((BridgeXmlBlockParser) attrs);
+
+        // get the view key
+        Object viewKey = parser.getViewCookie();
+
+        if (viewKey == null) {
+            int currentDepth = parser.getDepth();
+
+            // test whether we are in an included file or in a adapter binding view.
+            BridgeXmlBlockParser previousParser = bc.getPreviousParser();
+            if (previousParser != null) {
+                // looks like we are inside an embedded layout.
+                // only apply the cookie of the calling node (<include>) if we are at the
+                // top level of the embedded layout. If there is a merge tag, then
+                // skip it and look for the 2nd level
+                int testDepth = isInMerge ? 2 : 1;
+                if (currentDepth == testDepth) {
+                    viewKey = previousParser.getViewCookie();
+                    // if we are in a merge, wrap the cookie in a MergeCookie.
+                    if (viewKey != null && isInMerge) {
+                        viewKey = new MergeCookie(viewKey);
+                    }
+                }
+            } else if (resourceReference != null && currentDepth == 1) {
+                // else if there's a resource reference, this means we are in an adapter
+                // binding case. Set the resource ref as the view cookie only for the top
+                // level view.
+                viewKey = resourceReference;
+            }
+        }
+
+        return viewKey;
     }
 }

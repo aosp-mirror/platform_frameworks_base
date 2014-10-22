@@ -1,48 +1,48 @@
 page.title=Android SDK
-page.tags="download"
+page.tags=download
 page.template=sdk
 header.hide=1
 page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 
-sdk.version=22.6.2
+sdk.version=23.0.2
 
-sdk.linux32_bundle_download=adt-bundle-linux-x86-20140321.zip
-sdk.linux32_bundle_bytes=527971926
-sdk.linux32_bundle_checksum=943ae4d28fe7c79108c8bf2aafd5e6d2
+sdk.linux32_bundle_download=adt-bundle-linux-x86-20140702.zip
+sdk.linux32_bundle_bytes=371950735
+sdk.linux32_bundle_checksum=5901c898bae4fe95476463a951b68404
 
-sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20140321.zip
-sdk.linux64_bundle_bytes=528187678
-sdk.linux64_bundle_checksum=f2a2153b5c7dbaeb86b550bf4f770c36
+sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20140702.zip
+sdk.linux64_bundle_bytes=372259418
+sdk.linux64_bundle_checksum=18a7c5778f96c0823349d465f58a0a36
 
-sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20140321.zip
-sdk.mac64_bundle_bytes=501955296
-sdk.mac64_bundle_checksum=4a08649cea9b098cdf7349f452294014
+sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20140702.zip
+sdk.mac64_bundle_bytes=320593642
+sdk.mac64_bundle_checksum=24c51a1ad96c5f6d43821d978bf9866d
 
-sdk.win32_bundle_download=adt-bundle-windows-x86-20140321.zip
-sdk.win32_bundle_bytes=535085536
-sdk.win32_bundle_checksum=b61495a6bf591cc374c31bce4fc46ec0
+sdk.win32_bundle_download=adt-bundle-windows-x86-20140702.zip
+sdk.win32_bundle_bytes=370612741
+sdk.win32_bundle_checksum=9d2cf3770edbb49461788164af2331f3
 
-sdk.win64_bundle_download=adt-bundle-windows-x86_64-20140321.zip
-sdk.win64_bundle_bytes=535287324
-sdk.win64_bundle_checksum=a6f4699bbdc5a29b371ed60610535651
+sdk.win64_bundle_download=adt-bundle-windows-x86_64-20140702.zip
+sdk.win64_bundle_bytes=370763706
+sdk.win64_bundle_checksum=bfc3472a12173422ba044182ac466c13
 
 
 
-sdk.linux_download=android-sdk_r22.6.2-linux.tgz
-sdk.linux_bytes=101050024
-sdk.linux_checksum=ff1541418a44d894bedc5cef10622220
+sdk.linux_download=android-sdk_r23.0.2-linux.tgz
+sdk.linux_bytes=140827643
+sdk.linux_checksum=94a8c62086a7398cc0e73e1c8e65f71e
 
-sdk.mac_download=android-sdk_r22.6.2-macosx.zip
-sdk.mac_bytes=74639394
-sdk.mac_checksum=2a319c862dd1dcf450bfe2a6b3d9c608
+sdk.mac_download=android-sdk_r23.0.2-macosx.zip
+sdk.mac_bytes=90996733
+sdk.mac_checksum=322787b0e6c629d926c28690c79ac0d8
 
-sdk.win_download=android-sdk_r22.6.2-windows.zip
-sdk.win_bytes=108917505
-sdk.win_checksum=6e5bfdb7b9c1d231ed6ec78b31551cbf
+sdk.win_download=android-sdk_r23.0.2-windows.zip
+sdk.win_bytes=141435413
+sdk.win_checksum=89f0576abf3f362a700767bdc2735c8a
 
-sdk.win_installer=installer_r22.6.2-windows.exe
-sdk.win_installer_bytes=87383126
-sdk.win_installer_checksum=2a68b8b22ecd0aba779b1581a914b395
+sdk.win_installer=installer_r23.0.2-windows.exe
+sdk.win_installer_bytes=93015376
+sdk.win_installer_checksum=7be4b9c230341e1fb57c0f84a8df3994
 
 
 
@@ -206,12 +206,10 @@ This is the Android Software Development Kit License Agreement
 
 
 <div id="next-steps" style="display:none;position:absolute;width:inherit">
-  <p>Now that you've downloaded the Android SDK, you don't need to return here
-  for SDK updates. The SDK tools allow you to
-  install additional packages and future updates from the SDK Manager.</p>
-  <p>For instructions about setting up your Android SDK for the first time,
-  read <a id="next-link" href="{@docRoot}sdk/installing/bundle.html">Setting
-  Up the ADT Bundle</a>.</p>
+  <p>You're just a few steps away from building apps for Android!</p>
+  <p>In a moment, you'll be redirected to <a
+  id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the
+  Android SDK</a>.</p>
 
 </div><!-- end next-steps -->
 
@@ -232,7 +230,6 @@ This is the Android Software Development Kit License Agreement
 </div>
 
 
-
 </div><!-- end TOS -->
 
 
@@ -249,21 +246,33 @@ This is the Android Software Development Kit License Agreement
 <p>The Android SDK provides you the API libraries and developer tools necessary to build, test,
   and debug apps for Android.</p>
 
-<p>If you're a new Android developer, we recommend you download the ADT Bundle
-to quickly start developing apps. It includes the essential
-Android SDK components and a version of the Eclipse IDE with built-in
-<b>ADT (Android Developer Tools)</b> to
-streamline your Android app development.</p>
+<p>Download the ADT Bundle to quickly start developing apps. It includes the essential Android
+SDK components and a version of the Eclipse IDE with built-in <b>ADT (Android Developer Tools)</b>
+to streamline your Android app development.</p>
 
-<p>With a single download, the ADT Bundle
+
+<!-- this appears when viewing the online docs -->
+<div class="online" style="margin-bottom:85px">
+
+<a class="big button subtitle" id="download-bundle-button"
+href="" style="width:295px;display:block;margin:25px 0" ></a>
+
+<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
+
+
+  <p>With a single download, the Eclipse ADT bundle
 includes everything you need to begin developing apps:</p>
 <ul>
 <li>Eclipse + ADT plugin</li>
 <li>Android SDK Tools</li>
 <li>Android Platform-tools</li>
-<li>The latest Android platform</li>
-<li>The latest Android system image for the emulator</li>
+<li>A version of the Android platform</li>
+<li>A version of the Android system image for the emulator</li>
 </ul>
+
+</div>
+<!-- end online -->
+
 
 
 <!-- this appears when viewing the offline docs -->
@@ -277,52 +286,47 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
 
 
 <div class="col-7" style="margin-right:0;">
-  <img src="{@docRoot}images/sdk-cube.png" alt="" height=264 />
+  <img src="{@docRoot}images/tools-home.png" alt="" height="347" width="400" />
 
-<!-- this appears when viewing the online docs -->
-<div class="online">
-
-<a class="big button subtitle" id="download-bundle-button"
-href="" style="display:none;width:265px;margin:0 auto;display:block" ></a>
-
-
-
-
-<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
-
-</div>
-<!-- end online -->
 
 </div><!-- end col-7 -->
 
 
 
 
+<div class="col-7" style="background: #ddd;
+    padding: 30px 20px; width:350px; margin:20px 0 0 20px;">
+
+  <h3 style="margin-top:0">
+  <a href="/sdk/installing/studio.html">Get Android Studio Beta</a>
+  </h3>
+
+  <p>
+  Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
+  over ADT. It's currently in beta but will be the official Android IDE once it's ready.</p>
+  <p>
+  If you're a new Android developer, you should consider starting with Android Studio, because the
+  ADT plugin for Eclipse is no longer in active development.</p>
+  <p style="margin: 0;">
+  <a href="/sdk/installing/studio.html" style="position:relative;z-index:99">Learn more about Android Studio</a></p>
+  </div>
+
+
 
 
 <!-- alternative SDK options -->
-<div class="col-13" style="margin:0;">
+<div class="col-13" style="margin:-70px 0 0;">
 
 
-<!-- this appears only when viewing the online docs -->
-<div class="online caution">
-<h3 style="margin:0 0 10px 0;font-size:14px">Android Studio Early Access Preview</h3>
+<p style="width:340px">If you prefer to use an existing version of Eclipse or another IDE,
+you can instead download the stand-alone Android SDK Tools:</p>
 
-<p>A new Android development environment called Android Studio,
-based on IntelliJ IDEA, is now available as an <strong>early access preview</strong>.
-For more information, see
-<a href="{@docRoot}sdk/installing/studio.html">Getting Started with Android Studio</a>.</p>
 
-</div>
-
-<p>If you prefer to use an existing version of Eclipse or another IDE,
-you can instead take a more customized approach to installing
-the Android SDK. See the following instructions:</p>
 
 
 <h4 id="ExistingIDE"><a href='' class="expandable"
   onclick="toggleExpandable(this,'.myide');hideExpandable('.pax,.reqs');return false;"
-  >USE AN EXISTING IDE</a></h4>
+  >GET THE SDK FOR AN EXISTING IDE</a></h4>
 
 <div class="col-13 myide" style="margin:0 0 15px;display:none;">
 
@@ -335,9 +339,7 @@ the ADT plugin to it.</p>
 <a class="button subtitle" id="download-tools-button" href="" style="display:none" ></a>
   </p>
 
-
 </div>
-
 
 
 
@@ -350,34 +352,21 @@ the ADT plugin to it.</p>
 <h5>Operating Systems</h5>
 <ul>
   <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
-  <li>Mac OS X 10.5.8 or later (x86 only)</li>
-  <li>Linux (tested on Ubuntu Linux, Lucid Lynx)
+  <li>Mac OS X 10.8.5 or later</li>
+  <li>Linux
     <ul>
-      <li>GNU C Library (glibc) 2.7 or later is required.</li>
-      <li>On Ubuntu Linux, version 8.04 or later is required.</li>
-      <li>64-bit distributions must be capable of running 32-bit applications.</li>
+      <li>64-bit distribution capable of running 32-bit applications</li>
+      <li>GNU C Library (glibc) 2.11 or later is required.</li>
+      <li>Tested on Ubuntu 12.04, Precise Pangolin</li>
     </ul>
   </li>
 </ul>
 </div>
 
-<div class="col-6 reqs" style="margin:0 0 15px 20px;display:none;">
-<h5>Eclipse IDE</h5>
-    <ul>
-      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.7.2 (Indigo) or greater
-<p class="note"><strong>Note:</strong> Eclipse 3.6 (Helios) is no longer
-supported with the latest version of ADT.</p></li>
-      <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
-in most Eclipse IDE packages) </li>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
-        (JRE alone is not sufficient)</li>
-      <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">Android Development Tools plugin</a>
-(recommended)</li>
-      <li><strong>Not</strong> compatible with GNU Compiler for Java (gcj)</li>
-    </ul>
 
+<div class="col-7 reqs" style="margin:0 0 80px 20px;display:none;">
 
-<h5>Other development environments</h5>
+<h5>Development tools</h5>
     <ul>
       <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
         (JRE alone is not sufficient)</li>
@@ -387,6 +376,4 @@ in most Eclipse IDE packages) </li>
 
 <p class="note"><strong>Note:</strong> Some Linux distributions may include JDK 1.4 or Gnu Compiler
 for Java, both of which are <em>not</em> supported for Android development. </p>
-</div><!-- end col-7 reqs -->
-
-
+</div><!-- end reqs -->

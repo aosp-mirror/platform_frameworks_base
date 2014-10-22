@@ -18,11 +18,18 @@
 package android.app;
 
 import android.app.ITransientNotification;
-import android.service.notification.StatusBarNotification;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
+import android.net.Uri;
+import android.os.Bundle;
+import android.service.notification.Condition;
+import android.service.notification.IConditionListener;
+import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
+import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
 
 /** {@hide} */
 interface INotificationManager
@@ -31,13 +38,21 @@ interface INotificationManager
 
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
     void cancelToast(String pkg, ITransientNotification callback);
-    void enqueueNotificationWithTag(String pkg, String basePkg, String tag, int id,
+    void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
             in Notification notification, inout int[] idReceived, int userId);
     void cancelNotificationWithTag(String pkg, String tag, int id, int userId);
 
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
 
+    void setPackagePriority(String pkg, int uid, int priority);
+    int getPackagePriority(String pkg, int uid);
+
+    void setPackageVisibilityOverride(String pkg, int uid, int visibility);
+    int getPackageVisibilityOverride(String pkg, int uid);
+
+    // TODO: Remove this when callers have been migrated to the equivalent
+    // INotificationListener method.
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 
@@ -45,7 +60,23 @@ interface INotificationManager
     void unregisterListener(in INotificationListener listener, int userid);
 
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
-    void cancelAllNotificationsFromListener(in INotificationListener token);
+    void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
-    StatusBarNotification[] getActiveNotificationsFromListener(in INotificationListener token);
+    ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
+    void requestHintsFromListener(in INotificationListener token, int hints);
+    int getHintsFromListener(in INotificationListener token);
+    void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
+    int getInterruptionFilterFromListener(in INotificationListener token);
+    void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
+
+    ComponentName getEffectsSuppressor();
+    boolean matchesCallFilter(in Bundle extras);
+
+    ZenModeConfig getZenModeConfig();
+    boolean setZenModeConfig(in ZenModeConfig config);
+    oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
+    oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
+    oneway void setZenModeCondition(in Condition condition);
+    oneway void setAutomaticZenModeConditions(in Uri[] conditionIds);
+    Condition[] getAutomaticZenModeConditions();
 }

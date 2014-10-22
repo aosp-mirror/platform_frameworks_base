@@ -17,6 +17,8 @@
 package android.app.backup;
 
 import java.lang.String;
+
+import android.annotation.SystemApi;
 import android.app.backup.RestoreSet;
 
 /**
@@ -36,6 +38,7 @@ public abstract class RestoreObserver {
      *
      * @hide
      */
+    @SystemApi
     public void restoreSetsAvailable(RestoreSet[] result) {
     }
 

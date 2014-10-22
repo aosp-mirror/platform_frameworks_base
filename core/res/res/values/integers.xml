@@ -19,4 +19,7 @@
 <resources>
     <integer name="kg_carousel_angle">75</integer>
     <integer name="kg_glowpad_rotation_offset">0</integer>
+    <integer name="button_pressed_animation_duration">100</integer>
+    <integer name="button_pressed_animation_delay">100</integer>
+    <integer name="disabled_alpha_animation_duration">100</integer>
 </resources>

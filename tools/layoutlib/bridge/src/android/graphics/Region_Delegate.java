@@ -275,21 +275,20 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeSetRegion(long native_dst, long native_src) {
+    /*package*/ static void nativeSetRegion(long native_dst, long native_src) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
-            return true;
+            return;
         }
 
         Region_Delegate srcRegion = sManager.getDelegate(native_src);
         if (srcRegion == null) {
-            return true;
+            return;
         }
 
         dstRegion.mArea.reset();
         dstRegion.mArea.add(srcRegion.mArea);
 
-        return true;
     }
 
     @LayoutlibDelegate

@@ -16,6 +16,8 @@
 
 package com.android.tools.layoutlib.create;
 
+import java.util.Set;
+
 /**
  * Interface describing the work to be done by {@link AsmGenerator}.
  */
@@ -69,4 +71,6 @@ public interface ICreateInfo {
      * The list can be empty but must not be null.
      */
     public abstract String[] getJavaPkgClasses();
+
+    public abstract Set<String> getExcludedClasses();
 }

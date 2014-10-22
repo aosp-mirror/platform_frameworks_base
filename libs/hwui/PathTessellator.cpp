@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "PathTessellator"
+#define LOG_TAG "OpenGLRenderer"
 #define LOG_NDEBUG 1
-#define ATRACE_TAG ATRACE_TAG_GRAPHICS
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #define VERTEX_DEBUG 0
 
@@ -24,11 +24,11 @@
 #define DEBUG_DUMP_ALPHA_BUFFER() \
     for (unsigned int i = 0; i < vertexBuffer.getSize(); i++) { \
         ALOGD("point %d at %f %f, alpha %f", \
-        i, buffer[i].position[0], buffer[i].position[1], buffer[i].alpha); \
+        i, buffer[i].x, buffer[i].y, buffer[i].alpha); \
     }
 #define DEBUG_DUMP_BUFFER() \
     for (unsigned int i = 0; i < vertexBuffer.getSize(); i++) { \
-        ALOGD("point %d at %f %f", i, buffer[i].position[0], buffer[i].position[1]); \
+        ALOGD("point %d at %f %f", i, buffer[i].x, buffer[i].y); \
     }
 #else
 #define DEBUG_DUMP_ALPHA_BUFFER()
@@ -49,29 +49,32 @@
 #include "Matrix.h"
 #include "Vector.h"
 #include "Vertex.h"
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
 
-#define THRESHOLD 0.5f
+#define OUTLINE_REFINE_THRESHOLD_SQUARED (0.5f * 0.5f)
 #define ROUND_CAP_THRESH 0.25f
 #define PI 3.1415926535897932f
+#define MAX_DEPTH 15
 
-void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint,
-        bool forceExpand) {
-    if (forceExpand || paint->getStyle() != SkPaint::kFill_Style) {
-        float outset = paint->getStrokeWidth() * 0.5f;
-        if (outset == 0) outset = 0.5f; // account for hairline
-        bounds.outset(outset, outset);
+/**
+ * Extracts the x and y scale from the transform as positive values, and clamps them
+ */
+void PathTessellator::extractTessellationScales(const Matrix4& transform,
+        float* scaleX, float* scaleY) {
+    if (CC_LIKELY(transform.isPureTranslate())) {
+        *scaleX = 1.0f;
+        *scaleY = 1.0f;
+    } else {
+        float m00 = transform.data[Matrix4::kScaleX];
+        float m01 = transform.data[Matrix4::kSkewY];
+        float m10 = transform.data[Matrix4::kSkewX];
+        float m11 = transform.data[Matrix4::kScaleY];
+        *scaleX = MathUtils::clampTessellationScale(sqrt(m00 * m00 + m01 * m01));
+        *scaleY = MathUtils::clampTessellationScale(sqrt(m10 * m10 + m11 * m11));
     }
-}
-
-inline static void copyVertex(Vertex* destPtr, const Vertex* srcPtr) {
-    Vertex::set(destPtr, srcPtr->position[0], srcPtr->position[1]);
-}
-
-inline static void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
-    AlphaVertex::set(destPtr, srcPtr->position[0], srcPtr->position[1], srcPtr->alpha);
 }
 
 /**
@@ -84,7 +87,7 @@ inline static void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcP
  *
  * NOTE: assumes angles between normals 90 degrees or less
  */
-inline static vec2 totalOffsetFromNormals(const vec2& normalA, const vec2& normalB) {
+inline static Vector2 totalOffsetFromNormals(const Vector2& normalA, const Vector2& normalB) {
     return (normalA + normalB) / (1 + fabs(normalA.dot(normalB)));
 }
 
@@ -93,24 +96,23 @@ inline static vec2 totalOffsetFromNormals(const vec2& normalA, const vec2& norma
  */
 struct PaintInfo {
 public:
-    PaintInfo(const SkPaint* paint, const mat4 *transform) :
+    PaintInfo(const SkPaint* paint, const mat4& transform) :
             style(paint->getStyle()), cap(paint->getStrokeCap()), isAA(paint->isAntiAlias()),
-            inverseScaleX(1.0f), inverseScaleY(1.0f),
             halfStrokeWidth(paint->getStrokeWidth() * 0.5f), maxAlpha(1.0f) {
         // compute inverse scales
-        if (CC_UNLIKELY(!transform->isPureTranslate())) {
-            float m00 = transform->data[Matrix4::kScaleX];
-            float m01 = transform->data[Matrix4::kSkewY];
-            float m10 = transform->data[Matrix4::kSkewX];
-            float m11 = transform->data[Matrix4::kScaleY];
-            float scaleX = sqrt(m00 * m00 + m01 * m01);
-            float scaleY = sqrt(m10 * m10 + m11 * m11);
-            inverseScaleX = (scaleX != 0) ? (1.0f / scaleX) : 1.0f;
-            inverseScaleY = (scaleY != 0) ? (1.0f / scaleY) : 1.0f;
+        if (CC_LIKELY(transform.isPureTranslate())) {
+            inverseScaleX = 1.0f;
+            inverseScaleY = 1.0f;
+        } else {
+            float scaleX, scaleY;
+            PathTessellator::extractTessellationScales(transform, &scaleX, &scaleY);
+            inverseScaleX = 1.0f / scaleX;
+            inverseScaleY = 1.0f / scaleY;
         }
 
         if (isAA && halfStrokeWidth != 0 && inverseScaleX == inverseScaleY &&
                 2 * halfStrokeWidth < inverseScaleX) {
+            // AA, with non-hairline stroke, width < 1 pixel. Scale alpha and treat as hairline.
             maxAlpha *= (2 * halfStrokeWidth) / inverseScaleX;
             halfStrokeWidth = 0.0f;
         }
@@ -124,7 +126,7 @@ public:
     float halfStrokeWidth;
     float maxAlpha;
 
-    inline void scaleOffsetForStrokeWidth(vec2& offset) const {
+    inline void scaleOffsetForStrokeWidth(Vector2& offset) const {
         if (halfStrokeWidth == 0.0f) {
             // hairline - compensate for scale
             offset.x *= 0.5f * inverseScaleX;
@@ -138,9 +140,8 @@ public:
      * NOTE: the input will not always be a normal, especially for sharp edges - it should be the
      * result of totalOffsetFromNormals (see documentation there)
      */
-    inline vec2 deriveAAOffset(const vec2& offset) const {
-        return vec2(offset.x * 0.5f * inverseScaleX,
-            offset.y * 0.5f * inverseScaleY);
+    inline Vector2 deriveAAOffset(const Vector2& offset) const {
+        return (Vector2){offset.x * 0.5f * inverseScaleX, offset.y * 0.5f * inverseScaleY};
     }
 
     /**
@@ -159,6 +160,24 @@ public:
         }
         return 0;
     }
+
+    /**
+     * Outset the bounds of point data (for line endpoints or points) to account for stroke
+     * geometry.
+     *
+     * bounds are in pre-scaled space.
+     */
+    void expandBoundsForStroke(Rect* bounds) const {
+        if (halfStrokeWidth == 0) {
+            // hairline, outset by (0.5f + fudge factor) in post-scaling space
+            bounds->outset(fabs(inverseScaleX) * (0.5f + Vertex::GeometryFudgeFactor()),
+                    fabs(inverseScaleY) * (0.5f + Vertex::GeometryFudgeFactor()));
+        } else {
+            // non hairline, outset by half stroke width pre-scaled, and fudge factor post scaled
+            bounds->outset(halfStrokeWidth + fabs(inverseScaleX) * Vertex::GeometryFudgeFactor(),
+                    halfStrokeWidth + fabs(inverseScaleY) * Vertex::GeometryFudgeFactor());
+        }
+    }
 };
 
 void getFillVerticesFromPerimeter(const Vector<Vertex>& perimeter, VertexBuffer& vertexBuffer) {
@@ -170,9 +189,9 @@ void getFillVerticesFromPerimeter(const Vector<Vertex>& perimeter, VertexBuffer&
     int srcAindex = 0;
     int srcBindex = perimeter.size() - 1;
     while (srcAindex <= srcBindex) {
-        copyVertex(&buffer[currentIndex++], &perimeter[srcAindex]);
+        buffer[currentIndex++] = perimeter[srcAindex];
         if (srcAindex == srcBindex) break;
-        copyVertex(&buffer[currentIndex++], &perimeter[srcBindex]);
+        buffer[currentIndex++] = perimeter[srcBindex];
         srcAindex++;
         srcBindex--;
     }
@@ -192,25 +211,23 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
     int currentIndex = 0;
     const Vertex* last = &(perimeter[perimeter.size() - 1]);
     const Vertex* current = &(perimeter[0]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    Vector2 lastNormal = {current->y - last->y, last->x - current->x};
     lastNormal.normalize();
     for (unsigned int i = 0; i < perimeter.size(); i++) {
         const Vertex* next = &(perimeter[i + 1 >= perimeter.size() ? 0 : i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        Vector2 nextNormal = {next->y - current->y, current->x - next->x};
         nextNormal.normalize();
 
-        vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
+        Vector2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
         paintInfo.scaleOffsetForStrokeWidth(totalOffset);
 
         Vertex::set(&buffer[currentIndex++],
-                current->position[0] + totalOffset.x,
-                current->position[1] + totalOffset.y);
+                current->x + totalOffset.x,
+                current->y + totalOffset.y);
 
         Vertex::set(&buffer[currentIndex++],
-                current->position[0] - totalOffset.x,
-                current->position[1] - totalOffset.y);
+                current->x - totalOffset.x,
+                current->y - totalOffset.y);
 
         last = current;
         current = next;
@@ -218,20 +235,21 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
     }
 
     // wrap around to beginning
-    copyVertex(&buffer[currentIndex++], &buffer[0]);
-    copyVertex(&buffer[currentIndex++], &buffer[1]);
+    buffer[currentIndex++] = buffer[0];
+    buffer[currentIndex++] = buffer[1];
 
     DEBUG_DUMP_BUFFER();
 }
 
 static inline void storeBeginEnd(const PaintInfo& paintInfo, const Vertex& center,
-        const vec2& normal, Vertex* buffer, int& currentIndex, bool begin) {
-    vec2 strokeOffset = normal;
+        const Vector2& normal, Vertex* buffer, int& currentIndex, bool begin) {
+    Vector2 strokeOffset = normal;
     paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
 
-    vec2 referencePoint(center.position[0], center.position[1]);
+    Vector2 referencePoint = {center.x, center.y};
     if (paintInfo.cap == SkPaint::kSquare_Cap) {
-        referencePoint += vec2(-strokeOffset.y, strokeOffset.x) * (begin ? -1 : 1);
+        Vector2 rotated = {-strokeOffset.y, strokeOffset.x};
+        referencePoint += rotated * (begin ? -1 : 1);
     }
 
     Vertex::set(&buffer[currentIndex++], referencePoint + strokeOffset);
@@ -255,11 +273,11 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
     if (extra > 0) {
         // tessellate both round caps
         float beginTheta = atan2(
-                    - (vertices[0].position[0] - vertices[1].position[0]),
-                    vertices[0].position[1] - vertices[1].position[1]);
+                    - (vertices[0].x - vertices[1].x),
+                    vertices[0].y - vertices[1].y);
         float endTheta = atan2(
-                    - (vertices[lastIndex].position[0] - vertices[lastIndex - 1].position[0]),
-                    vertices[lastIndex].position[1] - vertices[lastIndex - 1].position[1]);
+                    - (vertices[lastIndex].x - vertices[lastIndex - 1].x),
+                    vertices[lastIndex].y - vertices[lastIndex - 1].y);
         const float dTheta = PI / (extra + 1);
         const float radialScale = 2.0f / (1 + cos(dTheta));
 
@@ -272,40 +290,38 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
             }
 
             beginTheta += dTheta;
-            vec2 beginRadialOffset(cos(beginTheta), sin(beginTheta));
+            Vector2 beginRadialOffset = {cos(beginTheta), sin(beginTheta)};
             paintInfo.scaleOffsetForStrokeWidth(beginRadialOffset);
             Vertex::set(&buffer[capOffset],
-                    vertices[0].position[0] + beginRadialOffset.x,
-                    vertices[0].position[1] + beginRadialOffset.y);
+                    vertices[0].x + beginRadialOffset.x,
+                    vertices[0].y + beginRadialOffset.y);
 
             endTheta += dTheta;
-            vec2 endRadialOffset(cos(endTheta), sin(endTheta));
+            Vector2 endRadialOffset = {cos(endTheta), sin(endTheta)};
             paintInfo.scaleOffsetForStrokeWidth(endRadialOffset);
             Vertex::set(&buffer[allocSize - 1 - capOffset],
-                    vertices[lastIndex].position[0] + endRadialOffset.x,
-                    vertices[lastIndex].position[1] + endRadialOffset.y);
+                    vertices[lastIndex].x + endRadialOffset.x,
+                    vertices[lastIndex].y + endRadialOffset.y);
         }
     }
 
     int currentIndex = extra;
     const Vertex* last = &(vertices[0]);
     const Vertex* current = &(vertices[1]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-                last->position[0] - current->position[0]);
+    Vector2 lastNormal = {current->y - last->y, last->x - current->x};
     lastNormal.normalize();
 
     storeBeginEnd(paintInfo, vertices[0], lastNormal, buffer, currentIndex, true);
 
     for (unsigned int i = 1; i < vertices.size() - 1; i++) {
         const Vertex* next = &(vertices[i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        Vector2 nextNormal = {next->y - current->y, current->x - next->x};
         nextNormal.normalize();
 
-        vec2 strokeOffset  = totalOffsetFromNormals(lastNormal, nextNormal);
+        Vector2 strokeOffset  = totalOffsetFromNormals(lastNormal, nextNormal);
         paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
 
-        vec2 center(current->position[0], current->position[1]);
+        Vector2 center = {current->x, current->y};
         Vertex::set(&buffer[currentIndex++], center + strokeOffset);
         Vertex::set(&buffer[currentIndex++], center - strokeOffset);
 
@@ -329,7 +345,7 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
  * 3 - zig zag back and forth inside the shape to fill it (using perimeter.size() vertices)
  */
 void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Vertex>& perimeter,
-        VertexBuffer& vertexBuffer) {
+        VertexBuffer& vertexBuffer, float maxAlpha = 1.0f) {
     AlphaVertex* buffer = vertexBuffer.alloc<AlphaVertex>(perimeter.size() * 3 + 2);
 
     // generate alpha points - fill Alpha vertex gaps in between each point with
@@ -337,27 +353,25 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
     int currentIndex = 0;
     const Vertex* last = &(perimeter[perimeter.size() - 1]);
     const Vertex* current = &(perimeter[0]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    Vector2 lastNormal = {current->y - last->y, last->x - current->x};
     lastNormal.normalize();
     for (unsigned int i = 0; i < perimeter.size(); i++) {
         const Vertex* next = &(perimeter[i + 1 >= perimeter.size() ? 0 : i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        Vector2 nextNormal = {next->y - current->y, current->x - next->x};
         nextNormal.normalize();
 
         // AA point offset from original point is that point's normal, such that each side is offset
         // by .5 pixels
-        vec2 totalOffset = paintInfo.deriveAAOffset(totalOffsetFromNormals(lastNormal, nextNormal));
+        Vector2 totalOffset = paintInfo.deriveAAOffset(totalOffsetFromNormals(lastNormal, nextNormal));
 
         AlphaVertex::set(&buffer[currentIndex++],
-                current->position[0] + totalOffset.x,
-                current->position[1] + totalOffset.y,
+                current->x + totalOffset.x,
+                current->y + totalOffset.y,
                 0.0f);
         AlphaVertex::set(&buffer[currentIndex++],
-                current->position[0] - totalOffset.x,
-                current->position[1] - totalOffset.y,
-                1.0f);
+                current->x - totalOffset.x,
+                current->y - totalOffset.y,
+                maxAlpha);
 
         last = current;
         current = next;
@@ -365,8 +379,8 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
     }
 
     // wrap around to beginning
-    copyAlphaVertex(&buffer[currentIndex++], &buffer[0]);
-    copyAlphaVertex(&buffer[currentIndex++], &buffer[1]);
+    buffer[currentIndex++] = buffer[0];
+    buffer[currentIndex++] = buffer[1];
 
     // zig zag between all previous points on the inside of the hull to create a
     // triangle strip that fills the hull, repeating the first inner point to
@@ -374,9 +388,9 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
     int srcAindex = 0;
     int srcBindex = perimeter.size() - 1;
     while (srcAindex <= srcBindex) {
-        copyAlphaVertex(&buffer[currentIndex++], &buffer[srcAindex * 2 + 1]);
+        buffer[currentIndex++] = buffer[srcAindex * 2 + 1];
         if (srcAindex == srcBindex) break;
-        copyAlphaVertex(&buffer[currentIndex++], &buffer[srcBindex * 2 + 1]);
+        buffer[currentIndex++] = buffer[srcBindex * 2 + 1];
         srcAindex++;
         srcBindex--;
     }
@@ -391,7 +405,7 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
  * getStrokeVerticesFromUnclosedVerticesAA() below.
  */
 inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& vertices,
-        AlphaVertex* buffer, bool isFirst, vec2 normal, int offset) {
+        AlphaVertex* buffer, bool isFirst, Vector2 normal, int offset) {
     const int extra = paintInfo.capExtraDivisions();
     const int extraOffset = (extra + 1) / 2;
     const int capIndex = isFirst
@@ -400,27 +414,28 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
     if (isFirst) normal *= -1;
 
     // TODO: this normal should be scaled by radialScale if extra != 0, see totalOffsetFromNormals()
-    vec2 AAOffset = paintInfo.deriveAAOffset(normal);
+    Vector2 AAOffset = paintInfo.deriveAAOffset(normal);
 
-    vec2 strokeOffset = normal;
+    Vector2 strokeOffset = normal;
     paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
-    vec2 outerOffset = strokeOffset + AAOffset;
-    vec2 innerOffset = strokeOffset - AAOffset;
+    Vector2 outerOffset = strokeOffset + AAOffset;
+    Vector2 innerOffset = strokeOffset - AAOffset;
 
-    vec2 capAAOffset;
+    Vector2 capAAOffset = {0, 0};
     if (paintInfo.cap != SkPaint::kRound_Cap) {
         // if the cap is square or butt, the inside primary cap vertices will be inset in two
         // directions - both normal to the stroke, and parallel to it.
-        capAAOffset = vec2(-AAOffset.y, AAOffset.x);
+        capAAOffset = (Vector2){-AAOffset.y, AAOffset.x};
     }
 
     // determine referencePoint, the center point for the 4 primary cap vertices
     const Vertex* point = isFirst ? vertices.begin() : (vertices.end() - 1);
-    vec2 referencePoint(point->position[0], point->position[1]);
+    Vector2 referencePoint = {point->x, point->y};
     if (paintInfo.cap == SkPaint::kSquare_Cap) {
         // To account for square cap, move the primary cap vertices (that create the AA edge) by the
         // stroke offset vector (rotated to be parallel to the stroke)
-        referencePoint += vec2(-strokeOffset.y, strokeOffset.x);
+        Vector2 rotated = {-strokeOffset.y, strokeOffset.x};
+        referencePoint += rotated;
     }
 
     AlphaVertex::set(&buffer[capIndex + 0],
@@ -453,7 +468,7 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
         for (int i = 0; i < extra; i++) {
             theta += dTheta;
 
-            vec2 radialOffset(cos(theta), sin(theta));
+            Vector2 radialOffset = {cos(theta), sin(theta)};
 
             // scale to compensate for pinching at sharp angles, see totalOffsetFromNormals()
             radialOffset *= radialScale;
@@ -471,8 +486,8 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
 
             if (isFirst && i == extra - extraOffset) {
                 //copy most recent two points to first two points
-                copyAlphaVertex(&buffer[0], &buffer[capPerimIndex - 2]);
-                copyAlphaVertex(&buffer[1], &buffer[capPerimIndex - 1]);
+                buffer[0] = buffer[capPerimIndex - 2];
+                buffer[1] = buffer[capPerimIndex - 1];
 
                 capPerimIndex = 2; // start writing the rest of the round cap at index 2
             }
@@ -482,28 +497,28 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
             const int startCapFillIndex = capIndex + 2 * (extra - extraOffset) + 4;
             int capFillIndex = startCapFillIndex;
             for (int i = 0; i < extra + 2; i += 2) {
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[1 + i]);
+                buffer[capFillIndex++] = buffer[1 + i];
                 // TODO: to support odd numbers of divisions, break here on the last iteration
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[startCapFillIndex - 3 - i]);
+                buffer[capFillIndex++] = buffer[startCapFillIndex - 3 - i];
             }
         } else {
             int capFillIndex = 6 * vertices.size() + 2 + 6 * extra - (extra + 2);
             for (int i = 0; i < extra + 2; i += 2) {
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[capIndex + 1 + i]);
+                buffer[capFillIndex++] = buffer[capIndex + 1 + i];
                 // TODO: to support odd numbers of divisions, break here on the last iteration
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[capIndex + 3 + 2 * extra - i]);
+                buffer[capFillIndex++] = buffer[capIndex + 3 + 2 * extra - i];
             }
         }
         return;
     }
     if (isFirst) {
-        copyAlphaVertex(&buffer[0], &buffer[postCapIndex + 2]);
-        copyAlphaVertex(&buffer[1], &buffer[postCapIndex + 3]);
-        copyAlphaVertex(&buffer[postCapIndex + 4], &buffer[1]); // degenerate tris (the only two!)
-        copyAlphaVertex(&buffer[postCapIndex + 5], &buffer[postCapIndex + 1]);
+        buffer[0] = buffer[postCapIndex + 2];
+        buffer[1] = buffer[postCapIndex + 3];
+        buffer[postCapIndex + 4] = buffer[1]; // degenerate tris (the only two!)
+        buffer[postCapIndex + 5] = buffer[postCapIndex + 1];
     } else {
-        copyAlphaVertex(&buffer[6 * vertices.size()], &buffer[postCapIndex + 1]);
-        copyAlphaVertex(&buffer[6 * vertices.size() + 1], &buffer[postCapIndex + 3]);
+        buffer[6 * vertices.size()] = buffer[postCapIndex + 1];
+        buffer[6 * vertices.size() + 1] = buffer[postCapIndex + 3];
     }
 }
 
@@ -576,8 +591,7 @@ void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
 
     const Vertex* last = &(vertices[0]);
     const Vertex* current = &(vertices[1]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    Vector2 lastNormal = {current->y - last->y, last->x - current->x};
     lastNormal.normalize();
 
     // TODO: use normal from bezier traversal for cap, instead of from vertices
@@ -585,43 +599,42 @@ void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
 
     for (unsigned int i = 1; i < vertices.size() - 1; i++) {
         const Vertex* next = &(vertices[i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        Vector2 nextNormal = {next->y - current->y, current->x - next->x};
         nextNormal.normalize();
 
-        vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
-        vec2 AAOffset = paintInfo.deriveAAOffset(totalOffset);
+        Vector2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
+        Vector2 AAOffset = paintInfo.deriveAAOffset(totalOffset);
 
-        vec2 innerOffset = totalOffset;
+        Vector2 innerOffset = totalOffset;
         paintInfo.scaleOffsetForStrokeWidth(innerOffset);
-        vec2 outerOffset = innerOffset + AAOffset;
+        Vector2 outerOffset = innerOffset + AAOffset;
         innerOffset -= AAOffset;
 
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + outerOffset.x,
-                current->position[1] + outerOffset.y,
+                current->x + outerOffset.x,
+                current->y + outerOffset.y,
                 0.0f);
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentAAInnerIndex--],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentAAInnerIndex--],
-                current->position[0] - outerOffset.x,
-                current->position[1] - outerOffset.y,
+                current->x - outerOffset.x,
+                current->y - outerOffset.y,
                 0.0f);
 
         current = next;
@@ -646,48 +659,46 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
 
     const Vertex* last = &(perimeter[perimeter.size() - 1]);
     const Vertex* current = &(perimeter[0]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    Vector2 lastNormal = {current->y - last->y, last->x - current->x};
     lastNormal.normalize();
     for (unsigned int i = 0; i < perimeter.size(); i++) {
         const Vertex* next = &(perimeter[i + 1 >= perimeter.size() ? 0 : i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        Vector2 nextNormal = {next->y - current->y, current->x - next->x};
         nextNormal.normalize();
 
-        vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
-        vec2 AAOffset = paintInfo.deriveAAOffset(totalOffset);
+        Vector2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
+        Vector2 AAOffset = paintInfo.deriveAAOffset(totalOffset);
 
-        vec2 innerOffset = totalOffset;
+        Vector2 innerOffset = totalOffset;
         paintInfo.scaleOffsetForStrokeWidth(innerOffset);
-        vec2 outerOffset = innerOffset + AAOffset;
+        Vector2 outerOffset = innerOffset + AAOffset;
         innerOffset -= AAOffset;
 
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + outerOffset.x,
-                current->position[1] + outerOffset.y,
+                current->x + outerOffset.x,
+                current->y + outerOffset.y,
                 0.0f);
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentAAInnerIndex++],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentAAInnerIndex++],
-                current->position[0] - outerOffset.x,
-                current->position[1] - outerOffset.y,
+                current->x - outerOffset.x,
+                current->y - outerOffset.y,
                 0.0f);
 
         last = current;
@@ -696,23 +707,23 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
     }
 
     // wrap each strip around to beginning, creating degenerate tris to bridge strips
-    copyAlphaVertex(&buffer[currentAAOuterIndex++], &buffer[0]);
-    copyAlphaVertex(&buffer[currentAAOuterIndex++], &buffer[1]);
-    copyAlphaVertex(&buffer[currentAAOuterIndex++], &buffer[1]);
+    buffer[currentAAOuterIndex++] = buffer[0];
+    buffer[currentAAOuterIndex++] = buffer[1];
+    buffer[currentAAOuterIndex++] = buffer[1];
 
-    copyAlphaVertex(&buffer[currentStrokeIndex++], &buffer[offset]);
-    copyAlphaVertex(&buffer[currentStrokeIndex++], &buffer[offset + 1]);
-    copyAlphaVertex(&buffer[currentStrokeIndex++], &buffer[offset + 1]);
+    buffer[currentStrokeIndex++] = buffer[offset];
+    buffer[currentStrokeIndex++] = buffer[offset + 1];
+    buffer[currentStrokeIndex++] = buffer[offset + 1];
 
-    copyAlphaVertex(&buffer[currentAAInnerIndex++], &buffer[2 * offset]);
-    copyAlphaVertex(&buffer[currentAAInnerIndex++], &buffer[2 * offset + 1]);
+    buffer[currentAAInnerIndex++] = buffer[2 * offset];
+    buffer[currentAAInnerIndex++] = buffer[2 * offset + 1];
     // don't need to create last degenerate tri
 
     DEBUG_DUMP_ALPHA_BUFFER();
 }
 
 void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
-        const mat4 *transform, VertexBuffer& vertexBuffer) {
+        const mat4& transform, VertexBuffer& vertexBuffer) {
     ATRACE_CALL();
 
     const PaintInfo paintInfo(paint, transform);
@@ -733,7 +744,8 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
     // force close if we're filling the path, since fill path expects closed perimeter.
     bool forceClose = paintInfo.style != SkPaint::kStroke_Style;
     bool wasClosed = approximatePathOutlineVertices(path, forceClose,
-            threshInvScaleX * threshInvScaleX, threshInvScaleY * threshInvScaleY, tempVertices);
+            threshInvScaleX * threshInvScaleX, threshInvScaleY * threshInvScaleY,
+            OUTLINE_REFINE_THRESHOLD_SQUARED, tempVertices);
 
     if (!tempVertices.size()) {
         // path was empty, return without allocating vertex buffer
@@ -743,7 +755,7 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
 #if VERTEX_DEBUG
     for (unsigned int i = 0; i < tempVertices.size(); i++) {
         ALOGD("orig path: point at %f %f",
-                tempVertices[i].position[0], tempVertices[i].position[1]);
+                tempVertices[i].x, tempVertices[i].y);
     }
 #endif
 
@@ -771,21 +783,15 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
             getFillVerticesFromPerimeterAA(paintInfo, tempVertices, vertexBuffer);
         }
     }
-}
 
-static void expandRectToCoverVertex(SkRect& rect, float x, float y) {
-    rect.fLeft = fminf(rect.fLeft, x);
-    rect.fTop = fminf(rect.fTop, y);
-    rect.fRight = fmaxf(rect.fRight, x);
-    rect.fBottom = fmaxf(rect.fBottom, y);
-}
-static void expandRectToCoverVertex(SkRect& rect, const Vertex& vertex) {
-    expandRectToCoverVertex(rect, vertex.position[0], vertex.position[1]);
+    Rect bounds(path.getBounds());
+    paintInfo.expandBoundsForStroke(&bounds);
+    vertexBuffer.setBounds(bounds);
 }
 
 template <class TYPE>
 static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
-        const float* points, int count, SkRect& bounds) {
+        const float* points, int count, Rect& bounds) {
     bounds.set(points[0], points[1], points[0], points[1]);
 
     int numPoints = count / 2;
@@ -793,14 +799,14 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
     dstBuffer.alloc<TYPE>(numPoints * verticesPerPoint + (numPoints - 1) * 2);
 
     for (int i = 0; i < count; i += 2) {
-        expandRectToCoverVertex(bounds, points[i + 0], points[i + 1]);
+        bounds.expandToCoverVertex(points[i + 0], points[i + 1]);
         dstBuffer.copyInto<TYPE>(srcBuffer, points[i + 0], points[i + 1]);
     }
     dstBuffer.createDegenerateSeparators<TYPE>(verticesPerPoint);
 }
 
-void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* paint,
-        const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+void PathTessellator::tessellatePoints(const float* points, int count, const SkPaint* paint,
+        const mat4& transform, VertexBuffer& vertexBuffer) {
     const PaintInfo paintInfo(paint, transform);
 
     // determine point shape
@@ -818,10 +824,12 @@ void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* 
     Vector<Vertex> outlineVertices;
     approximatePathOutlineVertices(path, true,
             paintInfo.inverseScaleX * paintInfo.inverseScaleX,
-            paintInfo.inverseScaleY * paintInfo.inverseScaleY, outlineVertices);
+            paintInfo.inverseScaleY * paintInfo.inverseScaleY,
+            OUTLINE_REFINE_THRESHOLD_SQUARED, outlineVertices);
 
     if (!outlineVertices.size()) return;
 
+    Rect bounds;
     // tessellate, then duplicate outline across points
     int numPoints = count / 2;
     VertexBuffer tempBuffer;
@@ -829,15 +837,18 @@ void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* 
         getFillVerticesFromPerimeter(outlineVertices, tempBuffer);
         instanceVertices<Vertex>(tempBuffer, vertexBuffer, points, count, bounds);
     } else {
-        getFillVerticesFromPerimeterAA(paintInfo, outlineVertices, tempBuffer);
+        // note: pass maxAlpha directly, since we want fill to be alpha modulated
+        getFillVerticesFromPerimeterAA(paintInfo, outlineVertices, tempBuffer, paintInfo.maxAlpha);
         instanceVertices<AlphaVertex>(tempBuffer, vertexBuffer, points, count, bounds);
     }
 
-    expandBoundsForStroke(bounds, paint, true); // force-expand bounds to incorporate stroke
+    // expand bounds from vertex coords to pixel data
+    paintInfo.expandBoundsForStroke(&bounds);
+    vertexBuffer.setBounds(bounds);
 }
 
-void PathTessellator::tessellateLines(const float* points, int count, SkPaint* paint,
-        const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+void PathTessellator::tessellateLines(const float* points, int count, const SkPaint* paint,
+        const mat4& transform, VertexBuffer& vertexBuffer) {
     ATRACE_CALL();
     const PaintInfo paintInfo(paint, transform);
 
@@ -857,6 +868,7 @@ void PathTessellator::tessellateLines(const float* points, int count, SkPaint* p
     tempVertices.push();
     tempVertices.push();
     Vertex* tempVerticesData = tempVertices.editArray();
+    Rect bounds;
     bounds.set(points[0], points[1], points[0], points[1]);
     for (int i = 0; i < count; i += 4) {
         Vertex::set(&(tempVerticesData[0]), points[i + 0], points[i + 1]);
@@ -869,11 +881,9 @@ void PathTessellator::tessellateLines(const float* points, int count, SkPaint* p
         }
 
         // calculate bounds
-        expandRectToCoverVertex(bounds, tempVerticesData[0]);
-        expandRectToCoverVertex(bounds, tempVerticesData[1]);
+        bounds.expandToCoverVertex(tempVerticesData[0].x, tempVerticesData[0].y);
+        bounds.expandToCoverVertex(tempVerticesData[1].x, tempVerticesData[1].y);
     }
-
-    expandBoundsForStroke(bounds, paint, true); // force-expand bounds to incorporate stroke
 
     // since multiple objects tessellated into buffer, separate them with degen tris
     if (paintInfo.isAA) {
@@ -881,11 +891,20 @@ void PathTessellator::tessellateLines(const float* points, int count, SkPaint* p
     } else {
         vertexBuffer.createDegenerateSeparators<Vertex>(lineAllocSize);
     }
+
+    // expand bounds from vertex coords to pixel data
+    paintInfo.expandBoundsForStroke(&bounds);
+    vertexBuffer.setBounds(bounds);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Simple path line approximation
 ///////////////////////////////////////////////////////////////////////////////
+
+bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, float thresholdSquared,
+        Vector<Vertex>& outputVertices) {
+    return approximatePathOutlineVertices(path, true, 1.0f, 1.0f, thresholdSquared, outputVertices);
+}
 
 void pushToVector(Vector<Vertex>& vertices, float x, float y) {
     // TODO: make this not yuck
@@ -895,7 +914,8 @@ void pushToVector(Vector<Vertex>& vertices, float x, float y) {
 }
 
 bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool forceClose,
-        float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex>& outputVertices) {
+        float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+        Vector<Vertex>& outputVertices) {
     ATRACE_CALL();
 
     // TODO: to support joins other than sharp miter, join vertices should be labelled in the
@@ -922,7 +942,7 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[0].x(), pts[0].y(),
                         pts[2].x(), pts[2].y(),
                         pts[1].x(), pts[1].y(),
-                        sqrInvScaleX, sqrInvScaleY, outputVertices);
+                        sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
                 break;
             case SkPath::kCubic_Verb:
                 ALOGV("kCubic_Verb");
@@ -931,7 +951,7 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[1].x(), pts[1].y(),
                         pts[3].x(), pts[3].y(),
                         pts[2].x(), pts[2].y(),
-                        sqrInvScaleX, sqrInvScaleY, outputVertices);
+                        sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
                 break;
             default:
                 break;
@@ -939,8 +959,8 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
     }
 
     int size = outputVertices.size();
-    if (size >= 2 && outputVertices[0].position[0] == outputVertices[size - 1].position[0] &&
-            outputVertices[0].position[1] == outputVertices[size - 1].position[1]) {
+    if (size >= 2 && outputVertices[0].x == outputVertices[size - 1].x &&
+            outputVertices[0].y == outputVertices[size - 1].y) {
         outputVertices.pop();
         return true;
     }
@@ -954,7 +974,8 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
 void PathTessellator::recursiveCubicBezierVertices(
         float p1x, float p1y, float c1x, float c1y,
         float p2x, float p2y, float c2x, float c2y,
-        float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex>& outputVertices) {
+        float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+        Vector<Vertex>& outputVertices, int depth) {
     float dx = p2x - p1x;
     float dy = p2y - p1y;
     float d1 = fabs((c1x - p2x) * dy - (c1y - p2y) * dx);
@@ -962,8 +983,8 @@ void PathTessellator::recursiveCubicBezierVertices(
     float d = d1 + d2;
 
     // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
-
-    if (d * d < THRESHOLD * THRESHOLD * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+    if (depth >= MAX_DEPTH
+            || d * d <= thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, p2x, p2y);
     } else {
@@ -987,11 +1008,11 @@ void PathTessellator::recursiveCubicBezierVertices(
         recursiveCubicBezierVertices(
                 p1x, p1y, p1c1x, p1c1y,
                 mx, my, p1c1c2x, p1c1c2y,
-                sqrInvScaleX, sqrInvScaleY, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
         recursiveCubicBezierVertices(
                 mx, my, p2c1c2x, p2c1c2y,
                 p2x, p2y, p2c2x, p2c2y,
-                sqrInvScaleX, sqrInvScaleY, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
     }
 }
 
@@ -999,12 +1020,15 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float ax, float ay,
         float bx, float by,
         float cx, float cy,
-        float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex>& outputVertices) {
+        float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+        Vector<Vertex>& outputVertices, int depth) {
     float dx = bx - ax;
     float dy = by - ay;
     float d = (cx - bx) * dy - (cy - by) * dx;
 
-    if (d * d < THRESHOLD * THRESHOLD * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+    // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
+    if (depth >= MAX_DEPTH
+            || d * d <= thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, bx, by);
     } else {
@@ -1018,9 +1042,9 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float my = (acy + bcy) * 0.5f;
 
         recursiveQuadraticBezierVertices(ax, ay, mx, my, acx, acy,
-                sqrInvScaleX, sqrInvScaleY, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
         recursiveQuadraticBezierVertices(mx, my, bx, by, bcx, bcy,
-                sqrInvScaleX, sqrInvScaleY, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
     }
 }
 

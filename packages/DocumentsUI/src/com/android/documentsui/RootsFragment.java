@@ -133,11 +133,12 @@ public class RootsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        onDisplayStateChanged();
+    }
 
+    public void onDisplayStateChanged() {
         final Context context = getActivity();
         final State state = ((DocumentsActivity) context).getDisplayState();
-        state.showAdvanced = state.forceAdvanced
-                | SettingsActivity.getDisplayAdvancedDevices(context);
 
         if (state.action == ACTION_GET_CONTENT) {
             mList.setOnItemLongClickListener(mItemLongClickListener);
@@ -234,7 +235,7 @@ public class RootsFragment extends Fragment {
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
             final Context context = convertView.getContext();
-            icon.setImageDrawable(root.loadIcon(context));
+            icon.setImageDrawable(root.loadDrawerIcon(context));
             title.setText(root.title);
 
             // Show available space if no summary

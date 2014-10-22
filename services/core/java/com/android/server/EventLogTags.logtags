@@ -1,0 +1,208 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.server
+
+# ---------------------------
+# BatteryService.java
+# ---------------------------
+2722 battery_level (level|1|6),(voltage|1|1),(temperature|1|1)
+2723 battery_status (status|1|5),(health|1|5),(present|1|5),(plugged|1|5),(technology|3)
+# This is logged when battery goes from discharging to charging.
+# It lets us count the total amount of time between charges and the discharge level
+2730 battery_discharge (duration|2|3),(minLevel|1|6),(maxLevel|1|6)
+
+
+# ---------------------------
+# PowerManagerService.java
+# ---------------------------
+# This is logged when the device is being forced to sleep (typically by
+# the user pressing the power button).
+2724 power_sleep_requested (wakeLocksCleared|1|1)
+# This is logged when the screen on broadcast has completed
+2725 power_screen_broadcast_send (wakelockCount|1|1)
+# This is logged when the screen broadcast has completed
+2726 power_screen_broadcast_done (on|1|5),(broadcastDuration|2|3),(wakelockCount|1|1)
+# This is logged when the screen on broadcast has completed
+2727 power_screen_broadcast_stop (which|1|5),(wakelockCount|1|1)
+# This is logged when the screen is turned on or off.
+2728 power_screen_state (offOrOn|1|5),(becauseOfUser|1|5),(totalTouchDownTime|2|3),(touchCycles|1|1)
+# This is logged when the partial wake lock (keeping the device awake
+# regardless of whether the screen is off) is acquired or released.
+2729 power_partial_wake_state (releasedorAcquired|1|5),(tag|3)
+
+#
+# Leave IDs through 2739 for more power logs (2730 used by battery_discharge above)
+#
+
+
+# ---------------------------
+# DeviceStorageMonitorService.java
+# ---------------------------
+# The disk space free on the /data partition, in bytes
+2744 free_storage_changed (data|2|2)
+# Device low memory notification and disk space free on the /data partition, in bytes at that time
+2745 low_storage (data|2|2)
+# disk space free on the /data, /system, and /cache partitions in bytes
+2746 free_storage_left (data|2|2),(system|2|2),(cache|2|2)
+# file on cache partition was deleted
+2748 cache_file_deleted (path|3)
+
+
+# ---------------------------
+# NotificationManagerService.java
+# ---------------------------
+# when a NotificationManager.notify is called
+2750 notification_enqueue (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(notification|3)
+# when someone tries to cancel a notification, the notification manager sometimes
+# calls this with flags too
+2751 notification_cancel (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(required_flags|1),(forbidden_flags|1),(reason|1|5),(listener|3)
+# when someone tries to cancel all of the notifications for a particular package
+2752 notification_cancel_all (uid|1|5),(pid|1|5),(pkg|3),(userid|1|5),(required_flags|1),(forbidden_flags|1),(reason|1|5),(listener|3)
+# when the notification panel is shown
+# Note: New tag range starts here since 2753+ have been used below.
+27500 notification_panel_revealed
+# when the notification panel is hidden
+27501 notification_panel_hidden
+# when notifications are newly displayed on screen, or disappear from screen
+27510 notification_visibility_changed (newlyVisibleKeys|3),(noLongerVisibleKeys|3)
+# when notifications are expanded, or contracted
+27511 notification_expansion (key|3),(user_action|1),(expanded|1)
+# when a notification has been clicked
+27520 notification_clicked (key|3)
+
+# ---------------------------
+# Watchdog.java
+# ---------------------------
+2802 watchdog (Service|3)
+2803 watchdog_proc_pss (Process|3),(Pid|1|5),(Pss|1|2)
+2804 watchdog_soft_reset (Process|3),(Pid|1|5),(MaxPss|1|2),(Pss|1|2),(Skip|3)
+2805 watchdog_hard_reset (Process|3),(Pid|1|5),(MaxPss|1|2),(Pss|1|2)
+2806 watchdog_pss_stats (EmptyPss|1|2),(EmptyCount|1|1),(BackgroundPss|1|2),(BackgroundCount|1|1),(ServicePss|1|2),(ServiceCount|1|1),(VisiblePss|1|2),(VisibleCount|1|1),(ForegroundPss|1|2),(ForegroundCount|1|1),(NoPssCount|1|1)
+2807 watchdog_proc_stats (DeathsInOne|1|1),(DeathsInTwo|1|1),(DeathsInThree|1|1),(DeathsInFour|1|1),(DeathsInFive|1|1)
+2808 watchdog_scheduled_reboot (Now|2|1),(Interval|1|3),(StartTime|1|3),(Window|1|3),(Skip|3)
+2809 watchdog_meminfo (MemFree|1|2),(Buffers|1|2),(Cached|1|2),(Active|1|2),(Inactive|1|2),(AnonPages|1|2),(Mapped|1|2),(Slab|1|2),(SReclaimable|1|2),(SUnreclaim|1|2),(PageTables|1|2)
+2810 watchdog_vmstat (runtime|2|3),(pgfree|1|1),(pgactivate|1|1),(pgdeactivate|1|1),(pgfault|1|1),(pgmajfault|1|1)
+2811 watchdog_requested_reboot (NoWait|1|1),(ScheduleInterval|1|3),(RecheckInterval|1|3),(StartTime|1|3),(Window|1|3),(MinScreenOff|1|3),(MinNextAlarm|1|3)
+
+
+# ---------------------------
+# BackupManagerService.java
+# ---------------------------
+2820 backup_data_changed (Package|3)
+2821 backup_start (Transport|3)
+2822 backup_transport_failure (Package|3)
+2823 backup_agent_failure (Package|3),(Message|3)
+2824 backup_package (Package|3),(Size|1|2)
+2825 backup_success (Packages|1|1),(Time|1|3)
+2826 backup_reset (Transport|3)
+2827 backup_initialize
+2830 restore_start (Transport|3),(Source|2|5)
+2831 restore_transport_failure
+2832 restore_agent_failure (Package|3),(Message|3)
+2833 restore_package (Package|3),(Size|1|2)
+2834 restore_success (Packages|1|1),(Time|1|3)
+
+2840 full_backup_package (Package|3)
+2841 full_backup_agent_failure (Package|3),(Message|3)
+2842 full_backup_transport_failure
+2843 full_backup_success (Package|3)
+2844 full_restore_package (Package|3)
+
+2850 backup_transport_lifecycle (Transport|3),(Bound|1|1)
+
+
+# ---------------------------
+# SystemServer.java
+# ---------------------------
+# SystemServer.run() starts:
+3010 boot_progress_system_run (time|2|3)
+
+
+# ---------------------------
+# PackageManagerService.java
+# ---------------------------
+# Package Manager starts:
+3060 boot_progress_pms_start (time|2|3)
+# Package Manager .apk scan starts:
+3070 boot_progress_pms_system_scan_start (time|2|3)
+# Package Manager .apk scan starts:
+3080 boot_progress_pms_data_scan_start (time|2|3)
+# Package Manager .apk scan ends:
+3090 boot_progress_pms_scan_end (time|2|3)
+# Package Manager ready:
+3100 boot_progress_pms_ready (time|2|3)
+# + check activity_launch_time for Home app
+# Value of "unknown sources" setting at app install time
+3110 unknown_sources_enabled (value|1)
+# Package Manager critical info
+3120 pm_critical_info (msg|3)
+
+
+# ---------------------------
+# WindowManagerService.java
+# ---------------------------
+# Out of memory for surfaces.
+31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
+# Task created.
+31001 wm_task_created (TaskId|1|5),(StackId|1|5)
+# Task moved to top (1) or bottom (0).
+31002 wm_task_moved (TaskId|1|5),(ToTop|1),(Index|1)
+# Task removed with source explanation.
+31003 wm_task_removed (TaskId|1|5),(Reason|3)
+# Stack created.
+31004 wm_stack_created (StackId|1|5),(RelativeBoxId|1|5),(Position|1),(Weight|1|6)
+# Home stack moved to top (1) or bottom (0).
+31005 wm_home_stack_moved (ToTop|1)
+# Stack removed.
+31006 wm_stack_removed (StackId|1|5)
+
+
+# ---------------------------
+# InputMethodManagerService.java
+# ---------------------------
+# Re-connecting to input method service because we haven't received its interface
+32000 imf_force_reconnect_ime (IME|4),(Time Since Connect|2|3),(Showing|1|1)
+
+
+# ---------------------------
+# ConnectivityService.java
+# ---------------------------
+# Connectivity state changed
+50020 connectivity_state_changed (type|1),(subtype|1),(state|1)
+
+
+# ---------------------------
+# NetworkStatsService.java
+# ---------------------------
+51100 netstats_mobile_sample (dev_rx_bytes|2|2),(dev_tx_bytes|2|2),(dev_rx_pkts|2|1),(dev_tx_pkts|2|1),(xt_rx_bytes|2|2),(xt_tx_bytes|2|2),(xt_rx_pkts|2|1),(xt_tx_pkts|2|1),(uid_rx_bytes|2|2),(uid_tx_bytes|2|2),(uid_rx_pkts|2|1),(uid_tx_pkts|2|1),(trusted_time|2|3)
+51101 netstats_wifi_sample (dev_rx_bytes|2|2),(dev_tx_bytes|2|2),(dev_rx_pkts|2|1),(dev_tx_pkts|2|1),(xt_rx_bytes|2|2),(xt_tx_bytes|2|2),(xt_rx_pkts|2|1),(xt_tx_pkts|2|1),(uid_rx_bytes|2|2),(uid_tx_bytes|2|2),(uid_rx_pkts|2|1),(uid_tx_pkts|2|1),(trusted_time|2|3)
+
+
+# ---------------------------
+# LockdownVpnTracker.java
+# ---------------------------
+51200 lockdown_vpn_connecting (egress_net|1)
+51201 lockdown_vpn_connected (egress_net|1)
+51202 lockdown_vpn_error (egress_net|1)
+
+# ---------------------------
+# ConfigUpdateInstallReceiver.java
+# ---------------------------
+51300 config_install_failed (dir|3)
+
+# ---------------------------
+# IntentFirewall.java
+# ---------------------------
+51400 ifw_intent_matched (Intent Type|1|5),(Component Name|3),(Caller Uid|1|5),(Caller Pkg Count|1|1),(Caller Pkgs|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
+
+# ---------------------------
+# IdleMaintenanceService.java
+# ---------------------------
+2753 idle_maintenance_window_start (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+2754 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+
+# ---------------------------
+# MountService.java
+# ---------------------------
+2755 fstrim_start (time|2|3)
+2756 fstrim_finish (time|2|3)

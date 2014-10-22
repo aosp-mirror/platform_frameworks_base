@@ -78,6 +78,30 @@ public final class PageRange implements Parcelable {
         return mEnd;
     }
 
+    /**
+     * Gets whether a page range contains a a given page.
+     *
+     * @param pageIndex The page index.
+     * @return True if the page is within this range.
+     *
+     * @hide
+     */
+    public boolean contains(int pageIndex) {
+        return (pageIndex >= mStart) && (pageIndex <= mEnd);
+    }
+
+    /**
+     * Get the size of this range which is the number of
+     * pages it contains.
+     *
+     * @return The size of the range.
+     *
+     * @hide
+     */
+    public int getSize() {
+        return mEnd - mStart + 1;
+    }
+
     @Override
     public int describeContents() {
         return 0;

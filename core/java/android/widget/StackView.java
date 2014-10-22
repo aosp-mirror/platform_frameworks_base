@@ -168,9 +168,16 @@ public class StackView extends AdapterViewAnimator {
      * {@inheritDoc}
      */
     public StackView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.StackView, defStyleAttr, 0);
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public StackView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.StackView, defStyleAttr, defStyleRes);
 
         mResOutColor = a.getColor(
                 com.android.internal.R.styleable.StackView_resOutColor, 0);

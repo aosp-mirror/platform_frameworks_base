@@ -17,7 +17,6 @@
 package android.bluetooth;
 
 import android.os.Handler;
-import android.os.Message;
 import android.os.ParcelUuid;
 
 import java.io.Closeable;

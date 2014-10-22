@@ -533,10 +533,9 @@ public class SignalStrength implements Parcelable {
         int dBm;
 
         if(isGsm()) {
-            if (getLteLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+            dBm = getLteDbm();
+            if (dBm == INVALID) {
                 dBm = getGsmDbm();
-            } else {
-                dBm = getLteDbm();
             }
         } else {
             int cdmaDbm = getCdmaDbm();

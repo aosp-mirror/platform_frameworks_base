@@ -26,7 +26,9 @@ import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
 import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
+import android.media.IVolumeController;
 import android.media.Rating;
+import android.media.audiopolicy.AudioPolicyConfig;
 import android.net.Uri;
 import android.view.KeyEvent;
 
@@ -34,15 +36,6 @@ import android.view.KeyEvent;
  * {@hide}
  */
 interface IAudioService {
-
-    int verifyX509CertChain(int chainsize, in byte[] chain, String host, String authtype);
-
-    void adjustVolume(int direction, int flags, String callingPackage);
-
-    boolean isLocalOrRemoteMusicActive();
-
-    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
-            String callingPackage);
 
     void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage);
@@ -63,7 +56,9 @@ interface IAudioService {
 
     boolean isStreamMute(int streamType);
 
-    void setMasterMute(boolean state, int flags, IBinder cb);
+    void forceRemoteSubmixFullVolume(boolean startForcing, IBinder cb);
+
+    void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb);
 
     boolean isMasterMute();
 
@@ -79,7 +74,9 @@ interface IAudioService {
 
     int getLastAudibleMasterVolume();
 
-    void setRingerMode(int ringerMode);
+    void setMicrophoneMute(boolean on, String callingPackage);
+
+    void setRingerMode(int ringerMode, boolean checkZen);
 
     int getRingerMode();
 
@@ -125,15 +122,6 @@ interface IAudioService {
     void unregisterAudioFocusClient(String clientId);
 
     int getCurrentAudioFocus();
-
-    oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
-    void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
-
-           void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c, IBinder token);
-    oneway void unregisterMediaButtonIntent(in PendingIntent pi);
-
-    oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
-    oneway void unregisterMediaButtonEventReceiverForCalls();
 
     /**
      * Register an IRemoteControlDisplay.
@@ -187,43 +175,9 @@ interface IAudioService {
      */
     oneway void remoteControlDisplayWantsPlaybackPositionSync(in IRemoteControlDisplay rcd,
             boolean wantsSync);
-    /**
-     * Request the user of a RemoteControlClient to seek to the given playback position.
-     * @param generationId the RemoteControlClient generation counter for which this request is
-     *         issued. Requests for an older generation than current one will be ignored.
-     * @param timeMs the time in ms to seek to, must be positive.
-     */
-     void setRemoteControlClientPlaybackPosition(int generationId, long timeMs);
-     /**
-      * Notify the user of a RemoteControlClient that it should update its metadata with the
-      * new value for the given key.
-      * @param generationId the RemoteControlClient generation counter for which this request is
-      *         issued. Requests for an older generation than current one will be ignored.
-      * @param key the metadata key for which a new value exists
-      * @param value the new metadata value
-      */
-     void updateRemoteControlClientMetadata(int generationId, int key, in Rating value);
-
-    /**
-     * Do not use directly, use instead
-     *     {@link android.media.AudioManager#registerRemoteControlClient(RemoteControlClient)}
-     */
-    int registerRemoteControlClient(in PendingIntent mediaIntent,
-            in IRemoteControlClient rcClient, in String callingPackageName);
-    /**
-     * Do not use directly, use instead
-     *     {@link android.media.AudioManager#unregisterRemoteControlClient(RemoteControlClient)}
-     */
-    oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
-            in IRemoteControlClient rcClient);
-
-    oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
-    void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed);
-           int  getRemoteStreamMaxVolume();
-           int  getRemoteStreamVolume();
-    oneway void registerRemoteVolumeObserverForRcc(int rccId, in IRemoteVolumeObserver rvo);
 
     void startBluetoothSco(IBinder cb, int targetSdkVersion);
+    void startBluetoothScoVirtualCall(IBinder cb);
     void stopBluetoothSco(IBinder cb);
 
     void forceVolumeControlStream(int streamType, IBinder cb);
@@ -233,10 +187,24 @@ interface IAudioService {
     int getMasterStreamType();
 
     void setWiredDeviceConnectionState(int device, int state, String name);
-    int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state);
+    int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state, int profile);
 
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 
     boolean isCameraSoundForced();
 
+    void setVolumeController(in IVolumeController controller);
+
+    void notifyVolumeControllerVisible(in IVolumeController controller, boolean visible);
+
+    boolean isStreamAffectedByRingerMode(int streamType);
+
+    void disableSafeMediaVolume();
+
+    int setHdmiSystemAudioSupported(boolean on);
+
+    boolean isHdmiSystemAudioSupported();
+
+    boolean registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
+    oneway void unregisterAudioPolicyAsync(in IBinder cb);
 }

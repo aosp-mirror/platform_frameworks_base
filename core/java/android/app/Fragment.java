@@ -17,14 +17,20 @@
 package android.app;
 
 import android.animation.Animator;
+import android.annotation.Nullable;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -56,11 +62,11 @@ final class FragmentState implements Parcelable {
     final boolean mRetainInstance;
     final boolean mDetached;
     final Bundle mArguments;
-    
+
     Bundle mSavedFragmentState;
-    
+
     Fragment mInstance;
-    
+
     public FragmentState(Fragment frag) {
         mClassName = frag.getClass().getName();
         mIndex = frag.mIndex;
@@ -72,7 +78,7 @@ final class FragmentState implements Parcelable {
         mDetached = frag.mDetached;
         mArguments = frag.mArguments;
     }
-    
+
     public FragmentState(Parcel in) {
         mClassName = in.readString();
         mIndex = in.readInt();
@@ -85,18 +91,18 @@ final class FragmentState implements Parcelable {
         mArguments = in.readBundle();
         mSavedFragmentState = in.readBundle();
     }
-    
+
     public Fragment instantiate(Activity activity, Fragment parent) {
         if (mInstance != null) {
             return mInstance;
         }
-        
+
         if (mArguments != null) {
             mArguments.setClassLoader(activity.getClassLoader());
         }
-        
+
         mInstance = Fragment.instantiate(activity, mClassName, mArguments);
-        
+
         if (mSavedFragmentState != null) {
             mSavedFragmentState.setClassLoader(activity.getClassLoader());
             mInstance.mSavedFragmentState = mSavedFragmentState;
@@ -115,7 +121,7 @@ final class FragmentState implements Parcelable {
 
         return mInstance;
     }
-    
+
     public int describeContents() {
         return 0;
     }
@@ -132,13 +138,13 @@ final class FragmentState implements Parcelable {
         dest.writeBundle(mArguments);
         dest.writeBundle(mSavedFragmentState);
     }
-    
+
     public static final Parcelable.Creator<FragmentState> CREATOR
             = new Parcelable.Creator<FragmentState>() {
         public FragmentState createFromParcel(Parcel in) {
             return new FragmentState(in);
         }
-        
+
         public FragmentState[] newArray(int size) {
             return new FragmentState[size];
         }
@@ -160,11 +166,12 @@ final class FragmentState implements Parcelable {
  * activity: if the activity is stopped, no fragments inside of it can be
  * started; when the activity is destroyed, all fragments will be destroyed.
  *
- * <p>All subclasses of Fragment must include a public empty constructor.
+ * <p>All subclasses of Fragment must include a public no-argument constructor.
  * The framework will often re-instantiate a fragment class when needed,
  * in particular during state restore, and needs to be able to find this
- * constructor to instantiate it.  If the empty constructor is not available,
- * a runtime exception will occur in some cases during state restore.
+ * constructor to instantiate it.  If the no-argument constructor is not
+ * available, a runtime exception will occur in some cases during state
+ * restore.
  *
  * <p>Topics covered here:
  * <ol>
@@ -297,17 +304,17 @@ final class FragmentState implements Parcelable {
  * how you can determine if a fragment placed in a container is no longer
  * running in a layout with that container and avoid creating its view hierarchy
  * in that case.)
- * 
+ *
  * <p>The attributes of the &lt;fragment&gt; tag are used to control the
  * LayoutParams provided when attaching the fragment's view to the parent
  * container.  They can also be parsed by the fragment in {@link #onInflate}
  * as parameters.
- * 
+ *
  * <p>The fragment being instantiated must have some kind of unique identifier
  * so that it can be re-associated with a previous instance if the parent
  * activity needs to be destroyed and recreated.  This can be provided these
  * ways:
- * 
+ *
  * <ul>
  * <li>If nothing is explicitly supplied, the view ID of the container will
  * be used.
@@ -316,7 +323,7 @@ final class FragmentState implements Parcelable {
  * <li><code>android:id</code> can be used in &lt;fragment&gt; to provide
  * a specific identifier for the fragment.
  * </ul>
- * 
+ *
  * <a name="BackStack"></a>
  * <h3>Back Stack</h3>
  *
@@ -345,7 +352,7 @@ final class FragmentState implements Parcelable {
 public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListener {
     private static final ArrayMap<String, Class<?>> sClassMap =
             new ArrayMap<String, Class<?>>();
-    
+
     static final int INVALID_STATE = -1;   // Invalid state used as a null value.
     static final int INITIALIZING = 0;     // Not yet created.
     static final int CREATED = 1;          // Created.
@@ -353,9 +360,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     static final int STOPPED = 3;          // Fully created, not started.
     static final int STARTED = 4;          // Created and started, not resumed.
     static final int RESUMED = 5;          // Created started and resumed.
-    
+
+    private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
+
     int mState = INITIALIZING;
-    
+
     // Non-null if the fragment's view hierarchy is currently animating away,
     // meaning we need to wait a bit on completely destroying it.  This is the
     // animation that is running.
@@ -368,13 +377,13 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // When instantiated from saved state, this is the saved state.
     Bundle mSavedFragmentState;
     SparseArray<Parcelable> mSavedViewState;
-    
+
     // Index into active fragment array.
     int mIndex = -1;
-    
+
     // Internal unique name for this fragment;
     String mWho;
-    
+
     // Construction arguments;
     Bundle mArguments;
 
@@ -389,25 +398,25 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     // True if the fragment is in the list of added fragments.
     boolean mAdded;
-    
+
     // If set this fragment is being removed from its activity.
     boolean mRemoving;
 
     // True if the fragment is in the resumed state.
     boolean mResumed;
-    
+
     // Set to true if this fragment was instantiated from a layout file.
     boolean mFromLayout;
-    
+
     // Set to true when the view has actually been inflated in its layout.
     boolean mInLayout;
 
     // True if this fragment has been restored from previously saved state.
     boolean mRestored;
-    
+
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
-    
+
     // The fragment manager we are associated with.  Set as soon as the
     // fragment is used in a transaction; cleared after it has been removed
     // from all transactions.
@@ -426,29 +435,29 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // was dynamically added to the view hierarchy, or the ID supplied in
     // layout.
     int mFragmentId;
-    
+
     // When a fragment is being dynamically added to the view hierarchy, this
     // is the identifier of the parent container it is being added to.
     int mContainerId;
-    
+
     // The optional named tag for this fragment -- usually used to find
     // fragments that are not part of the layout.
     String mTag;
-    
+
     // Set to true when the app has requested that this fragment be hidden
     // from the user.
     boolean mHidden;
-    
+
     // Set to true when the app has requested that this fragment be detached.
     boolean mDetached;
 
     // If set this fragment would like its instance retained across
     // configuration changes.
     boolean mRetainInstance;
-    
+
     // If set this fragment is being retained across the current config change.
     boolean mRetaining;
-    
+
     // If set this fragment has menu items to contribute.
     boolean mHasMenu;
 
@@ -457,16 +466,16 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     // Used to verify that subclasses call through to super class.
     boolean mCalled;
-    
+
     // If app has requested a specific animation, this is the one to use.
     int mNextAnim;
-    
+
     // The parent container of the fragment after dynamically added to UI.
     ViewGroup mContainer;
-    
+
     // The View generated for this fragment.
     View mView;
-    
+
     // Whether this fragment should defer starting until after other fragments
     // have been started and their loaders are finished.
     boolean mDeferStart;
@@ -477,7 +486,19 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     LoaderManagerImpl mLoaderManager;
     boolean mLoadersStarted;
     boolean mCheckedForLoaderManager;
-    
+
+    private Transition mEnterTransition = null;
+    private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
+    private Transition mExitTransition = null;
+    private Transition mReenterTransition = USE_DEFAULT_TRANSITION;
+    private Transition mSharedElementEnterTransition = null;
+    private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
+    private Boolean mAllowReturnTransitionOverlap;
+    private Boolean mAllowEnterTransitionOverlap;
+
+    SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+    SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+
     /**
      * State information that has been retrieved from a fragment instance
      * through {@link FragmentManager#saveFragmentInstanceState(Fragment)
@@ -541,7 +562,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * will not be called when the fragment is re-instantiated; instead,
      * arguments can be supplied by the caller with {@link #setArguments}
      * and later retrieved by the Fragment with {@link #getArguments}.
-     * 
+     *
      * <p>Applications should generally not implement a constructor.  The
      * first place application code can run where the fragment is ready to
      * be used is in {@link #onAttach(Activity)}, the point where the fragment
@@ -575,7 +596,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * the given fragment class.  This is a runtime exception; it is not
      * normally expected to happen.
      */
-    public static Fragment instantiate(Context context, String fname, Bundle args) {
+    public static Fragment instantiate(Context context, String fname, @Nullable Bundle args) {
         try {
             Class<?> clazz = sClassMap.get(fname);
             if (clazz == null) {
@@ -607,7 +628,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                     + " empty constructor that is public", e);
         }
     }
-    
+
     final void restoreViewState(Bundle savedInstanceState) {
         if (mSavedViewState != null) {
             mView.restoreHierarchyState(mSavedViewState);
@@ -647,7 +668,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     @Override final public int hashCode() {
         return super.hashCode();
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
@@ -667,7 +688,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         sb.append('}');
         return sb.toString();
     }
-    
+
     /**
      * Return the identifier this fragment is known by.  This is either
      * the android:id value supplied in a layout or the container view ID
@@ -676,14 +697,14 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     final public int getId() {
         return mFragmentId;
     }
-    
+
     /**
      * Get the tag name of the fragment, if specified.
      */
     final public String getTag() {
         return mTag;
     }
-    
+
     /**
      * Supply the construction arguments for this fragment.  This can only
      * be called before the fragment has been attached to its activity; that
@@ -757,7 +778,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     final public Activity getActivity() {
         return mActivity;
     }
-    
+
     /**
      * Return <code>getActivity().getResources()</code>.
      */
@@ -767,7 +788,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
         return mActivity.getResources();
     }
-    
+
     /**
      * Return a localized, styled CharSequence from the application's package's
      * default string table.
@@ -867,7 +888,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     final public boolean isRemoving() {
         return mRemoving;
     }
-    
+
     /**
      * Return true if the layout is included as part of an activity view
      * hierarchy via the &lt;fragment&gt; tag.  This will always be true when
@@ -886,7 +907,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     final public boolean isResumed() {
         return mResumed;
     }
-    
+
     /**
      * Return true if the fragment is currently visible to the user.  This means
      * it: (1) has been added, (2) has its view attached to the window, and 
@@ -896,7 +917,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         return isAdded() && !isHidden() && mView != null
                 && mView.getWindowToken() != null && mView.getVisibility() == View.VISIBLE;
     }
-    
+
     /**
      * Return true if the fragment has been hidden.  By default fragments
      * are shown.  You can find out about changes to this state with
@@ -907,7 +928,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     final public boolean isHidden() {
         return mHidden;
     }
-    
+
     /**
      * Called when the hidden state (as returned by {@link #isHidden()} of
      * the fragment has changed.  Fragments start out not hidden; this will
@@ -917,7 +938,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void onHiddenChanged(boolean hidden) {
     }
-    
+
     /**
      * Control whether a fragment instance is retained across Activity
      * re-creation (such as from a configuration change).  This can only
@@ -939,16 +960,16 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
         mRetainInstance = retain;
     }
-    
+
     final public boolean getRetainInstance() {
         return mRetainInstance;
     }
-    
+
     /**
      * Report that this fragment would like to participate in populating
      * the options menu by receiving a call to {@link #onCreateOptionsMenu}
      * and related methods.
-     * 
+     *
      * @param hasMenu If true, the fragment has menu items to contribute.
      */
     public void setHasOptionsMenu(boolean hasMenu) {
@@ -1031,7 +1052,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void startActivity(Intent intent) {
         startActivity(intent, null);
     }
-    
+
     /**
      * Call {@link Activity#startActivity(Intent, Bundle)} from the fragment's
      * containing Activity.
@@ -1078,13 +1099,13 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             mActivity.startActivityFromFragment(this, intent, requestCode, options);
         }
     }
-    
+
     /**
      * Receive the result from a previous call to
      * {@link #startActivityForResult(Intent, int)}.  This follows the
      * related Activity API as described there in
      * {@link Activity#onActivityResult(int, int, Intent)}.
-     * 
+     *
      * @param requestCode The integer request code originally supplied to
      *                    startActivityForResult(), allowing you to identify who this
      *                    result came from.
@@ -1095,16 +1116,24 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     }
-    
+
     /**
      * @hide Hack so that DialogFragment can make its Dialog before creating
      * its views, and the view construction can use the dialog's context for
      * inflation.  Maybe this should become a public API. Note sure.
      */
     public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
-        return mActivity.getLayoutInflater();
+        // Newer platform versions use the child fragment manager's LayoutInflaterFactory.
+        if (mActivity.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            LayoutInflater result = mActivity.getLayoutInflater().cloneInContext(mActivity);
+            getChildFragmentManager(); // Init if needed; use raw implementation below.
+            result.setPrivateFactory(mChildFragmentManager.getLayoutInflaterFactory());
+            return result;
+        } else {
+            return mActivity.getLayoutInflater();
+        }
     }
-    
+
     /**
      * @deprecated Use {@link #onInflate(Activity, AttributeSet, Bundle)} instead.
      */
@@ -1120,7 +1149,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * tag in a layout file.  Note this is <em>before</em> the fragment's
      * {@link #onAttach(Activity)} has been called; all you should do here is
      * parse the attributes and save them away.
-     * 
+     *
      * <p>This is called every time the fragment is inflated, even if it is
      * being inflated into a new instance with saved state.  It typically makes
      * sense to re-parse the parameters each time, to allow them to change with
@@ -1158,8 +1187,33 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
         onInflate(attrs, savedInstanceState);
         mCalled = true;
+
+        TypedArray a = activity.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.Fragment);
+        mEnterTransition = loadTransition(activity, a, mEnterTransition, null,
+                com.android.internal.R.styleable.Fragment_fragmentEnterTransition);
+        mReturnTransition = loadTransition(activity, a, mReturnTransition, USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentReturnTransition);
+        mExitTransition = loadTransition(activity, a, mExitTransition, null,
+                com.android.internal.R.styleable.Fragment_fragmentExitTransition);
+        mReenterTransition = loadTransition(activity, a, mReenterTransition, USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentReenterTransition);
+        mSharedElementEnterTransition = loadTransition(activity, a, mSharedElementEnterTransition,
+                null, com.android.internal.R.styleable.Fragment_fragmentSharedElementEnterTransition);
+        mSharedElementReturnTransition = loadTransition(activity, a, mSharedElementReturnTransition,
+                USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentSharedElementReturnTransition);
+        if (mAllowEnterTransitionOverlap == null) {
+            mAllowEnterTransitionOverlap = a.getBoolean(
+                    com.android.internal.R.styleable.Fragment_fragmentAllowEnterTransitionOverlap, true);
+        }
+        if (mAllowReturnTransitionOverlap == null) {
+            mAllowReturnTransitionOverlap = a.getBoolean(
+                    com.android.internal.R.styleable.Fragment_fragmentAllowReturnTransitionOverlap, true);
+        }
+        a.recycle();
     }
-    
+
     /**
      * Called when a fragment is first attached to its activity.
      * {@link #onCreate(Bundle)} will be called after this.
@@ -1167,25 +1221,25 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onAttach(Activity activity) {
         mCalled = true;
     }
-    
+
     /**
      * Called when a fragment loads an animation.
      */
     public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
         return null;
     }
-    
+
     /**
      * Called to do initial creation of a fragment.  This is called after
      * {@link #onAttach(Activity)} and before
      * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-     * 
+     *
      * <p>Note that this can be called while the fragment's activity is
      * still in the process of being created.  As such, you can not rely
      * on things like the activity's content view hierarchy being initialized
      * at this point.  If you want to do work once the activity itself is
      * created, see {@link #onActivityCreated(Bundle)}.
-     * 
+     *
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
@@ -1198,10 +1252,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * This is optional, and non-graphical fragments can return null (which
      * is the default implementation).  This will be called between
      * {@link #onCreate(Bundle)} and {@link #onActivityCreated(Bundle)}.
-     * 
+     *
      * <p>If you return a View from here, you will later be called in
      * {@link #onDestroyView} when the view is being released.
-     * 
+     *
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
      * @param container If non-null, this is the parent view that the fragment's
@@ -1209,10 +1263,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * but this can be used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
-     * 
+     *
      * @return Return the View for the fragment's UI, or null.
      */
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Nullable
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         return null;
     }
@@ -1227,19 +1282,20 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
      */
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     }
-    
+
     /**
      * Get the root view for the fragment's layout (the one returned by {@link #onCreateView}),
      * if provided.
-     * 
+     *
      * @return The fragment's root view, or null if it has no layout.
      */
+    @Nullable
     public View getView() {
         return mView;
     }
-    
+
     /**
      * Called when the fragment's activity has been created and this
      * fragment's view hierarchy instantiated.  It can be used to do final
@@ -1279,7 +1335,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void onStart() {
         mCalled = true;
-        
+
         if (!mLoadersStarted) {
             mLoadersStarted = true;
             if (!mCheckedForLoaderManager) {
@@ -1291,7 +1347,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             }
         }
     }
-    
+
     /**
      * Called when the fragment is visible to the user and actively running.
      * This is generally
@@ -1301,7 +1357,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onResume() {
         mCalled = true;
     }
-    
+
     /**
      * Called to ask the fragment to save its current dynamic state, so it
      * can later be reconstructed in a new instance of its process is
@@ -1323,11 +1379,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void onSaveInstanceState(Bundle outState) {
     }
-    
+
     public void onConfigurationChanged(Configuration newConfig) {
         mCalled = true;
     }
-    
+
     /**
      * Called when the Fragment is no longer resumed.  This is generally
      * tied to {@link Activity#onPause() Activity.onPause} of the containing
@@ -1336,7 +1392,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onPause() {
         mCalled = true;
     }
-    
+
     /**
      * Called when the Fragment is no longer started.  This is generally
      * tied to {@link Activity#onStop() Activity.onStop} of the containing
@@ -1345,11 +1401,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onStop() {
         mCalled = true;
     }
-    
+
     public void onLowMemory() {
         mCalled = true;
     }
-    
+
     public void onTrimMemory(int level) {
         mCalled = true;
     }
@@ -1366,7 +1422,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onDestroyView() {
         mCalled = true;
     }
-    
+
     /**
      * Called when the fragment is no longer in use.  This is called
      * after {@link #onStop()} and before {@link #onDetach()}.
@@ -1401,6 +1457,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mRestored = false;
         mBackStackNesting = 0;
         mFragmentManager = null;
+        mChildFragmentManager = null;
         mActivity = null;
         mFragmentId = 0;
         mContainerId = 0;
@@ -1420,16 +1477,16 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onDetach() {
         mCalled = true;
     }
-    
+
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.  For this method
      * to be called, you must have first called {@link #setHasOptionsMenu}.  See
      * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
      * for more information.
-     * 
+     *
      * @param menu The options menu in which you place your items.
-     * 
+     *
      * @see #setHasOptionsMenu
      * @see #onPrepareOptionsMenu
      * @see #onOptionsItemSelected
@@ -1444,10 +1501,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * dynamically modify the contents.  See
      * {@link Activity#onPrepareOptionsMenu(Menu) Activity.onPrepareOptionsMenu}
      * for more information.
-     * 
+     *
      * @param menu The options menu as last shown or first initialized by
      *             onCreateOptionsMenu().
-     * 
+     *
      * @see #setHasOptionsMenu
      * @see #onCreateOptionsMenu
      */
@@ -1463,7 +1520,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void onDestroyOptionsMenu() {
     }
-    
+
     /**
      * This hook is called whenever an item in your options menu is selected.
      * The default implementation simply returns false to have the normal
@@ -1471,15 +1528,15 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * its Handler as appropriate).  You can use this method for any items
      * for which you would like to do processing without those other
      * facilities.
-     * 
+     *
      * <p>Derived classes should call through to the base class for it to
      * perform the default menu handling.
-     * 
+     *
      * @param item The menu item that was selected.
-     * 
+     *
      * @return boolean Return false to allow normal menu processing to
      *         proceed, true to consume it here.
-     * 
+     *
      * @see #onCreateOptionsMenu
      */
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -1489,13 +1546,13 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * This hook is called whenever the options menu is being closed (either by the user canceling
      * the menu with the back/menu button, or when an item is selected).
-     *  
+     *
      * @param menu The options menu as last shown or first initialized by
      *             onCreateOptionsMenu().
      */
     public void onOptionsMenuClosed(Menu menu) {
     }
-    
+
     /**
      * Called when a context menu for the {@code view} is about to be shown.
      * Unlike {@link #onCreateOptionsMenu}, this will be called every
@@ -1523,25 +1580,25 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * {@link OnCreateContextMenuListener} on the view to this fragment, so
      * {@link #onCreateContextMenu(ContextMenu, View, ContextMenuInfo)} will be
      * called when it is time to show the context menu.
-     * 
+     *
      * @see #unregisterForContextMenu(View)
      * @param view The view that should show a context menu.
      */
     public void registerForContextMenu(View view) {
         view.setOnCreateContextMenuListener(this);
     }
-    
+
     /**
      * Prevents a context menu to be shown for the given view. This method will
      * remove the {@link OnCreateContextMenuListener} on the view.
-     * 
+     *
      * @see #registerForContextMenu(View)
      * @param view The view that should stop showing a context menu.
      */
     public void unregisterForContextMenu(View view) {
         view.setOnCreateContextMenuListener(null);
     }
-    
+
     /**
      * This hook is called whenever an item in a context menu is selected. The
      * default implementation simply returns false to have the normal processing
@@ -1554,7 +1611,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * <p>
      * Derived classes should call through to the base class for it to perform
      * the default menu handling.
-     * 
+     *
      * @param item The context menu item that was selected.
      * @return boolean Return false to allow normal context menu processing to
      *         proceed, true to consume it here.
@@ -1562,7 +1619,298 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public boolean onContextItemSelected(MenuItem item) {
         return false;
     }
-    
+
+    /**
+     * When custom transitions are used with Fragments, the enter transition callback
+     * is called when this Fragment is attached or detached when not popping the back stack.
+     *
+     * @param callback Used to manipulate the shared element transitions on this Fragment
+     *                 when added not as a pop from the back stack.
+     */
+    public void setEnterSharedElementCallback(SharedElementCallback callback) {
+        if (callback == null) {
+            callback = SharedElementCallback.NULL_CALLBACK;
+        }
+        mEnterTransitionCallback = callback;
+    }
+
+    /**
+     * @hide
+     */
+    public void setEnterSharedElementTransitionCallback(SharedElementCallback callback) {
+        setEnterSharedElementCallback(callback);
+    }
+
+    /**
+     * When custom transitions are used with Fragments, the exit transition callback
+     * is called when this Fragment is attached or detached when popping the back stack.
+     *
+     * @param callback Used to manipulate the shared element transitions on this Fragment
+     *                 when added as a pop from the back stack.
+     */
+    public void setExitSharedElementCallback(SharedElementCallback callback) {
+        if (callback == null) {
+            callback = SharedElementCallback.NULL_CALLBACK;
+        }
+        mExitTransitionCallback = callback;
+    }
+
+    /**
+     * @hide
+     */
+    public void setExitSharedElementTransitionCallback(SharedElementCallback callback) {
+        setExitSharedElementCallback(callback);
+    }
+
+    /**
+     * Sets the Transition that will be used to move Views into the initial scene. The entering
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#INVISIBLE} to {@link View#VISIBLE}. If <code>transition</code> is null,
+     * entering Views will remain unaffected.
+     *
+     * @param transition The Transition to use to move Views into the initial Scene.
+     * @attr ref android.R.styleable#Fragment_fragmentEnterTransition
+     */
+    public void setEnterTransition(Transition transition) {
+        mEnterTransition = transition;
+    }
+
+    /**
+     * Returns the Transition that will be used to move Views into the initial scene. The entering
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#INVISIBLE} to {@link View#VISIBLE}.
+     *
+     * @return the Transition to use to move Views into the initial Scene.
+     * @attr ref android.R.styleable#Fragment_fragmentEnterTransition
+     */
+    public Transition getEnterTransition() {
+        return mEnterTransition;
+    }
+
+    /**
+     * Sets the Transition that will be used to move Views out of the scene when the Fragment is
+     * preparing to be removed, hidden, or detached because of popping the back stack. The exiting
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#VISIBLE} to {@link View#INVISIBLE}. If <code>transition</code> is null,
+     * entering Views will remain unaffected. If nothing is set, the default will be to
+     * use the same value as set in {@link #setEnterTransition(android.transition.Transition)}.
+     *
+     * @param transition The Transition to use to move Views out of the Scene when the Fragment
+     *                   is preparing to close.
+     * @attr ref android.R.styleable#Fragment_fragmentExitTransition
+     */
+    public void setReturnTransition(Transition transition) {
+        mReturnTransition = transition;
+    }
+
+    /**
+     * Returns the Transition that will be used to move Views out of the scene when the Fragment is
+     * preparing to be removed, hidden, or detached because of popping the back stack. The exiting
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#VISIBLE} to {@link View#INVISIBLE}. If <code>transition</code> is null,
+     * entering Views will remain unaffected.
+     *
+     * @return the Transition to use to move Views out of the Scene when the Fragment
+     *         is preparing to close.
+     * @attr ref android.R.styleable#Fragment_fragmentExitTransition
+     */
+    public Transition getReturnTransition() {
+        return mReturnTransition == USE_DEFAULT_TRANSITION ? getEnterTransition()
+                : mReturnTransition;
+    }
+
+    /**
+     * Sets the Transition that will be used to move Views out of the scene when the
+     * fragment is removed, hidden, or detached when not popping the back stack.
+     * The exiting Views will be those that are regular Views or ViewGroups that
+     * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as exiting is governed by changing visibility
+     * from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null, the views will
+     * remain unaffected.
+     *
+     * @param transition The Transition to use to move Views out of the Scene when the Fragment
+     *                   is being closed not due to popping the back stack.
+     * @attr ref android.R.styleable#Fragment_fragmentExitTransition
+     */
+    public void setExitTransition(Transition transition) {
+        mExitTransition = transition;
+    }
+
+    /**
+     * Returns the Transition that will be used to move Views out of the scene when the
+     * fragment is removed, hidden, or detached when not popping the back stack.
+     * The exiting Views will be those that are regular Views or ViewGroups that
+     * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as exiting is governed by changing visibility
+     * from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null, the views will
+     * remain unaffected.
+     *
+     * @return the Transition to use to move Views out of the Scene when the Fragment
+     *         is being closed not due to popping the back stack.
+     * @attr ref android.R.styleable#Fragment_fragmentExitTransition
+     */
+    public Transition getExitTransition() {
+        return mExitTransition;
+    }
+
+    /**
+     * Sets the Transition that will be used to move Views in to the scene when returning due
+     * to popping a back stack. The entering Views will be those that are regular Views
+     * or ViewGroups that have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions
+     * will extend {@link android.transition.Visibility} as exiting is governed by changing
+     * visibility from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null,
+     * the views will remain unaffected. If nothing is set, the default will be to use the same
+     * transition as {@link #setExitTransition(android.transition.Transition)}.
+     *
+     * @param transition The Transition to use to move Views into the scene when reentering from a
+     *                   previously-started Activity.
+     * @attr ref android.R.styleable#Fragment_fragmentReenterTransition
+     */
+    public void setReenterTransition(Transition transition) {
+        mReenterTransition = transition;
+    }
+
+    /**
+     * Returns the Transition that will be used to move Views in to the scene when returning due
+     * to popping a back stack. The entering Views will be those that are regular Views
+     * or ViewGroups that have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions
+     * will extend {@link android.transition.Visibility} as exiting is governed by changing
+     * visibility from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null,
+     * the views will remain unaffected. If nothing is set, the default will be to use the same
+     * transition as {@link #setExitTransition(android.transition.Transition)}.
+     *
+     * @return the Transition to use to move Views into the scene when reentering from a
+     *                   previously-started Activity.
+     * @attr ref android.R.styleable#Fragment_fragmentReenterTransition
+     */
+    public Transition getReenterTransition() {
+        return mReenterTransition == USE_DEFAULT_TRANSITION ? getExitTransition()
+                : mReenterTransition;
+    }
+
+    /**
+     * Sets the Transition that will be used for shared elements transferred into the content
+     * Scene. Typical Transitions will affect size and location, such as
+     * {@link android.transition.ChangeBounds}. A null
+     * value will cause transferred shared elements to blink to the final position.
+     *
+     * @param transition The Transition to use for shared elements transferred into the content
+     *                   Scene.
+     * @attr ref android.R.styleable#Fragment_fragmentSharedElementEnterTransition
+     */
+    public void setSharedElementEnterTransition(Transition transition) {
+        mSharedElementEnterTransition = transition;
+    }
+
+    /**
+     * Returns the Transition that will be used for shared elements transferred into the content
+     * Scene. Typical Transitions will affect size and location, such as
+     * {@link android.transition.ChangeBounds}. A null
+     * value will cause transferred shared elements to blink to the final position.
+     *
+     * @return The Transition to use for shared elements transferred into the content
+     *                   Scene.
+     * @attr ref android.R.styleable#Fragment_fragmentSharedElementEnterTransition
+     */
+    public Transition getSharedElementEnterTransition() {
+        return mSharedElementEnterTransition;
+    }
+
+    /**
+     * Sets the Transition that will be used for shared elements transferred back during a
+     * pop of the back stack. This Transition acts in the leaving Fragment.
+     * Typical Transitions will affect size and location, such as
+     * {@link android.transition.ChangeBounds}. A null
+     * value will cause transferred shared elements to blink to the final position.
+     * If no value is set, the default will be to use the same value as
+     * {@link #setSharedElementEnterTransition(android.transition.Transition)}.
+     *
+     * @param transition The Transition to use for shared elements transferred out of the content
+     *                   Scene.
+     * @attr ref android.R.styleable#Fragment_fragmentSharedElementReturnTransition
+     */
+    public void setSharedElementReturnTransition(Transition transition) {
+        mSharedElementReturnTransition = transition;
+    }
+
+    /**
+     * Return the Transition that will be used for shared elements transferred back during a
+     * pop of the back stack. This Transition acts in the leaving Fragment.
+     * Typical Transitions will affect size and location, such as
+     * {@link android.transition.ChangeBounds}. A null
+     * value will cause transferred shared elements to blink to the final position.
+     * If no value is set, the default will be to use the same value as
+     * {@link #setSharedElementEnterTransition(android.transition.Transition)}.
+     *
+     * @return The Transition to use for shared elements transferred out of the content
+     *                   Scene.
+     * @attr ref android.R.styleable#Fragment_fragmentSharedElementReturnTransition
+     */
+    public Transition getSharedElementReturnTransition() {
+        return mSharedElementReturnTransition == USE_DEFAULT_TRANSITION ?
+                getSharedElementEnterTransition() : mSharedElementReturnTransition;
+    }
+
+    /**
+     * Sets whether the the exit transition and enter transition overlap or not.
+     * When true, the enter transition will start as soon as possible. When false, the
+     * enter transition will wait until the exit transition completes before starting.
+     *
+     * @param allow true to start the enter transition when possible or false to
+     *              wait until the exiting transition completes.
+     * @attr ref android.R.styleable#Fragment_fragmentAllowEnterTransitionOverlap
+     */
+    public void setAllowEnterTransitionOverlap(boolean allow) {
+        mAllowEnterTransitionOverlap = allow;
+    }
+
+    /**
+     * Returns whether the the exit transition and enter transition overlap or not.
+     * When true, the enter transition will start as soon as possible. When false, the
+     * enter transition will wait until the exit transition completes before starting.
+     *
+     * @return true when the enter transition should start as soon as possible or false to
+     * when it should wait until the exiting transition completes.
+     * @attr ref android.R.styleable#Fragment_fragmentAllowEnterTransitionOverlap
+     */
+    public boolean getAllowEnterTransitionOverlap() {
+        return (mAllowEnterTransitionOverlap == null) ? true : mAllowEnterTransitionOverlap;
+    }
+
+    /**
+     * Sets whether the the return transition and reenter transition overlap or not.
+     * When true, the reenter transition will start as soon as possible. When false, the
+     * reenter transition will wait until the return transition completes before starting.
+     *
+     * @param allow true to start the reenter transition when possible or false to wait until the
+     *              return transition completes.
+     * @attr ref android.R.styleable#Fragment_fragmentAllowReturnTransitionOverlap
+     */
+    public void setAllowReturnTransitionOverlap(boolean allow) {
+        mAllowReturnTransitionOverlap = allow;
+    }
+
+    /**
+     * Returns whether the the return transition and reenter transition overlap or not.
+     * When true, the reenter transition will start as soon as possible. When false, the
+     * reenter transition will wait until the return transition completes before starting.
+     *
+     * @return true to start the reenter transition when possible or false to wait until the
+     *         return transition completes.
+     * @attr ref android.R.styleable#Fragment_fragmentAllowReturnTransitionOverlap
+     */
+    public boolean getAllowReturnTransitionOverlap() {
+        return (mAllowReturnTransitionOverlap == null) ? true : mAllowReturnTransitionOverlap;
+    }
+
     /**
      * Print the Fragments's state into the given stream.
      *
@@ -1574,53 +1922,53 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.print(prefix); writer.print("mFragmentId=#");
-                writer.print(Integer.toHexString(mFragmentId));
-                writer.print(" mContainerId=#");
-                writer.print(Integer.toHexString(mContainerId));
-                writer.print(" mTag="); writer.println(mTag);
+        writer.print(Integer.toHexString(mFragmentId));
+        writer.print(" mContainerId=#");
+        writer.print(Integer.toHexString(mContainerId));
+        writer.print(" mTag="); writer.println(mTag);
         writer.print(prefix); writer.print("mState="); writer.print(mState);
-                writer.print(" mIndex="); writer.print(mIndex);
-                writer.print(" mWho="); writer.print(mWho);
-                writer.print(" mBackStackNesting="); writer.println(mBackStackNesting);
+        writer.print(" mIndex="); writer.print(mIndex);
+        writer.print(" mWho="); writer.print(mWho);
+        writer.print(" mBackStackNesting="); writer.println(mBackStackNesting);
         writer.print(prefix); writer.print("mAdded="); writer.print(mAdded);
-                writer.print(" mRemoving="); writer.print(mRemoving);
-                writer.print(" mResumed="); writer.print(mResumed);
-                writer.print(" mFromLayout="); writer.print(mFromLayout);
-                writer.print(" mInLayout="); writer.println(mInLayout);
+        writer.print(" mRemoving="); writer.print(mRemoving);
+        writer.print(" mResumed="); writer.print(mResumed);
+        writer.print(" mFromLayout="); writer.print(mFromLayout);
+        writer.print(" mInLayout="); writer.println(mInLayout);
         writer.print(prefix); writer.print("mHidden="); writer.print(mHidden);
-                writer.print(" mDetached="); writer.print(mDetached);
-                writer.print(" mMenuVisible="); writer.print(mMenuVisible);
-                writer.print(" mHasMenu="); writer.println(mHasMenu);
+        writer.print(" mDetached="); writer.print(mDetached);
+        writer.print(" mMenuVisible="); writer.print(mMenuVisible);
+        writer.print(" mHasMenu="); writer.println(mHasMenu);
         writer.print(prefix); writer.print("mRetainInstance="); writer.print(mRetainInstance);
-                writer.print(" mRetaining="); writer.print(mRetaining);
-                writer.print(" mUserVisibleHint="); writer.println(mUserVisibleHint);
+        writer.print(" mRetaining="); writer.print(mRetaining);
+        writer.print(" mUserVisibleHint="); writer.println(mUserVisibleHint);
         if (mFragmentManager != null) {
             writer.print(prefix); writer.print("mFragmentManager=");
-                    writer.println(mFragmentManager);
+            writer.println(mFragmentManager);
         }
         if (mActivity != null) {
             writer.print(prefix); writer.print("mActivity=");
-                    writer.println(mActivity);
+            writer.println(mActivity);
         }
         if (mParentFragment != null) {
             writer.print(prefix); writer.print("mParentFragment=");
-                    writer.println(mParentFragment);
+            writer.println(mParentFragment);
         }
         if (mArguments != null) {
             writer.print(prefix); writer.print("mArguments="); writer.println(mArguments);
         }
         if (mSavedFragmentState != null) {
             writer.print(prefix); writer.print("mSavedFragmentState=");
-                    writer.println(mSavedFragmentState);
+            writer.println(mSavedFragmentState);
         }
         if (mSavedViewState != null) {
             writer.print(prefix); writer.print("mSavedViewState=");
-                    writer.println(mSavedViewState);
+            writer.println(mSavedViewState);
         }
         if (mTarget != null) {
             writer.print(prefix); writer.print("mTarget="); writer.print(mTarget);
-                    writer.print(" mTargetRequestCode=");
-                    writer.println(mTargetRequestCode);
+            writer.print(" mTargetRequestCode=");
+            writer.println(mTargetRequestCode);
         }
         if (mNextAnim != 0) {
             writer.print(prefix); writer.print("mNextAnim="); writer.println(mNextAnim);
@@ -1634,7 +1982,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mAnimatingAway != null) {
             writer.print(prefix); writer.print("mAnimatingAway="); writer.println(mAnimatingAway);
             writer.print(prefix); writer.print("mStateAfterAnimating=");
-                    writer.println(mStateAfterAnimating);
+            writer.println(mStateAfterAnimating);
         }
         if (mLoaderManager != null) {
             writer.print(prefix); writer.println("Loader Manager:");
@@ -1665,6 +2013,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                     throw new IllegalStateException("Fragment does not have a view");
                 }
                 return mView.findViewById(id);
+            }
+
+            @Override
+            public boolean hasView() {
+                return (mView != null);
             }
         }, this);
     }
@@ -1872,7 +2225,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new SuperNotCalledException("Fragment " + this
                     + " did not call through to super.onStop()");
         }
-        
+
         if (mLoadersStarted) {
             mLoadersStarted = false;
             if (!mCheckedForLoaderManager) {
@@ -1915,4 +2268,23 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                     + " did not call through to super.onDestroy()");
         }
     }
+
+    private static Transition loadTransition(Context context, TypedArray typedArray,
+            Transition currentValue, Transition defaultValue, int id) {
+        if (currentValue != defaultValue) {
+            return currentValue;
+        }
+        int transitionId = typedArray.getResourceId(id, 0);
+        Transition transition = defaultValue;
+        if (transitionId != 0 && transitionId != com.android.internal.R.transition.no_transition) {
+            TransitionInflater inflater = TransitionInflater.from(context);
+            transition = inflater.inflateTransition(transitionId);
+            if (transition instanceof TransitionSet &&
+                    ((TransitionSet)transition).getTransitionCount() == 0) {
+                transition = null;
+            }
+        }
+        return transition;
+    }
+
 }

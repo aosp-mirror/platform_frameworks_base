@@ -18,7 +18,6 @@
 package android.media.effect;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 
 /**
  * <p>The EffectFactory class defines the list of available Effects, and provides functionality to

@@ -40,7 +40,7 @@ void ResourceCache::logCache() {
 
 ResourceCache::ResourceCache() {
     Mutex::Autolock _l(mLock);
-    mCache = new KeyedVector<void*, ResourceReference*>();
+    mCache = new KeyedVector<const void*, ResourceReference*>();
 }
 
 ResourceCache::~ResourceCache() {
@@ -61,27 +61,17 @@ void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType)
     incrementRefcountLocked(resource, resourceType);
 }
 
-void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
+void ResourceCache::incrementRefcount(const SkBitmap* bitmapResource) {
     bitmapResource->pixelRef()->globalRef();
     SkSafeRef(bitmapResource->getColorTable());
     incrementRefcount((void*) bitmapResource, kBitmap);
 }
 
-void ResourceCache::incrementRefcount(SkPath* pathResource) {
+void ResourceCache::incrementRefcount(const SkPath* pathResource) {
     incrementRefcount((void*) pathResource, kPath);
 }
 
-void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
-    SkSafeRef(shaderResource->getSkShader());
-    incrementRefcount((void*) shaderResource, kShader);
-}
-
-void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
-    SkSafeRef(filterResource->getSkColorFilter());
-    incrementRefcount((void*) filterResource, kColorFilter);
-}
-
-void ResourceCache::incrementRefcount(Res_png_9patch* patchResource) {
+void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
     incrementRefcount((void*) patchResource, kNinePatch);
 }
 
@@ -99,27 +89,17 @@ void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourc
     ref->refCount++;
 }
 
-void ResourceCache::incrementRefcountLocked(SkBitmap* bitmapResource) {
+void ResourceCache::incrementRefcountLocked(const SkBitmap* bitmapResource) {
     bitmapResource->pixelRef()->globalRef();
     SkSafeRef(bitmapResource->getColorTable());
     incrementRefcountLocked((void*) bitmapResource, kBitmap);
 }
 
-void ResourceCache::incrementRefcountLocked(SkPath* pathResource) {
+void ResourceCache::incrementRefcountLocked(const SkPath* pathResource) {
     incrementRefcountLocked((void*) pathResource, kPath);
 }
 
-void ResourceCache::incrementRefcountLocked(SkiaShader* shaderResource) {
-    SkSafeRef(shaderResource->getSkShader());
-    incrementRefcountLocked((void*) shaderResource, kShader);
-}
-
-void ResourceCache::incrementRefcountLocked(SkiaColorFilter* filterResource) {
-    SkSafeRef(filterResource->getSkColorFilter());
-    incrementRefcountLocked((void*) filterResource, kColorFilter);
-}
-
-void ResourceCache::incrementRefcountLocked(Res_png_9patch* patchResource) {
+void ResourceCache::incrementRefcountLocked(const Res_png_9patch* patchResource) {
     incrementRefcountLocked((void*) patchResource, kNinePatch);
 }
 
@@ -132,27 +112,17 @@ void ResourceCache::decrementRefcount(void* resource) {
     decrementRefcountLocked(resource);
 }
 
-void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
+void ResourceCache::decrementRefcount(const SkBitmap* bitmapResource) {
     bitmapResource->pixelRef()->globalUnref();
     SkSafeUnref(bitmapResource->getColorTable());
     decrementRefcount((void*) bitmapResource);
 }
 
-void ResourceCache::decrementRefcount(SkPath* pathResource) {
+void ResourceCache::decrementRefcount(const SkPath* pathResource) {
     decrementRefcount((void*) pathResource);
 }
 
-void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
-    SkSafeUnref(shaderResource->getSkShader());
-    decrementRefcount((void*) shaderResource);
-}
-
-void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
-    SkSafeUnref(filterResource->getSkColorFilter());
-    decrementRefcount((void*) filterResource);
-}
-
-void ResourceCache::decrementRefcount(Res_png_9patch* patchResource) {
+void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
     decrementRefcount((void*) patchResource);
 }
 
@@ -173,27 +143,17 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
     }
 }
 
-void ResourceCache::decrementRefcountLocked(SkBitmap* bitmapResource) {
+void ResourceCache::decrementRefcountLocked(const SkBitmap* bitmapResource) {
     bitmapResource->pixelRef()->globalUnref();
     SkSafeUnref(bitmapResource->getColorTable());
     decrementRefcountLocked((void*) bitmapResource);
 }
 
-void ResourceCache::decrementRefcountLocked(SkPath* pathResource) {
+void ResourceCache::decrementRefcountLocked(const SkPath* pathResource) {
     decrementRefcountLocked((void*) pathResource);
 }
 
-void ResourceCache::decrementRefcountLocked(SkiaShader* shaderResource) {
-    SkSafeUnref(shaderResource->getSkShader());
-    decrementRefcountLocked((void*) shaderResource);
-}
-
-void ResourceCache::decrementRefcountLocked(SkiaColorFilter* filterResource) {
-    SkSafeUnref(filterResource->getSkColorFilter());
-    decrementRefcountLocked((void*) filterResource);
-}
-
-void ResourceCache::decrementRefcountLocked(Res_png_9patch* patchResource) {
+void ResourceCache::decrementRefcountLocked(const Res_png_9patch* patchResource) {
     decrementRefcountLocked((void*) patchResource);
 }
 
@@ -224,12 +184,12 @@ void ResourceCache::destructorLocked(SkPath* resource) {
     }
 }
 
-void ResourceCache::destructor(SkBitmap* resource) {
+void ResourceCache::destructor(const SkBitmap* resource) {
     Mutex::Autolock _l(mLock);
     destructorLocked(resource);
 }
 
-void ResourceCache::destructorLocked(SkBitmap* resource) {
+void ResourceCache::destructorLocked(const SkBitmap* resource) {
     ssize_t index = mCache->indexOfKey(resource);
     ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
     if (ref == NULL) {
@@ -239,44 +199,6 @@ void ResourceCache::destructorLocked(SkBitmap* resource) {
         } else {
             delete resource;
         }
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-    }
-}
-
-void ResourceCache::destructor(SkiaShader* resource) {
-    Mutex::Autolock _l(mLock);
-    destructorLocked(resource);
-}
-
-void ResourceCache::destructorLocked(SkiaShader* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
-        // If we're not tracking this resource, just delete it
-        delete resource;
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-    }
-}
-
-void ResourceCache::destructor(SkiaColorFilter* resource) {
-    Mutex::Autolock _l(mLock);
-    destructorLocked(resource);
-}
-
-void ResourceCache::destructorLocked(SkiaColorFilter* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
-        // If we're not tracking this resource, just delete it
-        delete resource;
         return;
     }
     ref->destroyed = true;
@@ -348,7 +270,7 @@ bool ResourceCache::recycleLocked(SkBitmap* resource) {
  * This method should only be called while the mLock mutex is held (that mutex is grabbed
  * by the various destructor() and recycle() methods which call this method).
  */
-void ResourceCache::deleteResourceReferenceLocked(void* resource, ResourceReference* ref) {
+void ResourceCache::deleteResourceReferenceLocked(const void* resource, ResourceReference* ref) {
     if (ref->recycled && ref->resourceType == kBitmap) {
         ((SkBitmap*) resource)->setPixels(NULL, NULL);
     }
@@ -370,16 +292,6 @@ void ResourceCache::deleteResourceReferenceLocked(void* resource, ResourceRefere
                 } else {
                     delete path;
                 }
-            }
-            break;
-            case kShader: {
-                SkiaShader* shader = (SkiaShader*) resource;
-                delete shader;
-            }
-            break;
-            case kColorFilter: {
-                SkiaColorFilter* filter = (SkiaColorFilter*) resource;
-                delete filter;
             }
             break;
             case kNinePatch: {

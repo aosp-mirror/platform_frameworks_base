@@ -20,6 +20,7 @@
 #include "utils/Log.h"
 
 #include <media/mediaplayer.h>
+#include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
 #include <stdio.h>
 #include <assert.h>
@@ -45,6 +46,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
+#include "android_util_Binder.h"
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -183,7 +185,7 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
 
 static void
 android_media_MediaPlayer_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jstring path,
+        JNIEnv *env, jobject thiz, jobject httpServiceBinderObj, jstring path,
         jobjectArray keys, jobjectArray values) {
 
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -214,8 +216,15 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
         return;
     }
 
+    sp<IMediaHTTPService> httpService;
+    if (httpServiceBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, httpServiceBinderObj);
+        httpService = interface_cast<IMediaHTTPService>(binder);
+    }
+
     status_t opStatus =
         mp->setDataSource(
+                httpService,
                 pathStr,
                 headersVector.size() > 0? &headersVector : NULL);
 
@@ -491,6 +500,39 @@ android_media_MediaPlayer_setAudioStreamType(JNIEnv *env, jobject thiz, jint str
     process_media_player_call( env, thiz, mp->setAudioStreamType((audio_stream_type_t) streamtype) , NULL, NULL );
 }
 
+static jint
+android_media_MediaPlayer_getAudioStreamType(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+    audio_stream_type_t streamtype;
+    process_media_player_call( env, thiz, mp->getAudioStreamType(&streamtype), NULL, NULL );
+    ALOGV("getAudioStreamType: %d (streamtype)", streamtype);
+    return (jint) streamtype;
+}
+
+static jboolean
+android_media_MediaPlayer_setParameter(JNIEnv *env, jobject thiz, jint key, jobject java_request)
+{
+    ALOGV("setParameter: key %d", key);
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    Parcel *request = parcelForJavaObject(env, java_request);
+    status_t err = mp->setParameter(key, *request);
+    if (err == OK) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 static void
 android_media_MediaPlayer_setLooping(JNIEnv *env, jobject thiz, jboolean looping)
 {
@@ -625,7 +667,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         return;
     }
 
-    clazz = env->FindClass("android/net/ProxyProperties");
+    clazz = env->FindClass("android/net/ProxyInfo");
     if (clazz == NULL) {
         return;
     }
@@ -637,7 +679,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         env->GetMethodID(clazz, "getPort", "()I");
 
     fields.proxyConfigGetExclusionList =
-        env->GetMethodID(clazz, "getExclusionList", "()Ljava/lang/String;");
+        env->GetMethodID(clazz, "getExclusionListAsString", "()Ljava/lang/String;");
 }
 
 static void
@@ -726,7 +768,8 @@ static void android_media_MediaPlayer_attachAuxEffect(JNIEnv *env,  jobject thiz
 }
 
 static jint
-android_media_MediaPlayer_pullBatteryData(JNIEnv *env, jobject thiz, jobject java_reply)
+android_media_MediaPlayer_pullBatteryData(
+        JNIEnv *env, jobject /* thiz */, jobject java_reply)
 {
     sp<IBinder> binder = defaultServiceManager()->getService(String16("media.player"));
     sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
@@ -806,64 +849,19 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
     ;
 }
 
-static void
-android_media_MediaPlayer_updateProxyConfig(
-        JNIEnv *env, jobject thiz, jobject proxyProps)
-{
-    ALOGV("updateProxyConfig");
-    sp<MediaPlayer> thisplayer = getMediaPlayer(env, thiz);
-    if (thisplayer == NULL) {
-        return;
-    }
-
-    if (proxyProps == NULL) {
-        thisplayer->updateProxyConfig(
-                NULL /* host */, 0 /* port */, NULL /* exclusionList */);
-    } else {
-        jstring hostObj = (jstring)env->CallObjectMethod(
-                proxyProps, fields.proxyConfigGetHost);
-
-        const char *host = env->GetStringUTFChars(hostObj, NULL);
-
-        int port = env->CallIntMethod(proxyProps, fields.proxyConfigGetPort);
-
-        jstring exclusionListObj = (jstring)env->CallObjectMethod(
-                proxyProps, fields.proxyConfigGetExclusionList);
-
-        if (host != NULL && exclusionListObj != NULL) {
-            const char *exclusionList = env->GetStringUTFChars(exclusionListObj, NULL);
-
-            if (exclusionList != NULL) {
-                thisplayer->updateProxyConfig(host, port, exclusionList);
-
-                env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
-                exclusionList = NULL;
-            } else {
-                thisplayer->updateProxyConfig(host, port, "");
-            }
-        } else if (host != NULL) {
-            thisplayer->updateProxyConfig(host, port, "");
-        }
-
-        if (host != NULL) {
-            env->ReleaseStringUTFChars(hostObj, host);
-            host = NULL;
-        }
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
     {
-        "_setDataSource",
-        "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+        "nativeSetDataSource",
+        "(Landroid/os/IBinder;Ljava/lang/String;[Ljava/lang/String;"
+        "[Ljava/lang/String;)V",
         (void *)android_media_MediaPlayer_setDataSourceAndHeaders
     },
 
     {"_setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
-    {"prepare",             "()V",                              (void *)android_media_MediaPlayer_prepare},
+    {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
@@ -876,10 +874,12 @@ static JNINativeMethod gMethods[] = {
     {"getDuration",         "()I",                              (void *)android_media_MediaPlayer_getDuration},
     {"_release",            "()V",                              (void *)android_media_MediaPlayer_release},
     {"_reset",              "()V",                              (void *)android_media_MediaPlayer_reset},
-    {"setAudioStreamType",  "(I)V",                             (void *)android_media_MediaPlayer_setAudioStreamType},
+    {"_setAudioStreamType", "(I)V",                             (void *)android_media_MediaPlayer_setAudioStreamType},
+    {"_getAudioStreamType", "()I",                              (void *)android_media_MediaPlayer_getAudioStreamType},
+    {"setParameter",        "(ILandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_setParameter},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
-    {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
+    {"_setVolume",          "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
@@ -888,12 +888,11 @@ static JNINativeMethod gMethods[] = {
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
-    {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
+    {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
-    {"updateProxyConfig", "(Landroid/net/ProxyProperties;)V", (void *)android_media_MediaPlayer_updateProxyConfig},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";
@@ -911,6 +910,7 @@ extern int register_android_media_Drm(JNIEnv *env);
 extern int register_android_media_MediaCodec(JNIEnv *env);
 extern int register_android_media_MediaExtractor(JNIEnv *env);
 extern int register_android_media_MediaCodecList(JNIEnv *env);
+extern int register_android_media_MediaHTTPConnection(JNIEnv *env);
 extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaMuxer(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
@@ -922,7 +922,7 @@ extern int register_android_mtp_MtpDatabase(JNIEnv *env);
 extern int register_android_mtp_MtpDevice(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
+jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
     JNIEnv* env = NULL;
     jint result = -1;
@@ -1015,6 +1015,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_Drm(env) < 0) {
         ALOGE("ERROR: MediaDrm native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaHTTPConnection(env) < 0) {
+        ALOGE("ERROR: MediaHTTPConnection native registration failed");
         goto bail;
     }
 

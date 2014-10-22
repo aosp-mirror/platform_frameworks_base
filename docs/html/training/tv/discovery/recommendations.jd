@@ -1,0 +1,240 @@
+page.title=Recommending TV Content
+page.tags="recommendation","recommend"
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#service">Create a Recommendations Service</a></li>
+    <li><a href="#build">Build Recommendations</a></li>
+    <li><a href="#run-service">Run Recommendations Service</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  When interacting with TVs, users generally prefer to give minimal input before watching
+  content. An ideal scenario for many TV users is: sit down, turn on, and watch. The fewest steps
+  to get users to content they enjoy is generally the path they prefer.
+</p>
+
+<p>
+  The Android framework assists with minimum-input interaction by providing a recommendations row
+  on the home screen. Content recommendations appear as the first row of the TV launch screen after
+  the first use of the device. Contributing recommendations from your app's content catalog can help
+  bring users back to your app.
+</p>
+
+<img src="{@docRoot}images/tv/home-recommendations.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> An example of the recommendations row.
+</p>
+
+<p>
+  This lesson teaches you how to create recommendations and provide them to the Android framework
+  so your app content can be easily discovered and enjoyed by users.
+</p>
+
+
+<h2 id="service">Create a Recommendations Service</h2>
+
+<p>
+  Content recommendations are created with background processing. In order for your application to
+  contribute to recommendations, create a service that periodically adds listings from your
+  app's catalog to the system list of recommendations.
+</p>
+
+<p>
+  The following code example illustrates how to extend {@link android.app.IntentService} to
+  create a recommendation service for your application:
+</p>
+
+<pre>
+public class RecommendationsService extends IntentService {
+    private static final int MAX_RECOMMENDATIONS = 3;
+
+    public RecommendationsService() {
+        super("RecommendationService");
+    }
+
+    &#64;Override
+    protected void onHandleIntent(Intent intent) {
+        MovieDatabase database = MovieDatabase.instance(getApplicationContext());
+        List<Movie> recommendations = database.recommendations();
+
+        int count = 0;
+
+        try {
+            for (Movie movie : recommendations) {
+                // build the individual content recommendations
+                buildRecommendation(getApplicationContext(), movie);
+
+                if (++count >= MAX_RECOMMENDATIONS) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to update recommendation", e);
+        }
+    }
+}
+</pre>
+
+<p>
+  In order for this service to be recognized by the system and run, register it using your
+  app manifest. The following code snippet illustrates how to declare this class as a service:
+</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    ...
+
+    &lt;service android:name=&quot;.RecommendationsService&quot;
+             android:enabled=&quot;true&quot; android:exported=&quot;true&quot;/&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="build">Build Recommendations</h2>
+
+<p>
+  Once your recommendation server starts running, it must create recommendations and pass them to
+  the Android framework. The framework receives the recommendations as {@link
+  android.app.Notification} objects that use a specific template and are marked with a specific
+  category.
+</p>
+
+<p>
+  The following code example demonstrates how to get an instance of the {@link
+  android.app.NotificationManager}, build a recommendation, and post it to the manager:
+</p>
+
+<pre>
+public class RecommendationsService extends IntentService {
+
+    ...
+
+    public Notification buildRecommendation(Context context, Movie movie)
+            throws IOException {
+
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager)
+                    mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        Bundle extras = new Bundle();
+        if (mBackgroundUri != movie.getBackgroundUri()) {
+            extras.putString(EXTRA_BACKGROUND_IMAGE_URL, movie.getBackgroundUri());
+        }
+
+        // build the recommendation as a Notification object
+        Notification notification = new NotificationCompat.BigPictureStyle(
+                new NotificationCompat.Builder(context)
+                        .setContentTitle(movie.getTitle())
+                        .setContentText(movie.getDescription())
+                        .setContentInfo(APP_NAME)
+                        .setGroup("ActionMovies")
+                        .setSortKey("0.8")
+                        .setPriority(movie.getPriority())
+                        .setColor(#FFFF2020)
+                        .setCategory("recommendation")
+                        .setLargeIcon(movie.getImage())
+                        .setSmallIcon(movie.getSmallIcon())
+                        .setContentIntent(buildPendingIntent(movie.getId()))
+                        .setExtras(extras))
+                .build();
+
+        // post the recommendation to the NotificationManager
+        mNotificationManager.notify(movie.getId(), notification);
+        mNotificationManager = null;
+        return notification;
+    }
+
+    private PendingIntent buildPendingIntent(long id) {
+        Intent detailsIntent = new Intent(this, DetailsActivity.class);
+        detailsIntent.putExtra("id", id);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(DetailsActivity.class);
+        stackBuilder.addNextIntent(detailsIntent);
+        // Ensure each PendingIntent is unique
+        detailsIntent.setAction(Long.toString(id));
+
+        PendingIntent intent = stackBuilder.getPendingIntent(
+                0, PendingIntent.FLAG_UPDATE_CURRENT);
+        return intent;
+    }
+}
+</pre>
+
+
+<h3 id="run-service">Run Recommendations Service</h3>
+
+<p>
+  Your app's recommendation service must run periodically in order to create current
+  recommendations. To run your service, create a class that runs a timer and invokes
+  it at regular intervals. The following code example extends the {@link
+  android.content.BroadcastReceiver} class to start periodic execution of a recommendation service
+  every 12 hours:
+</p>
+
+<pre>
+public class BootupReceiver extends BroadcastReceiver {
+    private static final String TAG = "BootupActivity";
+
+    private static final long INITIAL_DELAY = 5000;
+
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().endsWith(Intent.ACTION_BOOT_COMPLETED)) {
+            scheduleRecommendationUpdate(context);
+        }
+    }
+
+    private void scheduleRecommendationUpdate(Context context) {
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(
+                Context.ALARM_SERVICE);
+        Intent recommendationIntent = new Intent(context,
+                UpdateRecommendationsService.class);
+        PendingIntent alarmIntent = PendingIntent.getService(context, 0,
+                recommendationIntent, 0);
+
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                INITIAL_DELAY,
+                AlarmManager.INTERVAL_HALF_DAY,
+                alarmIntent);
+    }
+}
+</pre>
+
+<p>
+  This implementation of the {@link android.content.BroadcastReceiver} class must run after start
+  up of the TV device where it is installed. To accomplish this, register this class in your app
+  manifest with an intent filter that listens for the completion of the device boot process. The
+  following sample code demonstrates how to add this configuration to the manifest:
+</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    &lt;receiver android:name=&quot;.BootupReceiver&quot; android:enabled=&quot;true&quot;
+              android:exported=&quot;false&quot;&gt;
+      &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.BOOT_COMPLETED&quot;/&gt;
+      &lt;/intent-filter&gt;
+    &lt;/receiver&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p class="important">
+  <strong>Important:</strong> Receiving a boot completed notification requires that your app
+  requests the {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission.
+  For more information, see {@link android.content.Intent#ACTION_BOOT_COMPLETED}.
+</p>

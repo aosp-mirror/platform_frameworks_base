@@ -16,6 +16,8 @@
 
 package android.util;
 
+import libcore.util.EmptyArray;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -234,8 +236,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * will grow once items are added to it.
      */
     public ArrayMap() {
-        mHashes = ContainerHelpers.EMPTY_INTS;
-        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mHashes = EmptyArray.INT;
+        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -244,8 +246,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public ArrayMap(int capacity) {
         if (capacity == 0) {
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
         } else {
             allocArrays(capacity);
         }
@@ -253,8 +255,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     private ArrayMap(boolean immutable) {
-        mHashes = EMPTY_IMMUTABLE_INTS;
-        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mHashes = EmptyArray.INT;
+        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -275,8 +277,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public void clear() {
         if (mSize > 0) {
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         }
     }
@@ -321,7 +323,17 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
-        return key == null ? (indexOfNull() >= 0) : (indexOf(key, key.hashCode()) >= 0);
+        return indexOfKey(key) >= 0;
+    }
+
+    /**
+     * Returns the index of a key in the set.
+     *
+     * @param key The key to search for.
+     * @return Returns the index of the key if it exists, else a negative integer.
+     */
+    public int indexOfKey(Object key) {
+        return key == null ? indexOfNull() : indexOf(key, key.hashCode());
     }
 
     int indexOfValue(Object value) {
@@ -363,7 +375,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V get(Object key) {
-        final int index = key == null ? indexOfNull() : indexOf(key, key.hashCode());
+        final int index = indexOfKey(key);
         return index >= 0 ? (V)mArray[(index<<1)+1] : null;
     }
 
@@ -408,7 +420,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * Add a new value to the array map.
-     * @param key The key under which to store the value.  <b>Must not be null.</b>  If
+     * @param key The key under which to store the value.  If
      * this key already exists in the array, its value will be replaced.
      * @param value The value to store for the given key.
      * @return Returns the old value that was stored for the given key, or null if there
@@ -494,6 +506,44 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * The use of the {@link #append} function can result in invalid array maps, in particular
+     * an array map where the same key appears multiple times.  This function verifies that
+     * the array map is valid, throwing IllegalArgumentException if a problem is found.  The
+     * main use for this method is validating an array map after unpacking from an IPC, to
+     * protect against malicious callers.
+     * @hide
+     */
+    public void validate() {
+        final int N = mSize;
+        if (N <= 1) {
+            // There can't be dups.
+            return;
+        }
+        int basehash = mHashes[0];
+        int basei = 0;
+        for (int i=1; i<N; i++) {
+            int hash = mHashes[i];
+            if (hash != basehash) {
+                basehash = hash;
+                basei = i;
+                continue;
+            }
+            // We are in a run of entries with the same hash code.  Go backwards through
+            // the array to see if any keys are the same.
+            final Object cur = mArray[i<<1];
+            for (int j=i-1; j>=basei; j--) {
+                final Object prev = mArray[j<<1];
+                if (cur == prev) {
+                    throw new IllegalArgumentException("Duplicate key in ArrayMap: " + cur);
+                }
+                if (cur != null && prev != null && cur.equals(prev)) {
+                    throw new IllegalArgumentException("Duplicate key in ArrayMap: " + cur);
+                }
+            }
+        }
+    }
+
+    /**
      * Perform a {@link #put(Object, Object)} of all key/value pairs in <var>array</var>
      * @param array The array whose contents are to be retrieved.
      */
@@ -521,7 +571,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V remove(Object key) {
-        int index = key == null ? indexOfNull() : indexOf(key, key.hashCode());
+        final int index = indexOfKey(key);
         if (index >= 0) {
             return removeAt(index);
         }
@@ -540,8 +590,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
             freeArrays(mHashes, mArray, mSize);
-            mHashes = ContainerHelpers.EMPTY_INTS;
-            mArray = ContainerHelpers.EMPTY_OBJECTS;
+            mHashes = EmptyArray.INT;
+            mArray = EmptyArray.OBJECT;
             mSize = 0;
         } else {
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {
@@ -707,7 +757,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
                 @Override
                 protected int colIndexOfKey(Object key) {
-                    return key == null ? indexOfNull() : indexOf(key, key.hashCode());
+                    return indexOfKey(key);
                 }
 
                 @Override

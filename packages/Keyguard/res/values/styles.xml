@@ -19,32 +19,20 @@
 
 <resources>
     <!-- Keyguard PIN pad styles -->
-    <style name="Widget.Button.NumPadKey"
-            parent="@android:style/Widget.Button">
+    <style name="Widget.TextView.NumPadKey" parent="@android:style/Widget.TextView">
         <item name="android:singleLine">true</item>
-        <item name="android:gravity">left|center_vertical</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
-        <item name="android:textSize">34dp</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:paddingTop">6dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:paddingLeft">20dp</item>
-        <item name="android:paddingRight">6dp</item>
+        <item name="android:gravity">center_horizontal|center_vertical</item>
+        <item name="android:background">@null</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:paddingBottom">-16dp</item>
     </style>
-    <style name="TextAppearance.NumPadKey"
-            parent="@android:style/TextAppearance">
-        <item name="android:textSize">34dp</item>
+    <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
+        <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffff</item>
-    </style>
-    <style name="TextAppearance.NumPadKey.Klondike">
-        <item name="android:textSize">20dp</item>
-        <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:textStyle">normal</item>
         <item name="android:textColor">#80ffffff</item>
+        <item name="android:paddingBottom">0dp</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->
@@ -55,9 +43,6 @@
 
     <!-- Built-in clock widget stuff -->
     <style name="widget_label">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">sans-serif-condensed</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
     <style name="big_thin">
@@ -68,7 +53,7 @@
         <item name="android:textSize">@dimen/widget_big_font_size</item>
     </style>
 
-    <style name="Widget.TransportControl.SeekBar" parent="@android:style/Widget.Holo.SeekBar">
+    <style name="Widget.TransportControl.SeekBar" parent="@android:style/Widget.DeviceDefault.Light.SeekBar">
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
@@ -82,4 +67,12 @@
         <item name="android:mirrorForRtl">true</item>
     </style>
 
+    <style name="BouncerSecurityContainer">
+        <item name="android:layout_gravity">center_horizontal|bottom</item>
+    </style>
+
+    <style name="PasswordTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorControlNormal">#80ffffff</item>
+        <item name="android:colorControlActivated">#80ffffff</item>
+    </style>
 </resources>

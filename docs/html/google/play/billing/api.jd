@@ -1,6 +1,7 @@
-page.title=In-app Billing Version 3
+page.title=In-app Billing API
 parent.title=In-app Billing
 parent.link=index.html
+page.tags="billing, inapp, iap"
 @jd:body
 
 <div id="qv-wrapper">

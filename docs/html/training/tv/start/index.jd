@@ -1,0 +1,63 @@
+page.title=Building TV Apps
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android 5.0 (API level 21) or higher</li>
+    <li>Android Studio 0.8 or later and Gradle 0.12 or later</li>
+  </ul>
+</div>
+</div>
+
+<p>
+  Android offers a rich user experience that's optimized for apps running on large screen devices,
+  such as high-definition televisions. Apps on TV offer new opportunities to delight your users
+  from the comfort of their couch.
+</p>
+
+<p>
+  TV apps use the same structure as those for phones and tablets. This approach means you can
+  create new TV apps based on what you already know about building apps for Android, or extend your
+  existing apps to also run on TV devices. However, the user interaction model for TV is
+  substantially different from phone and tablet devices. In order to make your app successful on TV
+  devices, you must design new layouts that can be easily understood from 10 feet away, and provide
+  navigation that works with just a directional pad and a select button.
+</p>
+
+<p>
+  This class describes how to start building apps for TV, including setting up your development
+  environment, basic requirements for layouts and navigation, as well as guidance on how to handle
+  hardware features that are not typically available on TV devices.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> You are encouraged to use <a href=
+  "{@docRoot}sdk/installing/studio.html">Android Studio</a> for building TV apps, because it
+  provides project setup, library inclusion, and packaging conveniences. This training assumes you
+  are using Android Studio.
+</p>
+
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/tv/start/start.html">
+    Getting Started with TV Apps</a></dt>
+    <dd>Learn how to create a new Android Studio project for TV apps or modify your existing
+      app project to run on TV devices.</dd>
+  <dt><a href="{@docRoot}training/tv/start/layouts.html">
+    Building TV Layouts</a></dt>
+    <dd>Learn the minimum requirements for TV layouts and how to implement them.</dd>
+  <dt><a href="{@docRoot}training/tv/start/navigation.html">
+    Creating TV Navigation</a></dt>
+    <dd>Learn the requirements for TV navigation and how to implement TV-compatible
+      navigation.</dd>
+  <dt><a href="{@docRoot}training/tv/start/hardware.html">
+    Handling TV Hardware</a></dt>
+    <dd>Learn how to check if your app is running on TV hardware, handle unsupported hardware
+      features, and manage controller devices.</dd>
+</dl>

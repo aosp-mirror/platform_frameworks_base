@@ -21,18 +21,92 @@
 
 package android.graphics;
 
+/**
+ * A color filter that can be used to simulate simple lighting effects.
+ * A <code>LightingColorFilter</code> is defined by two parameters, one
+ * used to multiply the source color (called <code>colorMultiply</code>)
+ * and one used to add to the source color (called <code>colorAdd</code>).
+ * The alpha channel is left untouched by this color filter.
+ *
+ * Given a source color RGB, the resulting R'G'B' color is computed thusly:
+ * <pre>
+ * R' = R * colorMultiply.R + colorAdd.R
+ * G' = G * colorMultiply.G + colorAdd.G
+ * B' = B * colorMultiply.B + colorAdd.B
+ * </pre>
+ * The result is pinned to the <code>[0..255]</code> range for each channel.
+ */
 public class LightingColorFilter extends ColorFilter {
+    private int mMul;
+    private int mAdd;
 
     /**
-     * Create a colorfilter that multiplies the RGB channels by one color, and then adds a second color,
-     * pinning the result for each component to [0..255]. The alpha components of the mul and add arguments
-     * are ignored.
+     * Create a colorfilter that multiplies the RGB channels by one color,
+     * and then adds a second color. The alpha components of the mul and add
+     * arguments are ignored.
      */
     public LightingColorFilter(int mul, int add) {
-        native_instance = native_CreateLightingFilter(mul, add);
-        nativeColorFilter = nCreateLightingFilter(native_instance, mul, add);
+        mMul = mul;
+        mAdd = add;
+        update();
+    }
+
+    /**
+     * Returns the RGB color used to multiply the source color when the
+     * color filter is applied.
+     *
+     * @see #setColorMultiply(int)
+     *
+     * @hide
+     */
+    public int getColorMultiply() {
+        return mMul;
+    }
+
+    /**
+     * Specifies the RGB color used to multiply the source color when the
+     * color filter is applied.
+     * The alpha channel of this color is ignored.
+     *
+     * @see #getColorMultiply()
+     *
+     * @hide
+     */
+    public void setColorMultiply(int mul) {
+        mMul = mul;
+        update();
+    }
+
+    /**
+     * Returns the RGB color that will be added to the source color
+     * when the color filter is applied.
+     *
+     * @see #setColorAdd(int)
+     *
+     * @hide
+     */
+    public int getColorAdd() {
+        return mAdd;
+    }
+
+    /**
+     * Specifies the RGB that will be added to the source color when
+     * the color filter is applied.
+     * The alpha channel of this color is ignored.
+     *
+     * @see #getColorAdd()
+     *
+     * @hide
+     */
+    public void setColorAdd(int add) {
+        mAdd = add;
+        update();
+    }
+
+    private void update() {
+        destroyFilter(native_instance);
+        native_instance = native_CreateLightingFilter(mMul, mAdd);
     }
 
     private static native long native_CreateLightingFilter(int mul, int add);
-    private static native long nCreateLightingFilter(long nativeFilter, int mul, int add);
 }

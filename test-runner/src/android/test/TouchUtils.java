@@ -120,19 +120,13 @@ public class TouchUtils {
      */
     public static void scrollToBottom(InstrumentationTestCase test, Activity activity,
             ViewGroup v) {
-        View firstChild;
-        int firstId = Integer.MIN_VALUE;
-        int firstTop = Integer.MIN_VALUE; 
-        int prevId;
-        int prevTop; 
+        ViewStateSnapshot prev;
+        ViewStateSnapshot next = new ViewStateSnapshot(v);
         do {
-            prevId = firstId;
-            prevTop = firstTop;
+            prev = next;
             TouchUtils.dragQuarterScreenUp(test, activity);
-            firstChild = v.getChildAt(0);
-            firstId = firstChild.getId();
-            firstTop = firstChild.getTop(); 
-        } while ((prevId != firstId) || (prevTop != firstTop));
+            next = new ViewStateSnapshot(v);
+        } while (!prev.equals(next));
     }
 
     /**
@@ -160,19 +154,13 @@ public class TouchUtils {
      * @param v The ViewGroup that should be dragged
      */
     public static void scrollToTop(InstrumentationTestCase test, Activity activity, ViewGroup v) {
-        View firstChild;
-        int firstId = Integer.MIN_VALUE;
-        int firstTop = Integer.MIN_VALUE; 
-        int prevId;
-        int prevTop; 
+        ViewStateSnapshot prev;
+        ViewStateSnapshot next = new ViewStateSnapshot(v);
         do {
-            prevId = firstId;
-            prevTop = firstTop;
+            prev = next;
             TouchUtils.dragQuarterScreenDown(test, activity);
-            firstChild = v.getChildAt(0);
-            firstId = firstChild.getId();
-            firstTop = firstChild.getTop(); 
-        } while ((prevId != firstId) || (prevTop != firstTop));
+            next = new ViewStateSnapshot(v);
+        } while (!prev.equals(next));
     }
     
     /**
@@ -776,20 +764,64 @@ public class TouchUtils {
         MotionEvent event = MotionEvent.obtain(downTime, eventTime,
                 MotionEvent.ACTION_DOWN, x, y, 0);
         inst.sendPointerSync(event);
-        inst.waitForIdleSync();
-
         for (int i = 0; i < stepCount; ++i) {
             y += yStep;
             x += xStep;
             eventTime = SystemClock.uptimeMillis();
             event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
             inst.sendPointerSync(event);
-            inst.waitForIdleSync();
         }
 
         eventTime = SystemClock.uptimeMillis();
         event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_UP, x, y, 0);
         inst.sendPointerSync(event);
         inst.waitForIdleSync();
+    }
+
+    private static class ViewStateSnapshot {
+        final View mFirst;
+        final View mLast;
+        final int mFirstTop;
+        final int mLastBottom;
+        final int mChildCount;
+        private ViewStateSnapshot(ViewGroup viewGroup) {
+            mChildCount = viewGroup.getChildCount();
+            if (mChildCount == 0) {
+                mFirst = mLast = null;
+                mFirstTop = mLastBottom = Integer.MIN_VALUE;
+            } else {
+                mFirst = viewGroup.getChildAt(0);
+                mLast = viewGroup.getChildAt(mChildCount - 1);
+                mFirstTop = mFirst.getTop();
+                mLastBottom = mLast.getBottom();
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            final ViewStateSnapshot that = (ViewStateSnapshot) o;
+            return mFirstTop == that.mFirstTop &&
+                    mLastBottom == that.mLastBottom &&
+                    mFirst == that.mFirst &&
+                    mLast == that.mLast &&
+                    mChildCount == that.mChildCount;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = mFirst != null ? mFirst.hashCode() : 0;
+            result = 31 * result + (mLast != null ? mLast.hashCode() : 0);
+            result = 31 * result + mFirstTop;
+            result = 31 * result + mLastBottom;
+            result = 31 * result + mChildCount;
+            return result;
+        }
     }
 }

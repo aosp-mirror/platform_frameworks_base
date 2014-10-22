@@ -22,7 +22,7 @@
      is the portrait layout.  -->
 <com.android.keyguard.KeyguardPatternView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_pattern_view"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"
-            android:layout_gravity="center">
+            android:layout_gravity="center_horizontal|bottom">
 
             <include layout="@layout/keyguard_message_area"
                 android:layout_width="match_parent"
@@ -49,7 +49,6 @@
 
           <FrameLayout
              android:id="@+id/keyguard_bouncer_frame"
-             android:background="@drawable/kg_bouncer_bg_white"
              android:layout_width="match_parent"
              android:layout_height="0dp"
              android:layout_weight="1"

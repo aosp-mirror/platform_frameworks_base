@@ -18,43 +18,76 @@ package android.view.textservice;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.ParcelableSpan;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.SpellCheckSpan;
 
 /**
  * This class contains a metadata of the input of TextService
  */
 public final class TextInfo implements Parcelable {
-    private final String mText;
+    private final CharSequence mCharSequence;
     private final int mCookie;
-    private final int mSequence;
+    private final int mSequenceNumber;
+
+    private static final int DEFAULT_COOKIE = 0;
+    private static final int DEFAULT_SEQUENCE_NUMBER = 0;
 
     /**
      * Constructor.
      * @param text the text which will be input to TextService
      */
     public TextInfo(String text) {
-        this(text, 0, 0);
+        this(text, 0, getStringLengthOrZero(text), DEFAULT_COOKIE, DEFAULT_SEQUENCE_NUMBER);
     }
 
     /**
      * Constructor.
      * @param text the text which will be input to TextService
      * @param cookie the cookie for this TextInfo
-     * @param sequence the sequence number for this TextInfo
+     * @param sequenceNumber the sequence number for this TextInfo
      */
-    public TextInfo(String text, int cookie, int sequence) {
-        if (TextUtils.isEmpty(text)) {
-            throw new IllegalArgumentException(text);
+    public TextInfo(String text, int cookie, int sequenceNumber) {
+        this(text, 0, getStringLengthOrZero(text), cookie, sequenceNumber);
+    }
+
+    private static int getStringLengthOrZero(final String text) {
+        return TextUtils.isEmpty(text) ? 0 : text.length();
+    }
+
+    /**
+     * Constructor.
+     * @param charSequence the text which will be input to TextService. Attached spans that
+     * implement {@link ParcelableSpan} will also be marshaled alongside with the text.
+     * @param start the beginning of the range of text (inclusive).
+     * @param end the end of the range of text (exclusive).
+     * @param cookie the cookie for this TextInfo
+     * @param sequenceNumber the sequence number for this TextInfo
+     */
+    public TextInfo(CharSequence charSequence, int start, int end, int cookie, int sequenceNumber) {
+        if (TextUtils.isEmpty(charSequence)) {
+            throw new IllegalArgumentException("charSequence is empty");
         }
-        mText = text;
+        // Create a snapshot of the text including spans in case they are updated outside later.
+        final SpannableStringBuilder spannableString =
+                new SpannableStringBuilder(charSequence, start, end);
+        // SpellCheckSpan is for internal use. We do not want to marshal this for TextService.
+        final SpellCheckSpan[] spans = spannableString.getSpans(0, spannableString.length(),
+                SpellCheckSpan.class);
+        for (int i = 0; i < spans.length; ++i) {
+            spannableString.removeSpan(spans[i]);
+        }
+
+        mCharSequence = spannableString;
         mCookie = cookie;
-        mSequence = sequence;
+        mSequenceNumber = sequenceNumber;
     }
 
     public TextInfo(Parcel source) {
-        mText = source.readString();
+        mCharSequence = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mCookie = source.readInt();
-        mSequence = source.readInt();
+        mSequenceNumber = source.readInt();
     }
 
     /**
@@ -65,16 +98,27 @@ public final class TextInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mText);
+        TextUtils.writeToParcel(mCharSequence, dest, flags);
         dest.writeInt(mCookie);
-        dest.writeInt(mSequence);
+        dest.writeInt(mSequenceNumber);
     }
 
     /**
      * @return the text which is an input of a text service
      */
     public String getText() {
-        return mText;
+        if (mCharSequence == null) {
+            return null;
+        }
+        return mCharSequence.toString();
+    }
+
+    /**
+     * @return the charSequence which is an input of a text service. This may have some parcelable
+     * spans.
+     */
+    public CharSequence getCharSequence() {
+        return mCharSequence;
     }
 
     /**
@@ -88,7 +132,7 @@ public final class TextInfo implements Parcelable {
      * @return the sequence of TextInfo
      */
     public int getSequence() {
-        return mSequence;
+        return mSequenceNumber;
     }
 
     /**

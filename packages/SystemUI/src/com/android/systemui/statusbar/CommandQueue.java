@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -41,21 +40,22 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int OP_REMOVE_ICON = 2;
 
     private static final int MSG_ICON                       = 1 << MSG_SHIFT;
-    private static final int MSG_ADD_NOTIFICATION           = 2 << MSG_SHIFT;
-    private static final int MSG_UPDATE_NOTIFICATION        = 3 << MSG_SHIFT;
-    private static final int MSG_REMOVE_NOTIFICATION        = 4 << MSG_SHIFT;
-    private static final int MSG_DISABLE                    = 5 << MSG_SHIFT;
-    private static final int MSG_EXPAND_NOTIFICATIONS       = 6 << MSG_SHIFT;
-    private static final int MSG_COLLAPSE_PANELS            = 7 << MSG_SHIFT;
-    private static final int MSG_EXPAND_SETTINGS            = 8 << MSG_SHIFT;
-    private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 9 << MSG_SHIFT;
-    private static final int MSG_TOP_APP_WINDOW_CHANGED     = 10 << MSG_SHIFT;
-    private static final int MSG_SHOW_IME_BUTTON            = 11 << MSG_SHIFT;
-    private static final int MSG_SET_HARD_KEYBOARD_STATUS   = 12 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_RECENT_APPS         = 13 << MSG_SHIFT;
-    private static final int MSG_PRELOAD_RECENT_APPS        = 14 << MSG_SHIFT;
-    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 15 << MSG_SHIFT;
-    private static final int MSG_SET_WINDOW_STATE           = 16 << MSG_SHIFT;
+    private static final int MSG_DISABLE                    = 2 << MSG_SHIFT;
+    private static final int MSG_EXPAND_NOTIFICATIONS       = 3 << MSG_SHIFT;
+    private static final int MSG_COLLAPSE_PANELS            = 4 << MSG_SHIFT;
+    private static final int MSG_EXPAND_SETTINGS            = 5 << MSG_SHIFT;
+    private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 6 << MSG_SHIFT;
+    private static final int MSG_TOP_APP_WINDOW_CHANGED     = 7 << MSG_SHIFT;
+    private static final int MSG_SHOW_IME_BUTTON            = 8 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_RECENT_APPS         = 9 << MSG_SHIFT;
+    private static final int MSG_PRELOAD_RECENT_APPS        = 10 << MSG_SHIFT;
+    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 11 << MSG_SHIFT;
+    private static final int MSG_SET_WINDOW_STATE           = 12 << MSG_SHIFT;
+    private static final int MSG_SHOW_RECENT_APPS           = 13 << MSG_SHIFT;
+    private static final int MSG_HIDE_RECENT_APPS           = 14 << MSG_SHIFT;
+    private static final int MSG_BUZZ_BEEP_BLINKED          = 15 << MSG_SHIFT;
+    private static final int MSG_NOTIFICATION_LIGHT_OFF     = 16 << MSG_SHIFT;
+    private static final int MSG_NOTIFICATION_LIGHT_PULSE   = 17 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -64,14 +64,11 @@ public class CommandQueue extends IStatusBar.Stub {
     public static final int FLAG_EXCLUDE_INPUT_METHODS_PANEL = 1 << 3;
     public static final int FLAG_EXCLUDE_COMPAT_MODE_PANEL = 1 << 4;
 
+    private static final String SHOW_IME_SWITCHER_KEY = "showImeSwitcherKey";
+
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
-
-    private class NotificationQueueEntry {
-        IBinder key;
-        StatusBarNotification notification;
-    }
 
     /**
      * These methods are called back on the main thread.
@@ -81,23 +78,25 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
-        public void addNotification(IBinder key, StatusBarNotification notification);
-        public void updateNotification(IBinder key, StatusBarNotification notification);
-        public void removeNotification(IBinder key);
-        public void disable(int state);
+        public void disable(int state, boolean animate);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel();
         public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
-        public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
-        public void setHardKeyboardStatus(boolean available, boolean enabled);
+        public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+                boolean showImeSwitcher);
+        public void showRecentApps(boolean triggeredFromAltTab);
+        public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
         public void toggleRecentApps();
         public void preloadRecentApps();
+        public void cancelPreloadRecentApps();
         public void showSearchPanel();
         public void hideSearchPanel();
-        public void cancelPreloadRecentApps();
         public void setWindowState(int window, int state);
+        public void buzzBeepBlinked();
+        public void notificationLightOff();
+        public void notificationLightPulse(int argb, int onMillis, int offMillis);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -118,30 +117,6 @@ public class CommandQueue extends IStatusBar.Stub {
             int what = MSG_ICON | index;
             mHandler.removeMessages(what);
             mHandler.obtainMessage(what, OP_REMOVE_ICON, 0, null).sendToTarget();
-        }
-    }
-
-    public void addNotification(IBinder key, StatusBarNotification notification) {
-        synchronized (mList) {
-            NotificationQueueEntry ne = new NotificationQueueEntry();
-            ne.key = key;
-            ne.notification = notification;
-            mHandler.obtainMessage(MSG_ADD_NOTIFICATION, 0, 0, ne).sendToTarget();
-        }
-    }
-
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-        synchronized (mList) {
-            NotificationQueueEntry ne = new NotificationQueueEntry();
-            ne.key = key;
-            ne.notification = notification;
-            mHandler.obtainMessage(MSG_UPDATE_NOTIFICATION, 0, 0, ne).sendToTarget();
-        }
-    }
-
-    public void removeNotification(IBinder key) {
-        synchronized (mList) {
-            mHandler.obtainMessage(MSG_REMOVE_NOTIFICATION, 0, 0, key).sendToTarget();
         }
     }
 
@@ -188,19 +163,30 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
-            mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, vis, backDisposition, token)
-                    .sendToTarget();
+            Message m = mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, vis, backDisposition, token);
+            m.getData().putBoolean(SHOW_IME_SWITCHER_KEY, showImeSwitcher);
+            m.sendToTarget();
         }
     }
 
-    public void setHardKeyboardStatus(boolean available, boolean enabled) {
+    public void showRecentApps(boolean triggeredFromAltTab) {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_HARD_KEYBOARD_STATUS);
-            mHandler.obtainMessage(MSG_SET_HARD_KEYBOARD_STATUS,
-                    available ? 1 : 0, enabled ? 1 : 0).sendToTarget();
+            mHandler.removeMessages(MSG_SHOW_RECENT_APPS);
+            mHandler.obtainMessage(MSG_SHOW_RECENT_APPS,
+                    triggeredFromAltTab ? 1 : 0, 0, null).sendToTarget();
+        }
+    }
+
+    public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
+            mHandler.obtainMessage(MSG_HIDE_RECENT_APPS,
+                    triggeredFromAltTab ? 1 : 0, triggeredFromHomeKey ? 1 : 0,
+                    null).sendToTarget();
         }
     }
 
@@ -229,6 +215,26 @@ public class CommandQueue extends IStatusBar.Stub {
         synchronized (mList) {
             // don't coalesce these
             mHandler.obtainMessage(MSG_SET_WINDOW_STATE, window, state, null).sendToTarget();
+        }
+    }
+
+    public void buzzBeepBlinked() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_BUZZ_BEEP_BLINKED);
+            mHandler.sendEmptyMessage(MSG_BUZZ_BEEP_BLINKED);
+        }
+    }
+
+    public void notificationLightOff() {
+        synchronized (mList) {
+            mHandler.sendEmptyMessage(MSG_NOTIFICATION_LIGHT_OFF);
+        }
+    }
+
+    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
+        synchronized (mList) {
+            mHandler.obtainMessage(MSG_NOTIFICATION_LIGHT_PULSE, onMillis, offMillis, argb)
+                    .sendToTarget();
         }
     }
 
@@ -262,22 +268,8 @@ public class CommandQueue extends IStatusBar.Stub {
                     }
                     break;
                 }
-                case MSG_ADD_NOTIFICATION: {
-                    final NotificationQueueEntry ne = (NotificationQueueEntry)msg.obj;
-                    mCallbacks.addNotification(ne.key, ne.notification);
-                    break;
-                }
-                case MSG_UPDATE_NOTIFICATION: {
-                    final NotificationQueueEntry ne = (NotificationQueueEntry)msg.obj;
-                    mCallbacks.updateNotification(ne.key, ne.notification);
-                    break;
-                }
-                case MSG_REMOVE_NOTIFICATION: {
-                    mCallbacks.removeNotification((IBinder)msg.obj);
-                    break;
-                }
                 case MSG_DISABLE:
-                    mCallbacks.disable(msg.arg1);
+                    mCallbacks.disable(msg.arg1, true /* animate */);
                     break;
                 case MSG_EXPAND_NOTIFICATIONS:
                     mCallbacks.animateExpandNotificationsPanel();
@@ -295,10 +287,14 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.topAppWindowChanged(msg.arg1 != 0);
                     break;
                 case MSG_SHOW_IME_BUTTON:
-                    mCallbacks.setImeWindowStatus((IBinder)msg.obj, msg.arg1, msg.arg2);
+                    mCallbacks.setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
+                            msg.getData().getBoolean(SHOW_IME_SWITCHER_KEY, false));
                     break;
-                case MSG_SET_HARD_KEYBOARD_STATUS:
-                    mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);
+                case MSG_SHOW_RECENT_APPS:
+                    mCallbacks.showRecentApps(msg.arg1 != 0);
+                    break;
+                case MSG_HIDE_RECENT_APPS:
+                    mCallbacks.hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
                     mCallbacks.toggleRecentApps();
@@ -311,6 +307,15 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SET_WINDOW_STATE:
                     mCallbacks.setWindowState(msg.arg1, msg.arg2);
+                    break;
+                case MSG_BUZZ_BEEP_BLINKED:
+                    mCallbacks.buzzBeepBlinked();
+                    break;
+                case MSG_NOTIFICATION_LIGHT_OFF:
+                    mCallbacks.notificationLightOff();
+                    break;
+                case MSG_NOTIFICATION_LIGHT_PULSE:
+                    mCallbacks.notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
                     break;
             }
         }

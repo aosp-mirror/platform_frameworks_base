@@ -55,8 +55,9 @@
         android:icon="@drawable/ic_menu_view_list"
         android:showAsAction="never" />
     <item
-        android:id="@+id/menu_settings"
-        android:title="@string/menu_settings"
-        android:icon="@drawable/ic_menu_settings"
+        android:id="@+id/menu_advanced"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_file_size"
         android:showAsAction="never" />
 </menu>

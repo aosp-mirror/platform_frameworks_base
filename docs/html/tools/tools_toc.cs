@@ -1,48 +1,38 @@
 <ul id="nav">
 
   <li class="nav-section">
-    <div class="nav-section-header empty">
-        <a href="<?cs var:toroot ?>tools/index.html"><span class="en">Developer Tools</span></a>
-    </div>
-  </li>
-
-  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/installing/bundle.html">
-          <span class="en">Setting Up the ADT Bundle</span></a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/index.html">
+          <span class="en">Installing the SDK</span></a></li>
 
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>sdk/installing/index.html"><span class="en">Setting Up
-    an Existing IDE</span></a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
-              <span class="en">Installing the Eclipse Plugin</span></a></li>
-        <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
-            <span class="en">Adding Platforms and Packages</span></a></li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>sdk/installing/studio.html">Android Studio</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
-              Migrating from Eclipse</a></li>
-          <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
-              Tips and Tricks</a></li>
-          <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
-              Using the Layout Editor</a></li>
-          </ul>
-      </li>
-      <li><a href="<?cs var:toroot ?>sdk/exploring.html">
-          <span class="en">Exploring the SDK</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">Download the NDK</a>
-      </li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
+          <span class="en">Adding SDK Packages</span></a></li>
     </ul>
+  </li>
+
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>sdk/installing/studio.html">Android Studio</a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
+          Migrating from Eclipse</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/create-project.html">
+          Creating a Project</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
+          Tips and Tricks</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-androidview.html">
+          Using the Android Project View</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
+          Using the Layout Editor</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-build.html">
+          Building Your Project with Gradle</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-debug.html">
+          Debugging with Android Studio</a></li>
+      </ul>
   </li>
 
   <li class="nav-section">
@@ -170,7 +160,13 @@ class="en">Support Library</span></a></div>
 class="en">Tools Help</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/adt.html">ADT</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/adt.html">ADT</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
+              <span class="en">Installing the Eclipse Plugin</span></a></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
@@ -240,6 +236,11 @@ class="en">Platforms</span></a></li>
     </ul>
   </li>
 
+  <li class="nav-section">
+    <div class="nav-section-header empty">
+      <a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">NDK</a>
+    </div>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header">

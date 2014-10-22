@@ -16,18 +16,11 @@
 
 package android.renderscript;
 
-import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map.Entry;
-import java.util.HashMap;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 /**
  * The superclass for all user-defined scripts. This is only
@@ -51,7 +44,6 @@ public class ScriptC extends Script {
      * @param id
      * @param rs
      *
-     * @hide
      */
     protected ScriptC(long id, RenderScript rs) {
         super(id, rs);
@@ -77,7 +69,6 @@ public class ScriptC extends Script {
      * Only intended for use by the generated derived classes.
      *
      * @param rs
-     * @hide
      */
     protected ScriptC(RenderScript rs, String resName, byte[] bitcode32, byte[] bitcode64) {
         super(0, rs);

@@ -78,19 +78,6 @@ public class ComposeShader_Delegate extends Shader_Delegate {
         return sManager.addNewDelegate(newDelegate);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate1(long native_shader, long native_skiaShaderA,
-            long native_skiaShaderB, long native_mode) {
-        // pass, not needed.
-        return 0;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static long nativePostCreate2(long native_shader, long native_skiaShaderA,
-            long native_skiaShaderB, int porterDuffMode) {
-        // pass, not needed.
-        return 0;
-    }
 
     // ---- Private delegate/helper methods ----
 

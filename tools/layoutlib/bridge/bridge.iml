@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/src" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/.settings" />
+      <excludeFolder url="file://$MODULE_DIR$/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/generated" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/assets" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/dependency-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/incremental" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/libs" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/manifests" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/res" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/rs" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/build/intermediates/symbols" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/res/testApp/MyApplication/gradle" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="icu4j" level="project" />
+    <orderEntry type="library" name="kxml2-2.3.0" level="project" />
+    <orderEntry type="library" name="layoutlib_api-prebuilt" level="project" />
+    <orderEntry type="library" name="ninepatch-prebuilt" level="project" />
+    <orderEntry type="library" name="tools-common-prebuilt" level="project" />
+    <orderEntry type="library" name="framework.jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="guava" level="project" />
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/sdk-common/sdk-common.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/sdk-common/sdk-common-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" scope="TEST" name="JUnit4" level="application" />
+  </component>
+</module>
+

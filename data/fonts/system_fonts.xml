@@ -65,6 +65,37 @@
             <file>RobotoCondensed-BoldItalic.ttf</file>
         </fileset>
     </family>
+
+    <family>
+        <nameset>
+            <name>sans-serif-medium</name>
+        </nameset>
+        <fileset>
+            <file>Roboto-Medium.ttf</file>
+            <file>Roboto-MediumItalic.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>sans-serif-black</name>
+        </nameset>
+        <fileset>
+            <file>Roboto-Black.ttf</file>
+            <file>Roboto-BlackItalic.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>sans-serif-condensed-light</name>
+        </nameset>
+        <fileset>
+            <file>RobotoCondensed-Light.ttf</file>
+            <file>RobotoCondensed-LightItalic.ttf</file>
+        </fileset>
+    </family>
+
     <family>
         <nameset>
             <name>serif</name>
@@ -78,10 +109,10 @@
             <name>ITC Stone Serif</name>
         </nameset>
         <fileset>
-            <file>DroidSerif-Regular.ttf</file>
-            <file>DroidSerif-Bold.ttf</file>
-            <file>DroidSerif-Italic.ttf</file>
-            <file>DroidSerif-BoldItalic.ttf</file>
+            <file>NotoSerif-Regular.ttf</file>
+            <file>NotoSerif-Bold.ttf</file>
+            <file>NotoSerif-Italic.ttf</file>
+            <file>NotoSerif-BoldItalic.ttf</file>
         </fileset>
     </family>
 
@@ -98,12 +129,22 @@
     <family>
         <nameset>
             <name>monospace</name>
-            <name>courier</name>
-            <name>courier new</name>
+            <name>sans-serif-monospace</name>
             <name>monaco</name>
         </nameset>
         <fileset>
             <file>DroidSansMono.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>serif-monospace</name>
+            <name>courier</name>
+            <name>courier new</name>
+        </nameset>
+        <fileset>
+            <file>CutiveMono.ttf</file>
         </fileset>
     </family>
 

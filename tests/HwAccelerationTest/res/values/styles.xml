@@ -1,0 +1,37 @@
+<resources>
+    <style name="ReorderTextView" parent="@android:style/TextAppearance.Medium">
+        <item name="android:background">@drawable/appwidget_background</item>
+        <item name="android:layout_width">300dp</item>
+        <item name="android:layout_height">100dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="LeftReorderTextView" parent="@style/ReorderTextView">
+        <item name="android:translationX">50dp</item>
+        <item name="android:layout_alignParentLeft">true</item>
+    </style>
+    <style name="RightReorderTextView" parent="@style/ReorderTextView">
+        <item name="android:translationX">-50dp</item>
+        <item name="android:layout_alignParentRight">true</item>
+    </style>
+
+    <style name="TopLeftReorderTextView" parent="@style/LeftReorderTextView">
+        <item name="android:text">200</item>
+        <item name="android:translationZ">200dp</item>
+        <item name="android:layout_alignParentTop">true</item>
+    </style>
+    <style name="BottomLeftReorderTextView" parent="@style/LeftReorderTextView">
+        <item name="android:text">300</item>
+        <item name="android:translationZ">300dp</item>
+        <item name="android:layout_alignParentBottom">true</item>
+    </style>
+    <style name="TopRightReorderTextView" parent="@style/RightReorderTextView">
+        <item name="android:text">100</item>
+        <item name="android:translationZ">100dp</item>
+        <item name="android:layout_alignParentTop">true</item>
+    </style>
+    <style name="BottomRightReorderTextView" parent="@style/RightReorderTextView">
+        <item name="android:text">400</item>
+        <item name="android:translationZ">400dp</item>
+        <item name="android:layout_alignParentBottom">true</item>
+    </style>
+</resources>

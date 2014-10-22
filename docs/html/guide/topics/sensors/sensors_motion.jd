@@ -1,5 +1,6 @@
 page.title=Motion Sensors
-page.tags="sensorevent","accelerometer","gyroscope","gravity","rotation","stepcounter"
+page.tags=sensorevent,accelerometer,gyroscope,gravity,rotation,stepcounter
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -529,7 +530,6 @@ North Pole.</li>
 The sample application is located in the API Demos code (<a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
 OS - RotationVectorDemo</a>).</p>
-
 
 <h2 id="sensors-motion-significant">Using the Significant Motion Sensor</h2>
 

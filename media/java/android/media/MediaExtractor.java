@@ -21,7 +21,9 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.media.MediaHTTPService;
 import android.net.Uri;
+import android.os.IBinder;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -137,11 +139,19 @@ final public class MediaExtractor {
                 ++i;
             }
         }
-        setDataSource(path, keys, values);
+
+        nativeSetDataSource(
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                path,
+                keys,
+                values);
     }
 
-    private native final void setDataSource(
-            String path, String[] keys, String[] values) throws IOException;
+    private native final void nativeSetDataSource(
+            IBinder httpServiceBinder,
+            String path,
+            String[] keys,
+            String[] values) throws IOException;
 
     /**
      * Sets the data source (file-path or http URL) to use.
@@ -156,7 +166,11 @@ final public class MediaExtractor {
      * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
      */
     public final void setDataSource(String path) throws IOException {
-        setDataSource(path, null, null);
+        nativeSetDataSource(
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                path,
+                null,
+                null);
     }
 
     /**
@@ -283,8 +297,12 @@ final public class MediaExtractor {
 
     /**
      * Retrieve the current encoded sample and store it in the byte buffer
-     * starting at the given offset. Returns the sample size (or -1 if
-     * no more samples are available).
+     * starting at the given offset.
+     * <p>
+     * <b>Note:</b>As of API 21, on success the position and limit of
+     * {@code byteBuf} is updated to point to the data just read.
+     * @param byteBuf the destination byte buffer
+     * @return the sample size (or -1 if no more samples are available).
      */
     public native int readSampleData(ByteBuffer byteBuf, int offset);
 
@@ -302,7 +320,10 @@ final public class MediaExtractor {
 
     // Keep these in sync with their equivalents in NuMediaExtractor.h
     /**
-     * The sample is a sync sample
+     * The sample is a sync sample (or in {@link MediaCodec}'s terminology
+     * it is a key frame.)
+     *
+     * @see MediaCodec#BUFFER_FLAG_KEY_FRAME
      */
     public static final int SAMPLE_FLAG_SYNC      = 1;
 

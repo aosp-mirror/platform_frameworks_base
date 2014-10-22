@@ -19,9 +19,12 @@ package android.graphics.drawable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.graphics.*;
+import android.graphics.PorterDuff.Mode;
 import android.view.Gravity;
 import android.util.AttributeSet;
 
@@ -84,13 +87,14 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        super.inflate(r, parser, attrs);
+        super.inflate(r, parser, attrs, theme);
 
         int type;
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ScaleDrawable);
+        TypedArray a = obtainAttributes(
+                r, theme, attrs, com.android.internal.R.styleable.ScaleDrawable);
 
         float sw = getPercent(a, com.android.internal.R.styleable.ScaleDrawable_scaleWidth);
         float sh = getPercent(a, com.android.internal.R.styleable.ScaleDrawable_scaleHeight);
@@ -107,7 +111,7 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            dr = Drawable.createFromXmlInner(r, parser, attrs);
+            dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
         if (dr == null) {
@@ -184,6 +188,16 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void setColorFilter(ColorFilter cf) {
         mScaleState.mDrawable.setColorFilter(cf);
+    }
+
+    @Override
+    public void setTintList(ColorStateList tint) {
+        mScaleState.mDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mScaleState.mDrawable.setTintMode(tintMode);
     }
 
     @Override
@@ -282,6 +296,8 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
                 }
                 mDrawable.setCallback(owner);
                 mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
                 mScaleWidth = orig.mScaleWidth;
                 mScaleHeight = orig.mScaleHeight;
                 mGravity = orig.mGravity;

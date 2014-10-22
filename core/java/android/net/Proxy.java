@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.net.ProxyInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -63,8 +64,24 @@ public final class Proxy {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
-    /** {@hide} **/
-    public static final String EXTRA_PROXY_INFO = "proxy";
+    /**
+     * Intent extra included with {@link #PROXY_CHANGE_ACTION} intents.
+     * It describes the new proxy being used (as a {@link ProxyInfo} object).
+     */
+    public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
+
+    /** @hide */
+    public static final int PROXY_VALID             = 0;
+    /** @hide */
+    public static final int PROXY_HOSTNAME_EMPTY    = 1;
+    /** @hide */
+    public static final int PROXY_HOSTNAME_INVALID  = 2;
+    /** @hide */
+    public static final int PROXY_PORT_EMPTY        = 3;
+    /** @hide */
+    public static final int PROXY_PORT_INVALID      = 4;
+    /** @hide */
+    public static final int PROXY_EXCLLIST_INVALID  = 5;
 
     private static ConnectivityManager sConnectivityManager = null;
 
@@ -77,8 +94,10 @@ public final class Proxy {
 
     private static final Pattern HOSTNAME_PATTERN;
 
-    private static final String EXCLLIST_REGEXP = "$|^(.?" + NAME_IP_REGEX
-        + ")+(,(.?" + NAME_IP_REGEX + "))*$";
+    private static final String EXCL_REGEX =
+        "[a-zA-Z0-9*]+(\\-[a-zA-Z0-9*]+)*(\\.[a-zA-Z0-9*]+(\\-[a-zA-Z0-9*]+)*)*";
+
+    private static final String EXCLLIST_REGEXP = "^$|^" + EXCL_REGEX + "(," + EXCL_REGEX + ")*$";
 
     private static final Pattern EXCLLIST_PATTERN;
 
@@ -99,24 +118,14 @@ public final class Proxy {
      */
     public static final java.net.Proxy getProxy(Context ctx, String url) {
         String host = "";
-        if (url != null) {
+        if ((url != null) && !isLocalHost(host)) {
             URI uri = URI.create(url);
-            host = uri.getHost();
-        }
+            ProxySelector proxySelector = ProxySelector.getDefault();
 
-        if (!isLocalHost(host)) {
-            if (sConnectivityManager == null) {
-                sConnectivityManager = (ConnectivityManager)ctx.getSystemService(
-                        Context.CONNECTIVITY_SERVICE);
-            }
-            if (sConnectivityManager == null) return java.net.Proxy.NO_PROXY;
+            List<java.net.Proxy> proxyList = proxySelector.select(uri);
 
-            ProxyProperties proxyProperties = sConnectivityManager.getProxy();
-
-            if (proxyProperties != null) {
-                if (!proxyProperties.isExcluded(host)) {
-                    return proxyProperties.makeProxy();
-                }
+            if (proxyList.size() > 0) {
+                return proxyList.get(0);
             }
         }
         return java.net.Proxy.NO_PROXY;
@@ -236,90 +245,39 @@ public final class Proxy {
      * Validate syntax of hostname, port and exclusion list entries
      * {@hide}
      */
-    public static void validate(String hostname, String port, String exclList) {
+    public static int validate(String hostname, String port, String exclList) {
         Matcher match = HOSTNAME_PATTERN.matcher(hostname);
         Matcher listMatch = EXCLLIST_PATTERN.matcher(exclList);
 
-        if (!match.matches()) {
-            throw new IllegalArgumentException();
-        }
+        if (!match.matches()) return PROXY_HOSTNAME_INVALID;
 
-        if (!listMatch.matches()) {
-            throw new IllegalArgumentException();
-        }
+        if (!listMatch.matches()) return PROXY_EXCLLIST_INVALID;
 
-        if (hostname.length() > 0 && port.length() == 0) {
-            throw new IllegalArgumentException();
-        }
+        if (hostname.length() > 0 && port.length() == 0) return PROXY_PORT_EMPTY;
 
         if (port.length() > 0) {
-            if (hostname.length() == 0) {
-                throw new IllegalArgumentException();
-            }
+            if (hostname.length() == 0) return PROXY_HOSTNAME_EMPTY;
             int portVal = -1;
             try {
                 portVal = Integer.parseInt(port);
             } catch (NumberFormatException ex) {
-                throw new IllegalArgumentException();
+                return PROXY_PORT_INVALID;
             }
-            if (portVal <= 0 || portVal > 0xFFFF) {
-                throw new IllegalArgumentException();
-            }
+            if (portVal <= 0 || portVal > 0xFFFF) return PROXY_PORT_INVALID;
         }
-    }
-
-    static class AndroidProxySelectorRoutePlanner
-            extends org.apache.http.impl.conn.ProxySelectorRoutePlanner {
-
-        private Context mContext;
-
-        public AndroidProxySelectorRoutePlanner(SchemeRegistry schreg, ProxySelector prosel,
-                Context context) {
-            super(schreg, prosel);
-            mContext = context;
-        }
-
-        @Override
-        protected java.net.Proxy chooseProxy(List<java.net.Proxy> proxies, HttpHost target,
-                HttpRequest request, HttpContext context) {
-            return getProxy(mContext, target.getHostName());
-        }
-
-        @Override
-        protected HttpHost determineProxy(HttpHost target, HttpRequest request,
-                HttpContext context) {
-            return getPreferredHttpHost(mContext, target.getHostName());
-        }
-
-        @Override
-        public HttpRoute determineRoute(HttpHost target, HttpRequest request,
-                HttpContext context) {
-            HttpHost proxy = getPreferredHttpHost(mContext, target.getHostName());
-            if (proxy == null) {
-                return new HttpRoute(target);
-            } else {
-                return new HttpRoute(target, null, proxy, false);
-            }
-        }
+        return PROXY_VALID;
     }
 
     /** @hide */
-    public static final HttpRoutePlanner getAndroidProxySelectorRoutePlanner(Context context) {
-        AndroidProxySelectorRoutePlanner ret = new AndroidProxySelectorRoutePlanner(
-                new SchemeRegistry(), ProxySelector.getDefault(), context);
-        return ret;
-    }
-
-    /** @hide */
-    public static final void setHttpProxySystemProperty(ProxyProperties p) {
+    public static final void setHttpProxySystemProperty(ProxyInfo p) {
         String host = null;
         String port = null;
         String exclList = null;
-        String pacFileUrl = null;
+        Uri pacFileUrl = Uri.EMPTY;
         if (p != null) {
             host = p.getHost();
             port = Integer.toString(p.getPort());
-            exclList = p.getExclusionList();
+            exclList = p.getExclusionListAsString();
             pacFileUrl = p.getPacFileUrl();
         }
         setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
@@ -327,7 +285,7 @@ public final class Proxy {
 
     /** @hide */
     public static final void setHttpProxySystemProperty(String host, String port, String exclList,
-            String pacFileUrl) {
+            Uri pacFileUrl) {
         if (exclList != null) exclList = exclList.replace(",", "|");
         if (false) Log.d(TAG, "setHttpProxySystemProperty :"+host+":"+port+" - "+exclList);
         if (host != null) {
@@ -351,7 +309,7 @@ public final class Proxy {
             System.clearProperty("http.nonProxyHosts");
             System.clearProperty("https.nonProxyHosts");
         }
-        if (!TextUtils.isEmpty(pacFileUrl)) {
+        if (!Uri.EMPTY.equals(pacFileUrl)) {
             ProxySelector.setDefault(new PacProxySelector());
         } else {
             ProxySelector.setDefault(sDefaultProxySelector);

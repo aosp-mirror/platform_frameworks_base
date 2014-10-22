@@ -16,7 +16,11 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
+import android.util.SparseArray;
+
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 /**
  * Representation of a user on the device.
@@ -65,6 +69,8 @@ public final class UserHandle implements Parcelable {
     public static final boolean MU_ENABLED = true;
 
     final int mHandle;
+
+    private static final SparseArray<UserHandle> userHandles = new SparseArray<UserHandle>();
 
     /**
      * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
@@ -122,6 +128,18 @@ public final class UserHandle implements Parcelable {
     /** @hide */
     public static final int getCallingUserId() {
         return getUserId(Binder.getCallingUid());
+    }
+
+    /** @hide */
+    public static final UserHandle getCallingUserHandle() {
+        int userId = getUserId(Binder.getCallingUid());
+        UserHandle userHandle = userHandles.get(userId);
+        // Intentionally not synchronized to save time
+        if (userHandle == null) {
+            userHandle = new UserHandle(userId);
+            userHandles.put(userId, userHandle);
+        }
+        return userHandle;
     }
 
     /**
@@ -216,8 +234,19 @@ public final class UserHandle implements Parcelable {
      * @return user id of the current process
      * @hide
      */
+    @SystemApi
     public static final int myUserId() {
         return getUserId(Process.myUid());
+    }
+
+    /**
+     * Returns true if this UserHandle refers to the owner user; false otherwise.
+     * @return true if this UserHandle refers to the owner user; false otherwise.
+     * @hide
+     */
+    @SystemApi
+    public final boolean isOwner() {
+        return this.equals(OWNER);
     }
 
     /** @hide */
@@ -225,7 +254,11 @@ public final class UserHandle implements Parcelable {
         mHandle = h;
     }
 
-    /** @hide */
+    /**
+     * Returns the userId stored in this UserHandle.
+     * @hide
+     */
+    @SystemApi
     public int getIdentifier() {
         return mHandle;
     }

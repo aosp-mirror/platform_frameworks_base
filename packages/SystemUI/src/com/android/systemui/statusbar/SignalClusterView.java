@@ -26,18 +26,22 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl;
+import com.android.systemui.statusbar.policy.SecurityController;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView
         extends LinearLayout
-        implements NetworkController.SignalCluster {
+        implements NetworkControllerImpl.SignalCluster,
+        SecurityController.SecurityControllerCallback {
 
-    static final boolean DEBUG = false;
     static final String TAG = "SignalClusterView";
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    NetworkController mNC;
+    NetworkControllerImpl mNC;
+    SecurityController mSC;
 
+    private boolean mVpnVisible = false;
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
     private boolean mMobileVisible = false;
@@ -45,10 +49,15 @@ public class SignalClusterView
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
+    private boolean mRoaming;
+    private boolean mIsMobileTypeIconWide;
 
     ViewGroup mWifiGroup, mMobileGroup;
-    ImageView mWifi, mMobile, mMobileType, mAirplane;
-    View mSpacer;
+    ImageView mVpn, mWifi, mMobile, mMobileType, mAirplane;
+    View mWifiAirplaneSpacer;
+    View mWifiSignalSpacer;
+
+    private int mWideTypeIconStartPadding;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -62,37 +71,65 @@ public class SignalClusterView
         super(context, attrs, defStyle);
     }
 
-    public void setNetworkController(NetworkController nc) {
+    public void setNetworkController(NetworkControllerImpl nc) {
         if (DEBUG) Log.d(TAG, "NetworkController=" + nc);
         mNC = nc;
+    }
+
+    public void setSecurityController(SecurityController sc) {
+        if (DEBUG) Log.d(TAG, "SecurityController=" + sc);
+        mSC = sc;
+        mSC.addCallback(this);
+        mVpnVisible = mSC.isVpnEnabled();
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mWideTypeIconStartPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.wide_type_icon_start_padding);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        mVpn            = (ImageView) findViewById(R.id.vpn);
         mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
         mWifi           = (ImageView) findViewById(R.id.wifi_signal);
         mMobileGroup    = (ViewGroup) findViewById(R.id.mobile_combo);
         mMobile         = (ImageView) findViewById(R.id.mobile_signal);
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
-        mSpacer         =             findViewById(R.id.spacer);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
+        mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
+        mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
 
         apply();
     }
 
     @Override
     protected void onDetachedFromWindow() {
+        mVpn            = null;
         mWifiGroup      = null;
         mWifi           = null;
         mMobileGroup    = null;
         mMobile         = null;
         mMobileType     = null;
-        mSpacer         = null;
         mAirplane       = null;
 
         super.onDetachedFromWindow();
+    }
+
+    // From SecurityController.
+    @Override
+    public void onStateChanged() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                mVpnVisible = mSC.isVpnEnabled();
+                apply();
+            }
+        });
     }
 
     @Override
@@ -105,13 +142,16 @@ public class SignalClusterView
     }
 
     @Override
-    public void setMobileDataIndicators(boolean visible, int strengthIcon,
-            int typeIcon, String contentDescription, String typeContentDescription) {
+    public void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
+            String contentDescription, String typeContentDescription, boolean roaming,
+            boolean isTypeIconWide) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
+        mRoaming = roaming;
+        mIsMobileTypeIconWide = isTypeIconWide;
 
         apply();
     }
@@ -158,13 +198,19 @@ public class SignalClusterView
         apply();
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     // Run after each indicator change.
     private void apply() {
         if (mWifiGroup == null) return;
 
+        mVpn.setVisibility(mVpnVisible ? View.VISIBLE : View.GONE);
+        if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
         if (mWifiVisible) {
             mWifi.setImageResource(mWifiStrengthId);
-
             mWifiGroup.setContentDescription(mWifiDescription);
             mWifiGroup.setVisibility(View.VISIBLE);
         } else {
@@ -179,7 +225,6 @@ public class SignalClusterView
         if (mMobileVisible && !mIsAirplaneMode) {
             mMobile.setImageResource(mMobileStrengthId);
             mMobileType.setImageResource(mMobileTypeId);
-
             mMobileGroup.setContentDescription(mMobileTypeDescription + " " + mMobileDescription);
             mMobileGroup.setVisibility(View.VISIBLE);
         } else {
@@ -193,19 +238,26 @@ public class SignalClusterView
             mAirplane.setVisibility(View.GONE);
         }
 
-        if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
-            mSpacer.setVisibility(View.INVISIBLE);
+        if (mIsAirplaneMode && mWifiVisible) {
+            mWifiAirplaneSpacer.setVisibility(View.VISIBLE);
         } else {
-            mSpacer.setVisibility(View.GONE);
+            mWifiAirplaneSpacer.setVisibility(View.GONE);
         }
+
+        if (mRoaming && mMobileVisible && mWifiVisible) {
+            mWifiSignalSpacer.setVisibility(View.VISIBLE);
+        } else {
+            mWifiSignalSpacer.setVisibility(View.GONE);
+        }
+
+        mMobile.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0, 0, 0, 0);
 
         if (DEBUG) Log.d(TAG,
                 String.format("mobile: %s sig=%d typ=%d",
                     (mMobileVisible ? "VISIBLE" : "GONE"),
                     mMobileStrengthId, mMobileTypeId));
 
-        mMobileType.setVisibility(
-                !mWifiVisible ? View.VISIBLE : View.GONE);
+        mMobileType.setVisibility((mRoaming || mMobileTypeId != 0) ? View.VISIBLE : View.GONE);
     }
 }
 

@@ -64,8 +64,8 @@ enum install_status_t {
     INSTALL_FAILED_INSUFFICIENT_STORAGE = -4,
     INSTALL_FAILED_CONTAINER_ERROR = -18,
     INSTALL_FAILED_INTERNAL_ERROR = -110,
-    INSTALL_FAILED_NO_MATCHING_ABIS = -112,
-    NO_NATIVE_LIBRARIES = -113
+    INSTALL_FAILED_NO_MATCHING_ABIS = -113,
+    NO_NATIVE_LIBRARIES = -114
 };
 
 typedef install_status_t (*iterFunc)(JNIEnv*, void*, ZipFileRO*, ZipEntryRO, const char*);

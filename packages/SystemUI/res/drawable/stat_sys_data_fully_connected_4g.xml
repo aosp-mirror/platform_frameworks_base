@@ -1,0 +1,27 @@
+<!--
+Copyright (C) 2014 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="8.5dp"
+        android:height="17dp"
+        android:viewportWidth="12.0"
+        android:viewportHeight="24.0">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4.600000,7.800000l0.700000,0.000000l0.000000,1.300000L4.600000,9.100000L4.600000,11.000000L3.000000,11.000000L3.000000,9.200000L0.100000,9.200000L0.000000,8.100000L3.000000,2.500000l1.700000,0.000000L4.700000,7.800000zM1.600000,7.800000L3.000000,7.800000l0.000000,-3.000000L2.900000,5.000000L1.600000,7.800000z"/>
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11.900000,9.900000c-0.200000,0.400000 -0.600000,0.700000 -1.000000,0.900000s-1.000000,0.400000 -1.800000,0.400000c-0.900000,0.000000 -1.700000,-0.300000 -2.200000,-0.800000S6.100000,9.000000 6.100000,7.900000L6.100000,5.600000c0.000000,-1.100000 0.300000,-1.900000 0.800000,-2.400000S8.100000,2.400000 9.000000,2.400000c1.000000,0.000000 1.700000,0.200000 2.100000,0.700000s0.700000,1.200000 0.700000,2.100000l-1.600000,0.000000c0.000000,-0.500000 -0.100000,-0.900000 -0.200000,-1.100000S9.500000,3.700000 9.000000,3.700000c-0.400000,0.000000 -0.700000,0.200000 -0.900000,0.500000S7.700000,5.000000 7.700000,5.600000l0.000000,2.300000c0.000000,0.700000 0.100000,1.100000 0.300000,1.400000s0.600000,0.500000 1.000000,0.500000c0.300000,0.000000 0.600000,0.000000 0.700000,-0.100000s0.300000,-0.200000 0.400000,-0.300000L10.099999,7.800000L9.000000,7.800000L9.000000,6.600000l2.900000,0.000000L11.900000,9.900000z"/>
+</vector>

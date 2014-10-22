@@ -16,23 +16,23 @@
 
 package com.android.keyguard;
 
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.widget.PasswordEntryKeyboardHelper;
-import com.android.internal.widget.PasswordEntryKeyboardView;
 
 import java.util.List;
 /**
@@ -44,8 +44,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
     private final boolean mShowImeAtScreenOn;
+    private final int mDisappearYTranslation;
 
     InputMethodManager mImm;
+    private TextView mPasswordEntry;
+    private Interpolator mLinearOutSlowInInterpolator;
+    private Interpolator mFastOutLinearInInterpolator;
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -55,6 +59,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         super(context, attrs);
         mShowImeAtScreenOn = context.getResources().
                 getBoolean(R.bool.kg_show_ime_at_screen_on);
+        mDisappearYTranslation = getResources().getDimensionPixelSize(
+                R.dimen.disappear_y_translation);
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(
+                context, android.R.interpolator.linear_out_slow_in);
+        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(
+                context, android.R.interpolator.fast_out_linear_in);
     }
 
     protected void resetState() {
@@ -73,18 +83,31 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    public void onResume(int reason) {
+    public void onResume(final int reason) {
         super.onResume(reason);
-        mPasswordEntry.requestFocus();
-        if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
-            mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
-        }
+
+        // Wait a bit to focus the field so the focusable flag on the window is already set then.
+        post(new Runnable() {
+            @Override
+            public void run() {
+                mPasswordEntry.requestFocus();
+                if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
+                    mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
+                }
+            }
+        });
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mImm.hideSoftInputFromWindow(getWindowToken(), 0);
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        mPasswordEntry.requestFocus();
     }
 
     @Override
@@ -96,16 +119,22 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         mImm = (InputMethodManager) getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
 
+        mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        mPasswordEntry.setOnEditorActionListener(this);
+        mPasswordEntry.addTextChangedListener(this);
 
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mCallback.userActivity(0); // TODO: customize timeout for text?
+                mCallback.userActivity();
             }
         });
+
+        // Set selected property on so the view can send accessibility events.
+        mPasswordEntry.setSelected(true);
 
         mPasswordEntry.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -116,7 +145,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
             public void afterTextChanged(Editable s) {
                 if (mCallback != null) {
-                    mCallback.userActivity(0);
+                    mCallback.userActivity();
                 }
             }
         });
@@ -130,7 +159,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             imeOrDeleteButtonVisible = true;
             switchImeButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    mCallback.userActivity(0); // Leave the screen on a bit longer
+                    mCallback.userActivity(); // Leave the screen on a bit longer
                     mImm.showInputMethodPicker();
                 }
             });
@@ -146,6 +175,27 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 mPasswordEntry.setLayoutParams(params);
             }
         }
+    }
+
+    @Override
+    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
+        // send focus to the password field
+        return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
+    }
+
+    @Override
+    protected void resetPasswordText(boolean animate) {
+        mPasswordEntry.setText("");
+    }
+
+    @Override
+    protected String getPasswordText() {
+        return mPasswordEntry.getText().toString();
+    }
+
+    @Override
+    protected void setPasswordEntryEnabled(boolean enabled) {
+        mPasswordEntry.setEnabled(enabled);
     }
 
     /**
@@ -203,5 +253,59 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     @Override
     public int getWrongPasswordStringId() {
         return R.string.kg_wrong_password;
+    }
+
+    @Override
+    public void startAppearAnimation() {
+        setAlpha(0f);
+        setTranslationY(0f);
+        animate()
+                .alpha(1)
+                .withLayer()
+                .setDuration(300)
+                .setInterpolator(mLinearOutSlowInInterpolator);
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        animate()
+                .alpha(0f)
+                .translationY(mDisappearYTranslation)
+                .setInterpolator(mFastOutLinearInInterpolator)
+                .setDuration(100)
+                .withEndAction(finishRunnable);
+        return true;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (mCallback != null) {
+            mCallback.userActivity();
+        }
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        // Check if this was the result of hitting the enter key
+        final boolean isSoftImeEvent = event == null
+                && (actionId == EditorInfo.IME_NULL
+                || actionId == EditorInfo.IME_ACTION_DONE
+                || actionId == EditorInfo.IME_ACTION_NEXT);
+        final boolean isKeyboardEnterKey = event != null
+                && KeyEvent.isConfirmKey(event.getKeyCode())
+                && event.getAction() == KeyEvent.ACTION_DOWN;
+        if (isSoftImeEvent || isKeyboardEnterKey) {
+            verifyPasswordAndUnlock();
+            return true;
+        }
+        return false;
     }
 }

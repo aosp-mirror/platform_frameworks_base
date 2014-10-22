@@ -23,8 +23,8 @@ import android.widget.Button;
 
 public class ButtonActivityTest extends ImfBaseTestCase<ButtonActivity> {
 
-	final public String TAG = "ButtonActivityTest";
-	
+    final public String TAG = "ButtonActivityTest";
+    
     public ButtonActivityTest() {
         super(ButtonActivity.class);
     }

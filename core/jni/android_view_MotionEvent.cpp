@@ -23,6 +23,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <input/Input.h>
+#include <ScopedUtfChars.h>
 #include "android_os_Parcel.h"
 #include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"
@@ -210,8 +211,9 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
     outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.orientation));
 
-    uint64_t bits = env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits);
-    if (bits) {
+    BitSet64 bits =
+            BitSet64(env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits));
+    if (!bits.isEmpty()) {
         jfloatArray valuesArray = jfloatArray(env->GetObjectField(pointerCoordsObj,
                 gPointerCoordsClassInfo.mPackedAxisValues));
         if (valuesArray) {
@@ -220,11 +222,9 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
 
             uint32_t index = 0;
             do {
-                uint32_t axis = __builtin_ctzll(bits);
-                uint64_t axisBit = 1LL << axis;
-                bits &= ~axisBit;
+                uint32_t axis = bits.clearFirstMarkedBit();
                 outRawPointerCoords->setAxisValue(axis, values[index++]);
-            } while (bits);
+            } while (!bits.isEmpty());
 
             env->ReleasePrimitiveArrayCritical(valuesArray, values, JNI_ABORT);
             env->DeleteLocalRef(valuesArray);
@@ -274,21 +274,19 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.orientation,
             rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
 
-    const uint64_t unpackedAxisBits = 0
-            | (1LL << AMOTION_EVENT_AXIS_X)
-            | (1LL << AMOTION_EVENT_AXIS_Y)
-            | (1LL << AMOTION_EVENT_AXIS_PRESSURE)
-            | (1LL << AMOTION_EVENT_AXIS_SIZE)
-            | (1LL << AMOTION_EVENT_AXIS_TOUCH_MAJOR)
-            | (1LL << AMOTION_EVENT_AXIS_TOUCH_MINOR)
-            | (1LL << AMOTION_EVENT_AXIS_TOOL_MAJOR)
-            | (1LL << AMOTION_EVENT_AXIS_TOOL_MINOR)
-            | (1LL << AMOTION_EVENT_AXIS_ORIENTATION);
-
     uint64_t outBits = 0;
-    uint64_t remainingBits = rawPointerCoords->bits & ~unpackedAxisBits;
-    if (remainingBits) {
-        uint32_t packedAxesCount = __builtin_popcountll(remainingBits);
+    BitSet64 bits = BitSet64(rawPointerCoords->bits);
+    bits.clearBit(AMOTION_EVENT_AXIS_X);
+    bits.clearBit(AMOTION_EVENT_AXIS_Y);
+    bits.clearBit(AMOTION_EVENT_AXIS_PRESSURE);
+    bits.clearBit(AMOTION_EVENT_AXIS_SIZE);
+    bits.clearBit(AMOTION_EVENT_AXIS_TOUCH_MAJOR);
+    bits.clearBit(AMOTION_EVENT_AXIS_TOUCH_MINOR);
+    bits.clearBit(AMOTION_EVENT_AXIS_TOOL_MAJOR);
+    bits.clearBit(AMOTION_EVENT_AXIS_TOOL_MINOR);
+    bits.clearBit(AMOTION_EVENT_AXIS_ORIENTATION);
+    if (!bits.isEmpty()) {
+        uint32_t packedAxesCount = bits.count();
         jfloatArray outValuesArray = obtainPackedAxisValuesArray(env, packedAxesCount,
                 outPointerCoordsObj);
         if (!outValuesArray) {
@@ -301,12 +299,10 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
         const float* values = rawPointerCoords->values;
         uint32_t index = 0;
         do {
-            uint32_t axis = __builtin_ctzll(remainingBits);
-            uint64_t axisBit = 1LL << axis;
-            remainingBits &= ~axisBit;
-            outBits |= axisBit;
+            uint32_t axis = bits.clearFirstMarkedBit();
+            outBits |= BitSet64::valueForBit(axis);
             outValues[index++] = rawPointerCoords->getAxisValue(axis);
-        } while (remainingBits);
+        } while (!bits.isEmpty());
 
         env->ReleasePrimitiveArrayCritical(outValuesArray, outValues, 0);
         env->DeleteLocalRef(outValuesArray);
@@ -724,6 +720,17 @@ static void android_view_MotionEvent_nativeWriteToParcel(JNIEnv* env, jclass cla
     }
 }
 
+static jstring android_view_MotionEvent_nativeAxisToString(JNIEnv* env, jclass clazz,
+        jint axis) {
+    return env->NewStringUTF(MotionEvent::getLabel(static_cast<int32_t>(axis)));
+}
+
+static jint android_view_MotionEvent_nativeAxisFromString(JNIEnv* env, jclass clazz,
+        jstring label) {
+    ScopedUtfChars axisLabel(env, label);
+    return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()));
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMotionEventMethods[] = {
@@ -840,6 +847,10 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeWriteToParcel",
             "(JLandroid/os/Parcel;)V",
             (void*)android_view_MotionEvent_nativeWriteToParcel },
+    { "nativeAxisToString", "(I)Ljava/lang/String;",
+            (void*)android_view_MotionEvent_nativeAxisToString },
+    { "nativeAxisFromString", "(Ljava/lang/String;)I",
+            (void*)android_view_MotionEvent_nativeAxisFromString },
 };
 
 #define FIND_CLASS(var, className) \

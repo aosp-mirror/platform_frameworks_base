@@ -1,0 +1,36 @@
+page.title=Engage & Retain Users
+page.metaDescription=Engaging and retaining active users is the key to success. Here are some resources to help you build an active user base.
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+<p>
+  Engaging and retaining active users is the key to success. This is specially
+  true for subscription and in-app purchase models. Here are several tools and
+  techniques to keep your users coming back.
+</p>
+
+<div class="dynamic-grid">
+
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/engagelanding"
+    data-cardSizes="9x6,9x6,6x6,6x6,6x6,9x6,9x6,6x6,6x6,6x6"
+    data-maxResults="10">
+  </div>
+
+  <h3>Related Resources</h3>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:youtube+tag:engagement"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x3"
+    data-maxResults="3">
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:engagement"
+    data-sortdOrder="-timestamp"
+    data-cardSizes="6x3"
+    data-maxResults="3">
+  </div>
+
+</div>

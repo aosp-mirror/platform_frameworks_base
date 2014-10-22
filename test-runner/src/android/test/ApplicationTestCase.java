@@ -16,8 +16,6 @@
 
 package android.test;
 
-import java.lang.reflect.Field;
-
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;

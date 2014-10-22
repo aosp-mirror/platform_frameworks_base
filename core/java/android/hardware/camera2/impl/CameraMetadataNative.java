@@ -20,15 +20,49 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.Face;
-import android.hardware.camera2.Rational;
+import android.hardware.camera2.marshal.Marshaler;
+import android.hardware.camera2.marshal.MarshalQueryable;
+import android.hardware.camera2.marshal.MarshalRegistry;
+import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
+import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
+import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
+import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
+import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
+import android.hardware.camera2.marshal.impl.MarshalQueryableHighSpeedVideoConfiguration;
+import android.hardware.camera2.marshal.impl.MarshalQueryableMeteringRectangle;
+import android.hardware.camera2.marshal.impl.MarshalQueryableNativeByteToInteger;
+import android.hardware.camera2.marshal.impl.MarshalQueryablePair;
+import android.hardware.camera2.marshal.impl.MarshalQueryableParcelable;
+import android.hardware.camera2.marshal.impl.MarshalQueryablePrimitive;
+import android.hardware.camera2.marshal.impl.MarshalQueryableRange;
+import android.hardware.camera2.marshal.impl.MarshalQueryableRect;
+import android.hardware.camera2.marshal.impl.MarshalQueryableReprocessFormatsMap;
+import android.hardware.camera2.marshal.impl.MarshalQueryableRggbChannelVector;
+import android.hardware.camera2.marshal.impl.MarshalQueryableSize;
+import android.hardware.camera2.marshal.impl.MarshalQueryableSizeF;
+import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration;
+import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
+import android.hardware.camera2.marshal.impl.MarshalQueryableString;
+import android.hardware.camera2.params.Face;
+import android.hardware.camera2.params.HighSpeedVideoConfiguration;
+import android.hardware.camera2.params.LensShadingMap;
+import android.hardware.camera2.params.StreamConfiguration;
+import android.hardware.camera2.params.StreamConfigurationDuration;
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.params.TonemapCurve;
+import android.hardware.camera2.utils.TypeReference;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
+import android.util.Size;
 
-import java.lang.reflect.Array;
+import com.android.internal.util.Preconditions;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -38,12 +72,190 @@ import java.util.HashMap;
  * Implementation of camera metadata marshal/unmarshal across Binder to
  * the camera service
  */
-public class CameraMetadataNative extends CameraMetadata implements Parcelable {
+public class CameraMetadataNative implements Parcelable {
+
+    public static class Key<T> {
+        private boolean mHasTag;
+        private int mTag;
+        private final Class<T> mType;
+        private final TypeReference<T> mTypeReference;
+        private final String mName;
+        private final int mHash;
+        /**
+         * Visible for testing only.
+         *
+         * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
+         * for application code or vendor-extended keys.</p>
+         */
+        public Key(String name, Class<T> type) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (type == null) {
+                throw new NullPointerException("Type needs to be non-null");
+            }
+            mName = name;
+            mType = type;
+            mTypeReference = TypeReference.createSpecializedTypeReference(type);
+            mHash = mName.hashCode() ^ mTypeReference.hashCode();
+        }
+
+        /**
+         * Visible for testing only.
+         *
+         * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
+         * for application code or vendor-extended keys.</p>
+         */
+        @SuppressWarnings("unchecked")
+        public Key(String name, TypeReference<T> typeReference) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (typeReference == null) {
+                throw new NullPointerException("TypeReference needs to be non-null");
+            }
+            mName = name;
+            mType = (Class<T>)typeReference.getRawType();
+            mTypeReference = typeReference;
+            mHash = mName.hashCode() ^ mTypeReference.hashCode();
+        }
+
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        public final String getName() {
+            return mName;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public final int hashCode() {
+            return mHash;
+        }
+
+        /**
+         * Compare this key against other native keys, request keys, result keys, and
+         * characteristics keys.
+         *
+         * <p>Two keys are considered equal if their name and type reference are equal.</p>
+         *
+         * <p>Note that the equality against non-native keys is one-way. A native key may be equal
+         * to a result key; but that same result key will not be equal to a native key.</p>
+         */
+        @SuppressWarnings("rawtypes")
+        @Override
+        public final boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || this.hashCode() != o.hashCode()) {
+                return false;
+            }
+
+            Key<?> lhs;
+
+            if (o instanceof CaptureResult.Key) {
+                lhs = ((CaptureResult.Key)o).getNativeKey();
+            } else if (o instanceof CaptureRequest.Key) {
+                lhs = ((CaptureRequest.Key)o).getNativeKey();
+            } else if (o instanceof CameraCharacteristics.Key) {
+                lhs = ((CameraCharacteristics.Key)o).getNativeKey();
+            } else if ((o instanceof Key)) {
+                lhs = (Key<?>)o;
+            } else {
+                return false;
+            }
+
+            return mName.equals(lhs.mName) && mTypeReference.equals(lhs.mTypeReference);
+        }
+
+        /**
+         * <p>
+         * Get the tag corresponding to this key. This enables insertion into the
+         * native metadata.
+         * </p>
+         *
+         * <p>This value is looked up the first time, and cached subsequently.</p>
+         *
+         * @return The tag numeric value corresponding to the string
+         */
+        public final int getTag() {
+            if (!mHasTag) {
+                mTag = CameraMetadataNative.getTag(mName);
+                mHasTag = true;
+            }
+            return mTag;
+        }
+
+        /**
+         * Get the raw class backing the type {@code T} for this key.
+         *
+         * <p>The distinction is only important if {@code T} is a generic, e.g.
+         * {@code Range<Integer>} since the nested type will be erased.</p>
+         */
+        public final Class<T> getType() {
+            // TODO: remove this; other places should use #getTypeReference() instead
+            return mType;
+        }
+
+        /**
+         * Get the type reference backing the type {@code T} for this key.
+         *
+         * <p>The distinction is only important if {@code T} is a generic, e.g.
+         * {@code Range<Integer>} since the nested type will be retained.</p>
+         */
+        public final TypeReference<T> getTypeReference() {
+            return mTypeReference;
+        }
+    }
 
     private static final String TAG = "CameraMetadataJV";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
     // this should be in sync with HAL_PIXEL_FORMAT_BLOB defined in graphics.h
-    private static final int NATIVE_JPEG_FORMAT = 0x21;
+    public static final int NATIVE_JPEG_FORMAT = 0x21;
+
+    private static final String CELLID_PROCESS = "CELLID";
+    private static final String GPS_PROCESS = "GPS";
+    private static final int FACE_LANDMARK_SIZE = 6;
+
+    private static String translateLocationProviderToProcess(final String provider) {
+        if (provider == null) {
+            return null;
+        }
+        switch(provider) {
+            case LocationManager.GPS_PROVIDER:
+                return GPS_PROCESS;
+            case LocationManager.NETWORK_PROVIDER:
+                return CELLID_PROCESS;
+            default:
+                return null;
+        }
+    }
+
+    private static String translateProcessToLocationProvider(final String process) {
+        if (process == null) {
+            return null;
+        }
+        switch(process) {
+            case GPS_PROCESS:
+                return LocationManager.GPS_PROVIDER;
+            case CELLID_PROCESS:
+                return LocationManager.NETWORK_PROVIDER;
+            default:
+                return null;
+        }
+    }
 
     public CameraMetadataNative() {
         super();
@@ -62,6 +274,20 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         if (mMetadataPtr == 0) {
             throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         }
+    }
+
+    /**
+     * Move the contents from {@code other} into a new camera metadata instance.</p>
+     *
+     * <p>After this call, {@code other} will become empty.</p>
+     *
+     * @param other the previous metadata instance which will get pilfered
+     * @return a new metadata instance with the values from {@code other} moved into it
+     */
+    public static CameraMetadataNative move(CameraMetadataNative other) {
+        CameraMetadataNative newObject = new CameraMetadataNative();
+        newObject.swap(other);
+        return newObject;
     }
 
     public static final Parcelable.Creator<CameraMetadataNative> CREATOR =
@@ -89,20 +315,59 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         nativeWriteToParcel(dest);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T get(Key<T> key) {
-        T value = getOverride(key);
-        if (value != null) {
-            return value;
-        }
+    /**
+     * @hide
+     */
+    public <T> T get(CameraCharacteristics.Key<T> key) {
+        return get(key.getNativeKey());
+    }
 
+    /**
+     * @hide
+     */
+    public <T> T get(CaptureResult.Key<T> key) {
+        return get(key.getNativeKey());
+    }
+
+    /**
+     * @hide
+     */
+    public <T> T get(CaptureRequest.Key<T> key) {
+        return get(key.getNativeKey());
+    }
+
+    /**
+     * Look-up a metadata field value by its key.
+     *
+     * @param key a non-{@code null} key instance
+     * @return the field corresponding to the {@code key}, or {@code null} if no value was set
+     */
+    public <T> T get(Key<T> key) {
+        Preconditions.checkNotNull(key, "key must not be null");
+
+        // Check if key has been overridden to use a wrapper class on the java side.
+        GetCommand g = sGetCommandMap.get(key);
+        if (g != null) {
+            return g.getValue(this, key);
+        }
         return getBase(key);
     }
 
     public void readFromParcel(Parcel in) {
         nativeReadFromParcel(in);
     }
+
+    /**
+     * Set the global client-side vendor tag descriptor to allow use of vendor
+     * tags in camera applications.
+     *
+     * @return int A native status_t value corresponding to one of the
+     * {@link CameraBinderDecorator} integer constants.
+     * @see CameraBinderDecorator#throwOnError
+     *
+     * @hide
+     */
+    public static native int nativeSetupGlobalVendorTagDescriptor();
 
     /**
      * Set a camera metadata field to a value. The field definitions can be
@@ -114,11 +379,25 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
      * type to the key.
      */
     public <T> void set(Key<T> key, T value) {
-        if (setOverride(key, value)) {
+        SetCommand s = sSetCommandMap.get(key);
+        if (s != null) {
+            s.setValue(this, value);
             return;
         }
 
         setBase(key, value);
+    }
+
+    public <T> void set(CaptureRequest.Key<T> key, T value) {
+        set(key.getNativeKey(), value);
+    }
+
+    public <T> void set(CaptureResult.Key<T> key, T value) {
+        set(key.getNativeKey(), value);
+    }
+
+    public <T> void set(CameraCharacteristics.Key<T> key, T value) {
+        set(key.getNativeKey(), value);
     }
 
     // Keep up-to-date with camera_metadata.h
@@ -157,273 +436,16 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         mMetadataPtr = 0; // set it to 0 again to prevent eclipse from making this field final
     }
 
-    private static int getTypeSize(int nativeType) {
-        switch(nativeType) {
-            case TYPE_BYTE:
-                return 1;
-            case TYPE_INT32:
-            case TYPE_FLOAT:
-                return 4;
-            case TYPE_INT64:
-            case TYPE_DOUBLE:
-            case TYPE_RATIONAL:
-                return 8;
-        }
-
-        throw new UnsupportedOperationException("Unknown type, can't get size "
-                + nativeType);
+    private <T> T getBase(CameraCharacteristics.Key<T> key) {
+        return getBase(key.getNativeKey());
     }
 
-    private static Class<?> getExpectedType(int nativeType) {
-        switch(nativeType) {
-            case TYPE_BYTE:
-                return Byte.TYPE;
-            case TYPE_INT32:
-                return Integer.TYPE;
-            case TYPE_FLOAT:
-                return Float.TYPE;
-            case TYPE_INT64:
-                return Long.TYPE;
-            case TYPE_DOUBLE:
-                return Double.TYPE;
-            case TYPE_RATIONAL:
-                return Rational.class;
-        }
-
-        throw new UnsupportedOperationException("Unknown type, can't map to Java type "
-                + nativeType);
+    private <T> T getBase(CaptureResult.Key<T> key) {
+        return getBase(key.getNativeKey());
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> int packSingleNative(T value, ByteBuffer buffer, Class<T> type,
-            int nativeType, boolean sizeOnly) {
-
-        if (!sizeOnly) {
-            /**
-             * Rewrite types when the native type doesn't match the managed type
-             *  - Boolean -> Byte
-             *  - Integer -> Byte
-             */
-
-            if (nativeType == TYPE_BYTE && type == Boolean.TYPE) {
-                // Since a boolean can't be cast to byte, and we don't want to use putBoolean
-                boolean asBool = (Boolean) value;
-                byte asByte = (byte) (asBool ? 1 : 0);
-                value = (T) (Byte) asByte;
-            } else if (nativeType == TYPE_BYTE && type == Integer.TYPE) {
-                int asInt = (Integer) value;
-                byte asByte = (byte) asInt;
-                value = (T) (Byte) asByte;
-            } else if (type != getExpectedType(nativeType)) {
-                throw new UnsupportedOperationException("Tried to pack a type of " + type +
-                        " but we expected the type to be " + getExpectedType(nativeType));
-            }
-
-            if (nativeType == TYPE_BYTE) {
-                buffer.put((Byte) value);
-            } else if (nativeType == TYPE_INT32) {
-                buffer.putInt((Integer) value);
-            } else if (nativeType == TYPE_FLOAT) {
-                buffer.putFloat((Float) value);
-            } else if (nativeType == TYPE_INT64) {
-                buffer.putLong((Long) value);
-            } else if (nativeType == TYPE_DOUBLE) {
-                buffer.putDouble((Double) value);
-            } else if (nativeType == TYPE_RATIONAL) {
-                Rational r = (Rational) value;
-                buffer.putInt(r.getNumerator());
-                buffer.putInt(r.getDenominator());
-            }
-
-        }
-
-        return getTypeSize(nativeType);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> int packSingle(T value, ByteBuffer buffer, Class<T> type, int nativeType,
-            boolean sizeOnly) {
-
-        int size = 0;
-
-        if (type.isPrimitive() || type == Rational.class) {
-            size = packSingleNative(value, buffer, type, nativeType, sizeOnly);
-        } else if (type.isEnum()) {
-            size = packEnum((Enum)value, buffer, (Class<Enum>)type, nativeType, sizeOnly);
-        } else if (type.isArray()) {
-            size = packArray(value, buffer, type, nativeType, sizeOnly);
-        } else {
-            size = packClass(value, buffer, type, nativeType, sizeOnly);
-        }
-
-        return size;
-    }
-
-    private static <T extends Enum<T>> int packEnum(T value, ByteBuffer buffer, Class<T> type,
-            int nativeType, boolean sizeOnly) {
-
-        // TODO: add support for enums with their own values.
-        return packSingleNative(getEnumValue(value), buffer, Integer.TYPE, nativeType, sizeOnly);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> int packClass(T value, ByteBuffer buffer, Class<T> type, int nativeType,
-            boolean sizeOnly) {
-
-        MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
-        if (marshaler == null) {
-            throw new IllegalArgumentException(String.format("Unknown Key type: %s", type));
-        }
-
-        return marshaler.marshal(value, buffer, nativeType, sizeOnly);
-    }
-
-    private static <T> int packArray(T value, ByteBuffer buffer, Class<T> type, int nativeType,
-            boolean sizeOnly) {
-
-        int size = 0;
-        int arrayLength = Array.getLength(value);
-
-        @SuppressWarnings("unchecked")
-        Class<Object> componentType = (Class<Object>)type.getComponentType();
-
-        for (int i = 0; i < arrayLength; ++i) {
-            size += packSingle(Array.get(value, i), buffer, componentType, nativeType, sizeOnly);
-        }
-
-        return size;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T unpackSingleNative(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        T val;
-
-        if (nativeType == TYPE_BYTE) {
-            val = (T) (Byte) buffer.get();
-        } else if (nativeType == TYPE_INT32) {
-            val = (T) (Integer) buffer.getInt();
-        } else if (nativeType == TYPE_FLOAT) {
-            val = (T) (Float) buffer.getFloat();
-        } else if (nativeType == TYPE_INT64) {
-            val = (T) (Long) buffer.getLong();
-        } else if (nativeType == TYPE_DOUBLE) {
-            val = (T) (Double) buffer.getDouble();
-        } else if (nativeType == TYPE_RATIONAL) {
-            val = (T) new Rational(buffer.getInt(), buffer.getInt());
-        } else {
-            throw new UnsupportedOperationException("Unknown type, can't unpack a native type "
-                + nativeType);
-        }
-
-        /**
-         * Rewrite types when the native type doesn't match the managed type
-         *  - Byte -> Boolean
-         *  - Byte -> Integer
-         */
-
-        if (nativeType == TYPE_BYTE && type == Boolean.TYPE) {
-            // Since a boolean can't be cast to byte, and we don't want to use getBoolean
-            byte asByte = (Byte) val;
-            boolean asBool = asByte != 0;
-            val = (T) (Boolean) asBool;
-        } else if (nativeType == TYPE_BYTE && type == Integer.TYPE) {
-            byte asByte = (Byte) val;
-            int asInt = asByte;
-            val = (T) (Integer) asInt;
-        } else if (type != getExpectedType(nativeType)) {
-            throw new UnsupportedOperationException("Tried to unpack a type of " + type +
-                    " but we expected the type to be " + getExpectedType(nativeType));
-        }
-
-        return val;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> T unpackSingle(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        if (type.isPrimitive() || type == Rational.class) {
-            return unpackSingleNative(buffer, type, nativeType);
-        }
-
-        if (type.isEnum()) {
-            return (T) unpackEnum(buffer, (Class<Enum>)type, nativeType);
-        }
-
-        if (type.isArray()) {
-            return unpackArray(buffer, type, nativeType);
-        }
-
-        T instance = unpackClass(buffer, type, nativeType);
-
-        return instance;
-    }
-
-    private static <T extends Enum<T>> T unpackEnum(ByteBuffer buffer, Class<T> type,
-            int nativeType) {
-        int ordinal = unpackSingleNative(buffer, Integer.TYPE, nativeType);
-        return getEnumFromValue(type, ordinal);
-    }
-
-    private static <T> T unpackClass(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
-        if (marshaler == null) {
-            throw new IllegalArgumentException("Unknown class type: " + type);
-        }
-
-        return marshaler.unmarshal(buffer, nativeType);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T unpackArray(ByteBuffer buffer, Class<T> type, int nativeType) {
-
-        Class<?> componentType = type.getComponentType();
-        Object array;
-
-        int elementSize = getTypeSize(nativeType);
-
-        MetadataMarshalClass<?> marshaler = getMarshaler(componentType, nativeType);
-        if (marshaler != null) {
-            elementSize = marshaler.getNativeSize(nativeType);
-        }
-
-        if (elementSize != MetadataMarshalClass.NATIVE_SIZE_DYNAMIC) {
-            int remaining = buffer.remaining();
-            int arraySize = remaining / elementSize;
-
-            if (VERBOSE) {
-                Log.v(TAG,
-                        String.format(
-                            "Attempting to unpack array (count = %d, element size = %d, bytes " +
-                            "remaining = %d) for type %s",
-                            arraySize, elementSize, remaining, type));
-            }
-
-            array = Array.newInstance(componentType, arraySize);
-            for (int i = 0; i < arraySize; ++i) {
-               Object elem = unpackSingle(buffer, componentType, nativeType);
-               Array.set(array, i, elem);
-            }
-        } else {
-            // Dynamic size, use an array list.
-            ArrayList<Object> arrayList = new ArrayList<Object>();
-
-            int primitiveSize = getTypeSize(nativeType);
-            while (buffer.remaining() >= primitiveSize) {
-                Object elem = unpackSingle(buffer, componentType, nativeType);
-                arrayList.add(elem);
-            }
-
-            array = arrayList.toArray((T[]) Array.newInstance(componentType, 0));
-        }
-
-        if (buffer.remaining() != 0) {
-            Log.e(TAG, "Trailing bytes (" + buffer.remaining() + ") left over after unpacking "
-                    + type);
-        }
-
-        return (T) array;
+    private <T> T getBase(CaptureRequest.Key<T> key) {
+        return getBase(key.getNativeKey());
     }
 
     private <T> T getBase(Key<T> key) {
@@ -433,43 +455,214 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
             return null;
         }
 
-        int nativeType = getNativeType(tag);
-
+        Marshaler<T> marshaler = getMarshalerForKey(key);
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
-        return unpackSingle(buffer, key.getType(), nativeType);
+        return marshaler.unmarshal(buffer);
     }
 
-    // Need overwrite some metadata that has different definitions between native
-    // and managed sides.
-    @SuppressWarnings("unchecked")
-    private <T> T getOverride(Key<T> key) {
-        if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
-            return (T) getAvailableFormats();
-        } else if (key.equals(CaptureResult.STATISTICS_FACES)) {
-            return (T) getFaces();
-        } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
-            return (T) fixFaceRectangles();
-        }
-
-        // For other keys, get() falls back to getBase()
-        return null;
+    // Use Command pattern here to avoid lots of expensive if/equals checks in get for overridden
+    // metadata.
+    private static final HashMap<Key<?>, GetCommand> sGetCommandMap =
+            new HashMap<Key<?>, GetCommand>();
+    static {
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_AVAILABLE_FORMATS.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getAvailableFormats();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_FACES.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getFaces();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_FACE_RECTANGLES.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getFaceRectangles();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getStreamConfigurationMap();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_MAX_REGIONS_AE.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxRegions(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_MAX_REGIONS_AWB.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxRegions(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_MAX_REGIONS_AF.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxRegions(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxNumOutputs(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxNumOutputs(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxNumOutputs(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureRequest.TONEMAP_CURVE.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getTonemapCurve();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.JPEG_GPS_LOCATION.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getGpsLocation();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_LENS_SHADING_CORRECTION_MAP.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getLensShadingMap();
+                    }
+                });
     }
 
     private int[] getAvailableFormats() {
         int[] availableFormats = getBase(CameraCharacteristics.SCALER_AVAILABLE_FORMATS);
-        for (int i = 0; i < availableFormats.length; i++) {
-            // JPEG has different value between native and managed side, need override.
-            if (availableFormats[i] == NATIVE_JPEG_FORMAT) {
-                availableFormats[i] = ImageFormat.JPEG;
+        if (availableFormats != null) {
+            for (int i = 0; i < availableFormats.length; i++) {
+                // JPEG has different value between native and managed side, need override.
+                if (availableFormats[i] == NATIVE_JPEG_FORMAT) {
+                    availableFormats[i] = ImageFormat.JPEG;
+                }
             }
         }
+
         return availableFormats;
     }
 
-    private Face[] getFaces() {
-        final int FACE_LANDMARK_SIZE = 6;
+    private boolean setFaces(Face[] faces) {
+        if (faces == null) {
+            return false;
+        }
 
+        int numFaces = faces.length;
+
+        // Detect if all faces are SIMPLE or not; count # of valid faces
+        boolean fullMode = true;
+        for (Face face : faces) {
+            if (face == null) {
+                numFaces--;
+                Log.w(TAG, "setFaces - null face detected, skipping");
+                continue;
+            }
+
+            if (face.getId() == Face.ID_UNSUPPORTED) {
+                fullMode = false;
+            }
+        }
+
+        Rect[] faceRectangles = new Rect[numFaces];
+        byte[] faceScores = new byte[numFaces];
+        int[] faceIds = null;
+        int[] faceLandmarks = null;
+
+        if (fullMode) {
+            faceIds = new int[numFaces];
+            faceLandmarks = new int[numFaces * FACE_LANDMARK_SIZE];
+        }
+
+        int i = 0;
+        for (Face face : faces) {
+            if (face == null) {
+                continue;
+            }
+
+            faceRectangles[i] = face.getBounds();
+            faceScores[i] = (byte)face.getScore();
+
+            if (fullMode) {
+                faceIds[i] = face.getId();
+
+                int j = 0;
+
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getLeftEyePosition().x;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getLeftEyePosition().y;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getRightEyePosition().x;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getRightEyePosition().y;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getMouthPosition().x;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getMouthPosition().y;
+            }
+
+            i++;
+        }
+
+        set(CaptureResult.STATISTICS_FACE_RECTANGLES, faceRectangles);
+        set(CaptureResult.STATISTICS_FACE_IDS, faceIds);
+        set(CaptureResult.STATISTICS_FACE_LANDMARKS, faceLandmarks);
+        set(CaptureResult.STATISTICS_FACE_SCORES, faceScores);
+
+        return true;
+    }
+
+    private Face[] getFaces() {
         Integer faceDetectMode = get(CaptureResult.STATISTICS_FACE_DETECT_MODE);
+        byte[] faceScores = get(CaptureResult.STATISTICS_FACE_SCORES);
+        Rect[] faceRectangles = get(CaptureResult.STATISTICS_FACE_RECTANGLES);
+        int[] faceIds = get(CaptureResult.STATISTICS_FACE_IDS);
+        int[] faceLandmarks = get(CaptureResult.STATISTICS_FACE_LANDMARKS);
+
+        if (areValuesAllNull(faceDetectMode, faceScores, faceRectangles, faceIds, faceLandmarks)) {
+            return null;
+        }
+
         if (faceDetectMode == null) {
             Log.w(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
             faceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE;
@@ -485,8 +678,6 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         }
 
         // Face scores and rectangles are required by SIMPLE and FULL mode.
-        byte[] faceScores = get(CaptureResult.STATISTICS_FACE_SCORES);
-        Rect[] faceRectangles = get(CaptureResult.STATISTICS_FACE_RECTANGLES);
         if (faceScores == null || faceRectangles == null) {
             Log.w(TAG, "Expect face scores and rectangles to be non-null");
             return new Face[0];
@@ -498,8 +689,6 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         // To be safe, make number of faces is the minimal of all face info metadata length.
         int numFaces = Math.min(faceScores.length, faceRectangles.length);
         // Face id and landmarks are only required by FULL mode.
-        int[] faceIds = get(CaptureResult.STATISTICS_FACE_IDS);
-        int[] faceLandmarks = get(CaptureResult.STATISTICS_FACE_LANDMARKS);
         if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
             if (faceIds == null || faceLandmarks == null) {
                 Log.w(TAG, "Expect face ids and landmarks to be non-null for FULL mode," +
@@ -532,9 +721,12 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
                 if (faceScores[i] <= Face.SCORE_MAX &&
                         faceScores[i] >= Face.SCORE_MIN &&
                         faceIds[i] >= 0) {
-                    Point leftEye = new Point(faceLandmarks[i*6], faceLandmarks[i*6+1]);
-                    Point rightEye = new Point(faceLandmarks[i*6+2], faceLandmarks[i*6+3]);
-                    Point mouth = new Point(faceLandmarks[i*6+4], faceLandmarks[i*6+5]);
+                    Point leftEye = new Point(faceLandmarks[i*FACE_LANDMARK_SIZE],
+                            faceLandmarks[i*FACE_LANDMARK_SIZE+1]);
+                    Point rightEye = new Point(faceLandmarks[i*FACE_LANDMARK_SIZE+2],
+                            faceLandmarks[i*FACE_LANDMARK_SIZE+3]);
+                    Point mouth = new Point(faceLandmarks[i*FACE_LANDMARK_SIZE+4],
+                            faceLandmarks[i*FACE_LANDMARK_SIZE+5]);
                     Face face = new Face(faceRectangles[i], faceScores[i], faceIds[i],
                             leftEye, rightEye, mouth);
                     faceList.add(face);
@@ -550,7 +742,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     // (left, top, width, height) at the native level, so the normal Rect
     // conversion that does (l, t, w, h) -> (l, t, r, b) is unnecessary. Undo
     // that conversion here for just the faces.
-    private Rect[] fixFaceRectangles() {
+    private Rect[] getFaceRectangles() {
         Rect[] faceRectangles = getBase(CaptureResult.STATISTICS_FACE_RECTANGLES);
         if (faceRectangles == null) return null;
 
@@ -565,35 +757,220 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return fixedFaceRectangles;
     }
 
+    private LensShadingMap getLensShadingMap() {
+        float[] lsmArray = getBase(CaptureResult.STATISTICS_LENS_SHADING_MAP);
+        Size s = get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE);
+
+        // Do not warn if lsmArray is null while s is not. This is valid.
+        if (lsmArray == null) {
+            return null;
+        }
+
+        if (s == null) {
+            Log.w(TAG, "getLensShadingMap - Lens shading map size was null.");
+            return null;
+        }
+
+        LensShadingMap map = new LensShadingMap(lsmArray, s.getHeight(), s.getWidth());
+        return map;
+    }
+
+    private Location getGpsLocation() {
+        String processingMethod = get(CaptureResult.JPEG_GPS_PROCESSING_METHOD);
+        double[] coords = get(CaptureResult.JPEG_GPS_COORDINATES);
+        Long timeStamp = get(CaptureResult.JPEG_GPS_TIMESTAMP);
+
+        if (areValuesAllNull(processingMethod, coords, timeStamp)) {
+            return null;
+        }
+
+        Location l = new Location(translateProcessToLocationProvider(processingMethod));
+        if (timeStamp != null) {
+            l.setTime(timeStamp);
+        } else {
+            Log.w(TAG, "getGpsLocation - No timestamp for GPS location.");
+        }
+
+        if (coords != null) {
+            l.setLatitude(coords[0]);
+            l.setLongitude(coords[1]);
+            l.setAltitude(coords[2]);
+        } else {
+            Log.w(TAG, "getGpsLocation - No coordinates for GPS location");
+        }
+
+        return l;
+    }
+
+    private boolean setGpsLocation(Location l) {
+        if (l == null) {
+            return false;
+        }
+
+        double[] coords = { l.getLatitude(), l.getLongitude(), l.getAltitude() };
+        String processMethod = translateLocationProviderToProcess(l.getProvider());
+        long timestamp = l.getTime();
+
+        set(CaptureRequest.JPEG_GPS_TIMESTAMP, timestamp);
+        set(CaptureRequest.JPEG_GPS_COORDINATES, coords);
+
+        if (processMethod == null) {
+            Log.w(TAG, "setGpsLocation - No process method, Location is not from a GPS or NETWORK" +
+                    "provider");
+        } else {
+            setBase(CaptureRequest.JPEG_GPS_PROCESSING_METHOD, processMethod);
+        }
+        return true;
+    }
+
+    private StreamConfigurationMap getStreamConfigurationMap() {
+        StreamConfiguration[] configurations = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS);
+        StreamConfigurationDuration[] minFrameDurations = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS);
+        StreamConfigurationDuration[] stallDurations = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS);
+        HighSpeedVideoConfiguration[] highSpeedVideoConfigurations = getBase(
+                CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
+
+        return new StreamConfigurationMap(
+                configurations, minFrameDurations, stallDurations, highSpeedVideoConfigurations);
+    }
+
+    private <T> Integer getMaxRegions(Key<T> key) {
+        final int AE = 0;
+        final int AWB = 1;
+        final int AF = 2;
+
+        // The order of the elements is: (AE, AWB, AF)
+        int[] maxRegions = getBase(CameraCharacteristics.CONTROL_MAX_REGIONS);
+
+        if (maxRegions == null) {
+            return null;
+        }
+
+        if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)) {
+            return maxRegions[AE];
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)) {
+            return maxRegions[AWB];
+        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)) {
+            return maxRegions[AF];
+        } else {
+            throw new AssertionError("Invalid key " + key);
+        }
+    }
+
+    private <T> Integer getMaxNumOutputs(Key<T> key) {
+        final int RAW = 0;
+        final int PROC = 1;
+        final int PROC_STALLING = 2;
+
+        // The order of the elements is: (raw, proc+nonstalling, proc+stalling)
+        int[] maxNumOutputs = getBase(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS);
+
+        if (maxNumOutputs == null) {
+            return null;
+        }
+
+        if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW)) {
+            return maxNumOutputs[RAW];
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC)) {
+            return maxNumOutputs[PROC];
+        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
+            return maxNumOutputs[PROC_STALLING];
+        } else {
+            throw new AssertionError("Invalid key " + key);
+        }
+    }
+
+    private <T> TonemapCurve getTonemapCurve() {
+        float[] red = getBase(CaptureRequest.TONEMAP_CURVE_RED);
+        float[] green = getBase(CaptureRequest.TONEMAP_CURVE_GREEN);
+        float[] blue = getBase(CaptureRequest.TONEMAP_CURVE_BLUE);
+
+        if (areValuesAllNull(red, green, blue)) {
+            return null;
+        }
+
+        if (red == null || green == null || blue == null) {
+            Log.w(TAG, "getTonemapCurve - missing tone curve components");
+            return null;
+        }
+        TonemapCurve tc = new TonemapCurve(red, green, blue);
+        return tc;
+    }
+
+    private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
+        setBase(key.getNativeKey(), value);
+    }
+
+    private <T> void setBase(CaptureResult.Key<T> key, T value) {
+        setBase(key.getNativeKey(), value);
+    }
+
+    private <T> void setBase(CaptureRequest.Key<T> key, T value) {
+        setBase(key.getNativeKey(), value);
+    }
+
     private <T> void setBase(Key<T> key, T value) {
         int tag = key.getTag();
 
         if (value == null) {
-            writeValues(tag, null);
+            // Erase the entry
+            writeValues(tag, /*src*/null);
             return;
-        }
+        } // else update the entry to a new value
 
-        int nativeType = getNativeType(tag);
-
-        int size = packSingle(value, null, key.getType(), nativeType, /* sizeOnly */true);
+        Marshaler<T> marshaler = getMarshalerForKey(key);
+        int size = marshaler.calculateMarshalSize(value);
 
         // TODO: Optimization. Cache the byte[] and reuse if the size is big enough.
         byte[] values = new byte[size];
 
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
-        packSingle(value, buffer, key.getType(), nativeType, /*sizeOnly*/false);
+        marshaler.marshal(value, buffer);
 
         writeValues(tag, values);
     }
 
-    // Set the camera metadata override.
-    private <T> boolean setOverride(Key<T> key, T value) {
-        if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
-            return setAvailableFormats((int[]) value);
-        }
-
-        // For other keys, set() falls back to setBase().
-        return false;
+    // Use Command pattern here to avoid lots of expensive if/equals checks in get for overridden
+    // metadata.
+    private static final HashMap<Key<?>, SetCommand> sSetCommandMap =
+            new HashMap<Key<?>, SetCommand>();
+    static {
+        sSetCommandMap.put(CameraCharacteristics.SCALER_AVAILABLE_FORMATS.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setAvailableFormats((int[]) value);
+            }
+        });
+        sSetCommandMap.put(CaptureResult.STATISTICS_FACE_RECTANGLES.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setFaceRectangles((Rect[]) value);
+            }
+        });
+        sSetCommandMap.put(CaptureResult.STATISTICS_FACES.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setFaces((Face[])value);
+            }
+        });
+        sSetCommandMap.put(CaptureRequest.TONEMAP_CURVE.getNativeKey(), new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setTonemapCurve((TonemapCurve) value);
+            }
+        });
+        sSetCommandMap.put(CaptureResult.JPEG_GPS_LOCATION.getNativeKey(), new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setGpsLocation((Location) value);
+            }
+        });
     }
 
     private boolean setAvailableFormats(int[] value) {
@@ -615,6 +992,54 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return true;
     }
 
+    /**
+     * Convert Face Rectangles from managed side to native side as they have different definitions.
+     * <p>
+     * Managed side face rectangles are defined as: left, top, width, height.
+     * Native side face rectangles are defined as: left, top, right, bottom.
+     * The input face rectangle need to be converted to native side definition when set is called.
+     * </p>
+     *
+     * @param faceRects Input face rectangles.
+     * @return true if face rectangles can be set successfully. Otherwise, Let the caller
+     *             (setBase) to handle it appropriately.
+     */
+    private boolean setFaceRectangles(Rect[] faceRects) {
+        if (faceRects == null) {
+            return false;
+        }
+
+        Rect[] newFaceRects = new Rect[faceRects.length];
+        for (int i = 0; i < newFaceRects.length; i++) {
+            newFaceRects[i] = new Rect(
+                    faceRects[i].left,
+                    faceRects[i].top,
+                    faceRects[i].right + faceRects[i].left,
+                    faceRects[i].bottom + faceRects[i].top);
+        }
+
+        setBase(CaptureResult.STATISTICS_FACE_RECTANGLES, newFaceRects);
+        return true;
+    }
+
+    private <T> boolean setTonemapCurve(TonemapCurve tc) {
+        if (tc == null) {
+            return false;
+        }
+
+        float[][] curve = new float[3][];
+        for (int i = TonemapCurve.CHANNEL_RED; i <= TonemapCurve.CHANNEL_BLUE; i++) {
+            int pointCount = tc.getPointCount(i);
+            curve[i] = new float[pointCount * TonemapCurve.POINT_SIZE];
+            tc.copyColorCurve(i, curve[i], 0);
+        }
+        setBase(CaptureRequest.TONEMAP_CURVE_RED, curve[0]);
+        setBase(CaptureRequest.TONEMAP_CURVE_GREEN, curve[1]);
+        setBase(CaptureRequest.TONEMAP_CURVE_BLUE, curve[2]);
+
+        return true;
+    }
+
     private long mMetadataPtr; // native CameraMetadata*
 
     private native long nativeAllocate();
@@ -631,6 +1056,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     private native synchronized byte[] nativeReadValues(int tag);
     private native synchronized void nativeWriteValues(int tag, byte[] src);
+    private native synchronized void nativeDump() throws IOException; // dump to ALOGD
 
     private static native int nativeGetTagFromKey(String keyName)
             throws IllegalArgumentException;
@@ -722,6 +1148,22 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return nativeReadValues(tag);
     }
 
+    /**
+     * Dumps the native metadata contents to logcat.
+     *
+     * <p>Visibility for testing/debugging only. The results will not
+     * include any synthesized keys, as they are invisible to the native layer.</p>
+     *
+     * @hide
+     */
+    public void dumpToLog() {
+        try {
+            nativeDump();
+        } catch (IOException e) {
+            Log.wtf(TAG, "Dump logging failed", e);
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -731,125 +1173,78 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         }
     }
 
-    private static final HashMap<Class<? extends Enum>, int[]> sEnumValues =
-            new HashMap<Class<? extends Enum>, int[]>();
     /**
-     * Register a non-sequential set of values to be used with the pack/unpack functions.
-     * This enables get/set to correctly marshal the enum into a value that is C-compatible.
+     * Get the marshaler compatible with the {@code key} and type {@code T}.
      *
-     * @param enumType The class for an enum
-     * @param values A list of values mapping to the ordinals of the enum
-     *
-     * @hide
+     * @throws UnsupportedOperationException
+     *          if the native/managed type combination for {@code key} is not supported
      */
-    public static <T extends Enum<T>> void registerEnumValues(Class<T> enumType, int[] values) {
-        if (enumType.getEnumConstants().length != values.length) {
-            throw new IllegalArgumentException(
-                    "Expected values array to be the same size as the enumTypes values "
-                            + values.length + " for type " + enumType);
-        }
-        if (VERBOSE) {
-            Log.v(TAG, "Registered enum values for type " + enumType + " values");
-        }
-
-        sEnumValues.put(enumType, values);
+    private static <T> Marshaler<T> getMarshalerForKey(Key<T> key) {
+        return MarshalRegistry.getMarshaler(key.getTypeReference(),
+                getNativeType(key.getTag()));
     }
 
-    /**
-     * Get the numeric value from an enum. This is usually the same as the ordinal value for
-     * enums that have fully sequential values, although for C-style enums the range of values
-     * may not map 1:1.
-     *
-     * @param enumValue Enum instance
-     * @return Int guaranteed to be ABI-compatible with the C enum equivalent
-     */
-    private static <T extends Enum<T>> int getEnumValue(T enumValue) {
-        int[] values;
-        values = sEnumValues.get(enumValue.getClass());
-
-        int ordinal = enumValue.ordinal();
-        if (values != null) {
-            return values[ordinal];
-        }
-
-        return ordinal;
-    }
-
-    /**
-     * Finds the enum corresponding to it's numeric value. Opposite of {@link #getEnumValue} method.
-     *
-     * @param enumType Class of the enum we want to find
-     * @param value The numeric value of the enum
-     * @return An instance of the enum
-     */
-    private static <T extends Enum<T>> T getEnumFromValue(Class<T> enumType, int value) {
-        int ordinal;
-
-        int[] registeredValues = sEnumValues.get(enumType);
-        if (registeredValues != null) {
-            ordinal = -1;
-
-            for (int i = 0; i < registeredValues.length; ++i) {
-                if (registeredValues[i] == value) {
-                    ordinal = i;
-                    break;
-                }
-            }
-        } else {
-            ordinal = value;
-        }
-
-        T[] values = enumType.getEnumConstants();
-
-        if (ordinal < 0 || ordinal >= values.length) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Argument 'value' (%d) was not a valid enum value for type %s "
-                                    + "(registered? %b)",
-                            value,
-                            enumType, (registeredValues != null)));
-        }
-
-        return values[ordinal];
-    }
-
-    static HashMap<Class<?>, MetadataMarshalClass<?>> sMarshalerMap = new
-            HashMap<Class<?>, MetadataMarshalClass<?>>();
-
-    private static <T> void registerMarshaler(MetadataMarshalClass<T> marshaler) {
-        sMarshalerMap.put(marshaler.getMarshalingClass(), marshaler);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> MetadataMarshalClass<T> getMarshaler(Class<T> type, int nativeType) {
-        MetadataMarshalClass<T> marshaler = (MetadataMarshalClass<T>) sMarshalerMap.get(type);
-
-        if (marshaler != null && !marshaler.isNativeTypeSupported(nativeType)) {
-            throw new UnsupportedOperationException("Unsupported type " + nativeType +
-                    " to be marshalled to/from a " + type);
-        }
-
-        return marshaler;
-    }
-
-    /**
-     * We use a class initializer to allow the native code to cache some field offsets
-     */
-    static {
-        nativeClassInit();
-
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void registerAllMarshalers() {
         if (VERBOSE) {
             Log.v(TAG, "Shall register metadata marshalers");
         }
 
-        // load built-in marshallers
-        registerMarshaler(new MetadataMarshalRect());
-        registerMarshaler(new MetadataMarshalSize());
-        registerMarshaler(new MetadataMarshalString());
+        MarshalQueryable[] queryList = new MarshalQueryable[] {
+                // marshalers for standard types
+                new MarshalQueryablePrimitive(),
+                new MarshalQueryableEnum(),
+                new MarshalQueryableArray(),
 
+                // pseudo standard types, that expand/narrow the native type into a managed type
+                new MarshalQueryableBoolean(),
+                new MarshalQueryableNativeByteToInteger(),
+
+                // marshalers for custom types
+                new MarshalQueryableRect(),
+                new MarshalQueryableSize(),
+                new MarshalQueryableSizeF(),
+                new MarshalQueryableString(),
+                new MarshalQueryableReprocessFormatsMap(),
+                new MarshalQueryableRange(),
+                new MarshalQueryablePair(),
+                new MarshalQueryableMeteringRectangle(),
+                new MarshalQueryableColorSpaceTransform(),
+                new MarshalQueryableStreamConfiguration(),
+                new MarshalQueryableStreamConfigurationDuration(),
+                new MarshalQueryableRggbChannelVector(),
+                new MarshalQueryableBlackLevelPattern(),
+                new MarshalQueryableHighSpeedVideoConfiguration(),
+
+                // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
+                new MarshalQueryableParcelable(),
+        };
+
+        for (MarshalQueryable query : queryList) {
+            MarshalRegistry.registerMarshalQueryable(query);
+        }
         if (VERBOSE) {
             Log.v(TAG, "Registered metadata marshalers");
         }
     }
 
+    /** Check if input arguments are all {@code null}.
+     *
+     * @param objs Input arguments for null check
+     * @return {@code true} if input arguments are all {@code null}, otherwise {@code false}
+     */
+    private static boolean areValuesAllNull(Object... objs) {
+        for (Object o : objs) {
+            if (o != null) return false;
+        }
+        return true;
+    }
+
+    static {
+        /*
+         * We use a class initializer to allow the native code to cache some field offsets
+         */
+        nativeClassInit();
+        registerAllMarshalers();
+    }
 }

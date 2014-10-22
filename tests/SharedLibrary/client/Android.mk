@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_APK_LIBRARIES := SharedLibrary
+LOCAL_RES_LIBRARIES := SharedLibrary
 
 LOCAL_PACKAGE_NAME := SharedLibraryClient
 

@@ -87,9 +87,8 @@ public class LruCache<K, V> {
 
     /**
      * Sets the size of the cache.
-     * @param maxSize The new maximum size.
      *
-     * @hide
+     * @param maxSize The new maximum size.
      */
     public void resize(int maxSize) {
         if (maxSize <= 0) {

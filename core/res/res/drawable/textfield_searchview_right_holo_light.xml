@@ -14,9 +14,9 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+          android:autoMirrored="true">
     <item android:state_focused="true"
-        android:drawable="@drawable/textfield_search_right_selected_holo_light" />
+          android:drawable="@drawable/textfield_search_right_selected_holo_light" />
     <item android:drawable="@drawable/textfield_search_right_default_holo_light" />
 </selector>
-

@@ -1,0 +1,149 @@
+page.title=Know Your User
+page.metaDescription=It\'s essential to understand your users and listen to their input. Here are some ideas.
+page.image=/distribute/images/know-your-user.jpg
+page.tags="users, growth, global"
+
+@jd:body
+
+<div style="width:100%">
+  <img src="{@docRoot}images/gp-androidify.png">
+</div>
+
+<p>
+  A key part of growing your apps' installed base is knowing more about your
+  users &mdash; how they discover your app, what devices they use, what they do
+  when they use your app, and how often they return to it.
+</p>
+
+  <h2 id="read-ratings-comments">
+  Read Ratings Comments
+  </h2>
+
+<p>
+  The most obvious way to get to know your users is by reading review comments
+  for your apps on Google Play. While the details provided in reviews will vary
+  greatly, in addition to telling you about what users like and dislike in your
+  apps, they can also provide insight into your users’ motivations for using
+  your apps. And remember that users can update their ratings and comments
+  about an app when you fix issues.
+</p>
+
+<p>
+  Learn more about <a href=
+  "{@docRoot}distribute/essentials/optimizing-your-app.html#listen-to-your-users">
+  how to listen to users</a>.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-your-user-0.jpg" class="border-img">
+  <p class="img-caption">
+  User ratings
+  </p>
+</div>
+
+<div class="headerLine">
+  <h2 id="start-community">
+  Start a Community
+  </h2>
+
+
+</div>
+
+<p>
+  Another great way to get to know your users, learn who they are, and what
+  they are looking for, is to start a community. There are many support tools
+  you can use, from forums such as <a href="http://groups.google.com/">Google
+  Groups</a> to comprehensive customer support products. You can integrate some
+  directly into your apps. And once you deploy a support tool, make sure to
+  fill in the support link in your Google Play product details page.
+</p>
+
+<p>
+  <a href="{@docRoot}distribute/users/build-community.html">Learn more about
+  starting and managing a community</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="create-survey">
+  Create a Survey
+  </h2>
+
+
+</div>
+
+<p>
+  Consider using a survey to gather information about your users and their
+  views on your apps. Compared to app reviews, a questionnaire enables you to
+  seek specific information. However use with care, as the creation of suitable
+  question is something of an art. Also consider providing an appropriate
+  incentive for completing the questionnaire, as too few responses can be worse
+  than no responses at all.
+</p>
+
+<p>
+  You can create a questionnaire with <a href=
+  "http://www.google.com/drive/apps.html#forms">Google Drive Forms</a> or use
+  one of the various third-party survey and questionnaire hosting tools
+  available, such as SurveyMonkey.
+</p>
+
+<div class="headerLine">
+  <h2 id="add-analytics">
+  Add Analytics to your Apps
+  </h2>
+
+
+</div>
+
+<p>
+  Analytics data can tell you a lot about your users, by exposing their
+  behaviour in your apps. You can use <a href=
+  "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html">
+  Google Analytics by linking it with your Google Play account</a> or use a
+  third-party analytics tool. Analytics tools can help you gather information
+  on app installs, feature popularity, unused features, and more. You can see
+  any usage pattern differences by region, device, time day and other
+  variables.
+</p>
+
+<p>
+  Read more about <a href=
+  "{@docRoot}distribute/essentials/optimizing-your-app.html#measuring-analyzing-responding">
+  measuring behavior</a>.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-stats.png" class="border-img">
+</div>
+
+<div class="headerLine">
+  <h2 id="use-google">
+  Use Google+
+  </h2>
+
+
+</div>
+
+<p>
+  <a href="https://plus.google.com/">Google+</a> is a great way to gather user
+  feedback, announce surveys and contests, and see how users react to new
+  features and functionality. Many developers manage a Google+ page to
+  communicate with their users. It’s also a good way to get feedback from your
+  beta-testing. Some developers have a page for each of their apps. This is
+  especially true for game developers, who post challenges and tournaments.
+  Google+ can also be used to post game walkthroughs and tips.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-your-user-2.jpg">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/knowyouruser"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>

@@ -23,7 +23,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.security.InvalidKeyException;
@@ -89,9 +91,19 @@ public final class KeyChain {
     public static final String ACCOUNT_TYPE = "com.android.keychain";
 
     /**
+     * Package name for KeyChain chooser.
+     */
+    private static final String KEYCHAIN_PACKAGE = "com.android.keychain";
+
+    /**
      * Action to bring up the KeyChainActivity
      */
     private static final String ACTION_CHOOSER = "com.android.keychain.CHOOSER";
+
+    /**
+     * Package name for the Certificate Installer.
+     */
+    private static final String CERT_INSTALLER_PACKAGE = "com.android.certinstaller";
 
     /**
      * Extra for use with {@link #ACTION_CHOOSER}
@@ -201,7 +213,7 @@ public final class KeyChain {
      */
     public static Intent createInstallIntent() {
         Intent intent = new Intent(ACTION_INSTALL);
-        intent.setClassName("com.android.certinstaller",
+        intent.setClassName(CERT_INSTALLER_PACKAGE,
                             "com.android.certinstaller.CertInstallerMain");
         return intent;
     }
@@ -267,6 +279,7 @@ public final class KeyChain {
             throw new NullPointerException("response == null");
         }
         Intent intent = new Intent(ACTION_CHOOSER);
+        intent.setPackage(KEYCHAIN_PACKAGE);
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
         intent.putExtra(EXTRA_HOST, host);
         intent.putExtra(EXTRA_PORT, port);
@@ -384,7 +397,8 @@ public final class KeyChain {
         return KeyStore.getInstance().isHardwareBacked(algorithm);
     }
 
-    private static X509Certificate toCertificate(byte[] bytes) {
+    /** @hide */
+    public static X509Certificate toCertificate(byte[] bytes) {
         if (bytes == null) {
             throw new IllegalArgumentException("bytes == null");
         }
@@ -426,6 +440,14 @@ public final class KeyChain {
      * Caller should call unbindService on the result when finished.
      */
     public static KeyChainConnection bind(Context context) throws InterruptedException {
+        return bindAsUser(context, Process.myUserHandle());
+    }
+
+    /**
+     * @hide
+     */
+    public static KeyChainConnection bindAsUser(Context context, UserHandle user)
+            throws InterruptedException {
         if (context == null) {
             throw new NullPointerException("context == null");
         }
@@ -448,9 +470,10 @@ public final class KeyChain {
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
         intent.setComponent(comp);
-        boolean isBound = context.bindService(intent,
-                                              keyChainServiceConnection,
-                                              Context.BIND_AUTO_CREATE);
+        boolean isBound = context.bindServiceAsUser(intent,
+                                                    keyChainServiceConnection,
+                                                    Context.BIND_AUTO_CREATE,
+                                                    user);
         if (!isBound) {
             throw new AssertionError("could not bind to KeyChainService");
         }

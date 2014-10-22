@@ -21,9 +21,6 @@ import android.hardware.location.IGeofenceHardware;
 import android.os.IBinder;
 
 import android.location.IGeofenceProvider;
-import android.util.Log;
-
-import java.lang.Long;
 
 /**
  * Base class for geofence providers implemented as unbundled services.

@@ -19,11 +19,15 @@ package android.widget;
 import android.content.UndoManager;
 import android.content.UndoOperation;
 import android.content.UndoOwner;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputFilter;
 import android.text.SpannableString;
+
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.EditableInputConnection;
 
 import android.R;
@@ -37,6 +41,7 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -45,8 +50,6 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.DynamicLayout;
@@ -75,7 +78,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
-import android.view.DisplayList;
+import android.view.RenderNode;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HardwareCanvas;
@@ -93,6 +96,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -137,7 +141,16 @@ public class Editor {
     InputContentType mInputContentType;
     InputMethodState mInputMethodState;
 
-    DisplayList[] mTextDisplayLists;
+    private static class TextDisplayList {
+        RenderNode displayList;
+        boolean isDirty;
+        public TextDisplayList(String name) {
+            isDirty = true;
+            displayList = RenderNode.create(name, null);
+        }
+        boolean needsRecord() { return isDirty || !displayList.isValid(); }
+    }
+    TextDisplayList[] mTextDisplayLists;
 
     boolean mFrozenWithFocus;
     boolean mSelectionMoved;
@@ -205,6 +218,8 @@ public class Editor {
 
     private TextView mTextView;
 
+    final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
+
     Editor(TextView textView) {
         mTextView = textView;
     }
@@ -239,9 +254,13 @@ public class Editor {
             // We had an active selection from before, start the selection mode.
             startSelectionActionMode();
         }
+
+        getPositionListener().addSubscriber(mCursorAnchorInfoNotifier, true);
     }
 
     void onDetachedFromWindow() {
+        getPositionListener().removeSubscriber(mCursorAnchorInfoNotifier);
+
         if (mError != null) {
             hideError();
         }
@@ -262,7 +281,7 @@ public class Editor {
             mTextView.removeCallbacks(mShowSuggestionRunnable);
         }
 
-        invalidateTextDisplayList();
+        destroyDisplayListsData();
 
         if (mSpellChecker != null) {
             mSpellChecker.closeSession();
@@ -275,6 +294,18 @@ public class Editor {
         hideControllers();
         mPreserveDetachedSelection = false;
         mTemporaryDetach = false;
+    }
+
+    private void destroyDisplayListsData() {
+        if (mTextDisplayLists != null) {
+            for (int i = 0; i < mTextDisplayLists.length; i++) {
+                RenderNode displayList = mTextDisplayLists[i] != null
+                        ? mTextDisplayLists[i].displayList : null;
+                if (displayList != null && displayList.isValid()) {
+                    displayList.destroyDisplayListData();
+                }
+            }
+        }
     }
 
     private void showError() {
@@ -758,7 +789,7 @@ public class Editor {
                 boolean parentPositionChanged, boolean parentScrolled);
     }
 
-    private boolean isPositionVisible(int positionX, int positionY) {
+    private boolean isPositionVisible(final float positionX, final float positionY) {
         synchronized (TEMP_POSITION) {
             final float[] position = TEMP_POSITION;
             position[0] = positionX;
@@ -1266,25 +1297,6 @@ public class Editor {
                         reported = reportExtractedText();
                     }
                 }
-
-                if (imm.isWatchingCursor(mTextView) && highlight != null) {
-                    highlight.computeBounds(ims.mTmpRectF, true);
-                    ims.mTmpOffset[0] = ims.mTmpOffset[1] = 0;
-
-                    canvas.getMatrix().mapPoints(ims.mTmpOffset);
-                    ims.mTmpRectF.offset(ims.mTmpOffset[0], ims.mTmpOffset[1]);
-
-                    ims.mTmpRectF.offset(0, cursorOffsetVertical);
-
-                    ims.mCursorRectInWindow.set((int)(ims.mTmpRectF.left + 0.5),
-                            (int)(ims.mTmpRectF.top + 0.5),
-                            (int)(ims.mTmpRectF.right + 0.5),
-                            (int)(ims.mTmpRectF.bottom + 0.5));
-
-                    imm.updateCursor(mTextView,
-                            ims.mCursorRectInWindow.left, ims.mCursorRectInWindow.top,
-                            ims.mCursorRectInWindow.right, ims.mCursorRectInWindow.bottom);
-                }
             }
         }
 
@@ -1319,7 +1331,7 @@ public class Editor {
 
         if (layout instanceof DynamicLayout) {
             if (mTextDisplayLists == null) {
-                mTextDisplayLists = new DisplayList[ArrayUtils.idealObjectArraySize(0)];
+                mTextDisplayLists = ArrayUtils.emptyArray(TextDisplayList.class);
             }
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
@@ -1343,15 +1355,13 @@ public class Editor {
                     searchStartIndex = blockIndex + 1;
                 }
 
-                DisplayList blockDisplayList = mTextDisplayLists[blockIndex];
-                if (blockDisplayList == null) {
-                    blockDisplayList = mTextDisplayLists[blockIndex] =
-                            mTextView.getHardwareRenderer().createDisplayList("Text " + blockIndex);
-                } else {
-                    if (blockIsInvalid) blockDisplayList.clear();
+                if (mTextDisplayLists[blockIndex] == null) {
+                    mTextDisplayLists[blockIndex] =
+                            new TextDisplayList("Text " + blockIndex);
                 }
 
-                final boolean blockDisplayListIsInvalid = !blockDisplayList.isValid();
+                final boolean blockDisplayListIsInvalid = mTextDisplayLists[blockIndex].needsRecord();
+                RenderNode blockDisplayList = mTextDisplayLists[blockIndex].displayList;
                 if (i >= indexFirstChangedBlock || blockDisplayListIsInvalid) {
                     final int blockBeginLine = endOfPreviousBlock + 1;
                     final int top = layout.getLineTop(blockBeginLine);
@@ -1381,7 +1391,7 @@ public class Editor {
                             // No need to untranslate, previous context is popped after
                             // drawDisplayList
                         } finally {
-                            blockDisplayList.end();
+                            blockDisplayList.end(hardwareCanvas);
                             // Same as drawDisplayList below, handled by our TextView's parent
                             blockDisplayList.setClipToBounds(false);
                         }
@@ -1392,7 +1402,7 @@ public class Editor {
                     blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
                 }
 
-                ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, null,
+                ((HardwareCanvas) canvas).drawRenderNode(blockDisplayList, null,
                         0 /* no child clipping, our TextView parent enforces it */);
 
                 endOfPreviousBlock = blockEndLine;
@@ -1421,10 +1431,7 @@ public class Editor {
         }
 
         // No available index found, the pool has to grow
-        int newSize = ArrayUtils.idealIntArraySize(length + 1);
-        DisplayList[] displayLists = new DisplayList[newSize];
-        System.arraycopy(mTextDisplayLists, 0, displayLists, 0, length);
-        mTextDisplayLists = displayLists;
+        mTextDisplayLists = GrowingArrayUtils.append(mTextDisplayLists, length, null);
         return length;
     }
 
@@ -1461,7 +1468,7 @@ public class Editor {
             while (i < numberOfBlocks) {
                 final int blockIndex = blockIndices[i];
                 if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX) {
-                    mTextDisplayLists[blockIndex].clear();
+                    mTextDisplayLists[blockIndex].isDirty = true;
                 }
                 if (blockEndLines[i] >= lastLine) break;
                 i++;
@@ -1472,7 +1479,7 @@ public class Editor {
     void invalidateTextDisplayList() {
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
-                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].clear();
+                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].isDirty = true;
             }
         }
     }
@@ -1681,7 +1688,7 @@ public class Editor {
 
     private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
         if (mCursorDrawable[cursorIndex] == null)
-            mCursorDrawable[cursorIndex] = mTextView.getResources().getDrawable(
+            mCursorDrawable[cursorIndex] = mTextView.getContext().getDrawable(
                     mTextView.mCursorDrawableRes);
 
         if (mTempRect == null) mTempRect = new Rect();
@@ -1852,9 +1859,8 @@ public class Editor {
         }
 
         final int originalLength = mTextView.getText().length();
-        long minMax = mTextView.prepareSpacesAroundPaste(offset, offset, content);
-        int min = TextUtils.unpackRangeStartFromLong(minMax);
-        int max = TextUtils.unpackRangeEndFromLong(minMax);
+        int min = offset;
+        int max = offset;
 
         Selection.setSelection((Spannable) mTextView.getText(), max);
         mTextView.replaceText_internal(min, max, content);
@@ -2117,7 +2123,8 @@ public class Editor {
     private class PositionListener implements ViewTreeObserver.OnPreDrawListener {
         // 3 handles
         // 3 ActionPopup [replace, suggestion, easyedit] (suggestionsPopup first hides the others)
-        private final int MAXIMUM_NUMBER_OF_LISTENERS = 6;
+        // 1 CursorAnchorInfoNotifier
+        private final int MAXIMUM_NUMBER_OF_LISTENERS = 7;
         private TextViewPositionListener[] mPositionListeners =
                 new TextViewPositionListener[MAXIMUM_NUMBER_OF_LISTENERS];
         private boolean mCanMove[] = new boolean[MAXIMUM_NUMBER_OF_LISTENERS];
@@ -2321,8 +2328,8 @@ public class Editor {
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
 
         private class CustomPopupWindow extends PopupWindow {
-            public CustomPopupWindow(Context context, int defStyle) {
-                super(context, null, defStyle);
+            public CustomPopupWindow(Context context, int defStyleAttr) {
+                super(context, null, defStyleAttr);
             }
 
             @Override
@@ -2784,7 +2791,12 @@ public class Editor {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            TypedArray styledAttributes = mTextView.getContext().obtainStyledAttributes(
+            final boolean legacy = mTextView.getContext().getApplicationInfo().targetSdkVersion <
+                    Build.VERSION_CODES.LOLLIPOP;
+            final Context context = !legacy && menu instanceof MenuBuilder ?
+                    ((MenuBuilder) menu).getContext() :
+                    mTextView.getContext();
+            final TypedArray styledAttributes = context.obtainStyledAttributes(
                     com.android.internal.R.styleable.SelectionModeDrawables);
 
             mode.setTitle(mTextView.getContext().getString(
@@ -2971,12 +2983,178 @@ public class Editor {
                 positionY += mContentView.getMeasuredHeight();
 
                 // Assumes insertion and selection handles share the same height
-                final Drawable handle = mTextView.getResources().getDrawable(
+                final Drawable handle = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleRes);
                 positionY += handle.getIntrinsicHeight();
             }
 
             return positionY;
+        }
+    }
+
+    /**
+     * A listener to call {@link InputMethodManager#updateCursorAnchorInfo(View, CursorAnchorInfo)}
+     * while the input method is requesting the cursor/anchor position. Does nothing as long as
+     * {@link InputMethodManager#isWatchingCursor(View)} returns false.
+     */
+    private final class CursorAnchorInfoNotifier implements TextViewPositionListener {
+        final CursorAnchorInfo.Builder mSelectionInfoBuilder = new CursorAnchorInfo.Builder();
+        final int[] mTmpIntOffset = new int[2];
+        final Matrix mViewToScreenMatrix = new Matrix();
+
+        @Override
+        public void updatePosition(int parentPositionX, int parentPositionY,
+                boolean parentPositionChanged, boolean parentScrolled) {
+            final InputMethodState ims = mInputMethodState;
+            if (ims == null || ims.mBatchEditNesting > 0) {
+                return;
+            }
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            if (null == imm) {
+                return;
+            }
+            if (!imm.isActive(mTextView)) {
+                return;
+            }
+            // Skip if the IME has not requested the cursor/anchor position.
+            if (!imm.isCursorAnchorInfoEnabled()) {
+                return;
+            }
+            Layout layout = mTextView.getLayout();
+            if (layout == null) {
+                return;
+            }
+
+            final CursorAnchorInfo.Builder builder = mSelectionInfoBuilder;
+            builder.reset();
+
+            final int selectionStart = mTextView.getSelectionStart();
+            builder.setSelectionRange(selectionStart, mTextView.getSelectionEnd());
+
+            // Construct transformation matrix from view local coordinates to screen coordinates.
+            mViewToScreenMatrix.set(mTextView.getMatrix());
+            mTextView.getLocationOnScreen(mTmpIntOffset);
+            mViewToScreenMatrix.postTranslate(mTmpIntOffset[0], mTmpIntOffset[1]);
+            builder.setMatrix(mViewToScreenMatrix);
+
+            final float viewportToContentHorizontalOffset =
+                    mTextView.viewportToContentHorizontalOffset();
+            final float viewportToContentVerticalOffset =
+                    mTextView.viewportToContentVerticalOffset();
+
+            final CharSequence text = mTextView.getText();
+            if (text instanceof Spannable) {
+                final Spannable sp = (Spannable) text;
+                int composingTextStart = EditableInputConnection.getComposingSpanStart(sp);
+                int composingTextEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                if (composingTextEnd < composingTextStart) {
+                    final int temp = composingTextEnd;
+                    composingTextEnd = composingTextStart;
+                    composingTextStart = temp;
+                }
+                final boolean hasComposingText =
+                        (0 <= composingTextStart) && (composingTextStart < composingTextEnd);
+                if (hasComposingText) {
+                    final CharSequence composingText = text.subSequence(composingTextStart,
+                            composingTextEnd);
+                    builder.setComposingText(composingTextStart, composingText);
+
+                    final int minLine = layout.getLineForOffset(composingTextStart);
+                    final int maxLine = layout.getLineForOffset(composingTextEnd - 1);
+                    for (int line = minLine; line <= maxLine; ++line) {
+                        final int lineStart = layout.getLineStart(line);
+                        final int lineEnd = layout.getLineEnd(line);
+                        final int offsetStart = Math.max(lineStart, composingTextStart);
+                        final int offsetEnd = Math.min(lineEnd, composingTextEnd);
+                        final boolean ltrLine =
+                                layout.getParagraphDirection(line) == Layout.DIR_LEFT_TO_RIGHT;
+                        final float[] widths = new float[offsetEnd - offsetStart];
+                        layout.getPaint().getTextWidths(text, offsetStart, offsetEnd, widths);
+                        final float top = layout.getLineTop(line);
+                        final float bottom = layout.getLineBottom(line);
+                        for (int offset = offsetStart; offset < offsetEnd; ++offset) {
+                            final float charWidth = widths[offset - offsetStart];
+                            final boolean isRtl = layout.isRtlCharAt(offset);
+                            final float primary = layout.getPrimaryHorizontal(offset);
+                            final float secondary = layout.getSecondaryHorizontal(offset);
+                            // TODO: This doesn't work perfectly for text with custom styles and
+                            // TAB chars.
+                            final float left;
+                            final float right;
+                            if (ltrLine) {
+                                if (isRtl) {
+                                    left = secondary - charWidth;
+                                    right = secondary;
+                                } else {
+                                    left = primary;
+                                    right = primary + charWidth;
+                                }
+                            } else {
+                                if (!isRtl) {
+                                    left = secondary;
+                                    right = secondary + charWidth;
+                                } else {
+                                    left = primary - charWidth;
+                                    right = primary;
+                                }
+                            }
+                            // TODO: Check top-right and bottom-left as well.
+                            final float localLeft = left + viewportToContentHorizontalOffset;
+                            final float localRight = right + viewportToContentHorizontalOffset;
+                            final float localTop = top + viewportToContentVerticalOffset;
+                            final float localBottom = bottom + viewportToContentVerticalOffset;
+                            final boolean isTopLeftVisible = isPositionVisible(localLeft, localTop);
+                            final boolean isBottomRightVisible =
+                                    isPositionVisible(localRight, localBottom);
+                            int characterBoundsFlags = 0;
+                            if (isTopLeftVisible || isBottomRightVisible) {
+                                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+                            }
+                            if (!isTopLeftVisible || !isTopLeftVisible) {
+                                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                            }
+                            if (isRtl) {
+                                characterBoundsFlags |= CursorAnchorInfo.FLAG_IS_RTL;
+                            }
+                            // Here offset is the index in Java chars.
+                            builder.addCharacterBounds(offset, localLeft, localTop, localRight,
+                                    localBottom, characterBoundsFlags);
+                        }
+                    }
+                }
+            }
+
+            // Treat selectionStart as the insertion point.
+            if (0 <= selectionStart) {
+                final int offset = selectionStart;
+                final int line = layout.getLineForOffset(offset);
+                final float insertionMarkerX = layout.getPrimaryHorizontal(offset)
+                        + viewportToContentHorizontalOffset;
+                final float insertionMarkerTop = layout.getLineTop(line)
+                        + viewportToContentVerticalOffset;
+                final float insertionMarkerBaseline = layout.getLineBaseline(line)
+                        + viewportToContentVerticalOffset;
+                final float insertionMarkerBottom = layout.getLineBottom(line)
+                        + viewportToContentVerticalOffset;
+                final boolean isTopVisible =
+                        isPositionVisible(insertionMarkerX, insertionMarkerTop);
+                final boolean isBottomVisible =
+                        isPositionVisible(insertionMarkerX, insertionMarkerBottom);
+                int insertionMarkerFlags = 0;
+                if (isTopVisible || isBottomVisible) {
+                    insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+                }
+                if (!isTopVisible || !isBottomVisible) {
+                    insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                }
+                if (layout.isRtlCharAt(offset)) {
+                    insertionMarkerFlags |= CursorAnchorInfo.FLAG_IS_RTL;
+                }
+                builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
+                        insertionMarkerBaseline, insertionMarkerBottom, insertionMarkerFlags);
+            }
+
+            imm.updateCursorAnchorInfo(mTextView, builder.build());
         }
     }
 
@@ -2991,6 +3169,7 @@ public class Editor {
         // Offset from touch position to mPosition
         private float mTouchToWindowOffsetX, mTouchToWindowOffsetY;
         protected int mHotspotX;
+        protected int mHorizontalGravity;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
         // Where the touch position should be on the handle to ensure a maximum cursor visibility
@@ -3005,6 +3184,8 @@ public class Editor {
         private boolean mPositionHasChanged = true;
         // Used to delay the appearance of the action popup window
         private Runnable mActionPopupShower;
+        // Minimum touch target size for handles
+        private int mMinSize;
 
         public HandleView(Drawable drawableLtr, Drawable drawableRtl) {
             super(mTextView.getContext());
@@ -3017,10 +3198,12 @@ public class Editor {
 
             mDrawableLtr = drawableLtr;
             mDrawableRtl = drawableRtl;
+            mMinSize = mTextView.getContext().getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.text_handle_min_size);
 
             updateDrawable();
 
-            final int handleHeight = mDrawable.getIntrinsicHeight();
+            final int handleHeight = getPreferredHeight();
             mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
         }
@@ -3030,9 +3213,11 @@ public class Editor {
             final boolean isRtlCharAtOffset = mTextView.getLayout().isRtlCharAt(offset);
             mDrawable = isRtlCharAtOffset ? mDrawableRtl : mDrawableLtr;
             mHotspotX = getHotspotX(mDrawable, isRtlCharAtOffset);
+            mHorizontalGravity = getHorizontalGravity(isRtlCharAtOffset);
         }
 
         protected abstract int getHotspotX(Drawable drawable, boolean isRtlRun);
+        protected abstract int getHorizontalGravity(boolean isRtlRun);
 
         // Touch-up filter: number of previous positions remembered
         private static final int HISTORY_SIZE = 5;
@@ -3077,7 +3262,15 @@ public class Editor {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(mDrawable.getIntrinsicWidth(), mDrawable.getIntrinsicHeight());
+            setMeasuredDimension(getPreferredWidth(), getPreferredHeight());
+        }
+
+        private int getPreferredWidth() {
+            return Math.max(mDrawable.getIntrinsicWidth(), mMinSize);
+        }
+
+        private int getPreferredHeight() {
+            return Math.max(mDrawable.getIntrinsicHeight(), mMinSize);
         }
 
         public void show() {
@@ -3169,7 +3362,8 @@ public class Editor {
                 }
                 final int line = layout.getLineForOffset(offset);
 
-                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX);
+                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX -
+                        getHorizontalOffset() + getCursorOffset());
                 mPositionY = layout.getLineBottom(line);
 
                 // Take TextView's padding and scroll into account.
@@ -3218,8 +3412,34 @@ public class Editor {
 
         @Override
         protected void onDraw(Canvas c) {
-            mDrawable.setBounds(0, 0, mRight - mLeft, mBottom - mTop);
+            final int drawWidth = mDrawable.getIntrinsicWidth();
+            final int left = getHorizontalOffset();
+
+            mDrawable.setBounds(left, 0, left + drawWidth, mDrawable.getIntrinsicHeight());
             mDrawable.draw(c);
+        }
+
+        private int getHorizontalOffset() {
+            final int width = getPreferredWidth();
+            final int drawWidth = mDrawable.getIntrinsicWidth();
+            final int left;
+            switch (mHorizontalGravity) {
+                case Gravity.LEFT:
+                    left = 0;
+                    break;
+                default:
+                case Gravity.CENTER:
+                    left = (width - drawWidth) / 2;
+                    break;
+                case Gravity.RIGHT:
+                    left = width - drawWidth;
+                    break;
+            }
+            return left;
+        }
+
+        protected int getCursorOffset() {
+            return 0;
         }
 
         @Override
@@ -3341,6 +3561,22 @@ public class Editor {
         }
 
         @Override
+        protected int getHorizontalGravity(boolean isRtlRun) {
+            return Gravity.CENTER_HORIZONTAL;
+        }
+
+        @Override
+        protected int getCursorOffset() {
+            int offset = super.getCursorOffset();
+            final Drawable cursor = mCursorCount > 0 ? mCursorDrawable[0] : null;
+            if (cursor != null) {
+                cursor.getPadding(mTempRect);
+                offset += (cursor.getIntrinsicWidth() - mTempRect.left - mTempRect.right) / 2;
+            }
+            return offset;
+        }
+
+        @Override
         public boolean onTouchEvent(MotionEvent ev) {
             final boolean result = super.onTouchEvent(ev);
 
@@ -3427,6 +3663,11 @@ public class Editor {
         }
 
         @Override
+        protected int getHorizontalGravity(boolean isRtlRun) {
+            return isRtlRun ? Gravity.RIGHT : Gravity.LEFT;
+        }
+
+        @Override
         public int getCurrentCursorOffset() {
             return mTextView.getSelectionStart();
         }
@@ -3467,6 +3708,11 @@ public class Editor {
             } else {
                 return drawable.getIntrinsicWidth() / 4;
             }
+        }
+
+        @Override
+        protected int getHorizontalGravity(boolean isRtlRun) {
+            return isRtlRun ? Gravity.LEFT : Gravity.RIGHT;
         }
 
         @Override
@@ -3548,7 +3794,7 @@ public class Editor {
 
         private InsertionHandleView getHandle() {
             if (mSelectHandleCenter == null) {
-                mSelectHandleCenter = mTextView.getResources().getDrawable(
+                mSelectHandleCenter = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleRes);
             }
             if (mHandle == null) {
@@ -3594,11 +3840,11 @@ public class Editor {
 
         private void initDrawables() {
             if (mSelectHandleLeft == null) {
-                mSelectHandleLeft = mTextView.getContext().getResources().getDrawable(
+                mSelectHandleLeft = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleLeftRes);
             }
             if (mSelectHandleRight == null) {
-                mSelectHandleRight = mTextView.getContext().getResources().getDrawable(
+                mSelectHandleRight = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleRightRes);
             }
         }
@@ -3901,7 +4147,6 @@ public class Editor {
 
     static class InputMethodState {
         Rect mCursorRectInWindow = new Rect();
-        RectF mTmpRectF = new RectF();
         float[] mTmpOffset = new float[2];
         ExtractedTextRequest mExtractedTextRequest;
         final ExtractedText mExtractedText = new ExtractedText();

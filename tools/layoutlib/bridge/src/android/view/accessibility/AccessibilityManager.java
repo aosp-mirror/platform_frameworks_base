@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import com.android.annotations.NonNull;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -31,14 +33,16 @@ import java.util.List;
  * for example an {@link android.app.Activity} starts, the focus or selection of a
  * {@link android.view.View} changes etc. Parties interested in handling accessibility
  * events implement and register an accessibility service which extends
- * {@link android.accessibilityservice.AccessibilityService}.
+ * {@code android.accessibilityservice.AccessibilityService}.
  *
  * @see AccessibilityEvent
- * @see android.accessibilityservice.AccessibilityService
  * @see android.content.Context#getSystemService
  */
+@SuppressWarnings("UnusedDeclaration")
 public final class AccessibilityManager {
-    private static AccessibilityManager sInstance = new AccessibilityManager();
+
+    private static AccessibilityManager sInstance = new AccessibilityManager(null, null, 0);
+
 
     /**
      * Listener for the accessibility state.
@@ -54,9 +58,46 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Listener for the system touch exploration state. To listen for changes to
+     * the touch exploration state on the device, implement this interface and
+     * register it with the system by calling
+     * {@link #addTouchExplorationStateChangeListener}.
+     */
+    public interface TouchExplorationStateChangeListener {
+
+        /**
+         * Called when the touch exploration enabled state changes.
+         *
+         * @param enabled Whether touch exploration is enabled.
+         */
+        public void onTouchExplorationStateChanged(boolean enabled);
+    }
+
+    /**
+     * Listener for the system high text contrast state. To listen for changes to
+     * the high text contrast state on the device, implement this interface and
+     * register it with the system by calling
+     * {@link #addHighTextContrastStateChangeListener}.
+     */
+    public interface HighTextContrastChangeListener {
+
+        /**
+         * Called when the high text contrast enabled state changes.
+         *
+         * @param enabled Whether high text contrast is enabled.
+         */
+        public void onHighTextContrastStateChanged(boolean enabled);
+    }
+
+    private final IAccessibilityManagerClient.Stub mClient =
+            new IAccessibilityManagerClient.Stub() {
+                public void setState(int state) {
+                }
+            };
+
+    /**
      * Get an AccessibilityManager instance (create one if necessary).
      *
-     * @hide
      */
     public static AccessibilityManager getInstance(Context context) {
         return sInstance;
@@ -67,7 +108,11 @@ public final class AccessibilityManager {
      *
      * @param context A {@link Context}.
      */
-    private AccessibilityManager() {
+    public AccessibilityManager(Context context, IAccessibilityManager service, int userId) {
+    }
+
+    public IAccessibilityManagerClient getClient() {
+        return mClient;
     }
 
     /**
@@ -80,13 +125,28 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Sends an {@link AccessibilityEvent}. If this {@link AccessibilityManager} is not
-     * enabled the call is a NOOP.
+     * Returns if the touch exploration in the system is enabled.
      *
-     * @param event The {@link AccessibilityEvent}.
+     * @return True if touch exploration is enabled, false otherwise.
+     */
+    public boolean isTouchExplorationEnabled() {
+        return true;
+    }
+
+    /**
+     * Returns if the high text contrast in the system is enabled.
+     * <p>
+     * <strong>Note:</strong> You need to query this only if you application is
+     * doing its own rendering and does not rely on the platform rendering pipeline.
+     * </p>
      *
-     * @throws IllegalStateException if a client tries to send an {@link AccessibilityEvent}
-     *         while accessibility is not enabled.
+     */
+    public boolean isHighTextContrastEnabled() {
+        return false;
+    }
+
+    /**
+     * Sends an {@link AccessibilityEvent}.
      */
     public void sendAccessibilityEvent(AccessibilityEvent event) {
     }
@@ -102,20 +162,40 @@ public final class AccessibilityManager {
      *
      * @return An unmodifiable list with {@link ServiceInfo}s.
      */
+    @Deprecated
     public List<ServiceInfo> getAccessibilityServiceList() {
-        // normal implementation does this in some case, so let's do the same
-        // (unmodifiableList wrapped around null).
-        List<ServiceInfo> services = null;
-        return Collections.unmodifiableList(services);
+        return Collections.emptyList();
     }
 
     public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList() {
-        // normal implementation does this in some case, so let's do the same
-        // (unmodifiableList wrapped around null).
-        List<AccessibilityServiceInfo> services = null;
-        return Collections.unmodifiableList(services);
+        return Collections.emptyList();
     }
 
+    /**
+     * Returns the {@link AccessibilityServiceInfo}s of the enabled accessibility services
+     * for a given feedback type.
+     *
+     * @param feedbackTypeFlags The feedback type flags.
+     * @return An unmodifiable list with {@link AccessibilityServiceInfo}s.
+     *
+     * @see AccessibilityServiceInfo#FEEDBACK_AUDIBLE
+     * @see AccessibilityServiceInfo#FEEDBACK_GENERIC
+     * @see AccessibilityServiceInfo#FEEDBACK_HAPTIC
+     * @see AccessibilityServiceInfo#FEEDBACK_SPOKEN
+     * @see AccessibilityServiceInfo#FEEDBACK_VISUAL
+     */
+    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(
+            int feedbackTypeFlags) {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Registers an {@link AccessibilityStateChangeListener} for changes in
+     * the global accessibility state of the system.
+     *
+     * @param listener The listener.
+     * @return True if successfully registered.
+     */
     public boolean addAccessibilityStateChangeListener(
             AccessibilityStateChangeListener listener) {
         return true;
@@ -124,6 +204,62 @@ public final class AccessibilityManager {
     public boolean removeAccessibilityStateChangeListener(
             AccessibilityStateChangeListener listener) {
         return true;
+    }
+
+    /**
+     * Registers a {@link TouchExplorationStateChangeListener} for changes in
+     * the global touch exploration state of the system.
+     *
+     * @param listener The listener.
+     * @return True if successfully registered.
+     */
+    public boolean addTouchExplorationStateChangeListener(
+            @NonNull TouchExplorationStateChangeListener listener) {
+        return true;
+    }
+
+    /**
+     * Unregisters a {@link TouchExplorationStateChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if successfully unregistered.
+     */
+    public boolean removeTouchExplorationStateChangeListener(
+            @NonNull TouchExplorationStateChangeListener listener) {
+        return true;
+    }
+
+    /**
+     * Registers a {@link HighTextContrastChangeListener} for changes in
+     * the global high text contrast state of the system.
+     *
+     * @param listener The listener.
+     * @return True if successfully registered.
+     *
+     */
+    public boolean addHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener) {
+        return true;
+    }
+
+    /**
+     * Unregisters a {@link HighTextContrastChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if successfully unregistered.
+     *
+     */
+    public boolean removeHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener) {
+        return true;
+    }
+
+    /**
+     * Sets the current state and notifies listeners, if necessary.
+     *
+     * @param stateFlags The state flags.
+     */
+    private void setStateLocked(int stateFlags) {
     }
 
     public int addAccessibilityInteractionConnection(IWindow windowToken,

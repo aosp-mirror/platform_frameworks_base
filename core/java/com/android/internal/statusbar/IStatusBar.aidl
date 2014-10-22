@@ -24,20 +24,23 @@ oneway interface IStatusBar
 {
     void setIcon(int index, in StatusBarIcon icon);
     void removeIcon(int index);
-    void addNotification(IBinder key, in StatusBarNotification notification);
-    void updateNotification(IBinder key, in StatusBarNotification notification);
-    void removeNotification(IBinder key);
     void disable(int state);
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel();
     void animateCollapsePanels();
     void setSystemUiVisibility(int vis, int mask);
     void topAppWindowChanged(boolean menuVisible);
-    void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
-    void setHardKeyboardStatus(boolean available, boolean enabled);
+    void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher);
+    void setWindowState(int window, int state);
+    void buzzBeepBlinked();
+    void notificationLightOff();
+    void notificationLightPulse(int argb, int millisOn, int millisOff);
+
+    void showRecentApps(boolean triggeredFromAltTab);
+    void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
-    void setWindowState(int window, int state);
 }
 

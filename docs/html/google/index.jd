@@ -89,6 +89,16 @@ cloud messaging.</p>
     to use Google Cloud Messaging.</p>
 </div>
 
+<div class="landing-cell">
+  <div class="cell-icon">
+  <img src="{@docRoot}images/google/gcs-small.png" width="40" >
+  </div>
+    <h4><a href="{@docRoot}google/gcs/index.html"
+    >Google Cloud Save</a></h4>
+    <p>Enable per-user data storage and sync in your apps with no backend programming
+    required.</p>
+</div>
+
 </div><!-- col-6 -->
 
 
@@ -125,7 +135,7 @@ cloud messaging.</p>
 <img src="{@docRoot}images/google/analytics.png" width="40" />
   </div>
     <h4><a class="external-link" 
-href="https://developers.google.com/analytics/devguides/collection/android/v2/"
+href="https://developers.google.com/analytics/devguides/collection/android/v4/"
   >Google Analytics</a></h4>
 
 <p>Measure your success and gain insights into how users engage with your app content

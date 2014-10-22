@@ -1,0 +1,99 @@
+page.title=Sending and Receiving Messages
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#SendMessage">Send a Message</a></li>
+  <li><a href="#ReceiveMessage">Receive a Message</a></li>
+</ol>
+</div>
+</div>
+
+<p>You send messages using the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a>
+and attach the following items to the message:</p>
+
+<ul>
+  <li>An arbitrary payload (optional)</li>
+  <li>A path that uniquely identifies the message's action</li>
+</ul>
+<p>
+Unlike data items, there is no syncing between the handheld and wearable apps.
+Messages are a one-way communication mechanism that's good for remote procedure calls (RPC),
+such as sending a message to the wearable
+to start an activity. You can also use messages in request/response model
+where one side of the connection sends a message, does some work,
+sends back a response message.</p>
+
+<h2 id="SendMessage">Send a Message</h2>
+
+<p>The following example shows how to send a message that indicates to the other
+side of the connect to start an activity.
+This call is made synchronously, which blocks until the message
+is received or when the request times out:
+</p>
+
+<p class="note"><b>Note:</b> Read more about asynchronous and synchronous calls
+to Google Play services and when to use each in
+<a href="{@docRoot}google/auth/api-client.html#Communicating">Communicate with Google Play Services</a>.
+</p>
+
+<pre>
+Node node; // the connected device to send the message to
+GoogleApiClient mGoogleApiClient;
+public static final START_ACTIVITY_PATH = "/start/MainActivity";
+...
+
+    SendMessageResult result = Wearable.MessageApi.sendMessage(
+            mGoogleApiClient, node, START_ACTIVITY_PATH, null).await();
+    if (!result.getStatus().isSuccess()) {
+        Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
+    }
+</pre>
+
+<p>
+Here's a simple way to get a list of connected nodes that you can potentially
+send messages to:</p>
+
+<pre>
+private Collection&lt;String&gt; getNodes() {
+    HashSet &lt;String&gt;results= new HashSet&lt;String&gt;();
+    NodeApi.GetConnectedNodesResult nodes =
+            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+    for (Node node : nodes.getNodes()) {
+        results.add(node.getId());
+    }
+    return results;
+}
+</pre>
+
+<h2 id="ReceiveMessage">Receiving a Message</h2>
+
+<p>
+
+To be notified of received messages, you implement a listener for message events.
+This example shows how you might do this by checking the <code>START_ACTIVITY_PATH</code>
+that the previous example used to send the message. If this condition is <code>true</code>,
+a specific activity is started.
+</p>
+
+<pre>
+&#64;Override
+public void onMessageReceived(MessageEvent messageEvent) {
+    if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
+        Intent startIntent = new Intent(this, MainActivity.class);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startIntent);
+    }
+}
+</pre>
+
+<p>
+This is just a snippet that requires more implementation details. Learn about
+how to implement a full listener service or activity in
+<a href="{@docRoot}training/wearables/data-layer/events.html">Listening for Data Layer Events</a>.
+</p>

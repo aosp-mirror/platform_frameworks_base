@@ -119,7 +119,8 @@ namespace {
 
     int parse_manifest(const void *data, size_t size, const char *target_package_name)
     {
-        ResXMLTree parser(data, size);
+        ResXMLTree parser;
+        parser.setTo(data, size);
         if (parser.getError() != NO_ERROR) {
             ALOGD("%s failed to init xml parser, error=0x%08x\n", __FUNCTION__, parser.getError());
             return -1;

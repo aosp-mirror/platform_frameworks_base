@@ -23,7 +23,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_PROGUARD_ENABLED := disabled
 
 # comment it out for now since we need use some hidden APIs
-# LOCAL_SDK_VERSION := current
+LOCAL_SDK_VERSION := current
 
 LOCAL_STATIC_JAVA_LIBRARIES := android-ex-camera2
 

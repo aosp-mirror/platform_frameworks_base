@@ -1,0 +1,710 @@
+page.title=Design for Notifications
+page.tags="notifications","design","L"
+@jd:body
+
+<style>
+  .col-5, .col-6, .col-7 {
+    margin-left:0px;
+  }
+</style>
+
+<p>The notification system allows users to keep informed about relevant and timely
+events in your app, such as new chat messages from a friend or a calendar event.
+Think of notifications as a news channel that alerts the user to important events as
+they happen or a log that chronicles events while the user is not paying attention -
+and one that is synced as appropriate across all their Android devices.</p>
+
+<h4 id="New"><strong>New in L</strong></h4>
+
+<p>In L, notifications receive an important structural visual and functional update:</p>
+
+<ul>
+  <li> Visual changes to notifications as part of material design</li>
+  <li> Notifications are now available on the device lockscreen, yet sensitive content can still
+  be hidden behind it</li>
+   <li> A new presentation format called Heads-up for receiving high priority notifications while
+  using the device</li>
+  <li> Cloud-synced notifications - act on a notification on your Android tablet and it is also
+  dismissed on your phone.</li>
+  <li> And starting now (in Android 4.4W, API Level 20, the platform release for Android Wear),
+  your notifications will bridge to Android Wear devices. You can extend the functionality of
+  notifications on Wear in two different ways. First, you can add speech input and canned responses
+  to Actions on Wear, allowing users to complete tasks from their wrists. Second, you can write
+  Wear apps that hook into your notifications to go even further in terms of creating interactive
+  experiences for users.</li>
+</ul>
+
+<h2 id="Anatomy">Anatomy of a notification</h2>
+
+<p>This section goes over basic parts of a notification and how they can
+appear on different types of devices.</p>
+
+<h3 id="BaseLayout">Base Layout</h3>
+
+<p>At a minimum, all notifications consist of a base layout, including:</p>
+
+<ul>
+  <li> The notification's <strong>icon</strong>, symbolizing the originating app, and also
+  potentially the kind of notification if the app has several substantially different sorts of
+  notifications it can post</li>
+  <li> A notification <strong>title</strong> and additional <strong>text</strong></li>
+  <li> A <strong>timestamp</strong></li>
+</ul>
+
+<p>Notifications created with <code>Notification.Builder</code> for versions of Android earlier
+than L will look and work the same in L, with only minor stylistic changes that the system handles
+for you.</p>
+
+
+    <img style="margin:20px 0 0 0" src="{@docRoot}preview/images/notifications/basic_combo.png"
+      alt="" width="700px" />
+
+
+<div style="clear:both;margin-top:20px">
+      <p class="img-caption">
+      Base layout of a handheld notification and the same notification on Wear,
+      with a user photo and a notification icon
+    </p>
+  </div>
+</div>
+
+<h3 id="ExpandedLayouts">Expanded layouts</h3>
+
+
+<p>You have the option to provide more details on notifications. You can use this to show the first
+few lines of a message or show a larger image preview. This provides the user with additional
+context, and - in some cases - may allow the user to read a message in its entirety. The user can
+pinch-zoom or perform a single-finger glide in order to toggle between compact and expanded layouts.
+ For single event notifications, Android provides three expanded layout templates (text, inbox, and
+ image) for you to re-use in your application. The following images show you how they look on
+ handhelds and wearables.</p>
+
+<img style="margin-top:30px" src="{@docRoot}preview/images/notifications/expandedtext_combo.png"
+  alt="" width="700px" height;="284px" />
+<img style="margin-top:30px" src="{@docRoot}preview/images/notifications/stack_combo.png"
+  alt="" width="700px" height;="284px" />
+<img style="margin-top:30px" src="{@docRoot}preview/images/notifications/ExpandedImage.png"
+    alt="" width="311px" height;="450px" />
+
+<h3 id="actions" style="clear:both; margin-top:40px">Actions</h3>
+
+<p>Android has supported optional actions that are displayed at the bottom of the notification, as
+far back as Jelly Bean. With actions, users can handle the most common tasks for a particular
+notification from within the notification shade without having to open the originating application.
+This speeds up interaction and, in conjunction with "swipe-to-dismiss", helps users to streamline
+their notification triaging experience.</p>
+
+
+  <img src="{@docRoot}preview/images/notifications/action_combo.png"
+    alt="" width="700px" />
+
+
+
+<p style="clear:both">Be judicious with how many actions you include with a notification. The more
+actions you include, the more cognitive complexity you create. Limit yourself to the fewest number
+of actions possible by only including the most imminently important and meaningful ones.</p>
+
+<p>Good candidates for actions on notifications are actions that:</p>
+
+<ul>
+  <li> Are essential, frequent and typical for the content type you're displaying
+  <li> Allow the user to accomplish tasks quickly
+</ul>
+
+<p>Avoid actions that are:</p>
+
+<ul>
+  <li> Ambiguous
+  <li> Duplicative of the default action of the notification (such as "Read" or "Open")
+</ul>
+
+
+
+<p>You can specify a maximum of three actions, each consisting of an action icon and an action name.
+ Adding actions to a simple base layout will make the notification expandable, even if the
+ notification doesn't have an expanded layout. Since actions are only shown for expanded
+ notifications and are otherwise hidden, you must make sure that any action a user can invoke from
+ a notification is available from within the associated application as well.</p>
+
+<h2 id="notifications_on_android_wear">Notifications on Android Wear</h2>
+
+<p>Additionally, notifications and their actions are bridged over to Wear devices by default.
+Developers have control to control which notifications from bridging from the phone to the watch
+and vice versa. And developers can control which actions bridge as well. If your app includes
+actions that can't be accomplished with a single tap, either hide these actions on your Wear
+notification or consider hooking them up to a Wear app to allow the user to finish the action on
+their watch.</p>
+
+<h4>Bridging notifications</h4>
+
+<p><strong>Notifications that should be bridged</strong></p>
+
+<ul>
+  <li> New instant messages</li>
+</ul>
+
+<img src="{@docRoot}preview/images/notifications/WearBasic.png" width="156px" height="156px"
+  alt="" />
+
+<p><strong>Don't bridge</strong></p>
+
+<ul>
+  <li> If a podcasting app has new episodes available for download,
+  keep this notification on the phone.</li>
+</ul>
+
+
+
+<h4 style="clear:both">Bridging actions</h4></p>
+
+<p><strong>Actions to bridge</strong></p>
+
+<ul>
+  <li> Single tap actions such as +1, Like, Heart</li>
+</ul>
+
+<p><strong>Actions not to bridge</strong></p>
+
+<ul>
+  <li> Actions that map to features that aren't possible on the watch</li>
+</ul>
+
+
+
+<p><b>Unique actions to define for Wear</b></p>
+
+<ul>
+  <li> Quick lists of canned responses such as "Be right back"</li>
+  <li> Open on phone</li>
+  <li> A "Comment" or "Reply" action that brings up the speech input screen</li>
+  <li> Actions that can launch Wear-specific apps</li>
+</ul>
+
+<img src="{@docRoot}preview/images/notifications/ReplyAction.png" width="156px" height="156px"
+  alt="" />
+
+
+</div>
+
+
+
+<h2 style="clear:left">Heads-up Notification</h2>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}preview/images/notifications/Headsup.png"
+    alt="" width="311px" />
+  <p class="img-caption">
+    Example of a Heads-up notification (incoming phone call, high priority) coming in on top of an
+    immersive app
+  </p>
+</div>
+
+<p>When notifications with priority set to High (see right) arrives, it is presented to users for a
+short period of time on the device with an expanded layout with its actions exposed.</p>
+<p> After this period of time, it retreats back to the Notification shade. If a notification is
+flagged as High or Max or a full-screen takeover, it gets a HUN in L.</p>
+
+<p><b>Good examples of Heads-up notifications</b></p>
+
+<ul>
+  <li> Incoming phone call when using device</li>
+  <li> Alarm when using device</li>
+  <li> New SMS message</li>
+  <li> Low battery</li>
+</ul>
+
+<h2 style="clear:both" id="guidelines">Guidelines</h2>
+
+
+<h3 id="MakeItPersonal">Make it personal</h3>
+
+<p>For notifications of items sent by another person (such as a message or status update), include
+that person's image using setLargeIcon. Also attach information about the person to the
+notification's metadata (see EXTRA_PEOPLE).</p>
+
+<p>Your notification's main icon will still be shown, so the user can associate it with the icon
+visible in the status bar.</p>
+
+
+<img src="{@docRoot}preview/images/notifications/Triggered.png"
+  alt="" width="311px"/>
+<p style="margin-top:10px" class="img-caption">
+  Notification that shows the person who triggered it and the content they are sending you
+</p>
+
+
+<h3 id="navigate_to_the_right_place">Navigate to the right place</h3>
+
+<p>When the user touches the body of a notification (outside of the action buttons), open your app
+to the place where the user can view and act upon the data referenced in the notification. In most
+cases this will be the detail view of a single data item such as a message, but it might also be a
+summary view if the notification is stacked (see <em>Stacked notifications</em> below) and
+references multiple items. If in any of those cases the user is taken to a hierarchy level below
+your app's top-level, insert navigation into your app's back stack to allow them to navigate to
+your app's top level using the system back button. For more information, see the chapter on
+<em>System-to-app navigation</em> in the <a href="/design/patterns/navigation.html">Navigation</a>
+design pattern.</p>
+
+<h3 id="correctly_set_and_manage_notification_priority">Correctly set and manage notification
+priority</h3>
+
+<p>Starting with Jelly Bean, Android supported a priority flag for notifications. It allows you to
+influence where your notification will appear in comparison to other notifications and help to make
+sure that users always see their most important notifications first. You can choose from the
+following priority levels when posting a notification:</p>
+<table>
+ <tr>
+    <td class="tab0">
+<p><strong>Priority</strong></p>
+</td>
+    <td class="tab0">
+<p><strong>Use</strong></p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>MAX</code></p>
+</td>
+    <td class="tab1">
+<p>Use for critical and urgent notifications that alert the user to a condition that is
+time-critical or needs to be resolved before they can continue with a particular task.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>HIGH</code></p>
+</td>
+    <td class="tab1">
+<p>Use high priority notifications primarily for important communication, such as message or chat
+events with content that is particularly interesting for the user. High priority notifications will get the Heads-Up Notification display starting in L.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>DEFAULT</code></p>
+</td>
+    <td class="tab1">
+<p>The default priority. Keep all notifications that don't fall into any of the other categories at
+this priority level.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>LOW</code></p>
+</td>
+    <td class="tab1">
+<p>Use for notifications that you still want the user to be informed about, but that rate low in
+urgency. LOW notifications will tend to show up at the bottom of the list, which makes them a good
+choice for things like pubic/undirected social updates: the user has asked to be notified about
+them, but they should never take precedence over urgent or direct communication.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>MIN</code></p>
+</td>
+    <td class="tab1">
+<p>Contextual/background information (e.g. weather information, contextual location information).
+Minimum priority notifications will not show in the status bar. The user will only discover them
+when they expand the notification shade.</p>
+</td>
+ </tr>
+</table>
+
+
+<h4 id="how_to_choose_an_appropriate_priority"><strong>How to choose an appropriate
+priority</strong></h4>
+
+<p>Default, High, and Max priority are interruptive priority levels and risk interrupting the user
+from what they are doing. This should not be taken lightly, so these levels should be  reserved
+for notifications that:</p>
+
+<ul>
+  <li> Involve another person</li>
+  <li> Are time-sensitive</li>
+  <li> Might immediately change the user's behavior in the real world</li>
+</ul>
+
+<p>Notifications set to <code>LOW</code> and <code>MIN</code> can still be very valuable for the
+user. Many if not most notifications just don't need to command the user's immediate attention, or
+vibrate the user's wrist, yet contain information that they will find valuable when they choose to
+look for notifications. Criteria for <code>LOW</code> and <code>MIN</code> priority notifications:</p>
+
+<ul>
+  <li> Don't involve other people</li>
+  <li> Aren't time sensitive</li>
+  <li> Is content the user might be interested in but could choose to browse at their leisure</li>
+</ul>
+
+
+  <img src="{@docRoot}preview/images/notifications/notifications_pattern_priority.png"
+    alt="" width="700"/>
+
+
+<h3 style="clear:both" id="set_a_notification_category">Set a notification category</h3>
+
+<p>If your notification falls into one of the predefined categories (see below), assign it
+accordingly.  Aspects of the system UI such as the notification shade (or any other notification
+listener) may use this information to make ranking and filtering decisions.</p>
+<table>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_CALL</code></p>
+</td>
+    <td>
+<p>Incoming call (voice or video) or similar synchronous communication request</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_MESSAGE</code></p>
+</td>
+    <td>
+<p>Incoming direct message (SMS, instant message, etc.)</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_EMAIL</code></p>
+</td>
+    <td>
+<p>Asynchronous bulk message (email)</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_EVENT</code></p>
+</td>
+    <td>
+<p>Calendar event</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_PROMO</code></p>
+</td>
+    <td>
+<p>Promotion or advertisement</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_ALARM</code></p>
+</td>
+    <td>
+<p>Alarm or timer</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_PROGRESS</code></p>
+</td>
+    <td>
+<p>Progress of a long-running background operation</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_SOCIAL</code></p>
+</td>
+    <td>
+<p>Social network or sharing update</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_ERROR</code></p>
+</td>
+    <td>
+<p>Error in background operation or authentication status</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_TRANSPORT</code></p>
+</td>
+    <td>
+<p>Media transport control for playback</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_SYSTEM</code></p>
+</td>
+    <td>
+<p>System or device status update.  Reserved for system use.</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_SERVICE</code></p>
+</td>
+    <td>
+<p>Indication of running background service</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_RECOMMENDATION</code></p>
+</td>
+    <td>
+<p>A specific, timely recommendation for a single thing.  For example, a news app might want to
+recommend a news story it believes the user will want to read next.</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code>Notification.CATEGORY_STATUS</code></p>
+</td>
+    <td>
+<p>Ongoing information about device or contextual status</p>
+</td>
+ </tr>
+</table>
+
+<h3 id="summarize_your_notifications">Summarize your notifications</h3>
+
+<p>If your app creates a notification while another of the same type is still pending, avoid
+creating an altogether new notification object. Instead, turn it into a summary notification for
+the app.</p>
+
+<p>A summary notification builds a summary description and allows the user to understand how many
+notifications of a particular kind are pending.</p>
+
+<div class="col-6">
+
+<p><strong>Don't</strong></p>
+  <img src="{@docRoot}preview/images/notifications/Summarise_Dont.png"
+    alt="" width="311px" />
+</div>
+
+<div>
+<p><strong>Do</strong></p>
+
+  <img src="{@docRoot}preview/images/notifications/Summarise_Do.png"
+    alt="" width="311px"/>
+</div>
+
+<p style="clear:left; padding-top:30px; padding-bottom:20px">You can provide more detail about the individual notifications that make up a
+ summary by using the expanded digest layout. This allows users to gain a better sense of which
+ notifications are pending and if they are interesting enough to be read in detail within the
+ associated app.</p>
+<div class="col-6">
+  <img src="{@docRoot}preview/images/notifications/Stack.png" style="margin-bottom:20px"
+    alt="" width="311px" />
+  <p class="img-caption">
+  Expanded and contracted notification that is a summary (using InboxStyle)
+  </p>
+</div>
+
+<h3 style="clear:both" id="make_notifications_optional">Make notifications optional</h3>
+
+<p>Users should always be in control of notifications. Allow the user to disable your app's
+notifications or change their alert properties, such as alert sound and whether to use vibration,
+by adding a notification settings item to your application settings.</p>
+
+<h3 id="use_distinct_icons">Use distinct icons</h3>
+<p>By glancing at the notification area, the user should be able to discern what kinds of
+notifications are currently pending.</p>
+
+<div class="figure">
+  <img src="{@docRoot}preview/images/notifications/ProductIcons.png"
+    alt="" width="420" />
+</div>
+
+  <div><p><strong>Do</strong></p>
+    <p>Look at the notification icons Android apps already provide and create notification icons for
+    your app that are sufficiently distinct in appearance.</p>
+
+    <p><strong>Do</strong></p>
+    <p>Use the proper <a href="/design/style/iconography.html#notification">notification icon
+    style</a> for small icons, and the Material Light
+    <a href="/design/style/iconography.html#action-bar">action bar icon style</a> for your action
+    icons. Do not place any additional alpha (dimming or fading) into your small icons and action
+    icons; they can have anti-aliased edges, but because L uses these icons as masks (that is, only
+    the alpha channel is used), the image should generally be drawn at full opacity.</p>
+<p ><strong>Do</strong></p>
+<p >Keep your icons visually simple and avoid excessive detail that is hard to discern.</p>
+
+</div>
+<p style="clear:both"><strong>Don't</strong></p>
+
+<p>Use color to distinguish your app from others. Notification icons should only be a white-on-transparent background image.</p>
+
+
+<h3 id="pulse_the_notification_led_appropriately">Pulse the notification LED appropriately</h3>
+
+<p>Many Android devices contain a notification LED, which is used to keep the user informed about
+events while the screen is off. Notifications with a priority level of MAX, HIGH, or DEFAULT should
+cause the LED to glow, while those with lower priority (<code>LOW</code> and <code>MIN</code>) should not.</p>
+
+<p>The user's control over notifications should extend to the LED. When you use DEFAULT_LIGHTS, the
+LED will glow with a white color. Your notifications shouldn't use a different color unless the
+user has explicitly customized it.</p>
+
+<h2 id="building_notifications_that_users_care_about">Building notifications that users care about</h2>
+
+<p>To create an app that users love, it is important to design your notifications carefully.
+Notifications embody your app's voice, and contribute to your app's personality. Unwanted or
+unimportant notifications can annoy the user or make them resent how much attention the app wants
+from them, so use notifications judiciously.</p>
+
+<h3 id="when_to_display_a_notification">When to display a notification</h3>
+
+<p>To create an application that people enjoy using, it's important to recognize that the user's
+attention and focus is a resource that must be protected. While Android's notification system has
+been designed to minimize the impact of notifications on the user's attention, it is nonetheless
+still important to be aware of the fact that notifications are interrupting the user's task flow.
+As you plan your notifications, ask yourself if they are important enough to warrant an interruption. If you are unsure, allow the user to opt into a notification using your apps notification settings or adjust
+the notifications priority flag to <code>LOW</code> or <code>MIN</code> to avoid distracting the user while they are doing
+something else.</p>
+
+  <img src="{@docRoot}preview/images/notifications/TimeSensitive.png"
+    alt="" width="311px" />
+  <p style="margin-top:10px" class="img-caption">
+   Time sensitive notification examples
+  </p>
+
+<p>While well behaved apps generally only speak when spoken to, there are some limited cases where an app actually should interrupt the user with an unprompted notification.</p>
+
+<p>Notifications should be used primarily for <strong>time sensitive events</strong>, and especially
+ if these synchronous events <strong>involve other people</strong>. For instance, an incoming chat
+ is a real time and synchronous form of communication: there is another user actively waiting on you
+  to respond. Calendar events are another good example of when to use a notification and grab the
+  user's attention, because the event is imminent, and calendar events often involve other people.</p>
+
+<h3 style="clear:both" id="when_not_to_display_a_notification">When not to display a notification</h3>
+
+<div class="figure" style="margin-top:60px">
+  <img src="{@docRoot}preview/images/notifications/AntiSample1.png"
+    alt="" width="311px" />
+</div>
+
+<p>There are however many other cases where notifications should not be used:</p>
+
+<ul>
+  <li> Avoid notifying the user of information that is not directed specifically at them, or
+  information that is not truly time sensitive. For instance the asynchronous and undirected updates
+  flowing through a social network generally do not warrant a real time interruption. For the users
+  that do care about them, allow them to opt-in.</li>
+  <li> Don't create a notification if the relevant new information is currently on screen. Instead,
+  use the UI of the application itself to notify the user of new information directly in context.
+  For instance, a chat application should not create system notifications while the user is actively chatting with another user.</li>
+  <li> Don't interrupt the user for low level technical operations, like saving or syncing information, or updating an application, if it is possible for the system to simply take care of itself without involving the user.</li>
+  <li> Don't interrupt the user to inform them of an error if it is possible for the application to recover from the error on its own without the user taking any action.</li>
+  <li> Don't create notifications that have no true notification content and merely  advertise your
+  app. A notification should provide useful, timely, new information and should not be used to
+  merely launch an app.</li>
+  <li> Don't create superfluous notifications just to get your brand in front of users.
+  Such notifications will only frustrate and likely alienate your audience. The best way to provide
+  the user with a small amount of updated information and to keep them engaged with your
+  application is to develop a widget that they can choose to place on their home screen.</li>
+</ul>
+
+<h2 style="clear:left" id="interacting_with_notifications">Interacting With Notifications</h2>
+
+<p>Notifications are indicated by icons in the status bar and can be accessed by opening the
+notification drawer.</p>
+
+<p>Touching a notification opens the associated app to detailed content matching the notification.
+Swiping left or right on a notification removes it from the list.</p>
+
+<h3 id="ongoing_notifications">Ongoing notifications</h3>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}preview/images/notifications/MusicPlayback.png"
+    alt="" width="311px"  />
+      <p class="img-caption">
+    Ongoing notification due to music playback
+  </p>
+</div>
+<p>Ongoing notifications keep users informed about an ongoing process in the background.
+For example, music players announce the currently playing track in the notification system and
+continue to do so until the user stops the playback. They can also be used to show the user
+feedback for longer tasks like downloading a file, or encoding a video. Ongoing notifications
+cannot be manually removed from the notification drawer.</p>
+
+<p>The L lockscreen doesn't show transport controls for RCC (RemoteControlClient)s anymore. But the
+lockscreen <em>does</em> show notifications, so each app's playback notification is now the primary
+way for users to control playback from a locked state. This gives apps more control over which
+buttons to show and in what way, while providing a consistent experience for the user whether on
+the lockscreen or unlocked.</p>
+
+<h3 style="clear:both" id="dialogs_and_toasts_are_for_feedback_not_notification">Dialogs
+and toasts are for feedback not notifications</h3>
+
+<p>Your app should not create a dialog or toast if it is not currently on screen. Dialogs and Toasts
+ should only be displayed as the immediate response to the user taking an action inside of your app.
+For further guidance on the use of dialogs and toasts, refer to
+<a href="/design/patterns/confirming-acknowledging.html">Confirming & Acknowledging</a>.</p>
+
+<h3>Ranking and Ordering</h3>
+
+<p>Notifications are "news" and so they are essentially shown in reverse-chronological order, with
+special consideration given to the app's stated notification priority.</p>
+
+<p>In L, notifications are now a key part of the lockscreen, and are featured prominently every
+time the device display comes on. Because space on the lockscreen is tight, it is more important
+than ever to identify the most urgent or relevant notifications.</p>
+
+<p>Therefore, L has a more sophisticated sorting algorithm for notifications, taking into account:</p>
+
+<ul>
+  <li> The timestamp and application's stated priority, as before.</li>
+  <li> Whether the notification has recently disturbed the user with sound or vibration. (That is,
+  if the phone just made noise, and the user wants to know "what just happened?" the lockscreen
+  should answer that at a glance.)</li>
+  <li> Any people that are attached to the notification using <code>EXTRA_PEOPLE</code>, and in
+  particular whether those are starred contacts.</li>
+</ul>
+
+<p>To best take advantage of this sorting, developers should focus on the user experience they want
+to create rather than aiming for any particular spot on the list.</p>
+
+  <img src="{@docRoot}preview/images/notifications/AntiSample3.png"
+    alt="" width="700px" />
+
+  <p class="img-caption" style="margin-top:10px">Gmail notifications are default priority, so they
+  normally sort below messages from an instant messaging app like Hangouts, but Gmail will get a
+  temporary bump when new messages come in.
+  </p>
+
+
+<h3>On the lockscreen</h3>
+
+<p>Starting in L, notifications are visible on the lockscreen, and so we must consider the user's
+privacy. Notifications often contain sensitive information, and we must take care when showing it to
+anyone who picks up the device and turns on the display.</p>
+
+<ul>
+  <li> For devices without a secure lockscreen, a simple slide gesture unlocks the whole device.
+  Therefore, Android will always show the complete contents of all notifications on insecure lockscreens.</li>
+  <li> When a device has a secure lockscreen (PIN, pattern, or password), however, it divides the
+  interface into two spheres: "public", the things that are displayed atop a secure lockscreen and
+  can therefore be seen by anyone; and "private", the world behind that lockscreen, which can only
+  be accessed by supplying the correct authentication.</li>
+</ul>
+
+<h3>The user decides what shows on the secure lockscreen</h3>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}preview/images/notifications/LockScreen.png"
+    alt="" width="311px" />
+      <p class="img-caption">
+    Notifications on the lockscreen followed by the Pattern Unlock when the user attempts to unlock the phone.
+  </p>
+</div>
+
+<p>When setting up a secure lockscreen, the user can choose to conceal sensitive details from atop the secure lockscreen. In this case the SystemUI considers the notification's <em>visibility level</em> to figure out what can safely be shown.</p>
+<p> To control the visibility level, call
+<code>Notification.Builder.setVisibility()</code> and specify one of these values:</p>
+
+<ul>
+  <li><code>Notification.VISIBILITY_PUBLIC</code>. Shows the notification's full content.
+  This is the system default if visibility is left unspecified.</li>
+  <li><code>Notification.VISIBILITY_PRIVATE</code>. The lockscreen will reveal basic information about the existence of this notification, including its icon and the name of the app that posted it. The rest of the notification's details, however, are not displayed.
+  <ul>
+    <li> If you want to provide a different public version of your notification for the system to display on a secure lockscreen, supply a replacement Notification object in the <code>Notification.publicVersion</code> field.
+    <li> This is an app's opportunity to create a redacted version of the content that is still useful but does not reveal personal information.
+    <li> <strong>Example: </strong>An SMS app whose notifications include the text of the SMS and the sender's name and contact icon. This notification should be <code>VISIBILITY_PRIVATE</code>, but the <code>publicVersion</code> could still contain useful information like "3 new messages" without any other identifying details.
+  </ul>
+  </li>
+  <li><code>Notification.VISIBILITY_SECRET</code>. Shows only the most minimal information, excluding even the notification's icon.</li>
+</ul>

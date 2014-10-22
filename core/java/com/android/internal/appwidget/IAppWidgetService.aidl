@@ -18,6 +18,8 @@ package com.android.internal.appwidget;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.appwidget.AppWidgetProviderInfo;
 import com.android.internal.appwidget.IAppWidgetHost;
 import android.os.Bundle;
@@ -30,35 +32,38 @@ interface IAppWidgetService {
     //
     // for AppWidgetHost
     //
-    int[] startListening(IAppWidgetHost host, String packageName, int hostId,
-            out List<RemoteViews> updatedViews, int userId);
-    void stopListening(int hostId, int userId);
-    int allocateAppWidgetId(String packageName, int hostId, int userId);
-    void deleteAppWidgetId(int appWidgetId, int userId);
-    void deleteHost(int hostId, int userId);
-    void deleteAllHosts(int userId);
-    RemoteViews getAppWidgetViews(int appWidgetId, int userId);
-    int[] getAppWidgetIdsForHost(int hostId, int userId);
+    int[] startListening(IAppWidgetHost host, String callingPackage, int hostId,
+            out List<RemoteViews> updatedViews);
+    void stopListening(String callingPackage, int hostId);
+    int allocateAppWidgetId(String callingPackage, int hostId);
+    void deleteAppWidgetId(String callingPackage, int appWidgetId);
+    void deleteHost(String packageName, int hostId);
+    void deleteAllHosts();
+    RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId);
+    int[] getAppWidgetIdsForHost(String callingPackage, int hostId);
+    IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
+            int intentFlags);
 
     //
     // for AppWidgetManager
     //
-    void updateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views, int userId);
-    void updateAppWidgetOptions(int appWidgetId, in Bundle extras, int userId);
-    Bundle getAppWidgetOptions(int appWidgetId, int userId);
-    void partiallyUpdateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views, int userId);
-    void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views, int userId);
-    void notifyAppWidgetViewDataChanged(in int[] appWidgetIds, int viewId, int userId);
-    List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter, int userId);
-    AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId, int userId);
+    void updateAppWidgetIds(String callingPackage, in int[] appWidgetIds, in RemoteViews views);
+    void updateAppWidgetOptions(String callingPackage, int appWidgetId, in Bundle extras);
+    Bundle getAppWidgetOptions(String callingPackage, int appWidgetId);
+    void partiallyUpdateAppWidgetIds(String callingPackage, in int[] appWidgetIds,
+            in RemoteViews views);
+    void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
+    void notifyAppWidgetViewDataChanged(String packageName, in int[] appWidgetIds, int viewId);
+    List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
+            int profileId);
+    AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId);
     boolean hasBindAppWidgetPermission(in String packageName, int userId);
-    void setBindAppWidgetPermission(in String packageName, in boolean permission, int userId);
-    void bindAppWidgetId(int appWidgetId, in ComponentName provider, in Bundle options, int userId);
-    boolean bindAppWidgetIdIfAllowed(in String packageName, int appWidgetId,
-            in ComponentName provider, in Bundle options, int userId);
-    void bindRemoteViewsService(int appWidgetId, in Intent intent, in IBinder connection, int userId);
-    void unbindRemoteViewsService(int appWidgetId, in Intent intent, int userId);
-    int[] getAppWidgetIds(in ComponentName provider, int userId);
-
+    void setBindAppWidgetPermission(in String packageName, int userId, in boolean permission);
+    boolean bindAppWidgetId(in String callingPackage, int appWidgetId,
+            int providerProfileId, in ComponentName providerComponent, in Bundle options);
+    void bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
+            in IBinder connection);
+    void unbindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent);
+    int[] getAppWidgetIds(in ComponentName providerComponent);
 }
 

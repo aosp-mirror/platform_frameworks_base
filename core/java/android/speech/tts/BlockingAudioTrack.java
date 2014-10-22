@@ -2,8 +2,10 @@
 
 package android.speech.tts;
 
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
+import android.speech.tts.TextToSpeechService.AudioOutputParams;
 import android.util.Log;
 
 /**
@@ -44,12 +46,11 @@ class BlockingAudioTrack {
     private static final int MIN_AUDIO_BUFFER_SIZE = 8192;
 
 
-    private final int mStreamType;
+    private final AudioOutputParams mAudioParams;
     private final int mSampleRateInHz;
     private final int mAudioFormat;
     private final int mChannelCount;
-    private final float mVolume;
-    private final float mPan;
+
 
     private final int mBytesPerFrame;
     /**
@@ -73,17 +74,16 @@ class BlockingAudioTrack {
     private AudioTrack mAudioTrack;
     private volatile boolean mStopped;
 
-    BlockingAudioTrack(int streamType, int sampleRate,
-            int audioFormat, int channelCount,
-            float volume, float pan) {
-        mStreamType = streamType;
+    private int mSessionId;
+
+    BlockingAudioTrack(AudioOutputParams audioParams, int sampleRate,
+            int audioFormat, int channelCount) {
+        mAudioParams = audioParams;
         mSampleRateInHz = sampleRate;
         mAudioFormat = audioFormat;
         mChannelCount = channelCount;
-        mVolume = volume;
-        mPan = pan;
 
-        mBytesPerFrame = getBytesPerFrame(mAudioFormat) * mChannelCount;
+        mBytesPerFrame = AudioFormat.getBytesPerSample(mAudioFormat) * mChannelCount;
         mIsShortUtterance = false;
         mAudioBufferSize = 0;
         mBytesWritten = 0;
@@ -215,8 +215,14 @@ class BlockingAudioTrack {
                 = AudioTrack.getMinBufferSize(mSampleRateInHz, channelConfig, mAudioFormat);
         int bufferSizeInBytes = Math.max(MIN_AUDIO_BUFFER_SIZE, minBufferSizeInBytes);
 
-        AudioTrack audioTrack = new AudioTrack(mStreamType, mSampleRateInHz, channelConfig,
-                mAudioFormat, bufferSizeInBytes, AudioTrack.MODE_STREAM);
+        AudioFormat audioFormat = (new AudioFormat.Builder())
+                .setChannelMask(channelConfig)
+                .setEncoding(mAudioFormat)
+                .setSampleRate(mSampleRateInHz).build();
+        AudioTrack audioTrack = new AudioTrack(mAudioParams.mAudioAttributes,
+                audioFormat, bufferSizeInBytes, AudioTrack.MODE_STREAM,
+                mAudioParams.mSessionId);
+
         if (audioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
             Log.w(TAG, "Unable to create audio track.");
             audioTrack.release();
@@ -225,20 +231,9 @@ class BlockingAudioTrack {
 
         mAudioBufferSize = bufferSizeInBytes;
 
-        setupVolume(audioTrack, mVolume, mPan);
+        setupVolume(audioTrack, mAudioParams.mVolume, mAudioParams.mPan);
         return audioTrack;
     }
-
-    private static int getBytesPerFrame(int audioFormat) {
-        if (audioFormat == AudioFormat.ENCODING_PCM_8BIT) {
-            return 1;
-        } else if (audioFormat == AudioFormat.ENCODING_PCM_16BIT) {
-            return 2;
-        }
-
-        return -1;
-    }
-
 
     private void blockUntilDone(AudioTrack audioTrack) {
         if (mBytesWritten <= 0) {
@@ -339,19 +334,11 @@ class BlockingAudioTrack {
     }
 
     private static final long clip(long value, long min, long max) {
-        if (value < min) {
-            return min;
-        }
-
-        if (value > max) {
-            return max;
-        }
-
-        return value;
+        return value < min ? min : (value < max ? value : max);
     }
 
-    private static float clip(float value, float min, float max) {
-        return value > max ? max : (value < min ? min : value);
+    private static final float clip(float value, float min, float max) {
+        return value < min ? min : (value < max ? value : max);
     }
 
 }

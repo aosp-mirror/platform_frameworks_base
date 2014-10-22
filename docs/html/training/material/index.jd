@@ -1,0 +1,62 @@
+page.title=Creating Apps with Material Design
+page.type=design
+page.image=design/material/images/MaterialLight.png
+page.metaDescription=Learn how to apply material design to your apps.
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android 5.0 (API level 21)</li>
+    <li>Android Studio 0.8</li>
+  </ul>
+</div>
+</div>
+
+<p>Material design is a comprehensive guide for visual, motion, and interaction design across
+platforms and devices. To use material design in your Android apps, follow the guidelines
+described in the
+<a href="http://www.google.com/design/spec/material-design/introduction.html">material design
+specification</a> and use the new components and functionality available in Android 5.0
+(API level 21).</p>
+
+<p>This class shows you how to create material design apps with the following elements:</p>
+
+<ul>
+<li>The material theme</li>
+<li>Widgets for cards and lists</li>
+<li>Custom shadows and view clipping</li>
+<li>Vector drawables</li>
+<li>Custom animations</li>
+</ul>
+
+<p>This class also teaches you how to maintain compatibility with versions of Android earlier than
+5.0 (API level 21) when you use material design features in your app.</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">Getting Started</a></dt>
+  <dd>Learn how to update your app with material design features.</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">Using the Material Theme</a></dt>
+  <dd>Learn how to apply material design styles to your app.</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">Creating Lists and Cards</a></dt>
+  <dd>Learn how to create lists and cards with a consistent look and feel using system widgets.</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">Defining Shadows and Clipping Views</a></dt>
+  <dd>Learn how to set elevation for your views to create custom shadows and how to clip views.</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">Working with Drawables</a></dt>
+  <dd>Learn how to create vector drawables and how to tint drawable resources.</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">Defining Custom Animations</a></dt>
+  <dd>Learn how to create custom animations for views and activity transitions with shared elements.</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">Maintaining Compatibility</a></dt>
+  <dd>Learn how to maintain compatibility with platform versions earlier than Android 5.0.</dd>
+</dl>

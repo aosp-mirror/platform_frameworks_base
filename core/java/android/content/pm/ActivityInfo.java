@@ -16,10 +16,14 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information you can retrieve about a particular application
@@ -63,7 +67,70 @@ public class ActivityInfo extends ComponentInfo
      * {@link #LAUNCH_SINGLE_INSTANCE}.
      */
     public int launchMode;
-    
+
+    /**
+     * Constant corresponding to <code>none</code> in
+     * the {@link android.R.attr#documentLaunchMode} attribute.
+     */
+    public static final int DOCUMENT_LAUNCH_NONE = 0;
+    /**
+     * Constant corresponding to <code>intoExisting</code> in
+     * the {@link android.R.attr#documentLaunchMode} attribute.
+     */
+    public static final int DOCUMENT_LAUNCH_INTO_EXISTING = 1;
+    /**
+     * Constant corresponding to <code>always</code> in
+     * the {@link android.R.attr#documentLaunchMode} attribute.
+     */
+    public static final int DOCUMENT_LAUNCH_ALWAYS = 2;
+    /**
+     * Constant corresponding to <code>never</code> in
+     * the {@link android.R.attr#documentLaunchMode} attribute.
+     */
+    public static final int DOCUMENT_LAUNCH_NEVER = 3;
+    /**
+     * The document launch mode style requested by the activity. From the
+     * {@link android.R.attr#documentLaunchMode} attribute, one of
+     * {@link #DOCUMENT_LAUNCH_NONE}, {@link #DOCUMENT_LAUNCH_INTO_EXISTING},
+     * {@link #DOCUMENT_LAUNCH_ALWAYS}.
+     *
+     * <p>Modes DOCUMENT_LAUNCH_ALWAYS
+     * and DOCUMENT_LAUNCH_INTO_EXISTING are equivalent to {@link
+     * android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
+     * Intent.FLAG_ACTIVITY_NEW_DOCUMENT} with and without {@link
+     * android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
+     * Intent.FLAG_ACTIVITY_MULTIPLE_TASK} respectively.
+     */
+    public int documentLaunchMode;
+
+    /**
+     * Constant corresponding to <code>persistRootOnly</code> in
+     * the {@link android.R.attr#persistableMode} attribute.
+     */
+    public static final int PERSIST_ROOT_ONLY = 0;
+    /**
+     * Constant corresponding to <code>doNotPersist</code> in
+     * the {@link android.R.attr#persistableMode} attribute.
+     */
+    public static final int PERSIST_NEVER = 1;
+    /**
+     * Constant corresponding to <code>persistAcrossReboots</code> in
+     * the {@link android.R.attr#persistableMode} attribute.
+     */
+    public static final int PERSIST_ACROSS_REBOOTS = 2;
+    /**
+     * Value indicating how this activity is to be persisted across
+     * reboots for restoring in the Recents list.
+     * {@link android.R.attr#persistableMode}
+     */
+    public int persistableMode;
+
+    /**
+     * The maximum number of tasks rooted at this activity that can be in the recent task list.
+     * Refer to {@link android.R.attr#maxRecents}.
+     */
+    public int maxRecents;
+
     /**
      * Optional name of a permission required to be able to access this
      * Activity.  From the "permission" attribute.
@@ -185,9 +252,28 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_IMMERSIVE = 0x0800;
     /**
+     * Bit in {@link #flags}: If set, a task rooted at this activity will have its
+     * baseIntent replaced by the activity immediately above this. Each activity may further
+     * relinquish its identity to the activity above it using this flag. Set from the
+     * {@link android.R.attr#relinquishTaskIdentity} attribute.
+     */
+    public static final int FLAG_RELINQUISH_TASK_IDENTITY = 0x1000;
+    /**
+     * Bit in {@link #flags} indicating that tasks started with this activity are to be
+     * removed from the recent list of tasks when the last activity in the task is finished.
+     * Corresponds to {@link android.R.attr#autoRemoveFromRecents}
+     */
+    public static final int FLAG_AUTO_REMOVE_FROM_RECENTS = 0x2000;
+    /**
+     * Bit in {@link #flags} indicating that this activity can start is creation/resume
+     * while the previous activity is still pausing.  Corresponds to
+     * {@link android.R.attr#resumeWhilePausing}
+     */
+    public static final int FLAG_RESUME_WHILE_PAUSING = 0x4000;
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the primary user.  Only works with broadcast receivers.  Set from the
-     * {@link android.R.attr#primaryUserOnly} attribute.
+     * android.R.attr#primaryUserOnly attribute.
      */
     public static final int FLAG_PRIMARY_USER_ONLY = 0x20000000;
     /**
@@ -198,6 +284,13 @@ public class ActivityInfo extends ComponentInfo
      * components; it is not applied to activities.
      */
     public static final int FLAG_SINGLE_USER = 0x40000000;
+    /**
+     * @hide Bit in {@link #flags}: If set, this activity may be launched into an
+     * owned ActivityContainer such as that within an ActivityView. If not set and
+     * this activity is launched into such a container a SecurityExcception will be
+     * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
+     */
+    public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
     /**
      * Options that have been set in the activity declaration in the
      * manifest.
@@ -211,6 +304,28 @@ public class ActivityInfo extends ComponentInfo
      * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER}.
      */
     public int flags;
+
+    /** @hide */
+    @IntDef({
+            SCREEN_ORIENTATION_UNSPECIFIED,
+            SCREEN_ORIENTATION_LANDSCAPE,
+            SCREEN_ORIENTATION_PORTRAIT,
+            SCREEN_ORIENTATION_USER,
+            SCREEN_ORIENTATION_BEHIND,
+            SCREEN_ORIENTATION_SENSOR,
+            SCREEN_ORIENTATION_NOSENSOR,
+            SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
+            SCREEN_ORIENTATION_SENSOR_PORTRAIT,
+            SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
+            SCREEN_ORIENTATION_REVERSE_PORTRAIT,
+            SCREEN_ORIENTATION_FULL_SENSOR,
+            SCREEN_ORIENTATION_USER_LANDSCAPE,
+            SCREEN_ORIENTATION_USER_PORTRAIT,
+            SCREEN_ORIENTATION_FULL_USER,
+            SCREEN_ORIENTATION_LOCKED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScreenOrientation {}
 
     /**
      * Constant corresponding to <code>unspecified</code> in
@@ -323,6 +438,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link #SCREEN_ORIENTATION_FULL_USER},
      * {@link #SCREEN_ORIENTATION_LOCKED},
      */
+    @ScreenOrientation
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
     
     /**
@@ -541,6 +657,7 @@ public class ActivityInfo extends ComponentInfo
         softInputMode = orig.softInputMode;
         uiOptions = orig.uiOptions;
         parentActivityName = orig.parentActivityName;
+        maxRecents = orig.maxRecents;
     }
     
     /**
@@ -554,13 +671,23 @@ public class ActivityInfo extends ComponentInfo
         return theme != 0 ? theme : applicationInfo.theme;
     }
 
+    private String persistableModeToString() {
+        switch(persistableMode) {
+            case PERSIST_ROOT_ONLY: return "PERSIST_ROOT_ONLY";
+            case PERSIST_NEVER: return "PERSIST_NEVER";
+            case PERSIST_ACROSS_REBOOTS: return "PERSIST_ACROSS_REBOOTS";
+            default: return "UNKNOWN=" + persistableMode;
+        }
+    }
+
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
         pw.println(prefix + "taskAffinity=" + taskAffinity
-                + " targetActivity=" + targetActivity);
+                + " targetActivity=" + targetActivity
+                + " persistableMode=" + persistableModeToString());
         if (launchMode != 0 || flags != 0 || theme != 0) {
             pw.println(prefix + "launchMode=" + launchMode
                     + " flags=0x" + Integer.toHexString(flags)
@@ -601,6 +728,8 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(softInputMode);
         dest.writeInt(uiOptions);
         dest.writeString(parentActivityName);
+        dest.writeInt(persistableMode);
+        dest.writeInt(maxRecents);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -626,5 +755,7 @@ public class ActivityInfo extends ComponentInfo
         softInputMode = source.readInt();
         uiOptions = source.readInt();
         parentActivityName = source.readString();
+        persistableMode = source.readInt();
+        maxRecents = source.readInt();
     }
 }

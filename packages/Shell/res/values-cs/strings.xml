@@ -17,8 +17,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Prostředí"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Byla vytvořena zpráva o chybě"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Zprávu o chybě můžete sdílet klepnutím."</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Zprávy o chybách obsahují data z různých souborů protokolů systému včetně osobních a soukromých informací. Zprávy o chybách sdílejte pouze s aplikacemi a uživateli, kterým důvěřujete."</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Bylo vytvořeno chybové hlášení"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Chcete-li hlášení chyby sdílet, přejeďte doleva."</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Chybové hlášení můžete sdílet klepnutím."</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"Chybová hlášení obsahují data z různých souborů protokolů systému včetně osobních a soukromých informací. Chybová hlášení sdílejte pouze s aplikacemi a uživateli, kterým důvěřujete."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Zobrazit tuto zprávu příště"</string>
 </resources>

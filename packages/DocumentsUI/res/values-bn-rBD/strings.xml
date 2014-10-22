@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="2783841764617238354">"দস্তাবেজগুলি"</string>
+    <string name="title_open" msgid="4353228937663917801">"এখান থেকে খুলুন"</string>
+    <string name="title_save" msgid="2433679664882857999">"এতে সংরক্ষণ করুন"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"ফোল্ডার তৈরি করুন"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"গ্রিড দৃশ্য"</string>
+    <string name="menu_list" msgid="7279285939892417279">"তালিকা দৃশ্য"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"এর দ্বারা সাজান"</string>
+    <string name="menu_search" msgid="3816712084502856974">"অনুসন্ধান করুন"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"সেটিংস"</string>
+    <string name="menu_open" msgid="432922957274920903">"খুলুন"</string>
+    <string name="menu_save" msgid="2394743337684426338">"সংরক্ষণ করুন"</string>
+    <string name="menu_share" msgid="3075149983979628146">"ভাগ করুন"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
+    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" নির্বাচন করুন"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> নির্বাচন করা হয়েছে"</string>
+    <string name="sort_name" msgid="9183560467917256779">"নামের দ্বারা"</string>
+    <string name="sort_date" msgid="586080032956151448">"পরিবর্তনের তারিখ দ্বারা"</string>
+    <string name="sort_size" msgid="3350681319735474741">"আকার অনুযায়ী"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"রুটগুলি দেখান"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"রুটগুলি লুকান"</string>
+    <string name="save_error" msgid="6167009778003223664">"দস্তাবেজ সংরক্ষণ করতে ব্যর্থ হয়েছে"</string>
+    <string name="create_error" msgid="3735649141335444215">"ফোল্ডার তৈরি করতে ব্যর্থ হয়েছে"</string>
+    <string name="query_error" msgid="1222448261663503501">"উন্নত ডিভাইসগুলি প্রদর্শন করে"</string>
+    <string name="root_recent" msgid="4470053704320518133">"সাম্প্রতিক"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> খালি আছে"</string>
+    <string name="root_type_service" msgid="2178854894416775409">"সঞ্চয়স্থান পরিষেবাগুলি"</string>
+    <string name="root_type_shortcut" msgid="3318760609471618093">"শর্টকাটগুলি"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"ডিভাইসগুলি"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"আরো অ্যাপ্লিকেশান"</string>
+    <string name="pref_advanced_devices" msgid="903257239609301276">"উন্নত ডিভাইসগুলি প্রদর্শন করে"</string>
+    <string name="pref_file_size" msgid="2826879315743961459">"ফাইলের আকার প্রদর্শন করে"</string>
+    <string name="pref_device_size" msgid="3542106883278997222">"ডিভাইসের মাপ প্রদর্শন করে"</string>
+    <string name="empty" msgid="7858882803708117596">"কোনো আইটেম নেই"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"ফাইল খোলা যাবে না"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"কিছু দস্তাবেজ মুছতে অসমর্থ"</string>
+    <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে ভাগ করুন"</string>
+</resources>

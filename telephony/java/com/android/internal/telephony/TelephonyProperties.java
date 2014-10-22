@@ -123,8 +123,8 @@ public interface TelephonyProperties
     /** Indicate the timer value for exiting emergency callback mode */
     static final String PROPERTY_ECM_EXIT_TIMER = "ro.cdma.ecmexittimer";
 
-    /** The international dialing prefix conversion string */
-    static final String PROPERTY_IDP_STRING = "ro.cdma.idpstring";
+    /** the international dialing prefix of current operator network */
+    static final String PROPERTY_OPERATOR_IDP_STRING = "gsm.operator.idpstring";
 
     /**
      * Defines the schema for the carrier specified OTASP number
@@ -187,4 +187,26 @@ public interface TelephonyProperties
      * Ignore RIL_UNSOL_NITZ_TIME_RECEIVED completely, used for debugging/testing.
      */
     static final String PROPERTY_IGNORE_NITZ = "telephony.test.ignore.nitz";
+
+     /**
+     * Property to set multi sim feature.
+     * Type:  String(dsds, dsda)
+     */
+    static final String PROPERTY_MULTI_SIM_CONFIG = "persist.radio.multisim.config";
+
+    /**
+     * Property to store default subscription.
+     */
+    static final String PROPERTY_DEFAULT_SUBSCRIPTION = "persist.radio.default.sub";
+
+    /**
+     * Property to enable MMS Mode.
+     * Type: string ( default = silent, enable to = prompt )
+     */
+    static final String PROPERTY_MMS_TRANSACTION = "mms.transaction";
+
+    /**
+     * Set to the sim count.
+     */
+    static final String PROPERTY_SIM_COUNT = "ro.telephony.sim.count";
 }

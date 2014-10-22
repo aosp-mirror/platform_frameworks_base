@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
+    NOTE: this file is the legacy format, for compatibility with apps. The new,
+    more flexible format is fonts.xml. Please keep the two in sync until the legacy
+    format can be fully removed.
+
     Fallback Fonts
 
     This file specifies the fonts, and the priority order, that will be searched for any
@@ -31,23 +35,26 @@
 <familyset>
     <family>
         <fileset>
-            <file variant="elegant">DroidNaskh-Regular.ttf</file>
+            <file variant="elegant">NotoNaskh-Regular.ttf</file>
+            <file variant="elegant">NotoNaskh-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file variant="compact">DroidNaskhUI-Regular.ttf</file>
+            <file variant="compact">NotoNaskhUI-Regular.ttf</file>
+            <file variant="compact">NotoNaskhUI-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>DroidSansEthiopic-Regular.ttf</file>
+            <file>NotoSansEthiopic-Regular.ttf</file>
+            <file>NotoSansEthiopic-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>DroidSansHebrew-Regular.ttf</file>
-            <file>DroidSansHebrew-Bold.ttf</file>
+            <file>NotoSansHebrew-Regular.ttf</file>
+            <file>NotoSansHebrew-Bold.ttf</file>
         </fileset>
     </family>
     <family>
@@ -64,12 +71,14 @@
     </family>
     <family>
         <fileset>
-            <file>DroidSansArmenian.ttf</file>
+            <file>NotoSansArmenian-Regular.ttf</file>
+            <file>NotoSansArmenian-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>DroidSansGeorgian.ttf</file>
+            <file>NotoSansGeorgian-Regular.ttf</file>
+            <file>NotoSansGeorgian-Bold.ttf</file>
         </fileset>
     </family>
     <family>
@@ -82,6 +91,32 @@
         <fileset>
             <file variant="compact">NotoSansDevanagariUI-Regular.ttf</file>
             <file variant="compact">NotoSansDevanagariUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <!-- Gujarati should come after Devanagari -->
+    <family>
+        <fileset>
+            <file variant="elegant">NotoSansGujarati-Regular.ttf</file>
+            <file variant="elegant">NotoSansGujarati-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansGujaratiUI-Regular.ttf</file>
+            <file variant="compact">NotoSansGujaratiUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <!-- Gurmukhi should come after Devanagari -->
+    <family>
+        <fileset>
+            <file variant="elegant">NotoSansGurmukhi-Regular.ttf</file>
+            <file variant="elegant">NotoSansGurmukhi-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansGurmukhiUI-Regular.ttf</file>
+            <file variant="compact">NotoSansGurmukhiUI-Bold.ttf</file>
         </fileset>
     </family>
     <family>
@@ -146,6 +181,12 @@
     </family>
     <family>
         <fileset>
+            <file>NotoSansSinhala-Regular.ttf</file>
+            <file>NotoSansSinhala-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file variant="elegant">NotoSansKhmer-Regular.ttf</file>
             <file variant="elegant">NotoSansKhmer-Bold.ttf</file>
         </fileset>
@@ -170,23 +211,59 @@
     </family>
     <family>
         <fileset>
+            <file variant="elegant">NotoSansMyanmar-Regular.ttf</file>
+            <file variant="elegant">NotoSansMyanmar-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansMyanmarUI-Regular.ttf</file>
+            <file variant="compact">NotoSansMyanmarUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansCherokee-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansCanadianAboriginal-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansYi-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="zh-Hans">NotoSansHans-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="zh-Hant">NotoSansHant-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="ja">NotoSansJP-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="ko">NotoSansKR-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NanumGothic.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>Padauk-book.ttf</file>
-            <file>Padauk-bookbold.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
-            <file>NotoSansSymbols-Regular.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
-            <file>AndroidEmoji.ttf</file>
+            <file>NotoSansSymbols-Regular-Subsetted.ttf</file>
         </fileset>
     </family>
     <family>

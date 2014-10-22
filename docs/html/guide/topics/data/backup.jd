@@ -899,8 +899,9 @@ Play built in.</li>
 {@code tools/} path:
 <pre class="no-pretty-print">adb shell bmgr enable true</pre>
       </li>
-      <li>If using a device, open the system <b>Settings</b>, select <b>Privacy</b>, then enable
-<b>Back up my data</b> and <b>Automatic restore</b>.
+      <li>If using a device, open the system <b>Settings</b>, select
+      <b>Backup & reset</b>, then enable
+      <b>Back up my data</b> and <b>Automatic restore</b>.</li>
     </ul>
   </li>
   <li>Open your application and initialize some data

@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="tools-common-prebuilt">
+    <ANNOTATIONS>
+      <root url="file://$PROJECT_DIR$" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/tools-common/tools-common-prebuilt.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$ANDROID_SRC$/tools/base/common/src/main/java" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,145 @@
+page.title=Packaging Wearable Apps
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Studio">Package with Android Studio</a></li>
+  <li><a href="#PackageManually">Package Manually</a></li>
+  <li><a href="#AssetCompression">Turn off Asset Compression</a></li>
+</ol>
+</div>
+</div>
+
+<p>When publishing to users, you must package a wearable app inside of a handheld app, 
+because users cannot browse and install apps directly on the wearable. If packaged properly,
+when users download the handheld app, the system automatically pushes the wearable app to the
+paired wearable.
+</p>
+
+<p class="note"><b>Note:</b> This feature doesn't work when you are signing your apps with
+a debug key when developing. While developing, installing apps with <code>adb install</code> or
+Android Studio directly to the wearable is required.</p>
+
+
+<h2 id="Studio">Package with Android Studio</h2>
+<p>To properly package a wearable app in Android Studio:</p>
+
+<ol>
+  <li>Declare a Gradle dependency in the handheld app's <code>build.gradle</code> file
+  that points to the wearable app module:
+<pre>
+dependencies {
+   compile 'com.google.android.gms:play-services:5.0.+@aar'
+   compile 'com.android.support:support-v4:20.0.+''
+   <b>wearApp project(':wearable')</b>
+}
+</pre>
+  </li>
+  <li>Click <b>Build > Generate Signed APK...</b> and follow the on-screen instructions
+  to specify your release keystore and sign your app. Android Studio exports the signed
+  handheld app with the wearable app embedded in it automatically into your project's root folder.
+
+  <p>Alternatively, you can create a <code>signingConfig</code> rule in the wearable and handheld
+  modules' <code>build.gradle</code> file to sign them with your release key. Both apps must be
+  signed to have the automatic pushing of the wearable app work.
+
+<pre>
+android {
+  ...
+  signingConfigs {
+    release {
+      keyAlias 'myAlias'
+      keyPassword 'myPw'
+      storeFile file('path/to/release.keystore')
+      storePassword 'myPw'
+    }
+  }
+  buildTypes {
+    release {
+      ...
+      signingConfig signingConfigs.release
+    }
+  }
+  ...
+}
+</pre>
+  <p>Build the handheld app by clicking the Gradle button on the right vertical toolbar of
+  Android Studio and running the <b>assembleRelease</b> task. The task is located under
+  <b>Project name > Handheld module name > assembleRelease</b>.
+  </p>
+
+<p class="note"><b>Note:</b>This example embeds the password in your Gradle file, which might be undesirable. See
+<a href="{@docRoot}sdk/installing/studio-build.html#configureSigning">Configure signing settings</a>
+for information about how to create an environment variable for the passwords instead.
+</p>
+</ol>
+
+<h3>Signing the wearable and handheld app separately</h3>
+<p>If your build process requires signing the wearable app separately from the handheld app,
+you can declare the following Gradle rule in the handheld module's <code>build.gradle</code> to
+embed the previously-signed wearable app:</p>
+
+<pre>
+dependencies {
+  ...
+  wearApp files('/path/to/wearable_app.apk')
+}
+</pre>
+
+<p>You then sign your handheld app in any manner you wish (either with the Android Studio
+<b>Build > Generate Signed APK...</b> menu item or with Gradle <code>signingConfig</code> rules as
+described in the previous section.</p>
+
+<h2 id="PackageManually">Package Manually</h2>
+<p>
+It's still possible to package the wearable app into the handheld app manually
+if you are using another IDE or another method of building.
+</p>
+
+<ol>
+  <li>Copy the signed wearable app to your handheld project's <code>res/raw</code> directory. We'll
+  refer to the APK as <code>wearable_app.apk</code>.</li>
+  <li>Create a <code>res/xml/wearable_app_desc.xml</code> file that contains the version and
+  path information of the wearable app. For example:
+<pre>
+&lt;wearableApp package="wearable.app.package.name"&gt;
+  &lt;versionCode&gt;1&lt;/versionCode&gt;
+  &lt;versionName&gt;1.0&lt;/versionName&gt;
+  &lt;rawPathResId>wearable_app&lt;/rawPathResId&gt; <!-- Do not include the .apk extension -->
+&lt;/wearableApp&gt;
+</pre>
+
+<p>
+The <code>package</code>, <code>versionCode</code>, and <code>versionName</code> are the
+same values specified in the wearable app's <code>AndroidManifest.xml</code> file. 
+The <code>rawPathResId</code> is the static variable name of the APK resource. For example, 
+for <code>wearable_app.apk</code>, the static variable name is <code>wearable_app</code>.
+</p>
+</li>
+<li>
+Add a <code>meta-data</code> tag to your handheld app's <code>&lt;application&gt;</code> tag to
+reference the <code>wearable_app_desc.xml</code> file.
+<pre>
+  &lt;meta-data android:name="com.google.android.wearable.beta.app" 
+                 android:resource="&#64;xml/wearable_app_desc"/&gt;
+</pre>
+</li>
+<li>Build and sign the handheld app.</li>
+</ol>
+
+<h2 id="AssetCompression">Turn off Asset Compression</h2>
+<p>Many build tools automatically compress any files added to the <code>res/raw</code>
+directory of an Android app. Because the wearable APK is already zipped, these tools re-compress the
+wearable APK and the wearable app installer can no longer read the wearable app.
+</p>
+
+<p>When this happens, the installation fails. On the handheld app, the <code>PackageUpdateService</code>
+logs the following error: "this file cannot be opened as a file descriptor; it is probably compressed."
+</p>
+
+<p>Android Studio doesn't compress your APK by default, but if you are using another build process,
+ensure that you don't doubly compress the wearable app.</p>

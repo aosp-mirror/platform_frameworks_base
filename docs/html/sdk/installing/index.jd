@@ -1,19 +1,217 @@
-page.title=Setting Up an Existing IDE
+page.title=Installing the Android SDK
 
 @jd:body
 
+<style>
+p.paging-links {
+  margin:0 0 40px;
+}
+.paging-links .next-page-link {
+  right:initial;
+}
+.procedure-box {
+  padding:20px 20px 5px;
+  margin-bottom:1em;
+  background:#eee;
+}
+.landing-button {
+  min-width: 155px;
+  text-align: center;
+}
+</style>
 
-<p>You should have already downloaded the <a href="{@docRoot}sdk/index.html#ExistingIDE"
->Android SDK Tools</a>. (If you downloaded the ADT Bundle, you should instead read
-<a href="{@docRoot}sdk/installing/bundle.html">Setting Up the ADT Bundle</a>.)</p>
-
-<p>The SDK Tools package is not the complete SDK environment. It includes only the core SDK tools, which you can
-use to download the rest of the SDK packages (such as the latest system image).</p>
 
 
-<div id="win" class="docs" style="display:none">
+<!-- ###################    ADT BUNDLE     ####################### -->
+<div id="adt" heading="Installing the Eclipse ADT Bundle" style="display:none">
 
-<h3>Getting started on Windows</h3>
+
+<p>The Eclipse ADT Bundle provides everything you need to start developing apps, including
+the Android SDK tools and a version of the Eclipse IDE with built-in ADT
+(Android Developer Tools) to streamline your Android app development.</p>
+
+<p>If you didn't download the Eclipse ADT bundle, go <a href="{@docRoot}sdk/index.html"
+><b>download the Eclipse ADT bundle now</b></a>, or switch to the
+<a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
+install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
+install</a> instructions</i>.</p>
+
+<div class="procedure-box">
+<p><b>To set up the ADT Bundle:</b></p>
+<ol>
+<li>Unpack the ZIP file
+(named {@code adt-bundle-&lt;os_platform>.zip}) and save it to an appropriate location,
+such as a "Development" directory in your home directory.</li>
+<li>Open the {@code adt-bundle-&lt;os_platform>/eclipse/} directory and launch
+<strong>Eclipse</strong>.</li>
+</ol>
+
+<p class="caution"><strong>Caution:</strong> Do not move any of the files or directories
+from the {@code adt-bundle-&lt;os_platform>} directory. If you move the {@code eclipse/}
+or {@code sdk/} directory, ADT will not be able to locate the SDK and you'll
+need to manually update the ADT preferences.</p>
+</div>
+
+<p>Eclipse with ADT is now ready and loaded with the Android developer tools, but there are still
+a couple packages you should add to make your Android SDK complete.</p>
+
+<p class="paging-links">
+<a href="{@docRoot}sdk/installing/adding-packages.html" class="next-page-link">
+Continue: Adding SDK Packages</a></p>
+
+
+</div>
+<!-- ################    END ADT BUNDLE    ##################### -->
+
+
+
+
+
+
+<!-- ################    STUDIO    ##################### -->
+<div id="studio" heading="Installing Android Studio" style="display:none">
+
+<p>Android Studio provides everything you need to start developing apps, including
+the Android SDK tools and the Android Studio IDE (powered by IntelliJ) to
+streamline your Android app development.</p>
+
+<p>If you didn't download Android Studio, go <a href="{@docRoot}sdk/installing/studio.html"
+><b>download Android Studio now</b></a>, or switch to the
+<a href="{@docRoot}sdk/installing/index.html?pkg=adt">Eclipse ADT
+install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
+install</a> instructions.</p>
+
+
+<p>Before you set up Android Studio, be sure you have installed
+JDK 6 or greater (the JRE alone is not sufficient). To check if you
+have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
+If the JDK is not available or the version is lower than 6,
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" class="external-link"
+>go download JDK</a>.</p>
+
+
+<div class="procedure-box">
+
+<p id="instructions-toggle"
+style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
+>[ Show instructions for all platforms ]</a></p>
+
+<div class="win docs" style="display:none">
+
+<p><b>To set up Android Studio on Windows:</b></p>
+  <ol>
+    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.</li>
+    <li>Follow the setup wizard to install Android Studio.
+
+    <p>On some Windows systems, the launcher script does not find where Java is installed.
+      If you encounter this problem,
+      you need to set an environment variable indicating the correct location.</p>
+      <p>Select <strong>Start menu > Computer > System Properties >
+      Advanced System Properties</strong>. Then open <strong>Advanced tab > Environment
+      Variables</strong> and add a new system variable <code>JAVA_HOME</code> that points to
+      your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
+    </p>
+    </li>
+
+  </ol>
+
+
+<p>The individual tools and
+other SDK packages are saved within the Android Studio application directory.
+If you need to access the tools directly, use a terminal to navigate into the application and locate
+the {@code sdk/} directory. For example:</p>
+<p><code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
+
+
+
+</div><!-- end windows -->
+
+
+<div class="mac docs" style="display:none">
+
+<p><b>To set up Android Studio on Mac OSX:</b></p>
+  <ol>
+    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.</li>
+    <li>Drag and drop Android Studio into the Applications folder.
+      <p>
+      Depending on your security settings, when you attempt to open Android Studio, you might
+      see a warning that says the package is damaged and should be moved to the trash. If this
+      happens, go to <strong>System Preferences > Security &amp; Privacy</strong> and under
+      <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
+      Then open Android Studio again.</p>
+    </li>
+  </ol>
+
+<p>The individual tools and
+other SDK packages are saved within the Android Studio application directory.
+If you need access the tools directly, use a terminal to navigate into the application and locate
+the {@code sdk/} directory. For example:</p>
+<p><code>/Applications/Android\ Studio.app/sdk/</code></p>
+
+
+</div><!-- end mac -->
+
+
+<div class="linux docs" style="display:none">
+
+<p><b>To set up Android Studio on Linux:</b></p>
+
+  <ol>
+    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an appropriate
+    location for your applications.
+    <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
+    in a terminal and execute {@code studio.sh}.
+      <p>You may want to add {@code android-studio/bin/} to your PATH environmental
+      variable so that you can start Android Studio from any directory.</p>
+    </li>
+  </ol>
+
+</div><!-- end linux -->
+</div><!-- end procedure box -->
+
+<p>Android Studio is now ready and loaded with the Android developer tools, but there are still a
+couple packages you should add to make your Android SDK complete.</p>
+
+<p class="paging-links">
+<a href="{@docRoot}sdk/installing/adding-packages.html" class="next-page-link">
+Continue: Adding SDK Packages</a></p>
+
+
+</div>
+<!-- ################    END STUDIO    ##################### -->
+
+
+
+
+
+
+
+
+
+<!-- ################    JUST SDK TOOLS    ##################### -->
+<div id="tools" heading="Installing the Stand-alone SDK Tools" style="display:none">
+
+
+<p>The stand-alone SDK Tools package does not include a complete Android development environment.
+It includes only the core SDK tools, which you can access from a command line or with a plugin
+for your favorite IDE (if available).</p>
+
+<p>If you didn't download the SDK tools, go <a href="{@docRoot}sdk/index.html"
+><b>download the SDK now</b></a>,
+or switch to the <a href="{@docRoot}sdk/installing/index.html?pkg=adt">Eclipse ADT
+install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
+install</a> instructions.</p>
+
+
+<div class="procedure-box">
+<p id="instructions-toggle"
+style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
+>[ Show instructions for all platforms ]</a></p>
+
+<div class="win docs" style="display:none">
+
+<p><b>To get started on Windows:</b></p>
+
 <p>Your download package is an executable file that starts an installer. The installer checks your machine
   for required tools, such as the proper Java SE Development Kit (JDK) and installs it if necessary.
   The installer then saves the Android SDK Tools into a default location (or you can specify the location).</p>
@@ -21,71 +219,51 @@ use to download the rest of the SDK packages (such as the latest system image).<
 <ol>
 <li>Double-click the executable ({@code .exe} file) to start the install.</li>
 <li>Make a note of the name and location in which it saves the SDK on your system&mdash;you will need to
-refer to the SDK directory later, when setting up the ADT plugin and when using
+refer to the SDK directory later when using
 the SDK tools from the command line.</li>
-<li>Once the installation completes, the installer offers to start the Android SDK Manager.
-If you'll be using Eclipse, <strong>do not</strong> start the Android SDK Manager,
-and instead move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
->Installing the Eclipse Plugin</a>.
-<p>If you're using a different IDE,
-start the SDK Manager and read <a href="{@docRoot}sdk/installing/adding-packages.html"
->Adding Platforms and Packages</a>.</p>
+<li>Once the installation completes, the installer starts the Android SDK Manager.
 </li>
 </ol>
 
 </div>
 
-  
 
-<div id="mac" class="docs" style="display:none">
-  
-<h3>Getting started on Mac</h3>
 
-<ol>
-<li>Unpack the ZIP file you've downloaded. By default, it's unpacked
+<div class="mac docs" style="display:none">
+
+<p><b>To get started on Mac OSX:</b></p>
+
+<p>Unpack the ZIP file you've downloaded. By default, it's unpacked
 into a directory named <code>android-sdk-mac_x86</code>. Move it to an appropriate location on your machine,
-such as a "Development" directory in your home directory.
+such as a "Development" directory in your home directory.</p>
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
-refer to the SDK directory later, when setting up the ADT plugin and when using
+refer to the SDK directory later when using
 the SDK tools from the command line.</p>
-</li>
-<li>If you're using Eclipse, move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
->Installing the Eclipse Plugin</a>. Otherwise, if you're using a different IDE,
-read <a href="{@docRoot}sdk/installing/adding-packages.html"
->Adding Platforms and Packages</a>.</li>
-</ol>
 
 </div>
 
 
 
 
-<div id="linux" class="docs" style="display:none">
-  
-<h3>Getting started on Linux</h3>
+<div class="linux docs" style="display:none">
 
-<ol>
-<li>Unpack the {@code .tgz} file you've downloaded. By default, the SDK files are unpacked
+<p><b>To get started on Linux:</b></p>
+
+<p>Unpack the {@code .tgz} file you've downloaded. By default, the SDK files are unpacked
 into a directory named <code>android-sdk-linux_x86</code>. Move it to an appropriate location on your machine,
-such as a "Development" directory in your home directory.
+such as a "Development" directory in your home directory.</p>
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
-refer to the SDK directory later, when setting up the ADT plugin and when using
+refer to the SDK directory later when using
 the SDK tools from the command line.</p>
-</li>
-<li>If you're using Eclipse, move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
->Installing the Eclipse Plugin</a>. Otherwise, if you're using a different IDE,
-read <a href="{@docRoot}sdk/installing/adding-packages.html"
->Adding Platforms and Packages</a>.</li>
-</ol>
 
 
-<h5 id="Troubleshooting"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'#ubuntu-trouble');return false;"
+<h5 id="Troubleshooting" style="margin-bottom:15px"><a href='' class="expandable"
+  onclick="toggleExpandable(this,'#UbuntuTrouble');return false;"
   >Troubleshooting Ubuntu</a></h5>
 
-<div id="ubuntu-trouble" style="display:none">
+<div id="UbuntuTrouble" style="display:none">
 <ul>
   <li>If you need help installing and configuring Java on your
     development machine, you might find these resources helpful:
@@ -97,17 +275,23 @@ read <a href="{@docRoot}sdk/installing/adding-packages.html"
   <li>Here are the steps to install Java and Eclipse, prior to installing
   the Android SDK and ADT Plugin.
     <ol>
-      <li>If you are running a 64-bit distribution on your development
-      machine, you need to install the <code>ia32-libs</code> package using
-      <code>apt-get:</code>:
-      <pre>apt-get install ia32-libs</pre>
+      <li><p>If you are running a 64-bit distribution on your development
+      machine, you need to install additional packages first. For Ubuntu 13.10 (Saucy Salamander)
+      and above, install the <code>libncurses5:i386</code>, <code>libstdc++6:i386</code>, and
+      <code>zlib1g:i386</code> packages using <code>apt-get</code>:</p>
+      <pre class="no-pretty-print">sudo dpkg --add-architecture i386
+sudo apt-get update
+sudo apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386</pre>
+      <p>For earlier versions of Ubuntu, install the <code>ia32-libs</code> package using
+      <code>apt-get</code>:</p>
+      <pre class="no-pretty-print">apt-get install ia32-libs</pre>
       </li>
-      <li>Next, install Java: <pre>apt-get install sun-java6-jdk</pre></li>
-      <li>The Ubuntu package manager does not currently offer an Eclipse 3.6
+      <li>Next, install Java: <pre class="no-pretty-print">apt-get install sun-java6-jdk</pre></li>
+      <li>The Ubuntu package manager does not currently offer an Eclipse 3.7
       version for download, so we recommend that you download Eclipse from
       eclipse.org (<a
-      href="http://www.eclipse.org/downloads/">http://www.eclipse.org/
-      downloads/</a>). A Java or RCP version of Eclipse is recommended.</li>
+      href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>).
+      A Java or RCP version of Eclipse is recommended.</li>
       <li>Follow the steps given in previous sections to install the SDK
       and the ADT plugin. </li>
     </ol>
@@ -116,38 +300,125 @@ read <a href="{@docRoot}sdk/installing/adding-packages.html"
 </div><!-- end ubuntu trouble -->
 
 
+</div><!-- end linux -->
+</div><!-- end procedure box -->
+
+
+<p>The Android SDK tools are now ready to begin developing apps, but there are still a
+couple packages you should add to make your Android SDK complete.</p>
+
+<p class="paging-links">
+<a href="{@docRoot}sdk/installing/adding-packages.html" class="next-page-link">
+Continue: Adding SDK Packages</a></p>
+
+
+</div>
+<!-- ################    END JUST TOOLS    ##################### -->
+
+
+
+
+
+<!-- ################    DEFAULT    ##################### -->
+
+
+<div id="default" style="display:none">
+
+<p>If you haven't already, <b><a href="{@docRoot}sdk/index.html">download
+the Android SDK</a></b>. </p>
+
+<p>Then, select which SDK package you want to install:</p>
+
+<div class="cols" style="margin:30px 0 60px">
+<div class="col-4" style="margin-left:0">
+<a href="{@docRoot}sdk/installing/index.html?pkg=adt" class="landing-button landing-secondary">
+Eclipse ADT
+</a>
 </div>
 
-<p style="margin-top:2em;"><a href='' onclick='showAll();return false;'>Information for other platforms</a></p>
+<div class="col-4">
+<a href="{@docRoot}sdk/installing/index.html?pkg=studio" class="landing-button landing-secondary">
+Android Studio
+</a>
+</div>
+
+<div class="col-4">
+<a href="{@docRoot}sdk/installing/index.html?pkg=tools" class="landing-button landing-secondary">
+Stand-alone SDK Tools
+</a>
+</div>
+</div>
+
+
+</div>
+<!-- ################    END DEFAULT    ##################### -->
+
+
+
+
+
 
 <script>
-  var $osDocs;
-  if (navigator.appVersion.indexOf("Win")!=-1) {
-    $osDocs = $('#win');
-  } else if (navigator.appVersion.indexOf("Mac")!=-1) {
-    $osDocs = $('#mac');
-  } else if (navigator.appVersion.indexOf("Linux")!=-1) {
-    $osDocs = $('#linux');
-  }
 
-  if ($osDocs.length) {
-    // reveal only the docs for this OS
-    $osDocs.show();
-  } else {
-    // not running a compatible OS, so just show all the docs
-    $('.docs').show();
+// Show proper instructions based on downloaded SDK package
+var package = getUrlParam("pkg");
+if (package == "tools") {
+  // Show the SDK Tools (other IDE) instructions
+  $("h1").text($("#tools").attr('heading'));
+  $("#tools").show();
+} else if (package == "adt") {
+  // Show the ADT instructions
+  $("h1").text($("#adt").attr('heading'));
+  $("#adt").show();
+} else if (package == "studio") {
+  // Show the Android Studio instructions
+  $("h1").text($("#studio").attr('heading'));
+  $("#studio").show();
+} else {
+  // Show the default page content so user can select their setup
+  $("#default").show();
+}
+
+// Show the proper instructions based on machine OS
+var $osDocs;
+if (navigator.appVersion.indexOf("Win")!=-1) {
+  $osDocs = $('.win');
+} else if (navigator.appVersion.indexOf("Mac")!=-1) {
+  $osDocs = $('.mac');
+} else if (navigator.appVersion.indexOf("Linux")!=-1) {
+  $osDocs = $('.linux');
+}
+
+if ($osDocs.length) {
+  // reveal only the docs for this OS
+  $osDocs.show();
+} else {
+  // not running a compatible OS, so just show all the docs
+  $('.docs').show();
+}
+
+
+/* Shows all the machine OS instructions */
+function showAll() {
+  $('.docs').show();
+  $("#instructions-toggle").hide();
+}
+
+/* Returns the value for the given URL parameter */
+function getUrlParam(param) {
+  var url = window.location.search.substring(1);
+  var variables = url.split('&');
+  for (var i = 0; i < variables.length; i++) {
+    var paramName = variables[i].split('=');
+    if (escape(paramName[0]) == param) {
+      return escape(paramName[1]);
+    }
   }
-  
-  function showAll() {
-    $('.docs').each(function() {
-      if (!$(this).is(':visible')) {
-        console.log('show')
-        $(this).show();
-      } else {
-        console.log('hide')
-        $(this).hide();
-        $osDocs.show();
-      }
-    });
-  }
+}
+
+/* direct link to ubuntu troubleshooting */
+if ( document.location.href.indexOf('#UbuntuTrouble') > -1 ) {
+  $(".linux.docs").show();
+  toggleExpandable(this,'#UbuntuTrouble');
+}
 </script>

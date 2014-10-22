@@ -47,8 +47,7 @@ quickly and professionally to vulnerability reports from external researchers.
 <a name="issue" id="issue"></a><h2>I think I found a security flaw. How do I
 report it?</h2>
 
-<p>You can reach the Android security team at <a
-href="mailto:security@android.com">security@android.com</a>. If you like, you
+<p>You can reach the Android security team at security@android.com. If you like, you
 can protect your message using our <a
 href="http://code.google.com/android/security_at_android_dot_com.txt">PGP
 key</a>.</p>
@@ -58,6 +57,15 @@ with a detailed summary of the issue and keeping the issue confidential while
 users are at risk. In return, we will make sure to keep the researcher informed
 of our progress in issuing a fix. </p>
 
+<p>Vulnerabilities specific to Android OEMs should be reported to the relevant
+vendor. An incomplete list of Android vendor security contacts can be found below.
+To be added to this list, please contact security@android.com.</p>
+
+<ul>
+  <li><a href="http://www.htc.com/www/terms/product-security/">HTC</a></li>
+  <li><a href="http://www.motorolasolutions.com/US-EN/About/Security%20Vulnerability">Motorola</a></li>
+  <li><a href="http://developer.samsung.com/notice/How-to-Use-the-Forum">Samsung</a> - m.security@samsung.com</li>
+</ul>
 
 <a name="informed" id="informed"></a><h2>How can I stay informed about Android security?</h2>
 
@@ -91,8 +99,8 @@ distributed for Android. How can I help?</h2>
 <p>Like any other platform, it will be possible for unethical developers
 to create malicious software, known as <a
 href="http://en.wikipedia.org/wiki/Malware">malware</a>, for Android. If you
-think somebody is trying to spread malware, please let us know at <a
-href="mailto:security@android.com">security@android.com</a>. Please include as
+think somebody is trying to spread malware, please let us know at
+security@android.com. Please include as
 much detail about the application as possible, with the location it is
 being distributed from and why you suspect it of being malicious software.</p>
 

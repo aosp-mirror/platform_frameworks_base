@@ -18,6 +18,7 @@ package com.android.layoutlib.bridge.util;
 
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 
 import android.util.SparseArray;
 
@@ -59,10 +60,8 @@ public class SparseWeakArray<E> {
      * number of mappings.
      */
     public SparseWeakArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
-
-        mKeys = new long[initialCapacity];
-        mValues = new WeakReference[initialCapacity];
+        mKeys = ArrayUtils.newUnpaddedLongArray(initialCapacity);
+        mValues = new WeakReference[mKeys.length];
         mSize = 0;
     }
 
@@ -142,18 +141,6 @@ public class SparseWeakArray<E> {
 
         mGarbage = false;
         mSize = o;
-
-        int newSize = ArrayUtils.idealLongArraySize(mSize);
-        if (newSize < mKeys.length) {
-            long[] nkeys = new long[newSize];
-            WeakReference<?>[] nvalues = new WeakReference[newSize];
-
-            System.arraycopy(mKeys, 0, nkeys, 0, newSize);
-            System.arraycopy(mValues, 0, nvalues, 0, newSize);
-
-            mKeys = nkeys;
-            mValues = nvalues;
-        }
     }
 
     /**
@@ -182,28 +169,8 @@ public class SparseWeakArray<E> {
                 i = ~binarySearch(mKeys, 0, mSize, key);
             }
 
-            if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealLongArraySize(mSize + 1);
-
-                long[] nkeys = new long[n];
-                WeakReference<?>[] nvalues = new WeakReference[n];
-
-                // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
-                System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-                System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-                mKeys = nkeys;
-                mValues = nvalues;
-            }
-
-            if (mSize - i != 0) {
-                // Log.e("SparseArray", "move " + (mSize - i));
-                System.arraycopy(mKeys, i, mKeys, i + 1, mSize - i);
-                System.arraycopy(mValues, i, mValues, i + 1, mSize - i);
-            }
-
-            mKeys[i] = key;
-            mValues[i] = new WeakReference(value);
+            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+            mValues = GrowingArrayUtils.insert(mValues, mSize, i, new WeakReference(value));
             mSize++;
         }
     }
@@ -321,24 +288,9 @@ public class SparseWeakArray<E> {
             gc();
         }
 
-        int pos = mSize;
-        if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealLongArraySize(pos + 1);
-
-            long[] nkeys = new long[n];
-            WeakReference<?>[] nvalues = new WeakReference[n];
-
-            // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
-            System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
-            System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
-
-            mKeys = nkeys;
-            mValues = nvalues;
-        }
-
-        mKeys[pos] = key;
-        mValues[pos] = new WeakReference(value);
-        mSize = pos + 1;
+        mKeys = GrowingArrayUtils.append(mKeys, mSize, key);
+        mValues = GrowingArrayUtils.append(mValues, mSize, new WeakReference(value));
+        mSize++;
     }
 
     private boolean hasReclaimedRefs() {

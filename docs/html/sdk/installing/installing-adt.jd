@@ -1,8 +1,8 @@
 page.title=Installing the Eclipse Plugin
-adt.zip.version=22.6.2
-adt.zip.download=ADT-22.6.2.zip
-adt.zip.bytes=14586842
-adt.zip.checksum=f660959fa71262b4285bcb64be284bf5
+adt.zip.version=23.0.4
+adt.zip.download=ADT-23.0.4.zip
+adt.zip.bytes=103336810
+adt.zip.checksum=91a43dcf686ab73dec2c08b77243492b
 
 @jd:body
 
@@ -15,19 +15,27 @@ of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
 </p>
 
-<p>If you need to install Eclipse, you can download it from <a href=
-"http://www.eclipse.org/downloads/">eclipse.org/downloads/</a>.</p>
+<p class="note"><strong>Note:</strong> You should install the ADT plugin
+only if you already have an Eclipse installation that you want to continue using. If you do not
+have Eclipse installed, you should instead <b><a href="{@docRoot}sdk/index.html">install
+the complete Android SDK</a></b>, which includes the latest IDE for Android developers.</p>
 
-
-<p class="note"><strong>Note:</strong> If you prefer to work in a different IDE, you do not need to
-install Eclipse or ADT. Instead, you can directly use the SDK tools to build and
-debug your application.</p>
-
+<p>Your existing Eclipse installation must meet these requirements:</p>
+    <ul>
+      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.7.2 (Indigo) or greater
+<p class="note"><strong>Note:</strong> Eclipse 3.6 (Helios) is no longer
+supported with the latest version of ADT.</p></li>
+      <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
+in most Eclipse IDE packages) </li>
+      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
+        (JRE alone is not sufficient)</li>
+      <li><strong>Not</strong> compatible with GNU Compiler for Java (gcj)</li>
+    </ul>
 
 
 <h2 id="Download">Download the ADT Plugin</h2>
 
-
+<p>To add the ADT plugin to Eclipse:</p>
 <ol>
     <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install New
 Software</strong>.</li>
@@ -35,10 +43,10 @@ Software</strong>.</li>
     <li>In the Add Repository dialog that appears, enter "ADT Plugin" for the <em>Name</em> and the
 following URL for the <em>Location</em>:
       <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+      <p class="note"><strong>Note:</strong> The Android Developer Tools update site requires
+      a secure connection. Make sure the update site URL you enter starts with HTTPS.</p>
     </li>
-    <li>Click <strong>OK</strong>.
-      <p>If you have trouble acquiring the plugin, try using "http" in the Location URL,
-instead of "https" (https is preferred for security reasons).</p></li>
+    <li>Click <strong>OK</strong>.</li>
     <li>In the Available Software dialog, select the checkbox next to Developer Tools and click
 <strong>Next</strong>.</li>
     <li>In the next window, you'll see a list of the tools to be downloaded. Click
@@ -70,92 +78,18 @@ To get these packages for your SDK, continue to
 <a href="{@docRoot}sdk/installing/adding-packages.html">Adding Platforms and Packages</a>.</p>
 
 
-<h2 id="tmgr">Download the ADT Translation Manager Plugin</h2>
-
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<h2>App Translations in Google Play</h2>
-<p>Google Play <a href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">App
-Translation Service</a> is available in the Developer Console to help you
-localize your app for a global user base. You can browse qualified vendors, get
-estimates, upload strings for translation, and then import the translations directly
-into your app.</p>
-</div>
-</div>
-
-<p>ADT Translation Manager Plugin is an Android SDK Tools plugin that helps
-you work with strings that you are localizing. It's designed to work
-with the translation services built into the Google Play Developer
-Console that let you quickly find and purchase translations of
-your app from a list of pre-qualified vendors. </p>
-
-<p>The plugin simplifies the management of strings
-during translation. It lets you easily export your default strings
-and upload them directly to the Developer Console, from which you
-can get estimates or purchase translations. When your translations
-are ready, the plugin lets you quickly download and import them
-back into your project. During import, it moves all of the translated resources into
-the correct locations under <code>res/values</code>, so that
-localization works instantly.</p>
-
-<p>For more information about translation services in Google Play, see <a
-href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">Purchase
-professional translations through the Developer Console</a>.</p>
-
-<p>To install the ADT Translation Manager Plugin follow these steps:</p>
-
-<ol>
-    <li>Install the ADT Plugin, as described above. </li>
-    <li>In Eclipse, select <strong>Help</strong> &gt; <strong>Install New
-Software</strong>.</li>
-    <li>Click <strong>Add</strong>, in the top-right corner.</li>
-    <li>In the Add Repository dialog that appears, enter a repository name for the <em>Name</em>
-      and the following URL for the <em>Location</em>:
-      <pre>https://dl.google.com/alt/</pre>
-    </li>
-    <li>Click <strong>OK</strong>.
-    <li>In the Available Software dialog, select the checkbox next to <strong>Android Developer Tools
-       - Translation Manager</strong> and click <strong>Next</strong>.</li>
-    <li>In the next window, you'll see a list of the tools to be downloaded. Click
-<strong>Next</strong>. </li>
-    <li>Read and accept the license agreements, then click <strong>Finish</strong>.
-      <p>If you get a security warning saying that the authenticity or validity of
-the software can't be established, click <strong>OK</strong>.</p></li>
-    <li>When the installation completes, restart Eclipse. </li>
-</ol>
-
-<h4 id="translation-manager-notes">Installation notes</h4>
-
-<ul>
-<li>The full ADT Plugin must be installed in your Eclipse environment before you install the ADT Translation Manager Plugin.</li>
-<li>ADT Translation Manager Plugin is designed for use with the translation services offered through the Google Play Developer Console. It is not designed for general purpose import/export of strings. </li>
-<li>To use the plugin, you must <a href="{@docRoot}distribute/googleplay/publish/register.html">set up a Developer Console account</a>. </li>
-<li>Currently, translation services are available through the Developer Console only as part of a pilot program. To use the plugin, you must first sign up for the pilot program by visiting the Developer Console.</li>
-<li>If you downloaded ADT as part of the SDK ADT bundle, you may encounter an error when attempting to download the ADT Translation Manager Plugin from the remote repository. In that case, open the <strong>Install New
-Software</strong>, uncheck "Contact all update sites during install to find required software" at the bottom and try again. </li>
-</ul>
-
-
-
 <h2 id="Troubleshooting">Troubleshooting ADT Installation</h2>
 
-<p> If you are having trouble downloading the ADT plugin after following the
-steps above, here are some suggestions: </p>
-
-<ul>
-  <li>If Eclipse can not find the remote update site containing the ADT plugin,
-try changing the remote site URL to use http, rather than https. That is, set
-the Location for the remote site to:
-<pre>http://dl-ssl.google.com/android/eclipse/</pre></li>
-<li>If you are behind a firewall (such as a corporate firewall), make sure that
+<p>If you are having trouble downloading the ADT plugin after following the
+steps above and you are behind a firewall (such as a corporate firewall), make sure that
 you have properly configured your proxy settings in Eclipse. In Eclipse,
 you can configure proxy information from the main Eclipse menu in
 <strong>Window</strong> (on Mac OS X, <strong>Eclipse</strong>) &gt;
 <strong>Preferences</strong> &gt; <strong>General</strong> &gt; <strong>Network
-Connections</strong>.</li>
-</ul>
+Connections</strong>.
+</p>
 
-<p> If you are still unable to use Eclipse to download the ADT plugin as a
+<p>If you are still unable to use Eclipse to download the ADT plugin as a
 remote update site, you can download the ADT zip file to your local machine and
 manually install it:</p>
 
@@ -170,7 +104,7 @@ manually install it:</p>
   </tr>
   <tr>
     <td>
-      <a href="http://dl.google.com/android/{@adtZipDownload}">{@adtZipDownload}</a>
+      <a href="https://dl.google.com/android/{@adtZipDownload}">{@adtZipDownload}</a>
     </td>
     <td>{@adtZipBytes} bytes</td>
     <td>{@adtZipChecksum}</td>

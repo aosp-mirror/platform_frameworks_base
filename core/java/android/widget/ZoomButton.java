@@ -49,8 +49,12 @@ public class ZoomButton extends ImageButton implements OnLongClickListener {
         this(context, attrs, 0);
     }
     
-    public ZoomButton(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ZoomButton(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ZoomButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         mHandler = new Handler();
         setOnLongClickListener(this);
     }

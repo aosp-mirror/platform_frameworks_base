@@ -73,4 +73,6 @@ import com.android.internal.view.IInputContextCallback;
 
     void getSelectedText(int flags, int seq, IInputContextCallback callback);
 
+    void requestUpdateCursorAnchorInfo(in int cursorUpdateMode, int seq,
+            IInputContextCallback callback);
 }

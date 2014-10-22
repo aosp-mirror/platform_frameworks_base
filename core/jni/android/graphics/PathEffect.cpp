@@ -20,7 +20,7 @@ public:
                                      jlong outerHandle, jlong innerHandle) {
         SkPathEffect* outer = reinterpret_cast<SkPathEffect*>(outerHandle);
         SkPathEffect* inner = reinterpret_cast<SkPathEffect*>(innerHandle);
-        SkPathEffect* effect = new SkComposePathEffect(outer, inner);
+        SkPathEffect* effect = SkComposePathEffect::Create(outer, inner);
         return reinterpret_cast<jlong>(effect);
     }
 
@@ -28,22 +28,20 @@ public:
                                  jlong firstHandle, jlong secondHandle) {
         SkPathEffect* first = reinterpret_cast<SkPathEffect*>(firstHandle);
         SkPathEffect* second = reinterpret_cast<SkPathEffect*>(secondHandle);
-        SkPathEffect* effect = new SkSumPathEffect(first, second);
+        SkPathEffect* effect = SkSumPathEffect::Create(first, second);
         return reinterpret_cast<jlong>(effect);
     }
 
     static jlong Dash_constructor(JNIEnv* env, jobject,
                                       jfloatArray intervalArray, jfloat phase) {
         AutoJavaFloatArray autoInterval(env, intervalArray);
-        int     count = autoInterval.length() & ~1;  // even number
-        float*  values = autoInterval.ptr();
-
-        SkAutoSTMalloc<32, SkScalar>    storage(count);
-        SkScalar*                       intervals = storage.get();
-        for (int i = 0; i < count; i++) {
-            intervals[i] = SkFloatToScalar(values[i]);
-        }
-        SkPathEffect* effect = new SkDashPathEffect(intervals, count, SkFloatToScalar(phase));
+        int         count = autoInterval.length() & ~1;  // even number
+#ifdef SK_SCALAR_IS_FLOAT
+        SkScalar*   intervals = autoInterval.ptr();
+#else
+        #error Need to convert float array to SkScalar array before calling the following function.
+#endif
+        SkPathEffect* effect = SkDashPathEffect::Create(intervals, count, phase);
         return reinterpret_cast<jlong>(effect);
     }
 
@@ -51,20 +49,19 @@ public:
                   jlong shapeHandle, jfloat advance, jfloat phase, jint style) {
         const SkPath* shape = reinterpret_cast<SkPath*>(shapeHandle);
         SkASSERT(shape != NULL);
-        SkPathEffect* effect = new SkPath1DPathEffect(*shape, SkFloatToScalar(advance),
-                     SkFloatToScalar(phase), (SkPath1DPathEffect::Style)style);
+        SkPathEffect* effect = SkPath1DPathEffect::Create(*shape, advance, phase,
+                (SkPath1DPathEffect::Style)style);
         return reinterpret_cast<jlong>(effect);
     }
 
     static jlong Corner_constructor(JNIEnv* env, jobject, jfloat radius){
-        SkPathEffect* effect = new SkCornerPathEffect(SkFloatToScalar(radius));
+        SkPathEffect* effect = SkCornerPathEffect::Create(radius);
         return reinterpret_cast<jlong>(effect);
     }
 
     static jlong Discrete_constructor(JNIEnv* env, jobject,
                                       jfloat length, jfloat deviation) {
-        SkPathEffect* effect = new SkDiscretePathEffect(SkFloatToScalar(length),
-                                        SkFloatToScalar(deviation));
+        SkPathEffect* effect = SkDiscretePathEffect::Create(length, deviation);
         return reinterpret_cast<jlong>(effect);
     }
 

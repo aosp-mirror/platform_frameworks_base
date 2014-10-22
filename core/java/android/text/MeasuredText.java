@@ -98,10 +98,10 @@ class MeasuredText {
         mPos = 0;
 
         if (mWidths == null || mWidths.length < len) {
-            mWidths = new float[ArrayUtils.idealFloatArraySize(len)];
+            mWidths = ArrayUtils.newUnpaddedFloatArray(len);
         }
         if (mChars == null || mChars.length < len) {
-            mChars = new char[ArrayUtils.idealCharArraySize(len)];
+            mChars = ArrayUtils.newUnpaddedCharArray(len);
         }
         TextUtils.getChars(text, start, end, mChars, 0);
 
@@ -130,7 +130,7 @@ class MeasuredText {
             mEasy = true;
         } else {
             if (mLevels == null || mLevels.length < len) {
-                mLevels = new byte[ArrayUtils.idealByteArraySize(len)];
+                mLevels = ArrayUtils.newUnpaddedByteArray(len);
             }
             int bidiRequest;
             if (textDir == TextDirectionHeuristics.LTR) {
@@ -159,18 +159,17 @@ class MeasuredText {
         mPos = p + len;
 
         if (mEasy) {
-            int flags = mDir == Layout.DIR_LEFT_TO_RIGHT
-                ? Canvas.DIRECTION_LTR : Canvas.DIRECTION_RTL;
-            return paint.getTextRunAdvances(mChars, p, len, p, len, flags, mWidths, p);
+            boolean isRtl = mDir != Layout.DIR_LEFT_TO_RIGHT;
+            return paint.getTextRunAdvances(mChars, p, len, p, len, isRtl, mWidths, p);
         }
 
         float totalAdvance = 0;
         int level = mLevels[p];
         for (int q = p, i = p + 1, e = p + len;; ++i) {
             if (i == e || mLevels[i] != level) {
-                int flags = (level & 0x1) == 0 ? Canvas.DIRECTION_LTR : Canvas.DIRECTION_RTL;
+                boolean isRtl = (level & 0x1) != 0;
                 totalAdvance +=
-                        paint.getTextRunAdvances(mChars, q, i - q, q, i - q, flags, mWidths, q);
+                        paint.getTextRunAdvances(mChars, q, i - q, q, i - q, isRtl, mWidths, q);
                 if (i == e) {
                     break;
                 }

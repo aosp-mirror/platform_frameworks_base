@@ -19,6 +19,7 @@
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
+#include <SkColor.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkRect.h>
@@ -51,7 +52,7 @@ PathDescription::PathDescription():
     memset(&shape, 0, sizeof(Shape));
 }
 
-PathDescription::PathDescription(ShapeType type, SkPaint* paint):
+PathDescription::PathDescription(ShapeType type, const SkPaint* paint):
         type(type),
         join(paint->getStrokeJoin()),
         cap(paint->getStrokeCap()),
@@ -74,15 +75,11 @@ hash_t PathDescription::hash() const {
     return JenkinsHashWhiten(hash);
 }
 
-int PathDescription::compare(const PathDescription& rhs) const {
-    return memcmp(this, &rhs, sizeof(PathDescription));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PathCache::canDrawAsConvexPath(SkPath* path, SkPaint* paint) {
+bool PathCache::canDrawAsConvexPath(SkPath* path, const SkPaint* paint) {
     // NOTE: This should only be used after PathTessellator handles joins properly
     return paint->getPathEffect() == NULL && path->getConvexity() == SkPath::kConvex_Convexity;
 }
@@ -108,15 +105,14 @@ void PathCache::computeBounds(const SkRect& bounds, const SkPaint* paint,
 }
 
 static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
-    bitmap.setConfig(SkBitmap::kA8_Config, width, height);
-    bitmap.allocPixels();
+    bitmap.allocPixels(SkImageInfo::MakeA8(width, height));
     bitmap.eraseColor(0);
 }
 
 static void initPaint(SkPaint& paint) {
     // Make sure the paint is opaque, color, alpha, filter, etc.
     // will be applied later when compositing the alpha8 texture
-    paint.setColor(0xff000000);
+    paint.setColor(SK_ColorBLACK);
     paint.setAlpha(255);
     paint.setColorFilter(NULL);
     paint.setMaskFilter(NULL);
@@ -163,14 +159,7 @@ PathCache::PathCache():
     } else {
         INIT_LOGD("  Using default %s cache size of %.2fMB", name, DEFAULT_PATH_CACHE_SIZE);
     }
-    init();
-}
 
-PathCache::~PathCache() {
-    mCache.clear();
-}
-
-void PathCache::init() {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
@@ -178,6 +167,10 @@ void PathCache::init() {
     mMaxTextureSize = maxTextureSize;
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
+}
+
+PathCache::~PathCache() {
+    mCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,12 +334,12 @@ PathCache::PathProcessor::PathProcessor(Caches& caches):
 }
 
 void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
-    sp<PathTask> t = static_cast<PathTask* >(task.get());
+    PathTask* t = static_cast<PathTask*>(task.get());
     ATRACE_NAME("pathPrecache");
 
     float left, top, offset;
     uint32_t width, height;
-    PathCache::computePathBounds(t->path, &t->paint, left, top, offset, width, height);
+    PathCache::computePathBounds(&t->path, &t->paint, left, top, offset, width, height);
 
     PathTexture* texture = t->texture;
     texture->left = left;
@@ -357,7 +350,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 
     if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
         SkBitmap* bitmap = new SkBitmap();
-        drawPath(t->path, &t->paint, *bitmap, left, top, offset, width, height);
+        drawPath(&t->path, &t->paint, *bitmap, left, top, offset, width, height);
         t->setResult(bitmap);
     } else {
         texture->width = 0;
@@ -415,7 +408,7 @@ void PathCache::clearGarbage() {
  * in the cache. The source path is also used to reclaim garbage when a
  * Dalvik Path object is collected.
  */
-static SkPath* getSourcePath(SkPath* path) {
+static const SkPath* getSourcePath(const SkPath* path) {
     const SkPath* sourcePath = path->getSourcePath();
     if (sourcePath && sourcePath->getGenerationID() == path->getGenerationID()) {
         return const_cast<SkPath*>(sourcePath);
@@ -423,7 +416,7 @@ static SkPath* getSourcePath(SkPath* path) {
     return path;
 }
 
-PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
+PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     path = getSourcePath(path);
 
     PathDescription entry(kShapePath, paint);
@@ -461,7 +454,7 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     return texture;
 }
 
-void PathCache::precache(SkPath* path, SkPaint* paint) {
+void PathCache::precache(const SkPath* path, const SkPaint* paint) {
     if (!Caches::getInstance().tasks.canRunTasks()) {
         return;
     }
@@ -509,7 +502,7 @@ void PathCache::precache(SkPath* path, SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getRoundRect(float width, float height,
-        float rx, float ry, SkPaint* paint) {
+        float rx, float ry, const SkPaint* paint) {
     PathDescription entry(kShapeRoundRect, paint);
     entry.shape.roundRect.mWidth = width;
     entry.shape.roundRect.mHeight = height;
@@ -534,7 +527,7 @@ PathTexture* PathCache::getRoundRect(float width, float height,
 // Circles
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getCircle(float radius, SkPaint* paint) {
+PathTexture* PathCache::getCircle(float radius, const SkPaint* paint) {
     PathDescription entry(kShapeCircle, paint);
     entry.shape.circle.mRadius = radius;
 
@@ -554,7 +547,7 @@ PathTexture* PathCache::getCircle(float radius, SkPaint* paint) {
 // Ovals
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getOval(float width, float height, SkPaint* paint) {
+PathTexture* PathCache::getOval(float width, float height, const SkPaint* paint) {
     PathDescription entry(kShapeOval, paint);
     entry.shape.oval.mWidth = width;
     entry.shape.oval.mHeight = height;
@@ -577,7 +570,7 @@ PathTexture* PathCache::getOval(float width, float height, SkPaint* paint) {
 // Rects
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getRect(float width, float height, SkPaint* paint) {
+PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint) {
     PathDescription entry(kShapeRect, paint);
     entry.shape.rect.mWidth = width;
     entry.shape.rect.mHeight = height;
@@ -601,7 +594,7 @@ PathTexture* PathCache::getRect(float width, float height, SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getArc(float width, float height,
-        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+        float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
     PathDescription entry(kShapeArc, paint);
     entry.shape.arc.mWidth = width;
     entry.shape.arc.mHeight = height;

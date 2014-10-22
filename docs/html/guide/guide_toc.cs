@@ -55,6 +55,9 @@
           <li><a href="<?cs var:toroot ?>guide/components/tasks-and-back-stack.html">
               <span class="en">Tasks and Back Stack</span>
             </a></li>
+          <li><a href="<?cs var:toroot ?>guide/components/recents.html">
+              <span class="en">Overview Screen</span>
+            </a></li>
         </ul>
       </li>
       <li class="nav-section">
@@ -368,7 +371,13 @@
                   <span class="en">Media Playback</span></a>
                 </li>
             <li><a href="<?cs var:toroot ?>guide/topics/media/mediarouter.html">
-                  <span class="en">MediaRouter</span></a>
+                  <span class="en">Media Router</span></a>
+                </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/mediarouteprovider.html">
+                  <span class="en">Media Route Provider</span></a>
+                </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/exoplayer.html">
+                  <span class="en">ExoPlayer</span></a>
                 </li>
             <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
                    <span class="en">Supported Media Formats</span></a>
@@ -561,7 +570,11 @@
       <li><a href="<?cs var:toroot ?>guide/practices/tablets-and-handsets.html">
             <span class="en">Supporting Tablets and Handsets</span>
           </a></li>
-
+      <li>
+        <a href="<?cs var:toroot ?>guide/practices/verifying-apps-art.html">
+          <span class="en">Verifying App Behavior on ART</span>
+        </a>
+      </li>
     </ul>
   </li>
 

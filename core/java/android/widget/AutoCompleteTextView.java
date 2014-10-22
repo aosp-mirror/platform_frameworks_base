@@ -35,9 +35,8 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-
 import com.android.internal.R;
-
+import java.lang.ref.WeakReference;
 
 /**
  * <p>An editable text view that shows completion suggestions automatically
@@ -85,8 +84,8 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
- * @attr ref android.R.styleable#AutoCompleteTextView_dropDownVerticalOffset
- * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHorizontalOffset
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
     static final boolean DEBUG = false;
@@ -130,30 +129,28 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     public AutoCompleteTextView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.autoCompleteTextViewStyle);
+        this(context, attrs, R.attr.autoCompleteTextViewStyle);
     }
 
-    public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        mPopup = new ListPopupWindow(context, attrs,
-                com.android.internal.R.attr.autoCompleteTextViewStyle);
+    public AutoCompleteTextView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        mPopup = new ListPopupWindow(context, attrs, defStyleAttr, defStyleRes);
         mPopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
 
-        TypedArray a =
-            context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.AutoCompleteTextView, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
 
-        mThreshold = a.getInt(
-                R.styleable.AutoCompleteTextView_completionThreshold, 2);
+        mThreshold = a.getInt(R.styleable.AutoCompleteTextView_completionThreshold, 2);
 
         mPopup.setListSelector(a.getDrawable(R.styleable.AutoCompleteTextView_dropDownSelector));
-        mPopup.setVerticalOffset((int)
-                a.getDimension(R.styleable.AutoCompleteTextView_dropDownVerticalOffset, 0.0f));
-        mPopup.setHorizontalOffset((int)
-                a.getDimension(R.styleable.AutoCompleteTextView_dropDownHorizontalOffset, 0.0f));
-        
+
         // Get the anchor's id now, but the view won't be ready, so wait to actually get the
         // view and store it in mDropDownAnchorView lazily in getDropDownAnchorView later.
         // Defaults to NO_ID, in which case the getDropDownAnchorView method will simply return
@@ -163,11 +160,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         
         // For dropdown width, the developer can specify a specific width, or MATCH_PARENT
         // (for full screen width) or WRAP_CONTENT (to match the width of the anchored view).
-        mPopup.setWidth(a.getLayoutDimension(
-                R.styleable.AutoCompleteTextView_dropDownWidth,
+        mPopup.setWidth(a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownWidth,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        mPopup.setHeight(a.getLayoutDimension(
-                R.styleable.AutoCompleteTextView_dropDownHeight,
+        mPopup.setHeight(a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownHeight,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
 
         mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
@@ -362,13 +357,15 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @attr ref android.R.styleable#PopupWindow_popupBackground
      */
     public void setDropDownBackgroundResource(int id) {
-        mPopup.setBackgroundDrawable(getResources().getDrawable(id));
+        mPopup.setBackgroundDrawable(getContext().getDrawable(id));
     }
     
     /**
      * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
      * 
      * @param offset the vertical offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public void setDropDownVerticalOffset(int offset) {
         mPopup.setVerticalOffset(offset);
@@ -378,6 +375,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
      * 
      * @return the vertical offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public int getDropDownVerticalOffset() {
         return mPopup.getVerticalOffset();
@@ -387,6 +386,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
      * 
      * @param offset the horizontal offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public void setDropDownHorizontalOffset(int offset) {
         mPopup.setHorizontalOffset(offset);
@@ -396,6 +397,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
      * 
      * @return the horizontal offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public int getDropDownHorizontalOffset() {
         return mPopup.getHorizontalOffset();
@@ -625,7 +628,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public <T extends ListAdapter & Filterable> void setAdapter(T adapter) {
         if (mObserver == null) {
-            mObserver = new PopupDataSetObserver();
+            mObserver = new PopupDataSetObserver(this);
         } else if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mObserver);
         }
@@ -1251,25 +1254,44 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
-    private class PopupDataSetObserver extends DataSetObserver {
+    /**
+     * Static inner listener that keeps a WeakReference to the actual AutoCompleteTextView.
+     * <p>
+     * This way, if adapter has a longer life span than the View, we won't leak the View, instead
+     * we will just leak a small Observer with 1 field.
+     */
+    private static class PopupDataSetObserver extends DataSetObserver {
+        private final WeakReference<AutoCompleteTextView> mViewReference;
+
+        private PopupDataSetObserver(AutoCompleteTextView view) {
+            mViewReference = new WeakReference<AutoCompleteTextView>(view);
+        }
+
         @Override
         public void onChanged() {
-            if (mAdapter != null) {
+            final AutoCompleteTextView textView = mViewReference.get();
+            if (textView != null && textView.mAdapter != null) {
                 // If the popup is not showing already, showing it will cause
                 // the list of data set observers attached to the adapter to
                 // change. We can't do it from here, because we are in the middle
                 // of iterating through the list of observers.
-                post(new Runnable() {
-                    public void run() {
-                        final ListAdapter adapter = mAdapter;
-                        if (adapter != null) {
-                            // This will re-layout, thus resetting mDataChanged, so that the
-                            // listView click listener stays responsive
-                            updateDropDownForFilter(adapter.getCount());
-                        }
-                    }
-                });
+                textView.post(updateRunnable);
             }
         }
+
+        private final Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                final AutoCompleteTextView textView = mViewReference.get();
+                if (textView == null) {
+                    return;
+                }
+                final ListAdapter adapter = textView.mAdapter;
+                if (adapter == null) {
+                    return;
+                }
+                textView.updateDropDownForFilter(adapter.getCount());
+            }
+        };
     }
 }

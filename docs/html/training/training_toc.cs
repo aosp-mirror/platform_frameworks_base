@@ -609,7 +609,35 @@ include the action bar on devices running Android 2.1 or higher."
             </li>
         </ul>
       </li>
-
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/volley/index.html"
+             description="How to perform fast, scalable UI operations over the network using Volley"
+             >Transmitting Network Data Using Volley</a>
+        </div>
+        <ul>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/simple.html">
+                Sending a Simple Request
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/requestqueue.html">
+                Setting Up a RequestQueue
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/request.html">
+                Making a Standard Request
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/volley/request-custom.html">
+                Implementing a Custom Request
+                </a>
+            </li>
+        </ul>
+      </li>
     </ul>
   </li>
   <!-- End connectivity and cloud -->
@@ -697,6 +725,212 @@ include the action bar on devices running Android 2.1 or higher."
   </li>
   <!-- End privacy and location -->
 
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/building-wearables.html">
+      <span class="small">Building Apps for</span><br/>
+              Wearables
+      </a>
+    </div>
+    <ul>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/notifications/index.html"
+             description="How to build handheld notifications that are synced to
+             and look great on wearables."
+            >Adding Wearable Features to Notifications</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/creating.html">Creating a Notification</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/voice-input.html">Receiving Voice Input in a Notification</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/pages.html">Adding Pages to a Notification</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/stacks.html">Stacking Notifications</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/apps/index.html"
+             description="How to build apps that run directly on wearables."
+            >Creating Wearable Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/creating.html">Creating and Running a Wearable App</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/layouts.html">Creating Custom Layouts</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/voice.html">Adding Voice Capabilities</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/packaging.html">Packaging Wearable Apps</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/bt-debugging.html">Debugging over Bluetooth</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/ui/index.html"
+             description="How to create custom user interfaces for wearable apps."
+            >Creating Custom UIs</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/layouts.html">Defining Layouts</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/cards.html">Creating Cards</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/lists.html">Creating Lists</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/2d-picker.html">Creating a 2D Picker</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/confirm.html">Showing Confirmations</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/ui/exit.html">Exiting Full-Screen Activities</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/data-layer/index.html"
+             description="How to sync data between handhelds and wearables."
+            >Sending and Syncing Data</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/accessing.html">Accessing the Wearable Data Layer</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/data-items.html">Syncing Data Items</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/assets.html">Transferring Assets</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/messages.html">Sending and Receiving Messages</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/events.html">Handling Data Layer Events</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <!-- End Building for wearables -->
+
+
+  <!-- Start: Building for TV -->
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/tv/index.html">
+      <span class="small">Building Apps for</span><br/>
+              TV
+      </a>
+    </div>
+    <ul>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+
+          <a href="<?cs var:toroot ?>training/tv/start/index.html"
+             description="How to start building TV apps or extend your existing app to run on TV
+             devices.">
+             Building TV Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/start.html">
+              Getting Started with TV Apps</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/hardware.html">
+              Handling TV Hardware</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/layouts.html">
+              Building TV Layouts</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/start/navigation.html">
+              Creating TV Navigation</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/playback/index.html"
+             description="How to build apps that provide media catalogs and play content.">
+             Building TV Playback Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/browse.html">
+              Creating a Catalog Browser</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/details.html">
+              Building a Details View</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/now-playing.html">
+              Displaying a Now Playing Card</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/discovery/index.html"
+             description="How to help users discover content from your app.">
+             Helping Users Find Content on TV</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/discovery/recommendations.html">
+              Recommending TV Content</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/discovery/in-app-search.html">
+              Searching within TV Apps</a>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/tv/games/index.html"
+           description="How to build games for TV.">
+           Building TV Games</a>
+      </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/tv/tif/index.html"
+           description="How to build Live TV apps.">
+           Building Live TV Apps</a>
+      </li>
+    </ul>
+  </li>
+  <!-- End: Building for TV -->
 
 
   <li class="nav-section">
@@ -906,29 +1140,6 @@ results."
       </li>
 
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/tv/index.html"
-             description=
-             "How to optimize your app's user interface and user input for
-             the &quot;ten foot experience&quot; of a TV screen."
-            >Designing for TV</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/tv/optimizing-layouts-tv.html">
-            Optimizing Layouts for TV
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/tv/optimizing-navigation-tv.html">
-            Optimizing Navigation for TV
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/tv/unsupported-features-tv.html">
-            Handling Features Not Supported on TV
-          </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/custom-views/index.html"
              description=
@@ -1030,6 +1241,45 @@ results."
           </li>
           <li><a href="<?cs var:toroot ?>training/system-ui/visibility.html">
             Responding to UI Visibility Changes
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/material/index.html"
+             description=
+             "How to implement material design on Android."
+            >Creating Apps with Material Design</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/material/get-started.html">
+            Getting Started
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/theme.html">
+            Using the Material Theme
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/lists-cards.html">
+            Creating Lists and Cards
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/shadows-clipping.html">
+            Defining Shadows and Clipping Views
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/drawables.html">
+            Working with Drawables
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/animations.html">
+            Defining Custom Animations
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/material/compatibility.html">
+            Maintaining Compatibility
           </a>
           </li>
         </ul>
@@ -1373,6 +1623,14 @@ results."
            description=
            "How to ensure that your app is secure when performing network transactions."
           >Security with HTTPS and SSL</a>
+      </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/security-gms-provider.html"
+           description=
+           "How to use and update Google Play services security provider, to
+           protect against SSL exploits."
+          >Updating Your Security Provider to Protect Against SSL Exploits</a>
       </li>
 
       <li class="nav-section">

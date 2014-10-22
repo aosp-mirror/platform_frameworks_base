@@ -28,21 +28,21 @@ public class NetworkState implements Parcelable {
 
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
-    public final LinkCapabilities linkCapabilities;
+    public final NetworkCapabilities networkCapabilities;
     /** Currently only used by testing. */
     public final String subscriberId;
     public final String networkId;
 
     public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            LinkCapabilities linkCapabilities) {
-        this(networkInfo, linkProperties, linkCapabilities, null, null);
+            NetworkCapabilities networkCapabilities) {
+        this(networkInfo, linkProperties, networkCapabilities, null, null);
     }
 
     public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            LinkCapabilities linkCapabilities, String subscriberId, String networkId) {
+            NetworkCapabilities networkCapabilities, String subscriberId, String networkId) {
         this.networkInfo = networkInfo;
         this.linkProperties = linkProperties;
-        this.linkCapabilities = linkCapabilities;
+        this.networkCapabilities = networkCapabilities;
         this.subscriberId = subscriberId;
         this.networkId = networkId;
     }
@@ -50,7 +50,7 @@ public class NetworkState implements Parcelable {
     public NetworkState(Parcel in) {
         networkInfo = in.readParcelable(null);
         linkProperties = in.readParcelable(null);
-        linkCapabilities = in.readParcelable(null);
+        networkCapabilities = in.readParcelable(null);
         subscriberId = in.readString();
         networkId = in.readString();
     }
@@ -64,7 +64,7 @@ public class NetworkState implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(networkInfo, flags);
         out.writeParcelable(linkProperties, flags);
-        out.writeParcelable(linkCapabilities, flags);
+        out.writeParcelable(networkCapabilities, flags);
         out.writeString(subscriberId);
         out.writeString(networkId);
     }

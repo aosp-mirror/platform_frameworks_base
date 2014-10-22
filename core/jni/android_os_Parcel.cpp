@@ -187,6 +187,45 @@ static void android_os_Parcel_writeNative(JNIEnv* env, jclass clazz, jlong nativ
     }
 }
 
+static void android_os_Parcel_writeBlob(JNIEnv* env, jclass clazz, jlong nativePtr, jobject data,
+                                        jint offset, jint length) {
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel == NULL) {
+        return;
+    }
+
+    if (data == NULL) {
+        const status_t err = parcel->writeInt32(-1);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+        }
+        return;
+    }
+
+    const status_t err = parcel->writeInt32(length);
+    if (err != NO_ERROR) {
+        signalExceptionForError(env, clazz, err);
+        return;
+    }
+
+    android::Parcel::WritableBlob blob;
+    android::status_t err2 = parcel->writeBlob(length, &blob);
+    if (err2 != NO_ERROR) {
+        signalExceptionForError(env, clazz, err2);
+        return;
+    }
+
+    jbyte* ar = (jbyte*)env->GetPrimitiveArrayCritical((jarray)data, 0);
+    if (ar == NULL) {
+        memset(blob.data(), 0, length);
+    } else {
+        memcpy(blob.data(), ar + offset, length);
+        env->ReleasePrimitiveArrayCritical((jarray)data, ar, 0);
+    }
+
+    blob.release();
+}
+
 static void android_os_Parcel_writeInt(JNIEnv* env, jclass clazz, jlong nativePtr, jint val) {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     const status_t err = parcel->writeInt32(val);
@@ -291,6 +330,36 @@ static jbyteArray android_os_Parcel_createByteArray(JNIEnv* env, jclass clazz, j
                     env->ReleasePrimitiveArrayCritical(ret, a2, 0);
                 }
             }
+        }
+    }
+
+    return ret;
+}
+
+static jbyteArray android_os_Parcel_readBlob(JNIEnv* env, jclass clazz, jlong nativePtr)
+{
+    jbyteArray ret = NULL;
+
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        int32_t len = parcel->readInt32();
+        if (len >= 0) {
+            android::Parcel::ReadableBlob blob;
+            android::status_t err = parcel->readBlob(len, &blob);
+            if (err != NO_ERROR) {
+                signalExceptionForError(env, clazz, err);
+                return NULL;
+            }
+
+            ret = env->NewByteArray(len);
+            if (ret != NULL) {
+                jbyte* a2 = (jbyte*)env->GetPrimitiveArrayCritical(ret, 0);
+                if (a2) {
+                    memcpy(a2, blob.data(), len);
+                    env->ReleasePrimitiveArrayCritical(ret, a2, 0);
+                }
+            }
+            blob.release();
         }
     }
 
@@ -634,6 +703,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeRestoreAllowFds",     "(JZ)V", (void*)android_os_Parcel_restoreAllowFds},
 
     {"nativeWriteByteArray",      "(J[BII)V", (void*)android_os_Parcel_writeNative},
+    {"nativeWriteBlob",           "(J[BII)V", (void*)android_os_Parcel_writeBlob},
     {"nativeWriteInt",            "(JI)V", (void*)android_os_Parcel_writeInt},
     {"nativeWriteLong",           "(JJ)V", (void*)android_os_Parcel_writeLong},
     {"nativeWriteFloat",          "(JF)V", (void*)android_os_Parcel_writeFloat},
@@ -643,6 +713,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeWriteFileDescriptor", "(JLjava/io/FileDescriptor;)V", (void*)android_os_Parcel_writeFileDescriptor},
 
     {"nativeCreateByteArray",     "(J)[B", (void*)android_os_Parcel_createByteArray},
+    {"nativeReadBlob",            "(J)[B", (void*)android_os_Parcel_readBlob},
     {"nativeReadInt",             "(J)I", (void*)android_os_Parcel_readInt},
     {"nativeReadLong",            "(J)J", (void*)android_os_Parcel_readLong},
     {"nativeReadFloat",           "(J)F", (void*)android_os_Parcel_readFloat},

@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
@@ -63,11 +64,11 @@ public final class ResourceHelper {
      * Returns the color value represented by the given string value
      * @param value the color value
      * @return the color as an int
-     * @throw NumberFormatException if the conversion failed.
+     * @throws NumberFormatException if the conversion failed.
      */
     public static int getColor(String value) {
         if (value != null) {
-            if (value.startsWith("#") == false) {
+            if (!value.startsWith("#")) {
                 throw new NumberFormatException(
                         String.format("Color value '%s' must start with #", value));
             }
@@ -113,7 +114,7 @@ public final class ResourceHelper {
 
     public static ColorStateList getColorStateList(ResourceValue resValue, BridgeContext context) {
         String value = resValue.getValue();
-        if (value != null && RenderResources.REFERENCE_NULL.equals(value) == false) {
+        if (value != null && !RenderResources.REFERENCE_NULL.equals(value)) {
             // first check if the value is a file (xml most likely)
             File f = new File(value);
             if (f.isFile()) {
@@ -165,6 +166,9 @@ public final class ResourceHelper {
      * @param context the current context
      */
     public static Drawable getDrawable(ResourceValue value, BridgeContext context) {
+        if (value == null) {
+            return null;
+        }
         String stringValue = value.getValue();
         if (RenderResources.REFERENCE_NULL.equals(stringValue)) {
             return null;
@@ -355,9 +359,9 @@ public final class ResourceHelper {
      * @param requireUnit whether the value is expected to contain a unit.
      * @return true if success.
      */
-    public static boolean parseFloatAttribute(String attribute, String value,
+    public static boolean parseFloatAttribute(String attribute, @NonNull String value,
             TypedValue outValue, boolean requireUnit) {
-        assert requireUnit == false || attribute != null;
+        assert !requireUnit || attribute != null;
 
         // remove the space before and after
         value = value.trim();
@@ -376,7 +380,7 @@ public final class ResourceHelper {
         }
 
         // check the first character
-        if (buf[0] < '0' && buf[0] > '9' && buf[0] != '.' && buf[0] != '-') {
+        if ((buf[0] < '0' || buf[0] > '9') && buf[0] != '.' && buf[0] != '-' && buf[0] != '+') {
             return false;
         }
 
@@ -408,7 +412,7 @@ public final class ResourceHelper {
 
             if (end.length() == 0) {
                 if (outValue != null) {
-                    if (requireUnit == false) {
+                    if (!requireUnit) {
                         outValue.type = TypedValue.TYPE_FLOAT;
                         outValue.data = Float.floatToIntBits(f);
                     } else {
@@ -486,6 +490,8 @@ public final class ResourceHelper {
 
     private static void applyUnit(UnitEntry unit, TypedValue outValue, float[] outScale) {
         outValue.type = unit.type;
+        // COMPLEX_UNIT_SHIFT is 0 and hence intelliJ complains about it. Suppress the warning.
+        //noinspection PointlessBitwiseExpression
         outValue.data = unit.unit << TypedValue.COMPLEX_UNIT_SHIFT;
         outScale[0] = unit.scale;
     }

@@ -57,8 +57,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setTextAlign(Paint.Align.CENTER);
         mNumberPain.setColor(res.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
-        mNotification = notification;
-        setContentDescription(notification);
+        setNotification(notification);
 
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
@@ -71,6 +70,11 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         setScaleType(ImageView.ScaleType.CENTER);
+    }
+
+    public void setNotification(Notification notification) {
+        mNotification = notification;
+        setContentDescription(notification);
     }
 
     public StatusBarIconView(Context context, AttributeSet attrs) {
@@ -119,7 +123,7 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         if (!numberEquals) {
-            if (icon.number > 0 && mContext.getResources().getBoolean(
+            if (icon.number > 0 && getContext().getResources().getBoolean(
                         R.bool.config_statusBarShowNumber)) {
                 if (mNumberBackground == null) {
                     mNumberBackground = getContext().getResources().getDrawable(
@@ -240,10 +244,10 @@ public class StatusBarIconView extends AnimatedImageView {
 
     void placeNumber() {
         final String str;
-        final int tooBig = mContext.getResources().getInteger(
+        final int tooBig = getContext().getResources().getInteger(
                 android.R.integer.status_bar_notification_info_maxnum);
         if (mIcon.number > tooBig) {
-            str = mContext.getResources().getString(
+            str = getContext().getResources().getString(
                         android.R.string.status_bar_notification_info_overflow);
         } else {
             NumberFormat f = NumberFormat.getIntegerInstance();

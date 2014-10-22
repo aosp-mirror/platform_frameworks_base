@@ -22,10 +22,19 @@ import java.util.HashMap;
 
 public class MultiUserAvatarCache {
 
+    private static MultiUserAvatarCache sInstance;
+
     private final HashMap<Integer, Drawable> mCache;
 
-    public MultiUserAvatarCache() {
+    private MultiUserAvatarCache() {
         mCache = new HashMap<Integer, Drawable>();
+    }
+
+    public static MultiUserAvatarCache getInstance() {
+        if (sInstance == null) {
+            sInstance = new MultiUserAvatarCache();
+        }
+        return sInstance;
     }
 
     public void clear(int userId) {

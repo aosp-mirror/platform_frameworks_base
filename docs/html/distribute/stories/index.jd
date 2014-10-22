@@ -1,0 +1,13 @@
+page.title=Developer Stories
+section.landing=true
+page.metaDescription=Android developers, their apps, and their successes with Android and Google Play.
+
+@jd:body
+
+<p>Android developers, their apps, and their successes with Android and Google Play.</p>
+
+<div class="resource-widget resource-flow-layout col-13"
+    data-query="type:youtube+tag:developerstory"
+    data-sortOrder="-timestamp"
+    data-cardSizes="18x12"
+    data-maxResults="32"></div>

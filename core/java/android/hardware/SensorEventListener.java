@@ -39,11 +39,13 @@ public interface SensorEventListener {
     public void onSensorChanged(SensorEvent event);
 
     /**
-     * Called when the accuracy of a sensor has changed.
-     * <p>See {@link android.hardware.SensorManager SensorManager}
-     * for details.
+     * Called when the accuracy of the registered sensor has changed.
      *
-     * @param accuracy The new accuracy of this sensor
+     * <p>See the SENSOR_STATUS_* constants in
+     * {@link android.hardware.SensorManager SensorManager} for details.
+     *
+     * @param accuracy The new accuracy of this sensor, one of
+     *         {@code SensorManager.SENSOR_STATUS_*}
      */
-    public void onAccuracyChanged(Sensor sensor, int accuracy);    
+    public void onAccuracyChanged(Sensor sensor, int accuracy);
 }

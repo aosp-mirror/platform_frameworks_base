@@ -1,5 +1,5 @@
 page.title=Grid View
-page.tags="gridview"
+page.tags=gridview
 @jd:body
 <div id="qv-wrapper">
 <div id="qv">
@@ -43,10 +43,10 @@ into the project's
   <li>Open the <code>res/layout/main.xml</code> file and insert the following:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;GridView xmlns:android="http://schemas.android.com/apk/res/android" 
+&lt;GridView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/gridview"
-    android:layout_width="fill_parent" 
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:columnWidth="90dp"
     android:numColumns="auto_fit"
     android:verticalSpacing="10dp"

@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Apvalkalas"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Trikčių ataskaita užfiksuota"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Palieskite, kad bendrintumėte trikčių ataskaitą"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Perbraukite kairėn, kad bendrintumėte trikties ataskaitą"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Palieskite, kad bendrintumėte trikčių ataskaitą"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Trikčių ataskaitose pateikiami duomenys iš įvairių sistemos žurnalo failų, įskaitant asmeninę ir privačią informaciją. Trikčių ataskaitas bendrinkite tik su patikimomis programomis ir žmonėmis."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Rodyti šį pranešimą kitą kartą"</string>
 </resources>

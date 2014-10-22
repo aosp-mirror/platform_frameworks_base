@@ -18,7 +18,6 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.os.Parcelable;
-import android.view.Menu;
 import android.view.ViewGroup;
 
 /**
@@ -61,7 +60,7 @@ public interface MenuPresenter {
 
     /**
      * Retrieve a MenuView to display the menu specified in
-     * {@link #initForMenu(Context, Menu)}.
+     * {@link #initForMenu(Context, MenuBuilder)}.
      *
      * @param root Intended parent of the MenuView.
      * @return A freshly created MenuView.

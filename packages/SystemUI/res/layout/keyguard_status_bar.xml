@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2014 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- Extends RelativeLayout -->
+<com.android.systemui.statusbar.phone.KeyguardStatusBarView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/keyguard_header"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/status_bar_header_height_keyguard"
+    android:baselineAligned="false"
+    >
+
+    <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+        android:layout_width="@dimen/multi_user_switch_width_keyguard"
+        android:layout_height="@dimen/status_bar_header_height_keyguard"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/ripple_drawable"
+        android:layout_marginEnd="@dimen/multi_user_switch_keyguard_margin">
+        <ImageView android:id="@+id/multi_user_avatar"
+            android:layout_width="@dimen/multi_user_avatar_keyguard_size"
+            android:layout_height="@dimen/multi_user_avatar_keyguard_size"
+            android:layout_gravity="center"
+            android:scaleType="centerInside"/>
+    </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
+    <LinearLayout android:id="@+id/system_icons_super_container"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_toStartOf="@id/multi_user_switch"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_marginStart="16dp"
+        android:paddingEnd="@dimen/system_icons_keyguard_padding_end">
+        <FrameLayout android:id="@+id/system_icons_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/status_bar_height"
+            android:layout_gravity="center_vertical"
+            >
+            <include layout="@layout/system_icons" />
+        </FrameLayout>
+        <TextView android:id="@+id/battery_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/header_battery_margin_keyguard"
+            android:paddingEnd="@dimen/battery_level_padding_end"
+            android:textColor="#ffffff"
+            android:visibility="gone"
+            android:textSize="@dimen/battery_level_text_size"
+            android:importantForAccessibility="noHideDescendants"/>
+    </LinearLayout>
+
+    <com.android.keyguard.CarrierText
+        android:id="@+id/keyguard_carrier_text"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/status_bar_header_height_keyguard"
+        android:layout_marginStart="@dimen/keyguard_carrier_text_margin"
+        android:layout_toStartOf="@id/system_icons_super_container"
+        android:gravity="center_vertical"
+        android:ellipsize="marquee"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#ffffff"
+        android:singleLine="true" />
+
+</com.android.systemui.statusbar.phone.KeyguardStatusBarView>

@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.test.voiceenrollment">
+
+    <uses-permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES" />
+    <application
+        android:permission="android.permission.MANAGE_VOICE_KEYPHRASES">
+        <activity
+            android:name="TestEnrollmentActivity"
+            android:label="Voice Enrollment Application"
+            android:theme="@android:style/Theme.Material.Light.Voice">
+            <intent-filter>
+                <action android:name="com.android.intent.action.MANAGE_VOICE_KEYPHRASES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="android.voice_enrollment"
+            android:resource="@xml/enrollment_application"/>
+    </application>
+</manifest>

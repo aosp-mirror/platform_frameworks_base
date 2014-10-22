@@ -30,13 +30,6 @@ through the Google Play Store to index the app content. To indicate which app
 content you’d like Google to index, simply add link elements either to
 your existing <a href="https://support.google.com/webmasters/answer/156184?hl=en" class="external-link" target="_blank">Sitemap</a> file or in the {@code &lt;head&gt;} element of each web
 page in your site, in the same way as you would for web pages.</p>
-<p class="note"><strong>Note: </strong>
-Currently, the Google Search app indexing capability is restricted to
-English-only Android apps from developers participating in the early adopter
-program. You can sign up to be a participant by submitting the <a
-href="https://docs.google.com/a/google.com/forms/d/1itcqPAQqggJ6e4m8aejWLM8Dc5O8P6qybgGbKCNxGV0/viewform"
-class="external-link" target="_blank">App Indexing Expression of Interest</a> form.
-</p>
 
 <p>The deep links that you share with Google Search must take this URI
 format:</p>

@@ -1,5 +1,5 @@
 page.title=OpenGL ES
-page.tags="games"
+page.tags=games
 @jd:body
 
 <div id="qv-wrapper">
@@ -33,14 +33,6 @@ page.tags="games"
       <li>{@link android.opengl.GLSurfaceView}</li>
       <li>{@link android.opengl.GLSurfaceView.Renderer}</li>
     </ol>
-    <h2>Related samples</h2>
-    <ol>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">GLSurfaceViewActivity</a></li>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/GLES20Activity.html">GLES20Activity</a></li>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity.html">TouchRotateActivity</a></li>
-      <li><a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/CompressedTextureActivity.html">Compressed Textures</a></li>
-    </ol>
     <h2>See also</h2>
     <ol>
       <li><a href="{@docRoot}training/graphics/opengl/index.html">
@@ -54,7 +46,8 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics
 </div>
 
 <p>Android includes support for high performance 2D and 3D graphics with the Open Graphics Library
-(OpenGL&reg;), specifically, the OpenGL ES API. OpenGL is a cross-platform graphics API that specifies a
+(OpenGL&reg;), specifically, the OpenGL ES API. OpenGL is a cross-platform graphics API that
+specifies a
 standard software interface for 3D graphics processing hardware. OpenGL ES is a flavor of the OpenGL
 specification intended for embedded devices. Android supports several versions of the OpenGL ES
 API:</p>
@@ -64,6 +57,8 @@ API:</p>
   <li>OpenGL ES 2.0 - This API specification is supported by Android 2.2 (API level 8) and higher.
     </li>
   <li>OpenGL ES 3.0 - This API specification is supported by Android 4.3 (API level 18) and higher.
+    </li>
+  <li>OpenGL ES 3.1 - This API specification is supported by Android 5.0 (API level 21) and higher.
     </li>
 </ul>
 
@@ -176,10 +171,18 @@ calling OpenGL APIs using the following classes:</p>
         interface to OpenGL ES 2.0 and is available starting with Android 2.2 (API level 8).</li>
     </ul>
   </li>
-  <li>OpenGL ES 3.0 API Class
+  </li>
+  <li>OpenGL ES 3.0/3.1 API Packages
     <ul>
-      <li>{@link android.opengl.GLES30 android.opengl.GLES30} - This package provides the
-        interface to OpenGL ES 3.0 and is available starting with Android 4.3 (API level 18).</li>
+      <li>{@link android.opengl} - This package provides the interface to the OpenGL ES 3.0/3.1
+classes.
+      Version 3.0 is available starting with Android 4.3 (API level 18). Version 3.1 is available
+starting with Android 5.0 (API level 21).
+      <ul>
+      <li>{@link android.opengl.GLES30}</li>
+      <li>{@link android.opengl.GLES31} </li>
+      <li>{@link android.opengl.GLES31Ext} (<a href="#aep">Android Extension Pack</a>)</li>
+      </ul>
     </ul>
   </li>
 </ul>
@@ -196,9 +199,12 @@ href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</
 Here are the most common OpenGL manifest declarations:</p>
 
 <ul>
-  <li><strong>OpenGL ES version requirements</strong> - If your application only supports OpenGL ES
-2.0, you must declare that requirement by adding the following settings to your manifest as
-shown below.
+  <li><strong>OpenGL ES version requirements</strong> - If your application requires a specific
+version of
+  OpenGL ES, you must declare that requirement by adding the following settings to your manifest as
+shown below.</li>
+
+<p>For OpenGL ES 2.0:</p>
 
 <pre>
 &lt;!-- Tell the system this app requires OpenGL ES 2.0. --&gt;
@@ -209,16 +215,25 @@ shown below.
     installed on devices that do not support OpenGL ES 2.0. If your application is exclusively for
     devices that support OpenGL ES 3.0, you can also specify this in your manifest:</p>
 
+<p>For OpenGL ES 3.0:</p>
+
 <pre>
 &lt;!-- Tell the system this app requires OpenGL ES 3.0. --&gt;
 &lt;uses-feature android:glEsVersion="0x00030000" android:required="true" /&gt;
 </pre>
 
+<p>For OpenGL ES 3.1:</p>
+
+<pre>
+&lt;!-- Tell the system this app requires OpenGL ES 3.1. --&gt;
+&lt;uses-feature android:glEsVersion="0x00030001" android:required="true" /&gt;
+</pre>
+
     <p class="note"><strong>Note:</strong>
-      The OpenGL ES 3.0 API is backwards-compatible with the 2.0 API, which means you can be more
+      The OpenGL ES 3.x API is backwards-compatible with the 2.0 API, which means you can be more
       flexible with your implementation of OpenGL ES in your application. By declaring the OpenGL
       ES 2.0 API as a requirement in your manifest, you can use that API version as a default, check
-      for the availability of the 3.0 API at run time and then use OpenGL ES 3.0 features if the
+      for the availability of the 3.x API at run time and then use OpenGL ES 3.x features if the
       device supports it. For more information about checking the OpenGL ES version supported by a
       device, see <a href="#version-check">Checking OpenGL ES Version</a>.
     </p>
@@ -414,7 +429,8 @@ public void onDrawFrame(GL10 unused) {
 </li>
 </ol>
 <p>For a complete example of how to apply projection and camera view with OpenGL ES 2.0, see the <a
-href="{@docRoot}training/graphics/opengl/index.html">Displaying Graphics with OpenGL ES</a> class.</p>
+href="{@docRoot}training/graphics/opengl/index.html">Displaying Graphics with OpenGL ES</a>
+class.</p>
 
 
 <h2 id="faces-winding">Shape Faces and Winding</h2>
@@ -585,10 +601,47 @@ supported.</p>
 device.</li>
 </ol>
 
+<h4 id="aep">Android Extension Pack (AEP)</h4>
 
-<h3 id="version-check">Checking OpenGL ES Version</h3>
+<p> The AEP ensures that your application supports a standardized set of OpenGL extensions above
+and beyond
+the core set described in the OpenGL 3.1 specification. Packaging these extensions together
+encourages a consistent set of functionality across devices, while allowing developers to take full
+advantage of the latest crop of mobile GPU devices.</p>
 
-<p>There are several versions of the OpenGL ES available on Android devices. You can specify the
+<p>The AEP also improves support for images, shader storage buffers, and atomic counters in
+fragment shaders.</p>
+
+<p>For your app to be able to use the AEP, the app's manifest must declare that the AEP is required.
+In addition, the platform version must support it. </p>
+
+<p>Declare the AEP requirement in the manifest as follows:</p>
+
+<pre>
+&lt;uses feature android:name="android.hardware.opengles.aep"
+              android:required="true" /&gt;
+</pre>
+
+<p>To verify that the platform version supports the AEP, use the
+{@link android.content.pm.PackageManager#hasSystemFeature} method, passing in
+{@link android.content.pm.PackageManager#FEATURE_OPENGLES_EXTENSION_PACK} as the argument. The following code snippet
+shows an example of how to do so:</p>
+
+<pre>
+boolean deviceSupportsAEP = getPackageManager().hasSystemFeature
+     (PackageManager.FEATURE_OPENGLES_EXTENSION_PACK);
+</pre>
+
+<p>If the method returns true, AEP is supported.<p>
+
+<p>For more information about the AEP, visit its page at the <a
+href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+Khronos OpenGL ES Registry</a>.
+
+
+<h3 id="version-check">Checking the OpenGL ES Version</h3>
+
+<p>There are several versions of OpenGL ES available on Android devices. You can specify the
 minimum version of the API your application requires in your <a href="#manifest">manifest</a>, but
 you may also want to take advantage of features in a newer API at the same time. For example,
 the OpenGL ES 3.0 API is backward-compatible with the 2.0 version of the API, so you may want to
@@ -600,7 +653,7 @@ application manifest, your application should check the version of the API avail
 You can do this in one of two ways:</p>
 
 <ol>
-  <li>Attempt create the higher-level OpenGL ES context ({@link android.opengl.EGLContext}) and
+  <li>Attempt to create the higher-level OpenGL ES context ({@link android.opengl.EGLContext}) and
     check the result.</li>
   <li>Create a minimum-supported OpenGL ES context and check the version value.</li>
 </ol>

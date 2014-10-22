@@ -1,0 +1,99 @@
+page.title=Deep Link to Bring Users Back
+page.metaDescription=Use deep links to bring your users into your apps from social posts, search, or ads.
+page.tags="app indexing, google+ signin"
+page.image=/images/gp-listing-4.jpg
+
+@jd:body
+
+<p>
+  Use deep links to bring your users into your apps from social posts,
+  search, or ads.
+</p>
+
+<div class="headerLine">
+<h2>Deep Linking from Google+ Posts</h2>
+</div>
+
+<p>
+  <a href="https://developers.google.com/+/mobile/android/share/deep-link">Deep
+  linking</a> allows the Google+ apps on mobile devices to direct clicks on a
+  shared post that contains deep-link information to a resource within your
+  apps.
+</p>
+
+<p style="margin-bottom:2em;">
+  If the user doesn’t have your app installed, they’re prompted to install it
+  before accessing the resource.
+</p>
+
+<div style="padding:2em, auto;width:550px;">
+  <div style="float:right; width:260px; padding-left:1em;">
+    <img src="{@docRoot}images/gp-engage-5.jpg" class="border-img">
+    <p class="img-caption">
+      G+ Post with Deep Link to Buy
+    </p>
+  </div>
+
+  <div style="width:260px;float:left;">
+    <img src="{@docRoot}images/gp-engage-6.jpg" class="border-img">
+    <p class="img-caption">
+      Purchase page within app
+    </p>
+  </div>
+</div>
+
+
+<div class="headerLine">
+<h2>Deep Linking from Google Search &mdash; App Indexing</h2>
+</div>
+
+
+<div style="float:right;">
+  <img src="/images/gp-listing-4.jpg" style="padding-top:1em;padding-left:2em;">
+</div>
+
+<p>
+  Another way to bring users back to your apps is to apply for app indexing.
+</p>
+
+<p>
+  When a user searches for content available within your app, Google can show
+  an "Open in App" button in in mobile search results. For instance, if a user
+  searches for a restaurant and you’ve got that establishment in your dining
+  app, a link can be shown to open the page within your app. Learn more about
+  <a href="https://developers.google.com/app-indexing/">linking to in-app
+  content</a>.
+</p>
+
+<div class="clearfloat" style="margin-top:2em;"></div>
+
+<div style="float:right;width:340px;padding-left:2em;">
+  <img src="/images/gp-ads-linking2.jpg" style="padding-top:1em;">
+</div>
+
+<div class="headerLine ">
+<h2>Deep Linking from Google Ads</h2>
+</div>
+<p>
+  Ads can remind users about the apps they already have.
+</p>
+
+<p>
+  As with deep links from Google's organic search results, AdWords deep links
+  send users directly to the relevant pages in apps they already have on their
+  mobile device. A mobile search for "flights to London," for instance, could
+  take a user straight to the London page in a travel app. <a href=
+  "http://www.thinkwithgoogle.com/products/ads-apps.html"
+  class="external-link">Learn more</a>.
+</p>
+
+<div class="headerLine clearfloat">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/engage/deeplinks" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>

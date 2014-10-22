@@ -175,6 +175,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public File getNoBackupFilesDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public File getExternalFilesDir(String type) {
         throw new UnsupportedOperationException();
     }
@@ -186,6 +191,11 @@ public class MockContext extends Context {
     
     @Override
     public File getCacheDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File getCodeCacheDir() {
         throw new UnsupportedOperationException();
     }
 
@@ -350,7 +360,17 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
+            Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+
     public void sendStickyBroadcast(Intent intent) {
         throw new UnsupportedOperationException();
     }
@@ -552,6 +572,13 @@ public class MockContext extends Context {
 
     /** {@hide} */
     @Override
+    public Context createApplicationContext(ApplicationInfo application, int flags)
+            throws PackageManager.NameNotFoundException {
+        return null;
+    }
+
+    /** {@hide} */
+    @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -575,7 +602,7 @@ public class MockContext extends Context {
 
     @Override
     public boolean isRestricted() {
-        throw new UnsupportedOperationException();        
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */
@@ -596,6 +623,11 @@ public class MockContext extends Context {
 
     @Override
     public File[] getExternalCacheDirs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File[] getExternalMediaDirs() {
         throw new UnsupportedOperationException();
     }
 }

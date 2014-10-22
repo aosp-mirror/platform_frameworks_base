@@ -1,0 +1,202 @@
+page.title=Build Community
+page.metaDescription=Build a loyal following with great support and communication.
+page.tags="users, growth, community"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>
+    Contents
+  </h2>
+
+  <ol>
+    <li>
+    <a href="#starting-your-community">Starting Your Community</a>
+    </li>
+
+    <li>
+    <a href="#tools-to-build-your-community">Tools to Build Your Community</a>
+    </li>
+
+    <li>
+    <a href="#managing-your-community">Managing Your Community</a>
+    </li>
+    <li>
+    <a href="#related-resources">Related Resources</a>
+    </li>
+  </ol>
+  </div>
+</div>
+
+<p>
+  Fans of your apps love to help others, turn newer users into fans, and bring
+  you more users as they talk about your app. Building a community can help you
+  tap into those influencers to help you improve your app and provide support
+  to others.
+</p>
+
+<p>
+  Building your own community can help you bring content that will delight
+  users and get them talking about your apps to friends, family and others in
+  their social network.
+</p>
+
+<div class="headerLine">
+  <h2 id="starting-your-community">
+  Starting Your Community
+  </h2>
+
+
+</div>
+
+<p>
+  In conjunction with your apps’ design and development, you should start
+  defining and building your community infrastructure. There’s no one approach
+  that fits all, and the approach for each of your apps may need to be a little
+  different. You should start by thinking about your potential users and asking
+  questions such as:
+</p>
+
+<ul>
+  <li>
+  <p>
+    How will my users prefer to interact? Game users may prefer a modern feed
+    style community, users of a financial management app a more traditional
+    discussion forum.
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Should I have a community for all my apps or should each app have its
+    own? Will users be turned off if the community isn’t just about the app
+    that interests them or can I make it a way to turn them onto my other
+    apps?
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Will different countries or territories, or speakers of particular
+    languages need separate forums? How will I handle feedback in languages I
+    don’t know?
+  </p>
+  </li>
+
+  <li>
+  <p>
+    Do I need any additional policies beyond those governing the tool used to
+    host the community?
+  </p>
+  </li>
+</ul>
+
+<p>
+  Any way you do it, starting your community early helps you build momentum as
+  you turn happy users into influencers.
+</p>
+
+<p>
+  Consider inviting your existing users through a rich notification or an
+  opt-in on your website. Don’t overlook inviting your critics too. If you have
+  been able to address their earlier issues you may convert them into
+  supporters — it’s not unknown for your harshest critics to become your most
+  enthusiastic fans if you address their concerns.
+</p>
+
+<p>
+  When you use the <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">beta-testing
+  feature</a> in Google Play, you’ll create a testers group through a <a href=
+  "https://support.google.com/groups/answer/46601">Google Group</a> or <a href=
+  "https://support.google.com/plus/topic/2888488">Google+ Community</a> to
+  define who gets your software for testing. Consider managing these groups as
+  communities in their own right.
+</p>
+
+<div class="headerLine">
+  <h2 id="tools-to-build-your-community">
+  Tools to Build Your Community
+  </h2>
+
+
+</div>
+
+<p>
+  There are many tools you can use to build your community. Before you launch,
+  inviting <a href="http://www.google.com/+/business/">Google+</a> users or
+  <a href="https://support.google.com/groups/answer/46601?hl=en">Google
+  Groups</a> to <a href=
+  "{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">beta-test</a>
+  your app can help you kickstart your community while you listen to and
+  respond to your user feedback.
+</p>
+
+<p>
+  Once you’ve launched, your Google+ or other social media presence can help
+  you continue to gather feedback, answer questions, and get input on updates.
+  Use social media to get the conversation started. Post updates to your
+  followers, announce new apps, and host contests. Ask followers to re-post so
+  that they bring new users into the conversation. Fans love to profess their
+  passion for great apps, so be sure to give them plenty of reason to do so.
+</p>
+
+<p>
+  Forums like <a href=
+  "https://support.google.com/groups/answer/46601?hl=en">Google Groups</a> are
+  particularly well suited to help you and your users provide support to
+  others. By helping out your community, you’re building your fan base who will
+  share their experiences with other prospective customers.
+</p>
+
+<p>
+  Respond to comments and reviews on both your product details page on Google
+  Play and <a href="http://youtube.com">YouTube</a> pages. Prospective
+  customers are influenced by reviews and comments, so be sure to manage your
+  brand in every channel you can.
+</p>
+
+<div class="headerLine">
+  <h2 id="managing-your-community">
+  Managing Your Community
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-community-0.png">
+</div>
+
+<p>
+  Engaged users want you to succeed. Let them know you’re listening! Responding
+  to posts, comments, and other social media mentions improves your ratings by
+  letting users know you care.
+</p>
+
+<p>
+  Update the product based on user feedback and announce new releases. Users
+  often change their original star ratings after feeling heard, inspiring more
+  users to install your apps.
+</p>
+
+<p>
+  There are many ways to make your community feel special. Consider polls to
+  let users influence product updates. Use competitions to inspire and reward
+  your community. Giving a special <em>member of the week</em> badge is an easy
+  way to recognize those that help others. Or get users involved in testing new
+  versions or new apps to make them feel special.
+</p>
+
+<div class="headerLine">
+  <h2 id="related-resources">
+  Related Resources
+  </h2>
+
+</div>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/buildcommunity"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

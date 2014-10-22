@@ -108,13 +108,20 @@ public class BarController {
         if (mWin != null) {
             if (win != null && (win.getAttrs().privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) == 0) {
-                if ((win.getAttrs().flags & mTranslucentWmFlag) != 0) {
+                int fl = PolicyControl.getWindowFlags(win, null);
+                if ((fl & mTranslucentWmFlag) != 0) {
                     vis |= mTranslucentFlag;
                 } else {
                     vis &= ~mTranslucentFlag;
                 }
+                if ((fl & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
+                    vis |= View.SYSTEM_UI_TRANSPARENT;
+                } else {
+                    vis &= ~View.SYSTEM_UI_TRANSPARENT;
+                }
             } else {
                 vis = (vis & ~mTranslucentFlag) | (oldVis & mTranslucentFlag);
+                vis = (vis & ~View.SYSTEM_UI_TRANSPARENT) | (oldVis & View.SYSTEM_UI_TRANSPARENT);
             }
         }
         return vis;
@@ -230,7 +237,8 @@ public class BarController {
             vis |= mTransientFlag;  // ignore clear requests until transition completes
             vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;  // never show transient bars in low profile
         }
-        if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0) {
+        if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0 ||
+                ((vis | oldVis) & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0) {
             mLastTranslucent = SystemClock.uptimeMillis();
         }
         return vis;

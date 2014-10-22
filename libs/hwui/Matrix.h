@@ -26,11 +26,19 @@
 namespace android {
 namespace uirenderer {
 
-#define MATRIX_STRING "[%.2f %.2f %.2f] [%.2f %.2f %.2f] [%.2f %.2f %.2f]"
-#define MATRIX_ARGS(m) \
+#define SK_MATRIX_STRING "[%.2f %.2f %.2f] [%.2f %.2f %.2f] [%.2f %.2f %.2f]"
+#define SK_MATRIX_ARGS(m) \
     (m)->get(0), (m)->get(1), (m)->get(2), \
     (m)->get(3), (m)->get(4), (m)->get(5), \
     (m)->get(6), (m)->get(7), (m)->get(8)
+
+#define MATRIX_4_STRING "[%.2f %.2f %.2f %.2f] [%.2f %.2f %.2f %.2f]" \
+    " [%.2f %.2f %.2f %.2f] [%.2f %.2f %.2f %.2f]"
+#define MATRIX_4_ARGS(m) \
+    (m)->data[0], (m)->data[4], (m)->data[8], (m)->data[12], \
+    (m)->data[1], (m)->data[5], (m)->data[9], (m)->data[13], \
+    (m)->data[2], (m)->data[6], (m)->data[10], (m)->data[14], \
+    (m)->data[3], (m)->data[7], (m)->data[11], (m)->data[15] \
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -134,17 +142,19 @@ public:
 
     void multiply(float v);
 
-    void translate(float x, float y) {
+    void translate(float x, float y, float z = 0) {
         if ((getType() & sGeometryMask) <= kTypeTranslate) {
             data[kTranslateX] += x;
             data[kTranslateY] += y;
+            data[kTranslateZ] += z;
+            mType |= kTypeUnknown;
         } else {
             // Doing a translation will only affect the translate bit of the type
             // Save the type
             uint8_t type = mType;
 
             Matrix4 u;
-            u.loadTranslate(x, y, 0.0f);
+            u.loadTranslate(x, y, z);
             multiply(u);
 
             // Restore the type and fix the translate bit
@@ -190,15 +200,17 @@ public:
     void copyTo(float* v) const;
     void copyTo(SkMatrix& v) const;
 
-    void mapRect(Rect& r) const;
-    void mapPoint(float& x, float& y) const;
+    float mapZ(const Vector3& orig) const;
+    void mapPoint3d(Vector3& vec) const;
+    void mapPoint(float& x, float& y) const; // 2d only
+    void mapRect(Rect& r) const; // 2d only
 
     float getTranslateX() const;
     float getTranslateY() const;
 
     void decomposeScale(float& sx, float& sy) const;
 
-    void dump() const;
+    void dump(const char* label = NULL) const;
 
     static const Matrix4& identity();
 

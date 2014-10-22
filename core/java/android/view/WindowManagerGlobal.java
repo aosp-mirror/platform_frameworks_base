@@ -19,8 +19,9 @@ package android.view;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.content.res.Configuration;
-import android.opengl.ManagedEGLContext;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -114,7 +115,6 @@ public final class WindowManagerGlobal {
     private final ArrayList<WindowManager.LayoutParams> mParams =
             new ArrayList<WindowManager.LayoutParams>();
     private final ArraySet<View> mDyingViews = new ArraySet<View>();
-    private boolean mNeedsEglTerminate;
 
     private Runnable mSystemPropertyUpdater;
 
@@ -147,9 +147,14 @@ public final class WindowManagerGlobal {
                     InputMethodManager imm = InputMethodManager.getInstance();
                     IWindowManager windowManager = getWindowManagerService();
                     sWindowSession = windowManager.openSession(
+                            new IWindowSessionCallback.Stub() {
+                                @Override
+                                public void onAnimatorScaleChanged(float scale) {
+                                    ValueAnimator.setDurationScale(scale);
+                                }
+                            },
                             imm.getClient(), imm.getInputContext());
-                    float animatorScale = windowManager.getAnimationScale(2);
-                    ValueAnimator.setDurationScale(animatorScale);
+                    ValueAnimator.setDurationScale(windowManager.getCurrentAnimatorScale());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to open window session", e);
                 }
@@ -201,6 +206,14 @@ public final class WindowManagerGlobal {
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams)params;
         if (parentWindow != null) {
             parentWindow.adjustLayoutParamsForSubWindow(wparams);
+        } else {
+            // If there's no parent and we're running on L or above (or in the
+            // system context), assume we want hardware acceleration.
+            final Context context = view.getContext();
+            if (context != null
+                    && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
+                wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            }
         }
 
         ViewRootImpl root;
@@ -362,6 +375,9 @@ public final class WindowManagerGlobal {
                 mDyingViews.remove(view);
             }
         }
+        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+            doTrimForeground();
+        }
     }
 
     private int findViewLocked(View view, boolean required) {
@@ -372,13 +388,22 @@ public final class WindowManagerGlobal {
         return index;
     }
 
-    public void startTrimMemory(int level) {
+    public static boolean shouldDestroyEglContext(int trimLevel) {
+        // On low-end gfx devices we trim when memory is moderate;
+        // on high-end devices we do this when low.
+        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
+            return true;
+        }
+        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
+                && !ActivityManager.isHighEndGfx()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void trimMemory(int level) {
         if (HardwareRenderer.isAvailable()) {
-            // On low-end gfx devices we trim when memory is moderate;
-            // on high-end devices we do this when low.
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
-                    || (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
-                            && !ActivityManager.isHighEndGfx())) {
+            if (shouldDestroyEglContext(level)) {
                 // Destroy all hardware surfaces and resources associated to
                 // known windows
                 synchronized (mLock) {
@@ -387,29 +412,40 @@ public final class WindowManagerGlobal {
                     }
                 }
                 // Force a full memory flush
-                mNeedsEglTerminate = true;
-                HardwareRenderer.startTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-                return;
+                level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             }
 
-            HardwareRenderer.startTrimMemory(level);
+            HardwareRenderer.trimMemory(level);
+
+            if (HardwareRenderer.sTrimForeground) {
+                doTrimForeground();
+            }
         }
     }
 
-    public void endTrimMemory() {
-        HardwareRenderer.endTrimMemory();
-
-        if (mNeedsEglTerminate) {
-            ManagedEGLContext.doTerminate();
-            mNeedsEglTerminate = false;
+    public static void trimForeground() {
+        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+            WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
+            wm.doTrimForeground();
         }
     }
 
-    public void trimLocalMemory() {
+    private void doTrimForeground() {
+        boolean hasVisibleWindows = false;
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
-                mRoots.get(i).destroyHardwareLayers();
+                final ViewRootImpl root = mRoots.get(i);
+                if (root.mView != null && root.getHostVisibility() == View.VISIBLE
+                        && root.mAttachInfo.mHardwareRenderer != null) {
+                    hasVisibleWindows = true;
+                } else {
+                    root.destroyHardwareResources();
+                }
             }
+        }
+        if (!hasVisibleWindows) {
+            HardwareRenderer.trimMemory(
+                    ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         }
     }
 
@@ -425,12 +461,12 @@ public final class WindowManagerGlobal {
                 for (int i = 0; i < count; i++) {
                     ViewRootImpl root = mRoots.get(i);
                     String name = getWindowName(root);
-                    pw.printf("\n\t%s", name);
+                    pw.printf("\n\t%s (visibility=%d)", name, root.getHostVisibility());
 
                     HardwareRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
                     if (renderer != null) {
-                        renderer.dumpGfxInfo(pw);
+                        renderer.dumpGfxInfo(pw, fd);
                     }
                 }
 
@@ -447,11 +483,6 @@ public final class WindowManagerGlobal {
                     String name = getWindowName(root);
                     pw.printf("  %s\n  %d views, %.2f kB of display lists",
                             name, info[0], info[1] / 1024.0f);
-                    HardwareRenderer renderer =
-                            root.getView().mAttachInfo.mHardwareRenderer;
-                    if (renderer != null) {
-                        pw.printf(", %d frames rendered", renderer.getFrameCount());
-                    }
                     pw.printf("\n\n");
 
                     viewsCount += info[0];

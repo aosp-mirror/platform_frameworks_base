@@ -192,11 +192,32 @@ public class SlidingDrawer extends ViewGroup {
      *
      * @param context The application's environment.
      * @param attrs The attributes defined in XML.
-     * @param defStyle The style to apply to this widget.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public SlidingDrawer(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SlidingDrawer, defStyle, 0);
+    public SlidingDrawer(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    /**
+     * Creates a new SlidingDrawer from a specified set of attributes defined in XML.
+     *
+     * @param context The application's environment.
+     * @param attrs The attributes defined in XML.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public SlidingDrawer(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.SlidingDrawer, defStyleAttr, defStyleRes);
 
         int orientation = a.getInt(R.styleable.SlidingDrawer_orientation, ORIENTATION_VERTICAL);
         mVertical = orientation == ORIENTATION_VERTICAL;

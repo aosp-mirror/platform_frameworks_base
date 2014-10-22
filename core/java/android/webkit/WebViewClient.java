@@ -19,8 +19,11 @@ package android.webkit;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
+import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.ViewRootImpl;
+
+import java.security.Principal;
 
 public class WebViewClient {
 
@@ -93,10 +96,33 @@ public class WebViewClient {
      * @return A {@link android.webkit.WebResourceResponse} containing the
      *         response information or null if the WebView should load the
      *         resource itself.
+     * @deprecated Use {@link #shouldInterceptRequest(WebView, WebResourceRequest)
+     *             shouldInterceptRequest(WebView, WebResourceRequest)} instead.
      */
+    @Deprecated
     public WebResourceResponse shouldInterceptRequest(WebView view,
             String url) {
         return null;
+    }
+
+    /**
+     * Notify the host application of a resource request and allow the
+     * application to return the data.  If the return value is null, the WebView
+     * will continue to load the resource as usual.  Otherwise, the return
+     * response and data will be used.  NOTE: This method is called on a thread
+     * other than the UI thread so clients should exercise caution
+     * when accessing private data or the view system.
+     *
+     * @param view The {@link android.webkit.WebView} that is requesting the
+     *             resource.
+     * @param request Object containing the details of the request.
+     * @return A {@link android.webkit.WebResourceResponse} containing the
+     *         response information or null if the WebView should load the
+     *         resource itself.
+     */
+    public WebResourceResponse shouldInterceptRequest(WebView view,
+            WebResourceRequest request) {
+        return shouldInterceptRequest(view, request.getUrl().toString());
     }
 
     /**
@@ -204,7 +230,7 @@ public class WebViewClient {
         handler.cancel();
     }
 
-   /**
+    /**
      * Notify the host application to handle a SSL client certificate
      * request. The host application is responsible for showing the UI
      * if desired and providing the keys. There are three ways to
@@ -221,8 +247,6 @@ public class WebViewClient {
      * @param view The WebView that is initiating the callback
      * @param request An instance of a {@link ClientCertRequest}
      *
-     * TODO(sgurun) unhide
-     * @hide
      */
     public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
         request.cancel();
@@ -270,11 +294,43 @@ public class WebViewClient {
      *
      * @param view The WebView that is initiating the callback.
      * @param event The key event.
+     * @deprecated This method is subsumed by the more generic onUnhandledInputEvent.
      */
+    @Deprecated
     public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
+        onUnhandledInputEventInternal(view, event);
+    }
+
+    /**
+     * Notify the host application that a input event was not handled by the WebView.
+     * Except system keys, WebView always consumes input events in the normal flow
+     * or if shouldOverrideKeyEvent returns true. This is called asynchronously
+     * from where the event is dispatched. It gives the host application a chance
+     * to handle the unhandled input events.
+     *
+     * Note that if the event is a {@link android.view.MotionEvent}, then it's lifetime is only
+     * that of the function call. If the WebViewClient wishes to use the event beyond that, then it
+     * <i>must</i> create a copy of the event.
+     *
+     * It is the responsibility of overriders of this method to call
+     * {@link #onUnhandledKeyEvent(WebView, KeyEvent)}
+     * when appropriate if they wish to continue receiving events through it.
+     *
+     * @param view The WebView that is initiating the callback.
+     * @param event The input event.
+     */
+    public void onUnhandledInputEvent(WebView view, InputEvent event) {
+        if (event instanceof KeyEvent) {
+            onUnhandledKeyEvent(view, (KeyEvent) event);
+            return;
+        }
+        onUnhandledInputEventInternal(view, event);
+    }
+
+    private void onUnhandledInputEventInternal(WebView view, InputEvent event) {
         ViewRootImpl root = view.getViewRootImpl();
         if (root != null) {
-            root.dispatchUnhandledKey(event);
+            root.dispatchUnhandledInputEvent(event);
         }
     }
 

@@ -19,7 +19,6 @@ package android.widget;
 import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
@@ -35,13 +34,14 @@ import android.view.textservice.TextInfo;
 import android.view.textservice.TextServicesManager;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
 
 import java.text.BreakIterator;
 import java.util.Locale;
 
 
 /**
- * Helper class for TextView. Bridge between the TextView and the Dictionnary service.
+ * Helper class for TextView. Bridge between the TextView and the Dictionary service.
  *
  * @hide
  */
@@ -82,7 +82,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     // The mLength first elements of the above arrays have been initialized
     private int mLength;
 
-    // Parsers on chunck of text, cutting text into words that will be checked
+    // Parsers on chunk of text, cutting text into words that will be checked
     private SpellParser[] mSpellParsers = new SpellParser[0];
 
     private int mSpanSequenceCounter = 0;
@@ -105,9 +105,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mTextView = textView;
 
         // Arbitrary: these arrays will automatically double their sizes on demand
-        final int size = ArrayUtils.idealObjectArraySize(1);
-        mIds = new int[size];
-        mSpellCheckSpans = new SpellCheckSpan[size];
+        final int size = 1;
+        mIds = ArrayUtils.newUnpaddedIntArray(size);
+        mSpellCheckSpans = new SpellCheckSpan[mIds.length];
 
         setLocale(mTextView.getSpellCheckerLocale());
 
@@ -184,17 +184,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
             if (mIds[i] < 0) return i;
         }
 
-        if (mLength == mSpellCheckSpans.length) {
-            final int newSize = mLength * 2;
-            int[] newIds = new int[newSize];
-            SpellCheckSpan[] newSpellCheckSpans = new SpellCheckSpan[newSize];
-            System.arraycopy(mIds, 0, newIds, 0, mLength);
-            System.arraycopy(mSpellCheckSpans, 0, newSpellCheckSpans, 0, mLength);
-            mIds = newIds;
-            mSpellCheckSpans = newSpellCheckSpans;
-        }
-
-        mSpellCheckSpans[mLength] = new SpellCheckSpan();
+        mIds = GrowingArrayUtils.append(mIds, mLength, 0);
+        mSpellCheckSpans = GrowingArrayUtils.append(
+                mSpellCheckSpans, mLength, new SpellCheckSpan());
         mLength++;
         return mLength - 1;
     }
@@ -284,23 +276,27 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
             // Do not check this word if the user is currently editing it
             final boolean isEditing;
+
+            // Defer spell check when typing a word with an interior apostrophe.
+            // TODO: a better solution to this would be to make the word
+            // iterator locale-sensitive and include the apostrophe in
+            // languages that use it (such as English).
+            final boolean apostrophe = (selectionStart == end + 1 && editable.charAt(end) == '\'');
             if (mIsSentenceSpellCheckSupported) {
                 // Allow the overlap of the cursor and the first boundary of the spell check span
                 // no to skip the spell check of the following word because the
                 // following word will never be spell-checked even if the user finishes composing
-                isEditing = selectionEnd <= start || selectionStart > end;
+                isEditing = !apostrophe && (selectionEnd <= start || selectionStart > end);
             } else {
-                isEditing = selectionEnd < start || selectionStart > end;
+                isEditing = !apostrophe && (selectionEnd < start || selectionStart > end);
             }
             if (start >= 0 && end > start && isEditing) {
-                final String word = (editable instanceof SpannableStringBuilder) ?
-                        ((SpannableStringBuilder) editable).substring(start, end) :
-                        editable.subSequence(start, end).toString();
                 spellCheckSpan.setSpellCheckInProgress(true);
-                textInfos[textInfosCount++] = new TextInfo(word, mCookie, mIds[i]);
+                final TextInfo textInfo = new TextInfo(editable, start, end, mCookie, mIds[i]);
+                textInfos[textInfosCount++] = textInfo;
                 if (DBG) {
-                    Log.d(TAG, "create TextInfo: (" + i + "/" + mLength + ")" + word
-                            + ", cookie = " + mCookie + ", seq = "
+                    Log.d(TAG, "create TextInfo: (" + i + "/" + mLength + ") text = "
+                            + textInfo.getSequence() + ", cookie = " + mCookie + ", seq = "
                             + mIds[i] + ", sel start = " + selectionStart + ", sel end = "
                             + selectionEnd + ", start = " + start + ", end = " + end);
                 }

@@ -17,17 +17,14 @@
 package android.security;
 
 import android.content.Context;
-import android.security.KeyPairGeneratorSpec.Builder;
 
 import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
 import java.security.KeyStore.ProtectionParameter;
-import java.security.cert.Certificate;
 
 /**
  * This provides the optional parameters that can be specified for
  * {@code KeyStore} entries that work with
- * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
+ * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
  * facility</a>. The Android KeyStore facility is accessed through a
  * {@link java.security.KeyStore} API using the {@code AndroidKeyStore}
  * provider. The {@code context} passed in may be used to pop up some UI to ask
@@ -70,7 +67,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      * Builder class for {@link KeyStoreParameter} objects.
      * <p>
      * This will build protection parameters for use with the
-     * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
+     * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
      * facility</a>.
      * <p>
      * This can be used to require that KeyStore entries be stored encrypted.

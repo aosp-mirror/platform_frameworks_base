@@ -16,7 +16,6 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
 import android.text.TextPaint;
 
 /**
@@ -27,7 +26,7 @@ public abstract class MetricAffectingSpan
 extends CharacterStyle
 implements UpdateLayout {
 
-	public abstract void updateMeasureState(TextPaint p);
+    public abstract void updateMeasureState(TextPaint p);
 
     /**
      * Returns "this" for most MetricAffectingSpans, but for 

@@ -26,9 +26,10 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.view.MotionEvent;
 
-import com.android.internal.policy.IKeyguardExitCallback;
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -38,10 +39,12 @@ import com.android.internal.policy.IKeyguardService;
  */
 public class KeyguardTouchDelegate {
     // TODO: propagate changes to these to {@link KeyguardServiceDelegate}
-    static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+    static final String KEYGUARD_PACKAGE = "com.android.systemui";
+    static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
 
     private static KeyguardTouchDelegate sInstance;
+    private static final List<OnKeyguardConnectionListener> sConnectionListeners =
+            new ArrayList<OnKeyguardConnectionListener>();
 
     private volatile IKeyguardService mService;
 
@@ -54,6 +57,10 @@ public class KeyguardTouchDelegate {
             Slog.v(TAG, "Connected to keyguard");
             mService = IKeyguardService.Stub.asInterface(service);
 
+            for (int i = 0; i < sConnectionListeners.size(); i++) {
+                OnKeyguardConnectionListener listener = sConnectionListeners.get(i);
+                listener.onKeyguardServiceConnected(KeyguardTouchDelegate.this);
+            }
         }
 
         @Override
@@ -61,6 +68,11 @@ public class KeyguardTouchDelegate {
             Slog.v(TAG, "Disconnected from keyguard");
             mService = null;
             sInstance = null; // force reconnection if this goes away
+
+            for (int i = 0; i < sConnectionListeners.size(); i++) {
+                OnKeyguardConnectionListener listener = sConnectionListeners.get(i);
+                listener.onKeyguardServiceDisconnected(KeyguardTouchDelegate.this);
+            }
         }
 
     };
@@ -128,16 +140,16 @@ public class KeyguardTouchDelegate {
         return false;
     }
 
-    public boolean isShowingAndNotHidden() {
+    public boolean isShowingAndNotOccluded() {
         final IKeyguardService service = mService;
         if (service != null) {
             try {
-                return service.isShowingAndNotHidden();
+                return service.isShowingAndNotOccluded();
             } catch (RemoteException e) {
                 Slog.w(TAG , "Remote Exception", e);
             }
         } else {
-            Slog.w(TAG, "isShowingAndNotHidden(): NO SERVICE!");
+            Slog.w(TAG, "isShowingAndNotOccluded(): NO SERVICE!");
         }
         return false;
     }
@@ -184,4 +196,13 @@ public class KeyguardTouchDelegate {
         }
     }
 
+    public static void addListener(OnKeyguardConnectionListener listener) {
+        sConnectionListeners.add(listener);
+    }
+
+    public interface OnKeyguardConnectionListener {
+
+        void onKeyguardServiceConnected(KeyguardTouchDelegate keyguardTouchDelegate);
+        void onKeyguardServiceDisconnected(KeyguardTouchDelegate keyguardTouchDelegate);
+    }
 }

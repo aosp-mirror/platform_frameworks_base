@@ -38,6 +38,7 @@ public class StatusBarManager {
     public static final int DISABLE_NOTIFICATION_ICONS = View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
     public static final int DISABLE_NOTIFICATION_ALERTS
             = View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
+    @Deprecated
     public static final int DISABLE_NOTIFICATION_TICKER
             = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
     public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
@@ -59,6 +60,7 @@ public class StatusBarManager {
             | DISABLE_SEARCH;
 
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
+    public static final int NAVIGATION_HINT_IME_SHOWN     = 1 << 1;
 
     public static final int WINDOW_STATUS_BAR = 1;
     public static final int WINDOW_NAVIGATION_BAR = 2;

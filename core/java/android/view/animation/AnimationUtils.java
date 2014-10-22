@@ -20,6 +20,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
 import android.util.AttributeSet;
@@ -143,7 +145,7 @@ public class AnimationUtils {
      */
     public static LayoutAnimationController loadLayoutAnimation(Context context, int id)
             throws NotFoundException {
-        
+
         XmlResourceParser parser = null;
         try {
             parser = context.getResources().getAnimation(id);
@@ -201,7 +203,7 @@ public class AnimationUtils {
     /**
      * Make an animation for objects becoming visible. Uses a slide and fade
      * effect.
-     * 
+     *
      * @param c Context for loading resources
      * @param fromLeft is the object to be animated coming from the left
      * @return The new animation
@@ -218,11 +220,11 @@ public class AnimationUtils {
         a.setStartTime(currentAnimationTimeMillis());
         return a;
     }
-    
+
     /**
      * Make an animation for objects becoming invisible. Uses a slide and fade
      * effect.
-     * 
+     *
      * @param c Context for loading resources
      * @param toRight is the object to be animated exiting to the right
      * @return The new animation
@@ -234,17 +236,17 @@ public class AnimationUtils {
         } else {
             a = AnimationUtils.loadAnimation(c, com.android.internal.R.anim.slide_out_left);
         }
-        
+
         a.setInterpolator(new AccelerateInterpolator());
         a.setStartTime(currentAnimationTimeMillis());
         return a;
     }
 
-    
+
     /**
      * Make an animation for objects becoming visible. Uses a slide up and fade
      * effect.
-     * 
+     *
      * @param c Context for loading resources
      * @return The new animation
      */
@@ -255,10 +257,10 @@ public class AnimationUtils {
         a.setStartTime(currentAnimationTimeMillis());
         return a;
     }
-    
+
     /**
      * Loads an {@link Interpolator} object from a resource
-     * 
+     *
      * @param context Application context used to access resources
      * @param id The resource id of the animation to load
      * @return The animation object reference by the specified id
@@ -268,7 +270,7 @@ public class AnimationUtils {
         XmlResourceParser parser = null;
         try {
             parser = context.getResources().getAnimation(id);
-            return createInterpolatorFromXml(context, parser);
+            return createInterpolatorFromXml(context.getResources(), context.getTheme(), parser);
         } catch (XmlPullParserException ex) {
             NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
                     Integer.toHexString(id));
@@ -284,52 +286,84 @@ public class AnimationUtils {
         }
 
     }
-    
-    private static Interpolator createInterpolatorFromXml(Context c, XmlPullParser parser)
+
+    /**
+     * Loads an {@link Interpolator} object from a resource
+     *
+     * @param res The resources
+     * @param id The resource id of the animation to load
+     * @return The interpolator object reference by the specified id
+     * @throws NotFoundException
+     * @hide
+     */
+    public static Interpolator loadInterpolator(Resources res, Theme theme, int id) throws NotFoundException {
+        XmlResourceParser parser = null;
+        try {
+            parser = res.getAnimation(id);
+            return createInterpolatorFromXml(res, theme, parser);
+        } catch (XmlPullParserException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } finally {
+            if (parser != null)
+                parser.close();
+        }
+
+    }
+
+    private static Interpolator createInterpolatorFromXml(Resources res, Theme theme, XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        
+
         Interpolator interpolator = null;
- 
+
         // Make sure we are on a start tag.
         int type;
         int depth = parser.getDepth();
 
-        while (((type=parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
-               && type != XmlPullParser.END_DOCUMENT) {
+        while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
+                && type != XmlPullParser.END_DOCUMENT) {
 
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
 
             AttributeSet attrs = Xml.asAttributeSet(parser);
-            
-            String  name = parser.getName();
-    
-            
+
+            String name = parser.getName();
+
             if (name.equals("linearInterpolator")) {
-                interpolator = new LinearInterpolator(c, attrs);
+                interpolator = new LinearInterpolator();
             } else if (name.equals("accelerateInterpolator")) {
-                interpolator = new AccelerateInterpolator(c, attrs);
+                interpolator = new AccelerateInterpolator(res, theme, attrs);
             } else if (name.equals("decelerateInterpolator")) {
-                interpolator = new DecelerateInterpolator(c, attrs);
-            }  else if (name.equals("accelerateDecelerateInterpolator")) {
-                interpolator = new AccelerateDecelerateInterpolator(c, attrs);
-            }  else if (name.equals("cycleInterpolator")) {
-                interpolator = new CycleInterpolator(c, attrs);
+                interpolator = new DecelerateInterpolator(res, theme, attrs);
+            } else if (name.equals("accelerateDecelerateInterpolator")) {
+                interpolator = new AccelerateDecelerateInterpolator();
+            } else if (name.equals("cycleInterpolator")) {
+                interpolator = new CycleInterpolator(res, theme, attrs);
             } else if (name.equals("anticipateInterpolator")) {
-                interpolator = new AnticipateInterpolator(c, attrs);
+                interpolator = new AnticipateInterpolator(res, theme, attrs);
             } else if (name.equals("overshootInterpolator")) {
-                interpolator = new OvershootInterpolator(c, attrs);
+                interpolator = new OvershootInterpolator(res, theme, attrs);
             } else if (name.equals("anticipateOvershootInterpolator")) {
-                interpolator = new AnticipateOvershootInterpolator(c, attrs);
+                interpolator = new AnticipateOvershootInterpolator(res, theme, attrs);
             } else if (name.equals("bounceInterpolator")) {
-                interpolator = new BounceInterpolator(c, attrs);
+                interpolator = new BounceInterpolator();
+            } else if (name.equals("pathInterpolator")) {
+                interpolator = new PathInterpolator(res, theme, attrs);
             } else {
                 throw new RuntimeException("Unknown interpolator name: " + parser.getName());
             }
 
         }
-    
+
         return interpolator;
 
     }

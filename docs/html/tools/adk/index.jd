@@ -1,5 +1,5 @@
 page.title=Accessory Development Kit
-page.tags="adk"
+page.tags=adk
 @jd:body
 
 <p>The Accessory Development Kit (ADK) is a reference implementation for hardware manufacturers and

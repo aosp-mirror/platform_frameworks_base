@@ -36,8 +36,7 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         }
     }
 
-    private void setLocale(String code) {
-        Locale locale = new Locale(code);
+    private void setLocale(Locale locale) {
         Locale.setDefault(locale);
         Configuration config = new Configuration();
         config.locale = locale;
@@ -268,193 +267,193 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
      */
     public void testMatrix100000() throws Throwable {
         final int resId = R.integer.matrix_100000;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 100);
     }
 
     public void testMatrix100001() throws Throwable {
         final int resId = R.integer.matrix_100001;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 600);
     }
 
     public void testMatrix100010() throws Throwable {
         final int resId = R.integer.matrix_100010;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 500);
     }
 
     public void testMatrix100011() throws Throwable {
         final int resId = R.integer.matrix_100011;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 600);
     }
 
     public void testMatrix100100() throws Throwable {
         final int resId = R.integer.matrix_100100;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
     public void testMatrix100101() throws Throwable {
         final int resId = R.integer.matrix_100101;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
     public void testMatrix100110() throws Throwable {
         final int resId = R.integer.matrix_100110;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
     public void testMatrix100111() throws Throwable {
         final int resId = R.integer.matrix_100111;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
     public void testMatrix101000() throws Throwable {
         final int resId = R.integer.matrix_101000;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 300);
     }
 
     public void testMatrix101001() throws Throwable {
         final int resId = R.integer.matrix_101001;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 600);
     }
 
     public void testMatrix101010() throws Throwable {
         final int resId = R.integer.matrix_101010;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 500);
     }
 
     public void testMatrix101011() throws Throwable {
         final int resId = R.integer.matrix_101011;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 600);
     }
 
     public void testMatrix101100() throws Throwable {
         final int resId = R.integer.matrix_101100;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
     public void testMatrix101101() throws Throwable {
         final int resId = R.integer.matrix_101101;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
     public void testMatrix101110() throws Throwable {
         final int resId = R.integer.matrix_101110;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
     public void testMatrix101111() throws Throwable {
         final int resId = R.integer.matrix_101111;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
     public void testMatrix110000() throws Throwable {
         final int resId = R.integer.matrix_110000;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
     public void testMatrix110001() throws Throwable {
         final int resId = R.integer.matrix_110001;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
     public void testMatrix110010() throws Throwable {
         final int resId = R.integer.matrix_110010;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
     public void testMatrix110011() throws Throwable {
         final int resId = R.integer.matrix_110011;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
     public void testMatrix110100() throws Throwable {
         final int resId = R.integer.matrix_110100;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
     public void testMatrix110101() throws Throwable {
         final int resId = R.integer.matrix_110101;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 
     public void testMatrix110110() throws Throwable {
         final int resId = R.integer.matrix_110110;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
     public void testMatrix110111() throws Throwable {
         final int resId = R.integer.matrix_110111;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 
     public void testMatrix111000() throws Throwable {
         final int resId = R.integer.matrix_111000;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
     public void testMatrix111001() throws Throwable {
         final int resId = R.integer.matrix_111001;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
     public void testMatrix111010() throws Throwable {
         final int resId = R.integer.matrix_111010;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
     public void testMatrix111011() throws Throwable {
         final int resId = R.integer.matrix_111011;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
     public void testMatrix111100() throws Throwable {
         final int resId = R.integer.matrix_111100;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
     public void testMatrix111101() throws Throwable {
         final int resId = R.integer.matrix_111101;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 
     public void testMatrix111110() throws Throwable {
         final int resId = R.integer.matrix_111110;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
     public void testMatrix111111() throws Throwable {
         final int resId = R.integer.matrix_111111;
-        setLocale("sv_SE");
+        setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 }

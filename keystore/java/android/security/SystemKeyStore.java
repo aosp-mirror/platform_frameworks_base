@@ -18,10 +18,8 @@ package android.security;
 
 import android.os.Environment;
 import android.os.FileUtils;
-import android.os.Process;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

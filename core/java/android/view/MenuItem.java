@@ -258,8 +258,8 @@ public interface MenuItem {
     /**
      * Change both the numeric and alphabetic shortcut associated with this
      * item. Note that the shortcut will be triggered when the key that
-     * generates the given character is pressed alone or along with with the alt
-     * key. Also note that case is not significant and that alphabetic shortcut
+     * generates the given character is pressed along with the ctrl key.
+     * Also note that case is not significant and that alphabetic shortcut
      * characters will be displayed in lower case.
      * <p>
      * See {@link Menu} for the menu types that support shortcuts.
@@ -293,9 +293,9 @@ public interface MenuItem {
     /**
      * Change the alphabetic shortcut associated with this item. The shortcut
      * will be triggered when the key that generates the given character is
-     * pressed alone or along with with the alt key. Case is not significant and
-     * shortcut characters will be displayed in lower case. Note that menu items
-     * with the characters '\b' or '\n' as shortcuts will get triggered by the
+     * pressed along with the ctrl key. Case is not significant and shortcut
+     * characters will be displayed in lower case. Note that menu items with
+     * the characters '\b' or '\n' as shortcuts will get triggered by the
      * Delete key or Carriage Return key, respectively.
      * <p>
      * See {@link Menu} for the menu types that support shortcuts.

@@ -1,5 +1,6 @@
 #include "GraphicsJNI.h"
 #include "SkMaskFilter.h"
+#include "SkBlurMask.h"
 #include "SkBlurMaskFilter.h"
 #include "SkTableMaskFilter.h"
 
@@ -19,8 +20,8 @@ public:
     }
 
     static jlong createBlur(JNIEnv* env, jobject, jfloat radius, jint blurStyle) {
-        SkMaskFilter* filter = SkBlurMaskFilter::Create(SkFloatToScalar(radius),
-                                        (SkBlurMaskFilter::BlurStyle)blurStyle);
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
+        SkMaskFilter* filter = SkBlurMaskFilter::Create((SkBlurStyle)blurStyle, sigma);
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
@@ -31,20 +32,19 @@ public:
         AutoJavaFloatArray autoDir(env, dirArray, 3);
         float* values = autoDir.ptr();
         for (int i = 0; i < 3; i++) {
-            direction[i] = SkFloatToScalar(values[i]);
+            direction[i] = values[i];
         }
 
-        SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(direction,
-                                                      SkFloatToScalar(ambient),
-                                                      SkFloatToScalar(specular),
-                                                      SkFloatToScalar(radius));
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
+        SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(sigma,
+                direction, ambient, specular);
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
 
     static jlong createTable(JNIEnv* env, jobject, jbyteArray jtable) {
         AutoJavaByteArray autoTable(env, jtable, 256);
-        SkMaskFilter* filter = new SkTableMaskFilter((const uint8_t*)autoTable.ptr());
+        SkMaskFilter* filter = SkTableMaskFilter::Create((const uint8_t*)autoTable.ptr());
         return reinterpret_cast<jlong>(filter);
     }
 

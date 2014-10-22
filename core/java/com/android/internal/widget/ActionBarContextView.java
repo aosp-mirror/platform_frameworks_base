@@ -16,8 +16,11 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
+
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
+import android.widget.ActionMenuPresenter;
+import android.widget.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
 import android.animation.Animator;
@@ -25,7 +28,6 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -57,6 +59,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     private int mSubtitleStyleRes;
     private Drawable mSplitBackground;
     private boolean mTitleOptional;
+    private int mCloseItemLayout;
 
     private Animator mCurrentAnimation;
     private boolean mAnimateInOnLayout;
@@ -74,11 +77,17 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         this(context, attrs, com.android.internal.R.attr.actionModeStyle);
     }
     
-    public ActionBarContextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionMode, defStyle, 0);
-        setBackgroundDrawable(a.getDrawable(
+    public ActionBarContextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ActionBarContextView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.ActionMode, defStyleAttr, defStyleRes);
+        setBackground(a.getDrawable(
                 com.android.internal.R.styleable.ActionMode_background));
         mTitleStyleRes = a.getResourceId(
                 com.android.internal.R.styleable.ActionMode_titleTextStyle, 0);
@@ -90,6 +99,10 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
         mSplitBackground = a.getDrawable(
                 com.android.internal.R.styleable.ActionMode_backgroundSplit);
+
+        mCloseItemLayout = a.getResourceId(
+                com.android.internal.R.styleable.ActionMode_closeItemLayout,
+                R.layout.action_mode_close_item);
 
         a.recycle();
     }
@@ -104,7 +117,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     }
 
     @Override
-    public void setSplitActionBar(boolean split) {
+    public void setSplitToolbar(boolean split) {
         if (mSplitActionBar != split) {
             if (mActionMenuPresenter != null) {
                 // Mode is already active; move everything over and adjust the menu itself.
@@ -112,7 +125,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                         LayoutParams.MATCH_PARENT);
                 if (!split) {
                     mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-                    mMenuView.setBackgroundDrawable(null);
+                    mMenuView.setBackground(null);
                     final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
                     if (oldParent != null) oldParent.removeView(mMenuView);
                     addView(mMenuView, layoutParams);
@@ -126,13 +139,13 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                     layoutParams.width = LayoutParams.MATCH_PARENT;
                     layoutParams.height = mContentHeight;
                     mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-                    mMenuView.setBackgroundDrawable(mSplitBackground);
+                    mMenuView.setBackground(mSplitBackground);
                     final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
                     if (oldParent != null) oldParent.removeView(mMenuView);
                     mSplitView.addView(mMenuView, layoutParams);
                 }
             }
-            super.setSplitActionBar(split);
+            super.setSplitToolbar(split);
         }
     }
 
@@ -203,7 +216,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     public void initForMode(final ActionMode mode) {
         if (mClose == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            mClose = inflater.inflate(R.layout.action_mode_close_item, this, false);
+            mClose = inflater.inflate(mCloseItemLayout, this, false);
             addView(mClose);
         } else if (mClose.getParent() == null) {
             addView(mClose);
@@ -226,7 +239,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         if (!mSplitActionBar) {
-            menu.addMenuPresenter(mActionMenuPresenter);
+            menu.addMenuPresenter(mActionMenuPresenter, mPopupContext);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             mMenuView.setBackgroundDrawable(null);
             addView(mMenuView, layoutParams);
@@ -239,7 +252,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = mContentHeight;
-            menu.addMenuPresenter(mActionMenuPresenter);
+            menu.addMenuPresenter(mActionMenuPresenter, mPopupContext);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             mMenuView.setBackgroundDrawable(mSplitBackground);
             mSplitView.addView(mMenuView, layoutParams);

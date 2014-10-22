@@ -17,32 +17,23 @@
 
 package android.filterpacks.videosink;
 
-import android.content.Context;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.FrameManager;
 import android.filterfw.core.GenerateFieldPort;
-import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.GLFrame;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.NativeFrame;
-import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.filterfw.geometry.Point;
 import android.filterfw.geometry.Quad;
-import android.os.ConditionVariable;
 import android.media.MediaRecorder;
 import android.media.CamcorderProfile;
 import android.filterfw.core.GLEnvironment;
 
 import java.io.IOException;
 import java.io.FileDescriptor;
-import java.util.List;
-import java.util.Set;
 
 import android.util.Log;
 

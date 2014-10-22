@@ -16,8 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
-
 /**
  *
  * Intrinsic for converting RGB to RGBA by using a 3D lookup table.  The
@@ -86,8 +84,21 @@ public final class ScriptIntrinsic3DLUT extends ScriptIntrinsic {
      * @param aout Output allocation
      */
     public void forEach(Allocation ain, Allocation aout) {
-        forEach(0, ain, aout, null);
+        forEach(ain, aout, null);
     }
+
+    /**
+     * Invoke the kernel and apply the lookup to each cell of ain
+     * and copy to aout.
+     *
+     * @param ain Input allocation
+     * @param aout Output allocation
+     * @param opt Launch options for kernel
+     */
+    public void forEach(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        forEach(0, ain, aout, null, opt);
+    }
+
 
     /**
      * Get a KernelID for this intrinsic kernel.

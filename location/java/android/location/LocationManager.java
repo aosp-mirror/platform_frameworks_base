@@ -16,23 +16,23 @@
 
 package android.location;
 
+import com.android.internal.location.ProviderProperties;
+
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.RemoteException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Log;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.android.internal.location.ProviderProperties;
 
 /**
  * This class provides access to the system location services.  These
@@ -59,6 +59,8 @@ public class LocationManager {
 
     private final Context mContext;
     private final ILocationManager mService;
+    private final GpsMeasurementListenerTransport mGpsMeasurementListenerTransport;
+    private final GpsNavigationMessageListenerTransport mGpsNavigationMessageListenerTransport;
     private final HashMap<GpsStatus.Listener, GpsStatusListenerTransport> mGpsStatusListeners =
             new HashMap<GpsStatus.Listener, GpsStatusListenerTransport>();
     private final HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport> mNmeaListeners =
@@ -309,6 +311,9 @@ public class LocationManager {
     public LocationManager(Context context, ILocationManager service) {
         mService = service;
         mContext = context;
+        mGpsMeasurementListenerTransport = new GpsMeasurementListenerTransport(mContext, mService);
+        mGpsNavigationMessageListenerTransport =
+                new GpsNavigationMessageListenerTransport(mContext, mService);
     }
 
     private LocationProvider createProvider(String name, ProviderProperties properties) {
@@ -804,6 +809,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void requestLocationUpdates(LocationRequest request, LocationListener listener,
             Looper looper) {
         checkListener(listener);
@@ -831,6 +837,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void requestLocationUpdates(LocationRequest request, PendingIntent intent) {
         checkPendingIntent(intent);
         requestLocationUpdates(request, null, null, intent);
@@ -1104,11 +1111,15 @@ public class LocationManager {
      * unless they depend on provider-specific APIs such as
      * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
      *
+     * <p>
+     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this
+     * method would throw {@link SecurityException} if the location permissions
+     * were not sufficient to use the specified provider.
+     *
      * @param provider the name of the provider
      * @return true if the provider exists and is enabled
      *
      * @throws IllegalArgumentException if provider is null
-     * @throws SecurityException if no suitable permission is present
      */
     public boolean isProviderEnabled(String provider) {
         checkProvider(provider);
@@ -1564,6 +1575,53 @@ public class LocationManager {
         }
     }
 
+    /**
+     * Adds a GPS Measurement listener.
+     *
+     * @param listener a {@link GpsMeasurementsEvent.Listener} object to register.
+     * @return {@code true} if the listener was successfully registered, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+        return mGpsMeasurementListenerTransport.add(listener);
+    }
+
+    /**
+     * Removes a GPS Measurement listener.
+     *
+     * @param listener a {@link GpsMeasurementsEvent.Listener} object to remove.
+     *
+     * @hide
+     */
+    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+        mGpsMeasurementListenerTransport.remove(listener);
+    }
+
+    /**
+     * Adds a GPS Navigation Message listener.
+     *
+     * @param listener a {@link GpsNavigationMessageEvent.Listener} object to register.
+     * @return {@code true} if the listener was successfully registered, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
+        return mGpsNavigationMessageListenerTransport.add(listener);
+    }
+
+    /**
+     * Removes a GPS Navigation Message listener.
+     *
+     * @param listener a {@link GpsNavigationMessageEvent.Listener} object to remove.
+     *
+     * @hide
+     */
+    public void removeGpsNavigationMessageListener(
+            GpsNavigationMessageEvent.Listener listener) {
+        mGpsNavigationMessageListenerTransport.remove(listener);
+    }
+
      /**
      * Retrieves information about the current status of the GPS engine.
      * This should only be called from the {@link GpsStatus.Listener#onGpsStatusChanged}
@@ -1610,7 +1668,7 @@ public class LocationManager {
      * @hide
      */
     public boolean sendNiResponse(int notifId, int userResponse) {
-    	try {
+        try {
             return mService.sendNiResponse(notifId, userResponse);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in sendNiResponse: ", e);

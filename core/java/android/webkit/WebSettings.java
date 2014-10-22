@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 
 /**
@@ -169,6 +170,38 @@ public abstract class WebSettings {
         ON_DEMAND,
         OFF
     }
+
+    /**
+     * Used with {@link #setMixedContentMode}
+     *
+     * In this mode, the WebView will allow a secure origin to load content from any other origin,
+     * even if that origin is insecure. This is the least secure mode of operation for the WebView,
+     * and where possible apps should not set this mode.
+     */
+    public static final int MIXED_CONTENT_ALWAYS_ALLOW = 0;
+
+    /**
+     * Used with {@link #setMixedContentMode}
+     *
+     * In this mode, the WebView will not allow a secure origin to load content from an insecure
+     * origin. This is the preferred and most secure mode of operation for the WebView and apps are
+     * strongly advised to use this mode.
+     */
+    public static final int MIXED_CONTENT_NEVER_ALLOW = 1;
+
+    /**
+     * Used with {@link #setMixedContentMode}
+     *
+     * In this mode, the WebView will attempt to be compatible with the approach of a modern web
+     * browser with regard to mixed content. Some insecure content may be allowed to be loaded by
+     * a secure origin and other types of content will be blocked. The types of content are allowed
+     * or blocked may change release to release and are not explicitly defined.
+     *
+     * This mode is intended to be used by apps that are not in control of the content that they
+     * render but desire to operate in a reasonably secure environment. For highest security, apps
+     * are recommended to use {@link #MIXED_CONTENT_NEVER_ALLOW}.
+     */
+    public static final int MIXED_CONTENT_COMPATIBILITY_MODE = 2;
 
     /**
      * Hidden constructor to prevent clients from creating a new settings
@@ -464,6 +497,24 @@ public abstract class WebSettings {
      * @see #setTextZoom
      */
     public synchronized int getTextZoom() {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Sets policy for third party cookies.
+     * Developers should access this via {@link CookieManager#setShouldAcceptThirdPartyCookies}.
+     * @hide Internal API.
+     */
+    public void setAcceptThirdPartyCookies(boolean accept) {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Gets policy for third party cookies.
+     * Developers should access this via {@link CookieManager#getShouldAcceptThirdPartyCookies}.
+     * @hide Internal API
+     */
+    public boolean getAcceptThirdPartyCookies() {
         throw new MustOverrideException();
     }
 
@@ -1304,9 +1355,10 @@ public abstract class WebSettings {
     public synchronized boolean getJavaScriptCanOpenWindowsAutomatically() {
         throw new MustOverrideException();
     }
+
     /**
      * Sets the default text encoding name to use when decoding html pages.
-     * The default is "Latin-1".
+     * The default is "UTF-8".
      *
      * @param encoding the text encoding name
      */
@@ -1403,4 +1455,63 @@ public abstract class WebSettings {
     public int getCacheMode() {
         throw new MustOverrideException();
     }
+
+    /**
+     * Configures the WebView's behavior when a secure origin attempts to load a resource from an
+     * insecure origin.
+     *
+     * By default, apps that target {@link android.os.Build.VERSION_CODES#KITKAT} or below default
+     * to {@link #MIXED_CONTENT_ALWAYS_ALLOW}. Apps targeting
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} default to {@link #MIXED_CONTENT_NEVER_ALLOW}.
+     *
+     * The preferred and most secure mode of operation for the WebView is
+     * {@link #MIXED_CONTENT_NEVER_ALLOW} and use of {@link #MIXED_CONTENT_ALWAYS_ALLOW} is
+     * strongly discouraged.
+     *
+     * @param mode The mixed content mode to use. One of {@link #MIXED_CONTENT_NEVER_ALLOW},
+     *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
+     */
+    public abstract void setMixedContentMode(int mode);
+
+    /**
+     * Gets the current behavior of the WebView with regard to loading insecure content from a
+     * secure origin.
+     * @return The current setting, one of {@link #MIXED_CONTENT_NEVER_ALLOW},
+     *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
+     */
+    public abstract int getMixedContentMode();
+
+    /**
+     * Sets whether to use a video overlay for embedded encrypted video.
+     * In API levels prior to {@link android.os.Build.VERSION_CODES#LOLLIPOP}, encrypted video can
+     * only be rendered directly on a secure video surface, so it had been a hard problem to play
+     * encrypted video in HTML.  When this flag is on, WebView can play encrypted video (MSE/EME)
+     * by using a video overlay (aka hole-punching) for videos embedded using HTML &lt;video&gt;
+     * tag.<br>
+     * Caution: This setting is intended for use only in a narrow set of circumstances and apps
+     * should only enable it if they require playback of encrypted video content. It will impose
+     * the following limitations on the WebView:
+     * <ul>
+     * <li> Only one video overlay can be played at a time.
+     * <li> Changes made to position or dimensions of a video element may be propagated to the
+     * corresponding video overlay with a noticeable delay.
+     * <li> The video overlay is not visible to web APIs and as such may not interact with
+     * script or styling. For example, CSS styles applied to the &lt;video&gt; tag may be ignored.
+     * </ul>
+     * This is not an exhaustive set of constraints and it may vary with new versions of the
+     * WebView.
+     * @hide
+     */
+    @SystemApi
+    public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean flag);
+
+    /**
+     * Gets whether a video overlay will be used for embedded encrypted video.
+     *
+     * @return true if WebView uses a video overlay for embedded encrypted video.
+     * @see #setVideoOverlayForEmbeddedEncryptedVideoEnabled
+     * @hide
+     */
+    @SystemApi
+    public abstract boolean getVideoOverlayForEmbeddedEncryptedVideoEnabled();
 }

@@ -19,10 +19,7 @@
 <resources>
     <!-- Keyguard dimensions -->
     <!-- Size of the clock font in keyguard's status view -->
-    <dimen name="kg_status_clock_font_size">188dp</dimen>
-
-    <!-- Size of the generic status lines keyguard's status view  -->
-    <dimen name="kg_status_line_font_size">19sp</dimen>
+    <dimen name="kg_status_clock_font_size">140dp</dimen>
 
     <!-- Top margin for the clock view --> 
     <dimen name="kg_clock_top_margin">0dp</dimen>
@@ -61,7 +58,5 @@
     <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
 
-    <!-- Default clock parameters -->
-    <dimen name="widget_label_font_size">19dp</dimen>
-
+    <dimen name="widget_big_font_size">150dp</dimen>
 </resources>

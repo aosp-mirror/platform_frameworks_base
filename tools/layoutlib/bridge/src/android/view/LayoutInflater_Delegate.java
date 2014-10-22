@@ -48,9 +48,9 @@ public class LayoutInflater_Delegate {
      * This implementation just records the merge status before calling the default implementation.
      */
     @LayoutlibDelegate
-    /*package*/ static void rInflate(LayoutInflater thisInflater,
-            XmlPullParser parser, View parent, final AttributeSet attrs,
-            boolean finishInflate) throws XmlPullParserException, IOException {
+    /* package */ static void rInflate(LayoutInflater thisInflater, XmlPullParser parser,
+            View parent, final AttributeSet attrs, boolean finishInflate, boolean inheritContext)
+            throws XmlPullParserException, IOException {
 
         if (finishInflate == false) {
             // this is a merge rInflate!
@@ -61,7 +61,7 @@ public class LayoutInflater_Delegate {
 
         // ---- START DEFAULT IMPLEMENTATION.
 
-        thisInflater.rInflate_Original(parser, parent, attrs, finishInflate);
+        thisInflater.rInflate_Original(parser, parent, attrs, finishInflate, inheritContext);
 
         // ---- END DEFAULT IMPLEMENTATION.
 
@@ -74,10 +74,8 @@ public class LayoutInflater_Delegate {
     }
 
     @LayoutlibDelegate
-    public static void parseInclude(
-            LayoutInflater thisInflater,
-            XmlPullParser parser, View parent, AttributeSet attrs)
-            throws XmlPullParserException, IOException {
+    public static void parseInclude(LayoutInflater thisInflater, XmlPullParser parser, View parent,
+            AttributeSet attrs, boolean inheritContext) throws XmlPullParserException, IOException {
 
         int type;
 
@@ -113,9 +111,11 @@ public class LayoutInflater_Delegate {
 
                     if (TAG_MERGE.equals(childName)) {
                         // Inflate all children.
-                        thisInflater.rInflate(childParser, parent, childAttrs, false);
+                        thisInflater.rInflate(childParser, parent, childAttrs, false,
+                                inheritContext);
                     } else {
-                        final View view = thisInflater.createViewFromTag(parent, childName, childAttrs);
+                        final View view = thisInflater.createViewFromTag(parent, childName,
+                                childAttrs, inheritContext);
                         final ViewGroup group = (ViewGroup) parent;
 
                         // We try to load the layout params set in the <include /> tag. If
@@ -151,7 +151,7 @@ public class LayoutInflater_Delegate {
                         }
 
                         // Inflate all children.
-                        thisInflater.rInflate(childParser, view, childAttrs, true);
+                        thisInflater.rInflate(childParser, view, childAttrs, true, true);
 
                         // Attempt to override the included layout's android:id with the
                         // one set on the <include /> tag itself.

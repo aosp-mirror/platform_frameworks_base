@@ -146,6 +146,8 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public static final int RIL_RADIO_TECHNOLOGY_GSM = 16;
+    /** @hide */
+    public static final int RIL_RADIO_TECHNOLOGY_TD_SCDMA = 17;
 
     /**
      * Available registration states for GSM, UMTS and CDMA.
@@ -848,7 +850,8 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_HSPA
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_HSPAP
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_GSM;
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_GSM
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_TD_SCDMA;
     }
 
     /** @hide */

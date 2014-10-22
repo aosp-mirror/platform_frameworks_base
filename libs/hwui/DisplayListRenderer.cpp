@@ -21,128 +21,63 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
-#include "DisplayList.h"
+#include "Caches.h"
 #include "DeferredDisplayList.h"
 #include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
 #include "DisplayListRenderer.h"
-#include "Caches.h"
+#include "RenderNode.h"
 
 namespace android {
 namespace uirenderer {
 
-DisplayListRenderer::DisplayListRenderer():
-        mCaches(Caches::getInstance()), mDisplayListData(new DisplayListData),
-        mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false),
-        mHasDrawOps(false), mFunctorCount(0) {
+DisplayListRenderer::DisplayListRenderer()
+    : mCaches(Caches::getInstance())
+    , mDisplayListData(NULL)
+    , mTranslateX(0.0f)
+    , mTranslateY(0.0f)
+    , mDeferredBarrierType(kBarrier_None)
+    , mHighContrastText(false)
+    , mRestoreSaveCount(-1) {
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
-    reset();
-}
-
-void DisplayListRenderer::reset() {
-    mDisplayListData = new DisplayListData();
-    mCaches.resourceCache.lock();
-
-    for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mBitmapResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mOwnedBitmapResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mFilterResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mPatchResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mShaders.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mSourcePaths.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
-    }
-
-    for (size_t i = 0; i < mLayers.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mLayers.itemAt(i));
-    }
-
-    mCaches.resourceCache.unlock();
-
-    mBitmapResources.clear();
-    mOwnedBitmapResources.clear();
-    mFilterResources.clear();
-    mPatchResources.clear();
-    mSourcePaths.clear();
-
-    mShaders.clear();
-    mShaderMap.clear();
-
-    mPaints.clear();
-    mPaintMap.clear();
-
-    mRegions.clear();
-    mRegionMap.clear();
-
-    mPaths.clear();
-    mPathMap.clear();
-
-    mMatrices.clear();
-
-    mLayers.clear();
-
-    mHasDrawOps = false;
-    mFunctorCount = 0;
+    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+            "Destroyed a DisplayListRenderer during a record!");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Operations
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
-    if (!displayList) {
-        displayList = new DisplayList(*this);
-    } else {
-        displayList->initFromDisplayListRenderer(*this, true);
-    }
-    displayList->setRenderable(mHasDrawOps);
-    return displayList;
-}
-
-bool DisplayListRenderer::isDeferred() {
-    return true;
-}
-
-void DisplayListRenderer::setViewport(int width, int height) {
-    mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
-
-    mWidth = width;
-    mHeight = height;
+DisplayListData* DisplayListRenderer::finishRecording() {
+    mPaintMap.clear();
+    mRegionMap.clear();
+    mPathMap.clear();
+    DisplayListData* data = mDisplayListData;
+    mDisplayListData = 0;
+    return data;
 }
 
 status_t DisplayListRenderer::prepareDirty(float left, float top,
         float right, float bottom, bool opaque) {
-    mSnapshot = new Snapshot(mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    mSaveCount = 1;
 
-    mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
+    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+            "prepareDirty called a second time during a recording!");
+    mDisplayListData = new DisplayListData();
+
+    initializeSaveStack(0, 0, getWidth(), getHeight(), Vector3());
+
+    mDeferredBarrierType = kBarrier_InOrder;
     mDirtyClip = opaque;
-
     mRestoreSaveCount = -1;
 
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
 void DisplayListRenderer::finish() {
-    insertRestoreToCount();
-    insertTranslate();
+    flushRestoreToCount();
+    flushTranslate();
 }
 
 void DisplayListRenderer::interrupt() {
@@ -154,13 +89,13 @@ void DisplayListRenderer::resume() {
 status_t DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     // Ignore dirty during recording, it matters only when we replay
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mFunctorCount++;
+    mDisplayListData->functors.add(functor);
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
 int DisplayListRenderer::save(int flags) {
     addStateOp(new (alloc()) SaveOp(flags));
-    return OpenGLRenderer::save(flags);
+    return StatefulBaseRenderer::save(flags);
 }
 
 void DisplayListRenderer::restore() {
@@ -170,85 +105,86 @@ void DisplayListRenderer::restore() {
     }
 
     mRestoreSaveCount--;
-    insertTranslate();
-    OpenGLRenderer::restore();
+    flushTranslate();
+    StatefulBaseRenderer::restore();
 }
 
 void DisplayListRenderer::restoreToCount(int saveCount) {
     mRestoreSaveCount = saveCount;
-    insertTranslate();
-    OpenGLRenderer::restoreToCount(saveCount);
+    flushTranslate();
+    StatefulBaseRenderer::restoreToCount(saveCount);
 }
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode, int flags) {
-    addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, alpha, mode, flags));
-    return OpenGLRenderer::save(flags);
+        const SkPaint* paint, int flags) {
+    // force matrix/clip isolation for layer
+    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+
+    paint = refPaint(paint);
+    addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, paint, flags));
+    return StatefulBaseRenderer::save(flags);
 }
 
-void DisplayListRenderer::translate(float dx, float dy) {
-    mHasTranslate = true;
+void DisplayListRenderer::translate(float dx, float dy, float dz) {
+    // ignore dz, not used at defer time
+    mHasDeferredTranslate = true;
     mTranslateX += dx;
     mTranslateY += dy;
-    insertRestoreToCount();
-    OpenGLRenderer::translate(dx, dy);
+    flushRestoreToCount();
+    StatefulBaseRenderer::translate(dx, dy, dz);
 }
 
 void DisplayListRenderer::rotate(float degrees) {
     addStateOp(new (alloc()) RotateOp(degrees));
-    OpenGLRenderer::rotate(degrees);
+    StatefulBaseRenderer::rotate(degrees);
 }
 
 void DisplayListRenderer::scale(float sx, float sy) {
     addStateOp(new (alloc()) ScaleOp(sx, sy));
-    OpenGLRenderer::scale(sx, sy);
+    StatefulBaseRenderer::scale(sx, sy);
 }
 
 void DisplayListRenderer::skew(float sx, float sy) {
     addStateOp(new (alloc()) SkewOp(sx, sy));
-    OpenGLRenderer::skew(sx, sy);
+    StatefulBaseRenderer::skew(sx, sy);
 }
 
-void DisplayListRenderer::setMatrix(SkMatrix* matrix) {
-    matrix = refMatrix(matrix);
+void DisplayListRenderer::setMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) SetMatrixOp(matrix));
-    OpenGLRenderer::setMatrix(matrix);
+    StatefulBaseRenderer::setMatrix(matrix);
 }
 
-void DisplayListRenderer::concatMatrix(SkMatrix* matrix) {
-    matrix = refMatrix(matrix);
+void DisplayListRenderer::concatMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) ConcatMatrixOp(matrix));
-    OpenGLRenderer::concatMatrix(matrix);
+    StatefulBaseRenderer::concatMatrix(matrix);
 }
 
 bool DisplayListRenderer::clipRect(float left, float top, float right, float bottom,
         SkRegion::Op op) {
     addStateOp(new (alloc()) ClipRectOp(left, top, right, bottom, op));
-    return OpenGLRenderer::clipRect(left, top, right, bottom, op);
+    return StatefulBaseRenderer::clipRect(left, top, right, bottom, op);
 }
 
-bool DisplayListRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+bool DisplayListRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
     path = refPath(path);
     addStateOp(new (alloc()) ClipPathOp(path, op));
-    return OpenGLRenderer::clipPath(path, op);
+    return StatefulBaseRenderer::clipPath(path, op);
 }
 
-bool DisplayListRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
+bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     region = refRegion(region);
     addStateOp(new (alloc()) ClipRegionOp(region, op));
-    return OpenGLRenderer::clipRegion(region, op);
+    return StatefulBaseRenderer::clipRegion(region, op);
 }
 
-status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
-        Rect& dirty, int32_t flags) {
+status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
+    LOG_ALWAYS_FATAL_IF(!renderNode, "missing rendernode");
+
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
+    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *currentTransform());
+    addRenderNodeOp(op);
 
-    // TODO: To be safe, the display list should be ref-counted in the
-    //       resources cache, but we rely on the caller (UI toolkit) to
-    //       do the right thing for now
-
-    addDrawOp(new (alloc()) DrawDisplayListOp(displayList, flags));
     return DrawGlInfo::kStatusDone;
 }
 
@@ -258,68 +194,60 @@ status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, left, top, paint));
+    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
-    bitmap = refBitmap(bitmap);
-    matrix = refMatrix(matrix);
-    paint = refPaint(paint);
-
-    addDrawOp(new (alloc()) DrawBitmapMatrixOp(bitmap, matrix, paint));
-    return DrawGlInfo::kStatusDone;
-}
-
-status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop,
-        float dstRight, float dstBottom, SkPaint* paint) {
-    bitmap = refBitmap(bitmap);
-    paint = refPaint(paint);
-
-    if (srcLeft == 0 && srcTop == 0 &&
-            srcRight == bitmap->width() && srcBottom == bitmap->height() &&
-            (srcBottom - srcTop == dstBottom - dstTop) &&
-            (srcRight - srcLeft == dstRight - dstLeft)) {
+        float dstRight, float dstBottom, const SkPaint* paint) {
+    if (srcLeft == 0 && srcTop == 0
+            && srcRight == bitmap->width() && srcBottom == bitmap->height()
+            && (srcBottom - srcTop == dstBottom - dstTop)
+            && (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint));
-        return DrawGlInfo::kStatusDone;
-    }
+        save(SkCanvas::kMatrix_SaveFlag);
+        translate(dstLeft, dstTop);
+        drawBitmap(bitmap, paint);
+        restore();
+    } else {
+        bitmap = refBitmap(bitmap);
+        paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapRectOp(bitmap,
-                    srcLeft, srcTop, srcRight, srcBottom,
-                    dstLeft, dstTop, dstRight, dstBottom, paint));
+        addDrawOp(new (alloc()) DrawBitmapRectOp(bitmap,
+                srcLeft, srcTop, srcRight, srcBottom,
+                dstLeft, dstTop, dstRight, dstBottom, paint));
+    }
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
-        SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) {
     bitmap = refBitmapData(bitmap);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapDataOp(bitmap, left, top, paint));
+    addDrawOp(new (alloc()) DrawBitmapDataOp(bitmap, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-        float* vertices, int* colors, SkPaint* paint) {
-    int count = (meshWidth + 1) * (meshHeight + 1) * 2;
+status_t DisplayListRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+        const float* vertices, const int* colors, const SkPaint* paint) {
+    int vertexCount = (meshWidth + 1) * (meshHeight + 1);
     bitmap = refBitmap(bitmap);
-    vertices = refBuffer<float>(vertices, count);
+    vertices = refBuffer<float>(vertices, vertexCount * 2); // 2 floats per vertex
     paint = refPaint(paint);
-    colors = refBuffer<int>(colors, count);
+    colors = refBuffer<int>(colors, vertexCount); // 1 color per vertex
 
     addDrawOp(new (alloc()) DrawBitmapMeshOp(bitmap, meshWidth, meshHeight,
                     vertices, colors, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-        float left, float top, float right, float bottom, SkPaint* paint) {
+status_t DisplayListRenderer::drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     patch = refPatch(patch);
     paint = refPaint(paint);
@@ -334,41 +262,73 @@ status_t DisplayListRenderer::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 status_t DisplayListRenderer::drawRect(float left, float top, float right, float bottom,
-        SkPaint* paint) {
+        const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawRectOp(left, top, right, bottom, paint));
     return DrawGlInfo::kStatusDone;
 }
 
 status_t DisplayListRenderer::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, SkPaint* paint) {
+        float rx, float ry, const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawRoundRectOp(left, top, right, bottom, rx, ry, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
+status_t DisplayListRenderer::drawRoundRect(
+        CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+        CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+        CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+        CanvasPropertyPaint* paint) {
+    mDisplayListData->refProperty(left);
+    mDisplayListData->refProperty(top);
+    mDisplayListData->refProperty(right);
+    mDisplayListData->refProperty(bottom);
+    mDisplayListData->refProperty(rx);
+    mDisplayListData->refProperty(ry);
+    mDisplayListData->refProperty(paint);
+    addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
+            &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
+    return DrawGlInfo::kStatusDone;
+}
+
+status_t DisplayListRenderer::drawCircle(float x, float y, float radius, const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawCircleOp(x, y, radius, paint));
     return DrawGlInfo::kStatusDone;
 }
 
+status_t DisplayListRenderer::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+        CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
+    mDisplayListData->refProperty(x);
+    mDisplayListData->refProperty(y);
+    mDisplayListData->refProperty(radius);
+    mDisplayListData->refProperty(paint);
+    addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
+            &radius->value, &paint->value));
+    return DrawGlInfo::kStatusDone;
+}
+
 status_t DisplayListRenderer::drawOval(float left, float top, float right, float bottom,
-        SkPaint* paint) {
+        const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawOvalOp(left, top, right, bottom, paint));
     return DrawGlInfo::kStatusDone;
 }
 
 status_t DisplayListRenderer::drawArc(float left, float top, float right, float bottom,
-        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+        float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
+    if (fabs(sweepAngle) >= 360.0f) {
+        return drawOval(left, top, right, bottom, paint);
+    }
+
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawArcOp(left, top, right, bottom,
                     startAngle, sweepAngle, useCenter, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
+status_t DisplayListRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
     path = refPath(path);
     paint = refPaint(paint);
 
@@ -376,7 +336,7 @@ status_t DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawLines(float* points, int count, SkPaint* paint) {
+status_t DisplayListRenderer::drawLines(const float* points, int count, const SkPaint* paint) {
     points = refBuffer<float>(points, count);
     paint = refPaint(paint);
 
@@ -384,7 +344,7 @@ status_t DisplayListRenderer::drawLines(float* points, int count, SkPaint* paint
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPoints(float* points, int count, SkPaint* paint) {
+status_t DisplayListRenderer::drawPoints(const float* points, int count, const SkPaint* paint) {
     points = refBuffer<float>(points, count);
     paint = refPaint(paint);
 
@@ -393,7 +353,7 @@ status_t DisplayListRenderer::drawPoints(float* points, int count, SkPaint* pain
 }
 
 status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
-        SkPath* path, float hOffset, float vOffset, SkPaint* paint) {
+        const SkPath* path, float hOffset, float vOffset, const SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
     text = refText(text, bytesCount);
@@ -407,7 +367,7 @@ status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, i
 }
 
 status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int count,
-        const float* positions, SkPaint* paint) {
+        const float* positions, const SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
     text = refText(text, bytesCount);
@@ -419,57 +379,62 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     return DrawGlInfo::kStatusDone;
 }
 
+static void simplifyPaint(int color, SkPaint* paint) {
+    paint->setColor(color);
+    paint->setShader(NULL);
+    paint->setColorFilter(NULL);
+    paint->setLooper(NULL);
+    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
+    paint->setStrokeJoin(SkPaint::kRound_Join);
+    paint->setLooper(NULL);
+}
+
 status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, const float* positions, SkPaint* paint,
+        float x, float y, const float* positions, const SkPaint* paint,
         float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
 
-    if (!text || count <= 0) return DrawGlInfo::kStatusDone;
+    if (!text || count <= 0 || paintWillNotDrawText(*paint)) return DrawGlInfo::kStatusDone;
 
     text = refText(text, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
-    paint = refPaint(paint);
 
-    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
-            x, y, positions, paint, totalAdvance, bounds);
-    addDrawOp(op);
+    if (CC_UNLIKELY(mHighContrastText)) {
+        // high contrast draw path
+        int color = paint->getColor();
+        int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
+        bool darken = channelSum < (128 * 3);
+
+        // outline
+        SkPaint* outlinePaint = copyPaint(paint);
+        simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, outlinePaint);
+        outlinePaint->setStyle(SkPaint::kStrokeAndFill_Style);
+        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
+                x, y, positions, outlinePaint, totalAdvance, bounds)); // bounds?
+
+        // inner
+        SkPaint* innerPaint = copyPaint(paint);
+        simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, innerPaint);
+        innerPaint->setStyle(SkPaint::kFill_Style);
+        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
+                x, y, positions, innerPaint, totalAdvance, bounds));
+    } else {
+        // standard draw path
+        paint = refPaint(paint);
+
+        DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
+                x, y, positions, paint, totalAdvance, bounds);
+        addDrawOp(op);
+    }
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawRects(const float* rects, int count, SkPaint* paint) {
+status_t DisplayListRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
     if (count <= 0) return DrawGlInfo::kStatusDone;
 
     rects = refBuffer<float>(rects, count);
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawRectsOp(rects, count, paint));
     return DrawGlInfo::kStatusDone;
-}
-
-void DisplayListRenderer::resetShader() {
-    addStateOp(new (alloc()) ResetShaderOp());
-}
-
-void DisplayListRenderer::setupShader(SkiaShader* shader) {
-    shader = refShader(shader);
-    addStateOp(new (alloc()) SetupShaderOp(shader));
-}
-
-void DisplayListRenderer::resetColorFilter() {
-    addStateOp(new (alloc()) ResetColorFilterOp());
-}
-
-void DisplayListRenderer::setupColorFilter(SkiaColorFilter* filter) {
-    filter = refColorFilter(filter);
-    addStateOp(new (alloc()) SetupColorFilterOp(filter));
-}
-
-void DisplayListRenderer::resetShadow() {
-    addStateOp(new (alloc()) ResetShadowOp());
-    OpenGLRenderer::resetShadow();
-}
-
-void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int color) {
-    addStateOp(new (alloc()) SetupShadowOp(radius, dx, dy, color));
-    OpenGLRenderer::setupShadow(radius, dx, dy, color);
 }
 
 void DisplayListRenderer::resetPaintFilter() {
@@ -480,39 +445,84 @@ void DisplayListRenderer::setupPaintFilter(int clearBits, int setBits) {
     addStateOp(new (alloc()) SetupPaintFilterOp(clearBits, setBits));
 }
 
-void DisplayListRenderer::insertRestoreToCount() {
+void DisplayListRenderer::insertReorderBarrier(bool enableReorder) {
+    flushRestoreToCount();
+    flushTranslate();
+    mDeferredBarrierType = enableReorder ? kBarrier_OutOfOrder : kBarrier_InOrder;
+}
+
+void DisplayListRenderer::flushRestoreToCount() {
     if (mRestoreSaveCount >= 0) {
-        DisplayListOp* op = new (alloc()) RestoreToCountOp(mRestoreSaveCount);
-        mDisplayListData->displayListOps.add(op);
+        addOpAndUpdateChunk(new (alloc()) RestoreToCountOp(mRestoreSaveCount));
         mRestoreSaveCount = -1;
     }
 }
 
-void DisplayListRenderer::insertTranslate() {
-    if (mHasTranslate) {
+void DisplayListRenderer::flushTranslate() {
+    if (mHasDeferredTranslate) {
         if (mTranslateX != 0.0f || mTranslateY != 0.0f) {
-            DisplayListOp* op = new (alloc()) TranslateOp(mTranslateX, mTranslateY);
-            mDisplayListData->displayListOps.add(op);
+            addOpAndUpdateChunk(new (alloc()) TranslateOp(mTranslateX, mTranslateY));
             mTranslateX = mTranslateY = 0.0f;
         }
-        mHasTranslate = false;
+        mHasDeferredTranslate = false;
     }
 }
 
-void DisplayListRenderer::addStateOp(StateOp* op) {
-    addOpInternal(op);
+size_t DisplayListRenderer::addOpAndUpdateChunk(DisplayListOp* op) {
+    int insertIndex = mDisplayListData->displayListOps.add(op);
+    if (mDeferredBarrierType != kBarrier_None) {
+        // op is first in new chunk
+        mDisplayListData->chunks.push();
+        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.editTop();
+        newChunk.beginOpIndex = insertIndex;
+        newChunk.endOpIndex = insertIndex + 1;
+        newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
+
+        int nextChildIndex = mDisplayListData->children().size();
+        newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
+        mDeferredBarrierType = kBarrier_None;
+    } else {
+        // standard case - append to existing chunk
+        mDisplayListData->chunks.editTop().endOpIndex = insertIndex + 1;
+    }
+    return insertIndex;
 }
 
-void DisplayListRenderer::addDrawOp(DrawOp* op) {
+size_t DisplayListRenderer::flushAndAddOp(DisplayListOp* op) {
+    flushRestoreToCount();
+    flushTranslate();
+    return addOpAndUpdateChunk(op);
+}
+
+size_t DisplayListRenderer::addStateOp(StateOp* op) {
+    return flushAndAddOp(op);
+}
+
+size_t DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
-    if (op->getLocalBounds(mDrawModifiers, localBounds)) {
-        bool rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
+    if (op->getLocalBounds(localBounds)) {
+        bool rejected = quickRejectConservative(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);
     }
 
-    mHasDrawOps = true;
-    addOpInternal(op);
+    mDisplayListData->hasDrawOps = true;
+    return flushAndAddOp(op);
+}
+
+size_t DisplayListRenderer::addRenderNodeOp(DrawRenderNodeOp* op) {
+    int opIndex = addDrawOp(op);
+    int childIndex = mDisplayListData->addChild(op);
+
+    // update the chunk's child indices
+    DisplayListData::Chunk& chunk = mDisplayListData->chunks.editTop();
+    chunk.endChildIndex = childIndex + 1;
+
+    if (op->renderNode()->stagingProperties().isProjectionReceiver()) {
+        // use staging property, since recording on UI thread
+        mDisplayListData->projectionReceiveIndex = opIndex;
+    }
+    return opIndex;
 }
 
 }; // namespace uirenderer

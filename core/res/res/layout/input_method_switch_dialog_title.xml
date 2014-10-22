@@ -33,7 +33,7 @@
 
         <com.android.internal.widget.DialogTitle
             android:id="@+id/alertTitle"
-            style="@android:style/DialogWindowTitle.Holo"
+            style="@android:style/DialogWindowTitle.DeviceDefault"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -48,11 +48,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dip"
-            android:background="@android:color/holo_blue_light" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -85,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
-                    android:text="@string/use_physical_keyboard"
+                    android:text="@string/show_ime"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?android:attr/textColorAlertDialogListItem" />
             </LinearLayout>
@@ -97,12 +92,10 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="12dip" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDividerAlertDialog" />
     </LinearLayout>
-
-    <View
-        android:id="@+id/titleDivider"
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="@android:drawable/divider_horizontal_dark" />
-
 </LinearLayout>

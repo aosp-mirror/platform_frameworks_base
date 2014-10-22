@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN-kodni kiriting"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"SIM karta PUK kodi va yangi PIN kodni tering"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM karta PUK kodi"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Yangi SIM karta PIN kodi"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Parolni kiritish uchun bosing"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Qulfni ochish uchun parolni kiriting"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Qulfni ochish uchun PIN-kodni kiriting"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Noto‘g‘ri PIN kod."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Qulfni ochish uchun avval \"Menu\"ni, so‘ngra 0 raqamini bosing."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Yuzni tanitib qulfni ochishga urinish miqdoridan oshib ketdi"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Zaryad to‘ldi"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Quvvat olmoqda"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Zaryadlagichni ulang."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Qulfni ochish uchun \"Menyu\"ga bosing."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Tarmoq qulflangan"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM karta yo‘q"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Ushbu planshetda SIM karta yo‘q."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Ushbu telefonda SIM karta yo‘q."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Telefonga SIM kartani joylashtiring."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM karta qo‘yilmagan yoki o‘qib bo‘lmayapti. SIM kartani joylashtiring."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM kartadan foydalanib bo‘lmaydi."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM kartangiz butunlay o‘chirilgan.\n Boshqa SIM karta olish uchun aloqa operatori bilan bog‘laning."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM karta qulflangan."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM karta PUK kod bilan qulflangan."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM karta qulfi ochilmoqda…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Vidjet %2$d / %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Vidjet qo‘shish."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Bo‘sh"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Qulfni ochish maydoni kengaytirildi."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Qulfni ochish maydoni yig‘ildi."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> vidjeti."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Foydalanuvchi tanlagichi"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Holati"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Media boshqaruvlari"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Vidjetlarni saralashni boshlandi."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Vidjetlarni saralash tugatildi."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> vidjeti o‘chirildi."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Qulfni ochish maydonini kengaytirish."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Qulfni silab ochish"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Chizmali qulfni ochish."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Qulfni yuzni tanitib ochish"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin qulfini ochish."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Parolli qulfni ochish."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Chizmali qulf maydoni."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Maydonni silang"</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Avvalgi qo‘shiq tugmasi"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Keyingi qo‘shiq tugmasi"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pauza tugmasi"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Ijro etish tugmasi"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"To‘xtatish tugmasi"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Yoqdi"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Yoqmadi"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Yurak"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Avval qulfni oching"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Ishga tushirish bekor qilindi"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"O‘chirish uchun <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>ni pastga tashlang."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> o‘chirilmaydi."</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Bekor qilish"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"O‘chirish"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Tayyor"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Usulni o‘zgartirish"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Kiritish"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Qulfni ochish"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Ovozsiz"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Ovoz yoqib qo‘yilgan"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Izlash"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun yuqoriga suring."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun pastga suring."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun chapga suring."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun o‘ngga suring."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Joriy foydalanuvchi <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Favqulodda qo‘ng‘iroq"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Chizmali parol unutilgan"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Xato chizma paroli"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Xato parol"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Xato PIN kod"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> soniyadan so‘ng qaytadan urinib ko‘ring."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Chizmali parolni chizing"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM karta PIN kodini kiriting"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN kodni tering"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Parol kiriting"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM karta hozir o‘chirilgan. Davom etish uchun PUK kodni kiriting. To‘liqroq ma’lumot olish uchun tarmoq operatori bilan bog‘laning."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"So‘ralgan PIN kodni kiriting"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"So‘ralgan PIN kodni tasdiqlang"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM karta qulfi ochilmoqda…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kod kamida 8 ta raqam bo‘lishi shart."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodlar bir xil emas"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Chizmali parolni ochishga juda ko‘p urinildi"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Foydalanuvchi nomi (e-pochta)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Parol"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Hisobga kirish"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Foydalanuvchi nomi yoki parol xato."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Foydalanuvchi nomingiz yoki parolingizni unutdingizmi?\n "<b>"google.com/accounts/recovery"</b>"ga tashrif buyuring."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Hisob tekshirilmoqda…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodingizni <xliff:g id="NUMBER_0">%d</xliff:g> marta xato kiritdingiz. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qaytadan urinib ko‘ring."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Parolingizni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qaytadan urinib ko‘ring."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Chizmali parolingizni <xliff:g id="NUMBER_0">%d</xliff:g> marta xato chizdingiz. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qaytadan urinib ko‘ring."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Siz planshet qulfini ochish uchun <xliff:g id="NUMBER_0">%d</xliff:g> marta muvaffaqiyatsiz urindingiz. <xliff:g id="NUMBER_1">%d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng planshetning zavod sozlamalari tiklanadi va barcha foydalanuvchi ma’lumotlari o‘chiriladi."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Siz telefon qulfini ochish uchun <xliff:g id="NUMBER_0">%d</xliff:g> marta muvaffaqiyatsiz urindingiz. <xliff:g id="NUMBER_1">%d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng telefonning zavod sozlamalari tiklanadi va barcha foydalanuvchi ma’lumotlari o‘chiriladi."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Planshet qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta muvaffaqiyatsiz urinib ko‘rdingiz. Planshetning hozir zavod sozlamari tiklanadi."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta muvaffaqiyatsiz urinib ko‘rdingiz. Telefonning hozir zavod sozlamari tiklanadi."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Chizmali parolni  <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Chizmali parolni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"O‘chirish"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM karta PIN kodi noto‘g‘ri. Qurilma qulfini ochish uchun aloqa operatoringiz bilan bog‘laning."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM karta PIN kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta uirinib ko‘rishingiz mumkin, urinishlar tugagandan keyin qurilmangizni qulfdan chiqarish uchun aloqa operatoringiz bilan bog‘lanishingiz kerak."</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM karta PIN kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta urinib ko‘rishingiz mumkin."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartadan foydalanib bo‘lmaydi. Aloqa operatoringiz bilan bog‘laning."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM karta PUK kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta urinib ko‘rganingizdan so‘ng, SIM kartadan umuman foydalanib bo‘lmaydi."</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM karta PUK kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta urinib ko‘rganingizdan so‘ng, SIM kartadan umuman foydalanib bo‘lmaydi."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM karta PIN jarayoni amalga oshmadi!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM karta PUK jarayoni amalga oshmadi!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod qabul qilindi!"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Avvalgi qo‘shiq tugmasi"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Keyingi qo‘shiq tugmasi"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Pauza tugmasi"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Ijro etish tugmasi"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"To‘xtatish tugmasi"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Aloqa yo‘q."</string>
+</resources>

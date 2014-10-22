@@ -17,8 +17,6 @@
 #ifndef ANDROID_HWUI_TASK_H
 #define ANDROID_HWUI_TASK_H
 
-#define ATRACE_TAG ATRACE_TAG_VIEW
-
 #include <utils/RefBase.h>
 #include <utils/Trace.h>
 
@@ -40,7 +38,7 @@ public:
     virtual ~Task() { }
 
     T getResult() const {
-        ATRACE_NAME("waitForTask");
+        ScopedTrace tracer(ATRACE_TAG_VIEW, "waitForTask");
         return mFuture->get();
     }
 

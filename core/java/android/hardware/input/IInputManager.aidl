@@ -16,8 +16,10 @@
 
 package android.hardware.input;
 
+import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
+import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -38,16 +40,21 @@ interface IInputManager {
     // applications, the caller must have the INJECT_EVENTS permission.
     boolean injectInputEvent(in InputEvent ev, int mode);
 
+    // Calibrate input device position
+    TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor, int rotation);
+    void setTouchCalibrationForInputDevice(String inputDeviceDescriptor, int rotation,
+            in TouchCalibration calibration);
+
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();
     KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
-    String getCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor);
-    void setCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    String getCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier);
+    void setCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
-    String[] getKeyboardLayoutsForInputDevice(String inputDeviceDescriptor);
-    void addKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    String[] getKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
+    void addKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
-    void removeKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
 
     // Registers an input devices changed listener.

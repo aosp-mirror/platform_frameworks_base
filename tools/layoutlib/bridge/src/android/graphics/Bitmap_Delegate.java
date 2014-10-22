@@ -53,6 +53,7 @@ import javax.imageio.ImageIO;
  */
 public final class Bitmap_Delegate {
 
+
     public enum BitmapCreateFlags {
         PREMULTIPLIED, MUTABLE
     }
@@ -68,6 +69,7 @@ public final class Bitmap_Delegate {
     private BufferedImage mImage;
     private boolean mHasAlpha = true;
     private boolean mHasMipMap = false;      // TODO: check the default.
+    private boolean mIsPremultiplied = true;
     private int mGenerationId = 0;
 
 
@@ -315,7 +317,7 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeReconfigure(long nativeBitmap, int width, int height,
-            int config, int allocSize) {
+            int config, int allocSize, boolean isPremultiplied) {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                 "Bitmap.reconfigure() is not supported", null /*data*/);
     }
@@ -393,21 +395,19 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeGetPixel(long nativeBitmap, int x, int y,
-            boolean isPremultiplied) {
+    /*package*/ static int nativeGetPixel(long nativeBitmap, int x, int y) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
             return 0;
         }
 
-        // TODO: Support isPremultiplied.
         return delegate.mImage.getRGB(x, y);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeGetPixels(long nativeBitmap, int[] pixels, int offset,
-            int stride, int x, int y, int width, int height, boolean isPremultiplied) {
+            int stride, int x, int y, int width, int height) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
             return;
@@ -418,8 +418,7 @@ public final class Bitmap_Delegate {
 
 
     @LayoutlibDelegate
-    /*package*/ static void nativeSetPixel(long nativeBitmap, int x, int y, int color,
-            boolean isPremultiplied) {
+    /*package*/ static void nativeSetPixel(long nativeBitmap, int x, int y, int color) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
             return;
@@ -430,7 +429,7 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeSetPixels(long nativeBitmap, int[] colors, int offset,
-            int stride, int x, int y, int width, int height, boolean isPremultiplied) {
+            int stride, int x, int y, int width, int height) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
             return;
@@ -518,7 +517,27 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeSetHasAlpha(long nativeBitmap, boolean hasAlpha) {
+    /*package*/ static boolean nativeIsPremultiplied(long nativeBitmap) {
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        return delegate != null && delegate.mIsPremultiplied;
+
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nativeSetPremultiplied(long nativeBitmap, boolean isPremul) {
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            return;
+        }
+
+        delegate.mIsPremultiplied = isPremul;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nativeSetHasAlpha(long nativeBitmap, boolean hasAlpha,
+            boolean isPremul) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {

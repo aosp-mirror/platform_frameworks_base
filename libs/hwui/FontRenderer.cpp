@@ -72,19 +72,20 @@ status_t TextSetupFunctor::operator ()(int what, void* data) {
             break;
         }
     }
-    renderer->setupDrawColorFilter();
-    renderer->setupDrawShader();
-    renderer->setupDrawBlending(true, mode);
+    renderer->setupDrawColorFilter(paint->getColorFilter());
+    renderer->setupDrawShader(paint->getShader());
+    renderer->setupDrawBlending(paint);
     renderer->setupDrawProgram();
-    renderer->setupDrawModelView(x, y, x, y, pureTranslate, true);
+    renderer->setupDrawModelView(kModelViewMode_Translate, false,
+            0.0f, 0.0f, 0.0f, 0.0f, pureTranslate);
     // Calling setupDrawTexture with the name 0 will enable the
     // uv attributes and increase the texture unit count
     // texture binding will be performed by the font renderer as
     // needed
     renderer->setupDrawTexture(0);
     renderer->setupDrawPureColorUniforms();
-    renderer->setupDrawColorFilterUniforms();
-    renderer->setupDrawShaderUniforms(pureTranslate);
+    renderer->setupDrawColorFilterUniforms(paint->getColorFilter());
+    renderer->setupDrawShaderUniforms(paint->getShader(), pureTranslate);
     renderer->setupDrawTextGammaUniforms();
 
     return NO_ERROR;
@@ -497,7 +498,7 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
                 }
 
                 checkTextureUpdate();
-                caches.bindIndicesBuffer();
+                caches.bindQuadIndicesBuffer();
 
                 if (!mDrawn) {
                     // If returns true, a VBO was bound and we must
@@ -514,8 +515,8 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
             texture->setLinearFiltering(mLinearFiltering, false);
 
             TextureVertex* mesh = texture->mesh();
-            caches.bindPositionVertexPointer(force, &mesh[0].position[0]);
-            caches.bindTexCoordsVertexPointer(force, &mesh[0].texture[0]);
+            caches.bindPositionVertexPointer(force, &mesh[0].x);
+            caches.bindTexCoordsVertexPointer(force, &mesh[0].u);
             force = false;
 
             glDrawElements(GL_TRIANGLES, texture->meshElementCount(),
@@ -586,12 +587,12 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
     }
 }
 
-void FontRenderer::setFont(SkPaint* paint, const mat4& matrix) {
+void FontRenderer::setFont(const SkPaint* paint, const SkMatrix& matrix) {
     mCurrentFont = Font::create(this, paint, matrix);
 }
 
-FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius, const float* positions) {
+FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, float radius, const float* positions) {
     checkInit();
 
     DropShadow image;
@@ -612,8 +613,9 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     Rect bounds;
     mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds, positions);
 
-    uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
-    uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
+    uint32_t intRadius = Blur::convertRadiusToInt(radius);
+    uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * intRadius;
+    uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * intRadius;
 
     uint32_t maxSize = Caches::getInstance().maxTextureSize;
     if (paddedWidth > maxSize || paddedHeight > maxSize) {
@@ -634,8 +636,8 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
 
     memset(dataBuffer, 0, size);
 
-    int penX = radius - bounds.left;
-    int penY = radius - bounds.bottom;
+    int penX = intRadius - bounds.left;
+    int penY = intRadius - bounds.bottom;
 
     if ((bounds.right > bounds.left) && (bounds.top > bounds.bottom)) {
         // text has non-whitespace, so draw and blur to create the shadow
@@ -675,7 +677,8 @@ void FontRenderer::finishRender() {
     issueDrawCommand();
 }
 
-void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix) {
+void FontRenderer::precache(const SkPaint* paint, const char* text, int numGlyphs,
+        const SkMatrix& matrix) {
     Font* font = Font::create(this, paint, matrix);
     font->precache(paint, text, numGlyphs);
 }
@@ -684,7 +687,7 @@ void FontRenderer::endPrecaching() {
     checkTextureUpdate();
 }
 
-bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
+bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
         const float* positions, Rect* bounds, Functor* functor, bool forceFinish) {
     if (!mCurrentFont) {
@@ -702,8 +705,8 @@ bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *t
     return mDrawn;
 }
 
-bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, SkPath* path,
+bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
         float hOffset, float vOffset, Rect* bounds, Functor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
@@ -725,9 +728,10 @@ void FontRenderer::removeFont(const Font* font) {
     }
 }
 
-void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius) {
+void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, float radius) {
+    uint32_t intRadius = Blur::convertRadiusToInt(radius);
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
-    if (width * height * radius >= RS_MIN_INPUT_CUTOFF) {
+    if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
         if (mRs == 0) {
@@ -766,12 +770,12 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
     }
 #endif
 
-    float *gaussian = new float[2 * radius + 1];
-    Blur::generateGaussianWeights(gaussian, radius);
+    float *gaussian = new float[2 * intRadius + 1];
+    Blur::generateGaussianWeights(gaussian, intRadius);
 
     uint8_t* scratch = new uint8_t[width * height];
-    Blur::horizontal(gaussian, radius, *image, scratch, width, height);
-    Blur::vertical(gaussian, radius, scratch, *image, width, height);
+    Blur::horizontal(gaussian, intRadius, *image, scratch, width, height);
+    Blur::vertical(gaussian, intRadius, scratch, *image, width, height);
 
     delete[] gaussian;
     delete[] scratch;

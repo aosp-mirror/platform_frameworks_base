@@ -25,4 +25,10 @@
     -->
     <integer name="config_mobile_mtu">1358</integer>
 
+    <!-- service number convert map in roaming network. -->
+    <!-- [dialstring],[replacement][,optional gid] -->
+    <string-array translatable="false" name="dial_string_replace">
+        <item>"*611:+19085594899,BAE0000000000000"</item>
+        <item>"*86:+1MDN,BAE0000000000000"</item>
+    </string-array>
 </resources>

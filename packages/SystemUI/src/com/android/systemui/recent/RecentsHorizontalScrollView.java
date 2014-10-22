@@ -55,15 +55,13 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
-        float densityScale = getResources().getDisplayMetrics().density;
-        float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
-        mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, densityScale, pagingTouchSlop);
+        mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, context);
         mFadedEdgeDrawHelper = FadedEdgeDrawHelper.create(context, attrs, this, false);
         mRecycledViews = new HashSet<View>();
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
-        mSwipeHelper.setMinAlpha(minAlpha);
+        mSwipeHelper.setMinSwipeProgress(minAlpha);
     }
 
     private int scrollPositionOfMostRecent() {
@@ -192,6 +190,16 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         return true;
     }
 
+    @Override
+    public boolean isAntiFalsingNeeded() {
+        return false;
+    }
+
+    @Override
+    public float getFalsingThresholdFactor() {
+        return 1.0f;
+    }
+
     public void dismissChild(View v) {
         mSwipeHelper.dismissChild(v, 0);
     }
@@ -216,6 +224,15 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     public void onDragCancelled(View v) {
     }
 
+    @Override
+    public void onChildSnappedBack(View animView) {
+    }
+
+    @Override
+    public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
+        return false;
+    }
+
     public View getChildAtPosition(MotionEvent ev) {
         final float x = ev.getX() + getScrollX();
         final float y = ev.getY() + getScrollY();
@@ -238,9 +255,9 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         if (mFadedEdgeDrawHelper != null) {
 
             mFadedEdgeDrawHelper.drawCallback(canvas,
-                    left, right, top, bottom, mScrollX, mScrollY,
+                    left, right, top, bottom, getScrollX(), getScrollY(),
                     0, 0,
-                    getLeftFadingEdgeStrength(), getRightFadingEdgeStrength(), mPaddingTop);
+                    getLeftFadingEdgeStrength(), getRightFadingEdgeStrength(), getPaddingTop());
         }
     }
 
@@ -279,7 +296,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         super.onFinishInflate();
         setScrollbarFadingEnabled(true);
         mLinearLayout = (LinearLayout) findViewById(R.id.recents_linear_layout);
-        final int leftPadding = mContext.getResources()
+        final int leftPadding = getContext().getResources()
             .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
         setOverScrollEffectPadding(leftPadding, 0);
     }
@@ -296,7 +313,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         super.onConfigurationChanged(newConfig);
         float densityScale = getResources().getDisplayMetrics().density;
         mSwipeHelper.setDensityScale(densityScale);
-        float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
+        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
     }
 

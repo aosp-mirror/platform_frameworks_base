@@ -26,14 +26,14 @@ import android.test.suitebuilder.annotation.MediumTest;
 
 import com.google.android.collect.Sets;
 
+import libcore.io.IoUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashSet;
-
-import libcore.io.IoUtils;
 
 @MediumTest
 public class FileUtilsTest extends AndroidTestCase {
@@ -112,6 +112,23 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("", FileUtils.readTextFile(mTestFile, -10, "<>"));
     }
 
+    public void testContains() throws Exception {
+        assertTrue(FileUtils.contains(new File("/"), new File("/moo.txt")));
+        assertTrue(FileUtils.contains(new File("/"), new File("/")));
+
+        assertTrue(FileUtils.contains(new File("/sdcard"), new File("/sdcard")));
+        assertTrue(FileUtils.contains(new File("/sdcard/"), new File("/sdcard/")));
+
+        assertTrue(FileUtils.contains(new File("/sdcard"), new File("/sdcard/moo.txt")));
+        assertTrue(FileUtils.contains(new File("/sdcard/"), new File("/sdcard/moo.txt")));
+
+        assertFalse(FileUtils.contains(new File("/sdcard"), new File("/moo.txt")));
+        assertFalse(FileUtils.contains(new File("/sdcard/"), new File("/moo.txt")));
+
+        assertFalse(FileUtils.contains(new File("/sdcard"), new File("/sdcard.txt")));
+        assertFalse(FileUtils.contains(new File("/sdcard/"), new File("/sdcard.txt")));
+    }
+
     public void testDeleteOlderEmptyDir() throws Exception {
         FileUtils.deleteOlderFiles(mDir, 10, WEEK_IN_MILLIS);
         assertDirContents();
@@ -123,7 +140,7 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file3", 2 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file4", 3 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file5", 4 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 3, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 3, DAY_IN_MILLIS));
         assertDirContents("file1", "file2", "file3");
     }
 
@@ -131,13 +148,13 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file1", -HOUR_IN_MILLIS);
         touch("file2", HOUR_IN_MILLIS);
         touch("file3", WEEK_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
         assertDirContents("file1", "file2");
 
         touch("file1", -HOUR_IN_MILLIS);
         touch("file2", HOUR_IN_MILLIS);
         touch("file3", WEEK_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
         assertDirContents("file1", "file2");
     }
 
@@ -147,7 +164,8 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file3", 2 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file4", 3 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file5", 4 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
+        assertFalse(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
         assertDirContents("file1");
     }
 
@@ -157,7 +175,8 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file3", 2 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file4", 3 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file5", 4 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 2, 0);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 2, 0));
+        assertFalse(FileUtils.deleteOlderFiles(mDir, 2, 0));
         assertDirContents("file1", "file2");
     }
 

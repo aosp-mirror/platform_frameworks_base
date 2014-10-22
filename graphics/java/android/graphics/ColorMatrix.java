@@ -16,23 +16,29 @@
 
 package android.graphics;
 
+import java.util.Arrays;
+
 /**
  *  4x5 matrix for transforming the color+alpha components of a Bitmap.
  *  The matrix is stored in a single array, and its treated as follows:
+ * <pre>
  *  [ a, b, c, d, e,
  *    f, g, h, i, j,
  *    k, l, m, n, o,
  *    p, q, r, s, t ]
+ * </pre>
  *
- * When applied to a color [r, g, b, a], the resulting color is computed as
- * (after clamping)
+ * When applied to a color <code>[r, g, b, a]</code>, the resulting color
+ * is computed as (after clamping):
+ * <pre>
  *   R' = a*R + b*G + c*B + d*A + e;
  *   G' = f*R + g*G + h*B + i*A + j;
  *   B' = k*R + l*G + m*B + n*A + o;
  *   A' = p*R + q*G + r*B + s*A + t;
+ * </pre>
  */
+@SuppressWarnings({ "MismatchedReadAndWriteOfArray", "PointlessArithmeticExpression" })
 public class ColorMatrix {
-
     private final float[] mArray = new float[20];
 
     /**
@@ -64,17 +70,16 @@ public class ColorMatrix {
     
     /**
      * Set this colormatrix to identity:
+     * <pre>
      * [ 1 0 0 0 0   - red vector
      *   0 1 0 0 0   - green vector
      *   0 0 1 0 0   - blue vector
      *   0 0 0 1 0 ] - alpha vector
+     * </pre>
      */
     public void reset() {
         final float[] a = mArray;
-        
-        for (int i = 19; i > 0; --i) {
-            a[i] = 0;
-        }
+        Arrays.fill(a, 0);
         a[0] = a[6] = a[12] = a[18] = 1;
     }
     
@@ -110,9 +115,9 @@ public class ColorMatrix {
     
     /**
      * Set the rotation on a color axis by the specified values.
-     * axis=0 correspond to a rotation around the RED color
-     * axis=1 correspond to a rotation around the GREEN color
-     * axis=2 correspond to a rotation around the BLUE color
+     * <code>axis=0</code> correspond to a rotation around the RED color
+     * <code>axis=1</code> correspond to a rotation around the GREEN color
+     * <code>axis=2</code> correspond to a rotation around the BLUE color
      */
     public void setRotate(int axis, float degrees) {
         reset();
@@ -142,7 +147,7 @@ public class ColorMatrix {
             throw new RuntimeException();
         }
     }
-    
+
     /**
      * Set this colormatrix to the concatenation of the two specified
      * colormatrices, such that the resulting colormatrix has the same effect
@@ -150,12 +155,10 @@ public class ColorMatrix {
      * matB to be the same colormatrix as this.
      */
     public void setConcat(ColorMatrix matA, ColorMatrix matB) {
-        float[] tmp = null;
-        
+        float[] tmp;
         if (matA == this || matB == this) {
             tmp = new float[20];
-        }
-        else {
+        } else {
             tmp = mArray;
         }
         
@@ -176,7 +179,7 @@ public class ColorMatrix {
             System.arraycopy(tmp, 0, mArray, 0, 20);
         }
     }
-    
+
     /**
      * Concat this colormatrix with the specified prematrix. This is logically
      * the same as calling setConcat(this, prematrix);
@@ -184,7 +187,7 @@ public class ColorMatrix {
     public void preConcat(ColorMatrix prematrix) {
         setConcat(this, prematrix);
     }
-    
+
     /**
      * Concat this colormatrix with the specified postmatrix. This is logically
      * the same as calling setConcat(postmatrix, this);
@@ -192,7 +195,7 @@ public class ColorMatrix {
     public void postConcat(ColorMatrix postmatrix) {
         setConcat(postmatrix, this);
     }
-    
+
     ///////////////////////////////////////////////////////////////////////////
     
     /**

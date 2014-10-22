@@ -28,6 +28,7 @@
 #include "DeferredDisplayList.h"
 #include "DisplayListOp.h"
 #include "OpenGLRenderer.h"
+#include "utils/MathUtils.h"
 
 #if DEBUG_DEFER
     #define DEFER_LOGD(...) ALOGD(__VA_ARGS__)
@@ -146,10 +147,6 @@ private:
     mergeid_t mMergeId;
 };
 
-// compare alphas approximately, with a small margin
-#define NEQ_FALPHA(lhs, rhs) \
-        fabs((float)lhs - (float)rhs) > 0.001f
-
 class MergingDrawBatch : public DrawBatch {
 public:
     MergingDrawBatch(DeferInfo& deferInfo, int width, int height) :
@@ -190,13 +187,17 @@ public:
 
         // Overlapping other operations is only allowed for text without shadow. For other ops,
         // multiDraw isn't guaranteed to overdraw correctly
-        if (!isTextBatch || state->mDrawModifiers.mHasShadow) {
+        if (!isTextBatch || op->hasTextShadow()) {
             if (intersects(state->mBounds)) return false;
         }
         const DeferredDisplayState* lhs = state;
         const DeferredDisplayState* rhs = mOps[0].state;
 
-        if (NEQ_FALPHA(lhs->mAlpha, rhs->mAlpha)) return false;
+        if (!MathUtils::areEqual(lhs->mAlpha, rhs->mAlpha)) return false;
+
+        // Identical round rect clip state means both ops will clip in the same way, or not at all.
+        // As the state objects are const, we can compare their pointers to determine mergeability
+        if (lhs->mRoundRectClipState != rhs->mRoundRectClipState) return false;
 
         /* Clipping compatibility check
          *
@@ -224,6 +225,16 @@ public:
 
         if (op->getPaintAlpha() != mOps[0].op->getPaintAlpha()) return false;
 
+        if (op->mPaint && mOps[0].op->mPaint &&
+            op->mPaint->getColorFilter() != mOps[0].op->mPaint->getColorFilter()) {
+            return false;
+        }
+
+        if (op->mPaint && mOps[0].op->mPaint &&
+            op->mPaint->getShader() != mOps[0].op->mPaint->getShader()) {
+            return false;
+        }
+
         /* Draw Modifiers compatibility check
          *
          * Shadows are ignored, as only text uses them, and in that case they are drawn
@@ -238,8 +249,6 @@ public:
          */
         const DrawModifiers& lhsMod = lhs->mDrawModifiers;
         const DrawModifiers& rhsMod = rhs->mDrawModifiers;
-        if (lhsMod.mShader != rhsMod.mShader) return false;
-        if (lhsMod.mColorFilter != rhsMod.mColorFilter) return false;
 
         // Draw filter testing expects bit fields to be clear if filter not set.
         if (lhsMod.mHasDrawFilter != rhsMod.mHasDrawFilter) return false;
@@ -491,7 +500,7 @@ void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, StateOp* o
 void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     /* 1: op calculates local bounds */
     DeferredDisplayState* const state = createState();
-    if (op->getLocalBounds(renderer.getDrawModifiers(), state->mBounds)) {
+    if (op->getLocalBounds(state->mBounds)) {
         if (state->mBounds.isEmpty()) {
             // valid empty bounds, don't bother deferring
             tryRecycleState(state);

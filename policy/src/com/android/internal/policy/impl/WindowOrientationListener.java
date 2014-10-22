@@ -25,6 +25,9 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimeUtils;
+
+import java.io.PrintWriter;
 
 /**
  * A special helper class used by the WindowManager
@@ -179,6 +182,21 @@ public abstract class WindowOrientationListener {
      * @see android.view.Surface
      */
     public abstract void onProposedRotationChanged(int rotation);
+
+    public void dump(PrintWriter pw, String prefix) {
+        synchronized (mLock) {
+            pw.println(prefix + TAG);
+            prefix += "  ";
+            pw.println(prefix + "mEnabled=" + mEnabled);
+            pw.println(prefix + "mCurrentRotation=" + mCurrentRotation);
+            pw.println(prefix + "mSensor=" + mSensor);
+            pw.println(prefix + "mRate=" + mRate);
+
+            if (mSensorEventListener != null) {
+                mSensorEventListener.dumpLocked(pw, prefix);
+            }
+        }
+    }
 
     /**
      * This class filters the raw accelerometer data and tries to detect actual changes in
@@ -341,6 +359,14 @@ public abstract class WindowOrientationListener {
             /* ROTATION_270 */ { -25, 65 }
         };
 
+        // The tilt angle below which we conclude that the user is holding the device
+        // overhead reading in bed and lock into that state.
+        private final int TILT_OVERHEAD_ENTER = -40;
+
+        // The tilt angle above which we conclude that the user would like a rotation
+        // change to occur and unlock from the overhead state.
+        private final int TILT_OVERHEAD_EXIT = -15;
+
         // The gap angle in degrees between adjacent orientation angles for hysteresis.
         // This creates a "dead zone" between the current orientation and a proposed
         // adjacent orientation.  No orientation proposal is made when the orientation
@@ -363,12 +389,18 @@ public abstract class WindowOrientationListener {
 
         // Timestamp when the device last appeared to be flat for sure (the flat delay elapsed).
         private long mFlatTimestampNanos;
+        private boolean mFlat;
 
         // Timestamp when the device last appeared to be swinging.
         private long mSwingTimestampNanos;
+        private boolean mSwinging;
 
         // Timestamp when the device last appeared to be undergoing external acceleration.
         private long mAccelerationTimestampNanos;
+        private boolean mAccelerating;
+
+        // Whether we are locked into an overhead usage mode.
+        private boolean mOverhead;
 
         // History of observed tilt angles.
         private static final int TILT_HISTORY_SIZE = 40;
@@ -378,6 +410,19 @@ public abstract class WindowOrientationListener {
 
         public int getProposedRotationLocked() {
             return mProposedRotation;
+        }
+
+        public void dumpLocked(PrintWriter pw, String prefix) {
+            pw.println(prefix + "mProposedRotation=" + mProposedRotation);
+            pw.println(prefix + "mPredictedRotation=" + mPredictedRotation);
+            pw.println(prefix + "mLastFilteredX=" + mLastFilteredX);
+            pw.println(prefix + "mLastFilteredY=" + mLastFilteredY);
+            pw.println(prefix + "mLastFilteredZ=" + mLastFilteredZ);
+            pw.println(prefix + "mTiltHistory={last: " + getLastTiltLocked() + "}");
+            pw.println(prefix + "mFlat=" + mFlat);
+            pw.println(prefix + "mSwinging=" + mSwinging);
+            pw.println(prefix + "mAccelerating=" + mAccelerating);
+            pw.println(prefix + "mOverhead=" + mOverhead);
         }
 
         @Override
@@ -477,7 +522,18 @@ public abstract class WindowOrientationListener {
 
                         // If the tilt angle is too close to horizontal then we cannot determine
                         // the orientation angle of the screen.
-                        if (Math.abs(tiltAngle) > MAX_TILT) {
+                        if (tiltAngle <= TILT_OVERHEAD_ENTER) {
+                            mOverhead = true;
+                        } else if (tiltAngle >= TILT_OVERHEAD_EXIT) {
+                            mOverhead = false;
+                        }
+                        if (mOverhead) {
+                            if (LOG) {
+                                Slog.v(TAG, "Ignoring sensor data, device is overhead: "
+                                        + "tiltAngle=" + tiltAngle);
+                            }
+                            clearPredictedRotationLocked();
+                        } else if (Math.abs(tiltAngle) > MAX_TILT) {
                             if (LOG) {
                                 Slog.v(TAG, "Ignoring sensor data, tilt angle too high: "
                                         + "tiltAngle=" + tiltAngle);
@@ -525,6 +581,9 @@ public abstract class WindowOrientationListener {
                         }
                     }
                 }
+                mFlat = isFlat;
+                mSwinging = isSwinging;
+                mAccelerating = isAccelerating;
 
                 // Determine new proposed rotation.
                 oldProposedRotation = mProposedRotation;
@@ -542,6 +601,7 @@ public abstract class WindowOrientationListener {
                             + ", isAccelerating=" + isAccelerating
                             + ", isFlat=" + isFlat
                             + ", isSwinging=" + isSwinging
+                            + ", isOverhead=" + mOverhead
                             + ", timeUntilSettledMS=" + remainingMS(now,
                                     mPredictedRotationTimestampNanos + PROPOSAL_SETTLE_TIME_NANOS)
                             + ", timeUntilAccelerationDelayExpiredMS=" + remainingMS(now,
@@ -659,8 +719,12 @@ public abstract class WindowOrientationListener {
             mLastFilteredTimestampNanos = Long.MIN_VALUE;
             mProposedRotation = -1;
             mFlatTimestampNanos = Long.MIN_VALUE;
+            mFlat = false;
             mSwingTimestampNanos = Long.MIN_VALUE;
+            mSwinging = false;
             mAccelerationTimestampNanos = Long.MIN_VALUE;
+            mAccelerating = false;
+            mOverhead = false;
             clearPredictedRotationLocked();
             clearTiltHistoryLocked();
         }
@@ -723,6 +787,11 @@ public abstract class WindowOrientationListener {
         private int nextTiltHistoryIndexLocked(int index) {
             index = (index == 0 ? TILT_HISTORY_SIZE : index) - 1;
             return mTiltHistoryTimestampNanos[index] != Long.MIN_VALUE ? index : -1;
+        }
+
+        private float getLastTiltLocked() {
+            int index = nextTiltHistoryIndexLocked(mTiltHistoryIndex);
+            return index >= 0 ? mTiltHistory[index] : Float.NaN;
         }
 
         private float remainingMS(long now, long until) {

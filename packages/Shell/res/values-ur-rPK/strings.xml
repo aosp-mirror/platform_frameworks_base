@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"شیل"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"بَگ رپورٹ کیپچر کر لی گئی"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"اپنی بگ رپورٹ کا اشتراک کرنے کیلئے بائیں سوائپ کریں"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"اپنی بَگ رپورٹ کا اشتراک کرنے کیلئے ٹچ کریں"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"بَگ رپورٹس میں سسٹم کی مختلف لاگ فائلوں سے ڈیٹا شامل ہوتا ہے، بشمول ذاتی اور نجی معلومات۔ بَگ رپورٹس کا اشتراک صرف اپنے بھروسے مند ایپس اور لوگوں کے ساتھ کریں۔"</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"یہ پیغام اگلی بار دکھائیں"</string>
+</resources>

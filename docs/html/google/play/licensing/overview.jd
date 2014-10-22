@@ -38,12 +38,11 @@ the licensing server and receives the result. The Google Play application sends
 the result to your application, which can allow or disallow further use of the
 application as needed.</p>
 
-<p class="note"><strong>Note:</strong> If a paid application has been uploaded 
-to Google Play, but saved only as a draft application (the app is 
-unpublished), the licensing server considers all users to be licensed users of 
-the application (because it's not even possible to purchase the app). This 
-exception is necessary in order for you to perform testing of your licensing 
-implementation.</p>
+<p class="note"><strong>Note:</strong> If a version of an app is in the alpha or
+beta channel, all users who are authorized to download and install that app are
+considered to be licensed users of the app. For more information, see <a
+href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">Alpha
+and Beta Testing</a>.</p>
 
 <div class="figure" style="width:469px">
 <img src="{@docRoot}images/licensing_arch.png" alt=""/>
@@ -52,6 +51,12 @@ license check through the License Verification Library and the Google Play
 client, which handles communication with the Google Play server.</p>
 </div>
 
+<p class="note"><strong>Note:</strong> Previously you could test an app by
+uploading an unpublished "draft" version. This functionality is no longer
+supported; instead, you must publish it to the alpha or beta distribution
+channel. For more information, see <a
+href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">Draft Apps
+are No Longer Supported</a>.
 
 <p>To properly identify the user and determine the license status, the licensing server requires
 information about the application and user&mdash;your application and the Google Play client work

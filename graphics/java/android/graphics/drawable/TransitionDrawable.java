@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
 import android.os.SystemClock;
 
@@ -41,20 +42,20 @@ import android.os.SystemClock;
 public class TransitionDrawable extends LayerDrawable implements Drawable.Callback {
 
     /**
-     * A transition is about to start. 
+     * A transition is about to start.
      */
     private static final int TRANSITION_STARTING = 0;
-    
+
     /**
      * The transition has started and the animation is in progress
      */
     private static final int TRANSITION_RUNNING = 1;
-   
+
     /**
      * No transition will be applied
      */
     private static final int TRANSITION_NONE = 2;
-   
+
     /**
      * The current state of the transition. One of {@link #TRANSITION_STARTING},
      * {@link #TRANSITION_RUNNING} and {@link #TRANSITION_NONE}
@@ -85,11 +86,11 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * @see #TransitionDrawable(Drawable[])
      */
     TransitionDrawable() {
-        this(new TransitionState(null, null, null), (Resources)null);
+        this(new TransitionState(null, null, null), null, null);
     }
 
-    private TransitionDrawable(TransitionState state, Resources res) {
-        super(state, res);
+    private TransitionDrawable(TransitionState state, Resources res, Theme theme) {
+        super(state, res, theme);
     }
 
     private TransitionDrawable(TransitionState state, Drawable[] layers) {
@@ -100,10 +101,10 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     LayerState createConstantState(LayerState state, Resources res) {
         return new TransitionState((TransitionState) state, this, res);
     }
-    
+
     /**
      * Begin the second layer on top of the first layer.
-     * 
+     *
      * @param durationMillis The length of the transition in milliseconds
      */
     public void startTransition(int durationMillis) {
@@ -115,7 +116,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
         mTransitionState = TRANSITION_STARTING;
         invalidateSelf();
     }
-    
+
     /**
      * Show only the first layer.
      */
@@ -183,7 +184,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
                 }
                 break;
         }
-      
+
         final int alpha = mAlpha;
         final boolean crossFade = mCrossFade;
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -216,7 +217,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
             d.draw(canvas);
             d.setAlpha(0xFF);
         }
-        
+
         if (!done) {
             invalidateSelf();
         }
@@ -251,12 +252,17 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
 
         @Override
         public Drawable newDrawable() {
-            return new TransitionDrawable(this, (Resources)null);
+            return new TransitionDrawable(this, null, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new TransitionDrawable(this, res);
+            return new TransitionDrawable(this, res, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new TransitionDrawable(this, res, theme);
         }
 
         @Override

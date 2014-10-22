@@ -19,7 +19,7 @@ package android.net;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 
-import android.net.LinkAddress;
+import android.net.IpPrefix;
 import android.net.RouteInfo;
 import android.os.Parcel;
 
@@ -32,9 +32,8 @@ public class RouteInfoTest extends TestCase {
         return InetAddress.parseNumericAddress(addr);
     }
 
-    private LinkAddress Prefix(String prefix) {
-        String[] parts = prefix.split("/");
-        return new LinkAddress(Address(parts[0]), Integer.parseInt(parts[1]));
+    private IpPrefix Prefix(String prefix) {
+        return new IpPrefix(prefix);
     }
 
     @SmallTest
@@ -43,17 +42,17 @@ public class RouteInfoTest extends TestCase {
 
         // Invalid input.
         try {
-            r = new RouteInfo(null, null, "rmnet0");
+            r = new RouteInfo((IpPrefix) null, null, "rmnet0");
             fail("Expected RuntimeException:  destination and gateway null");
         } catch(RuntimeException e) {}
 
         // Null destination is default route.
-        r = new RouteInfo(null, Address("2001:db8::1"), null);
+        r = new RouteInfo((IpPrefix) null, Address("2001:db8::1"), null);
         assertEquals(Prefix("::/0"), r.getDestination());
         assertEquals(Address("2001:db8::1"), r.getGateway());
         assertNull(r.getInterface());
 
-        r = new RouteInfo(null, Address("192.0.2.1"), "wlan0");
+        r = new RouteInfo((IpPrefix) null, Address("192.0.2.1"), "wlan0");
         assertEquals(Prefix("0.0.0.0/0"), r.getDestination());
         assertEquals(Address("192.0.2.1"), r.getGateway());
         assertEquals("wlan0", r.getInterface());
@@ -71,17 +70,19 @@ public class RouteInfoTest extends TestCase {
     }
 
     public void testMatches() {
-        class PatchedRouteInfo extends RouteInfo {
-            public PatchedRouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
-                super(destination, gateway, iface);
+        class PatchedRouteInfo {
+            private final RouteInfo mRouteInfo;
+
+            public PatchedRouteInfo(IpPrefix destination, InetAddress gateway, String iface) {
+                mRouteInfo = new RouteInfo(destination, gateway, iface);
             }
 
             public boolean matches(InetAddress destination) {
-                return super.matches(destination);
+                return mRouteInfo.matches(destination);
             }
         }
 
-        RouteInfo r;
+        PatchedRouteInfo r;
 
         r = new PatchedRouteInfo(Prefix("2001:db8:f00::ace:d00d/127"), null, "rmnet0");
         assertTrue(r.matches(Address("2001:db8:f00::ace:d00c")));
@@ -96,11 +97,11 @@ public class RouteInfoTest extends TestCase {
         assertFalse(r.matches(Address("192.0.0.21")));
         assertFalse(r.matches(Address("8.8.8.8")));
 
-        RouteInfo ipv6Default = new PatchedRouteInfo(Prefix("::/0"), null, "rmnet0");
+        PatchedRouteInfo ipv6Default = new PatchedRouteInfo(Prefix("::/0"), null, "rmnet0");
         assertTrue(ipv6Default.matches(Address("2001:db8::f00")));
         assertFalse(ipv6Default.matches(Address("192.0.2.1")));
 
-        RouteInfo ipv4Default = new PatchedRouteInfo(Prefix("0.0.0.0/0"), null, "rmnet0");
+        PatchedRouteInfo ipv4Default = new PatchedRouteInfo(Prefix("0.0.0.0/0"), null, "rmnet0");
         assertTrue(ipv4Default.matches(Address("255.255.255.255")));
         assertTrue(ipv4Default.matches(Address("192.0.2.1")));
         assertFalse(ipv4Default.matches(Address("2001:db8::f00")));
@@ -149,38 +150,91 @@ public class RouteInfoTest extends TestCase {
         assertAreNotEqual(r1, r3);
     }
 
-    public void testHostRoute() {
+    public void testHostAndDefaultRoutes() {
       RouteInfo r;
 
       r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0");
       assertFalse(r.isHostRoute());
+      assertTrue(r.isDefaultRoute());
+      assertTrue(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("::/0"), Address("::"), "wlan0");
       assertFalse(r.isHostRoute());
+      assertTrue(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertTrue(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
       assertFalse(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("2001:db8::/48"), null, "wlan0");
       assertFalse(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("192.0.2.0/32"), Address("0.0.0.0"), "wlan0");
       assertTrue(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("2001:db8::/128"), Address("::"), "wlan0");
       assertTrue(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("192.0.2.0/32"), null, "wlan0");
       assertTrue(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("2001:db8::/128"), null, "wlan0");
       assertTrue(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("::/128"), Address("fe80::"), "wlan0");
       assertTrue(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
 
       r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
       assertTrue(r.isHostRoute());
+      assertFalse(r.isDefaultRoute());
+      assertFalse(r.isIPv4Default());
+      assertFalse(r.isIPv6Default());
+    }
+
+    public void testTruncation() {
+      LinkAddress l;
+      RouteInfo r;
+
+      l = new LinkAddress("192.0.2.5/30");
+      r = new RouteInfo(l, Address("192.0.2.1"), "wlan0");
+      assertEquals("192.0.2.4", r.getDestination().getAddress().getHostAddress());
+
+      l = new LinkAddress("2001:db8:1:f::5/63");
+      r = new RouteInfo(l, Address("2001:db8:5::1"), "wlan0");
+      assertEquals("2001:db8:1:e::", r.getDestination().getAddress().getHostAddress());
+    }
+
+    // Make sure that creating routes to multicast addresses doesn't throw an exception. Even though
+    // there's nothing we can do with them, we don't want to crash if, e.g., someone calls
+    // requestRouteToHostAddress("230.0.0.0", MOBILE_HIPRI);
+    public void testMulticastRoute() {
+      RouteInfo r;
+      r = new RouteInfo(Prefix("230.0.0.0/32"), Address("192.0.2.1"), "wlan0");
+      r = new RouteInfo(Prefix("ff02::1/128"), Address("2001:db8::1"), "wlan0");
+      // No exceptions? Good.
     }
 
     public RouteInfo passThroughParcel(RouteInfo r) {

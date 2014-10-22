@@ -79,17 +79,20 @@ public class SizeAdaptiveLayout extends ViewGroup {
     private int mModestyPanelTop;
 
     public SizeAdaptiveLayout(Context context) {
-        super(context);
-        initialize();
+        this(context, null);
     }
 
     public SizeAdaptiveLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initialize();
+        this(context, attrs, 0);
     }
 
-    public SizeAdaptiveLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public SizeAdaptiveLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public SizeAdaptiveLayout(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initialize();
     }
 
@@ -104,8 +107,6 @@ public class SizeAdaptiveLayout extends ViewGroup {
         }
         if (background instanceof ColorDrawable) {
             mModestyPanel.setBackgroundDrawable(background);
-        } else {
-            mModestyPanel.setBackgroundColor(Color.BLACK);
         }
         SizeAdaptiveLayout.LayoutParams layout =
                 new SizeAdaptiveLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -151,6 +152,10 @@ public class SizeAdaptiveLayout extends ViewGroup {
         if (DEBUG) Log.d(TAG, this + " measure spec: " +
                          MeasureSpec.toString(heightMeasureSpec));
         View model = selectActiveChild(heightMeasureSpec);
+        if (model == null) {
+            setMeasuredDimension(0, 0);
+            return;
+        }
         SizeAdaptiveLayout.LayoutParams lp =
           (SizeAdaptiveLayout.LayoutParams) model.getLayoutParams();
         if (DEBUG) Log.d(TAG, "active min: " + lp.minHeight + " max: " + lp.maxHeight);
@@ -239,6 +244,8 @@ public class SizeAdaptiveLayout extends ViewGroup {
         int measureSpec = View.MeasureSpec.makeMeasureSpec(bottom - top,
                                                            View.MeasureSpec.EXACTLY);
         mActiveChild = selectActiveChild(measureSpec);
+        if (mActiveChild == null) return;
+
         mActiveChild.setVisibility(View.VISIBLE);
 
         if (mLastActive != mActiveChild && mLastActive != null) {

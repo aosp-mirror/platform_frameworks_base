@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 
 public final class NavigationBarTransitions extends BarTransitions {
 
-    private static final float KEYGUARD_QUIESCENT_ALPHA = 0.5f;
     private static final int CONTENT_FADE_DURATION = 200;
 
     private final NavigationBarView mView;
@@ -61,7 +60,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     @Override
     public void transitionTo(int mode, boolean animate) {
         mRequestedMode = mode;
-        if (mVertical && mode == MODE_TRANSLUCENT) {
+        if (mVertical && (mode == MODE_TRANSLUCENT || mode == MODE_TRANSPARENT)) {
             // translucent mode not allowed when vertical
             mode = MODE_OPAQUE;
         }
@@ -80,9 +79,7 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(mView.getHomeButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getRecentsButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getMenuButton(), alpha, animate);
-
-        setKeyButtonViewQuiescentAlpha(mView.getSearchLight(), KEYGUARD_QUIESCENT_ALPHA, animate);
-        setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), KEYGUARD_QUIESCENT_ALPHA, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getImeSwitchButton(), alpha, animate);
 
         applyBackButtonQuiescentAlpha(mode, animate);
 
@@ -97,11 +94,10 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     public void applyBackButtonQuiescentAlpha(int mode, boolean animate) {
         float backAlpha = 0;
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getSearchLight());
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getCameraButton());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getHomeButton());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getRecentsButton());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getMenuButton());
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getImeSwitchButton());
         if (backAlpha > 0) {
             setKeyButtonViewQuiescentAlpha(mView.getBackButton(), backAlpha, animate);
         }
@@ -112,19 +108,6 @@ public final class NavigationBarTransitions extends BarTransitions {
             return Math.max(max, ((KeyButtonView)v).getQuiescentAlpha());
         }
         return max;
-    }
-
-    @Override
-    public void setContentVisible(boolean visible) {
-        final float alpha = visible ? 1 : 0;
-        fadeContent(mView.getCameraButton(), alpha);
-        fadeContent(mView.getSearchLight(), alpha);
-    }
-
-    private void fadeContent(View v, float alpha) {
-        if (v != null) {
-            v.animate().alpha(alpha).setDuration(CONTENT_FADE_DURATION);
-        }
     }
 
     private void setKeyButtonViewQuiescentAlpha(View button, float alpha, boolean animate) {

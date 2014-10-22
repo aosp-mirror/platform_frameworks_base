@@ -84,4 +84,18 @@ public interface KeyguardSecurityView {
      * @param duration millisends for the transisiton animation.
      */
     void hideBouncer(int duration);
+
+    /**
+     * Starts the animation which should run when the security view appears.
+     */
+    void startAppearAnimation();
+
+    /**
+     * Starts the animation which should run when the security view disappears.
+     *
+     * @param finishRunnable the runnable to be run when the animation ended
+     * @return true if an animation started and {@code finishRunnable} will be run, false if no
+     *         animation started and {@code finishRunnable} will not be run
+     */
+    boolean startDisappearAnimation(Runnable finishRunnable);
 }

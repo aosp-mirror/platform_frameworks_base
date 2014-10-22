@@ -16,27 +16,30 @@
 
 package android.mtp;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaScanner;
 import android.net.Uri;
-import android.os.Environment;
+import android.os.BatteryManager;
+import android.os.BatteryStats;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Images;
 import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -115,10 +118,34 @@ public class MtpDatabase {
                                             + Files.FileColumns.PARENT + "=?";
 
     private final MediaScanner mMediaScanner;
+    private MtpServer mServer;
+
+    // read from native code
+    private int mBatteryLevel;
+    private int mBatteryScale;
 
     static {
         System.loadLibrary("media_jni");
     }
+
+    private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
+          @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                mBatteryScale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+                int newLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                if (newLevel != mBatteryLevel) {
+                    mBatteryLevel = newLevel;
+                    if (mServer != null) {
+                        // send device property changed event
+                        mServer.sendDevicePropertyChanged(
+                                MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL);
+                    }
+                }
+            }
+        }
+    };
 
     public MtpDatabase(Context context, String volumeName, String storagePath,
             String[] subDirectories) {
@@ -171,6 +198,23 @@ public class MtpDatabase {
             }
         }
         initDeviceProperties(context);
+    }
+
+    public void setServer(MtpServer server) {
+        mServer = server;
+
+        // always unregister before registering
+        try {
+            mContext.unregisterReceiver(mBatteryReceiver);
+        } catch (IllegalArgumentException e) {
+            // wasn't previously registered, ignore
+        }
+
+        // register for battery notifications when we are connected
+        if (server != null) {
+            mContext.registerReceiver(mBatteryReceiver,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        }
     }
 
     @Override
@@ -257,8 +301,29 @@ public class MtpDatabase {
         return false;
     }
 
+    // returns true if the path is in the storage root
+    private boolean inStorageRoot(String path) {
+        try {
+            File f = new File(path);
+            String canonical = f.getCanonicalPath();
+            for (String root: mStorageMap.keySet()) {
+                if (canonical.startsWith(root)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+        return false;
+    }
+
     private int beginSendObject(String path, int format, int parent,
                          int storageId, long size, long modified) {
+        // if the path is outside of the storage root, do not allow access
+        if (!inStorageRoot(path)) {
+            Log.e(TAG, "attempt to put file outside of storage area: " + path);
+            return -1;
+        }
         // if mSubDirectories is not null, do not allow copying files to any other locations
         if (!inStorageSubDirectory(path)) return -1;
 
@@ -558,6 +623,11 @@ public class MtpDatabase {
             MtpConstants.PROPERTY_DURATION,
             MtpConstants.PROPERTY_GENRE,
             MtpConstants.PROPERTY_COMPOSER,
+            MtpConstants.PROPERTY_AUDIO_WAVE_CODEC,
+            MtpConstants.PROPERTY_BITRATE_TYPE,
+            MtpConstants.PROPERTY_AUDIO_BITRATE,
+            MtpConstants.PROPERTY_NUMBER_OF_CHANNELS,
+            MtpConstants.PROPERTY_SAMPLE_RATE,
     };
 
     static final int[] VIDEO_PROPERTIES = {
@@ -665,6 +735,7 @@ public class MtpDatabase {
             MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,
             MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,
             MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE,
+            MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL,
         };
     }
 
@@ -820,6 +891,8 @@ public class MtpDatabase {
                 imageSize.getChars(0, imageSize.length(), outStringValue, 0);
                 outStringValue[imageSize.length()] = 0;
                 return MtpConstants.RESPONSE_OK;
+
+            // DEVICE_PROPERTY_BATTERY_LEVEL is implemented in the JNI code
 
             default:
                 return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;

@@ -105,6 +105,7 @@ public class SurfaceView extends View {
     final Rect mWinFrame = new Rect();
     final Rect mOverscanInsets = new Rect();
     final Rect mContentInsets = new Rect();
+    final Rect mStableInsets = new Rect();
     final Configuration mConfiguration = new Configuration();
 
     static final int KEEP_SCREEN_ON_MSG = 1;
@@ -188,8 +189,13 @@ public class SurfaceView extends View {
         init();
     }
 
-    public SurfaceView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
@@ -416,7 +422,8 @@ public class SurfaceView extends View {
         mWindowType = type;
     }
 
-    private void updateWindow(boolean force, boolean redrawNeeded) {
+    /** @hide */
+    protected void updateWindow(boolean force, boolean redrawNeeded) {
         if (!mHaveFrame) {
             return;
         }
@@ -511,7 +518,7 @@ public class SurfaceView extends View {
                             visible ? VISIBLE : GONE,
                             WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY,
                             mWinFrame, mOverscanInsets, mContentInsets,
-                            mVisibleInsets, mConfiguration, mNewSurface);
+                            mVisibleInsets, mStableInsets, mConfiguration, mNewSurface);
                     if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                         mReportDrawNeeded = true;
                     }
@@ -646,7 +653,8 @@ public class SurfaceView extends View {
 
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
-                Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
+                Rect visibleInsets, Rect stableInsets, boolean reportDraw,
+                Configuration newConfig) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
                 if (DEBUG) Log.v(

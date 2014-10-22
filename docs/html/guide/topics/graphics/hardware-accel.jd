@@ -263,256 +263,153 @@ changed.</li>
   <p>The following table describes the support level of various operations across API levels:</p>
 
   <style type="text/css">
-    .tblGenFixed, .tblGeneric{font-size:15px}.tblGenFixed td {padding:0 3px;letter-spacing:0;word-spacing:0;background-color:#fff;z-index:1;border-top:0px none;border-left:0px none;border-bottom:1px solid #CCC;border-right:1px solid #CCC;} .dn {display:none} .tblGenFixed td.s0 {background-color:white;border-top:1px solid #CCC;border-left:1px solid #CCC;} .tblGenFixed td.s1 {background-color:#434343;color:#ffffff;text-align:center;border-top:1px solid #CCC;} .tblGenFixed td.s2 {background-color:#d9d9d9;color:#000000;text-align:center;} .tblGenFixed td.s3 {background-color:white;color:#000000;text-align:center;} .tblGenFixed td.s5 {background-color:#434343;color:#ffffff;text-align:left;border-left:1px solid #CCC;} .tblGenFixed td.s10 {background-color:white;font-family:courier new,monospace;color:#000000;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.g_pos {background-color:#d9d9d9;color:#6aa84f;text-align:center;} .tblGenFixed td.g_neg {background-color:#d9d9d9;color:#980000;text-align:center;} .tblGenFixed td.w_pos {background-color:white;color:#6aa84f;text-align:center;} .tblGenFixed td.w_neg {background-color:white;color:#980000;text-align:center;}
+    .tblGenFixed, .tblGeneric{font-size:15px}.tblGenFixed td {padding:0 3px;letter-spacing:0;word-spacing:0;background-color:#fff;z-index:1;border-top:0px none;border-left:0px none;border-bottom:1px solid #CCC;border-right:1px solid #CCC;} .dn {display:none} .tblGenFixed td.s0 {background-color:white;border-top:1px solid #CCC;border-left:1px solid #CCC;} .tblGenFixed td.s1 {background-color:#434343;color:#ffffff;text-align:center;border-top:1px solid #CCC;} .tblGenFixed td.s3 {background-color:white;color:#000000;text-align:center;} .tblGenFixed td.s5 {background-color:#434343;color:#ffffff;text-align:left;border-left:1px solid #CCC;} .tblGenFixed td.label_pos {background-color:white;font-family:courier new,monospace;color:#000000;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.label_neg {background-color:#ececec;font-family:courier new,monospace;color:#000000;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.value_pos {background-color:white;color:#000000;text-align:center;} .tblGenFixed td.value_neg {background-color:#ececec;color:#980000;text-align:center;}
   </style>
   <table border="0" cellpadding="0" cellspacing="0" class="tblGenFixed" id="tblMain">
     <tbody>
     <tr class="rShim">
         <td class="rShim" style="width:380px;"></td>
-        <td class="rShim" style="width:120px;"></td>
-        <td class="rShim" style="width:120px;"></td>
-        <td class="rShim" style="width:120px;"></td>
-        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:240px;"></td>
     </tr>
     <tr>
-        <td rowspan="2" class="s0"></td>
-        <td colspan="4" class="s1">API level</td>
-    </tr>
-    <tr>
-        <td style="display:none;"></td>
-        <td class="s2">&lt; 16</td>
-        <td class="s3">16</td>
-        <td class="s2">17</td>
-        <td class="s3">18</td>
+        <td class="s0"></td>
+        <td class="s1">First supported API level</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Canvas</td>
     </tr>
     <tr>
-        <td class="s10">drawBitmapMesh() (colors array)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">drawBitmapMesh() (colors array)</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">drawPicture()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">drawPicture()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">drawPosText()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
-        <td class="g_pos">&#10003;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">drawPosText()</td>
+        <td class="value_pos">16</td>
     </tr>
     <tr>
-        <td class="s10">drawTextOnPath()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
-        <td class="g_pos">&#10003;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">drawTextOnPath()</td>
+        <td class="value_pos">16</td>
     </tr>
     <tr>
-        <td class="s10">drawVertices()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">drawVertices()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">setDrawFilter()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
-        <td class="g_pos">&#10003;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">setDrawFilter()</td>
+        <td class="value_pos">16</td>
     </tr>
     <tr>
-        <td class="s10">clipPath()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">clipPath()</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">clipRegion()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">clipRegion()</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">clipRect(Region.Op.XOR)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">clipRect(Region.Op.XOR)</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">clipRect(Region.Op.Difference)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">clipRect(Region.Op.Difference)</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">clipRect(Region.Op.ReverseDifference)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">clipRect(Region.Op.ReverseDifference)</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">clipRect() with rotation/perspective</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">clipRect() with rotation/perspective</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Paint</td>
     </tr>
     <tr>
-        <td class="s10">setAntiAlias() (for text)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">setAntiAlias() (for text)</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">setAntiAlias() (for lines)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
-        <td class="g_pos">&#10003;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">setAntiAlias() (for lines)</td>
+        <td class="value_pos">16</td>
     </tr>
     <tr>
-        <td class="s10">setFilterBitmap()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_pos">&#10003;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">setFilterBitmap()</td>
+        <td class="value_pos">17</td>
     </tr>
     <tr>
-        <td class="s10">setLinearText()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">setLinearText()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">setMaskFilter()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">setMaskFilter()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">setPathEffect() (for lines)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">setPathEffect() (for lines)</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">setRasterizer()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">setRasterizer()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">setShadowLayer() (other than text)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">setShadowLayer() (other than text)</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">setStrokeCap() (for lines)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">setStrokeCap() (for lines)</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="s10">setStrokeCap() (for points)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_pos">setStrokeCap() (for points)</td>
+        <td class="value_pos">19</td>
     </tr>
     <tr>
-        <td class="s10">setSubpixelText()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">setSubpixelText()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Xfermode</td>
     </tr>
     <tr>
-        <td class="s10">AvoidXfermode</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">AvoidXfermode</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">PixelXorXfermode</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">PixelXorXfermode</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">PorterDuff.Mode.DARKEN (framebuffer)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">PorterDuff.Mode.DARKEN (framebuffer)</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">PorterDuff.Mode.LIGHTEN (framebuffer)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">PorterDuff.Mode.LIGHTEN (framebuffer)</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">PorterDuff.Mode.OVERLAY (framebuffer)</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">PorterDuff.Mode.OVERLAY (framebuffer)</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Shader</td>
     </tr>
     <tr>
-        <td class="s10">ComposeShader inside ComposeShader</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">ComposeShader inside ComposeShader</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">Same type shaders inside ComposeShader</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
+        <td class="label_neg">Same type shaders inside ComposeShader</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">Local matrix on ComposeShader</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
+        <td class="label_pos">Local matrix on ComposeShader</td>
+        <td class="value_pos">18</td>
     </tr>
     </tbody>
   </table>
@@ -530,64 +427,39 @@ changed.</li>
     <tbody>
     <tr class="rShim">
         <td class="rShim" style="width:380px;"></td>
-        <td class="rShim" style="width:120px;"></td>
-        <td class="rShim" style="width:120px;"></td>
-        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:240px;"></td>
     </tr>
     <tr>
-        <td rowspan="2" class="s0"></td>
-        <td colspan="4" class="s1">API level</td>
+        <td class="s5">Drawing operation to be scaled</td>
+        <td class="s1">First supported API level</td>
     </tr>
     <tr>
-        <td style="display:none;"></td>
-        <td class="s2">&lt; 17</td>
-        <td class="s3">17</td>
-        <td class="s2">18</td>
+        <td class="label_pos">drawText()</td>
+        <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td colspan="5" class="s5">Support for large scale factors</td>
+        <td class="label_neg">drawPosText()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">drawText()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_pos">&#10003;</td>
+        <td class="label_neg">drawTextOnPath()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">drawPosText()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
+        <td class="label_pos">Simple Shapes*</td>
+        <td class="value_pos">17</td>
     </tr>
     <tr>
-        <td class="s10">drawTextOnPath()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
+        <td class="label_neg">Complex Shapes*</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">Simple Shapes*</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_pos">&#10003;</td>
-        <td class="g_pos">&#10003;</td>
+        <td class="label_neg">drawPath()</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     <tr>
-        <td class="s10">Complex Shapes*</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-    </tr>
-    <tr>
-        <td class="s10">drawPath()</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
-    </tr>
-    <tr>
-        <td class="s10">Shadow layer</td>
-        <td class="g_neg">&#10007;</td>
-        <td class="w_neg">&#10007;</td>
-        <td class="g_neg">&#10007;</td>
+        <td class="label_neg">Shadow layer</td>
+        <td class="value_neg">&#10007;</td>
     </tr>
     </tbody>
   </table>

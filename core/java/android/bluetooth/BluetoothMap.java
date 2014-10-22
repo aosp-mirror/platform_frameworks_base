@@ -22,9 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.RemoteException;
-import android.os.IBinder;
-import android.os.ServiceManager;
+import android.os.*;
 import android.util.Log;
 
 /**
@@ -106,7 +104,8 @@ public final class BluetoothMap implements BluetoothProfile {
         Intent intent = new Intent(IBluetoothMap.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
-        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
+                android.os.Process.myUserHandle())) {
             Log.e(TAG, "Could not bind to Bluetooth MAP Service with " + intent);
             return false;
         }
