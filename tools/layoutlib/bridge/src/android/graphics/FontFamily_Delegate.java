@@ -213,6 +213,10 @@ public class FontFamily_Delegate {
         return null;
     }
 
+    @Nullable
+    /*package*/ static String getFontLocation() {
+        return sFontLocation;
+    }
 
     // ---- native methods ----
 
