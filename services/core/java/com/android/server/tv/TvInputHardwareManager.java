@@ -668,14 +668,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
                     mActiveConfig = null;
                 } else {
-                    if (config != mActiveConfig && mActiveConfig != null) {
+                    if (!config.equals(mActiveConfig)) {
                         result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
                         if (result != TvInputHal.SUCCESS) {
                             mActiveConfig = null;
                             return false;
                         }
                     }
-                    result = mHal.addStream(mInfo.getDeviceId(), surface, config);
+                    result = mHal.addOrUpdateStream(mInfo.getDeviceId(), surface, config);
                     if (result == TvInputHal.SUCCESS) {
                         mActiveConfig = config;
                     }
@@ -801,7 +801,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     return false;
                 }
 
-                int result = mHal.addStream(mInfo.getDeviceId(), surface, config);
+                int result = mHal.addOrUpdateStream(mInfo.getDeviceId(), surface, config);
                 return result == TvInputHal.SUCCESS;
             }
         }

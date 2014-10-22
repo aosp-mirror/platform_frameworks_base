@@ -235,7 +235,7 @@ public:
 
     static JTvInputHal* createInstance(JNIEnv* env, jobject thiz);
 
-    int addStream(int deviceId, int streamId, const sp<Surface>& surface);
+    int addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface);
     int removeStream(int deviceId, int streamId);
     const tv_stream_config_t* getStreamConfigs(int deviceId, int* numConfigs);
 
@@ -312,7 +312,7 @@ JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz) {
     return new JTvInputHal(env, thiz, device);
 }
 
-int JTvInputHal::addStream(int deviceId, int streamId, const sp<Surface>& surface) {
+int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface) {
     KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
     if (connections.indexOfKey(streamId) < 0) {
         connections.add(streamId, Connection());
@@ -555,14 +555,14 @@ static jlong nativeOpen(JNIEnv* env, jobject thiz) {
     return (jlong)JTvInputHal::createInstance(env, thiz);
 }
 
-static int nativeAddStream(JNIEnv* env, jclass clazz,
+static int nativeAddOrUpdateStream(JNIEnv* env, jclass clazz,
         jlong ptr, jint deviceId, jint streamId, jobject jsurface) {
     JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
     if (!jsurface) {
         return BAD_VALUE;
     }
     sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
-    return tvInputHal->addStream(deviceId, streamId, surface);
+    return tvInputHal->addOrUpdateStream(deviceId, streamId, surface);
 }
 
 static int nativeRemoveStream(JNIEnv* env, jclass clazz,
@@ -612,8 +612,8 @@ static JNINativeMethod gTvInputHalMethods[] = {
     /* name, signature, funcPtr */
     { "nativeOpen", "()J",
             (void*) nativeOpen },
-    { "nativeAddStream", "(JIILandroid/view/Surface;)I",
-            (void*) nativeAddStream },
+    { "nativeAddOrUpdateStream", "(JIILandroid/view/Surface;)I",
+            (void*) nativeAddOrUpdateStream },
     { "nativeRemoveStream", "(JII)I",
             (void*) nativeRemoveStream },
     { "nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
