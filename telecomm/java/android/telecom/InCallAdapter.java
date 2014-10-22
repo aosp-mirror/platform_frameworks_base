@@ -189,14 +189,16 @@ public final class InCallAdapter {
     }
 
     /**
-     * Instructs Telecom to add a PhoneAccountHandle to the specified call
+     * Instructs Telecom to add a PhoneAccountHandle to the specified call.
      *
-     * @param callId The identifier of the call
-     * @param accountHandle The PhoneAccountHandle through which to place the call
+     * @param callId The identifier of the call.
+     * @param accountHandle The PhoneAccountHandle through which to place the call.
+     * @param setDefault {@code True} if this account should be set as the default for calls.
      */
-    public void phoneAccountSelected(String callId, PhoneAccountHandle accountHandle) {
+    public void phoneAccountSelected(String callId, PhoneAccountHandle accountHandle,
+            boolean setDefault) {
         try {
-            mAdapter.phoneAccountSelected(callId, accountHandle);
+            mAdapter.phoneAccountSelected(callId, accountHandle, setDefault);
         } catch (RemoteException e) {
         }
     }
