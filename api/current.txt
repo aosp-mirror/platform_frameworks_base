@@ -4405,6 +4405,7 @@ package android.app {
     method public boolean inKeyguardRestrictedInputMode();
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
+    method public boolean isKeyguardInTrustedState();
     method public deprecated android.app.KeyguardManager.KeyguardLock newKeyguardLock(java.lang.String);
   }
 

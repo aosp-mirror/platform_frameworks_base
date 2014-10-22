@@ -16,6 +16,7 @@
 
 package com.android.server.trust;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -24,6 +25,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
@@ -41,6 +43,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
@@ -100,8 +103,10 @@ public class TrustManagerService extends SystemService {
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
+    private final UserManager mUserManager;
 
-    private UserManager mUserManager;
+    @GuardedBy("mUserIsTrusted")
+    private final SparseBooleanArray mUserIsTrusted = new SparseBooleanArray();
 
     public TrustManagerService(Context context) {
         super(context);
@@ -160,7 +165,11 @@ public class TrustManagerService extends SystemService {
 
     public void updateTrust(int userId, boolean initiatedByUser) {
         dispatchOnTrustManagedChanged(aggregateIsTrustManaged(userId), userId);
-        dispatchOnTrustChanged(aggregateIsTrusted(userId), userId, initiatedByUser);
+        boolean trusted = aggregateIsTrusted(userId);
+        synchronized (mUserIsTrusted) {
+            mUserIsTrusted.put(userId, trusted);
+        }
+        dispatchOnTrustChanged(trusted, userId, initiatedByUser);
     }
 
     void refreshAgentList(int userId) {
@@ -547,6 +556,16 @@ public class TrustManagerService extends SystemService {
             mHandler.obtainMessage(MSG_UNREGISTER_LISTENER, trustListener).sendToTarget();
         }
 
+        @Override
+        public boolean isTrusted(int userId) throws RemoteException {
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+                    false /* allowAll */, true /* requireFull */, "isTrusted", null);
+            userId = resolveProfileParent(userId);
+            synchronized (mUserIsTrusted) {
+                return mUserIsTrusted.get(userId);
+            }
+        }
+
         private void enforceReportPermission() {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, "reporting trust events");
@@ -622,6 +641,19 @@ public class TrustManagerService extends SystemService {
             return b ? "1" : "0";
         }
     };
+
+    private int resolveProfileParent(int userId) {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            UserInfo parent = mUserManager.getProfileParent(userId);
+            if (parent != null) {
+                return parent.getUserHandle().getIdentifier();
+            }
+            return userId;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
 
     private final Handler mHandler = new Handler() {
         @Override
