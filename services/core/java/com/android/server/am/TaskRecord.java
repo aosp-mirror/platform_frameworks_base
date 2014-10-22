@@ -144,7 +144,7 @@ final class TaskRecord {
     boolean mReuseTask = false;
 
     private Bitmap mLastThumbnail; // Last thumbnail captured for this item.
-    private final File mLastThumbnailFile; // File containing last thubmnail.
+    private final File mLastThumbnailFile; // File containing last thumbnail.
     private final String mFilename;
     CharSequence lastDescription; // Last description captured for this item.
 
