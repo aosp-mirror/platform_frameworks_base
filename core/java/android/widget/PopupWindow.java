@@ -97,9 +97,11 @@ public class PopupWindow {
     private boolean mAllowScrollingAnchorParent = true;
     private boolean mLayoutInsetDecor = false;
     private boolean mNotTouchModal;
+    private boolean mAttachedInDecor = true;
+    private boolean mAttachedInDecorSet = false;
 
     private OnTouchListener mTouchInterceptor;
-    
+
     private int mWidthMode;
     private int mWidth;
     private int mLastWidth;
@@ -316,6 +318,7 @@ public class PopupWindow {
             mContext = contentView.getContext();
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         }
+
         setContentView(contentView);
         setWidth(width);
         setHeight(height);
@@ -373,16 +376,16 @@ public class PopupWindow {
     public int getAnimationStyle() {
         return mAnimationStyle;
     }
-    
+
     /**
-     * Set the flag on popup to ignore cheek press eventt; by default this flag
+     * Set the flag on popup to ignore cheek press event; by default this flag
      * is set to false
      * which means the pop wont ignore cheek press dispatch events.
-     * 
+     *
      * <p>If the popup is showing, calling this method will take effect only
      * the next time the popup is shown or through a manual call to one of
      * the {@link #update()} methods.</p>
-     * 
+     *
      * @see #update()
      */
     public void setIgnoreCheekPress() {
@@ -443,6 +446,19 @@ public class PopupWindow {
         if (mWindowManager == null && mContentView != null) {
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         }
+
+        // Setting the default for attachedInDecor based on SDK version here
+        // instead of in the constructor since we might not have the context
+        // object in the constructor. We only want to set default here if the
+        // app hasn't already set the attachedInDecor.
+        if (mContext != null && !mAttachedInDecorSet) {
+            // Attach popup window in decor frame of parent window by default for
+            // {@link Build.VERSION_CODES.LOLLIPOP_MR1} or greater. Keep current
+            // behavior of not attaching to decor frame for older SDKs.
+            setAttachedInDecor(mContext.getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.LOLLIPOP_MR1);
+        }
+
     }
 
     /**
@@ -452,7 +468,7 @@ public class PopupWindow {
     public void setTouchInterceptor(OnTouchListener l) {
         mTouchInterceptor = l;
     }
-    
+
     /**
      * <p>Indicate whether the popup window can grab the focus.</p>
      *
@@ -699,6 +715,36 @@ public class PopupWindow {
      */
     public void setLayoutInScreenEnabled(boolean enabled) {
         mLayoutInScreen = enabled;
+    }
+
+    /**
+     * <p>Indicates whether the popup window will be attached in the decor frame of its parent
+     * window.
+     *
+     * @return true if the window will be attached to the decor frame of its parent window.
+     *
+     * @see #setAttachedInDecor(boolean)
+     * @see WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR
+     */
+    public boolean isAttachedInDecor() {
+        return mAttachedInDecor;
+    }
+
+    /**
+     * <p>This will attach the popup window to the decor frame of the parent window to avoid
+     * overlaping with screen decorations like the navigation bar. Overrides the default behavior of
+     * the flag {@link WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR}.
+     *
+     * <p>By default the flag is set on SDK version {@link Build.VERSION_CODES#LOLLIPOP_MR1} or
+     * greater and cleared on lesser SDK versions.
+     *
+     * @param enabled true if the popup should be attached to the decor frame of its parent window.
+     *
+     * @see WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR
+     */
+    public void setAttachedInDecor(boolean enabled) {
+        mAttachedInDecor = enabled;
+        mAttachedInDecorSet = true;
     }
 
     /**
@@ -1140,9 +1186,12 @@ public class PopupWindow {
         if (mNotTouchModal) {
             curFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
+        if (mAttachedInDecor) {
+          curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
+        }
         return curFlags;
     }
-    
+
     private int computeAnimationResource() {
         if (mAnimationStyle == -1) {
             if (mIsDropdown) {

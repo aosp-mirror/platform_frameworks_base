@@ -3342,9 +3342,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean noActionBar = !hasFeature(FEATURE_ACTION_BAR) || hasFeature(FEATURE_NO_TITLE);
 
         if (targetPreHoneycomb || (targetPreIcs && targetHcNeedsOptions && noActionBar)) {
-            addFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
+            setNeedsMenuKey(WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE);
         } else {
-            clearFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
+            setNeedsMenuKey(WindowManager.LayoutParams.NEEDS_MENU_SET_FALSE);
         }
 
         // Non-floating windows on high end devices must put up decor beneath the system bars and

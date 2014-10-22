@@ -34909,6 +34909,7 @@ package android.view {
     field public static final int FLAG_HARDWARE_ACCELERATED = 16777216; // 0x1000000
     field public static final int FLAG_IGNORE_CHEEK_PRESSES = 32768; // 0x8000
     field public static final int FLAG_KEEP_SCREEN_ON = 128; // 0x80
+    field public static final int FLAG_LAYOUT_ATTACHED_IN_DECOR = 1073741824; // 0x40000000
     field public static final int FLAG_LAYOUT_INSET_DECOR = 65536; // 0x10000
     field public static final int FLAG_LAYOUT_IN_OVERSCAN = 33554432; // 0x2000000
     field public static final int FLAG_LAYOUT_IN_SCREEN = 256; // 0x100
@@ -38172,6 +38173,7 @@ package android.widget {
     method public int getSoftInputMode();
     method public int getWidth();
     method public boolean isAboveAnchor();
+    method public boolean isAttachedInDecor();
     method public boolean isClippingEnabled();
     method public boolean isFocusable();
     method public boolean isOutsideTouchable();
@@ -38179,6 +38181,7 @@ package android.widget {
     method public boolean isSplitTouchEnabled();
     method public boolean isTouchable();
     method public void setAnimationStyle(int);
+    method public void setAttachedInDecor(boolean);
     method public void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setClippingEnabled(boolean);
     method public void setContentView(android.view.View);
