@@ -162,10 +162,10 @@ public class ListPreference extends DialogPreference {
     @Override
     public CharSequence getSummary() {
         final CharSequence entry = getEntry();
-        if (mSummary == null || entry == null) {
+        if (mSummary == null) {
             return super.getSummary();
         } else {
-            return String.format(mSummary, entry);
+            return String.format(mSummary, entry == null ? "" : entry);
         }
     }
 
