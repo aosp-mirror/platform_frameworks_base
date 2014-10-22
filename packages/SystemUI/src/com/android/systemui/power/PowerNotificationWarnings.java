@@ -144,7 +144,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             showSaverNotification();
             mShowing = SHOWING_SAVER;
         } else {
-            mNoMan.cancel(TAG_NOTIFICATION, ID_NOTIFICATION);
+            mNoMan.cancelAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, UserHandle.ALL);
             mShowing = SHOWING_NOTHING;
         }
     }
@@ -165,7 +165,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.CURRENT);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.ALL);
     }
 
     private void showWarningNotification() {
@@ -202,7 +202,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.CURRENT);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.ALL);
     }
 
     private void showSaverNotification() {
@@ -219,7 +219,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (hasSaverSettings()) {
             nb.setContentIntent(pendingActivity(mOpenSaverSettings));
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, nb.build(), UserHandle.CURRENT);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, nb.build(), UserHandle.ALL);
     }
 
     private void addStopSaverAction(Notification.Builder nb) {
@@ -340,6 +340,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         updateNotification();
     }
 
+    @Override
+    public void userSwitched() {
+        updateNotification();
+    }
+
     private void showStartSaverConfirmation() {
         if (mSaverConfirmation != null) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
@@ -369,7 +374,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_STOP_SAVER);
-            mContext.registerReceiver(this, filter, null, mHandler);
+            mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, mHandler);
         }
 
         @Override
