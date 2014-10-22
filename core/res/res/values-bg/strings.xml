@@ -1763,11 +1763,11 @@
     <string name="deleted_key" msgid="7659477886625566590">"Изтрихте <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> за работа"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"За да освободите екрана, докоснете и задръжте едновременно бутона за връщане назад и този за общ преглед."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да освободите този екран, докоснете и задръжте бутона за общ преглед."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да освободите този екран, докоснете и задръжте бутона „Общ преглед“."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Екранът е фиксиран. Освобождаването не е разрешено от организацията ви."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Да се използва ли функцията за фиксиране на екрана?"</string>
     <string name="lock_to_app_description" msgid="4120623404152035221">"Фиксирането на екрана заключва дисплея в един изглед.\n\nЗа да го освободите, докоснете и задръжте едновременно бутона за връщане назад и този за общ преглед."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Фиксирането на екрана заключва дисплея в един изглед.\n\nЗа да го освободите, докоснете и задръжте бутона за общ преглед."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Фиксирането на екрана заключва дисплея в един изглед.\n\nЗа да го освободите, докоснете и задръжте бутона „Общ преглед“."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"НЕ, БЛАГОДАРЯ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"СТАРТИРАНЕ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранът е фиксиран"</string>

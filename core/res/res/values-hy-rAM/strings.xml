@@ -1763,7 +1763,7 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> թիվը ջնջված է"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Աշխատանքային <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Այս էկրան ապամրացնելու համար միաժամանակ հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Այս էկրան ապամրացնելու համար հպեք և պահեք Համատեսքի կոճակին:"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Այս էկրանն ապամրացնելու համար հպեք և պահեք Համատեսքի կոճակը:"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Էկրանն ամրացված է: Ապամրացումը չի թույլատրվում ձեր կազմակերպության կողմից:"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Օգտագործե՞լ էկրանի ամրացումը:"</string>
     <string name="lock_to_app_description" msgid="4120623404152035221">"Էկրանի ամրացումը կողպում է էկրանը ընթացիկ տեսքով:\n\nԱպամրացնելու համար միաժամանակ հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
