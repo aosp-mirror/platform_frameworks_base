@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> തിരഞ്ഞെടുത്തു"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ഇല്ലാതാക്കി"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'ചുരുക്കവിവരണം\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, ചുരുക്കവിവരണം സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'കാഴ്ച\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, കാഴ്ച സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"സ്ക്രീൻ പിൻ ചെയ്തിരിക്കുന്നു. നിങ്ങളുടെ ഓർഗനൈസേഷൻ അൺപിൻ ചെയ്യൽ അനുവദിക്കുന്നില്ല."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"സ്ക്രീൻ പിൻ ചെയ്യൽ ഉപയോഗിക്കണോ?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"സ്‌ക്രീൻ പിൻ ചെയ്യൽ, ഒരൊറ്റ കാഴ്‌ചയിൽ ഡി‌സ്‌പ്ലേയെ ലോക്കുചെയ്യുന്നു.\n\nഅൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'ചുരുക്കവിവരണം\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"സ്‌ക്രീൻ പിൻ ചെയ്യൽ, ഒരൊറ്റ കാഴ്‌ചയിൽ ഡി‌സ്‌പ്ലേയെ ലോക്കുചെയ്യുന്നു.\n\nഅൺപിൻ ചെയ്യാൻ, ചുരുക്കവിവരണം സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"സ്‌ക്രീൻ പിൻ ചെയ്യൽ, ഒരൊറ്റ കാഴ്‌ചയിൽ ഡി‌സ്‌പ്ലേയെ ലോക്കുചെയ്യുന്നു.\n\nഅൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'കാഴ്ച\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"സ്‌ക്രീൻ പിൻ ചെയ്യൽ, ഒരൊറ്റ കാഴ്‌ചയിൽ ഡി‌സ്‌പ്ലേയെ ലോക്കുചെയ്യുന്നു.\n\nഅൺപിൻ ചെയ്യാൻ, കാഴ്ച സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"വേണ്ട, നന്ദി"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ആരംഭിക്കുക"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>

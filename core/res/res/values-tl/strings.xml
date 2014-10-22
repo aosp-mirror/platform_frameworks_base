@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Napili ang <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Pangkalahatang-ideya nang sabay-sabay."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Pangkalahatang-ideya."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Overview nang sabay-sabay."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Overview."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Naka-pin ang screen. Hindi pinapayagan ng iyong organisasyon ang pag-a-unpin."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Gamitin ang pagpi-pin ng screen?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Nila-lock ng pagpi-pin ng screen ang display sa iisang view.\n\nUpang i-unpin, pindutin nang matagal ang Bumalik at Pangkalahatang-ideya nang sabay-sabay."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Nila-lock ng pagpi-pin ng screen ang display sa iisang view.\n\nUpang i-unpin, pindutin nang matagal ang Pangkalahatang-ideya."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Nila-lock ng pagpi-pin ng screen ang display sa iisang view.\n\nUpang i-unpin, pindutin nang matagal ang Bumalik at Overview nang sabay-sabay."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Nila-lock ng pagpi-pin ng screen ang display sa iisang view.\n\nUpang i-unpin, pindutin nang matagal ang Overview."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"HINDI, SALAMAT NA LANG"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SIMULAN"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Naka-pin ang screen"</string>
