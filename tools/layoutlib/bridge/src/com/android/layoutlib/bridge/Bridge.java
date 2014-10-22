@@ -38,7 +38,7 @@ import com.ibm.icu.util.ULocale;
 
 import android.content.res.BridgeAssetManager;
 import android.graphics.Bitmap;
-import android.graphics.Typeface_Accessor;
+import android.graphics.FontFamily_Delegate;
 import android.graphics.Typeface_Delegate;
 import android.os.Looper;
 import android.os.Looper_Accessor;
@@ -250,7 +250,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
 
         // load the fonts.
-        Typeface_Delegate.setFontLocation(fontLocation.getAbsolutePath());
+        FontFamily_Delegate.setFontLocation(fontLocation.getAbsolutePath());
 
         // now parse com.android.internal.R (and only this one as android.R is a subset of
         // the internal version), and put the content in the maps.
@@ -303,7 +303,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         BridgeAssetManager.clearSystem();
 
         // dispose of the default typeface.
-        Typeface_Accessor.resetDefaults();
+        Typeface_Delegate.resetDefaults();
 
         return true;
     }
