@@ -1761,12 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"Izbrano: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Če želite odpeti ta zaslon, se hkrati dotaknite tipk za nazaj in za pregled ter ju pridržite."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Če želite odpeti ta zaslon, se dotaknite tipke za pregled in jo pridržite."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Če želite odpeti ta zaslon, se hkrati dotaknite tipk Nazaj in Pregled ter ju pridržite."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Če želite odpeti ta zaslon, se dotaknite tipke Pregled in jo pridržite."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pripet. Vaša organizacija ne dovoli odpenjanja."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Želite uporabljati pripenjanje zaslona?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se hkrati dotaknite tipk za nazaj in za pregled ter ju pridržite."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se dotaknite tipke za pregled in jo pridržite."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se hkrati dotaknite tipk Nazaj in Pregled ter ju pridržite."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se dotaknite tipke Pregled in jo pridržite."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NE, HVALA"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ZAŽENI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>

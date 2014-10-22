@@ -1761,12 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para soltar a pantalla, mantén premido Atrás e Vista xeral ao mesmo tempo."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para soltar a pantalla, mantén premido Vista xeral."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para soltar a pantalla, mantén premido Atrás e Visión xeral ao mesmo tempo."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para soltar a pantalla, mantén premido Visión xeral."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"A pantalla está fixada. A túa organización non permite desactivar a pantalla."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Queres usar a fixación de pantalla?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"A fixación de pantalla bloquea a pantalla nunha única vista.\n\nPara soltar a pantalla, mantén premido Atrás e Vista xeral ao mesmo tempo."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"A fixación de pantalla bloquea a pantalla nunha única vista.\n\nPara soltar a pantalla, mantén premido e Vista xeral."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"A fixación de pantalla bloquea a pantalla nunha única vista.\n\nPara soltar a pantalla, mantén premido Atrás e Visión xeral ao mesmo tempo."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"A fixación de pantalla bloquea a pantalla nunha única vista.\n\nPara soltar a pantalla, mantén premido e Visión xeral."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NON, GRAZAS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>

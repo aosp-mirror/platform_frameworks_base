@@ -1496,7 +1496,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Tambahkan akun"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Tambah"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Kurangi"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> sentuh dan tahan."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> sentuh lama."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Geser ke atas untuk menambah dan ke bawah untuk mengurangi."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Tambah menit"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Kurangi menit"</string>
@@ -1761,12 +1761,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> dipilih"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> dihapus"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kantor <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk melepas pin layar ini, sentuh dan tahan tombol Kembali dan Ikhtisar secara bersamaan."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk melepas pin layar ini, sentuh dan tahan tombol Ikhtisar."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Ringkasan secara bersamaan."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk melepas pin layar ini, sentuh lama tombol Ringkasan."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Layar disematkan. Pelepasan sematan tidak diizinkan oleh organisasi Anda."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Gunakan penyematan layar?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Pemasangan pin pada layar mengunci layar dalam satu tampilan.\n\nUntuk melepas pin, sentuh dan tahan tombol Kembali dan Ikhtisar secara bersamaan."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pemasangan pin pada layar mengunci layar dalam satu tampilan.\n\nUntuk melepas pin, sentuh dan tahan tombol Ikhtisar."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Pemasangan pin pada layar mengunci layar dalam satu tampilan.\n\nUntuk melepas pin, sentuh lama tombol Kembali dan Ringkasan secara bersamaan."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pemasangan pin pada layar mengunci layar dalam satu tampilan.\n\nUntuk melepas pin, sentuh lama tombol Ringkasan."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"TIDAK, TERIMA KASIH"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"MULAI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Layar disematkan"</string>
