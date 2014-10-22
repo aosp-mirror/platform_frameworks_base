@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Aquí es mostren les teves pantalles recents."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Omet les aplicacions recents"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 pantalla en la visió general"</item>
-    <item quantity="other" msgid="5523506463832158203">"%d pantalles en la visió general"</item>
+    <item quantity="one" msgid="3969335317929254918">"1 pantalla a Visió general"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d pantalles a Visió general"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Cap notificació"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continu"</string>
