@@ -236,8 +236,8 @@ enum {
 #define Res_MAKEINTERNAL(entry) (0x01000000 | (entry&0xFFFF))
 #define Res_MAKEARRAY(entry) (0x02000000 | (entry&0xFFFF))
 
-#define Res_MAXPACKAGE 255
-#define Res_MAXTYPE 255
+static const size_t Res_MAXPACKAGE = 255;
+static const size_t Res_MAXTYPE = 255;
 
 /**
  * Representation of a value in a resource, supplying type

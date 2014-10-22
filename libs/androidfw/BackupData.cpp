@@ -27,7 +27,7 @@
 
 namespace android {
 
-static const bool DEBUG = false;
+static const bool kIsDebug = false;
 
 /*
  * File Format (v1):
@@ -62,7 +62,7 @@ BackupDataWriter::BackupDataWriter(int fd)
      m_entityCount(0)
 {
     m_pos = (ssize_t) lseek(fd, 0, SEEK_CUR);
-    if (DEBUG) ALOGI("BackupDataWriter(%d) @ %ld", fd, (long)m_pos);
+    if (kIsDebug) ALOGI("BackupDataWriter(%d) @ %ld", fd, (long)m_pos);
 }
 
 BackupDataWriter::~BackupDataWriter()
@@ -79,7 +79,7 @@ BackupDataWriter::write_padding_for(int n)
     paddingSize = padding_extra(n);
     if (paddingSize > 0) {
         uint32_t padding = 0xbcbcbcbc;
-        if (DEBUG) ALOGI("writing %zd padding bytes for %d", paddingSize, n);
+        if (kIsDebug) ALOGI("writing %zd padding bytes for %d", paddingSize, n);
         amt = write(m_fd, &padding, paddingSize);
         if (amt != paddingSize) {
             m_status = errno;
@@ -112,7 +112,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     } else {
         k = key;
     }
-    if (DEBUG) {
+    if (kIsDebug) {
         ALOGD("Writing header: prefix='%s' key='%s' dataSize=%zu", m_keyPrefix.string(),
                 key.string(), dataSize);
     }
@@ -126,7 +126,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     header.keyLen = tolel(keyLen);
     header.dataSize = tolel(dataSize);
 
-    if (DEBUG) ALOGI("writing entity header, %zu bytes", sizeof(entity_header_v1));
+    if (kIsDebug) ALOGI("writing entity header, %zu bytes", sizeof(entity_header_v1));
     amt = write(m_fd, &header, sizeof(entity_header_v1));
     if (amt != sizeof(entity_header_v1)) {
         m_status = errno;
@@ -134,7 +134,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     }
     m_pos += amt;
 
-    if (DEBUG) ALOGI("writing entity header key, %zd bytes", keyLen+1);
+    if (kIsDebug) ALOGI("writing entity header key, %zd bytes", keyLen+1);
     amt = write(m_fd, k.string(), keyLen+1);
     if (amt != keyLen+1) {
         m_status = errno;
@@ -152,10 +152,10 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
 status_t
 BackupDataWriter::WriteEntityData(const void* data, size_t size)
 {
-    if (DEBUG) ALOGD("Writing data: size=%lu", (unsigned long) size);
+    if (kIsDebug) ALOGD("Writing data: size=%lu", (unsigned long) size);
 
     if (m_status != NO_ERROR) {
-        if (DEBUG) {
+        if (kIsDebug) {
             ALOGD("Not writing data - stream in error state %d (%s)", m_status, strerror(m_status));
         }
         return m_status;
@@ -167,7 +167,7 @@ BackupDataWriter::WriteEntityData(const void* data, size_t size)
     ssize_t amt = write(m_fd, data, size);
     if (amt != (ssize_t)size) {
         m_status = errno;
-        if (DEBUG) ALOGD("write returned error %d (%s)", m_status, strerror(m_status));
+        if (kIsDebug) ALOGD("write returned error %d (%s)", m_status, strerror(m_status));
         return m_status;
     }
     m_pos += amt;
@@ -189,7 +189,7 @@ BackupDataReader::BackupDataReader(int fd)
 {
     memset(&m_header, 0, sizeof(m_header));
     m_pos = (ssize_t) lseek(fd, 0, SEEK_CUR);
-    if (DEBUG) ALOGI("BackupDataReader(%d) @ %ld", fd, (long)m_pos);
+    if (kIsDebug) ALOGI("BackupDataReader(%d) @ %ld", fd, (long)m_pos);
 }
 
 BackupDataReader::~BackupDataReader()
@@ -342,15 +342,19 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
         return -1;
     }
     int remaining = m_dataEndPos - m_pos;
-    //ALOGD("ReadEntityData size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
-    //        size, m_pos, m_dataEndPos, remaining);
+    if (kIsDebug) {
+        ALOGD("ReadEntityData size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
+                size, m_pos, m_dataEndPos, remaining);
+    }
     if (remaining <= 0) {
         return 0;
     }
     if (((int)size) > remaining) {
         size = remaining;
     }
-    //ALOGD("   reading %d bytes", size);
+    if (kIsDebug) {
+        ALOGD("   reading %d bytes", size);
+    }
     int amt = read(m_fd, data, size);
     if (amt < 0) {
         m_status = errno;
