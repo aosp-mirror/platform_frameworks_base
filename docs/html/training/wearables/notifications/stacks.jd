@@ -45,7 +45,7 @@ final static String GROUP_KEY_EMAILS = "group_key_emails";
 Notification notif = new NotificationCompat.Builder(mContext)
          .setContentTitle("New mail from " + sender1)
          .setContentText(subject1)
-         .setSmallIcon(R.drawable.new_mail);
+         .setSmallIcon(R.drawable.new_mail)
          .setGroup(GROUP_KEY_EMAILS)
          .build();
 
@@ -65,7 +65,7 @@ instead of as a new card:</p>
 Notification notif2 = new NotificationCompat.Builder(mContext)
          .setContentTitle("New mail from " + sender2)
          .setContentText(subject2)
-         .setSmallIcon(R.drawable.new_mail);
+         .setSmallIcon(R.drawable.new_mail)
          .setGroup(GROUP_KEY_EMAILS)
          .build();
 
