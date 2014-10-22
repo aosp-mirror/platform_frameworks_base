@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
     sp<Surface> surface = control->getSurface();
 
     RenderNode* rootNode = new RenderNode();
+    rootNode->incStrong(0);
     rootNode->mutateStagingProperties().setLeftTopRightBottom(0, 0, width, height);
     rootNode->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
     rootNode->mutateStagingProperties().setClipToBounds(false);
