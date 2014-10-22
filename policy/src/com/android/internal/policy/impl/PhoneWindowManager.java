@@ -3181,10 +3181,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // whether it is taking care of insetting its content.  If not,
             // we need to use the parent's content frame so that the entire
             // window is positioned within that content.  Otherwise we can use
-            // the display frame and let the attached window take care of
+            // the overscan frame and let the attached window take care of
             // positioning its content appropriately.
             if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
-                cf.set(attached.getOverscanFrameLw());
+                // Set the content frame of the attached window to the parent's decor frame
+                // (same as content frame when IME isn't present) if specifically requested by
+                // setting {@link WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR} flag.
+                // Otherwise, use the overscan frame.
+                cf.set((fl & FLAG_LAYOUT_ATTACHED_IN_DECOR) != 0
+                        ? attached.getContentFrameLw() : attached.getOverscanFrameLw());
             } else {
                 // If the window is resizing, then we want to base the content
                 // frame on our attached content frame to resize...  however,
