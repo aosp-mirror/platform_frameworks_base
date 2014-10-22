@@ -704,9 +704,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         WindowState ws = this;
         WindowList windows = getWindowList();
         while (true) {
-            if ((ws.mAttrs.privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
-                return (ws.mAttrs.flags & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+            if (ws.mAttrs.needsMenuKey != WindowManager.LayoutParams.NEEDS_MENU_UNSET) {
+                return ws.mAttrs.needsMenuKey == WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
             }
             // If we reached the bottom of the range of windows we are considering,
             // assume no menu is needed.
