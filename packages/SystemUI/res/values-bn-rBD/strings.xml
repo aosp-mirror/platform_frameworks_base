@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"আপনার সাম্প্রতিক স্ক্রীনগুলো এখানে দেখা যাবে"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"সাম্প্রতিক অ্যাপ্লিকেশানগুলি খারিজ করুন"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"ওভারভিউ-এ ১টি স্ক্রীন"</item>
-    <item quantity="other" msgid="5523506463832158203">"ওভারভিউ-এ %dটি স্ক্রীন"</item>
+    <item quantity="one" msgid="3969335317929254918">"এক নজরে-এ ১টি স্ক্রীন"</item>
+    <item quantity="other" msgid="5523506463832158203">"এক নজরে-এ %dটি স্ক্রীন"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"কোনো বিজ্ঞপ্তি নেই"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"চলতে-থাকা"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"ফিরুন"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"হোম"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"মেনু"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"ওভারভিউ"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"এক নজরে"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"অনুসন্ধান করুন"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ক্যামেরা"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ফোন"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"দ্রুত সেটিংস৷"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"লক স্ক্রীন।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"সেটিংস"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ওভারভিউ৷"</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"এক নজরে৷"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ব্যবহারকারী <xliff:g id="USER">%s</xliff:g>৷"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi বন্ধ হয়েছে।"</string>
