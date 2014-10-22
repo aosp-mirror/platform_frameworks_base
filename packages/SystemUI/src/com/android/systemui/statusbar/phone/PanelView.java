@@ -68,7 +68,6 @@ public abstract class PanelView extends FrameLayout {
     protected int mTouchSlop;
     protected boolean mHintAnimationRunning;
     private boolean mOverExpandedBeforeFling;
-    private float mOriginalIndicationY;
     private boolean mTouchAboveFalsingThreshold;
     private int mUnlockFalsingThreshold;
 
@@ -841,16 +840,15 @@ public abstract class PanelView extends FrameLayout {
         });
         animator.start();
         mHeightAnimator = animator;
-        mOriginalIndicationY = mKeyguardBottomArea.getIndicationView().getY();
         mKeyguardBottomArea.getIndicationView().animate()
-                .y(mOriginalIndicationY - mHintDistance)
+                .translationY(-mHintDistance)
                 .setDuration(250)
                 .setInterpolator(mFastOutSlowInInterpolator)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
                         mKeyguardBottomArea.getIndicationView().animate()
-                                .y(mOriginalIndicationY)
+                                .translationY(0)
                                 .setDuration(450)
                                 .setInterpolator(mBounceInterpolator)
                                 .start();
