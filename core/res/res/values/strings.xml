@@ -1449,9 +1449,8 @@
     <string name="permlab_bodySensors">body sensors (like heart rate monitors)
     </string>
     <!-- Description of the body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensors" product="default">Allows the app to
-      access data from sensors you use to measure what’s happening inside your
-      body, such as heart rate.</string>
+    <string name="permdesc_bodySensors" product="default">Allows the app to access data from sensors
+    that monitor your physical condition, such as your heart rate.</string>
 
     <!-- Title of the read social stream permission, listed so the user can decide whether to allow the application to read information from the user's social stream. [CHAR LIMIT=30] -->
     <string name="permlab_readSocialStream" product="default">read your social stream</string>
