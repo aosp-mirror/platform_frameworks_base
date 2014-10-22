@@ -5086,6 +5086,12 @@ public final class Settings {
         public static final String AIRPLANE_MODE_ON = "airplane_mode_on";
 
         /**
+         * Whether Theater Mode is on.
+         * {@hide}
+         */
+        public static final String THEATER_MODE_ON = "theater_mode_on";
+
+        /**
          * Constant for use in AIRPLANE_MODE_RADIOS to specify Bluetooth radio.
          */
         public static final String RADIO_BLUETOOTH = "bluetooth";
