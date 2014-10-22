@@ -503,6 +503,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
 
+    // Allowed theater mode wake actions
+    private boolean mAllowTheaterModeWakeFromKey;
+    private boolean mAllowTheaterModeWakeFromPowerKey;
+    private boolean mAllowTheaterModeWakeFromMotion;
+    private boolean mAllowTheaterModeWakeFromCameraLens;
+    private boolean mAllowTheaterModeWakeFromLidSwitch;
+    private boolean mAllowTheaterModeWakeFromWakeGesture;
+
     // Screenshot trigger states
     // Time to volume and power must be pressed within this interval of each other.
     private static final long SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS = 150;
@@ -656,7 +664,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             synchronized (mLock) {
                 if (shouldEnableWakeGestureLp()) {
                     performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
-                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                    wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture);
                 }
             }
         }
@@ -1022,6 +1030,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_lidControlsSleep);
         mTranslucentDecorEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableTranslucentDecor);
+
+        mAllowTheaterModeWakeFromKey = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromKey);
+        mAllowTheaterModeWakeFromPowerKey = mAllowTheaterModeWakeFromKey
+                || mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_allowTheaterModeWakeFromPowerKey);
+        mAllowTheaterModeWakeFromMotion = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromMotion);
+        mAllowTheaterModeWakeFromCameraLens = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromCameraLens);
+        mAllowTheaterModeWakeFromLidSwitch = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromLidSwitch);
+        mAllowTheaterModeWakeFromWakeGesture = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromGesture);
+
         readConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
@@ -4065,7 +4088,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         updateRotation(true);
 
         if (lidOpen) {
-            mPowerManager.wakeUp(SystemClock.uptimeMillis());
+            wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromLidSwitch);
         } else if (!mLidControlsSleep) {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
@@ -4087,7 +4110,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
             }
-            mPowerManager.wakeUp(whenNanos / 1000000);
+            wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromCameraLens);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
         }
         mCameraLensCoverState = lensCoverState;
@@ -4265,7 +4288,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // key processing.
         if (mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
             if (isWakeKey) {
-                mPowerManager.wakeUp(event.getEventTime());
+                wakeUp(event.getEventTime(), keyCode == KeyEvent.KEYCODE_POWER
+                        ? mAllowTheaterModeWakeFromPowerKey : mAllowTheaterModeWakeFromKey);
             }
             return result;
         }
@@ -4514,8 +4538,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (isWakeKey) {
-            mPowerManager.wakeUp(event.getEventTime());
+            wakeUp(event.getEventTime(), keyCode == KeyEvent.KEYCODE_POWER
+                    ? mAllowTheaterModeWakeFromPowerKey : mAllowTheaterModeWakeFromKey);
         }
+
         return result;
     }
 
@@ -4558,7 +4584,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
-            mPowerManager.wakeUp(whenNanos / 1000000);
+            wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotion);
             return 0;
         }
         if (shouldDispatchInputWhenNonInteractive()) {
@@ -4734,6 +4760,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onScreenTurnedOff(why);
         }
+    }
+
+    private void wakeUp(long wakeTime, boolean wakeInTheaterMode) {
+        if (!wakeInTheaterMode && isTheaterModeEnabled()) {
+            return;
+        }
+
+        mPowerManager.wakeUp(wakeTime);
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -5612,6 +5646,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.System.DEFAULT_NOTIFICATION_URI);
         ringTone.setStreamType(AudioManager.STREAM_MUSIC);
         ringTone.play();
+    }
+
+    private boolean isTheaterModeEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.THEATER_MODE_ON, 0) == 1;
     }
 
     private boolean isGlobalAccessibilityGestureEnabled() {

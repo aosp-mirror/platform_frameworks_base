@@ -619,6 +619,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mTurnOnScreen;
 
+    // Whether or not a layout can cause a wake up when theater mode is enabled.
+    boolean mAllowTheaterModeWakeFromLayout;
+
     DragState mDragState = null;
 
     // For frozen screen animations.
@@ -880,6 +883,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mAnimator = new WindowAnimator(this);
+
+        mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         initPolicy();
@@ -9953,8 +9959,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (mTurnOnScreen) {
-            if (DEBUG_VISIBILITY) Slog.v(TAG, "Turning screen on after layout!");
-            mPowerManager.wakeUp(SystemClock.uptimeMillis());
+            if (mAllowTheaterModeWakeFromLayout
+                    || Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.THEATER_MODE_ON, 0) == 0) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "Turning screen on after layout!");
+                mPowerManager.wakeUp(SystemClock.uptimeMillis());
+            }
             mTurnOnScreen = false;
         }
 

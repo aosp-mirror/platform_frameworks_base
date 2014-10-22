@@ -65,11 +65,15 @@ final class DockObserver extends SystemService {
 
     private boolean mUpdatesStopped;
 
+    private final boolean mAllowTheaterModeWakeFromDock;
+
     public DockObserver(Context context) {
         super(context);
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mAllowTheaterModeWakeFromDock = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromDock);
 
         init();  // set initial status
 
@@ -126,8 +130,12 @@ final class DockObserver extends SystemService {
         if (newState != mReportedDockState) {
             mReportedDockState = newState;
             if (mSystemReady) {
-                // Wake up immediately when docked or undocked.
-                mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                // Wake up immediately when docked or undocked except in theater mode.
+                if (mAllowTheaterModeWakeFromDock
+                        || Settings.Global.getInt(getContext().getContentResolver(),
+                            Settings.Global.THEATER_MODE_ON, 0) == 0) {
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                }
                 updateLocked();
             }
         }
