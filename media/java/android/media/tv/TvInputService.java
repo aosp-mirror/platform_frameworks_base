@@ -1067,9 +1067,19 @@ public abstract class TvInputService extends Service {
 
     /**
      * Base class for a TV input session which represents an external device connected to a
-     * hardware TV input. Once TV input returns an implementation of this class on
-     * {@link #onCreateSession(String)}, the framework will create a hardware session and forward
-     * the application's surface to the hardware TV input.
+     * hardware TV input.
+     * <p>
+     * This class is for an input which provides channels for the external set-top box to the
+     * application. Once a TV input returns an implementation of this class on
+     * {@link #onCreateSession(String)}, the framework will create a separate session for
+     * a hardware TV Input (e.g. HDMI 1) and forward the application's surface to the session so
+     * that the user can see the screen of the hardware TV Input when she tunes to a channel from
+     * this TV input. The implementation of this class is expected to change the channel of the
+     * external set-top box via a proprietary protocol when {@link HardwareSession#onTune(Uri)} is
+     * requested by the application.
+     * </p><p>
+     * Note that this class is not for inputs for internal hardware like built-in tuner and HDMI 1.
+     * </p>
      * @see #onCreateSession(String)
      */
     public abstract static class HardwareSession extends Session {
