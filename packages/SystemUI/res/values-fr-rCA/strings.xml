@@ -26,7 +26,7 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vos écrans récents s\'affichent ici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Masquer les applications récentes"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"Aperçu d\'1 écran"</item>
+    <item quantity="one" msgid="3969335317929254918">"Aperçu de 1 écran"</item>
     <item quantity="other" msgid="5523506463832158203">"Aperçu de %d écrans"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
@@ -167,7 +167,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Paramètres rapides"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Écran de verrouillage"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Paramètres"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Aperçu."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Aperçu"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Utilisateur : <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi désactivé"</string>

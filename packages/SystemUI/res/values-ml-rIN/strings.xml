@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"നിങ്ങളുടെ പുതിയ സ്ക്രീനുകൾ ഇവിടെ ദൃശ്യമാകുന്നു"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"സമീപകാല അപ്ലിക്കേഷനുകൾ നിരസിക്കുക"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"ചുരുക്കവിവരണത്തിലെ ഒരു സ്‌ക്രീൻ"</item>
-    <item quantity="other" msgid="5523506463832158203">"ചുരുക്കവിവരണത്തിലെ %d സ്‌ക്രീനുകൾ"</item>
+    <item quantity="one" msgid="3969335317929254918">"കാഴ്ചയിലെ ഒരു സ്‌ക്രീൻ"</item>
+    <item quantity="other" msgid="5523506463832158203">"കാഴ്ചയിലെ %d സ്‌ക്രീനുകൾ"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"മടങ്ങുക"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ഹോം"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"മെനു"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"ചുരുക്കവിവരണം"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"കാഴ്ച"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"തിരയൽ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ക്യാമറ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ഫോണ്‍"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ദ്രുത ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ലോക്ക് സ്‌ക്രീൻ."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ക്രമീകരണങ്ങൾ"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ചുരുക്കവിവരണം."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"കാഴ്ച."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ഉപയോക്താവ് <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"വൈഫൈ ഓഫാക്കി."</string>
