@@ -1761,8 +1761,8 @@
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"如要取消固定這個畫面，請輕觸並按住總覽按鈕。"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"螢幕已固定，且貴機構不允許取消固定。"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"使用螢幕固定功能？"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"螢幕鎖定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請同時輕觸並按住返回按鈕和總覽按鈕。"</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"螢幕鎖定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請輕觸並按住總覽按鈕。"</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"螢幕固定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請同時輕觸並按住返回按鈕和總覽按鈕。"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"螢幕固定功能可鎖定螢幕，讓單一畫面持續顯示。\n\n如要取消固定單一畫面，請輕觸並按住總覽按鈕。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了，謝謝"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"啟動"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定螢幕"</string>
