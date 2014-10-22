@@ -327,7 +327,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // If the user has toggled it too quickly, then just eat up the event here (it's better than
         // showing a janky screenshot).
         // NOTE: Ideally, the screenshot mechanism would take the window transform into account
-        if (System.currentTimeMillis() - mLastToggleTime < sMinToggleDelay) {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime > mLastToggleTime) && (currentTime - mLastToggleTime) < sMinToggleDelay) {
             return;
         }
 
