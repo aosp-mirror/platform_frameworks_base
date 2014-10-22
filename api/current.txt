@@ -28951,6 +28951,7 @@ package android.telephony {
     method public void updateMmsSendStatus(android.content.Context, int, byte[], int, android.net.Uri);
     method public void updateSmsSendStatus(int, boolean);
     field public static final java.lang.String EXTRA_MMS_DATA = "android.telephony.extra.MMS_DATA";
+    field public static final java.lang.String EXTRA_MMS_HTTP_STATUS = "android.telephony.extra.MMS_HTTP_STATUS";
     field public static final java.lang.String MMS_CONFIG_ALIAS_ENABLED = "aliasEnabled";
     field public static final java.lang.String MMS_CONFIG_ALIAS_MAX_CHARS = "aliasMaxChars";
     field public static final java.lang.String MMS_CONFIG_ALIAS_MIN_CHARS = "aliasMinChars";
