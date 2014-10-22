@@ -2087,7 +2087,7 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
-        intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRAM_PARAM1, extra);
+        intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRA_PARAM1, extra);
         getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                 HdmiControlService.PERMISSION);
     }

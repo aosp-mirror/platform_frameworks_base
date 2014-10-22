@@ -114,7 +114,7 @@ public final class HdmiPortInfo implements Parcelable {
     }
 
     /**
-     * Describe the kinds of special objects contained in this Parcelable's
+     * Describes the kinds of special objects contained in this Parcelable's
      * marshalled representation.
      */
     @Override
@@ -146,7 +146,7 @@ public final class HdmiPortInfo implements Parcelable {
             };
 
     /**
-     * Serialize this object into a {@link Parcel}.
+     * Serializes this object into a {@link Parcel}.
      *
      * @param dest The Parcel in which the object should be written.
      * @param flags Additional flags about how the object should be written.
