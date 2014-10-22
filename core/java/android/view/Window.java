@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -801,9 +800,6 @@ public abstract class Window {
     public void setFlags(int flags, int mask) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.flags = (attrs.flags&~mask) | (flags&mask);
-        if ((mask&WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0) {
-            attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY;
-        }
         mForcedWindowFlags |= mask;
         dispatchWindowAttributesChanged(attrs);
     }
@@ -811,6 +807,15 @@ public abstract class Window {
     private void setPrivateFlags(int flags, int mask) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.privateFlags = (attrs.privateFlags & ~mask) | (flags & mask);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * {@hide}
+     */
+    protected void setNeedsMenuKey(int value) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.needsMenuKey = value;
         dispatchWindowAttributesChanged(attrs);
     }
 
