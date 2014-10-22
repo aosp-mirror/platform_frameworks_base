@@ -84,6 +84,8 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -329,6 +331,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final boolean mFactoryTest;
     final boolean mOnlyCore;
     final boolean mLazyDexOpt;
+    final long mDexOptLRUThresholdInMills;
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
@@ -1293,6 +1296,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
+
+        // TODO: add a property to control this?
+        long dexOptLRUThresholdInMinutes;
+        if (mLazyDexOpt) {
+            dexOptLRUThresholdInMinutes = 30; // only last 30 minutes of apps for eng builds.
+        } else {
+            dexOptLRUThresholdInMinutes = 7 * 24 * 60; // apps used in the 7 days for users.
+        }
+        mDexOptLRUThresholdInMills = dexOptLRUThresholdInMinutes * 60 * 1000;
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -4568,22 +4580,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
         // should do a full dexopt.
         if (mLazyDexOpt || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
-            // TODO: add a property to control this?
-            long dexOptLRUThresholdInMinutes;
-            if (mLazyDexOpt) {
-                dexOptLRUThresholdInMinutes = 30; // only last 30 minutes of apps for eng builds.
-            } else {
-                dexOptLRUThresholdInMinutes = 7 * 24 * 60; // apps used in the 7 days for users.
-            }
-            long dexOptLRUThresholdInMills = dexOptLRUThresholdInMinutes * 60 * 1000;
-
             int total = pkgs.size();
             int skipped = 0;
             long now = System.currentTimeMillis();
             for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
                 PackageParser.Package pkg = i.next();
                 long then = pkg.mLastPackageUsageTimeInMills;
-                if (then + dexOptLRUThresholdInMills < now) {
+                if (then + mDexOptLRUThresholdInMills < now) {
                     if (DEBUG_DEXOPT) {
                         Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
                               ((then == 0) ? "never" : new Date(then)));
@@ -13379,6 +13382,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ksh);
             }
             return false;
+        }
+    }
+
+    public void getUsageStatsIfNoPackageUsageInfo() {
+        if (!mPackageUsage.isHistoricalPackageUsageAvailable()) {
+            UsageStatsManager usm = (UsageStatsManager) mContext.getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usm == null) {
+                throw new IllegalStateException("UsageStatsManager must be initialized");
+            }
+            long now = System.currentTimeMillis();
+            Map<String, UsageStats> stats = usm.queryAndAggregateUsageStats(now - mDexOptLRUThresholdInMills, now);
+            for (Map.Entry<String, UsageStats> entry : stats.entrySet()) {
+                String packageName = entry.getKey();
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    continue;
+                }
+                UsageStats usage = entry.getValue();
+                pkg.mLastPackageUsageTimeInMills = usage.getLastTimeUsed();
+                mPackageUsage.mIsHistoricalPackageUsageAvailable = true;
+            }
         }
     }
 }
