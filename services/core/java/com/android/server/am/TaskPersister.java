@@ -166,7 +166,7 @@ public class TaskPersister {
                         break;
                     }
                 }
-                if (queueNdx < 0) {
+                if (queueNdx < 0 && task.isPersistable) {
                     mWriteQueue.add(new TaskWriteQueueItem(task));
                 }
             } else {
@@ -473,13 +473,15 @@ public class TaskPersister {
                         if (DEBUG) Slog.d(TAG, "mRecents=" + tasks);
                         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                             final TaskRecord task = tasks.get(taskNdx);
-                            if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task + " persistable=" +
-                                    task.isPersistable);
-                            if (task.isPersistable && !task.stack.isHomeStack()) {
+                            if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task +
+                                    " persistable=" + task.isPersistable);
+                            if ((task.isPersistable || task.inRecents)
+                                    && !task.stack.isHomeStack()) {
                                 if (DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                                 persistentTaskIds.add(task.taskId);
                             } else {
-                                if (DEBUG) Slog.d(TAG, "omitting from persistentTaskIds task=" + task);
+                                if (DEBUG) Slog.d(TAG,
+                                        "omitting from persistentTaskIds task=" + task);
                             }
                         }
                     }
