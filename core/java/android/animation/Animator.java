@@ -16,6 +16,8 @@
 
 package android.animation;
 
+import android.content.res.ConstantState;
+
 import java.util.ArrayList;
 
 /**
@@ -39,6 +41,18 @@ public abstract class Animator implements Cloneable {
      * Whether this animator is currently in a paused state.
      */
     boolean mPaused = false;
+
+    /**
+     * A set of flags which identify the type of configuration changes that can affect this
+     * Animator. Used by the Animator cache.
+     */
+    int mChangingConfigurations = 0;
+
+    /**
+     * If this animator is inflated from a constant state, keep a reference to it so that
+     * ConstantState will not be garbage collected until this animator is collected
+     */
+    private AnimatorConstantState mConstantState;
 
     /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
@@ -295,25 +309,71 @@ public abstract class Animator implements Cloneable {
         }
     }
 
+    /**
+     * Return a mask of the configuration parameters for which this animator may change, requiring
+     * that it should be re-created from Resources. The default implementation returns whatever
+     * value was provided through setChangingConfigurations(int) or 0 by default.
+     *
+     * @return Returns a mask of the changing configuration parameters, as defined by
+     * {@link android.content.pm.ActivityInfo}.
+     * @see android.content.pm.ActivityInfo
+     * @hide
+     */
+    public int getChangingConfigurations() {
+        return mChangingConfigurations;
+    }
+
+    /**
+     * Set a mask of the configuration parameters for which this animator may change, requiring
+     * that it be re-created from resource.
+     *
+     * @param configs A mask of the changing configuration parameters, as
+     * defined by {@link android.content.pm.ActivityInfo}.
+     *
+     * @see android.content.pm.ActivityInfo
+     * @hide
+     */
+    public void setChangingConfigurations(int configs) {
+        mChangingConfigurations = configs;
+    }
+
+    /**
+     * Sets the changing configurations value to the union of the current changing configurations
+     * and the provided configs.
+     * This method is called while loading the animator.
+     * @hide
+     */
+    public void appendChangingConfigurations(int configs) {
+        mChangingConfigurations |= configs;
+    }
+
+    /**
+     * Return a {@link android.content.res.ConstantState} instance that holds the shared state of
+     * this Animator.
+     * <p>
+     * This constant state is used to create new instances of this animator when needed, instead
+     * of re-loading it from resources. Default implementation creates a new
+     * {@link AnimatorConstantState}. You can override this method to provide your custom logic or
+     * return null if you don't want this animator to be cached.
+     *
+     * @return The ConfigurationBoundResourceCache.BaseConstantState associated to this Animator.
+     * @see android.content.res.ConstantState
+     * @see #clone()
+     * @hide
+     */
+    public ConstantState<Animator> createConstantState() {
+        return new AnimatorConstantState(this);
+    }
+
     @Override
     public Animator clone() {
         try {
             final Animator anim = (Animator) super.clone();
             if (mListeners != null) {
-                ArrayList<AnimatorListener> oldListeners = mListeners;
-                anim.mListeners = new ArrayList<AnimatorListener>();
-                int numListeners = oldListeners.size();
-                for (int i = 0; i < numListeners; ++i) {
-                    anim.mListeners.add(oldListeners.get(i));
-                }
+                anim.mListeners = new ArrayList<AnimatorListener>(mListeners);
             }
             if (mPauseListeners != null) {
-                ArrayList<AnimatorPauseListener> oldListeners = mPauseListeners;
-                anim.mPauseListeners = new ArrayList<AnimatorPauseListener>();
-                int numListeners = oldListeners.size();
-                for (int i = 0; i < numListeners; ++i) {
-                    anim.mPauseListeners.add(oldListeners.get(i));
-                }
+                anim.mPauseListeners = new ArrayList<AnimatorPauseListener>(mPauseListeners);
             }
             return anim;
         } catch (CloneNotSupportedException e) {
@@ -468,5 +528,36 @@ public abstract class Animator implements Cloneable {
      */
     public void setAllowRunningAsynchronously(boolean mayRunAsync) {
         // It is up to subclasses to support this, if they can.
+    }
+
+    /**
+     * Creates a {@link ConstantState} which holds changing configurations information associated
+     * with the given Animator.
+     * <p>
+     * When {@link #newInstance()} is called, default implementation clones the Animator.
+     */
+    private static class AnimatorConstantState extends ConstantState<Animator> {
+
+        final Animator mAnimator;
+        int mChangingConf;
+
+        public AnimatorConstantState(Animator animator) {
+            mAnimator = animator;
+            // ensure a reference back to here so that constante state is not gc'ed.
+            mAnimator.mConstantState = this;
+            mChangingConf = mAnimator.getChangingConfigurations();
+        }
+
+        @Override
+        public int getChangingConfigurations() {
+            return mChangingConf;
+        }
+
+        @Override
+        public Animator newInstance() {
+            final Animator clone = mAnimator.clone();
+            clone.mConstantState = this;
+            return clone;
+        }
     }
 }

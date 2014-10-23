@@ -241,6 +241,19 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public int getChangingConfigurations() {
+        int conf = super.getChangingConfigurations();
+        final int nodeCount = mNodes.size();
+        for (int i = 0; i < nodeCount; i ++) {
+            conf |= mNodes.get(i).animation.getChangingConfigurations();
+        }
+        return conf;
+    }
+
+    /**
      * Sets the TimeInterpolator for all current {@link #getChildAnimations() child animations}
      * of this AnimatorSet. The default value is null, which means that no interpolator
      * is set on this AnimatorSet. Setting the interpolator to any non-null value
@@ -628,23 +641,25 @@ public final class AnimatorSet extends Animator {
          * manually, as we clone each Node (and its animation). The clone will then be sorted,
          * and will populate any appropriate lists, when it is started.
          */
+        final int nodeCount = mNodes.size();
         anim.mNeedsSort = true;
         anim.mTerminated = false;
         anim.mStarted = false;
         anim.mPlayingSet = new ArrayList<Animator>();
         anim.mNodeMap = new HashMap<Animator, Node>();
-        anim.mNodes = new ArrayList<Node>();
-        anim.mSortedNodes = new ArrayList<Node>();
+        anim.mNodes = new ArrayList<Node>(nodeCount);
+        anim.mSortedNodes = new ArrayList<Node>(nodeCount);
         anim.mReversible = mReversible;
         anim.mSetListener = null;
 
         // Walk through the old nodes list, cloning each node and adding it to the new nodemap.
         // One problem is that the old node dependencies point to nodes in the old AnimatorSet.
         // We need to track the old/new nodes in order to reconstruct the dependencies in the clone.
-        HashMap<Node, Node> nodeCloneMap = new HashMap<Node, Node>(); // <old, new>
-        for (Node node : mNodes) {
+
+        for (int n = 0; n < nodeCount; n++) {
+            final Node node = mNodes.get(n);
             Node nodeClone = node.clone();
-            nodeCloneMap.put(node, nodeClone);
+            node.mTmpClone = nodeClone;
             anim.mNodes.add(nodeClone);
             anim.mNodeMap.put(nodeClone.animation, nodeClone);
             // Clear out the dependencies in the clone; we'll set these up manually later
@@ -652,40 +667,50 @@ public final class AnimatorSet extends Animator {
             nodeClone.tmpDependencies = null;
             nodeClone.nodeDependents = null;
             nodeClone.nodeDependencies = null;
+
             // clear out any listeners that were set up by the AnimatorSet; these will
             // be set up when the clone's nodes are sorted
-            ArrayList<AnimatorListener> cloneListeners = nodeClone.animation.getListeners();
+            final ArrayList<AnimatorListener> cloneListeners = nodeClone.animation.getListeners();
             if (cloneListeners != null) {
-                ArrayList<AnimatorListener> listenersToRemove = null;
-                for (AnimatorListener listener : cloneListeners) {
+                for (int i = cloneListeners.size() - 1; i >= 0; i--) {
+                    final AnimatorListener listener = cloneListeners.get(i);
                     if (listener instanceof AnimatorSetListener) {
-                        if (listenersToRemove == null) {
-                            listenersToRemove = new ArrayList<AnimatorListener>();
-                        }
-                        listenersToRemove.add(listener);
-                    }
-                }
-                if (listenersToRemove != null) {
-                    for (AnimatorListener listener : listenersToRemove) {
-                        cloneListeners.remove(listener);
+                        cloneListeners.remove(i);
                     }
                 }
             }
         }
         // Now that we've cloned all of the nodes, we're ready to walk through their
         // dependencies, mapping the old dependencies to the new nodes
-        for (Node node : mNodes) {
-            Node nodeClone = nodeCloneMap.get(node);
+        for (int n = 0; n < nodeCount; n++) {
+            final Node node = mNodes.get(n);
+            final Node clone = node.mTmpClone;
             if (node.dependencies != null) {
-                for (Dependency dependency : node.dependencies) {
-                    Node clonedDependencyNode = nodeCloneMap.get(dependency.node);
-                    Dependency cloneDependency = new Dependency(clonedDependencyNode,
+                clone.dependencies = new ArrayList<Dependency>(node.dependencies.size());
+                final int depSize = node.dependencies.size();
+                for (int i = 0; i < depSize; i ++) {
+                    final Dependency dependency = node.dependencies.get(i);
+                    Dependency cloneDependency = new Dependency(dependency.node.mTmpClone,
                             dependency.rule);
-                    nodeClone.addDependency(cloneDependency);
+                    clone.dependencies.add(cloneDependency);
+                }
+            }
+            if (node.nodeDependents != null) {
+                clone.nodeDependents = new ArrayList<Node>(node.nodeDependents.size());
+                for (Node dep : node.nodeDependents) {
+                    clone.nodeDependents.add(dep.mTmpClone);
+                }
+            }
+            if (node.nodeDependencies != null) {
+                clone.nodeDependencies = new ArrayList<Node>(node.nodeDependencies.size());
+                for (Node dep : node.nodeDependencies) {
+                    clone.nodeDependencies.add(dep.mTmpClone);
                 }
             }
         }
-
+        for (int n = 0; n < nodeCount; n++) {
+            mNodes.get(n).mTmpClone = null;
+        }
         return anim;
     }
 
@@ -1015,6 +1040,11 @@ public final class AnimatorSet extends Animator {
          * are done and it's time to send out an end event for the entire AnimatorSet.
          */
         public boolean done = false;
+
+        /**
+         * Temporary field to hold the clone in AnimatorSet#clone. Cleaned after clone is complete
+         */
+        private Node mTmpClone = null;
 
         /**
          * Constructs the Node with the animation that it encapsulates. A Node has no
