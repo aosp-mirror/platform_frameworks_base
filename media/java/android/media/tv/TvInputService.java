@@ -332,8 +332,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the change on the track information. This is expected to be called whenever a track
-         * is added/removed and the metadata of a track is modified.
+         * Sends the list of all audio/video/subtitle tracks. The is used by the framework to
+         * maintain the track information for a given session, which in turn is used by
+         * {@link TvView#getTracks} for the application to retrieve metadata for a given track type.
+         * The TV input service must call this method as soon as the track information becomes
+         * available or is updated. Note that in a case where a part of the information for a
+         * certain track is updated, it is not necessary to create a new {@link TvTrackInfo} object
+         * with a different track ID.
          *
          * @param tracks A list which includes track information.
          * @throws IllegalArgumentException if {@code tracks} contains redundant tracks.
@@ -364,8 +369,12 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the ID of the selected track for a given track type. This is expected to be called
-         * whenever there is a change on track selection.
+         * Sends the type and ID of a selected track. This is used to inform the application that a
+         * specific track is selected. The TV input service must call this method as soon as a track
+         * is selected either by default or in response to a call to {@link #onSelectTrack}. The
+         * selected track ID for a given type is maintained in the framework until the next call to
+         * this method even after the entire track list is updated (but is reset when the session is
+         * tuned to a new channel), so care must be taken not to result in an obsolete track ID.
          *
          * @param type The type of the selected track. The type can be
          *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
