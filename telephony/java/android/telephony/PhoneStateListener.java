@@ -227,7 +227,7 @@ public class PhoneStateListener {
      * @hide
      */
     /** @hide */
-    protected long mSubId = SubscriptionManager.INVALID_SUB_ID;
+    protected int mSubId = SubscriptionManager.INVALID_SUB_ID;
 
     private final Handler mHandler;
 
@@ -252,10 +252,10 @@ public class PhoneStateListener {
     /**
      * Create a PhoneStateListener for the Phone using the specified subscription.
      * This class requires Looper.myLooper() not return null. To supply your
-     * own non-null Looper use PhoneStateListener(long subId, Looper looper) below.
+     * own non-null Looper use PhoneStateListener(int subId, Looper looper) below.
      * @hide
      */
-    public PhoneStateListener(long subId) {
+    public PhoneStateListener(int subId) {
         this(subId, Looper.myLooper());
     }
 
@@ -264,7 +264,7 @@ public class PhoneStateListener {
      * and non-null Looper.
      * @hide
      */
-    public PhoneStateListener(long subId, Looper looper) {
+    public PhoneStateListener(int subId, Looper looper) {
         if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
         mSubId = subId;
         mHandler = new Handler(looper) {

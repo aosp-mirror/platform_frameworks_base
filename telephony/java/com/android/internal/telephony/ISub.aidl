@@ -25,7 +25,7 @@ interface ISub {
      * @param subId The unique SubInfoRecord index in database
      * @return SubInfoRecord, maybe null
      */
-    SubInfoRecord getSubInfoForSubscriber(long subId);
+    SubInfoRecord getSubInfoForSubscriber(int subId);
 
     /**
      * Get the SubInfoRecord according to an IccId
@@ -79,7 +79,7 @@ interface ISub {
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setColor(int color, long subId);
+    int setColor(int color, int subId);
 
     /**
      * Set display name by simInfo index
@@ -87,7 +87,7 @@ interface ISub {
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setDisplayName(String displayName, long subId);
+    int setDisplayName(String displayName, int subId);
 
     /**
      * Set display name by simInfo index with name source
@@ -96,7 +96,7 @@ interface ISub {
      * @param nameSource, 0: DEFAULT_SOURCE, 1: SIM_SOURCE, 2: USER_INPUT
      * @return the number of records updated
      */
-    int setDisplayNameUsingSrc(String displayName, long subId, long nameSource);
+    int setDisplayNameUsingSrc(String displayName, int subId, long nameSource);
 
     /**
      * Set phone number by subId
@@ -104,7 +104,7 @@ interface ISub {
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setDisplayNumber(String number, long subId);
+    int setDisplayNumber(String number, int subId);
 
     /**
      * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
@@ -112,7 +112,7 @@ interface ISub {
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setDisplayNumberFormat(int format, long subId);
+    int setDisplayNumberFormat(int format, int subId);
 
     /**
      * Set data roaming by simInfo index
@@ -120,35 +120,35 @@ interface ISub {
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setDataRoaming(int roaming, long subId);
+    int setDataRoaming(int roaming, int subId);
 
-    int getSlotId(long subId);
+    int getSlotId(int subId);
 
-    long[] getSubId(int slotId);
+    int[] getSubId(int slotId);
 
-    long getDefaultSubId();
+    int getDefaultSubId();
 
     int clearSubInfo();
 
-    int getPhoneId(long subId);
+    int getPhoneId(int subId);
 
     /**
      * Get the default data subscription
      * @return Id of the data subscription
      */
-    long getDefaultDataSubId();
+    int getDefaultDataSubId();
 
-    void setDefaultDataSubId(long subId);
+    void setDefaultDataSubId(int subId);
 
-    long getDefaultVoiceSubId();
+    int getDefaultVoiceSubId();
 
-    void setDefaultVoiceSubId(long subId);
+    void setDefaultVoiceSubId(int subId);
 
-    long getDefaultSmsSubId();
+    int getDefaultSmsSubId();
 
-    void setDefaultSmsSubId(long subId);
+    void setDefaultSmsSubId(int subId);
 
     void clearDefaultsForInactiveSubIds();
 
-    long[] getActiveSubIdList();
+    int[] getActiveSubIdList();
 }
