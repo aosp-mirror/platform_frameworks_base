@@ -746,7 +746,8 @@ sample_groups := -samplegroup Background \
                  -samplegroup Sensors \
                  -samplegroup Testing \
                  -samplegroup UI \
-                 -samplegroup Views
+                 -samplegroup Views \
+                 -samplegroup Wearable
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
