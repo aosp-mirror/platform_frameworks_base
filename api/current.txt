@@ -3053,9 +3053,10 @@ package android.animation {
     method public android.graphics.Rect evaluate(float, android.graphics.Rect, android.graphics.Rect);
   }
 
-  public class StateListAnimator {
+  public class StateListAnimator implements java.lang.Cloneable {
     ctor public StateListAnimator();
     method public void addState(int[], android.animation.Animator);
+    method public android.animation.StateListAnimator clone();
     method public void jumpToCurrentState();
   }
 
@@ -35668,13 +35669,13 @@ package android.view.accessibility {
 
 package android.view.animation {
 
-  public class AccelerateDecelerateInterpolator implements android.view.animation.Interpolator {
+  public class AccelerateDecelerateInterpolator extends android.view.animation.BaseInterpolator {
     ctor public AccelerateDecelerateInterpolator();
     ctor public AccelerateDecelerateInterpolator(android.content.Context, android.util.AttributeSet);
     method public float getInterpolation(float);
   }
 
-  public class AccelerateInterpolator implements android.view.animation.Interpolator {
+  public class AccelerateInterpolator extends android.view.animation.BaseInterpolator {
     ctor public AccelerateInterpolator();
     ctor public AccelerateInterpolator(float);
     ctor public AccelerateInterpolator(android.content.Context, android.util.AttributeSet);
@@ -35776,14 +35777,14 @@ package android.view.animation {
     method public static android.view.animation.Animation makeOutAnimation(android.content.Context, boolean);
   }
 
-  public class AnticipateInterpolator implements android.view.animation.Interpolator {
+  public class AnticipateInterpolator extends android.view.animation.BaseInterpolator {
     ctor public AnticipateInterpolator();
     ctor public AnticipateInterpolator(float);
     ctor public AnticipateInterpolator(android.content.Context, android.util.AttributeSet);
     method public float getInterpolation(float);
   }
 
-  public class AnticipateOvershootInterpolator implements android.view.animation.Interpolator {
+  public class AnticipateOvershootInterpolator extends android.view.animation.BaseInterpolator {
     ctor public AnticipateOvershootInterpolator();
     ctor public AnticipateOvershootInterpolator(float);
     ctor public AnticipateOvershootInterpolator(float, float);
@@ -35791,19 +35792,23 @@ package android.view.animation {
     method public float getInterpolation(float);
   }
 
-  public class BounceInterpolator implements android.view.animation.Interpolator {
+  public abstract class BaseInterpolator implements android.view.animation.Interpolator {
+    ctor public BaseInterpolator();
+  }
+
+  public class BounceInterpolator extends android.view.animation.BaseInterpolator {
     ctor public BounceInterpolator();
     ctor public BounceInterpolator(android.content.Context, android.util.AttributeSet);
     method public float getInterpolation(float);
   }
 
-  public class CycleInterpolator implements android.view.animation.Interpolator {
+  public class CycleInterpolator extends android.view.animation.BaseInterpolator {
     ctor public CycleInterpolator(float);
     ctor public CycleInterpolator(android.content.Context, android.util.AttributeSet);
     method public float getInterpolation(float);
   }
 
-  public class DecelerateInterpolator implements android.view.animation.Interpolator {
+  public class DecelerateInterpolator extends android.view.animation.BaseInterpolator {
     ctor public DecelerateInterpolator();
     ctor public DecelerateInterpolator(float);
     ctor public DecelerateInterpolator(android.content.Context, android.util.AttributeSet);
@@ -35878,20 +35883,20 @@ package android.view.animation {
     field public int index;
   }
 
-  public class LinearInterpolator implements android.view.animation.Interpolator {
+  public class LinearInterpolator extends android.view.animation.BaseInterpolator {
     ctor public LinearInterpolator();
     ctor public LinearInterpolator(android.content.Context, android.util.AttributeSet);
     method public float getInterpolation(float);
   }
 
-  public class OvershootInterpolator implements android.view.animation.Interpolator {
+  public class OvershootInterpolator extends android.view.animation.BaseInterpolator {
     ctor public OvershootInterpolator();
     ctor public OvershootInterpolator(float);
     ctor public OvershootInterpolator(android.content.Context, android.util.AttributeSet);
     method public float getInterpolation(float);
   }
 
-  public class PathInterpolator implements android.view.animation.Interpolator {
+  public class PathInterpolator extends android.view.animation.BaseInterpolator {
     ctor public PathInterpolator(android.graphics.Path);
     ctor public PathInterpolator(float, float);
     ctor public PathInterpolator(float, float, float, float);
