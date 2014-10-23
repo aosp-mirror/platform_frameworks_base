@@ -49,7 +49,8 @@ public:
     void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
     bool swapBuffers(EGLSurface surface);
 
-    bool enableDirtyRegions(EGLSurface surface);
+    // Returns true iff the surface is now preserving buffers.
+    bool setPreserveBuffer(EGLSurface surface, bool preserve);
 
     void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
 
@@ -71,8 +72,8 @@ private:
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
 
-    const bool mRequestDirtyRegions;
-    bool mCanSetDirtyRegions;
+    const bool mAllowPreserveBuffer;
+    bool mCanSetPreserveBuffer;
 
     EGLSurface mCurrentSurface;
 
