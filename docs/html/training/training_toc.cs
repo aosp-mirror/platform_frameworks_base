@@ -834,6 +834,12 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/wear-location-detection.html"
+           description=
+           "How to detect location data on Android Wear devices."
+          >Detecting Location</a>
+      </li>
     </ul>
   </li>
   <!-- End Building for wearables -->
