@@ -37,8 +37,6 @@ namespace {
 
 #include "data/lib/lib_arsc.h"
 
-enum { MAY_NOT_BE_BAG = false };
-
 TEST(ResTableTest, shouldLoadSuccessfully) {
     ResTable table;
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
@@ -48,15 +46,7 @@ TEST(ResTableTest, simpleTypeIsRetrievedCorrectly) {
     ResTable table;
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
-    Res_value val;
-    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG);
-
-    ASSERT_GE(block, 0);
-    ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
-
-    const ResStringPool* pool = table.getTableStringBlock(block);
-    ASSERT_TRUE(NULL != pool);
-    ASSERT_EQ(String8("test1"), pool->string8ObjectAt(val.data));
+    EXPECT_TRUE(IsStringEqual(table, base::R::string::test1, "test1"));
 }
 
 TEST(ResTableTest, resourceNameIsResolved) {
