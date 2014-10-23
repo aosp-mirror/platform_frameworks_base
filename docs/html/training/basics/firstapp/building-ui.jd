@@ -1,7 +1,7 @@
 page.title=Building a Simple User Interface
 trainingnavtop=true
 
-page.tags=ui, views, layout, widgets, string resources
+page.tags=ui, views, layouts, widgets, string resources
 helpoutsWidget=true
 
 @jd:body
