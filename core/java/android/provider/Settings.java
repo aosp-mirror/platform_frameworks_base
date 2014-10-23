@@ -6599,7 +6599,7 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          * @hide
          */
-        public static final String VOLTE_VT_ENABLED = "volte_vt_enabled";
+        public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
