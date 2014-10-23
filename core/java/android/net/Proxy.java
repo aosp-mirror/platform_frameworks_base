@@ -19,17 +19,10 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
-import android.net.ProxyInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.protocol.HttpContext;
 
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
@@ -212,6 +205,7 @@ public final class Proxy {
      * is no proxy.
      * {@hide}
      */
+    // TODO: Get rid of this method. It's used only in tests.
     public static final HttpHost getPreferredHttpHost(Context context,
             String url) {
         java.net.Proxy prefProxy = getProxy(context, url);
