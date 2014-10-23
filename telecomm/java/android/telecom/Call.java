@@ -484,10 +484,10 @@ public final class Call {
 
     /**
      * Notifies this {@code Call} that an account has been selected and to proceed with placing
-     * an outgoing call.
+     * an outgoing call. Optionally sets this account as the default account.
      */
-    public void phoneAccountSelected(PhoneAccountHandle accountHandle) {
-        mInCallAdapter.phoneAccountSelected(mTelecomCallId, accountHandle);
+    public void phoneAccountSelected(PhoneAccountHandle accountHandle, boolean setDefault) {
+        mInCallAdapter.phoneAccountSelected(mTelecomCallId, accountHandle, setDefault);
 
     }
 
