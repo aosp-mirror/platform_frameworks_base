@@ -1855,7 +1855,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
                             + " VALUES(?,?);");
-                    loadSetting(stmt, Settings.Global.VOLTE_VT_ENABLED, ImsConfig.FeatureValueConstants.ON);
+                    loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -2610,7 +2610,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Global.GUEST_USER_ENABLED,
                     R.bool.def_guest_user_enabled);
-            loadSetting(stmt, Settings.Global.VOLTE_VT_ENABLED, ImsConfig.FeatureValueConstants.ON);
+            loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
             // --- New global settings start here
         } finally {
             if (stmt != null) stmt.close();
