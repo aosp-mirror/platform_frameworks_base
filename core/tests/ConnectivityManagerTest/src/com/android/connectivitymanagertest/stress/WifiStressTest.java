@@ -216,7 +216,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
         assertTrue("wifi not connected", waitForNetworkState(ConnectivityManager.TYPE_WIFI,
                 State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
         // Run ping test to verify the data connection
-        assertTrue("Wi-Fi is connected, but no data connection.", pingTest(null));
+        assertTrue("Wi-Fi is connected, but no data connection.", pingTest());
 
         long i, sum = 0, avgReconnectTime = 0;
         for (i = 1; i <= mReconnectIterations; i++) {
@@ -264,7 +264,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
             } else {
                 assertEquals("mobile not connected", State.CONNECTED,
                         mCm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
-                assertTrue("no connectivity over mobile", pingTest(null));
+                assertTrue("no connectivity over mobile", pingTest());
             }
 
             // Turn screen on again
@@ -281,7 +281,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
             avgReconnectTime = sum / i;
             logv("average reconnection time is: " + avgReconnectTime);
 
-            assertTrue("Reconnect to Wi-Fi network, but no data connection.", pingTest(null));
+            assertTrue("Reconnect to Wi-Fi network, but no data connection.", pingTest());
         }
         Bundle result = new Bundle();
         result.putLong("actual-iterations", i - 1);
