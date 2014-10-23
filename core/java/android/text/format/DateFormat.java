@@ -216,7 +216,7 @@ public class DateFormat {
      */
     public static String getTimeFormatString(Context context) {
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        return is24HourFormat(context) ? d.timeFormat24 : d.timeFormat12;
+        return is24HourFormat(context) ? d.timeFormat_Hm : d.timeFormat_hm;
     }
 
     /**
