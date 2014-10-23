@@ -1412,12 +1412,16 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mCopiesEditText.setEnabled(true);
             mCopiesEditText.setFocusableInTouchMode(true);
         } else {
+            CharSequence text = mCopiesEditText.getText();
+            if (TextUtils.isEmpty(text) || !MIN_COPIES_STRING.equals(text.toString())) {
+                mCopiesEditText.setText(MIN_COPIES_STRING);
+            }
             mCopiesEditText.setEnabled(false);
             mCopiesEditText.setFocusable(false);
         }
         if (mCopiesEditText.getError() == null
                 && TextUtils.isEmpty(mCopiesEditText.getText())) {
-            mCopiesEditText.setText(String.valueOf(MIN_COPIES));
+            mCopiesEditText.setText(MIN_COPIES_STRING);
             mCopiesEditText.requestFocus();
         }
     }
