@@ -281,6 +281,9 @@ public final class PowerManagerService extends SystemService
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
 
+    // True if the device should wake up when plugged or unplugged in theater mode.
+    private boolean mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig;
+
     // True if the device should suspend when the screen is off due to proximity.
     private boolean mSuspendWhenScreenOffDueToProximityConfig;
 
@@ -419,6 +422,9 @@ public final class PowerManagerService extends SystemService
 
     // True if the battery level is currently considered low.
     private boolean mBatteryLevelLow;
+
+    // True if theater mode is enabled
+    private boolean mTheaterModeEnabled;
 
     private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
             = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
@@ -568,6 +574,9 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.THEATER_MODE_ON),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -585,6 +594,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
+        mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromUnplug);
         mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
         mDreamsSupportedConfig = resources.getBoolean(
@@ -636,6 +647,8 @@ public final class PowerManagerService extends SystemService
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
+        mTheaterModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.THEATER_MODE_ON, 0) == 1;
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
         mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
@@ -1331,6 +1344,11 @@ public final class PowerManagerService extends SystemService
 
         // If already dreaming and becoming powered, then don't wake.
         if (mIsPowered && mWakefulness == WAKEFULNESS_DREAMING) {
+            return false;
+        }
+
+        // Don't wake while theater mode is enabled.
+        if (mTheaterModeEnabled && !mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig) {
             return false;
         }
 
@@ -2360,6 +2378,10 @@ public final class PowerManagerService extends SystemService
                     + mDecoupleHalInteractiveModeFromDisplayConfig);
             pw.println("  mWakeUpWhenPluggedOrUnpluggedConfig="
                     + mWakeUpWhenPluggedOrUnpluggedConfig);
+            pw.println("  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig="
+                    + mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig);
+            pw.println("  mTheaterModeEnabled="
+                    + mTheaterModeEnabled);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
                     + mSuspendWhenScreenOffDueToProximityConfig);
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);

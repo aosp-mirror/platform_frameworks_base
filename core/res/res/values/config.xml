@@ -453,6 +453,26 @@
     <!-- If this is true, key chords can be used to take a screenshot on the device. -->
     <bool name="config_enableScreenshotChord">true</bool>
 
+    <!-- If this is true, allow wake from theater mode when plugged in or unplugged. -->
+    <bool name="config_allowTheaterModeWakeFromUnplug">false</bool>
+    <!-- If this is true, allow wake from theater mode from gesture. -->
+    <bool name="config_allowTheaterModeWakeFromGesture">false</bool>
+    <!-- If this is true, allow wake from theater mode from camera lens cover is switched. -->
+    <bool name="config_allowTheaterModeWakeFromCameraLens">false</bool>
+    <!-- If this is true, allow wake from theater mode from power key press. -->
+    <bool name="config_allowTheaterModeWakeFromPowerKey">true</bool>
+    <!-- If this is true, allow wake from theater mode from regular key press. Setting this value to
+         true implies config_allowTheaterModeWakeFromPowerKey is also true-->
+    <bool name="config_allowTheaterModeWakeFromKey">false</bool>
+    <!-- If this is true, allow wake from theater mode from motion. -->
+    <bool name="config_allowTheaterModeWakeFromMotion">false</bool>
+    <!-- If this is true, allow wake from theater mode from lid switch. -->
+    <bool name="config_allowTheaterModeWakeFromLidSwitch">false</bool>
+    <!-- If this is true, allow wake from theater mode when docked. -->
+    <bool name="config_allowTheaterModeWakeFromDock">false</bool>
+    <!-- If this is true, allow wake from theater mode from window layout flag. -->
+    <bool name="config_allowTheaterModeWakeFromWindowLayout">false</bool>
+
     <!-- Auto-rotation behavior -->
 
     <!-- If true, enables auto-rotation features using the accelerometer.
