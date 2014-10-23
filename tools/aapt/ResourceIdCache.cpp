@@ -10,7 +10,6 @@
 #include "ResourceIdCache.h"
 #include <map>
 
-
 static size_t mHits = 0;
 static size_t mMisses = 0;
 static size_t mCollisions = 0;
