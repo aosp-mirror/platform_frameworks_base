@@ -574,7 +574,8 @@ public class DocumentsActivity extends Activity {
         // Only sort by size when visible
         sortSize.setVisible(mState.showSize);
 
-        final boolean searchVisible;
+        boolean searchVisible;
+        boolean fileSizeVisible = mState.action != ACTION_MANAGE;
         if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
             createDir.setVisible(cwd != null && cwd.isCreateSupported());
             searchVisible = false;
@@ -583,6 +584,7 @@ public class DocumentsActivity extends Activity {
             if (cwd == null) {
                 grid.setVisible(false);
                 list.setVisible(false);
+                fileSizeVisible = false;
             }
 
             if (mState.action == ACTION_CREATE) {
@@ -604,7 +606,7 @@ public class DocumentsActivity extends Activity {
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
         advanced.setVisible(mState.action != ACTION_MANAGE);
-        fileSize.setVisible(mState.action != ACTION_MANAGE);
+        fileSize.setVisible(fileSizeVisible);
 
         return true;
     }
