@@ -234,7 +234,7 @@ page.image=/distribute/images/gp-tv-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App does not depend on a remote controller having a menu button to access user interface
+      App does not depend on a remote controller having a Menu button to access user interface
       controls.
       (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">Learn how</a>)
     </p>
@@ -291,8 +291,8 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App manifest sets an intent type of {@code ACTION_MAIN} with category
-      {@code CATEGORY_LEANBACK_LAUNCHER}.
+      App manifest sets an intent type of {@link android.content.Intent#ACTION_MAIN} with category
+      {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER}.
       (<a href="{@docRoot}training/tv/start/start.html#tv-activity">Learn how</a>)
     </p>
   </td>
@@ -321,8 +321,9 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      If the app requires a game controller, the app manifest sets the {@code uses-feature} setting
-      {@code android.hardware.gamepad} to {@code required="true"}.
+      If the app uses a game controller as it's primary input method, it declares the appropriate
+      requirement with the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"
+      >{@code &lt;uses-feature>}</a> manifest tag.
       (<a href="{@docRoot}training/tv/games/index.html#gamepad">Learn how</a>)
     </p>
   </td>
@@ -334,9 +335,9 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      If the app provides user instructions for use of game controllers, the instructions
-      do not include a controller with any branding.
-      (<a href="{@docRoot}training/tv/games/index.html#generic-controllers">Learn how</a>)
+      If the app provides visual instructions for using game controllers, the instructions should
+      be free of branding and show a compatible button layout.
+      (<a href="{@docRoot}training/tv/games/index.html#ControllerHelp">Learn how</a>)
     </p>
   </td>
 </tr>
@@ -351,7 +352,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App enables interaction with any advertising using D-pad controls.
+      App allows interaction with advertising using D-pad controls.
       (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">Learn how</a>)
     </p>
   </td>
@@ -363,7 +364,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      For advertising that uses full-screen, non-video ads, the app allows the user to
+      For advertising that uses fullscreen, non-video ads, the app allows the user to
       immediately dismiss the ad with D-pad controls.
     </p>
   </td>
@@ -375,7 +376,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      For advertising that uses clickable, non-full screen, non-video ads, the app does not allow
+      For advertising that uses clickable, non-fullscreen, non-video ads, the app does not allow
       ads to link to a web URL.
     </p>
   </td>
@@ -387,7 +388,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      For advertising that uses clickable, non-full screen, non-video ads, the app does not allow
+      For advertising that uses clickable, non-fullscreen, non-video ads, the app does not allow
       ads to link to another app that is not available on TV devices.
     </p>
   </td>
