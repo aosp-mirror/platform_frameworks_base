@@ -1040,7 +1040,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void addServiceLocked(Service service, UserState userState) {
         try {
-            service.linkToOwnDeathLocked();
+            service.onAdded();
             userState.mBoundServices.add(service);
             userState.mComponentNameToServiceMap.put(service.mComponentName, service);
         } catch (RemoteException re) {
@@ -1056,7 +1056,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void removeServiceLocked(Service service, UserState userState) {
         userState.mBoundServices.remove(service);
         userState.mComponentNameToServiceMap.remove(service.mComponentName);
-        service.unlinkToOwnDeathLocked();
+        service.onRemoved();
     }
 
     /**
@@ -1931,6 +1931,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         final ResolveInfo mResolveInfo;
 
+        final IBinder mOverlayWindowToken = new Binder();
+
         // the events pending events to be dispatched to this service
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<>();
@@ -2112,7 +2114,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mBindingServices.remove(mComponentName);
                     mWasConnectedAndDied = false;
                     try {
-                       mServiceInterface.setConnection(this, mId);
+                       mServiceInterface.init(this, mId, mOverlayWindowToken);
                        onUserStateChangedLocked(userState);
                     } catch (RemoteException re) {
                         Slog.w(LOG_TAG, "Error while setting connection for service: "
@@ -2602,6 +2604,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             /* do nothing - #binderDied takes care */
         }
 
+        public void onAdded() throws RemoteException {
+            linkToOwnDeathLocked();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mWindowManagerService.addWindowToken(mOverlayWindowToken,
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        public void onRemoved() {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mWindowManagerService.removeWindowToken(mOverlayWindowToken, true);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            unlinkToOwnDeathLocked();
+        }
+
         public void linkToOwnDeathLocked() throws RemoteException {
             mService.linkToDeath(this, 0);
         }
@@ -2614,7 +2637,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             try {
                 // Clear the proxy in the other process so this
                 // IAccessibilityServiceConnection can be garbage collected.
-                mServiceInterface.setConnection(null, mId);
+                mServiceInterface.init(null, mId, null);
             } catch (RemoteException re) {
                 /* ignore */
             }
@@ -3162,6 +3185,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
+                }
+
+                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY: {
+                    return AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY;
                 }
 
                 default: {

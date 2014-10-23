@@ -24,13 +24,18 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 
 import java.util.List;
 
@@ -366,7 +371,7 @@ public abstract class AccessibilityService extends Service {
         public void onAccessibilityEvent(AccessibilityEvent event);
         public void onInterrupt();
         public void onServiceConnected();
-        public void onSetConnectionId(int connectionId);
+        public void init(int connectionId, IBinder windowToken);
         public boolean onGesture(int gestureId);
         public boolean onKeyEvent(KeyEvent event);
     }
@@ -374,6 +379,10 @@ public abstract class AccessibilityService extends Service {
     private int mConnectionId;
 
     private AccessibilityServiceInfo mInfo;
+
+    private IBinder mWindowToken;
+
+    private WindowManager mWindowManager;
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -611,6 +620,18 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
+    @Override
+    public Object getSystemService(String name) {
+        if (Context.WINDOW_SERVICE.equals(name)) {
+            if (mWindowManager == null) {
+                WindowManager wrapped = (WindowManager) super.getSystemService(name);
+                mWindowManager = new LocalWindowManager(wrapped);
+            }
+            return mWindowManager;
+        }
+        return super.getSystemService(name);
+    }
+
     /**
      * Implement to return the implementation of the internal accessibility
      * service interface.
@@ -634,8 +655,9 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
-            public void onSetConnectionId( int connectionId) {
+            public void init(int connectionId, IBinder windowToken) {
                 mConnectionId = connectionId;
+                mWindowToken = windowToken;
             }
 
             @Override
@@ -658,7 +680,7 @@ public abstract class AccessibilityService extends Service {
      */
     public static class IAccessibilityServiceClientWrapper extends IAccessibilityServiceClient.Stub
             implements HandlerCaller.Callback {
-        private static final int DO_SET_SET_CONNECTION = 1;
+        private static final int DO_INIT = 1;
         private static final int DO_ON_INTERRUPT = 2;
         private static final int DO_ON_ACCESSIBILITY_EVENT = 3;
         private static final int DO_ON_GESTURE = 4;
@@ -677,9 +699,10 @@ public abstract class AccessibilityService extends Service {
             mCaller = new HandlerCaller(context, looper, this, true /*asyncHandler*/);
         }
 
-        public void setConnection(IAccessibilityServiceConnection connection, int connectionId) {
-            Message message = mCaller.obtainMessageIO(DO_SET_SET_CONNECTION, connectionId,
-                    connection);
+        public void init(IAccessibilityServiceConnection connection, int connectionId,
+                IBinder windowToken) {
+            Message message = mCaller.obtainMessageIOO(DO_INIT, connectionId,
+                    connection, windowToken);
             mCaller.sendMessage(message);
         }
 
@@ -730,20 +753,24 @@ public abstract class AccessibilityService extends Service {
                     mCallback.onInterrupt();
                 } return;
 
-                case DO_SET_SET_CONNECTION: {
+                case DO_INIT: {
                     mConnectionId = message.arg1;
+                    SomeArgs args = (SomeArgs) message.obj;
                     IAccessibilityServiceConnection connection =
-                        (IAccessibilityServiceConnection) message.obj;
+                            (IAccessibilityServiceConnection) args.arg1;
+                    IBinder windowToken = (IBinder) args.arg2;
+                    args.recycle();
                     if (connection != null) {
                         AccessibilityInteractionClient.getInstance().addConnection(mConnectionId,
                                 connection);
-                        mCallback.onSetConnectionId(mConnectionId);
+                        mCallback.init(mConnectionId, windowToken);
                         mCallback.onServiceConnected();
                     } else {
                         AccessibilityInteractionClient.getInstance().removeConnection(
                                 mConnectionId);
+                        mConnectionId = AccessibilityInteractionClient.NO_ID;
                         AccessibilityInteractionClient.getInstance().clearCache();
-                        mCallback.onSetConnectionId(AccessibilityInteractionClient.NO_ID);
+                        mCallback.init(AccessibilityInteractionClient.NO_ID, null);
                     }
                 } return;
 
@@ -783,6 +810,55 @@ public abstract class AccessibilityService extends Service {
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
             }
+        }
+    }
+
+    private class LocalWindowManager implements WindowManager {
+        private final WindowManager mImpl;
+
+        private LocalWindowManager(WindowManager impl) {
+            mImpl = impl;
+        }
+
+        @Override
+        public Display getDefaultDisplay() {
+            return mImpl.getDefaultDisplay();
+        }
+
+        @Override
+        public void addView(View view, ViewGroup.LayoutParams params) {
+            if (!(params instanceof WindowManager.LayoutParams)) {
+                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
+            }
+            WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
+            if (windowParams.type == LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+                    && windowParams.token == null) {
+                windowParams.token = mWindowToken;
+            }
+            mImpl.addView(view, params);
+        }
+
+        @Override
+        public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
+            if (!(params instanceof WindowManager.LayoutParams)) {
+                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
+            }
+            WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
+            if (windowParams.type == LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+                    && windowParams.token == null) {
+                windowParams.token = mWindowToken;
+            }
+            mImpl.updateViewLayout(view, params);
+        }
+
+        @Override
+        public void removeViewImmediate(View view) {
+            mImpl.removeViewImmediate(view);
+        }
+
+        @Override
+        public void removeView(View view) {
+            mImpl.removeView(view);
         }
     }
 }

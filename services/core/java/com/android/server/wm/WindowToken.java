@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.os.IBinder;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 
@@ -29,7 +30,7 @@ import java.io.PrintWriter;
 class WindowToken {
     // The window manager!
     final WindowManagerService service;
-    
+
     // The actual token.
     final IBinder token;
 
@@ -75,6 +76,15 @@ class WindowToken {
         token = _token;
         windowType = type;
         explicit = _explicit;
+    }
+
+    void removeAllWindows() {
+        for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+            WindowState win = windows.get(winNdx);
+            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) Slog.w(WindowManagerService.TAG,
+                    "removeAllWindows: removing win=" + win);
+            win.mService.removeWindowLocked(win.mSession, win);
+        }
     }
 
     void dump(PrintWriter pw, String prefix) {

@@ -992,8 +992,7 @@ final class AccessibilityController {
 
                     final int flags = windowState.mAttrs.flags;
 
-                    // If the window is not touchable, do not report it but take into account
-                    // the space it takes since the content behind it cannot be touched.
+                    // If the window is not touchable - ignore.
                     if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
                         continue;
                     }
@@ -1014,9 +1013,14 @@ final class AccessibilityController {
                         }
                     }
 
-                    // Account for the space this window takes.
-                    unaccountedSpace.op(boundsInScreen, unaccountedSpace,
-                            Region.Op.REVERSE_DIFFERENCE);
+                    // Account for the space this window takes if the window
+                    // is not an accessibility overlay which does not change
+                    // the reported windows.
+                    if (windowState.mAttrs.type == WindowManager.LayoutParams
+                            .TYPE_ACCESSIBILITY_OVERLAY) {
+                        unaccountedSpace.op(boundsInScreen, unaccountedSpace,
+                                Region.Op.REVERSE_DIFFERENCE);
+                    }
 
                     // We figured out what is touchable for the entire screen - done.
                     if (unaccountedSpace.isEmpty()) {
