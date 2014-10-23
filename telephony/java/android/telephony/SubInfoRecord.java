@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -105,6 +106,31 @@ public class SubInfoRecord implements Parcelable {
         this.simIconRes = iconRes;
         this.mcc = mcc;
         this.mnc = mnc;
+    }
+
+    /**
+     * Returns the string displayed to the user that identifies this subscription
+     */
+    public String getLabel() {
+        return this.displayName;
+    }
+
+    /**
+     * Return the icon used to identify this SIM.
+     * TODO: return the correct drawable.
+     */
+    public BitmapDrawable getIconDrawable() {
+        return new BitmapDrawable();
+    }
+
+    /**
+     * Return the color to be used for when displaying to the user. This is the value of the color.
+     * ex: 0x00ff00
+     */
+    public int getColor() {
+        // Note: This color is currently an index into a list of drawables, but this is soon to
+        // change.
+        return this.color;
     }
 
     public static final Parcelable.Creator<SubInfoRecord> CREATOR = new Parcelable.Creator<SubInfoRecord>() {
