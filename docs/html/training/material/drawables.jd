@@ -73,7 +73,7 @@ app's module:</p>
 <pre>
 dependencies {
     ...
-    compile 'com.android.support:palette-v7:+'
+    compile 'com.android.support:palette-v7:21.0.+'
 }
 </pre>
 
