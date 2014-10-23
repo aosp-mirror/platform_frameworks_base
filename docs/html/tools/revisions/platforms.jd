@@ -80,6 +80,23 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
 
 <h2 id="4.4">Android 4.4W</h2>
 
+<div class="toggle-content open">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-open.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(October 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Added location APIs support for Wear.</p>
+
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r20 or higher is required.</li>
+      <li>Android SDK Tools 23.0 or higher is required.</li>
+    </ul>
+  </div>
+
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
