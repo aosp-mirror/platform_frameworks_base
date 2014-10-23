@@ -206,15 +206,16 @@ video apps and games to display smooth synchronized content.</p>
 <p>Android 5.0 also adds support for <strong>multimedia tunneling</strong> to provide the best experience for ultra-high definition (4K) content and the ability to play compressed audio and video data together. </p>
 
 
-<!--
+
 <div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
 <img style="float:right; margin:0 1em 1em 2em"
     src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"
     srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"
     alt="" width="300" />
-<p class="img-caption">Android Work users have a unified view of their personal and work apps, which are badged for easy identification.</p>
+<p class="img-caption">Users have a unified view of their personal and work apps, which are
+badged for easy identification.</p>
 </div>
--->
+
 
 <h2 id="Work">Android in the workplace</h2>
 
