@@ -24,9 +24,7 @@ page.image=/distribute/images/gp-wear-quality.png
 </div>
 </div>
 
-<div class="top-right-float" style="padding-right:0;margin-bottom:1em;">
-  <img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:460px;">
-</div>
+<img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:480px;">
 
 <p>
   Android Wear aims to provide users with just the right information at just the right time. Great
@@ -334,7 +332,7 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App includes at least one Wear screenshot in Play details page.
+      App includes at least one Wear screenshot in its Play Store Listing.
       (<a href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">Learn how</a>)
     </p>
   </td>
