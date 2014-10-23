@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.content.res.ConfigurationBoundResourceCache;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
@@ -1289,12 +1290,7 @@ public class ValueAnimator extends Animator {
     public ValueAnimator clone() {
         final ValueAnimator anim = (ValueAnimator) super.clone();
         if (mUpdateListeners != null) {
-            ArrayList<AnimatorUpdateListener> oldListeners = mUpdateListeners;
-            anim.mUpdateListeners = new ArrayList<AnimatorUpdateListener>();
-            int numListeners = oldListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                anim.mUpdateListeners.add(oldListeners.get(i));
-            }
+            anim.mUpdateListeners = new ArrayList<AnimatorUpdateListener>(mUpdateListeners);
         }
         anim.mSeekTime = -1;
         anim.mPlayingBackwards = false;
