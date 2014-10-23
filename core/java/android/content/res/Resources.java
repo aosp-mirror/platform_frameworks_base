@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import android.animation.Animator;
+import android.animation.StateListAnimator;
 import android.util.Pools.SynchronizedPool;
 import android.view.ViewDebug;
 import com.android.internal.util.XmlUtils;
@@ -115,6 +117,10 @@ public class Resources {
             new ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>>();
     private final LongSparseArray<WeakReference<ColorStateList>> mColorStateListCache =
             new LongSparseArray<WeakReference<ColorStateList>>();
+    private final ConfigurationBoundResourceCache<Animator> mAnimatorCache =
+            new ConfigurationBoundResourceCache<Animator>(this);
+    private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
+            new ConfigurationBoundResourceCache<StateListAnimator>(this);
 
     private TypedValue mTmpValue = new TypedValue();
     private boolean mPreloading;
@@ -180,6 +186,24 @@ public class Resources {
             return dark;
         }
         return deviceDefault;
+    }
+
+    /**
+     * Used by AnimatorInflater.
+     *
+     * @hide
+     */
+    public ConfigurationBoundResourceCache<Animator> getAnimatorCache() {
+        return mAnimatorCache;
+    }
+
+    /**
+     * Used by AnimatorInflater.
+     *
+     * @hide
+     */
+    public ConfigurationBoundResourceCache<StateListAnimator> getStateListAnimatorCache() {
+        return mStateListAnimatorCache;
     }
 
     /**
@@ -1761,23 +1785,7 @@ public class Resources {
             // the framework.
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
-            int configChanges = 0xfffffff;
-            if (config != null) {
-                mTmpConfig.setTo(config);
-                int density = config.densityDpi;
-                if (density == Configuration.DENSITY_DPI_UNDEFINED) {
-                    density = mMetrics.noncompatDensityDpi;
-                }
-
-                mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
-
-                if (mTmpConfig.locale == null) {
-                    mTmpConfig.locale = Locale.getDefault();
-                    mTmpConfig.setLayoutDirection(mTmpConfig.locale);
-                }
-                configChanges = mConfiguration.updateFrom(mTmpConfig);
-                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
-            }
+            int configChanges = calcConfigChanges(config);
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
                 mConfiguration.setLayoutDirection(mConfiguration.locale);
@@ -1825,6 +1833,8 @@ public class Resources {
 
             clearDrawableCachesLocked(mDrawableCache, configChanges);
             clearDrawableCachesLocked(mColorDrawableCache, configChanges);
+            mAnimatorCache.onConfigurationChange(configChanges);
+            mStateListAnimatorCache.onConfigurationChange(configChanges);
 
             mColorStateListCache.clear();
 
@@ -1835,6 +1845,30 @@ public class Resources {
                 mPluralRule = NativePluralRules.forLocale(config.locale);
             }
         }
+    }
+
+    /**
+     * Called by ConfigurationBoundResourceCacheTest via reflection.
+     */
+    private int calcConfigChanges(Configuration config) {
+        int configChanges = 0xfffffff;
+        if (config != null) {
+            mTmpConfig.setTo(config);
+            int density = config.densityDpi;
+            if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+                density = mMetrics.noncompatDensityDpi;
+            }
+
+            mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
+
+            if (mTmpConfig.locale == null) {
+                mTmpConfig.locale = Locale.getDefault();
+                mTmpConfig.setLayoutDirection(mTmpConfig.locale);
+            }
+            configChanges = mConfiguration.updateFrom(mTmpConfig);
+            configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+        }
+        return configChanges;
     }
 
     private void clearDrawableCachesLocked(

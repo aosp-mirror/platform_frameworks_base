@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.animation;
 
-import com.android.frameworks.coretests.R;
+package android.view.animation;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.Button;
+/**
+ * An abstract class which is extended by default interpolators.
+ */
+abstract public class BaseInterpolator implements Interpolator {
+    private int mChangingConfiguration;
+    /**
+     * @hide
+     */
+    public int getChangingConfiguration() {
+        return mChangingConfiguration;
+    }
 
-public class BasicAnimatorActivity extends Activity {
-    public Button mAnimatingButton;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.animator_basic);
-        mAnimatingButton = (Button) findViewById(R.id.animatingButton);
+    /**
+     * @hide
+     */
+    void setChangingConfiguration(int changingConfiguration) {
+        mChangingConfiguration = changingConfiguration;
     }
 }

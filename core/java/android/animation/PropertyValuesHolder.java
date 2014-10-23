@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -791,7 +792,7 @@ public class PropertyValuesHolder implements Cloneable {
             // check to make sure that mProperty is on the class of target
             try {
                 Object testValue = null;
-                ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+                List<Keyframe> keyframes = mKeyframes.getKeyframes();
                 int keyframeCount = keyframes == null ? 0 : keyframes.size();
                 for (int i = 0; i < keyframeCount; i++) {
                     Keyframe kf = keyframes.get(i);
@@ -814,7 +815,7 @@ public class PropertyValuesHolder implements Cloneable {
         if (mSetter == null) {
             setupSetter(targetClass);
         }
-        ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+        List<Keyframe> keyframes = mKeyframes.getKeyframes();
         int keyframeCount = keyframes == null ? 0 : keyframes.size();
         for (int i = 0; i < keyframeCount; i++) {
             Keyframe kf = keyframes.get(i);
@@ -890,7 +891,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object which holds the start values that should be set.
      */
     void setupStartValue(Object target) {
-        ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+        List<Keyframe> keyframes = mKeyframes.getKeyframes();
         if (!keyframes.isEmpty()) {
             setupValue(target, keyframes.get(0));
         }
@@ -905,7 +906,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object which holds the start values that should be set.
      */
     void setupEndValue(Object target) {
-        ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+        List<Keyframe> keyframes = mKeyframes.getKeyframes();
         if (!keyframes.isEmpty()) {
             setupValue(target, keyframes.get(keyframes.size() - 1));
         }

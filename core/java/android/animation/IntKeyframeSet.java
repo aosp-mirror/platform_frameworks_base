@@ -19,6 +19,7 @@ package android.animation;
 import android.animation.Keyframe.IntKeyframe;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class holds a collection of IntKeyframe objects and is called by ValueAnimator to calculate
@@ -47,7 +48,7 @@ class IntKeyframeSet extends KeyframeSet implements Keyframes.IntKeyframes {
 
     @Override
     public IntKeyframeSet clone() {
-        ArrayList<Keyframe> keyframes = mKeyframes;
+        List<Keyframe> keyframes = mKeyframes;
         int numKeyframes = mKeyframes.size();
         IntKeyframe[] newKeyframes = new IntKeyframe[numKeyframes];
         for (int i = 0; i < numKeyframes; ++i) {
