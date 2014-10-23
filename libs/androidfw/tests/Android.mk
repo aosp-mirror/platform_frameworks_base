@@ -26,6 +26,7 @@ testFiles := \
     Idmap_test.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
+    TestHelpers.cpp \
     Theme_test.cpp \
     TypeWrappers_test.cpp \
     ZipUtils_test.cpp
