@@ -311,7 +311,10 @@ public class Surface implements Parcelable {
      * Unlike {@link #lockCanvas(Rect)} this will return a hardware-accelerated
      * canvas. See the <a href="{@docRoot}guide/topics/graphics/hardware-accel.html#unsupported">
      * unsupported drawing operations</a> for a list of what is and isn't
-     * supported in a hardware-accelerated canvas.
+     * supported in a hardware-accelerated canvas. It is also required to
+     * fully cover the surface every time {@link #lockHardwareCanvas()} is
+     * called as the buffer is not preserved between frames. Partial updates
+     * are not supported.
      *
      * @return A canvas for drawing into the surface.
      *
