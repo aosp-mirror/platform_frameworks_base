@@ -28221,6 +28221,7 @@ package android.telecom {
     method public android.telecom.PhoneAccountHandle getAccountHandle();
     method public android.net.Uri getAddress();
     method public int getCapabilities();
+    method public int getColor();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
     method public int getIconResId();
     method public java.lang.CharSequence getLabel();
@@ -28234,6 +28235,7 @@ package android.telecom {
     field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int NO_COLOR = -1; // 0xffffffff
     field public static final java.lang.String SCHEME_SIP = "sip";
     field public static final java.lang.String SCHEME_TEL = "tel";
     field public static final java.lang.String SCHEME_VOICEMAIL = "voicemail";
@@ -28245,6 +28247,7 @@ package android.telecom {
     method public android.telecom.PhoneAccount build();
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
+    method public android.telecom.PhoneAccount.Builder setColor(int);
     method public android.telecom.PhoneAccount.Builder setIconResId(int);
     method public android.telecom.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
     method public android.telecom.PhoneAccount.Builder setSubscriptionAddress(android.net.Uri);
