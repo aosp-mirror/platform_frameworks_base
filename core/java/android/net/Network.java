@@ -21,7 +21,9 @@ import android.os.Parcelable;
 import android.os.Parcel;
 import android.system.ErrnoException;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -264,18 +266,40 @@ public class Network implements Parcelable {
     }
 
     /**
+     * Binds the specified {@link DatagramSocket} to this {@code Network}. All data traffic on the
+     * socket will be sent on this {@code Network}, irrespective of any process-wide network binding
+     * set by {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be
+     * connected.
+     */
+    public void bindSocket(DatagramSocket socket) throws IOException {
+        // Apparently, the kernel doesn't update a connected UDP socket's routing upon mark changes.
+        if (socket.isConnected()) {
+            throw new SocketException("Socket is connected");
+        }
+        // Query a property of the underlying socket to ensure that the socket's file descriptor
+        // exists, is available to bind to a network and is not closed.
+        socket.getReuseAddress();
+        bindSocketFd(socket.getFileDescriptor$());
+    }
+
+    /**
      * Binds the specified {@link Socket} to this {@code Network}. All data traffic on the socket
      * will be sent on this {@code Network}, irrespective of any process-wide network binding set by
      * {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be connected.
      */
     public void bindSocket(Socket socket) throws IOException {
+        // Apparently, the kernel doesn't update a connected TCP socket's routing upon mark changes.
         if (socket.isConnected()) {
             throw new SocketException("Socket is connected");
         }
-        // Query a property of the underlying socket to ensure the underlying
-        // socket exists so a file descriptor is available to bind to a network.
+        // Query a property of the underlying socket to ensure that the socket's file descriptor
+        // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        int err = NetworkUtils.bindSocketToNetwork(socket.getFileDescriptor$().getInt$(), netId);
+        bindSocketFd(socket.getFileDescriptor$());
+    }
+
+    private void bindSocketFd(FileDescriptor fd) throws IOException {
+        int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
         if (err != 0) {
             // bindSocketToNetwork returns negative errno.
             throw new ErrnoException("Binding socket to network " + netId, -err)
