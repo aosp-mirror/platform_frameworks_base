@@ -15676,7 +15676,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 sizeChange(newWidth, newHeight, oldWidth, oldHeight);
             }
 
-            if ((mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+            if ((mViewFlags & VISIBILITY_MASK) == VISIBLE || mGhostView != null) {
                 // If we are visible, force the DRAWN bit to on so that
                 // this invalidate will go through (at least to our parent).
                 // This is because someone may have invalidated this view

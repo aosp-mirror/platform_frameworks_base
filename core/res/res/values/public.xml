@@ -2589,5 +2589,6 @@
 
     <!-- @hide -->
     <public-padding type="attr" name="private_resource_pad" end="0x01010500" />
+    <public type="attr" name="resizeClip"/>
 
 </resources>
