@@ -296,6 +296,9 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
                 mStagingDisplayListData->children()[i]->mRenderNode->incParentRefCount();
             }
         }
+        // Damage with the old display list first then the new one to catch any
+        // changes in isRenderable or, in the future, bounds
+        damageSelf(info);
         deleteDisplayListData();
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = NULL;
