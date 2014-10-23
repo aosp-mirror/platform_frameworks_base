@@ -376,10 +376,9 @@ class DisplayContent {
             stack.dump(prefix + "  ", pw);
         }
         pw.println();
-        pw.println("  Application tokens in bottom up Z order:");
+        pw.println("  Application tokens in top down Z order:");
         int ndx = 0;
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
