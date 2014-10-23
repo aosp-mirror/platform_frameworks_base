@@ -1431,6 +1431,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_WALLPAPER:
             case TYPE_PRIVATE_PRESENTATION:
             case TYPE_VOICE_INTERACTION:
+            case TYPE_ACCESSIBILITY_OVERLAY:
                 // The window manager will check these.
                 break;
             case TYPE_PHONE:
@@ -1660,15 +1661,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // the drag layer: input for drag-and-drop is associated with this window,
             // which sits above all other focusable windows
             return 25;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
+        case TYPE_ACCESSIBILITY_OVERLAY:
+            // overlay put by accessibility services to intercept user interaction
             return 26;
-        case TYPE_BOOT_PROGRESS:
+        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 27;
+        case TYPE_BOOT_PROGRESS:
+            return 28;
         case TYPE_POINTER:
             // the (mouse) pointer layer
-            return 28;
-        case TYPE_HIDDEN_NAV_CONSUMER:
             return 29;
+        case TYPE_HIDDEN_NAV_CONSUMER:
+            return 30;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return 2;
@@ -1972,7 +1976,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mKeyguardScrim = win;
                 break;
-
         }
         return WindowManagerGlobal.ADD_OKAY;
     }
