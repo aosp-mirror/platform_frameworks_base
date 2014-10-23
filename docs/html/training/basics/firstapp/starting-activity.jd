@@ -3,8 +3,9 @@ parent.title=Building Your First App
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Building a Simpler User Interface
-previous.link=building-ui.html
+
+page.tags=input events, intents, activity lifecycle
+helpoutsWidget=true
 
 @jd:body
 

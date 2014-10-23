@@ -1,12 +1,8 @@
 page.title=Building a Simple User Interface
-parent.title=Building Your First App
-parent.link=index.html
-
 trainingnavtop=true
-previous.title=Running Your App
-previous.link=running-app.html
-next.title=Starting Another Activity
-next.link=starting-activity.html
+
+page.tags=ui, views, layout, widgets, string resources
+helpoutsWidget=true
 
 @jd:body
 
