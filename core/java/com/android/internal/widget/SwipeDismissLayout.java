@@ -107,7 +107,9 @@ public class SwipeDismissLayout extends FrameLayout {
         // and temporarily disables translucency when it is fully visible.
         // As soon as the user starts swiping, we will re-enable
         // translucency.
-        ((Activity) context).convertFromTranslucent();
+        if (context instanceof Activity) {
+            ((Activity) context).convertFromTranslucent();
+        }
     }
 
     public void setOnDismissedListener(OnDismissedListener listener) {
@@ -203,7 +205,9 @@ public class SwipeDismissLayout extends FrameLayout {
                 mLastX = ev.getRawX();
                 updateSwiping(ev);
                 if (mSwiping) {
-                    ((Activity) getContext()).convertToTranslucent(null, null);
+                    if (getContext() instanceof Activity) {
+                        ((Activity) getContext()).convertToTranslucent(null, null);
+                    }
                     setProgress(ev.getRawX() - mDownX);
                     break;
                 }
@@ -225,7 +229,9 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     protected void cancel() {
-        ((Activity) getContext()).convertFromTranslucent();
+        if (getContext() instanceof Activity) {
+            ((Activity) getContext()).convertFromTranslucent();
+        }
         if (mProgressListener != null) {
             mProgressListener.onSwipeCancelled(this);
         }
