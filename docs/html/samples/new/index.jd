@@ -348,3 +348,18 @@ AppRestrictionEnforcer sample to toggle the restriction.
 </p>
 
 <p><a href="http://github.com/googlesamples/android-AppRestrictionSchema">Get it on GitHub</a></p>
+
+<h3 id="SpeedTracker">Speed Tracker (Wear)</h3>
+
+<p>
+This sample uses the FusedLocation APIs of Google Play Services on Android Wear 
+devices that have a hardware GPS built in. In those cases, this sample provides
+a simple screen that shows the current speed of the wearable device. User can
+set a speed limit and if the speed approaches that limit, it changes the color
+to yellow and if it exceeds the limit, it turns red. User can also enable
+recording of coordinates and when it pairs back with the phone, this data
+is synced with the phone component of the app and user can see a track
+made of those coordinates on a map on the phone.
+</p>
+
+<p><a href="http://github.com/googlesamples/android-SpeedTracker">Get it on GitHub</a></p>
