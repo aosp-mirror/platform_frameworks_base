@@ -291,18 +291,18 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Removes the task and kills the process */
-    public void removeTask(int taskId, boolean isDocument) {
+    /** Removes the task */
+    public void removeTask(int taskId) {
         if (mAm == null) return;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
 
-        // Remove the task, and only kill the process if it is not a document
-        mAm.removeTask(taskId, isDocument ? 0 : ActivityManager.REMOVE_TASK_KILL_PROCESS);
+        // Remove the task.
+        mAm.removeTask(taskId);
     }
 
     /**
      * Returns the activity info for a given component name.
-     * 
+     *
      * @param cn The component name of the activity.
      * @param userId The userId of the user that this is for.
      */
