@@ -222,10 +222,10 @@ public class TextClock extends TextView {
         if (mFormat12 == null || mFormat24 == null) {
             LocaleData ld = LocaleData.get(getContext().getResources().getConfiguration().locale);
             if (mFormat12 == null) {
-                mFormat12 = ld.timeFormat12;
+                mFormat12 = ld.timeFormat_hm;
             }
             if (mFormat24 == null) {
-                mFormat24 = ld.timeFormat24;
+                mFormat24 = ld.timeFormat_Hm;
             }
         }
 
@@ -429,9 +429,9 @@ public class TextClock extends TextView {
         LocaleData ld = LocaleData.get(getContext().getResources().getConfiguration().locale);
 
         if (format24Requested) {
-            mFormat = abc(mFormat24, mFormat12, ld.timeFormat24);
+            mFormat = abc(mFormat24, mFormat12, ld.timeFormat_Hm);
         } else {
-            mFormat = abc(mFormat12, mFormat24, ld.timeFormat12);
+            mFormat = abc(mFormat12, mFormat24, ld.timeFormat_hm);
         }
 
         boolean hadSeconds = mHasSeconds;
