@@ -22,7 +22,7 @@
     <color name="background_floating_material_light">#ffeeeeee</color>
 
     <color name="primary_material_dark">#ff212121</color>
-    <color name="primary_material_light">#ffbdbdbd</color>
+    <color name="primary_material_light">#ffe0e0e0</color>
     <color name="primary_dark_material_dark">#ff000000</color>
     <color name="primary_dark_material_light">#ff757575</color>
 
