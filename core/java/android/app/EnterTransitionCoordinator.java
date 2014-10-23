@@ -322,6 +322,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mListener != null) {
             mListener.onRejectSharedElements(rejectedSnapshots);
         }
+        removeNullViews(rejectedSnapshots);
         startRejectedAnimations(rejectedSnapshots);
 
         // Now start shared element transition
@@ -367,6 +368,16 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                     }
                 }
             });
+        }
+    }
+
+    private static void removeNullViews(ArrayList<View> views) {
+        if (views != null) {
+            for (int i = views.size() - 1; i >= 0; i--) {
+                if (views.get(i) == null) {
+                    views.remove(i);
+                }
+            }
         }
     }
 
