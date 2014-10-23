@@ -5052,6 +5052,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 stack.moveTaskToTop(task);
+                if (mAppTransition.isTransitionSet()) {
+                    task.setSendingToBottom(false);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -5070,6 +5073,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final TaskStack stack = task.mStack;
                 stack.moveTaskToBottom(task);
+                if (mAppTransition.isTransitionSet()) {
+                    task.setSendingToBottom(true);
+                }
                 moveStackWindowsLocked(stack.getDisplayContent());
             }
         } finally {
