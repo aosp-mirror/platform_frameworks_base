@@ -77,6 +77,28 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 21.0.2</a> <em>(October 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Complete updates for Eclipse ADT to solve instability issues on Windows platforms.</p>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 21.0.1</a> <em>(October 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Initial updates for Eclipse ADT on Windows. Please use Revision 21.0.2.</p>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.0.0</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -95,6 +117,7 @@ listing in the Android SDK Manager.</p>
     </dl>
   </div>
 </div>
+
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
