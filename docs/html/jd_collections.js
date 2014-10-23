@@ -67,9 +67,9 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html",
       "distribute/essentials/quality/tv.html",
+      "distribute/essentials/quality/wear.html",
       "https://developers.google.com/edu/guidelines",
-      "distribute/essentials/optimizing-your-app.html",
-      "distribute/essentials/best-practices/games.html"
+      "distribute/essentials/optimizing-your-app.html"
     ]
   },
   "distribute/users": {
@@ -330,6 +330,22 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/tv/start/hardware.html",
       "training/tv/games/index.html"
+    ]
+  },
+  "distribute/essentials/wearqualityguidelines/visualdesign": {
+    "title": "",
+    "resources": [
+      "design/wear/index.html",
+      "training/building-wearables.html",
+      "training/wearables/ui/index.html"
+    ]
+  },
+  "distribute/essentials/wearqualityguidelines/functionality": {
+    "title": "",
+    "resources": [
+      "training/wearables/notifications/index.html",
+      "training/wearables/apps/index.html",
+      "training/wearables/notifications/voice-input.html"
     ]
   },
   "distribute/essentials/core/performance": {

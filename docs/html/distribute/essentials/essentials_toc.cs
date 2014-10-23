@@ -17,6 +17,12 @@
     </div>
   </li>
   <li class="nav-section">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/wear.html">
+            <span class="en">Wear App Quality</span>
+          </a>
+    </div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/optimizing-your-app.html">
           <span class="en">Optimize Your App</span>
         </a>
