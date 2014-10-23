@@ -51,8 +51,10 @@ import com.android.internal.util.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
@@ -468,6 +470,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "layout")
     private int mChildCountWithTransientState = 0;
 
+    // Iterator over the children in decreasing Z order (top children first).
+    private OrderedChildIterator mOrderedChildIterator;
+
     /**
      * Currently registered axes for nested scrolling. Flag set consisting of
      * {@link #SCROLL_AXIS_HORIZONTAL} {@link #SCROLL_AXIS_VERTICAL} or {@link #SCROLL_AXIS_NONE}
@@ -817,19 +822,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return false;
         }
 
-        // Check whether any clickable siblings cover the child
-        // view and if so keep track of the intersections. Also
-        // respect Z ordering when iterating over children.
-        ArrayList<View> orderedList = buildOrderedChildList();
-        final boolean useCustomOrder = orderedList == null
-                && isChildrenDrawingOrderEnabled();
-
-        final int childCount = mChildrenCount;
-        for (int i = childCount - 1; i >= 0; i--) {
-            final int childIndex = useCustomOrder
-                    ? getChildDrawingOrder(childCount, i) : i;
-            final View sibling = (orderedList == null)
-                    ? mChildren[childIndex] : orderedList.get(childIndex);
+        Iterator<View> iterator = obtainOrderedChildIterator();
+        while (iterator.hasNext()) {
+            View sibling = iterator.next();
 
             // We care only about siblings over the child.
             if (sibling == child) {
@@ -837,12 +832,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             // Ignore invisible views as they are not interactive.
-            if (sibling.getVisibility() != View.VISIBLE) {
-                continue;
-            }
-
-            // If sibling is not interactive we do not care.
-            if (!sibling.isClickable() && !sibling.isLongClickable()) {
+            if (!isVisible(sibling)) {
                 continue;
             }
 
@@ -850,29 +840,36 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             RectF siblingBounds = mAttachInfo.mTmpTransformRect1;
             siblingBounds.set(0, 0, sibling.getWidth(), sibling.getHeight());
 
-            // Take into account the sibling transformation matrix.
-            if (!sibling.hasIdentityMatrix()) {
-                sibling.getMatrix().mapRect(siblingBounds);
-            }
-
-            // Offset the sibling to our coordinates.
-            final int siblingDx = sibling.mLeft - mScrollX;
-            final int siblingDy = sibling.mTop - mScrollY;
-            siblingBounds.offset(siblingDx, siblingDy);
+            // Translate the sibling bounds to our coordinates.
+            offsetChildRectToMyCoords(siblingBounds, sibling);
 
             // Compute the intersection between the child and the sibling.
             if (siblingBounds.intersect(bounds)) {
-                // If an interactive sibling completely covers the child, done.
-                if (siblingBounds.equals(bounds)) {
-                    if (orderedList != null) orderedList.clear();
-                    return false;
+                List<RectF> clickableRects = new ArrayList<>();
+                sibling.addClickableRectsForAccessibility(clickableRects);
+
+                final int clickableRectCount = clickableRects.size();
+                for (int j = 0; j < clickableRectCount; j++) {
+                    RectF clickableRect = clickableRects.get(j);
+
+                    // Translate the clickable rect to our coordinates.
+                    offsetChildRectToMyCoords(clickableRect, sibling);
+
+                    // Compute the intersection between the child and the clickable rects.
+                    if (clickableRect.intersect(bounds)) {
+                        // If a clickable rect completely covers the child, done.
+                        if (clickableRect.equals(bounds)) {
+                            releaseOrderedChildIterator();
+                            return false;
+                        }
+                        // Keep track of the intersection rectangle.
+                        intersections.add(clickableRect);
+                    }
                 }
-                // Keep track of the intersection rectangle.
-                RectF intersection = new RectF(siblingBounds);
-                intersections.add(intersection);
             }
         }
-        if (orderedList != null) orderedList.clear();
+
+        releaseOrderedChildIterator();
 
         if (mParent instanceof ViewGroup) {
             ViewGroup parentGroup = (ViewGroup) mParent;
@@ -881,6 +878,94 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         return true;
+    }
+
+    @Override
+    void addClickableRectsForAccessibility(List<RectF> outRects) {
+        int sizeBefore = outRects.size();
+
+        super.addClickableRectsForAccessibility(outRects);
+
+        // If we added ourselves, then no need to visit children.
+        if (outRects.size() > sizeBefore) {
+            return;
+        }
+
+        Iterator<View> iterator = obtainOrderedChildIterator();
+        while (iterator.hasNext()) {
+            View child = iterator.next();
+
+            // Cannot click on an invisible view.
+            if (!isVisible(child)) {
+                continue;
+            }
+
+            sizeBefore = outRects.size();
+
+            // Add clickable rects in the child bounds.
+            child.addClickableRectsForAccessibility(outRects);
+
+            // Offset the clickable rects for out children to our coordinates.
+            final int sizeAfter = outRects.size();
+            for (int j = sizeBefore; j < sizeAfter; j++) {
+                RectF rect = outRects.get(j);
+
+                // Translate the clickable rect to our coordinates.
+                offsetChildRectToMyCoords(rect, child);
+
+                // If a clickable rect fills the parent, done.
+                if ((int) rect.left == 0 && (int) rect.top == 0
+                        && (int) rect.right == mRight && (int) rect.bottom == mBottom) {
+                    releaseOrderedChildIterator();
+                    return;
+                }
+            }
+        }
+
+        releaseOrderedChildIterator();
+    }
+
+    private void offsetChildRectToMyCoords(RectF rect, View child) {
+        if (!child.hasIdentityMatrix()) {
+            child.getMatrix().mapRect(rect);
+        }
+        final int childDx = child.mLeft - mScrollX;
+        final int childDy = child.mTop - mScrollY;
+        rect.offset(childDx, childDy);
+    }
+
+    private static boolean isVisible(View view) {
+        return (view.getAlpha() > 0 && view.getTransitionAlpha() > 0 &&
+                view.getVisibility() == VISIBLE);
+    }
+
+    /**
+     * Obtains the iterator to traverse the children in a descending Z order.
+     * Only one party can use the iterator at any given time and you cannot
+     * modify the children while using this iterator. Acquisition if already
+     * obtained is an error.
+     *
+     * @return The child iterator.
+     */
+    OrderedChildIterator obtainOrderedChildIterator() {
+        if (mOrderedChildIterator == null) {
+            mOrderedChildIterator = new OrderedChildIterator();
+        } else if (mOrderedChildIterator.isInitialized()) {
+            throw new IllegalStateException("Already obtained");
+        }
+        mOrderedChildIterator.initialize();
+        return mOrderedChildIterator;
+    }
+
+    /**
+     * Releases the iterator to traverse the children in a descending Z order.
+     * Release if not obtained is an error.
+     */
+    void releaseOrderedChildIterator() {
+        if (mOrderedChildIterator == null || !mOrderedChildIterator.isInitialized()) {
+            throw new IllegalStateException("Not obtained");
+        }
+        mOrderedChildIterator.release();
     }
 
     /**
@@ -7294,5 +7379,58 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         sDebugLines[15] = y1;
 
         canvas.drawLines(sDebugLines, paint);
+    }
+
+    private final class OrderedChildIterator implements Iterator<View> {
+        private List<View> mOrderedChildList;
+        private boolean mUseCustomOrder;
+        private int mCurrentIndex;
+        private boolean mInitialized;
+
+        public void initialize() {
+            mOrderedChildList = buildOrderedChildList();
+            mUseCustomOrder = (mOrderedChildList == null)
+                    && isChildrenDrawingOrderEnabled();
+            mCurrentIndex = mChildrenCount - 1;
+            mInitialized = true;
+        }
+
+        public void release() {
+            if (mOrderedChildList != null) {
+                mOrderedChildList.clear();
+            }
+            mUseCustomOrder = false;
+            mCurrentIndex = 0;
+            mInitialized = false;
+        }
+
+        public boolean isInitialized() {
+            return mInitialized;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (mCurrentIndex >= 0);
+        }
+
+        @Override
+        public View next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("No such element");
+            }
+            return getChild(mCurrentIndex--);
+        }
+
+        private View getChild(int index) {
+            final int childIndex = mUseCustomOrder
+                    ? getChildDrawingOrder(mChildrenCount, index) : index;
+            return (mOrderedChildList == null)
+                    ? mChildren[childIndex] : mOrderedChildList.get(childIndex);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }
