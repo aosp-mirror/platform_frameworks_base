@@ -2980,8 +2980,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 return 0;
             }
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (win.mRequestedWidth != requestedWidth
-                    || win.mRequestedHeight != requestedHeight) {
+            if (viewVisibility != View.GONE && (win.mRequestedWidth != requestedWidth
+                    || win.mRequestedHeight != requestedHeight)) {
                 win.mLayoutNeeded = true;
                 win.mRequestedWidth = requestedWidth;
                 win.mRequestedHeight = requestedHeight;
