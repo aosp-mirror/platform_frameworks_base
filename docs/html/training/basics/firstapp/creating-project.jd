@@ -1,6 +1,7 @@
 page.title=Creating an Android Project
-parent.title=Building Your First App
-parent.link=index.html
+
+page.tags=eclipse, sdk, project setup, adt
+helpoutsWidget=true
 
 trainingnavtop=true
 next.title=Running Your App

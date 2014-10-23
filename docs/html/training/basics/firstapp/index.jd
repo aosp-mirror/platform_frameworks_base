@@ -3,8 +3,9 @@ page.metaDescription=If you're new to Android app development, this where you sh
 
 trainingnavtop=true
 startpage=true
-next.title=Creating an Android Project
-next.link=creating-project.html
+
+page.tags=sdk tools
+helpoutsWidget=true
 
 @jd:body
 
@@ -47,6 +48,3 @@ not apply to earlier versions.</p>
 <p>This class uses a tutorial format that incrementally builds a small Android app that teaches
 you some fundamental concepts about Android development, so it's important that you follow each
 step.</p>
-
-<p><strong><a href="creating-project.html">Start the first lesson &rsaquo;</a></strong></p>
-

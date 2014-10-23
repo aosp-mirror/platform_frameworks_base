@@ -1,5 +1,8 @@
 page.title=Adding SDK Packages
 
+page.tags=studio, sdk tools, eclipse adt, sdk manager, google play services, support library
+helpoutsWidget=true
+
 @jd:body
 
 <style>
