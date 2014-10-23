@@ -28486,6 +28486,9 @@ package android.telephony {
     ctor public SubInfoRecord();
     ctor public SubInfoRecord(long, java.lang.String, int, java.lang.String, int, int, java.lang.String, int, int, int[], int, int);
     method public int describeContents();
+    method public int getColor();
+    method public android.graphics.drawable.BitmapDrawable getIconDrawable();
+    method public java.lang.String getLabel();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public int color;
