@@ -374,6 +374,7 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
     ContextFactory factory;
     RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
     proxy->loadSystemProperties();
+    proxy->setSwapBehavior(kSwap_discardBuffer);
     proxy->initialize(surface);
     // Shadows can't be used via this interface, so just set the light source
     // to all 0s. (and width & height are unused, TODO remove them)

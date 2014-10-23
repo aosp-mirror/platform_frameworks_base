@@ -31,6 +31,7 @@
 
 #include "../Caches.h"
 #include "../IContextFactory.h"
+#include "CanvasContext.h"
 #include "DrawFrameTask.h"
 
 namespace android {
@@ -44,7 +45,6 @@ class Rect;
 
 namespace renderthread {
 
-class CanvasContext;
 class ErrorChannel;
 class RenderThread;
 class RenderProxyBridge;
@@ -63,6 +63,8 @@ public:
     ANDROID_API virtual ~RenderProxy();
 
     ANDROID_API void setFrameInterval(nsecs_t frameIntervalNanos);
+    // Won't take effect until next EGLSurface creation
+    ANDROID_API void setSwapBehavior(SwapBehavior swapBehavior);
     ANDROID_API bool loadSystemProperties();
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);

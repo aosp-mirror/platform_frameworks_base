@@ -42,7 +42,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         : mRenderThread(thread)
         , mEglManager(thread.eglManager())
         , mEglSurface(EGL_NO_SURFACE)
-        , mDirtyRegionsEnabled(false)
+        , mBufferPreserved(false)
+        , mSwapBehavior(kSwap_default)
         , mOpaque(!translucent)
         , mCanvas(NULL)
         , mHaveNewSurface(false)
@@ -82,7 +83,8 @@ void CanvasContext::setSurface(ANativeWindow* window) {
     }
 
     if (mEglSurface != EGL_NO_SURFACE) {
-        mDirtyRegionsEnabled = mEglManager.enableDirtyRegions(mEglSurface);
+        const bool preserveBuffer = (mSwapBehavior != kSwap_discardBuffer);
+        mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
         mHaveNewSurface = true;
         makeCurrent();
     } else {
@@ -101,6 +103,10 @@ void CanvasContext::requireSurface() {
     LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
             "requireSurface() called but no surface set!");
     makeCurrent();
+}
+
+void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
+    mSwapBehavior = swapBehavior;
 }
 
 bool CanvasContext::initialize(ANativeWindow* window) {
@@ -200,7 +206,7 @@ void CanvasContext::draw() {
     if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
         mCanvas->setViewport(width, height);
         dirty.setEmpty();
-    } else if (!mDirtyRegionsEnabled || mHaveNewSurface) {
+    } else if (!mBufferPreserved || mHaveNewSurface) {
         dirty.setEmpty();
     } else {
         if (!dirty.isEmpty() && !dirty.intersect(0, 0, width, height)) {

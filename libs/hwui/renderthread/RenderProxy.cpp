@@ -103,6 +103,18 @@ void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
     post(task);
 }
 
+CREATE_BRIDGE2(setSwapBehavior, CanvasContext* context, SwapBehavior swapBehavior) {
+    args->context->setSwapBehavior(args->swapBehavior);
+    return NULL;
+}
+
+void RenderProxy::setSwapBehavior(SwapBehavior swapBehavior) {
+    SETUP_TASK(setSwapBehavior);
+    args->context = mContext;
+    args->swapBehavior = swapBehavior;
+    post(task);
+}
+
 CREATE_BRIDGE1(loadSystemProperties, CanvasContext* context) {
     bool needsRedraw = false;
     if (Caches::hasInstance()) {
