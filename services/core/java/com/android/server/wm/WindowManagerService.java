@@ -5061,6 +5061,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(false);
                 }
+                moveStackWindowsLocked(displayContent);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
