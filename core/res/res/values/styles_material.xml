@@ -320,49 +320,47 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.ActionMode"/>
-    <style name="TextAppearance.Material.Widget.ActionMode.Title"
-           parent="TextAppearance.Material.Title">
-        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
-    </style>
-    <style name="TextAppearance.Material.Widget.ActionMode.Title.Inverse"
-           parent="TextAppearance.Material.Title.Inverse">
-        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
-    </style>
-    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle"
-           parent="TextAppearance.Material.Subhead">
-        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
-    </style>
-    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"
-           parent="TextAppearance.Material.Subhead.Inverse">
-        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
-    </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Title"
            parent="TextAppearance.Material.Title">
         <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Title.Inverse"
            parent="TextAppearance.Material.Title.Inverse">
         <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Subtitle"
            parent="TextAppearance.Material.Subhead">
         <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse"
            parent="TextAppearance.Material.Subhead.Inverse">
         <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.ActionBar.Menu" parent="TextAppearance.Material.Menu">
+    <style name="TextAppearance.Material.Widget.ActionBar.Menu"
+           parent="TextAppearance.Material.Menu">
+        <item name="textColor">?attr/actionMenuTextColor</item>
+        <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionBar.Menu.Inverse"
+           parent="TextAppearance.Material.Menu.Inverse">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.ActionBar.Menu.Inverse" parent="TextAppearance.Material.Menu.Inverse">
-        <item name="textColor">?attr/actionMenuTextColor</item>
-        <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
-    </style>
+    <style name="TextAppearance.Material.Widget.ActionMode"/>
+    <style name="TextAppearance.Material.Widget.ActionMode.Title"
+           parent="TextAppearance.Material.Widget.ActionBar.Title" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Title.Inverse"
+           parent="TextAppearance.Material.Widget.ActionBar.Title.Inverse" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle"
+           parent="TextAppearance.Material.Widget.ActionBar.Subtitle" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"
+           parent="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse" />
 
     <style name="TextAppearance.Material.Widget.Toolbar.Title"
            parent="TextAppearance.Material.Widget.ActionBar.Title" />
