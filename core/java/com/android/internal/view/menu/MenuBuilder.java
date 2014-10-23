@@ -828,8 +828,7 @@ public class MenuBuilder implements Menu {
                       || shortcutChar == possibleChars.meta[2]
                       || (qwerty && shortcutChar == '\b' &&
                           keyCode == KeyEvent.KEYCODE_DEL)) &&
-                  item.isEnabled() &&
-                  item.isVisible()) {
+                  item.isEnabled()) {
                 items.add(item);
             }
         }
