@@ -1796,9 +1796,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean addGpsStatusListener(IGpsStatusListener listener, String packageName) {
-        if (mGpsStatusProvider == null) {
-            return false;
-        }
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
@@ -1811,6 +1808,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+
+        if (mGpsStatusProvider == null) {
+            return false;
         }
 
         try {
