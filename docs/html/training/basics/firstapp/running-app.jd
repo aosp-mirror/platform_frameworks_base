@@ -4,7 +4,7 @@ parent.link=index.html
 
 trainingnavtop=true
 
-page.tags=emulator, virtual device
+page.tags=emulator
 helpoutsWidget=true
 
 @jd:body

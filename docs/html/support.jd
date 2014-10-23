@@ -30,7 +30,8 @@ page.image=/images/android-support-card.png
 </p>
 
 <p><b>
-<a href="https://helpouts.google.com/partner/ask?vertical=programming&tags=android&origin=http:%2F%2Fdeveloper.android.com%2Fsupport.html">Ask a question in Google Helpouts</a>
+<a target="_blank"
+href="https://helpouts.google.com/partner/ask?vertical=programming&tags=android&origin=http:%2F%2Fdeveloper.android.com%2Fsupport.html">Ask a question in Google Helpouts</a>
 </b></p>
 
 
