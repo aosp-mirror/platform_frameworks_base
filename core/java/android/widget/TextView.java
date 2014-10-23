@@ -8517,6 +8517,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } return false;
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
                 if (isFocused() && canSelectText()) {
+                    ensureIterableTextForAccessibilitySelectable();
                     CharSequence text = getIterableTextForAccessibility();
                     if (text == null) {
                         return false;
@@ -8542,6 +8543,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             } return false;
+            case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY: {
+                ensureIterableTextForAccessibilitySelectable();
+                return super.performAccessibilityAction(action, arguments);
+            }
             default: {
                 return super.performAccessibilityAction(action, arguments);
             }
@@ -9031,10 +9037,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public CharSequence getIterableTextForAccessibility() {
+        return mText;
+    }
+
+    private void ensureIterableTextForAccessibilitySelectable() {
         if (!(mText instanceof Spannable)) {
             setText(mText, BufferType.SPANNABLE);
         }
-        return mText;
     }
 
     /**
