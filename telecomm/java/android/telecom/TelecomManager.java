@@ -587,7 +587,6 @@ public class TelecomManager {
      *
      * @param account The complete {@link PhoneAccount}.
      */
-    @SystemApi
     public void registerPhoneAccount(PhoneAccount account) {
         try {
             if (isServiceConnected()) {
@@ -603,7 +602,6 @@ public class TelecomManager {
      *
      * @param accountHandle A {@link PhoneAccountHandle} for the {@link PhoneAccount} to unregister.
      */
-    @SystemApi
     public void unregisterPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -617,7 +615,6 @@ public class TelecomManager {
     /**
      * Remove all Accounts that belong to the calling package from the system.
      */
-    @SystemApi
     public void clearAccounts() {
         try {
             if (isServiceConnected()) {
@@ -650,7 +647,6 @@ public class TelecomManager {
      * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
      * </p>
      */
-    @SystemApi
     public boolean isInCall() {
         try {
             if (isServiceConnected()) {
@@ -802,7 +798,6 @@ public class TelecomManager {
      * @param extras A bundle that will be passed through to
      *            {@link ConnectionService#onCreateIncomingConnection}.
      */
-    @SystemApi
     public void addNewIncomingCall(PhoneAccountHandle phoneAccount, Bundle extras) {
         try {
             if (isServiceConnected()) {
