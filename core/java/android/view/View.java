@@ -15699,6 +15699,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return changed;
     }
 
+    /**
+     * Same as setFrame, but public and hidden. For use in {@link android.transition.ChangeBounds}.
+     * @hide
+     */
+    public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
+        setFrame(left, top, right, bottom);
+    }
+
     private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
         if (mOverlay != null) {
