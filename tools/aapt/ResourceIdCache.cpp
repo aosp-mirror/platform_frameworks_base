@@ -9,8 +9,6 @@
 #include <utils/Log.h>
 #include "ResourceIdCache.h"
 #include <map>
-using namespace std;
-
 
 static size_t mHits = 0;
 static size_t mMisses = 0;
@@ -29,7 +27,7 @@ struct CacheEntry {
     CacheEntry(const android::String16& name, uint32_t resId) : hashedName(name), id(resId) { }
 };
 
-static map< uint32_t, CacheEntry > mIdMap;
+static std::map< uint32_t, CacheEntry > mIdMap;
 
 
 // djb2; reasonable choice for strings when collisions aren't particularly important
@@ -63,7 +61,7 @@ uint32_t ResourceIdCache::lookup(const android::String16& package,
         bool onlyPublic) {
     const String16 hashedName = makeHashableName(package, type, name, onlyPublic);
     const uint32_t hashcode = hash(hashedName);
-    map<uint32_t, CacheEntry>::iterator item = mIdMap.find(hashcode);
+    std::map<uint32_t, CacheEntry>::iterator item = mIdMap.find(hashcode);
     if (item == mIdMap.end()) {
         // cache miss
         mMisses++;
