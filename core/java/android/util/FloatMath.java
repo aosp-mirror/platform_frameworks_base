@@ -21,7 +21,10 @@ package android.util;
  * versions of Android with a JIT, these are significantly slower than
  * the equivalent {@code Math} functions, which should be used in preference
  * to these.
+ *
+ * @deprecated Use {@link java.lang.Math} instead.
  */
+@Deprecated
 public class FloatMath {
 
     /** Prevents instantiation. */
