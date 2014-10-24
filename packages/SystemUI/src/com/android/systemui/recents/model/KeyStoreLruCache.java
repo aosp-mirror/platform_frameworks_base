@@ -21,15 +21,16 @@ import android.util.LruCache;
 import java.util.HashMap;
 
 /**
- * An LRU cache that support querying the keys as well as values. By using the Task's key, we can
- * prevent holding onto a reference to the Task resource data, while keeping the cache data in
- * memory where necessary.
+ * An LRU cache that internally support querying the keys as well as values.  We use this to keep
+ * track of the task metadata to determine when to invalidate the cache when tasks have been
+ * updated. Generally, this cache will return the last known cache value for the requested task
+ * key.
  */
 public class KeyStoreLruCache<V> {
     // We keep a set of keys that are associated with the LRU cache, so that we can find out
     // information about the Task that was previously in the cache.
     HashMap<Integer, Task.TaskKey> mTaskKeys = new HashMap<Integer, Task.TaskKey>();
-    // The cache implementation
+    // The cache implementation, mapping task id -> value
     LruCache<Integer, V> mCache;
 
     public KeyStoreLruCache(int cacheSize) {

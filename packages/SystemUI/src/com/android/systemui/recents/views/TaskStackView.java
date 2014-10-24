@@ -1081,12 +1081,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
 
     @Override
-    public void onComponentRemoved(HashSet<ComponentName> cns) {
+    public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
+        // Compute which components need to be removed
+        HashSet<ComponentName> removedComponents = monitor.computeComponentsRemoved(
+                mStack.getTaskKeys(), packageName, userId);
+
         // For other tasks, just remove them directly if they no longer exist
         ArrayList<Task> tasks = mStack.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             final Task t = tasks.get(i);
-            if (cns.contains(t.key.baseIntent.getComponent())) {
+            if (removedComponents.contains(t.key.baseIntent.getComponent())) {
                 TaskView tv = getChildViewForTask(t);
                 if (tv != null) {
                     // For visible children, defer removing the task until after the animation

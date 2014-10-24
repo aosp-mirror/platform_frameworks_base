@@ -19,6 +19,7 @@ package com.android.systemui.recents.model;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Looper;
+import android.os.UserHandle;
 import com.android.internal.content.PackageMonitor;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
@@ -26,16 +27,16 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * The package monitor listens for changes from PackageManager to update the contents of the Recents
- * list.
+ * The package monitor listens for changes from PackageManager to update the contents of the
+ * Recents list.
  */
 public class RecentsPackageMonitor extends PackageMonitor {
     public interface PackageCallbacks {
-        public void onComponentRemoved(HashSet<ComponentName> cns);
+        public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName,
+                                      int userId);
     }
 
     PackageCallbacks mCb;
-    List<Task.TaskKey> mTasks;
     SystemServicesProxy mSystemServicesProxy;
 
     /** Registers the broadcast receivers with the specified callbacks. */
@@ -43,7 +44,9 @@ public class RecentsPackageMonitor extends PackageMonitor {
         mSystemServicesProxy = new SystemServicesProxy(context);
         mCb = cb;
         try {
-            register(context, Looper.getMainLooper(), true);
+            // We register for events from all users, but will cross-reference them with
+            // packages for the current user and any profiles they have
+            register(context, Looper.getMainLooper(), UserHandle.ALL, true);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
@@ -59,29 +62,15 @@ public class RecentsPackageMonitor extends PackageMonitor {
         }
         mSystemServicesProxy = null;
         mCb = null;
-        mTasks.clear();
-    }
-
-    /** Sets the list of tasks to match against package broadcast changes. */
-    void setTasks(List<Task.TaskKey> tasks) {
-        mTasks = tasks;
     }
 
     @Override
     public void onPackageRemoved(String packageName, int uid) {
         if (mCb == null) return;
 
-        // Identify all the tasks that should be removed as a result of the package being removed.
-        // Using a set to ensure that we callback once per unique component.
-        HashSet<ComponentName> componentsToRemove = new HashSet<ComponentName>();
-        for (Task.TaskKey t : mTasks) {
-            ComponentName cn = t.baseIntent.getComponent();
-            if (cn.getPackageName().equals(packageName)) {
-                componentsToRemove.add(cn);
-            }
-        }
-        // Notify our callbacks that the components no longer exist
-        mCb.onComponentRemoved(componentsToRemove);
+        // Notify callbacks that a package has changed
+        final int eventUserId = getChangingUserId();
+        mCb.onPackagesChanged(this, packageName, eventUserId);
     }
 
     @Override
@@ -94,25 +83,38 @@ public class RecentsPackageMonitor extends PackageMonitor {
     public void onPackageModified(String packageName) {
         if (mCb == null) return;
 
+        // Notify callbacks that a package has changed
+        final int eventUserId = getChangingUserId();
+        mCb.onPackagesChanged(this, packageName, eventUserId);
+    }
+
+    /**
+     * Computes the components that have been removed as a result of a change in the specified
+     * package.
+     */
+    public HashSet<ComponentName> computeComponentsRemoved(List<Task.TaskKey> taskKeys,
+            String packageName, int userId) {
         // Identify all the tasks that should be removed as a result of the package being removed.
         // Using a set to ensure that we callback once per unique component.
-        HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
-        HashSet<ComponentName> componentsToRemove = new HashSet<ComponentName>();
-        for (Task.TaskKey t : mTasks) {
+        HashSet<ComponentName> existingComponents = new HashSet<ComponentName>();
+        HashSet<ComponentName> removedComponents = new HashSet<ComponentName>();
+        for (Task.TaskKey t : taskKeys) {
+            // Skip if this doesn't apply to the current user
+            if (t.userId != userId) continue;
+
             ComponentName cn = t.baseIntent.getComponent();
             if (cn.getPackageName().equals(packageName)) {
-                if (componentsKnownToExist.contains(cn)) {
+                if (existingComponents.contains(cn)) {
                     // If we know that the component still exists in the package, then skip
                     continue;
                 }
-                if (mSystemServicesProxy.getActivityInfo(cn) != null) {
-                    componentsKnownToExist.add(cn);
+                if (mSystemServicesProxy.getActivityInfo(cn, userId) != null) {
+                    existingComponents.add(cn);
                 } else {
-                    componentsToRemove.add(cn);
+                    removedComponents.add(cn);
                 }
             }
         }
-        // Notify our callbacks that the components no longer exist
-        mCb.onComponentRemoved(componentsToRemove);
+        return removedComponents;
     }
 }
