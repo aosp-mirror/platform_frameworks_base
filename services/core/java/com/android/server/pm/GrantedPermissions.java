@@ -17,13 +17,12 @@
 package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
-
-import java.util.HashSet;
+import android.util.ArraySet;
 
 class GrantedPermissions {
     int pkgFlags;
 
-    HashSet<String> grantedPermissions = new HashSet<String>();
+    ArraySet<String> grantedPermissions = new ArraySet<String>();
 
     int[] gids;
 
@@ -34,7 +33,7 @@ class GrantedPermissions {
     @SuppressWarnings("unchecked")
     GrantedPermissions(GrantedPermissions base) {
         pkgFlags = base.pkgFlags;
-        grantedPermissions = (HashSet<String>) base.grantedPermissions.clone();
+        grantedPermissions = new ArraySet<>(base.grantedPermissions);
 
         if (base.gids != null) {
             gids = base.gids.clone();

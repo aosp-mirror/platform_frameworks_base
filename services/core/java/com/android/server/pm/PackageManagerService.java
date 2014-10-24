@@ -199,8 +199,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -371,20 +369,20 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Keys are String (package name), values are Package.  This also serves
     // as the lock for the global state.  Methods that must be called with
     // this lock held have the prefix "LP".
-    final HashMap<String, PackageParser.Package> mPackages =
-            new HashMap<String, PackageParser.Package>();
+    final ArrayMap<String, PackageParser.Package> mPackages =
+            new ArrayMap<String, PackageParser.Package>();
 
     // Tracks available target package names -> overlay package paths.
-    final HashMap<String, HashMap<String, PackageParser.Package>> mOverlays =
-        new HashMap<String, HashMap<String, PackageParser.Package>>();
+    final ArrayMap<String, ArrayMap<String, PackageParser.Package>> mOverlays =
+        new ArrayMap<String, ArrayMap<String, PackageParser.Package>>();
 
     final Settings mSettings;
     boolean mRestoredSettings;
 
     // System configuration read by SystemConfig.
     final int[] mGlobalGids;
-    final SparseArray<HashSet<String>> mSystemPermissions;
-    final HashMap<String, FeatureInfo> mAvailableFeatures;
+    final SparseArray<ArraySet<String>> mSystemPermissions;
+    final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
     // If mac_permissions.xml was found for seinfo labeling.
     boolean mFoundPolicyFile;
@@ -403,8 +401,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     // Currently known shared libraries.
-    final HashMap<String, SharedLibraryEntry> mSharedLibraries =
-            new HashMap<String, SharedLibraryEntry>();
+    final ArrayMap<String, SharedLibraryEntry> mSharedLibraries =
+            new ArrayMap<String, SharedLibraryEntry>();
 
     // All available activities, for your resolving pleasure.
     final ActivityIntentResolver mActivities =
@@ -422,23 +420,23 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Mapping from provider base names (first directory in content URI codePath)
     // to the provider information.
-    final HashMap<String, PackageParser.Provider> mProvidersByAuthority =
-            new HashMap<String, PackageParser.Provider>();
+    final ArrayMap<String, PackageParser.Provider> mProvidersByAuthority =
+            new ArrayMap<String, PackageParser.Provider>();
 
     // Mapping from instrumentation class names to info about them.
-    final HashMap<ComponentName, PackageParser.Instrumentation> mInstrumentation =
-            new HashMap<ComponentName, PackageParser.Instrumentation>();
+    final ArrayMap<ComponentName, PackageParser.Instrumentation> mInstrumentation =
+            new ArrayMap<ComponentName, PackageParser.Instrumentation>();
 
     // Mapping from permission names to info about them.
-    final HashMap<String, PackageParser.PermissionGroup> mPermissionGroups =
-            new HashMap<String, PackageParser.PermissionGroup>();
+    final ArrayMap<String, PackageParser.PermissionGroup> mPermissionGroups =
+            new ArrayMap<String, PackageParser.PermissionGroup>();
 
     // Packages whose data we have transfered into another package, thus
     // should no longer exist.
-    final HashSet<String> mTransferedPackages = new HashSet<String>();
+    final ArraySet<String> mTransferedPackages = new ArraySet<String>();
     
     // Broadcast actions that are only available to the system.
-    final HashSet<String> mProtectedBroadcasts = new HashSet<String>();
+    final ArraySet<String> mProtectedBroadcasts = new ArraySet<String>();
 
     /** List of packages waiting for verification. */
     final SparseArray<PackageVerificationState> mPendingVerification
@@ -449,7 +447,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final PackageInstallerService mInstallerService;
 
-    HashSet<PackageParser.Package> mDeferredDexOpt = null;
+    ArraySet<PackageParser.Package> mDeferredDexOpt = null;
 
     // Cache of users who need badging.
     SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
@@ -473,24 +471,24 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
         // for each user id, a map of <package name -> components within that package>
-        final SparseArray<HashMap<String, ArrayList<String>>> mUidMap;
+        final SparseArray<ArrayMap<String, ArrayList<String>>> mUidMap;
 
         public PendingPackageBroadcasts() {
-            mUidMap = new SparseArray<HashMap<String, ArrayList<String>>>(2);
+            mUidMap = new SparseArray<ArrayMap<String, ArrayList<String>>>(2);
         }
 
         public ArrayList<String> get(int userId, String packageName) {
-            HashMap<String, ArrayList<String>> packages = getOrAllocate(userId);
+            ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
             return packages.get(packageName);
         }
 
         public void put(int userId, String packageName, ArrayList<String> components) {
-            HashMap<String, ArrayList<String>> packages = getOrAllocate(userId);
+            ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
             packages.put(packageName, components);
         }
 
         public void remove(int userId, String packageName) {
-            HashMap<String, ArrayList<String>> packages = mUidMap.get(userId);
+            ArrayMap<String, ArrayList<String>> packages = mUidMap.get(userId);
             if (packages != null) {
                 packages.remove(packageName);
             }
@@ -508,7 +506,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return mUidMap.keyAt(n);
         }
 
-        public HashMap<String, ArrayList<String>> packagesForUserId(int userId) {
+        public ArrayMap<String, ArrayList<String>> packagesForUserId(int userId) {
             return mUidMap.get(userId);
         }
 
@@ -525,10 +523,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             mUidMap.clear();
         }
 
-        private HashMap<String, ArrayList<String>> getOrAllocate(int userId) {
-            HashMap<String, ArrayList<String>> map = mUidMap.get(userId);
+        private ArrayMap<String, ArrayList<String>> getOrAllocate(int userId) {
+            ArrayMap<String, ArrayList<String>> map = mUidMap.get(userId);
             if (map == null) {
-                map = new HashMap<String, ArrayList<String>>();
+                map = new ArrayMap<String, ArrayList<String>>();
                 mUidMap.put(userId, map);
             }
             return map;
@@ -565,7 +563,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static UserManagerService sUserManager;
 
     // Stores a list of users whose package restrictions file needs to be updated
-    private HashSet<Integer> mDirtyUsers = new HashSet<Integer>();
+    private ArraySet<Integer> mDirtyUsers = new ArraySet<Integer>();
 
     final private DefaultContainerConnection mDefContainerConn =
             new DefaultContainerConnection();
@@ -1384,7 +1382,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // scanning install directories.
             final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING;
 
-            final HashSet<String> alreadyDexOpted = new HashSet<String>();
+            final ArraySet<String> alreadyDexOpted = new ArraySet<String>();
 
             /**
              * Add everything in the in the boot class path to the
@@ -2369,7 +2367,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return PackageManager.PERMISSION_GRANTED;
                 }
             } else {
-                HashSet<String> perms = mSystemPermissions.get(uid);
+                ArraySet<String> perms = mSystemPermissions.get(uid);
                 if (perms != null && perms.contains(permName)) {
                     return PackageManager.PERMISSION_GRANTED;
                 }
@@ -2790,11 +2788,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     PackageManager.SIGNATURE_NO_MATCH;
         }
 
-        HashSet<Signature> set1 = new HashSet<Signature>();
+        ArraySet<Signature> set1 = new ArraySet<Signature>();
         for (Signature sig : s1) {
             set1.add(sig);
         }
-        HashSet<Signature> set2 = new HashSet<Signature>();
+        ArraySet<Signature> set2 = new ArraySet<Signature>();
         for (Signature sig : s2) {
             set2.add(sig);
         }
@@ -2829,11 +2827,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             return PackageManager.SIGNATURE_NO_MATCH;
         }
 
-        HashSet<Signature> existingSet = new HashSet<Signature>();
+        ArraySet<Signature> existingSet = new ArraySet<Signature>();
         for (Signature sig : existingSigs.mSignatures) {
             existingSet.add(sig);
         }
-        HashSet<Signature> scannedCompatSet = new HashSet<Signature>();
+        ArraySet<Signature> scannedCompatSet = new ArraySet<Signature>();
         for (Signature sig : scannedPkg.mSignatures) {
             try {
                 Signature[] chainSignatures = sig.getChainSignatures();
@@ -4023,7 +4021,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void createIdmapsForPackageLI(PackageParser.Package pkg) {
-        HashMap<String, PackageParser.Package> overlays = mOverlays.get(pkg.packageName);
+        ArrayMap<String, PackageParser.Package> overlays = mOverlays.get(pkg.packageName);
         if (overlays == null) {
             Slog.w(TAG, "Unable to create idmap for " + pkg.packageName + ": no overlay packages");
             return;
@@ -4044,7 +4042,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     opkg.baseCodePath + ": overlay not trusted");
             return false;
         }
-        HashMap<String, PackageParser.Package> overlaySet = mOverlays.get(pkg.packageName);
+        ArrayMap<String, PackageParser.Package> overlaySet = mOverlays.get(pkg.packageName);
         if (overlaySet == null) {
             Slog.e(TAG, "was about to create idmap for " + pkg.baseCodePath + " and " +
                     opkg.baseCodePath + " but target package has no known overlays");
@@ -4465,7 +4463,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void performBootDexOpt() {
         enforceSystemOrRoot("Only the system can request dexopt be performed");
 
-        final HashSet<PackageParser.Package> pkgs;
+        final ArraySet<PackageParser.Package> pkgs;
         synchronized (mPackages) {
             pkgs = mDeferredDexOpt;
             mDeferredDexOpt = null;
@@ -4488,7 +4486,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Give priority to system apps that listen for pre boot complete.
             Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
-            HashSet<String> pkgNames = getPackageNamesForIntent(intent);
+            ArraySet<String> pkgNames = getPackageNamesForIntent(intent);
             for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
                 PackageParser.Package pkg = it.next();
                 if (pkgNames.contains(pkg.packageName)) {
@@ -4562,7 +4560,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void filterRecentlyUsedApps(HashSet<PackageParser.Package> pkgs) {
+    private void filterRecentlyUsedApps(ArraySet<PackageParser.Package> pkgs) {
         // Filter out packages that aren't recently used.
         //
         // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
@@ -4598,14 +4596,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private HashSet<String> getPackageNamesForIntent(Intent intent) {
+    private ArraySet<String> getPackageNamesForIntent(Intent intent) {
         List<ResolveInfo> ris = null;
         try {
             ris = AppGlobals.getPackageManager().queryIntentReceivers(
                     intent, null, 0, UserHandle.USER_OWNER);
         } catch (RemoteException e) {
         }
-        HashSet<String> pkgNames = new HashSet<String>();
+        ArraySet<String> pkgNames = new ArraySet<String>();
         if (ris != null) {
             for (ResolveInfo ri : ris) {
                 pkgNames.add(ri.activityInfo.packageName);
@@ -4683,8 +4681,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    public HashSet<String> getPackagesThatNeedDexOpt() {
-        HashSet<String> pkgs = null;
+    public ArraySet<String> getPackagesThatNeedDexOpt() {
+        ArraySet<String> pkgs = null;
         synchronized (mPackages) {
             for (PackageParser.Package p : mPackages.values()) {
                 if (DEBUG_DEXOPT) {
@@ -4694,7 +4692,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 if (pkgs == null) {
-                    pkgs = new HashSet<String>();
+                    pkgs = new ArraySet<String>();
                 }
                 pkgs.add(p.packageName);
             }
@@ -4707,7 +4705,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void performDexOptLibsLI(ArrayList<String> libs, String[] instructionSets,
-             boolean forceDex, boolean defer, HashSet<String> done) {
+             boolean forceDex, boolean defer, ArraySet<String> done) {
         for (int i=0; i<libs.size(); i++) {
             PackageParser.Package libPkg;
             String libName;
@@ -4732,7 +4730,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int DEX_OPT_FAILED = -1;
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            boolean forceDex, boolean defer, HashSet<String> done) {
+            boolean forceDex, boolean defer, ArraySet<String> done) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -4810,7 +4808,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // our list of deferred dexopts.
                     if (defer && isDexOptNeeded != DexFile.UP_TO_DATE) {
                         if (mDeferredDexOpt == null) {
-                            mDeferredDexOpt = new HashSet<PackageParser.Package>();
+                            mDeferredDexOpt = new ArraySet<PackageParser.Package>();
                         }
                         mDeferredDexOpt.add(pkg);
                         return DEX_OPT_DEFERRED;
@@ -4907,7 +4905,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static String[] getDexCodeInstructionSets(String[] instructionSets) {
-        HashSet<String> dexCodeInstructionSets = new HashSet<String>(instructionSets.length);
+        ArraySet<String> dexCodeInstructionSets = new ArraySet<String>(instructionSets.length);
         for (String instructionSet : instructionSets) {
             dexCodeInstructionSets.add(getDexCodeInstructionSet(instructionSet));
         }
@@ -4950,9 +4948,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private int performDexOptLI(PackageParser.Package pkg, String[] instructionSets,
                                 boolean forceDex, boolean defer, boolean inclDependencies) {
-        HashSet<String> done;
+        ArraySet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
-            done = new HashSet<String>();
+            done = new ArraySet<String>();
             done.add(pkg.packageName);
         } else {
             done = null;
@@ -6137,7 +6135,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             r = null;
             for (i=0; i<N; i++) {
                 PackageParser.Permission p = pkg.permissions.get(i);
-                HashMap<String, BasePermission> permissionMap =
+                ArrayMap<String, BasePermission> permissionMap =
                         p.tree ? mSettings.mPermissionTrees
                         : mSettings.mPermissions;
                 p.group = mPermissionGroups.get(p.info.group);
@@ -6265,9 +6263,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkg.mOverlayTarget != null && !pkg.mOverlayTarget.equals("android")) {
                     if (!mOverlays.containsKey(pkg.mOverlayTarget)) {
                         mOverlays.put(pkg.mOverlayTarget,
-                                new HashMap<String, PackageParser.Package>());
+                                new ArrayMap<String, PackageParser.Package>());
                     }
-                    HashMap<String, PackageParser.Package> map = mOverlays.get(pkg.mOverlayTarget);
+                    ArrayMap<String, PackageParser.Package> map = mOverlays.get(pkg.mOverlayTarget);
                     map.put(pkg.packageName, pkg);
                     PackageParser.Package orig = mPackages.get(pkg.mOverlayTarget);
                     if (orig != null && !createIdmapForPackagePairLI(orig, pkg)) {
@@ -6928,13 +6926,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
-        HashSet<String> origPermissions = gp.grantedPermissions;
+        ArraySet<String> origPermissions = gp.grantedPermissions;
         boolean changedPermission = false;
 
         if (replace) {
             ps.permissionsFixed = false;
             if (gp == ps) {
-                origPermissions = new HashSet<String>(gp.grantedPermissions);
+                origPermissions = new ArraySet<String>(gp.grantedPermissions);
                 gp.grantedPermissions.clear();
                 gp.gids = mGlobalGids;
             }
@@ -7081,7 +7079,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
-                                          BasePermission bp, HashSet<String> origPermissions) {
+                                          BasePermission bp, ArraySet<String> origPermissions) {
         boolean allowed;
         allowed = (compareSignatures(
                 bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
@@ -7339,8 +7337,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 //        }
 
         // Keys are String (activity class name), values are Activity.
-        private final HashMap<ComponentName, PackageParser.Activity> mActivities
-                = new HashMap<ComponentName, PackageParser.Activity>();
+        private final ArrayMap<ComponentName, PackageParser.Activity> mActivities
+                = new ArrayMap<ComponentName, PackageParser.Activity>();
         private int mFlags;
     }
 
@@ -7538,8 +7536,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 //        }
 
         // Keys are String (activity class name), values are Activity.
-        private final HashMap<ComponentName, PackageParser.Service> mServices
-                = new HashMap<ComponentName, PackageParser.Service>();
+        private final ArrayMap<ComponentName, PackageParser.Service> mServices
+                = new ArrayMap<ComponentName, PackageParser.Service>();
         private int mFlags;
     };
 
@@ -7732,8 +7730,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
 
-        private final HashMap<ComponentName, PackageParser.Provider> mProviders
-                = new HashMap<ComponentName, PackageParser.Provider>();
+        private final ArrayMap<ComponentName, PackageParser.Provider> mProviders
+                = new ArrayMap<ComponentName, PackageParser.Provider>();
         private int mFlags;
     };
 
@@ -11835,8 +11833,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             CrossProfileIntentResolver resolver =
                     mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
-            HashSet<CrossProfileIntentFilter> set =
-                    new HashSet<CrossProfileIntentFilter>(resolver.filterSet());
+            ArraySet<CrossProfileIntentFilter> set =
+                    new ArraySet<CrossProfileIntentFilter>(resolver.filterSet());
             for (CrossProfileIntentFilter filter : set) {
                 if (filter.getOwnerPackage().equals(ownerPackage)
                         && filter.getOwnerUserId() == callingUserId) {
