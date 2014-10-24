@@ -484,9 +484,13 @@ public final class PageAdapter extends Adapter implements
         return selectedPages;
     }
 
-    public void destroy(Runnable callback) {
-        throwIfNotClosed();
-        doDestroy(callback);
+    public void destroy() {
+        mPageContentRepository.destroy();
+        mCloseGuard.close();
+        mState = STATE_DESTROYED;
+        if (DEBUG) {
+            Log.i(LOG_TAG, "STATE_DESTROYED");
+        }
     }
 
     @Override
@@ -494,7 +498,7 @@ public final class PageAdapter extends Adapter implements
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                doDestroy(null);
+                destroy();
             }
         } finally {
             super.finalize();
@@ -739,15 +743,6 @@ public final class PageAdapter extends Adapter implements
 
     public void stopPreloadContent() {
         mPageContentRepository.stopPreload();
-    }
-
-    private void doDestroy(Runnable callback) {
-        mPageContentRepository.destroy(callback);
-        mCloseGuard.close();
-        mState = STATE_DESTROYED;
-        if (DEBUG) {
-            Log.i(LOG_TAG, "STATE_DESTROYED");
-        }
     }
 
     private void throwIfNotOpened() {
