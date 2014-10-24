@@ -16,10 +16,14 @@
 
 package android.app;
 
+import android.app.trust.ITrustManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.view.IWindowManager;
 import android.view.IOnKeyguardExitResult;
 import android.view.WindowManagerGlobal;
@@ -33,6 +37,7 @@ import android.view.WindowManagerGlobal;
  */
 public class KeyguardManager {
     private IWindowManager mWM;
+    private ITrustManager mTrustManager;
 
     /**
      * Intent used to prompt user for device credentials.
@@ -151,6 +156,8 @@ public class KeyguardManager {
 
     KeyguardManager() {
         mWM = WindowManagerGlobal.getWindowManagerService();
+        mTrustManager = ITrustManager.Stub.asInterface(
+                ServiceManager.getService(Context.TRUST_SERVICE));
     }
 
     /**
@@ -213,6 +220,34 @@ public class KeyguardManager {
         try {
             return mWM.inKeyguardRestrictedInputMode();
         } catch (RemoteException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Return whether unlocking the device is currently not requiring a password
+     * because of a trust agent.
+     *
+     * @return true if the keyguard can currently be unlocked without entering credentials
+     *         because the device is in a trusted environment.
+     */
+    public boolean isKeyguardInTrustedState() {
+        return isKeyguardInTrustedState(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * Return whether unlocking the device is currently not requiring a password
+     * because of a trust agent.
+     *
+     * @param userId the user for which the trusted state should be reported.
+     * @return true if the keyguard can currently be unlocked without entering credentials
+     *         because the device is in a trusted environment.
+     * @hide
+     */
+    public boolean isKeyguardInTrustedState(int userId) {
+        try {
+            return mTrustManager.isTrusted(userId);
+        } catch (RemoteException e) {
             return false;
         }
     }
