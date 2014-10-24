@@ -31,6 +31,7 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.util.IntArray;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
@@ -610,7 +611,7 @@ class SimpleMonthView extends View {
         }
 
         @Override
-        protected void getVisibleVirtualViews(List<Integer> virtualViewIds) {
+        protected void getVisibleVirtualViews(IntArray virtualViewIds) {
             for (int day = 1; day <= mNumCells; day++) {
                 virtualViewIds.add(day);
             }
