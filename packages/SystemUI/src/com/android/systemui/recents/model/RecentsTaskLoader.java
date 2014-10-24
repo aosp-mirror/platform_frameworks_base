@@ -418,13 +418,25 @@ public class RecentsTaskLoader {
         root.setStack(stack);
 
         // Start the task loader and add all the tasks we need to load
-        mLoader.start(context);
         mLoadQueue.addTasks(tasksToLoad);
+        mLoader.start(context);
+
         return root;
     }
 
+    /** Preloads the set of recent tasks (not including thumbnails). */
+    public void preload(Context context) {
+        ArrayList<Task> tasksToLoad = new ArrayList<Task>();
+        getTaskStack(mSystemServicesProxy, context.getResources(),
+                -1, -1, true, true, null, tasksToLoad);
+
+        // Start the task loader and add all the tasks we need to load
+        mLoadQueue.addTasks(tasksToLoad);
+        mLoader.start(context);
+    }
+
     /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
-    public TaskStack getTaskStack(SystemServicesProxy ssp, Resources res,
+    public synchronized TaskStack getTaskStack(SystemServicesProxy ssp, Resources res,
             int preloadTaskId, int preloadTaskCount,
             boolean loadTaskThumbnails, boolean isTopTaskHome,
             List<Task.TaskKey> taskKeysOut, List<Task> tasksToLoadOut) {
