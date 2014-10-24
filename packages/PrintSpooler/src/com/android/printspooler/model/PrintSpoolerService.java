@@ -78,7 +78,7 @@ public final class PrintSpoolerService extends Service {
 
     private static final boolean DEBUG_PERSISTENCE = false;
 
-    private static final boolean PERSISTNECE_MANAGER_ENABLED = true;
+    private static final boolean PERSISTENCE_MANAGER_ENABLED = true;
 
     private static final long CHECK_ALL_PRINTJOBS_HANDLED_DELAY = 5000;
 
@@ -728,7 +728,7 @@ public final class PrintSpoolerService extends Service {
         }
 
         public void writeStateLocked() {
-            if (!PERSISTNECE_MANAGER_ENABLED) {
+            if (!PERSISTENCE_MANAGER_ENABLED) {
                 return;
             }
             if (mWriteStateScheduled) {
@@ -935,7 +935,7 @@ public final class PrintSpoolerService extends Service {
         }
 
         public void readStateLocked() {
-            if (!PERSISTNECE_MANAGER_ENABLED) {
+            if (!PERSISTENCE_MANAGER_ENABLED) {
                 return;
             }
             FileInputStream in = null;
