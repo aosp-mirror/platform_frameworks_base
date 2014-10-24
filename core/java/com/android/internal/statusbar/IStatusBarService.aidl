@@ -43,6 +43,7 @@ interface IStatusBarService
     void onPanelRevealed();
     void onPanelHidden();
     void onNotificationClick(String key);
+    void onNotificationActionClick(String key, int actionIndex);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
