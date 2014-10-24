@@ -18,7 +18,6 @@ package com.android.systemui.recents.views;
 
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -42,7 +41,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
@@ -564,14 +562,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
 
     @Override
-    public void onComponentRemoved(HashSet<ComponentName> cns) {
+    public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
         // Propagate this event down to each task stack view
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child != mSearchBar) {
                 TaskStackView stackView = (TaskStackView) child;
-                stackView.onComponentRemoved(cns);
+                stackView.onPackagesChanged(monitor, packageName, userId);
             }
         }
     }

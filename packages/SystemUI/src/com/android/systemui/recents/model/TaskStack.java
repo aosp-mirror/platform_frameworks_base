@@ -255,6 +255,17 @@ public class TaskStack {
         return mTaskList.getTasks().get(mTaskList.size() - 1);
     }
 
+    /** Gets the task keys */
+    public ArrayList<Task.TaskKey> getTaskKeys() {
+        ArrayList<Task.TaskKey> taskKeys = new ArrayList<Task.TaskKey>();
+        ArrayList<Task> tasks = mTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            taskKeys.add(tasks.get(i).key);
+        }
+        return taskKeys;
+    }
+
     /** Gets the tasks */
     public ArrayList<Task> getTasks() {
         return mTaskList.getTasks();
