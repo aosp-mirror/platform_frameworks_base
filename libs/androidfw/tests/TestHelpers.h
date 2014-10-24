@@ -6,6 +6,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <utils/String8.h>
 #include <utils/String16.h>
+#include <gtest/gtest.h>
 
 static inline ::std::ostream& operator<<(::std::ostream& out, const android::String8& str) {
     return out << str.string();
@@ -17,6 +18,8 @@ static inline ::std::ostream& operator<<(::std::ostream& out, const android::Str
 
 namespace android {
 
+enum { MAY_NOT_BE_BAG = false };
+
 static inline bool operator==(const android::ResTable_config& a, const android::ResTable_config& b) {
     return memcmp(&a, &b, sizeof(a)) == 0;
 }
@@ -24,6 +27,8 @@ static inline bool operator==(const android::ResTable_config& a, const android::
 static inline ::std::ostream& operator<<(::std::ostream& out, const android::ResTable_config& c) {
     return out << c.toString().string();
 }
+
+::testing::AssertionResult IsStringEqual(const ResTable& table, uint32_t resourceId, const char* expectedStr);
 
 } // namespace android
 

@@ -42,6 +42,9 @@ namespace {
  * Package: com.android.test.basic
  */
 #include "data/basic/split_de_fr_arsc.h"
+#include "data/basic/split_hdpi_v4_arsc.h"
+#include "data/basic/split_xhdpi_v4_arsc.h"
+#include "data/basic/split_xxhdpi_v4_arsc.h"
 
 /**
  * Include a binary resource table. This table
@@ -163,6 +166,33 @@ TEST(SplitTest, TypeEntrySpecFlagsAreUpdated) {
     EXPECT_EQ(ResTable_config::CONFIG_LOCALE, frSpecFlags);
 }
 
+TEST(SplitTest, SelectBestDensity) {
+    ResTable_config baseConfig;
+    memset(&baseConfig, 0, sizeof(baseConfig));
+    baseConfig.density = ResTable_config::DENSITY_XHIGH;
+    baseConfig.sdkVersion = 21;
+
+    ResTable table;
+    table.setParameters(&baseConfig);
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(split_hdpi_v4_arsc, split_hdpi_v4_arsc_len));
+
+    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "hdpi"));
+
+    ASSERT_EQ(NO_ERROR, table.add(split_xhdpi_v4_arsc, split_xhdpi_v4_arsc_len));
+
+    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "xhdpi"));
+
+    ASSERT_EQ(NO_ERROR, table.add(split_xxhdpi_v4_arsc, split_xxhdpi_v4_arsc_len));
+
+    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "xhdpi"));
+
+    baseConfig.density = ResTable_config::DENSITY_XXHIGH;
+    table.setParameters(&baseConfig);
+
+    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "xxhdpi"));
+}
+
 TEST(SplitFeatureTest, TestNewResourceIsAccessible) {
     ResTable table;
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
@@ -188,7 +218,7 @@ TEST(SplitFeatureTest, TestNewResourceNameHasCorrectName) {
 
     ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
 
-    EXPECT_TRUE(table.getResourceName(base::R::string::test3, false, &name));
+    ASSERT_TRUE(table.getResourceName(base::R::string::test3, false, &name));
 
     EXPECT_EQ(String16("com.android.test.basic"),
             String16(name.package, name.packageLen));
