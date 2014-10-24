@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +32,15 @@ import com.android.internal.R;
  */
 class YearPickerView extends ListView implements AdapterView.OnItemClickListener,
         OnDateChangedListener {
+    private final Calendar mMinDate = Calendar.getInstance();
+    private final Calendar mMaxDate = Calendar.getInstance();
+
+    private final YearAdapter mAdapter;
+    private final int mViewSize;
+    private final int mChildSize;
+
     private DatePickerController mController;
-    private YearAdapter mAdapter;
-    private int mViewSize;
-    private int mChildSize;
+
     private int mSelectedPosition = -1;
     private int mYearSelectedCircleColor;
 
@@ -72,15 +76,23 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
 
         setOnItemClickListener(this);
         setDividerHeight(0);
+
+        mAdapter = new YearAdapter(getContext(), R.layout.year_label_text_view);
+        setAdapter(mAdapter);
+    }
+
+    public void setRange(Calendar min, Calendar max) {
+        mMinDate.setTimeInMillis(min.getTimeInMillis());
+        mMaxDate.setTimeInMillis(max.getTimeInMillis());
+
+        updateAdapterData();
     }
 
     public void init(DatePickerController controller) {
         mController = controller;
         mController.registerOnDateChangedListener(this);
 
-        mAdapter = new YearAdapter(getContext(), R.layout.year_label_text_view);
         updateAdapterData();
-        setAdapter(mAdapter);
 
         onDateChanged();
     }
@@ -98,8 +110,9 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
 
     private void updateAdapterData() {
         mAdapter.clear();
-        final int maxYear = mController.getMaxYear();
-        for (int year = mController.getMinYear(); year <= maxYear; year++) {
+
+        final int maxYear = mMaxDate.get(Calendar.YEAR);
+        for (int year = mMinDate.get(Calendar.YEAR); year <= maxYear; year++) {
             mAdapter.add(year);
         }
     }
@@ -173,12 +186,13 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
         updateAdapterData();
         mAdapter.notifyDataSetChanged();
         postSetSelectionCentered(
-                mController.getSelectedDay().get(Calendar.YEAR) - mController.getMinYear());
+                mController.getSelectedDay().get(Calendar.YEAR) - mMinDate.get(Calendar.YEAR));
     }
 
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
+
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
             event.setFromIndex(0);
             event.setToIndex(0);
