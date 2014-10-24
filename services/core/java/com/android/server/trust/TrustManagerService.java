@@ -122,11 +122,15 @@ public class TrustManagerService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY && !isSafeMode()) {
+        if (isSafeMode()) {
+            // No trust agents in safe mode.
+            return;
+        }
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
             refreshAgentList(UserHandle.USER_ALL);
-        } else if (phase == SystemService.PHASE_BOOT_COMPLETED && !isSafeMode()) {
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_OWNER);
         }
     }
@@ -174,6 +178,10 @@ public class TrustManagerService extends SystemService {
 
     void refreshAgentList(int userId) {
         if (DEBUG) Slog.d(TAG, "refreshAgentList()");
+        if (isSafeMode()) {
+            // Don't ever bind to trust agents in safe mode.
+            return;
+        }
         if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_OWNER) {
             Log.e(TAG, "refreshAgentList(userId=" + userId + "): Invalid user handle,"
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
@@ -580,6 +588,10 @@ public class TrustManagerService extends SystemService {
         protected void dump(FileDescriptor fd, final PrintWriter fout, String[] args) {
             mContext.enforceCallingPermission(Manifest.permission.DUMP,
                     "dumping TrustManagerService");
+            if (isSafeMode()) {
+                fout.println("disabled because the system is in safe mode.");
+                return;
+            }
             final UserInfo currentUser;
             final List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
             try {
