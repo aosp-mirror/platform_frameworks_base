@@ -1130,31 +1130,31 @@ public abstract class Window {
      * Set an explicit Drawable value for feature of this window. You must
      * have called requestFeature(featureId) before calling this function.
      *
-     * @param featureId The desired drawable feature to change.
-     * Features are constants defined by Window.
+     * @param featureId The desired drawable feature to change. Features are
+     *                  constants defined by Window.
      * @param drawable A Drawable object to display.
      */
     public abstract void setFeatureDrawable(int featureId, Drawable drawable);
 
     /**
-     * Set a custom alpha value for the given drawale feature, controlling how
+     * Set a custom alpha value for the given drawable feature, controlling how
      * much the background is visible through it.
      *
-     * @param featureId The desired drawable feature to change.
-     * Features are constants defined by Window.
+     * @param featureId The desired drawable feature to change. Features are
+     *                  constants defined by Window.
      * @param alpha The alpha amount, 0 is completely transparent and 255 is
      *              completely opaque.
      */
     public abstract void setFeatureDrawableAlpha(int featureId, int alpha);
 
     /**
-     * Set the integer value for a feature.  The range of the value depends on
-     * the feature being set.  For FEATURE_PROGRESSS, it should go from 0 to
-     * 10000. At 10000 the progress is complete and the indicator hidden.
+     * Set the integer value for a feature. The range of the value depends on
+     * the feature being set. For {@link #FEATURE_PROGRESS}, it should go from
+     * 0 to 10000. At 10000 the progress is complete and the indicator hidden.
      *
-     * @param featureId The desired feature to change.
-     * Features are constants defined by Window.
-     * @param value The value for the feature.  The interpretation of this
+     * @param featureId The desired feature to change. Features are constants
+     *                  defined by Window.
+     * @param value The value for the feature. The interpretation of this
      *              value is feature-specific.
      */
     public abstract void setFeatureInt(int featureId, int value);
