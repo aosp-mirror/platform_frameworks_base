@@ -1712,14 +1712,6 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // This conditional is a dirty hack to limit the logging done on
-        //     behalf of the download manager without affecting other apps.
-        if (!pkg.equals("com.android.providers.downloads")
-                || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
-            EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
-                    pkg, id, tag, userId, notification.toString());
-        }
-
         if (pkg == null || notification == null) {
             throw new IllegalArgumentException("null not allowed: pkg=" + pkg
                     + " id=" + id + " notification=" + notification);
@@ -1769,6 +1761,14 @@ public class NotificationManagerService extends SystemService {
                     }
                     mRankingHelper.extractSignals(r);
 
+                    // This conditional is a dirty hack to limit the logging done on
+                    //     behalf of the download manager without affecting other apps.
+                    if (!pkg.equals("com.android.providers.downloads")
+                            || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
+                        EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
+                                pkg, id, tag, userId, notification.toString(),
+                                (old != null) ? 1 : 0);
+                    }
                     // 3. Apply local rules
 
                     // blocked apps
