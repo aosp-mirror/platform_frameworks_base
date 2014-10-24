@@ -110,13 +110,12 @@ public final class PageContentRepository {
         mRenderer.close(callback);
     }
 
-    public void destroy(Runnable callback) {
-        throwIfNotClosed();
+    public void destroy() {
         mState = STATE_DESTROYED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
-        doDestroy(callback);
+        mRenderer.destroy();
     }
 
     public void startPreload(int firstShownPage, int lastShownPage) {
@@ -163,19 +162,11 @@ public final class PageContentRepository {
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                doDestroy(null);
+                destroy();
             }
         } finally {
             super.finalize();
         }
-    }
-
-    private void doDestroy(Runnable callback) {
-        mState = STATE_DESTROYED;
-        if (DEBUG) {
-            Log.i(LOG_TAG, "STATE_DESTROYED");
-        }
-        mRenderer.destroy(callback);
     }
 
     private void throwIfNotOpened() {
@@ -428,6 +419,7 @@ public final class PageContentRepository {
         private IPdfRenderer mRenderer;
 
         private boolean mBoundToService;
+        private boolean mDestroyed;
 
         public AsyncRenderer(Context context, OnMalformedPdfFileListener malformedPdfFileListener) {
             mContext = context;
@@ -441,7 +433,6 @@ public final class PageContentRepository {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mBoundToService = true;
             synchronized (mLock) {
                 mRenderer = IPdfRenderer.Stub.asInterface(service);
                 mLock.notifyAll();
@@ -465,9 +456,14 @@ public final class PageContentRepository {
             new AsyncTask<Void, Void, Integer>() {
                 @Override
                 protected void onPreExecute() {
+                    if (mDestroyed) {
+                        cancel(true);
+                        return;
+                    }
                     Intent intent = new Intent(PdfManipulationService.ACTION_GET_RENDERER);
                     intent.setClass(mContext, PdfManipulationService.class);
                     mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
+                    mBoundToService = true;
                 }
 
                 @Override
@@ -513,6 +509,14 @@ public final class PageContentRepository {
 
             new AsyncTask<Void, Void, Void>() {
                 @Override
+                protected void onPreExecute() {
+                    if (mDestroyed) {
+                        cancel(true);
+                        return;
+                    }
+                }
+
+                @Override
                 protected Void doInBackground(Void... params) {
                     synchronized (mLock) {
                         try {
@@ -534,27 +538,14 @@ public final class PageContentRepository {
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
-        public void destroy(final Runnable callback) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    return null;
-                }
-
-                @Override
-                public void onPostExecute(Void result) {
-                    if (mBoundToService) {
-                        mBoundToService = false;
-                        mContext.unbindService(AsyncRenderer.this);
-                    }
-                    mPageContentCache.invalidate();
-                    mPageContentCache.clear();
-                    if (callback != null) {
-                        callback.run();
-                    }
-
-                }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        public void destroy() {
+            if (mBoundToService) {
+                mBoundToService = false;
+                mContext.unbindService(AsyncRenderer.this);
+            }
+            mPageContentCache.invalidate();
+            mPageContentCache.clear();
+            mDestroyed = true;
         }
 
         public void startPreload(int firstShownPage, int lastShownPage, RenderSpec renderSpec) {
