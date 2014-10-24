@@ -420,10 +420,6 @@ public class RecentsTaskLoader {
         // Start the task loader and add all the tasks we need to load
         mLoader.start(context);
         mLoadQueue.addTasks(tasksToLoad);
-
-        // Update the package monitor with the list of packages to listen for
-        mPackageMonitor.setTasks(taskKeys);
-
         return root;
     }
 
