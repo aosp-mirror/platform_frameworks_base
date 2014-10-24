@@ -3795,6 +3795,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         runPostCollapseRunnables();
     }
 
+    public void onClosingFinished() {
+        runPostCollapseRunnables();
+    }
+
     public void onUnlockHintStarted() {
         mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
     }
