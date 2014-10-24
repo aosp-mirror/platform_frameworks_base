@@ -30585,7 +30585,7 @@ package android.text.format {
     method public static java.lang.String formatShortFileSize(android.content.Context, long);
   }
 
-  public class Time {
+  public deprecated class Time {
     ctor public Time(java.lang.String);
     ctor public Time();
     ctor public Time(android.text.format.Time);
@@ -31956,7 +31956,7 @@ package android.util {
     field public final int mTag;
   }
 
-  public class FloatMath {
+  public deprecated class FloatMath {
     method public static float ceil(float);
     method public static float cos(float);
     method public static float exp(float);
