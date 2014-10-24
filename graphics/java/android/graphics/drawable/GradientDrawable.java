@@ -1552,14 +1552,15 @@ public class GradientDrawable extends Drawable {
         public int mThickness = -1;
         public boolean mDither = false;
 
-        private float mCenterX = 0.5f;
-        private float mCenterY = 0.5f;
-        private float mGradientRadius = 0.5f;
-        private int mGradientRadiusType = RADIUS_TYPE_PIXELS;
-        private boolean mUseLevel;
-        private boolean mUseLevelForShape;
-        private boolean mOpaqueOverBounds;
-        private boolean mOpaqueOverShape;
+        float mCenterX = 0.5f;
+        float mCenterY = 0.5f;
+        float mGradientRadius = 0.5f;
+        int mGradientRadiusType = RADIUS_TYPE_PIXELS;
+        boolean mUseLevel = false;
+        boolean mUseLevelForShape = true;
+
+        boolean mOpaqueOverBounds;
+        boolean mOpaqueOverShape;
 
         ColorStateList mTint = null;
         PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
