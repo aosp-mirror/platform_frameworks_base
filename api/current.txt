@@ -17401,7 +17401,7 @@ package android.net {
     field public static final java.lang.String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 
-  public class ProxyInfo implements android.os.Parcelable {
+  public deprecated class ProxyInfo implements android.os.Parcelable {
     method public static android.net.ProxyInfo buildDirectProxy(java.lang.String, int);
     method public static android.net.ProxyInfo buildDirectProxy(java.lang.String, int, java.util.List<java.lang.String>);
     method public static android.net.ProxyInfo buildPacProxy(android.net.Uri);
@@ -17448,7 +17448,7 @@ package android.net {
     method public static javax.net.SocketFactory getDefault(int);
     method public static javax.net.ssl.SSLSocketFactory getDefault(int, android.net.SSLSessionCache);
     method public java.lang.String[] getDefaultCipherSuites();
-    method public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
+    method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
     method public static javax.net.ssl.SSLSocketFactory getInsecure(int, android.net.SSLSessionCache);
     method public byte[] getNpnSelectedProtocol(java.net.Socket);
     method public java.lang.String[] getSupportedCipherSuites();
@@ -17666,7 +17666,7 @@ package android.net {
 
 package android.net.http {
 
-  public final class AndroidHttpClient implements org.apache.http.client.HttpClient {
+  public final deprecated class AndroidHttpClient implements org.apache.http.client.HttpClient {
     method public void close();
     method public void disableCurlLogging();
     method public void enableCurlLogging(java.lang.String, int);
@@ -17684,8 +17684,8 @@ package android.net.http {
     method public org.apache.http.params.HttpParams getParams();
     method public static java.io.InputStream getUngzippedContent(org.apache.http.HttpEntity) throws java.io.IOException;
     method public static void modifyRequestToAcceptGzipResponse(org.apache.http.HttpRequest);
-    method public static android.net.http.AndroidHttpClient newInstance(java.lang.String, android.content.Context);
-    method public static android.net.http.AndroidHttpClient newInstance(java.lang.String);
+    method public static deprecated android.net.http.AndroidHttpClient newInstance(java.lang.String, android.content.Context);
+    method public static deprecated android.net.http.AndroidHttpClient newInstance(java.lang.String);
     method public static long parseDate(java.lang.String);
     field public static long DEFAULT_SYNC_MIN_GZIP_BYTES;
   }

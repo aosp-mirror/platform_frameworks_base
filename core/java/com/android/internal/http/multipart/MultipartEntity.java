@@ -80,7 +80,13 @@ import org.apache.commons.logging.LogFactory;
  * </pre>
  * 
  * @since 3.0
+ *
+ * @deprecated Please use {@link java.net.URLConnection} and friends instead.
+ *     The Apache HTTP client is no longer maintained and may be removed in a future
+ *     release. Please visit <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">this webpage</a>
+ *     for further details.
  */
+@Deprecated
 public class MultipartEntity extends AbstractHttpEntity {
 
     private static final Log log = LogFactory.getLog(MultipartEntity.class);
