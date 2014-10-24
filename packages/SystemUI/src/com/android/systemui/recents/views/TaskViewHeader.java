@@ -36,7 +36,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -56,23 +55,27 @@ public class TaskViewHeader extends FrameLayout {
 
     RecentsConfiguration mConfig;
 
+    // Header views
     ImageView mDismissButton;
     ImageView mApplicationIcon;
     TextView mActivityDescription;
 
-    RippleDrawable mBackground;
-    GradientDrawable mBackgroundColorDrawable;
+    // Header drawables
+    boolean mCurrentPrimaryColorIsDark;
+    int mCurrentPrimaryColor;
     int mBackgroundColor;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
+    RippleDrawable mBackground;
+    GradientDrawable mBackgroundColorDrawable;
     AnimatorSet mFocusAnimator;
-    PorterDuffColorFilter mDimFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
 
-    boolean mCurrentPrimaryColorIsDark;
-    int mCurrentPrimaryColor;
-
+    // Static highlight that we draw at the top of each view
     static Paint sHighlightPaint;
-    private Paint mDimPaint = new Paint();
+
+    // Header dim, which is only used when task view hardware layers are not used
+    Paint mDimLayerPaint = new Paint();
+    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -172,6 +175,16 @@ public class TaskViewHeader extends FrameLayout {
         return false;
     }
 
+    /**
+     * Sets the dim alpha, only used when we are not using hardware layers.
+     * (see RecentsConfiguration.useHardwareLayers)
+     */
+    void setDimAlpha(int alpha) {
+        mDimColorFilter.setColor(Color.argb(alpha, 0, 0, 0));
+        mDimLayerPaint.setColorFilter(mDimColorFilter);
+        setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
+    }
+
     /** Returns the secondary color for a primary color. */
     int getSecondaryColor(int primaryColor, boolean useLightOverlayColor) {
         int overlayColor = useLightOverlayColor ? Color.WHITE : Color.BLACK;
@@ -266,8 +279,7 @@ public class TaskViewHeader extends FrameLayout {
         boolean isRunning = false;
         if (mFocusAnimator != null) {
             isRunning = mFocusAnimator.isRunning();
-            mFocusAnimator.removeAllListeners();
-            mFocusAnimator.cancel();
+            Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
         }
 
         if (focused) {
@@ -343,12 +355,5 @@ public class TaskViewHeader extends FrameLayout {
                 setTranslationZ(0f);
             }
         }
-    }
-
-    public void setDimAlpha(int alpha) {
-        int color = Color.argb(alpha, 0, 0, 0);
-        mDimFilter.setColor(color);
-        mDimPaint.setColorFilter(mDimFilter);
-        setLayerType(LAYER_TYPE_HARDWARE, mDimPaint);
     }
 }

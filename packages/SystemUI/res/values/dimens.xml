@@ -239,7 +239,7 @@
     <dimen name="recents_search_bar_space_height">64dp</dimen>
 
     <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.04444</item>
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.03333</item>
 
     <!-- The overscroll percentage allowed on the stack. -->
     <item name="recents_stack_overscroll_percentage" format="float" type="dimen">0.0875</item>

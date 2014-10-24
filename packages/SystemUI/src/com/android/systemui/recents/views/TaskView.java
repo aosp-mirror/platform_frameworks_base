@@ -28,10 +28,9 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.AlternateRecentsComponent;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
@@ -53,11 +52,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     float mTaskProgress;
     ObjectAnimator mTaskProgressAnimator;
-    ObjectAnimator mDimAnimator;
     float mMaxDimScale;
-    int mDim;
+    int mDimAlpha;
     AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1f);
-    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.MULTIPLY);
+    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
+    Paint mDimLayerPaint = new Paint();
 
     Task mTask;
     boolean mTaskDataLoaded;
@@ -65,7 +64,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     boolean mFocusAnimationsEnabled;
     boolean mClipViewInStack;
     AnimateableViewBounds mViewBounds;
-    Paint mLayerPaint = new Paint();
 
     View mContent;
     TaskViewThumbnail mThumbnailView;
@@ -130,7 +128,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mContent = findViewById(R.id.task_view_content);
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
-        mThumbnailView.enableTaskBarClip(mHeaderView);
+        mThumbnailView.updateClipToTaskBar(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
         mActionButtonView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
@@ -179,10 +177,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 !mConfig.fakeShadows, updateCallback);
 
         // Update the task progress
-        if (mTaskProgressAnimator != null) {
-            mTaskProgressAnimator.removeAllListeners();
-            mTaskProgressAnimator.cancel();
-        }
+        Utilities.cancelAnimationWithoutCallbacks(mTaskProgressAnimator);
         if (duration <= 0) {
             setTaskProgress(toTransform.p);
         } else {
@@ -377,7 +372,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mThumbnailView.startLaunchTaskAnimation(postAnimRunnable);
 
             // Animate the dim
-            if (mDim > 0) {
+            if (mDimAlpha > 0) {
                 ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
                 anim.setDuration(mConfig.taskBarExitAnimDuration);
                 anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
@@ -495,26 +490,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Returns the current dim. */
     public void setDim(int dim) {
-        mDim = dim;
-        if (mDimAnimator != null) {
-            mDimAnimator.removeAllListeners();
-            mDimAnimator.cancel();
-        }
+        mDimAlpha = dim;
         if (mConfig.useHardwareLayers) {
             // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
             if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
-                if (mDimAnimator != null) {
-                    mDimAnimator.removeAllListeners();
-                    mDimAnimator.cancel();
-                }
-
-                int inverse = 255 - mDim;
-                mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
-                mLayerPaint.setColorFilter(mDimColorFilter);
-                mContent.setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+                mDimColorFilter.setColor(Color.argb(mDimAlpha, 0, 0, 0));
+                mDimLayerPaint.setColorFilter(mDimColorFilter);
+                mContent.setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
             }
         } else {
-            float dimAlpha = mDim / 255.0f;
+            float dimAlpha = mDimAlpha / 255.0f;
             if (mThumbnailView != null) {
                 mThumbnailView.setDimAlpha(dimAlpha);
             }
@@ -526,7 +511,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Returns the current dim. */
     public int getDim() {
-        return mDim;
+        return mDimAlpha;
     }
 
     /** Animates the dim to the task progress. */
