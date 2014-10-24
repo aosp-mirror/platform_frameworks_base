@@ -2372,6 +2372,8 @@ public class NotificationManagerService extends SystemService {
 
         // Save it for users of getHistoricalNotifications()
         mArchive.record(r.sbn);
+
+        EventLogTags.writeNotificationCanceled(r.getKey(), reason);
     }
 
     /**
