@@ -8,7 +8,7 @@ import android.util.Log;
 
 /**
  * Parent for classes of various HDMI-CEC device type used to access
- * {@link HdmiControlService}. Contains methods and data used in common.
+ * the HDMI control system service. Contains methods and data used in common.
  *
  * @hide
  */
