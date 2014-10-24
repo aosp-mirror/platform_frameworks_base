@@ -80,6 +80,8 @@ interface IAudioService {
 
     int getRingerMode();
 
+    boolean isValidRingerMode(int ringerMode);
+
     void setVibrateSetting(int vibrateType, int vibrateSetting);
 
     int getVibrateSetting(int vibrateType);
