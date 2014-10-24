@@ -802,6 +802,7 @@ public class NotificationPanelView extends PanelView implements
             requestPanelHeightUpdate();
             mNotificationStackScroller.setInterceptDelegateEnabled(expanded);
             mStatusBar.setQsExpanded(expanded);
+            mQsPanel.setExpanded(expanded);
         }
     }
 
