@@ -48,7 +48,10 @@ import libcore.util.ZoneInfoDB;
  *     <li>Much of the formatting / parsing assumes ASCII text and is therefore not suitable for
  *     use with non-ASCII scripts.</li>
  * </ul>
+ *
+ * @deprecated Use {@link java.util.GregorianCalendar} instead.
  */
+@Deprecated
 public class Time {
     private static final String Y_M_D_T_H_M_S_000 = "%Y-%m-%dT%H:%M:%S.000";
     private static final String Y_M_D_T_H_M_S_000_Z = "%Y-%m-%dT%H:%M:%S.000Z";
