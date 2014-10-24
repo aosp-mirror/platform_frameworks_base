@@ -25,7 +25,7 @@ import android.hardware.hdmi.HdmiRecordSources.RecordSource;
  */
 @SystemApi
 public abstract class HdmiRecordListener {
-    protected HdmiRecordListener() {}
+    public HdmiRecordListener() {}
 
     /**
      * Called when TV received one touch record request from record device. The client of this
@@ -34,7 +34,7 @@ public abstract class HdmiRecordListener {
      * @param recorderAddress
      * @return record source to be used for recording. Null if no device is available.
      */
-    public abstract RecordSource getOneTouchRecordSource(int recorderAddress);
+    public abstract RecordSource onOneTouchRecordSourceRequested(int recorderAddress);
 
     /**
      * Called when one touch record is started or failed during initialization.
