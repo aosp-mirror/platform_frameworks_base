@@ -2513,7 +2513,12 @@ public final class ActivityThread {
     }
 
     public void handleInstallProvider(ProviderInfo info) {
-        installContentProviders(mInitialApplication, Lists.newArrayList(info));
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            installContentProviders(mInitialApplication, Lists.newArrayList(info));
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
     }
 
     private void handleEnterAnimationComplete(IBinder token) {
