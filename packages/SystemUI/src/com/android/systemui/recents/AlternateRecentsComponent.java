@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** A proxy implementation for the recents component */
-public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
+public class AlternateRecentsComponent {
 
     final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
     final public static String EXTRA_FROM_SEARCH_HOME = "recents.triggeredOverSearchHome";
@@ -63,7 +63,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
     final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
 
-    final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
     final public static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
 
@@ -78,9 +77,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     Context mContext;
     LayoutInflater mInflater;
     SystemServicesProxy mSystemServicesProxy;
-    Handler mHandler;
     boolean mBootCompleted;
-    boolean mStartAnimationTriggered;
 
     // Task launching
     RecentsConfiguration mConfig;
@@ -106,7 +103,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         mInflater = LayoutInflater.from(context);
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
-        mHandler = new Handler();
         mTaskStackBounds = new Rect();
     }
 
@@ -364,30 +360,27 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for a unknown state->recents transition.
      */
     ActivityOptions getUnknownTransitionActivityOptions() {
-        mStartAnimationTriggered = false;
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
-                R.anim.recents_from_unknown_exit, mHandler, this);
+                R.anim.recents_from_unknown_exit);
     }
 
     /**
      * Creates the activity options for a home->recents transition.
      */
     ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
-        mStartAnimationTriggered = false;
         if (fromSearchHome) {
             return ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_search_launcher_enter,
-                    R.anim.recents_from_search_launcher_exit, mHandler, this);
+                    R.anim.recents_from_search_launcher_exit);
         }
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
-                R.anim.recents_from_launcher_exit, mHandler, this);
+                R.anim.recents_from_launcher_exit);
     }
 
     /**
-     * Creates the activity options for an app->recents transition.  If this method sets the static
-     * screenshot, then we will use that for the transition.
+     * Creates the activity options for an app->recents transition.
      */
     ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask,
             boolean isTopTaskHome) {
@@ -411,10 +404,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 c.setBitmap(null);
             }
 
-            mStartAnimationTriggered = false;
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mStatusBarView,
                     thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
-                    toTaskRect.height(), this);
+                    toTaskRect.height(), null);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
@@ -549,44 +541,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     public static void notifyVisibilityChanged(boolean visible) {
         if (sRecentsComponentCallbacks != null) {
             sRecentsComponentCallbacks.onVisibilityChanged(visible);
-        }
-    }
-
-    /**** OnAnimationStartedListener Implementation ****/
-
-    @Override
-    public void onAnimationStarted() {
-        // Notify recents to start the enter animation
-        if (!mStartAnimationTriggered) {
-            // There can be a race condition between the start animation callback and
-            // the start of the new activity (where we register the receiver that listens
-            // to this broadcast, so we add our own receiver and if that gets called, then
-            // we know the activity has not yet started and we can retry sending the broadcast.
-            BroadcastReceiver fallbackReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (getResultCode() == Activity.RESULT_OK) {
-                        mStartAnimationTriggered = true;
-                        return;
-                    }
-
-                    // Schedule for the broadcast to be sent again after some time
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            onAnimationStarted();
-                        }
-                    }, 75);
-                }
-            };
-
-            // Send the broadcast to notify Recents that the animation has started
-            Intent intent = new Intent(ACTION_START_ENTER_ANIMATION);
-            intent.setPackage(mContext.getPackageName());
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-                    Intent.FLAG_RECEIVER_FOREGROUND);
-            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
-                    fallbackReceiver, null, Activity.RESULT_CANCELED, null, null);
         }
     }
 }
