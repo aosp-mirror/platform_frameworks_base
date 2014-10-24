@@ -611,15 +611,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             if (mAllowAutoAdvance && autoAdvance) {
                 updateHeaderHour(newValue, false);
                 setCurrentItemShowing(MINUTE_INDEX, true, false);
-                mRadialTimePickerView.announceForAccessibility(newValue + ". " + mSelectMinutes);
+                mDelegator.announceForAccessibility(newValue + ". " + mSelectMinutes);
             } else {
                 updateHeaderHour(newValue, true);
-                mRadialTimePickerView.setContentDescription(
-                        mHourPickerDescription + ": " + newValue);
             }
         } else if (pickerIndex == MINUTE_INDEX){
             updateHeaderMinute(newValue, true);
-            mRadialTimePickerView.setContentDescription(mMinutePickerDescription + ": " + newValue);
         } else if (pickerIndex == AMPM_INDEX) {
             updateAmPmLabelStates(newValue);
         } else if (pickerIndex == ENABLE_PICKER_INDEX) {
@@ -744,19 +741,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         mRadialTimePickerView.setCurrentItemShowing(index, animateCircle);
 
         if (index == HOUR_INDEX) {
-            int hours = mRadialTimePickerView.getCurrentHour();
-            if (!mIs24HourView) {
-                hours = hours % 12;
-            }
-            mRadialTimePickerView.setContentDescription(mHourPickerDescription + ": " + hours);
             if (announce) {
-                mRadialTimePickerView.announceForAccessibility(mSelectHours);
+                mDelegator.announceForAccessibility(mSelectHours);
             }
         } else {
-            int minutes = mRadialTimePickerView.getCurrentMinute();
-            mRadialTimePickerView.setContentDescription(mMinutePickerDescription + ": " + minutes);
             if (announce) {
-                mRadialTimePickerView.announceForAccessibility(mSelectMinutes);
+                mDelegator.announceForAccessibility(mSelectMinutes);
             }
         }
 
@@ -789,7 +779,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
                     } else {
                         deletedKeyStr = String.format("%d", getValFromKeyCode(deleted));
                     }
-                    mRadialTimePickerView.announceForAccessibility(
+                    mDelegator.announceForAccessibility(
                             String.format(mDeletedKeyFormat, deletedKeyStr));
                     updateDisplay(true);
                 }
@@ -851,7 +841,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         }
 
         int val = getValFromKeyCode(keyCode);
-        mRadialTimePickerView.announceForAccessibility(String.format("%d", val));
+        mDelegator.announceForAccessibility(String.format("%d", val));
         // Automatically fill in 0's if AM or PM was legally entered.
         if (isTypedTimeFullyLegal()) {
             if (!mIs24HourView && mTypedTimes.size() <= 3) {
