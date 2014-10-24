@@ -48,10 +48,11 @@ interface IImsCallSessionListener {
     void callSessionResumeReceived(in IImsCallSession session, in ImsCallProfile profile);
 
     /**
-     * Notifiies the result of call merge operation.
+     * Notifies the result of call merge operation.
      */
-    void callSessionMerged(in IImsCallSession session,
+    void callSessionMergeStarted(in IImsCallSession session,
             in IImsCallSession newSession, in ImsCallProfile profile);
+    void callSessionMergeComplete(in IImsCallSession session);
     void callSessionMergeFailed(in IImsCallSession session,
             in ImsReasonInfo reasonInfo);
 
