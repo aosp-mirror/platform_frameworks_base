@@ -542,6 +542,19 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_VOICE_INTERACTION = FIRST_SYSTEM_WINDOW+31;
 
         /**
+         * Window type: Windows that are overlaid <em>only</em> by an {@link
+         * android.accessibilityservice.AccessibilityService} for interception of
+         * user interactions without changing the windows an accessibility service
+         * can introspect. In particular, an accessibility service can introspect
+         * only windows that a sighted user can interact with which is they can touch
+         * these windows or can type into these windows. For example, if there
+         * is a full screen accessibility overlay that is touchable, the windows
+         * below it will be introspectable by an accessibility service regardless
+         * they are covered by a touchable window.
+         */
+        public static final int TYPE_ACCESSIBILITY_OVERLAY = FIRST_SYSTEM_WINDOW+32;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
