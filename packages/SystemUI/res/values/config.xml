@@ -252,5 +252,8 @@
 
     <!-- Zen toast visibility duration -->
     <integer name="zen_toast_visible_duration">500</integer>
+
+    <!-- Enable the default volume dialog -->
+    <bool name="enable_volume_ui">true</bool>
 </resources>
 
