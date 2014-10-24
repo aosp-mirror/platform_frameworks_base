@@ -106,7 +106,7 @@ public abstract class PanelView extends FrameLayout {
     };
 
     protected void onExpandingFinished() {
-        mClosing = false;
+        endClosing();
         mBar.onExpandingFinished();
     }
 
@@ -249,9 +249,7 @@ public abstract class PanelView extends FrameLayout {
                 trackMovement(event);
                 if (!waitForTouchSlop || (mHeightAnimator != null && !mHintAnimationRunning) ||
                         mPeekPending || mPeekAnimator != null) {
-                    if (mHeightAnimator != null) {
-                        mHeightAnimator.cancel(); // end any outstanding animations
-                    }
+                    cancelHeightAnimator();
                     cancelPeek();
                     mTouchSlopExceeded = (mHeightAnimator != null && !mHintAnimationRunning)
                             || mPeekPending || mPeekAnimator != null;
@@ -292,9 +290,7 @@ public abstract class PanelView extends FrameLayout {
                             mInitialTouchY = y;
                             h = 0;
                         }
-                        if (mHeightAnimator != null) {
-                            mHeightAnimator.cancel(); // end any outstanding animations
-                        }
+                        cancelHeightAnimator();
                         removeCallbacks(mPeekRunnable);
                         mPeekPending = false;
                         onTrackingStarted();
@@ -371,7 +367,7 @@ public abstract class PanelView extends FrameLayout {
     }
 
     protected void onTrackingStarted() {
-        mClosing = false;
+        endClosing();
         mTracking = true;
         mCollapseAfterPeek = false;
         mBar.onTrackingStarted(PanelView.this);
@@ -406,9 +402,7 @@ public abstract class PanelView extends FrameLayout {
                 mStatusBar.userActivity();
                 if (mHeightAnimator != null && !mHintAnimationRunning ||
                         mPeekPending || mPeekAnimator != null) {
-                    if (mHeightAnimator != null) {
-                        mHeightAnimator.cancel(); // end any outstanding animations
-                    }
+                    cancelHeightAnimator();
                     cancelPeek();
                     mTouchSlopExceeded = true;
                     return true;
@@ -440,9 +434,7 @@ public abstract class PanelView extends FrameLayout {
                 trackMovement(event);
                 if (scrolledToBottom) {
                     if (h < -mTouchSlop && h < -Math.abs(x - mInitialTouchX)) {
-                        if (mHeightAnimator != null) {
-                            mHeightAnimator.cancel();
-                        }
+                        cancelHeightAnimator();
                         mInitialOffsetOnTouch = mExpandedHeight;
                         mInitialTouchY = y;
                         mInitialTouchX = x;
@@ -458,6 +450,20 @@ public abstract class PanelView extends FrameLayout {
                 break;
         }
         return false;
+    }
+
+    private void cancelHeightAnimator() {
+        if (mHeightAnimator != null) {
+            mHeightAnimator.cancel();
+        }
+        endClosing();
+    }
+
+    private void endClosing() {
+        if (mClosing) {
+            mClosing = false;
+            onClosingFinished();
+        }
     }
 
     private void initVelocityTracker() {
@@ -699,9 +705,7 @@ public abstract class PanelView extends FrameLayout {
                 mPeekRunnable.run();
             }
         } else if (!isFullyCollapsed() && !mTracking && !mClosing) {
-            if (mHeightAnimator != null) {
-                mHeightAnimator.cancel();
-            }
+            cancelHeightAnimator();
             mClosing = true;
             notifyExpandingStarted();
             if (delayed) {
@@ -784,12 +788,15 @@ public abstract class PanelView extends FrameLayout {
 
     private void abortAnimations() {
         cancelPeek();
-        if (mHeightAnimator != null) {
-            mHeightAnimator.cancel();
-        }
+        cancelHeightAnimator();
         removeCallbacks(mPostCollapseRunnable);
         removeCallbacks(mFlingCollapseRunnable);
     }
+
+    protected void onClosingFinished() {
+        mBar.onClosingFinished();
+    }
+
 
     protected void startUnlockHintAnimation() {
 
