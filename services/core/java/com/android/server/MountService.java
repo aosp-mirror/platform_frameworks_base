@@ -826,7 +826,9 @@ class MountService extends IMountService.Stub
 
                 // On an encrypted device we can't see system properties yet, so pull
                 // the system locale out of the mount service.
-                copyLocaleFromMountService();
+                if ("".equals(SystemProperties.get("vold.encrypt_progress"))) {
+                    copyLocaleFromMountService();
+                }
 
                 // Let package manager load internal ASECs.
                 mPms.scanAvailableAsecs();
