@@ -141,14 +141,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             } else if (action.equals(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // If we are toggling Recents, then first unfilter any filtered stacks first
                 dismissRecentsToFocusedTaskOrHome(true);
-            } else if (action.equals(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION)) {
-                // Try and start the enter animation (or restart it on configuration changed)
-                ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
-                mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
-                onEnterAnimationTriggered();
-                // Notify the fallback receiver that we have successfully got the broadcast
-                // See AlternateRecentsComponent.onAnimationStarted()
-                setResultCode(Activity.RESULT_OK);
             }
         }
     };
@@ -441,7 +433,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
         mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
-        onEnterAnimationTriggered();
+        // Animate the SystemUI scrim views
+        mScrimViews.startEnterRecentsAnimation();
     }
 
     @Override
@@ -469,7 +462,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         IntentFilter filter = new IntentFilter();
         filter.addAction(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY);
         filter.addAction(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader
@@ -509,6 +501,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (mAppWidgetHost.isListening()) {
             mAppWidgetHost.stopListening();
         }
+    }
+
+    @Override
+    public void onEnterAnimationComplete() {
+        // Try and start the enter animation (or restart it on configuration changed)
+        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
+        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
+
+        // Animate the SystemUI scrim views
+        mScrimViews.startEnterRecentsAnimation();
     }
 
     @Override
@@ -590,12 +592,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 (mConfig.debugModeEnabled ? "Enabled" : "Disabled") + ", please restart Recents now",
                 Toast.LENGTH_SHORT).show();
         }
-    }
-
-    /** Called when the enter recents animation is triggered. */
-    public void onEnterAnimationTriggered() {
-        // Animate the SystemUI scrim views
-        mScrimViews.startEnterRecentsAnimation();
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
