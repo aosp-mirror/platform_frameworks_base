@@ -225,4 +225,10 @@ interface IImsCallSession {
      * intermediates between the propriety implementation and Telecomm/InCall.
      */
     IImsVideoCallProvider getVideoCallProvider();
+
+    /**
+     * Determines if the current session is multiparty.
+     * @return {@code True} if the session is multiparty.
+     */
+    boolean isMultiparty();
 }
