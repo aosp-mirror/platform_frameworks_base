@@ -8852,7 +8852,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 task = mStackSupervisor.anyTaskForIdLocked(task.taskId);
                 if (task != null) {
                     if (!isSystemInitiated
-                            && ((mFocusedActivity == null) || (task != mFocusedActivity.task))) {
+                            && ((mStackSupervisor.getFocusedStack() == null)
+                                    || (task != mStackSupervisor.getFocusedStack().topTask()))) {
                         throw new IllegalArgumentException("Invalid task, not in foreground");
                     }
                     mStackSupervisor.setLockTaskModeLocked(task, !isSystemInitiated);
