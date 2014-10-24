@@ -657,8 +657,8 @@
     <string name="recents_empty_message">Your recent screens appear here</string>
     <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
     <string name="recents_app_info_button_label">Application Info</string>
-    <!-- Recents: The lock-to-app button. [CHAR LIMIT=NONE] -->
-    <string name="recents_lock_to_app_button_label">lock to app</string>
+    <!-- Recents: The screen pinning button. [CHAR LIMIT=NONE] -->
+    <string name="recents_lock_to_app_button_label">screen pinning</string>
     <!-- Recents: Temporary string for the button in the recents search bar. [CHAR LIMIT=NONE] -->
     <string name="recents_search_bar_label">search</string>
     <!-- Recents: Launch error string. [CHAR LIMIT=NONE] -->
