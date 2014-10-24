@@ -1616,15 +1616,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mSpoolerProvider.destroy();
             mPrintedDocument.finish();
             mPrintedDocument.destroy();
-            mPrintPreviewController.destroy(new Runnable() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            });
-        } else {
-            finish();
+            mPrintPreviewController.destroy();
         }
+        finish();
     }
 
     private final class SpinnerItem<T> {
