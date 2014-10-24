@@ -16,11 +16,13 @@ import android.util.Log;
 public abstract class HdmiClient {
     private static final String TAG = "HdmiClient";
 
-    protected final IHdmiControlService mService;
+    /* package */ final IHdmiControlService mService;
 
-    protected abstract int getDeviceType();
+    private IHdmiVendorCommandListener mIHdmiVendorCommandListener;
 
-    public HdmiClient(IHdmiControlService service) {
+    /* package */ abstract int getDeviceType();
+
+    /* package */ HdmiClient(IHdmiControlService service) {
         mService = service;
     }
 
@@ -40,7 +42,7 @@ public abstract class HdmiClient {
     }
 
     /**
-     * Send a key event to other logical device.
+     * Sends a key event to other logical device.
      *
      * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
      * @param isPressed true if this is key press event
@@ -54,7 +56,7 @@ public abstract class HdmiClient {
     }
 
     /**
-     * Send vendor-specific command.
+     * Sends vendor-specific command.
      *
      * @param targetAddress address of the target device
      * @param params vendor-specific parameter. For &lt;Vendor Command With ID&gt; do not
@@ -71,18 +73,23 @@ public abstract class HdmiClient {
     }
 
     /**
-     * Add a listener used to receive incoming vendor-specific command.
+     * Sets a listener used to receive incoming vendor-specific command.
      *
      * @param listener listener object
      */
-    public void addVendorCommandListener(@NonNull VendorCommandListener listener) {
+    public void setVendorCommandListener(@NonNull VendorCommandListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
         }
+        if (mIHdmiVendorCommandListener != null) {
+            throw new IllegalStateException("listener was already set");
+        }
         try {
-            mService.addVendorCommandListener(getListenerWrapper(listener), getDeviceType());
+            IHdmiVendorCommandListener wrappedListener = getListenerWrapper(listener);
+            mService.addVendorCommandListener(wrappedListener, getDeviceType());
+            mIHdmiVendorCommandListener = wrappedListener;
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to add vendor command listener: ", e);
+            Log.e(TAG, "failed to set vendor command listener: ", e);
         }
     }
 
