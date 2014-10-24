@@ -23,6 +23,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.widget.OverScroller;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.Utilities;
 
 /* The scrolling logic for a TaskStackView */
 public class TaskStackViewScroller {
@@ -161,10 +162,7 @@ public class TaskStackViewScroller {
 
     /** Aborts any current stack scrolls */
     void stopBoundScrollAnimation() {
-        if (mScrollAnimator != null) {
-            mScrollAnimator.removeAllListeners();
-            mScrollAnimator.cancel();
-        }
+        Utilities.cancelAnimationWithoutCallbacks(mScrollAnimator);
     }
 
     /**** OverScroller ****/
