@@ -54645,7 +54645,7 @@ package junit.runner {
 
 package org.apache.commons.logging {
 
-  public abstract interface Log {
+  public abstract deprecated interface Log {
     method public abstract void debug(java.lang.Object);
     method public abstract void debug(java.lang.Object, java.lang.Throwable);
     method public abstract void error(java.lang.Object);
@@ -54670,26 +54670,26 @@ package org.apache.commons.logging {
 
 package org.apache.http {
 
-  public class ConnectionClosedException extends java.io.IOException {
+  public deprecated class ConnectionClosedException extends java.io.IOException {
     ctor public ConnectionClosedException(java.lang.String);
   }
 
-  public abstract interface ConnectionReuseStrategy {
+  public abstract deprecated interface ConnectionReuseStrategy {
     method public abstract boolean keepAlive(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public abstract interface FormattedHeader implements org.apache.http.Header {
+  public abstract deprecated interface FormattedHeader implements org.apache.http.Header {
     method public abstract org.apache.http.util.CharArrayBuffer getBuffer();
     method public abstract int getValuePos();
   }
 
-  public abstract interface Header {
+  public abstract deprecated interface Header {
     method public abstract org.apache.http.HeaderElement[] getElements() throws org.apache.http.ParseException;
     method public abstract java.lang.String getName();
     method public abstract java.lang.String getValue();
   }
 
-  public abstract interface HeaderElement {
+  public abstract deprecated interface HeaderElement {
     method public abstract java.lang.String getName();
     method public abstract org.apache.http.NameValuePair getParameter(int);
     method public abstract org.apache.http.NameValuePair getParameterByName(java.lang.String);
@@ -54698,17 +54698,17 @@ package org.apache.http {
     method public abstract java.lang.String getValue();
   }
 
-  public abstract interface HeaderElementIterator implements java.util.Iterator {
+  public abstract deprecated interface HeaderElementIterator implements java.util.Iterator {
     method public abstract boolean hasNext();
     method public abstract org.apache.http.HeaderElement nextElement();
   }
 
-  public abstract interface HeaderIterator implements java.util.Iterator {
+  public abstract deprecated interface HeaderIterator implements java.util.Iterator {
     method public abstract boolean hasNext();
     method public abstract org.apache.http.Header nextHeader();
   }
 
-  public abstract interface HttpClientConnection implements org.apache.http.HttpConnection {
+  public abstract deprecated interface HttpClientConnection implements org.apache.http.HttpConnection {
     method public abstract void flush() throws java.io.IOException;
     method public abstract boolean isResponseAvailable(int) throws java.io.IOException;
     method public abstract void receiveResponseEntity(org.apache.http.HttpResponse) throws org.apache.http.HttpException, java.io.IOException;
@@ -54717,7 +54717,7 @@ package org.apache.http {
     method public abstract void sendRequestHeader(org.apache.http.HttpRequest) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpConnection {
+  public abstract deprecated interface HttpConnection {
     method public abstract void close() throws java.io.IOException;
     method public abstract org.apache.http.HttpConnectionMetrics getMetrics();
     method public abstract int getSocketTimeout();
@@ -54727,7 +54727,7 @@ package org.apache.http {
     method public abstract void shutdown() throws java.io.IOException;
   }
 
-  public abstract interface HttpConnectionMetrics {
+  public abstract deprecated interface HttpConnectionMetrics {
     method public abstract java.lang.Object getMetric(java.lang.String);
     method public abstract long getReceivedBytesCount();
     method public abstract long getRequestCount();
@@ -54736,7 +54736,7 @@ package org.apache.http {
     method public abstract void reset();
   }
 
-  public abstract interface HttpEntity {
+  public abstract deprecated interface HttpEntity {
     method public abstract void consumeContent() throws java.io.IOException;
     method public abstract java.io.InputStream getContent() throws java.io.IOException, java.lang.IllegalStateException;
     method public abstract org.apache.http.Header getContentEncoding();
@@ -54748,19 +54748,19 @@ package org.apache.http {
     method public abstract void writeTo(java.io.OutputStream) throws java.io.IOException;
   }
 
-  public abstract interface HttpEntityEnclosingRequest implements org.apache.http.HttpRequest {
+  public abstract deprecated interface HttpEntityEnclosingRequest implements org.apache.http.HttpRequest {
     method public abstract boolean expectContinue();
     method public abstract org.apache.http.HttpEntity getEntity();
     method public abstract void setEntity(org.apache.http.HttpEntity);
   }
 
-  public class HttpException extends java.lang.Exception {
+  public deprecated class HttpException extends java.lang.Exception {
     ctor public HttpException();
     ctor public HttpException(java.lang.String);
     ctor public HttpException(java.lang.String, java.lang.Throwable);
   }
 
-  public final class HttpHost implements java.lang.Cloneable {
+  public final deprecated class HttpHost implements java.lang.Cloneable {
     ctor public HttpHost(java.lang.String, int, java.lang.String);
     ctor public HttpHost(java.lang.String, int);
     ctor public HttpHost(java.lang.String);
@@ -54778,14 +54778,14 @@ package org.apache.http {
     field protected final java.lang.String schemeName;
   }
 
-  public abstract interface HttpInetConnection implements org.apache.http.HttpConnection {
+  public abstract deprecated interface HttpInetConnection implements org.apache.http.HttpConnection {
     method public abstract java.net.InetAddress getLocalAddress();
     method public abstract int getLocalPort();
     method public abstract java.net.InetAddress getRemoteAddress();
     method public abstract int getRemotePort();
   }
 
-  public abstract interface HttpMessage {
+  public abstract deprecated interface HttpMessage {
     method public abstract void addHeader(org.apache.http.Header);
     method public abstract void addHeader(java.lang.String, java.lang.String);
     method public abstract boolean containsHeader(java.lang.String);
@@ -54805,20 +54805,20 @@ package org.apache.http {
     method public abstract void setParams(org.apache.http.params.HttpParams);
   }
 
-  public abstract interface HttpRequest implements org.apache.http.HttpMessage {
+  public abstract deprecated interface HttpRequest implements org.apache.http.HttpMessage {
     method public abstract org.apache.http.RequestLine getRequestLine();
   }
 
-  public abstract interface HttpRequestFactory {
+  public abstract deprecated interface HttpRequestFactory {
     method public abstract org.apache.http.HttpRequest newHttpRequest(org.apache.http.RequestLine) throws org.apache.http.MethodNotSupportedException;
     method public abstract org.apache.http.HttpRequest newHttpRequest(java.lang.String, java.lang.String) throws org.apache.http.MethodNotSupportedException;
   }
 
-  public abstract interface HttpRequestInterceptor {
+  public abstract deprecated interface HttpRequestInterceptor {
     method public abstract void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpResponse implements org.apache.http.HttpMessage {
+  public abstract deprecated interface HttpResponse implements org.apache.http.HttpMessage {
     method public abstract org.apache.http.HttpEntity getEntity();
     method public abstract java.util.Locale getLocale();
     method public abstract org.apache.http.StatusLine getStatusLine();
@@ -54831,16 +54831,16 @@ package org.apache.http {
     method public abstract void setStatusLine(org.apache.http.ProtocolVersion, int, java.lang.String);
   }
 
-  public abstract interface HttpResponseFactory {
+  public abstract deprecated interface HttpResponseFactory {
     method public abstract org.apache.http.HttpResponse newHttpResponse(org.apache.http.ProtocolVersion, int, org.apache.http.protocol.HttpContext);
     method public abstract org.apache.http.HttpResponse newHttpResponse(org.apache.http.StatusLine, org.apache.http.protocol.HttpContext);
   }
 
-  public abstract interface HttpResponseInterceptor {
+  public abstract deprecated interface HttpResponseInterceptor {
     method public abstract void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpServerConnection implements org.apache.http.HttpConnection {
+  public abstract deprecated interface HttpServerConnection implements org.apache.http.HttpConnection {
     method public abstract void flush() throws java.io.IOException;
     method public abstract void receiveRequestEntity(org.apache.http.HttpEntityEnclosingRequest) throws org.apache.http.HttpException, java.io.IOException;
     method public abstract org.apache.http.HttpRequest receiveRequestHeader() throws org.apache.http.HttpException, java.io.IOException;
@@ -54848,7 +54848,7 @@ package org.apache.http {
     method public abstract void sendResponseHeader(org.apache.http.HttpResponse) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpStatus {
+  public abstract deprecated interface HttpStatus {
     field public static final int SC_ACCEPTED = 202; // 0xca
     field public static final int SC_BAD_GATEWAY = 502; // 0x1f6
     field public static final int SC_BAD_REQUEST = 400; // 0x190
@@ -54899,7 +54899,7 @@ package org.apache.http {
     field public static final int SC_USE_PROXY = 305; // 0x131
   }
 
-  public final class HttpVersion extends org.apache.http.ProtocolVersion implements java.io.Serializable {
+  public final deprecated class HttpVersion extends org.apache.http.ProtocolVersion implements java.io.Serializable {
     ctor public HttpVersion(int, int);
     field public static final java.lang.String HTTP = "HTTP";
     field public static final org.apache.http.HttpVersion HTTP_0_9;
@@ -54907,37 +54907,37 @@ package org.apache.http {
     field public static final org.apache.http.HttpVersion HTTP_1_1;
   }
 
-  public class MalformedChunkCodingException extends java.io.IOException {
+  public deprecated class MalformedChunkCodingException extends java.io.IOException {
     ctor public MalformedChunkCodingException();
     ctor public MalformedChunkCodingException(java.lang.String);
   }
 
-  public class MethodNotSupportedException extends org.apache.http.HttpException {
+  public deprecated class MethodNotSupportedException extends org.apache.http.HttpException {
     ctor public MethodNotSupportedException(java.lang.String);
     ctor public MethodNotSupportedException(java.lang.String, java.lang.Throwable);
   }
 
-  public abstract interface NameValuePair {
+  public abstract deprecated interface NameValuePair {
     method public abstract java.lang.String getName();
     method public abstract java.lang.String getValue();
   }
 
-  public class NoHttpResponseException extends java.io.IOException {
+  public deprecated class NoHttpResponseException extends java.io.IOException {
     ctor public NoHttpResponseException(java.lang.String);
   }
 
-  public class ParseException extends java.lang.RuntimeException {
+  public deprecated class ParseException extends java.lang.RuntimeException {
     ctor public ParseException();
     ctor public ParseException(java.lang.String);
   }
 
-  public class ProtocolException extends org.apache.http.HttpException {
+  public deprecated class ProtocolException extends org.apache.http.HttpException {
     ctor public ProtocolException();
     ctor public ProtocolException(java.lang.String);
     ctor public ProtocolException(java.lang.String, java.lang.Throwable);
   }
 
-  public class ProtocolVersion implements java.lang.Cloneable java.io.Serializable {
+  public deprecated class ProtocolVersion implements java.lang.Cloneable java.io.Serializable {
     ctor public ProtocolVersion(java.lang.String, int, int);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public int compareToVersion(org.apache.http.ProtocolVersion);
@@ -54955,28 +54955,28 @@ package org.apache.http {
     field protected final java.lang.String protocol;
   }
 
-  public abstract interface ReasonPhraseCatalog {
+  public abstract deprecated interface ReasonPhraseCatalog {
     method public abstract java.lang.String getReason(int, java.util.Locale);
   }
 
-  public abstract interface RequestLine {
+  public abstract deprecated interface RequestLine {
     method public abstract java.lang.String getMethod();
     method public abstract org.apache.http.ProtocolVersion getProtocolVersion();
     method public abstract java.lang.String getUri();
   }
 
-  public abstract interface StatusLine {
+  public abstract deprecated interface StatusLine {
     method public abstract org.apache.http.ProtocolVersion getProtocolVersion();
     method public abstract java.lang.String getReasonPhrase();
     method public abstract int getStatusCode();
   }
 
-  public abstract interface TokenIterator implements java.util.Iterator {
+  public abstract deprecated interface TokenIterator implements java.util.Iterator {
     method public abstract boolean hasNext();
     method public abstract java.lang.String nextToken();
   }
 
-  public class UnsupportedHttpVersionException extends org.apache.http.ProtocolException {
+  public deprecated class UnsupportedHttpVersionException extends org.apache.http.ProtocolException {
     ctor public UnsupportedHttpVersionException();
     ctor public UnsupportedHttpVersionException(java.lang.String);
   }
@@ -54985,14 +54985,14 @@ package org.apache.http {
 
 package org.apache.http.auth {
 
-  public final class AUTH {
+  public final deprecated class AUTH {
     field public static final java.lang.String PROXY_AUTH = "Proxy-Authenticate";
     field public static final java.lang.String PROXY_AUTH_RESP = "Proxy-Authorization";
     field public static final java.lang.String WWW_AUTH = "WWW-Authenticate";
     field public static final java.lang.String WWW_AUTH_RESP = "Authorization";
   }
 
-  public abstract interface AuthScheme {
+  public abstract deprecated interface AuthScheme {
     method public abstract org.apache.http.Header authenticate(org.apache.http.auth.Credentials, org.apache.http.HttpRequest) throws org.apache.http.auth.AuthenticationException;
     method public abstract java.lang.String getParameter(java.lang.String);
     method public abstract java.lang.String getRealm();
@@ -55002,11 +55002,11 @@ package org.apache.http.auth {
     method public abstract void processChallenge(org.apache.http.Header) throws org.apache.http.auth.MalformedChallengeException;
   }
 
-  public abstract interface AuthSchemeFactory {
+  public abstract deprecated interface AuthSchemeFactory {
     method public abstract org.apache.http.auth.AuthScheme newInstance(org.apache.http.params.HttpParams);
   }
 
-  public final class AuthSchemeRegistry {
+  public final deprecated class AuthSchemeRegistry {
     ctor public AuthSchemeRegistry();
     method public synchronized org.apache.http.auth.AuthScheme getAuthScheme(java.lang.String, org.apache.http.params.HttpParams) throws java.lang.IllegalStateException;
     method public synchronized java.util.List<java.lang.String> getSchemeNames();
@@ -55015,7 +55015,7 @@ package org.apache.http.auth {
     method public synchronized void unregister(java.lang.String);
   }
 
-  public class AuthScope {
+  public deprecated class AuthScope {
     ctor public AuthScope(java.lang.String, int, java.lang.String, java.lang.String);
     ctor public AuthScope(java.lang.String, int, java.lang.String);
     ctor public AuthScope(java.lang.String, int);
@@ -55032,7 +55032,7 @@ package org.apache.http.auth {
     field public static final java.lang.String ANY_SCHEME;
   }
 
-  public class AuthState {
+  public deprecated class AuthState {
     ctor public AuthState();
     method public org.apache.http.auth.AuthScheme getAuthScheme();
     method public org.apache.http.auth.AuthScope getAuthScope();
@@ -55044,35 +55044,35 @@ package org.apache.http.auth {
     method public void setCredentials(org.apache.http.auth.Credentials);
   }
 
-  public class AuthenticationException extends org.apache.http.ProtocolException {
+  public deprecated class AuthenticationException extends org.apache.http.ProtocolException {
     ctor public AuthenticationException();
     ctor public AuthenticationException(java.lang.String);
     ctor public AuthenticationException(java.lang.String, java.lang.Throwable);
   }
 
-  public final class BasicUserPrincipal implements java.security.Principal {
+  public final deprecated class BasicUserPrincipal implements java.security.Principal {
     ctor public BasicUserPrincipal(java.lang.String);
     method public java.lang.String getName();
   }
 
-  public abstract interface Credentials {
+  public abstract deprecated interface Credentials {
     method public abstract java.lang.String getPassword();
     method public abstract java.security.Principal getUserPrincipal();
   }
 
-  public class InvalidCredentialsException extends org.apache.http.auth.AuthenticationException {
+  public deprecated class InvalidCredentialsException extends org.apache.http.auth.AuthenticationException {
     ctor public InvalidCredentialsException();
     ctor public InvalidCredentialsException(java.lang.String);
     ctor public InvalidCredentialsException(java.lang.String, java.lang.Throwable);
   }
 
-  public class MalformedChallengeException extends org.apache.http.ProtocolException {
+  public deprecated class MalformedChallengeException extends org.apache.http.ProtocolException {
     ctor public MalformedChallengeException();
     ctor public MalformedChallengeException(java.lang.String);
     ctor public MalformedChallengeException(java.lang.String, java.lang.Throwable);
   }
 
-  public class NTCredentials implements org.apache.http.auth.Credentials {
+  public deprecated class NTCredentials implements org.apache.http.auth.Credentials {
     ctor public NTCredentials(java.lang.String);
     ctor public NTCredentials(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method public java.lang.String getDomain();
@@ -55082,14 +55082,14 @@ package org.apache.http.auth {
     method public java.lang.String getWorkstation();
   }
 
-  public class NTUserPrincipal implements java.security.Principal {
+  public deprecated class NTUserPrincipal implements java.security.Principal {
     ctor public NTUserPrincipal(java.lang.String, java.lang.String);
     method public java.lang.String getDomain();
     method public java.lang.String getName();
     method public java.lang.String getUsername();
   }
 
-  public class UsernamePasswordCredentials implements org.apache.http.auth.Credentials {
+  public deprecated class UsernamePasswordCredentials implements org.apache.http.auth.Credentials {
     ctor public UsernamePasswordCredentials(java.lang.String);
     ctor public UsernamePasswordCredentials(java.lang.String, java.lang.String);
     method public java.lang.String getPassword();
@@ -55101,16 +55101,16 @@ package org.apache.http.auth {
 
 package org.apache.http.auth.params {
 
-  public abstract interface AuthPNames {
+  public abstract deprecated interface AuthPNames {
     field public static final java.lang.String CREDENTIAL_CHARSET = "http.auth.credential-charset";
   }
 
-  public class AuthParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class AuthParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public AuthParamBean(org.apache.http.params.HttpParams);
     method public void setCredentialCharset(java.lang.String);
   }
 
-  public final class AuthParams {
+  public final deprecated class AuthParams {
     method public static java.lang.String getCredentialCharset(org.apache.http.params.HttpParams);
     method public static void setCredentialCharset(org.apache.http.params.HttpParams, java.lang.String);
   }
@@ -55119,39 +55119,39 @@ package org.apache.http.auth.params {
 
 package org.apache.http.client {
 
-  public abstract interface AuthenticationHandler {
+  public abstract deprecated interface AuthenticationHandler {
     method public abstract java.util.Map<java.lang.String, org.apache.http.Header> getChallenges(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.auth.MalformedChallengeException;
     method public abstract boolean isAuthenticationRequested(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
     method public abstract org.apache.http.auth.AuthScheme selectScheme(java.util.Map<java.lang.String, org.apache.http.Header>, org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.auth.AuthenticationException;
   }
 
-  public class CircularRedirectException extends org.apache.http.client.RedirectException {
+  public deprecated class CircularRedirectException extends org.apache.http.client.RedirectException {
     ctor public CircularRedirectException();
     ctor public CircularRedirectException(java.lang.String);
     ctor public CircularRedirectException(java.lang.String, java.lang.Throwable);
   }
 
-  public class ClientProtocolException extends java.io.IOException {
+  public deprecated class ClientProtocolException extends java.io.IOException {
     ctor public ClientProtocolException();
     ctor public ClientProtocolException(java.lang.String);
     ctor public ClientProtocolException(java.lang.Throwable);
     ctor public ClientProtocolException(java.lang.String, java.lang.Throwable);
   }
 
-  public abstract interface CookieStore {
+  public abstract deprecated interface CookieStore {
     method public abstract void addCookie(org.apache.http.cookie.Cookie);
     method public abstract void clear();
     method public abstract boolean clearExpired(java.util.Date);
     method public abstract java.util.List<org.apache.http.cookie.Cookie> getCookies();
   }
 
-  public abstract interface CredentialsProvider {
+  public abstract deprecated interface CredentialsProvider {
     method public abstract void clear();
     method public abstract org.apache.http.auth.Credentials getCredentials(org.apache.http.auth.AuthScope);
     method public abstract void setCredentials(org.apache.http.auth.AuthScope, org.apache.http.auth.Credentials);
   }
 
-  public abstract interface HttpClient {
+  public abstract deprecated interface HttpClient {
     method public abstract org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest) throws org.apache.http.client.ClientProtocolException, java.io.IOException;
     method public abstract org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.client.ClientProtocolException, java.io.IOException;
     method public abstract org.apache.http.HttpResponse execute(org.apache.http.HttpHost, org.apache.http.HttpRequest) throws org.apache.http.client.ClientProtocolException, java.io.IOException;
@@ -55164,40 +55164,40 @@ package org.apache.http.client {
     method public abstract org.apache.http.params.HttpParams getParams();
   }
 
-  public abstract interface HttpRequestRetryHandler {
+  public abstract deprecated interface HttpRequestRetryHandler {
     method public abstract boolean retryRequest(java.io.IOException, int, org.apache.http.protocol.HttpContext);
   }
 
-  public class HttpResponseException extends org.apache.http.client.ClientProtocolException {
+  public deprecated class HttpResponseException extends org.apache.http.client.ClientProtocolException {
     ctor public HttpResponseException(int, java.lang.String);
     method public int getStatusCode();
   }
 
-  public class NonRepeatableRequestException extends org.apache.http.ProtocolException {
+  public deprecated class NonRepeatableRequestException extends org.apache.http.ProtocolException {
     ctor public NonRepeatableRequestException();
     ctor public NonRepeatableRequestException(java.lang.String);
   }
 
-  public class RedirectException extends org.apache.http.ProtocolException {
+  public deprecated class RedirectException extends org.apache.http.ProtocolException {
     ctor public RedirectException();
     ctor public RedirectException(java.lang.String);
     ctor public RedirectException(java.lang.String, java.lang.Throwable);
   }
 
-  public abstract interface RedirectHandler {
+  public abstract deprecated interface RedirectHandler {
     method public abstract java.net.URI getLocationURI(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.ProtocolException;
     method public abstract boolean isRedirectRequested(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public abstract interface RequestDirector {
+  public abstract deprecated interface RequestDirector {
     method public abstract org.apache.http.HttpResponse execute(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface ResponseHandler {
+  public abstract deprecated interface ResponseHandler {
     method public abstract T handleResponse(org.apache.http.HttpResponse) throws org.apache.http.client.ClientProtocolException, java.io.IOException;
   }
 
-  public abstract interface UserTokenHandler {
+  public abstract deprecated interface UserTokenHandler {
     method public abstract java.lang.Object getUserToken(org.apache.http.protocol.HttpContext);
   }
 
@@ -55205,7 +55205,7 @@ package org.apache.http.client {
 
 package org.apache.http.client.entity {
 
-  public class UrlEncodedFormEntity extends org.apache.http.entity.StringEntity {
+  public deprecated class UrlEncodedFormEntity extends org.apache.http.entity.StringEntity {
     ctor public UrlEncodedFormEntity(java.util.List<? extends org.apache.http.NameValuePair>, java.lang.String) throws java.io.UnsupportedEncodingException;
     ctor public UrlEncodedFormEntity(java.util.List<? extends org.apache.http.NameValuePair>) throws java.io.UnsupportedEncodingException;
   }
@@ -55214,13 +55214,13 @@ package org.apache.http.client.entity {
 
 package org.apache.http.client.methods {
 
-  public abstract interface AbortableHttpRequest {
+  public abstract deprecated interface AbortableHttpRequest {
     method public abstract void abort();
     method public abstract void setConnectionRequest(org.apache.http.conn.ClientConnectionRequest) throws java.io.IOException;
     method public abstract void setReleaseTrigger(org.apache.http.conn.ConnectionReleaseTrigger) throws java.io.IOException;
   }
 
-  public class HttpDelete extends org.apache.http.client.methods.HttpRequestBase {
+  public deprecated class HttpDelete extends org.apache.http.client.methods.HttpRequestBase {
     ctor public HttpDelete();
     ctor public HttpDelete(java.net.URI);
     ctor public HttpDelete(java.lang.String);
@@ -55228,14 +55228,14 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "DELETE";
   }
 
-  public abstract class HttpEntityEnclosingRequestBase extends org.apache.http.client.methods.HttpRequestBase implements org.apache.http.HttpEntityEnclosingRequest {
+  public abstract deprecated class HttpEntityEnclosingRequestBase extends org.apache.http.client.methods.HttpRequestBase implements org.apache.http.HttpEntityEnclosingRequest {
     ctor public HttpEntityEnclosingRequestBase();
     method public boolean expectContinue();
     method public org.apache.http.HttpEntity getEntity();
     method public void setEntity(org.apache.http.HttpEntity);
   }
 
-  public class HttpGet extends org.apache.http.client.methods.HttpRequestBase {
+  public deprecated class HttpGet extends org.apache.http.client.methods.HttpRequestBase {
     ctor public HttpGet();
     ctor public HttpGet(java.net.URI);
     ctor public HttpGet(java.lang.String);
@@ -55243,7 +55243,7 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "GET";
   }
 
-  public class HttpHead extends org.apache.http.client.methods.HttpRequestBase {
+  public deprecated class HttpHead extends org.apache.http.client.methods.HttpRequestBase {
     ctor public HttpHead();
     ctor public HttpHead(java.net.URI);
     ctor public HttpHead(java.lang.String);
@@ -55251,7 +55251,7 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "HEAD";
   }
 
-  public class HttpOptions extends org.apache.http.client.methods.HttpRequestBase {
+  public deprecated class HttpOptions extends org.apache.http.client.methods.HttpRequestBase {
     ctor public HttpOptions();
     ctor public HttpOptions(java.net.URI);
     ctor public HttpOptions(java.lang.String);
@@ -55260,7 +55260,7 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "OPTIONS";
   }
 
-  public class HttpPost extends org.apache.http.client.methods.HttpEntityEnclosingRequestBase {
+  public deprecated class HttpPost extends org.apache.http.client.methods.HttpEntityEnclosingRequestBase {
     ctor public HttpPost();
     ctor public HttpPost(java.net.URI);
     ctor public HttpPost(java.lang.String);
@@ -55268,7 +55268,7 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "POST";
   }
 
-  public class HttpPut extends org.apache.http.client.methods.HttpEntityEnclosingRequestBase {
+  public deprecated class HttpPut extends org.apache.http.client.methods.HttpEntityEnclosingRequestBase {
     ctor public HttpPut();
     ctor public HttpPut(java.net.URI);
     ctor public HttpPut(java.lang.String);
@@ -55276,7 +55276,7 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "PUT";
   }
 
-  public abstract class HttpRequestBase extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.client.methods.AbortableHttpRequest java.lang.Cloneable org.apache.http.client.methods.HttpUriRequest {
+  public abstract deprecated class HttpRequestBase extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.client.methods.AbortableHttpRequest java.lang.Cloneable org.apache.http.client.methods.HttpUriRequest {
     ctor public HttpRequestBase();
     method public void abort();
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
@@ -55290,7 +55290,7 @@ package org.apache.http.client.methods {
     method public void setURI(java.net.URI);
   }
 
-  public class HttpTrace extends org.apache.http.client.methods.HttpRequestBase {
+  public deprecated class HttpTrace extends org.apache.http.client.methods.HttpRequestBase {
     ctor public HttpTrace();
     ctor public HttpTrace(java.net.URI);
     ctor public HttpTrace(java.lang.String);
@@ -55298,7 +55298,7 @@ package org.apache.http.client.methods {
     field public static final java.lang.String METHOD_NAME = "TRACE";
   }
 
-  public abstract interface HttpUriRequest implements org.apache.http.HttpRequest {
+  public abstract deprecated interface HttpUriRequest implements org.apache.http.HttpRequest {
     method public abstract void abort() throws java.lang.UnsupportedOperationException;
     method public abstract java.lang.String getMethod();
     method public abstract java.net.URI getURI();
@@ -55309,16 +55309,16 @@ package org.apache.http.client.methods {
 
 package org.apache.http.client.params {
 
-  public abstract interface AllClientPNames implements org.apache.http.auth.params.AuthPNames org.apache.http.client.params.ClientPNames org.apache.http.conn.params.ConnConnectionPNames org.apache.http.conn.params.ConnManagerPNames org.apache.http.conn.params.ConnRoutePNames org.apache.http.cookie.params.CookieSpecPNames org.apache.http.params.CoreConnectionPNames org.apache.http.params.CoreProtocolPNames {
+  public abstract deprecated interface AllClientPNames implements org.apache.http.auth.params.AuthPNames org.apache.http.client.params.ClientPNames org.apache.http.conn.params.ConnConnectionPNames org.apache.http.conn.params.ConnManagerPNames org.apache.http.conn.params.ConnRoutePNames org.apache.http.cookie.params.CookieSpecPNames org.apache.http.params.CoreConnectionPNames org.apache.http.params.CoreProtocolPNames {
   }
 
-  public final class AuthPolicy {
+  public final deprecated class AuthPolicy {
     field public static final java.lang.String BASIC = "Basic";
     field public static final java.lang.String DIGEST = "Digest";
     field public static final java.lang.String NTLM = "NTLM";
   }
 
-  public abstract interface ClientPNames {
+  public abstract deprecated interface ClientPNames {
     field public static final java.lang.String ALLOW_CIRCULAR_REDIRECTS = "http.protocol.allow-circular-redirects";
     field public static final java.lang.String CONNECTION_MANAGER_FACTORY = "http.connection-manager.factory-object";
     field public static final java.lang.String CONNECTION_MANAGER_FACTORY_CLASS_NAME = "http.connection-manager.factory-class-name";
@@ -55332,7 +55332,7 @@ package org.apache.http.client.params {
     field public static final java.lang.String VIRTUAL_HOST = "http.virtual-host";
   }
 
-  public class ClientParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class ClientParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public ClientParamBean(org.apache.http.params.HttpParams);
     method public void setAllowCircularRedirects(boolean);
     method public void setConnectionManagerFactory(org.apache.http.conn.ClientConnectionManagerFactory);
@@ -55347,7 +55347,7 @@ package org.apache.http.client.params {
     method public void setVirtualHost(org.apache.http.HttpHost);
   }
 
-  public final class CookiePolicy {
+  public final deprecated class CookiePolicy {
     field public static final java.lang.String BEST_MATCH = "best-match";
     field public static final java.lang.String BROWSER_COMPATIBILITY = "compatibility";
     field public static final java.lang.String NETSCAPE = "netscape";
@@ -55355,7 +55355,7 @@ package org.apache.http.client.params {
     field public static final java.lang.String RFC_2965 = "rfc2965";
   }
 
-  public class HttpClientParams {
+  public deprecated class HttpClientParams {
     method public static java.lang.String getCookiePolicy(org.apache.http.params.HttpParams);
     method public static boolean isAuthenticating(org.apache.http.params.HttpParams);
     method public static boolean isRedirecting(org.apache.http.params.HttpParams);
@@ -55368,7 +55368,7 @@ package org.apache.http.client.params {
 
 package org.apache.http.client.protocol {
 
-  public abstract interface ClientContext {
+  public abstract deprecated interface ClientContext {
     field public static final java.lang.String AUTHSCHEME_REGISTRY = "http.authscheme-registry";
     field public static final java.lang.String AUTH_SCHEME_PREF = "http.auth.scheme-pref";
     field public static final java.lang.String COOKIESPEC_REGISTRY = "http.cookiespec-registry";
@@ -55381,7 +55381,7 @@ package org.apache.http.client.protocol {
     field public static final java.lang.String USER_TOKEN = "http.user-token";
   }
 
-  public class ClientContextConfigurer implements org.apache.http.client.protocol.ClientContext {
+  public deprecated class ClientContextConfigurer implements org.apache.http.client.protocol.ClientContext {
     ctor public ClientContextConfigurer(org.apache.http.protocol.HttpContext);
     method public void setAuthSchemePref(java.util.List<java.lang.String>);
     method public void setAuthSchemeRegistry(org.apache.http.auth.AuthSchemeRegistry);
@@ -55390,27 +55390,27 @@ package org.apache.http.client.protocol {
     method public void setCredentialsProvider(org.apache.http.client.CredentialsProvider);
   }
 
-  public class RequestAddCookies implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestAddCookies implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestAddCookies();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestDefaultHeaders implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestDefaultHeaders implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestDefaultHeaders();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestProxyAuthentication implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestProxyAuthentication implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestProxyAuthentication();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestTargetAuthentication implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestTargetAuthentication implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestTargetAuthentication();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class ResponseProcessCookies implements org.apache.http.HttpResponseInterceptor {
+  public deprecated class ResponseProcessCookies implements org.apache.http.HttpResponseInterceptor {
     ctor public ResponseProcessCookies();
     method public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
@@ -55419,11 +55419,11 @@ package org.apache.http.client.protocol {
 
 package org.apache.http.client.utils {
 
-  public class CloneUtils {
+  public deprecated class CloneUtils {
     method public static java.lang.Object clone(java.lang.Object) throws java.lang.CloneNotSupportedException;
   }
 
-  public class URIUtils {
+  public deprecated class URIUtils {
     method public static java.net.URI createURI(java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String) throws java.net.URISyntaxException;
     method public static java.net.URI resolve(java.net.URI, java.lang.String);
     method public static java.net.URI resolve(java.net.URI, java.net.URI);
@@ -55431,7 +55431,7 @@ package org.apache.http.client.utils {
     method public static java.net.URI rewriteURI(java.net.URI, org.apache.http.HttpHost) throws java.net.URISyntaxException;
   }
 
-  public class URLEncodedUtils {
+  public deprecated class URLEncodedUtils {
     ctor public URLEncodedUtils();
     method public static java.lang.String format(java.util.List<? extends org.apache.http.NameValuePair>, java.lang.String);
     method public static boolean isEncoded(org.apache.http.HttpEntity);
@@ -55445,7 +55445,7 @@ package org.apache.http.client.utils {
 
 package org.apache.http.conn {
 
-  public class BasicEofSensorWatcher implements org.apache.http.conn.EofSensorWatcher {
+  public deprecated class BasicEofSensorWatcher implements org.apache.http.conn.EofSensorWatcher {
     ctor public BasicEofSensorWatcher(org.apache.http.conn.ManagedClientConnection, boolean);
     method public boolean eofDetected(java.io.InputStream) throws java.io.IOException;
     method public boolean streamAbort(java.io.InputStream) throws java.io.IOException;
@@ -55454,7 +55454,7 @@ package org.apache.http.conn {
     field protected org.apache.http.conn.ManagedClientConnection managedConn;
   }
 
-  public class BasicManagedEntity extends org.apache.http.entity.HttpEntityWrapper implements org.apache.http.conn.ConnectionReleaseTrigger org.apache.http.conn.EofSensorWatcher {
+  public deprecated class BasicManagedEntity extends org.apache.http.entity.HttpEntityWrapper implements org.apache.http.conn.ConnectionReleaseTrigger org.apache.http.conn.EofSensorWatcher {
     ctor public BasicManagedEntity(org.apache.http.HttpEntity, org.apache.http.conn.ManagedClientConnection, boolean);
     method public void abortConnection() throws java.io.IOException;
     method public boolean eofDetected(java.io.InputStream) throws java.io.IOException;
@@ -55466,7 +55466,7 @@ package org.apache.http.conn {
     field protected org.apache.http.conn.ManagedClientConnection managedConn;
   }
 
-  public abstract interface ClientConnectionManager {
+  public abstract deprecated interface ClientConnectionManager {
     method public abstract void closeExpiredConnections();
     method public abstract void closeIdleConnections(long, java.util.concurrent.TimeUnit);
     method public abstract org.apache.http.conn.scheme.SchemeRegistry getSchemeRegistry();
@@ -55475,41 +55475,41 @@ package org.apache.http.conn {
     method public abstract void shutdown();
   }
 
-  public abstract interface ClientConnectionManagerFactory {
+  public abstract deprecated interface ClientConnectionManagerFactory {
     method public abstract org.apache.http.conn.ClientConnectionManager newInstance(org.apache.http.params.HttpParams, org.apache.http.conn.scheme.SchemeRegistry);
   }
 
-  public abstract interface ClientConnectionOperator {
+  public abstract deprecated interface ClientConnectionOperator {
     method public abstract org.apache.http.conn.OperatedClientConnection createConnection();
     method public abstract void openConnection(org.apache.http.conn.OperatedClientConnection, org.apache.http.HttpHost, java.net.InetAddress, org.apache.http.protocol.HttpContext, org.apache.http.params.HttpParams) throws java.io.IOException;
     method public abstract void updateSecureConnection(org.apache.http.conn.OperatedClientConnection, org.apache.http.HttpHost, org.apache.http.protocol.HttpContext, org.apache.http.params.HttpParams) throws java.io.IOException;
   }
 
-  public abstract interface ClientConnectionRequest {
+  public abstract deprecated interface ClientConnectionRequest {
     method public abstract void abortRequest();
     method public abstract org.apache.http.conn.ManagedClientConnection getConnection(long, java.util.concurrent.TimeUnit) throws org.apache.http.conn.ConnectionPoolTimeoutException, java.lang.InterruptedException;
   }
 
-  public class ConnectTimeoutException extends java.io.InterruptedIOException {
+  public deprecated class ConnectTimeoutException extends java.io.InterruptedIOException {
     ctor public ConnectTimeoutException();
     ctor public ConnectTimeoutException(java.lang.String);
   }
 
-  public abstract interface ConnectionKeepAliveStrategy {
+  public abstract deprecated interface ConnectionKeepAliveStrategy {
     method public abstract long getKeepAliveDuration(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class ConnectionPoolTimeoutException extends org.apache.http.conn.ConnectTimeoutException {
+  public deprecated class ConnectionPoolTimeoutException extends org.apache.http.conn.ConnectTimeoutException {
     ctor public ConnectionPoolTimeoutException();
     ctor public ConnectionPoolTimeoutException(java.lang.String);
   }
 
-  public abstract interface ConnectionReleaseTrigger {
+  public abstract deprecated interface ConnectionReleaseTrigger {
     method public abstract void abortConnection() throws java.io.IOException;
     method public abstract void releaseConnection() throws java.io.IOException;
   }
 
-  public class EofSensorInputStream extends java.io.InputStream implements org.apache.http.conn.ConnectionReleaseTrigger {
+  public deprecated class EofSensorInputStream extends java.io.InputStream implements org.apache.http.conn.ConnectionReleaseTrigger {
     ctor public EofSensorInputStream(java.io.InputStream, org.apache.http.conn.EofSensorWatcher);
     method public void abortConnection() throws java.io.IOException;
     method protected void checkAbort() throws java.io.IOException;
@@ -55521,18 +55521,18 @@ package org.apache.http.conn {
     field protected java.io.InputStream wrappedStream;
   }
 
-  public abstract interface EofSensorWatcher {
+  public abstract deprecated interface EofSensorWatcher {
     method public abstract boolean eofDetected(java.io.InputStream) throws java.io.IOException;
     method public abstract boolean streamAbort(java.io.InputStream) throws java.io.IOException;
     method public abstract boolean streamClosed(java.io.InputStream) throws java.io.IOException;
   }
 
-  public class HttpHostConnectException extends java.net.ConnectException {
+  public deprecated class HttpHostConnectException extends java.net.ConnectException {
     ctor public HttpHostConnectException(org.apache.http.HttpHost, java.net.ConnectException);
     method public org.apache.http.HttpHost getHost();
   }
 
-  public abstract interface ManagedClientConnection implements org.apache.http.conn.ConnectionReleaseTrigger org.apache.http.HttpClientConnection org.apache.http.HttpInetConnection {
+  public abstract deprecated interface ManagedClientConnection implements org.apache.http.conn.ConnectionReleaseTrigger org.apache.http.HttpClientConnection org.apache.http.HttpInetConnection {
     method public abstract org.apache.http.conn.routing.HttpRoute getRoute();
     method public abstract javax.net.ssl.SSLSession getSSLSession();
     method public abstract java.lang.Object getState();
@@ -55548,14 +55548,14 @@ package org.apache.http.conn {
     method public abstract void unmarkReusable();
   }
 
-  public final class MultihomePlainSocketFactory implements org.apache.http.conn.scheme.SocketFactory {
+  public final deprecated class MultihomePlainSocketFactory implements org.apache.http.conn.scheme.SocketFactory {
     method public java.net.Socket connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams) throws java.io.IOException;
     method public java.net.Socket createSocket();
     method public static org.apache.http.conn.MultihomePlainSocketFactory getSocketFactory();
     method public final boolean isSecure(java.net.Socket) throws java.lang.IllegalArgumentException;
   }
 
-  public abstract interface OperatedClientConnection implements org.apache.http.HttpClientConnection org.apache.http.HttpInetConnection {
+  public abstract deprecated interface OperatedClientConnection implements org.apache.http.HttpClientConnection org.apache.http.HttpInetConnection {
     method public abstract java.net.Socket getSocket();
     method public abstract org.apache.http.HttpHost getTargetHost();
     method public abstract boolean isSecure();
@@ -55568,29 +55568,29 @@ package org.apache.http.conn {
 
 package org.apache.http.conn.params {
 
-  public abstract interface ConnConnectionPNames {
+  public abstract deprecated interface ConnConnectionPNames {
     field public static final java.lang.String MAX_STATUS_LINE_GARBAGE = "http.connection.max-status-line-garbage";
   }
 
-  public class ConnConnectionParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class ConnConnectionParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public ConnConnectionParamBean(org.apache.http.params.HttpParams);
     method public void setMaxStatusLineGarbage(int);
   }
 
-  public abstract interface ConnManagerPNames {
+  public abstract deprecated interface ConnManagerPNames {
     field public static final java.lang.String MAX_CONNECTIONS_PER_ROUTE = "http.conn-manager.max-per-route";
     field public static final java.lang.String MAX_TOTAL_CONNECTIONS = "http.conn-manager.max-total";
     field public static final java.lang.String TIMEOUT = "http.conn-manager.timeout";
   }
 
-  public class ConnManagerParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class ConnManagerParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public ConnManagerParamBean(org.apache.http.params.HttpParams);
     method public void setConnectionsPerRoute(org.apache.http.conn.params.ConnPerRouteBean);
     method public void setMaxTotalConnections(int);
     method public void setTimeout(long);
   }
 
-  public final class ConnManagerParams implements org.apache.http.conn.params.ConnManagerPNames {
+  public final deprecated class ConnManagerParams implements org.apache.http.conn.params.ConnManagerPNames {
     ctor public ConnManagerParams();
     method public static org.apache.http.conn.params.ConnPerRoute getMaxConnectionsPerRoute(org.apache.http.params.HttpParams);
     method public static int getMaxTotalConnections(org.apache.http.params.HttpParams);
@@ -55601,11 +55601,11 @@ package org.apache.http.conn.params {
     field public static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 20; // 0x14
   }
 
-  public abstract interface ConnPerRoute {
+  public abstract deprecated interface ConnPerRoute {
     method public abstract int getMaxForRoute(org.apache.http.conn.routing.HttpRoute);
   }
 
-  public final class ConnPerRouteBean implements org.apache.http.conn.params.ConnPerRoute {
+  public final deprecated class ConnPerRouteBean implements org.apache.http.conn.params.ConnPerRoute {
     ctor public ConnPerRouteBean(int);
     ctor public ConnPerRouteBean();
     method public int getDefaultMax();
@@ -55616,20 +55616,20 @@ package org.apache.http.conn.params {
     field public static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 2; // 0x2
   }
 
-  public abstract interface ConnRoutePNames {
+  public abstract deprecated interface ConnRoutePNames {
     field public static final java.lang.String DEFAULT_PROXY = "http.route.default-proxy";
     field public static final java.lang.String FORCED_ROUTE = "http.route.forced-route";
     field public static final java.lang.String LOCAL_ADDRESS = "http.route.local-address";
   }
 
-  public class ConnRouteParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class ConnRouteParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public ConnRouteParamBean(org.apache.http.params.HttpParams);
     method public void setDefaultProxy(org.apache.http.HttpHost);
     method public void setForcedRoute(org.apache.http.conn.routing.HttpRoute);
     method public void setLocalAddress(java.net.InetAddress);
   }
 
-  public class ConnRouteParams implements org.apache.http.conn.params.ConnRoutePNames {
+  public deprecated class ConnRouteParams implements org.apache.http.conn.params.ConnRoutePNames {
     method public static org.apache.http.HttpHost getDefaultProxy(org.apache.http.params.HttpParams);
     method public static org.apache.http.conn.routing.HttpRoute getForcedRoute(org.apache.http.params.HttpParams);
     method public static java.net.InetAddress getLocalAddress(org.apache.http.params.HttpParams);
@@ -55644,7 +55644,7 @@ package org.apache.http.conn.params {
 
 package org.apache.http.conn.routing {
 
-  public class BasicRouteDirector implements org.apache.http.conn.routing.HttpRouteDirector {
+  public deprecated class BasicRouteDirector implements org.apache.http.conn.routing.HttpRouteDirector {
     ctor public BasicRouteDirector();
     method protected int directStep(org.apache.http.conn.routing.RouteInfo, org.apache.http.conn.routing.RouteInfo);
     method protected int firstStep(org.apache.http.conn.routing.RouteInfo);
@@ -55652,7 +55652,7 @@ package org.apache.http.conn.routing {
     method protected int proxiedStep(org.apache.http.conn.routing.RouteInfo, org.apache.http.conn.routing.RouteInfo);
   }
 
-  public final class HttpRoute implements java.lang.Cloneable org.apache.http.conn.routing.RouteInfo {
+  public final deprecated class HttpRoute implements java.lang.Cloneable org.apache.http.conn.routing.RouteInfo {
     ctor public HttpRoute(org.apache.http.HttpHost, java.net.InetAddress, org.apache.http.HttpHost[], boolean, org.apache.http.conn.routing.RouteInfo.TunnelType, org.apache.http.conn.routing.RouteInfo.LayerType);
     ctor public HttpRoute(org.apache.http.HttpHost, java.net.InetAddress, org.apache.http.HttpHost, boolean, org.apache.http.conn.routing.RouteInfo.TunnelType, org.apache.http.conn.routing.RouteInfo.LayerType);
     ctor public HttpRoute(org.apache.http.HttpHost, java.net.InetAddress, boolean);
@@ -55674,7 +55674,7 @@ package org.apache.http.conn.routing {
     method public final java.lang.String toString();
   }
 
-  public abstract interface HttpRouteDirector {
+  public abstract deprecated interface HttpRouteDirector {
     method public abstract int nextStep(org.apache.http.conn.routing.RouteInfo, org.apache.http.conn.routing.RouteInfo);
     field public static final int COMPLETE = 0; // 0x0
     field public static final int CONNECT_PROXY = 2; // 0x2
@@ -55685,11 +55685,11 @@ package org.apache.http.conn.routing {
     field public static final int UNREACHABLE = -1; // 0xffffffff
   }
 
-  public abstract interface HttpRoutePlanner {
+  public abstract deprecated interface HttpRoutePlanner {
     method public abstract org.apache.http.conn.routing.HttpRoute determineRoute(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException;
   }
 
-  public abstract interface RouteInfo {
+  public abstract deprecated interface RouteInfo {
     method public abstract int getHopCount();
     method public abstract org.apache.http.HttpHost getHopTarget(int);
     method public abstract org.apache.http.conn.routing.RouteInfo.LayerType getLayerType();
@@ -55716,7 +55716,7 @@ package org.apache.http.conn.routing {
     enum_constant public static final org.apache.http.conn.routing.RouteInfo.TunnelType TUNNELLED;
   }
 
-  public final class RouteTracker implements java.lang.Cloneable org.apache.http.conn.routing.RouteInfo {
+  public final deprecated class RouteTracker implements java.lang.Cloneable org.apache.http.conn.routing.RouteInfo {
     ctor public RouteTracker(org.apache.http.HttpHost, java.net.InetAddress);
     ctor public RouteTracker(org.apache.http.conn.routing.HttpRoute);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
@@ -55746,15 +55746,15 @@ package org.apache.http.conn.routing {
 
 package org.apache.http.conn.scheme {
 
-  public abstract interface HostNameResolver {
+  public abstract deprecated interface HostNameResolver {
     method public abstract java.net.InetAddress resolve(java.lang.String) throws java.io.IOException;
   }
 
-  public abstract interface LayeredSocketFactory implements org.apache.http.conn.scheme.SocketFactory {
+  public abstract deprecated interface LayeredSocketFactory implements org.apache.http.conn.scheme.SocketFactory {
     method public abstract java.net.Socket createSocket(java.net.Socket, java.lang.String, int, boolean) throws java.io.IOException, java.net.UnknownHostException;
   }
 
-  public final class PlainSocketFactory implements org.apache.http.conn.scheme.SocketFactory {
+  public final deprecated class PlainSocketFactory implements org.apache.http.conn.scheme.SocketFactory {
     ctor public PlainSocketFactory(org.apache.http.conn.scheme.HostNameResolver);
     ctor public PlainSocketFactory();
     method public java.net.Socket connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams) throws java.io.IOException;
@@ -55763,7 +55763,7 @@ package org.apache.http.conn.scheme {
     method public final boolean isSecure(java.net.Socket) throws java.lang.IllegalArgumentException;
   }
 
-  public final class Scheme {
+  public final deprecated class Scheme {
     ctor public Scheme(java.lang.String, org.apache.http.conn.scheme.SocketFactory, int);
     method public final boolean equals(java.lang.Object);
     method public final int getDefaultPort();
@@ -55774,7 +55774,7 @@ package org.apache.http.conn.scheme {
     method public final java.lang.String toString();
   }
 
-  public final class SchemeRegistry {
+  public final deprecated class SchemeRegistry {
     ctor public SchemeRegistry();
     method public final synchronized org.apache.http.conn.scheme.Scheme get(java.lang.String);
     method public final synchronized org.apache.http.conn.scheme.Scheme getScheme(java.lang.String);
@@ -55785,7 +55785,7 @@ package org.apache.http.conn.scheme {
     method public final synchronized org.apache.http.conn.scheme.Scheme unregister(java.lang.String);
   }
 
-  public abstract interface SocketFactory {
+  public abstract deprecated interface SocketFactory {
     method public abstract java.net.Socket connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams) throws org.apache.http.conn.ConnectTimeoutException, java.io.IOException, java.net.UnknownHostException;
     method public abstract java.net.Socket createSocket() throws java.io.IOException;
     method public abstract boolean isSecure(java.net.Socket) throws java.lang.IllegalArgumentException;
@@ -55795,7 +55795,7 @@ package org.apache.http.conn.scheme {
 
 package org.apache.http.conn.ssl {
 
-  public abstract class AbstractVerifier implements org.apache.http.conn.ssl.X509HostnameVerifier {
+  public abstract deprecated class AbstractVerifier implements org.apache.http.conn.ssl.X509HostnameVerifier {
     ctor public AbstractVerifier();
     method public static boolean acceptableCountryWildcard(java.lang.String);
     method public static int countDots(java.lang.String);
@@ -55807,19 +55807,19 @@ package org.apache.http.conn.ssl {
     method public final void verify(java.lang.String, java.lang.String[], java.lang.String[], boolean) throws javax.net.ssl.SSLException;
   }
 
-  public class AllowAllHostnameVerifier extends org.apache.http.conn.ssl.AbstractVerifier {
+  public deprecated class AllowAllHostnameVerifier extends org.apache.http.conn.ssl.AbstractVerifier {
     ctor public AllowAllHostnameVerifier();
     method public final java.lang.String toString();
     method public final void verify(java.lang.String, java.lang.String[], java.lang.String[]);
   }
 
-  public class BrowserCompatHostnameVerifier extends org.apache.http.conn.ssl.AbstractVerifier {
+  public deprecated class BrowserCompatHostnameVerifier extends org.apache.http.conn.ssl.AbstractVerifier {
     ctor public BrowserCompatHostnameVerifier();
     method public final java.lang.String toString();
     method public final void verify(java.lang.String, java.lang.String[], java.lang.String[]) throws javax.net.ssl.SSLException;
   }
 
-  public class SSLSocketFactory implements org.apache.http.conn.scheme.LayeredSocketFactory {
+  public deprecated class SSLSocketFactory implements org.apache.http.conn.scheme.LayeredSocketFactory {
     ctor public SSLSocketFactory(java.lang.String, java.security.KeyStore, java.lang.String, java.security.KeyStore, java.security.SecureRandom, org.apache.http.conn.scheme.HostNameResolver) throws java.security.KeyManagementException, java.security.KeyStoreException, java.security.NoSuchAlgorithmException, java.security.UnrecoverableKeyException;
     ctor public SSLSocketFactory(java.security.KeyStore, java.lang.String, java.security.KeyStore) throws java.security.KeyManagementException, java.security.KeyStoreException, java.security.NoSuchAlgorithmException, java.security.UnrecoverableKeyException;
     ctor public SSLSocketFactory(java.security.KeyStore, java.lang.String) throws java.security.KeyManagementException, java.security.KeyStoreException, java.security.NoSuchAlgorithmException, java.security.UnrecoverableKeyException;
@@ -55839,13 +55839,13 @@ package org.apache.http.conn.ssl {
     field public static final java.lang.String TLS = "TLS";
   }
 
-  public class StrictHostnameVerifier extends org.apache.http.conn.ssl.AbstractVerifier {
+  public deprecated class StrictHostnameVerifier extends org.apache.http.conn.ssl.AbstractVerifier {
     ctor public StrictHostnameVerifier();
     method public final java.lang.String toString();
     method public final void verify(java.lang.String, java.lang.String[], java.lang.String[]) throws javax.net.ssl.SSLException;
   }
 
-  public abstract interface X509HostnameVerifier implements javax.net.ssl.HostnameVerifier {
+  public abstract deprecated interface X509HostnameVerifier implements javax.net.ssl.HostnameVerifier {
     method public abstract boolean verify(java.lang.String, javax.net.ssl.SSLSession);
     method public abstract void verify(java.lang.String, javax.net.ssl.SSLSocket) throws java.io.IOException;
     method public abstract void verify(java.lang.String, java.security.cert.X509Certificate) throws javax.net.ssl.SSLException;
@@ -55856,7 +55856,7 @@ package org.apache.http.conn.ssl {
 
 package org.apache.http.conn.util {
 
-  public class InetAddressUtils {
+  public deprecated class InetAddressUtils {
     method public static boolean isIPv4Address(java.lang.String);
     method public static boolean isIPv6Address(java.lang.String);
     method public static boolean isIPv6HexCompressedAddress(java.lang.String);
@@ -55867,7 +55867,7 @@ package org.apache.http.conn.util {
 
 package org.apache.http.cookie {
 
-  public abstract interface ClientCookie implements org.apache.http.cookie.Cookie {
+  public abstract deprecated interface ClientCookie implements org.apache.http.cookie.Cookie {
     method public abstract boolean containsAttribute(java.lang.String);
     method public abstract java.lang.String getAttribute(java.lang.String);
     field public static final java.lang.String COMMENTURL_ATTR = "commenturl";
@@ -55882,7 +55882,7 @@ package org.apache.http.cookie {
     field public static final java.lang.String VERSION_ATTR = "version";
   }
 
-  public abstract interface Cookie {
+  public abstract deprecated interface Cookie {
     method public abstract java.lang.String getComment();
     method public abstract java.lang.String getCommentURL();
     method public abstract java.lang.String getDomain();
@@ -55897,18 +55897,18 @@ package org.apache.http.cookie {
     method public abstract boolean isSecure();
   }
 
-  public abstract interface CookieAttributeHandler {
+  public abstract deprecated interface CookieAttributeHandler {
     method public abstract boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public abstract void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public abstract void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class CookieIdentityComparator implements java.util.Comparator java.io.Serializable {
+  public deprecated class CookieIdentityComparator implements java.util.Comparator java.io.Serializable {
     ctor public CookieIdentityComparator();
     method public int compare(org.apache.http.cookie.Cookie, org.apache.http.cookie.Cookie);
   }
 
-  public final class CookieOrigin {
+  public final deprecated class CookieOrigin {
     ctor public CookieOrigin(java.lang.String, int, java.lang.String, boolean);
     method public java.lang.String getHost();
     method public java.lang.String getPath();
@@ -55916,12 +55916,12 @@ package org.apache.http.cookie {
     method public boolean isSecure();
   }
 
-  public class CookiePathComparator implements java.util.Comparator java.io.Serializable {
+  public deprecated class CookiePathComparator implements java.util.Comparator java.io.Serializable {
     ctor public CookiePathComparator();
     method public int compare(org.apache.http.cookie.Cookie, org.apache.http.cookie.Cookie);
   }
 
-  public abstract interface CookieSpec {
+  public abstract deprecated interface CookieSpec {
     method public abstract java.util.List<org.apache.http.Header> formatCookies(java.util.List<org.apache.http.cookie.Cookie>);
     method public abstract int getVersion();
     method public abstract org.apache.http.Header getVersionHeader();
@@ -55930,11 +55930,11 @@ package org.apache.http.cookie {
     method public abstract void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public abstract interface CookieSpecFactory {
+  public abstract deprecated interface CookieSpecFactory {
     method public abstract org.apache.http.cookie.CookieSpec newInstance(org.apache.http.params.HttpParams);
   }
 
-  public final class CookieSpecRegistry {
+  public final deprecated class CookieSpecRegistry {
     ctor public CookieSpecRegistry();
     method public synchronized org.apache.http.cookie.CookieSpec getCookieSpec(java.lang.String, org.apache.http.params.HttpParams) throws java.lang.IllegalStateException;
     method public synchronized org.apache.http.cookie.CookieSpec getCookieSpec(java.lang.String) throws java.lang.IllegalStateException;
@@ -55944,20 +55944,20 @@ package org.apache.http.cookie {
     method public synchronized void unregister(java.lang.String);
   }
 
-  public class MalformedCookieException extends org.apache.http.ProtocolException {
+  public deprecated class MalformedCookieException extends org.apache.http.ProtocolException {
     ctor public MalformedCookieException();
     ctor public MalformedCookieException(java.lang.String);
     ctor public MalformedCookieException(java.lang.String, java.lang.Throwable);
   }
 
-  public abstract interface SM {
+  public abstract deprecated interface SM {
     field public static final java.lang.String COOKIE = "Cookie";
     field public static final java.lang.String COOKIE2 = "Cookie2";
     field public static final java.lang.String SET_COOKIE = "Set-Cookie";
     field public static final java.lang.String SET_COOKIE2 = "Set-Cookie2";
   }
 
-  public abstract interface SetCookie implements org.apache.http.cookie.Cookie {
+  public abstract deprecated interface SetCookie implements org.apache.http.cookie.Cookie {
     method public abstract void setComment(java.lang.String);
     method public abstract void setDomain(java.lang.String);
     method public abstract void setExpiryDate(java.util.Date);
@@ -55967,7 +55967,7 @@ package org.apache.http.cookie {
     method public abstract void setVersion(int);
   }
 
-  public abstract interface SetCookie2 implements org.apache.http.cookie.SetCookie {
+  public abstract deprecated interface SetCookie2 implements org.apache.http.cookie.SetCookie {
     method public abstract void setCommentURL(java.lang.String);
     method public abstract void setDiscard(boolean);
     method public abstract void setPorts(int[]);
@@ -55977,12 +55977,12 @@ package org.apache.http.cookie {
 
 package org.apache.http.cookie.params {
 
-  public abstract interface CookieSpecPNames {
+  public abstract deprecated interface CookieSpecPNames {
     field public static final java.lang.String DATE_PATTERNS = "http.protocol.cookie-datepatterns";
     field public static final java.lang.String SINGLE_COOKIE_HEADER = "http.protocol.single-cookie-header";
   }
 
-  public class CookieSpecParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class CookieSpecParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public CookieSpecParamBean(org.apache.http.params.HttpParams);
     method public void setDatePatterns(java.util.Collection<java.lang.String>);
     method public void setSingleHeader(boolean);
@@ -55992,7 +55992,7 @@ package org.apache.http.cookie.params {
 
 package org.apache.http.entity {
 
-  public abstract class AbstractHttpEntity implements org.apache.http.HttpEntity {
+  public abstract deprecated class AbstractHttpEntity implements org.apache.http.HttpEntity {
     ctor protected AbstractHttpEntity();
     method public void consumeContent() throws java.io.IOException, java.lang.UnsupportedOperationException;
     method public org.apache.http.Header getContentEncoding();
@@ -56008,7 +56008,7 @@ package org.apache.http.entity {
     field protected org.apache.http.Header contentType;
   }
 
-  public class BasicHttpEntity extends org.apache.http.entity.AbstractHttpEntity {
+  public deprecated class BasicHttpEntity extends org.apache.http.entity.AbstractHttpEntity {
     ctor public BasicHttpEntity();
     method public java.io.InputStream getContent() throws java.lang.IllegalStateException;
     method public long getContentLength();
@@ -56019,11 +56019,11 @@ package org.apache.http.entity {
     method public void writeTo(java.io.OutputStream) throws java.io.IOException;
   }
 
-  public class BufferedHttpEntity extends org.apache.http.entity.HttpEntityWrapper {
+  public deprecated class BufferedHttpEntity extends org.apache.http.entity.HttpEntityWrapper {
     ctor public BufferedHttpEntity(org.apache.http.HttpEntity) throws java.io.IOException;
   }
 
-  public class ByteArrayEntity extends org.apache.http.entity.AbstractHttpEntity implements java.lang.Cloneable {
+  public deprecated class ByteArrayEntity extends org.apache.http.entity.AbstractHttpEntity implements java.lang.Cloneable {
     ctor public ByteArrayEntity(byte[]);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public java.io.InputStream getContent();
@@ -56034,17 +56034,17 @@ package org.apache.http.entity {
     field protected final byte[] content;
   }
 
-  public abstract interface ContentLengthStrategy {
+  public abstract deprecated interface ContentLengthStrategy {
     method public abstract long determineLength(org.apache.http.HttpMessage) throws org.apache.http.HttpException;
     field public static final int CHUNKED = -2; // 0xfffffffe
     field public static final int IDENTITY = -1; // 0xffffffff
   }
 
-  public abstract interface ContentProducer {
+  public abstract deprecated interface ContentProducer {
     method public abstract void writeTo(java.io.OutputStream) throws java.io.IOException;
   }
 
-  public class EntityTemplate extends org.apache.http.entity.AbstractHttpEntity {
+  public deprecated class EntityTemplate extends org.apache.http.entity.AbstractHttpEntity {
     ctor public EntityTemplate(org.apache.http.entity.ContentProducer);
     method public java.io.InputStream getContent();
     method public long getContentLength();
@@ -56053,7 +56053,7 @@ package org.apache.http.entity {
     method public void writeTo(java.io.OutputStream) throws java.io.IOException;
   }
 
-  public class FileEntity extends org.apache.http.entity.AbstractHttpEntity implements java.lang.Cloneable {
+  public deprecated class FileEntity extends org.apache.http.entity.AbstractHttpEntity implements java.lang.Cloneable {
     ctor public FileEntity(java.io.File, java.lang.String);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public java.io.InputStream getContent() throws java.io.IOException;
@@ -56064,7 +56064,7 @@ package org.apache.http.entity {
     field protected final java.io.File file;
   }
 
-  public class HttpEntityWrapper implements org.apache.http.HttpEntity {
+  public deprecated class HttpEntityWrapper implements org.apache.http.HttpEntity {
     ctor public HttpEntityWrapper(org.apache.http.HttpEntity);
     method public void consumeContent() throws java.io.IOException;
     method public java.io.InputStream getContent() throws java.io.IOException;
@@ -56078,7 +56078,7 @@ package org.apache.http.entity {
     field protected org.apache.http.HttpEntity wrappedEntity;
   }
 
-  public class InputStreamEntity extends org.apache.http.entity.AbstractHttpEntity {
+  public deprecated class InputStreamEntity extends org.apache.http.entity.AbstractHttpEntity {
     ctor public InputStreamEntity(java.io.InputStream, long);
     method public java.io.InputStream getContent() throws java.io.IOException;
     method public long getContentLength();
@@ -56087,7 +56087,7 @@ package org.apache.http.entity {
     method public void writeTo(java.io.OutputStream) throws java.io.IOException;
   }
 
-  public class SerializableEntity extends org.apache.http.entity.AbstractHttpEntity {
+  public deprecated class SerializableEntity extends org.apache.http.entity.AbstractHttpEntity {
     ctor public SerializableEntity(java.io.Serializable, boolean) throws java.io.IOException;
     method public java.io.InputStream getContent() throws java.io.IOException, java.lang.IllegalStateException;
     method public long getContentLength();
@@ -56096,7 +56096,7 @@ package org.apache.http.entity {
     method public void writeTo(java.io.OutputStream) throws java.io.IOException;
   }
 
-  public class StringEntity extends org.apache.http.entity.AbstractHttpEntity implements java.lang.Cloneable {
+  public deprecated class StringEntity extends org.apache.http.entity.AbstractHttpEntity implements java.lang.Cloneable {
     ctor public StringEntity(java.lang.String, java.lang.String) throws java.io.UnsupportedEncodingException;
     ctor public StringEntity(java.lang.String) throws java.io.UnsupportedEncodingException;
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
@@ -56112,7 +56112,7 @@ package org.apache.http.entity {
 
 package org.apache.http.impl {
 
-  public abstract class AbstractHttpClientConnection implements org.apache.http.HttpClientConnection {
+  public abstract deprecated class AbstractHttpClientConnection implements org.apache.http.HttpClientConnection {
     ctor public AbstractHttpClientConnection();
     method protected abstract void assertOpen() throws java.lang.IllegalStateException;
     method protected org.apache.http.impl.entity.EntityDeserializer createEntityDeserializer();
@@ -56132,7 +56132,7 @@ package org.apache.http.impl {
     method public void sendRequestHeader(org.apache.http.HttpRequest) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract class AbstractHttpServerConnection implements org.apache.http.HttpServerConnection {
+  public abstract deprecated class AbstractHttpServerConnection implements org.apache.http.HttpServerConnection {
     ctor public AbstractHttpServerConnection();
     method protected abstract void assertOpen() throws java.lang.IllegalStateException;
     method protected org.apache.http.impl.entity.EntityDeserializer createEntityDeserializer();
@@ -56151,24 +56151,24 @@ package org.apache.http.impl {
     method public void sendResponseHeader(org.apache.http.HttpResponse) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class DefaultConnectionReuseStrategy implements org.apache.http.ConnectionReuseStrategy {
+  public deprecated class DefaultConnectionReuseStrategy implements org.apache.http.ConnectionReuseStrategy {
     ctor public DefaultConnectionReuseStrategy();
     method protected org.apache.http.TokenIterator createTokenIterator(org.apache.http.HeaderIterator);
     method public boolean keepAlive(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class DefaultHttpClientConnection extends org.apache.http.impl.SocketHttpClientConnection {
+  public deprecated class DefaultHttpClientConnection extends org.apache.http.impl.SocketHttpClientConnection {
     ctor public DefaultHttpClientConnection();
     method public void bind(java.net.Socket, org.apache.http.params.HttpParams) throws java.io.IOException;
   }
 
-  public class DefaultHttpRequestFactory implements org.apache.http.HttpRequestFactory {
+  public deprecated class DefaultHttpRequestFactory implements org.apache.http.HttpRequestFactory {
     ctor public DefaultHttpRequestFactory();
     method public org.apache.http.HttpRequest newHttpRequest(org.apache.http.RequestLine) throws org.apache.http.MethodNotSupportedException;
     method public org.apache.http.HttpRequest newHttpRequest(java.lang.String, java.lang.String) throws org.apache.http.MethodNotSupportedException;
   }
 
-  public class DefaultHttpResponseFactory implements org.apache.http.HttpResponseFactory {
+  public deprecated class DefaultHttpResponseFactory implements org.apache.http.HttpResponseFactory {
     ctor public DefaultHttpResponseFactory(org.apache.http.ReasonPhraseCatalog);
     ctor public DefaultHttpResponseFactory();
     method protected java.util.Locale determineLocale(org.apache.http.protocol.HttpContext);
@@ -56177,18 +56177,18 @@ package org.apache.http.impl {
     field protected final org.apache.http.ReasonPhraseCatalog reasonCatalog;
   }
 
-  public class DefaultHttpServerConnection extends org.apache.http.impl.SocketHttpServerConnection {
+  public deprecated class DefaultHttpServerConnection extends org.apache.http.impl.SocketHttpServerConnection {
     ctor public DefaultHttpServerConnection();
     method public void bind(java.net.Socket, org.apache.http.params.HttpParams) throws java.io.IOException;
   }
 
-  public class EnglishReasonPhraseCatalog implements org.apache.http.ReasonPhraseCatalog {
+  public deprecated class EnglishReasonPhraseCatalog implements org.apache.http.ReasonPhraseCatalog {
     ctor protected EnglishReasonPhraseCatalog();
     method public java.lang.String getReason(int, java.util.Locale);
     field public static final org.apache.http.impl.EnglishReasonPhraseCatalog INSTANCE;
   }
 
-  public class HttpConnectionMetricsImpl implements org.apache.http.HttpConnectionMetrics {
+  public deprecated class HttpConnectionMetricsImpl implements org.apache.http.HttpConnectionMetrics {
     ctor public HttpConnectionMetricsImpl(org.apache.http.io.HttpTransportMetrics, org.apache.http.io.HttpTransportMetrics);
     method public java.lang.Object getMetric(java.lang.String);
     method public long getReceivedBytesCount();
@@ -56205,12 +56205,12 @@ package org.apache.http.impl {
     field public static final java.lang.String SENT_BYTES_COUNT = "http.sent-bytes-count";
   }
 
-  public class NoConnectionReuseStrategy implements org.apache.http.ConnectionReuseStrategy {
+  public deprecated class NoConnectionReuseStrategy implements org.apache.http.ConnectionReuseStrategy {
     ctor public NoConnectionReuseStrategy();
     method public boolean keepAlive(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class SocketHttpClientConnection extends org.apache.http.impl.AbstractHttpClientConnection implements org.apache.http.HttpInetConnection {
+  public deprecated class SocketHttpClientConnection extends org.apache.http.impl.AbstractHttpClientConnection implements org.apache.http.HttpInetConnection {
     ctor public SocketHttpClientConnection();
     method protected void assertNotOpen();
     method protected void assertOpen();
@@ -56229,7 +56229,7 @@ package org.apache.http.impl {
     method public void shutdown() throws java.io.IOException;
   }
 
-  public class SocketHttpServerConnection extends org.apache.http.impl.AbstractHttpServerConnection implements org.apache.http.HttpInetConnection {
+  public deprecated class SocketHttpServerConnection extends org.apache.http.impl.AbstractHttpServerConnection implements org.apache.http.HttpInetConnection {
     ctor public SocketHttpServerConnection();
     method protected void assertNotOpen();
     method protected void assertOpen();
@@ -56252,14 +56252,14 @@ package org.apache.http.impl {
 
 package org.apache.http.impl.auth {
 
-  public abstract class AuthSchemeBase implements org.apache.http.auth.AuthScheme {
+  public abstract deprecated class AuthSchemeBase implements org.apache.http.auth.AuthScheme {
     ctor public AuthSchemeBase();
     method public boolean isProxy();
     method protected abstract void parseChallenge(org.apache.http.util.CharArrayBuffer, int, int) throws org.apache.http.auth.MalformedChallengeException;
     method public void processChallenge(org.apache.http.Header) throws org.apache.http.auth.MalformedChallengeException;
   }
 
-  public class BasicScheme extends org.apache.http.impl.auth.RFC2617Scheme {
+  public deprecated class BasicScheme extends org.apache.http.impl.auth.RFC2617Scheme {
     ctor public BasicScheme();
     method public org.apache.http.Header authenticate(org.apache.http.auth.Credentials, org.apache.http.HttpRequest) throws org.apache.http.auth.AuthenticationException;
     method public static org.apache.http.Header authenticate(org.apache.http.auth.Credentials, java.lang.String, boolean);
@@ -56268,12 +56268,12 @@ package org.apache.http.impl.auth {
     method public boolean isConnectionBased();
   }
 
-  public class BasicSchemeFactory implements org.apache.http.auth.AuthSchemeFactory {
+  public deprecated class BasicSchemeFactory implements org.apache.http.auth.AuthSchemeFactory {
     ctor public BasicSchemeFactory();
     method public org.apache.http.auth.AuthScheme newInstance(org.apache.http.params.HttpParams);
   }
 
-  public class DigestScheme extends org.apache.http.impl.auth.RFC2617Scheme {
+  public deprecated class DigestScheme extends org.apache.http.impl.auth.RFC2617Scheme {
     ctor public DigestScheme();
     method public org.apache.http.Header authenticate(org.apache.http.auth.Credentials, org.apache.http.HttpRequest) throws org.apache.http.auth.AuthenticationException;
     method public static java.lang.String createCnonce();
@@ -56283,23 +56283,23 @@ package org.apache.http.impl.auth {
     method public void overrideParamter(java.lang.String, java.lang.String);
   }
 
-  public class DigestSchemeFactory implements org.apache.http.auth.AuthSchemeFactory {
+  public deprecated class DigestSchemeFactory implements org.apache.http.auth.AuthSchemeFactory {
     ctor public DigestSchemeFactory();
     method public org.apache.http.auth.AuthScheme newInstance(org.apache.http.params.HttpParams);
   }
 
-  public abstract interface NTLMEngine {
+  public abstract deprecated interface NTLMEngine {
     method public abstract java.lang.String generateType1Msg(java.lang.String, java.lang.String) throws org.apache.http.impl.auth.NTLMEngineException;
     method public abstract java.lang.String generateType3Msg(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws org.apache.http.impl.auth.NTLMEngineException;
   }
 
-  public class NTLMEngineException extends org.apache.http.auth.AuthenticationException {
+  public deprecated class NTLMEngineException extends org.apache.http.auth.AuthenticationException {
     ctor public NTLMEngineException();
     ctor public NTLMEngineException(java.lang.String);
     ctor public NTLMEngineException(java.lang.String, java.lang.Throwable);
   }
 
-  public class NTLMScheme extends org.apache.http.impl.auth.AuthSchemeBase {
+  public deprecated class NTLMScheme extends org.apache.http.impl.auth.AuthSchemeBase {
     ctor public NTLMScheme(org.apache.http.impl.auth.NTLMEngine);
     method public org.apache.http.Header authenticate(org.apache.http.auth.Credentials, org.apache.http.HttpRequest) throws org.apache.http.auth.AuthenticationException;
     method public java.lang.String getParameter(java.lang.String);
@@ -56310,7 +56310,7 @@ package org.apache.http.impl.auth {
     method protected void parseChallenge(org.apache.http.util.CharArrayBuffer, int, int) throws org.apache.http.auth.MalformedChallengeException;
   }
 
-  public abstract class RFC2617Scheme extends org.apache.http.impl.auth.AuthSchemeBase {
+  public abstract deprecated class RFC2617Scheme extends org.apache.http.impl.auth.AuthSchemeBase {
     ctor public RFC2617Scheme();
     method public java.lang.String getParameter(java.lang.String);
     method protected java.util.Map<java.lang.String, java.lang.String> getParameters();
@@ -56318,7 +56318,7 @@ package org.apache.http.impl.auth {
     method protected void parseChallenge(org.apache.http.util.CharArrayBuffer, int, int) throws org.apache.http.auth.MalformedChallengeException;
   }
 
-  public class UnsupportedDigestAlgorithmException extends java.lang.RuntimeException {
+  public deprecated class UnsupportedDigestAlgorithmException extends java.lang.RuntimeException {
     ctor public UnsupportedDigestAlgorithmException();
     ctor public UnsupportedDigestAlgorithmException(java.lang.String);
     ctor public UnsupportedDigestAlgorithmException(java.lang.String, java.lang.Throwable);
@@ -56328,14 +56328,14 @@ package org.apache.http.impl.auth {
 
 package org.apache.http.impl.client {
 
-  public abstract class AbstractAuthenticationHandler implements org.apache.http.client.AuthenticationHandler {
+  public abstract deprecated class AbstractAuthenticationHandler implements org.apache.http.client.AuthenticationHandler {
     ctor public AbstractAuthenticationHandler();
     method protected java.util.List<java.lang.String> getAuthPreferences();
     method protected java.util.Map<java.lang.String, org.apache.http.Header> parseChallenges(org.apache.http.Header[]) throws org.apache.http.auth.MalformedChallengeException;
     method public org.apache.http.auth.AuthScheme selectScheme(java.util.Map<java.lang.String, org.apache.http.Header>, org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.auth.AuthenticationException;
   }
 
-  public abstract class AbstractHttpClient implements org.apache.http.client.HttpClient {
+  public abstract deprecated class AbstractHttpClient implements org.apache.http.client.HttpClient {
     ctor protected AbstractHttpClient(org.apache.http.conn.ClientConnectionManager, org.apache.http.params.HttpParams);
     method public synchronized void addRequestInterceptor(org.apache.http.HttpRequestInterceptor);
     method public synchronized void addRequestInterceptor(org.apache.http.HttpRequestInterceptor, int);
@@ -56407,7 +56407,7 @@ package org.apache.http.impl.client {
     method public synchronized void setUserTokenHandler(org.apache.http.client.UserTokenHandler);
   }
 
-  public class BasicCookieStore implements org.apache.http.client.CookieStore {
+  public deprecated class BasicCookieStore implements org.apache.http.client.CookieStore {
     ctor public BasicCookieStore();
     method public synchronized void addCookie(org.apache.http.cookie.Cookie);
     method public synchronized void addCookies(org.apache.http.cookie.Cookie[]);
@@ -56416,19 +56416,19 @@ package org.apache.http.impl.client {
     method public synchronized java.util.List<org.apache.http.cookie.Cookie> getCookies();
   }
 
-  public class BasicCredentialsProvider implements org.apache.http.client.CredentialsProvider {
+  public deprecated class BasicCredentialsProvider implements org.apache.http.client.CredentialsProvider {
     ctor public BasicCredentialsProvider();
     method public synchronized void clear();
     method public synchronized org.apache.http.auth.Credentials getCredentials(org.apache.http.auth.AuthScope);
     method public synchronized void setCredentials(org.apache.http.auth.AuthScope, org.apache.http.auth.Credentials);
   }
 
-  public class BasicResponseHandler implements org.apache.http.client.ResponseHandler {
+  public deprecated class BasicResponseHandler implements org.apache.http.client.ResponseHandler {
     ctor public BasicResponseHandler();
     method public java.lang.String handleResponse(org.apache.http.HttpResponse) throws org.apache.http.client.HttpResponseException, java.io.IOException;
   }
 
-  public class ClientParamsStack extends org.apache.http.params.AbstractHttpParams {
+  public deprecated class ClientParamsStack extends org.apache.http.params.AbstractHttpParams {
     ctor public ClientParamsStack(org.apache.http.params.HttpParams, org.apache.http.params.HttpParams, org.apache.http.params.HttpParams, org.apache.http.params.HttpParams);
     ctor public ClientParamsStack(org.apache.http.impl.client.ClientParamsStack);
     ctor public ClientParamsStack(org.apache.http.impl.client.ClientParamsStack, org.apache.http.params.HttpParams, org.apache.http.params.HttpParams, org.apache.http.params.HttpParams, org.apache.http.params.HttpParams);
@@ -56446,12 +56446,12 @@ package org.apache.http.impl.client {
     field protected final org.apache.http.params.HttpParams requestParams;
   }
 
-  public class DefaultConnectionKeepAliveStrategy implements org.apache.http.conn.ConnectionKeepAliveStrategy {
+  public deprecated class DefaultConnectionKeepAliveStrategy implements org.apache.http.conn.ConnectionKeepAliveStrategy {
     ctor public DefaultConnectionKeepAliveStrategy();
     method public long getKeepAliveDuration(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class DefaultHttpClient extends org.apache.http.impl.client.AbstractHttpClient {
+  public deprecated class DefaultHttpClient extends org.apache.http.impl.client.AbstractHttpClient {
     ctor public DefaultHttpClient(org.apache.http.conn.ClientConnectionManager, org.apache.http.params.HttpParams);
     ctor public DefaultHttpClient(org.apache.http.params.HttpParams);
     ctor public DefaultHttpClient();
@@ -56474,7 +56474,7 @@ package org.apache.http.impl.client {
     method protected org.apache.http.client.UserTokenHandler createUserTokenHandler();
   }
 
-  public class DefaultHttpRequestRetryHandler implements org.apache.http.client.HttpRequestRetryHandler {
+  public deprecated class DefaultHttpRequestRetryHandler implements org.apache.http.client.HttpRequestRetryHandler {
     ctor public DefaultHttpRequestRetryHandler(int, boolean);
     ctor public DefaultHttpRequestRetryHandler();
     method public int getRetryCount();
@@ -56482,19 +56482,19 @@ package org.apache.http.impl.client {
     method public boolean retryRequest(java.io.IOException, int, org.apache.http.protocol.HttpContext);
   }
 
-  public class DefaultProxyAuthenticationHandler extends org.apache.http.impl.client.AbstractAuthenticationHandler {
+  public deprecated class DefaultProxyAuthenticationHandler extends org.apache.http.impl.client.AbstractAuthenticationHandler {
     ctor public DefaultProxyAuthenticationHandler();
     method public java.util.Map<java.lang.String, org.apache.http.Header> getChallenges(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.auth.MalformedChallengeException;
     method public boolean isAuthenticationRequested(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class DefaultRedirectHandler implements org.apache.http.client.RedirectHandler {
+  public deprecated class DefaultRedirectHandler implements org.apache.http.client.RedirectHandler {
     ctor public DefaultRedirectHandler();
     method public java.net.URI getLocationURI(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.ProtocolException;
     method public boolean isRedirectRequested(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class DefaultRequestDirector implements org.apache.http.client.RequestDirector {
+  public deprecated class DefaultRequestDirector implements org.apache.http.client.RequestDirector {
     ctor public DefaultRequestDirector(org.apache.http.protocol.HttpRequestExecutor, org.apache.http.conn.ClientConnectionManager, org.apache.http.ConnectionReuseStrategy, org.apache.http.conn.ConnectionKeepAliveStrategy, org.apache.http.conn.routing.HttpRoutePlanner, org.apache.http.protocol.HttpProcessor, org.apache.http.client.HttpRequestRetryHandler, org.apache.http.client.RedirectHandler, org.apache.http.client.AuthenticationHandler, org.apache.http.client.AuthenticationHandler, org.apache.http.client.UserTokenHandler, org.apache.http.params.HttpParams);
     method protected org.apache.http.HttpRequest createConnectRequest(org.apache.http.conn.routing.HttpRoute, org.apache.http.protocol.HttpContext);
     method protected boolean createTunnelToProxy(org.apache.http.conn.routing.HttpRoute, int, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
@@ -56517,32 +56517,32 @@ package org.apache.http.impl.client {
     field protected final org.apache.http.conn.routing.HttpRoutePlanner routePlanner;
   }
 
-  public class DefaultTargetAuthenticationHandler extends org.apache.http.impl.client.AbstractAuthenticationHandler {
+  public deprecated class DefaultTargetAuthenticationHandler extends org.apache.http.impl.client.AbstractAuthenticationHandler {
     ctor public DefaultTargetAuthenticationHandler();
     method public java.util.Map<java.lang.String, org.apache.http.Header> getChallenges(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.auth.MalformedChallengeException;
     method public boolean isAuthenticationRequested(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext);
   }
 
-  public class DefaultUserTokenHandler implements org.apache.http.client.UserTokenHandler {
+  public deprecated class DefaultUserTokenHandler implements org.apache.http.client.UserTokenHandler {
     ctor public DefaultUserTokenHandler();
     method public java.lang.Object getUserToken(org.apache.http.protocol.HttpContext);
   }
 
-  public class EntityEnclosingRequestWrapper extends org.apache.http.impl.client.RequestWrapper implements org.apache.http.HttpEntityEnclosingRequest {
+  public deprecated class EntityEnclosingRequestWrapper extends org.apache.http.impl.client.RequestWrapper implements org.apache.http.HttpEntityEnclosingRequest {
     ctor public EntityEnclosingRequestWrapper(org.apache.http.HttpEntityEnclosingRequest) throws org.apache.http.ProtocolException;
     method public boolean expectContinue();
     method public org.apache.http.HttpEntity getEntity();
     method public void setEntity(org.apache.http.HttpEntity);
   }
 
-  public class RedirectLocations {
+  public deprecated class RedirectLocations {
     ctor public RedirectLocations();
     method public void add(java.net.URI);
     method public boolean contains(java.net.URI);
     method public boolean remove(java.net.URI);
   }
 
-  public class RequestWrapper extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.client.methods.HttpUriRequest {
+  public deprecated class RequestWrapper extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.client.methods.HttpUriRequest {
     ctor public RequestWrapper(org.apache.http.HttpRequest) throws org.apache.http.ProtocolException;
     method public void abort() throws java.lang.UnsupportedOperationException;
     method public int getExecCount();
@@ -56560,7 +56560,7 @@ package org.apache.http.impl.client {
     method public void setURI(java.net.URI);
   }
 
-  public class RoutedRequest {
+  public deprecated class RoutedRequest {
     ctor public RoutedRequest(org.apache.http.impl.client.RequestWrapper, org.apache.http.conn.routing.HttpRoute);
     method public final org.apache.http.impl.client.RequestWrapper getRequest();
     method public final org.apache.http.conn.routing.HttpRoute getRoute();
@@ -56568,7 +56568,7 @@ package org.apache.http.impl.client {
     field protected final org.apache.http.conn.routing.HttpRoute route;
   }
 
-  public class TunnelRefusedException extends org.apache.http.HttpException {
+  public deprecated class TunnelRefusedException extends org.apache.http.HttpException {
     ctor public TunnelRefusedException(java.lang.String, org.apache.http.HttpResponse);
     method public org.apache.http.HttpResponse getResponse();
   }
@@ -56577,7 +56577,7 @@ package org.apache.http.impl.client {
 
 package org.apache.http.impl.conn {
 
-  public abstract class AbstractClientConnAdapter implements org.apache.http.conn.ManagedClientConnection {
+  public abstract deprecated class AbstractClientConnAdapter implements org.apache.http.conn.ManagedClientConnection {
     ctor protected AbstractClientConnAdapter(org.apache.http.conn.ClientConnectionManager, org.apache.http.conn.OperatedClientConnection);
     method public void abortConnection();
     method protected final void assertNotAborted() throws java.io.InterruptedIOException;
@@ -56609,7 +56609,7 @@ package org.apache.http.impl.conn {
     method public void unmarkReusable();
   }
 
-  public abstract class AbstractPoolEntry {
+  public abstract deprecated class AbstractPoolEntry {
     ctor protected AbstractPoolEntry(org.apache.http.conn.ClientConnectionOperator, org.apache.http.conn.routing.HttpRoute);
     method public java.lang.Object getState();
     method public void layerProtocol(org.apache.http.protocol.HttpContext, org.apache.http.params.HttpParams) throws java.io.IOException;
@@ -56625,7 +56625,7 @@ package org.apache.http.impl.conn {
     field protected volatile org.apache.http.conn.routing.RouteTracker tracker;
   }
 
-  public abstract class AbstractPooledConnAdapter extends org.apache.http.impl.conn.AbstractClientConnAdapter {
+  public abstract deprecated class AbstractPooledConnAdapter extends org.apache.http.impl.conn.AbstractClientConnAdapter {
     ctor protected AbstractPooledConnAdapter(org.apache.http.conn.ClientConnectionManager, org.apache.http.impl.conn.AbstractPoolEntry);
     method protected final void assertAttached();
     method public void close() throws java.io.IOException;
@@ -56640,7 +56640,7 @@ package org.apache.http.impl.conn {
     field protected volatile org.apache.http.impl.conn.AbstractPoolEntry poolEntry;
   }
 
-  public class DefaultClientConnection extends org.apache.http.impl.SocketHttpClientConnection implements org.apache.http.conn.OperatedClientConnection {
+  public deprecated class DefaultClientConnection extends org.apache.http.impl.SocketHttpClientConnection implements org.apache.http.conn.OperatedClientConnection {
     ctor public DefaultClientConnection();
     method public final java.net.Socket getSocket();
     method public final org.apache.http.HttpHost getTargetHost();
@@ -56650,7 +56650,7 @@ package org.apache.http.impl.conn {
     method public void update(java.net.Socket, org.apache.http.HttpHost, boolean, org.apache.http.params.HttpParams) throws java.io.IOException;
   }
 
-  public class DefaultClientConnectionOperator implements org.apache.http.conn.ClientConnectionOperator {
+  public deprecated class DefaultClientConnectionOperator implements org.apache.http.conn.ClientConnectionOperator {
     ctor public DefaultClientConnectionOperator(org.apache.http.conn.scheme.SchemeRegistry);
     method public org.apache.http.conn.OperatedClientConnection createConnection();
     method public void openConnection(org.apache.http.conn.OperatedClientConnection, org.apache.http.HttpHost, java.net.InetAddress, org.apache.http.protocol.HttpContext, org.apache.http.params.HttpParams) throws java.io.IOException;
@@ -56659,18 +56659,18 @@ package org.apache.http.impl.conn {
     field protected org.apache.http.conn.scheme.SchemeRegistry schemeRegistry;
   }
 
-  public class DefaultHttpRoutePlanner implements org.apache.http.conn.routing.HttpRoutePlanner {
+  public deprecated class DefaultHttpRoutePlanner implements org.apache.http.conn.routing.HttpRoutePlanner {
     ctor public DefaultHttpRoutePlanner(org.apache.http.conn.scheme.SchemeRegistry);
     method public org.apache.http.conn.routing.HttpRoute determineRoute(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException;
     field protected org.apache.http.conn.scheme.SchemeRegistry schemeRegistry;
   }
 
-  public class DefaultResponseParser extends org.apache.http.impl.io.AbstractMessageParser {
+  public deprecated class DefaultResponseParser extends org.apache.http.impl.io.AbstractMessageParser {
     ctor public DefaultResponseParser(org.apache.http.io.SessionInputBuffer, org.apache.http.message.LineParser, org.apache.http.HttpResponseFactory, org.apache.http.params.HttpParams);
     method protected org.apache.http.HttpMessage parseHead(org.apache.http.io.SessionInputBuffer) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class IdleConnectionHandler {
+  public deprecated class IdleConnectionHandler {
     ctor public IdleConnectionHandler();
     method public void add(org.apache.http.HttpConnection, long, java.util.concurrent.TimeUnit);
     method public void closeExpiredConnections();
@@ -56679,7 +56679,7 @@ package org.apache.http.impl.conn {
     method public void removeAll();
   }
 
-  public class LoggingSessionInputBuffer implements org.apache.http.io.SessionInputBuffer {
+  public deprecated class LoggingSessionInputBuffer implements org.apache.http.io.SessionInputBuffer {
     ctor public LoggingSessionInputBuffer(org.apache.http.io.SessionInputBuffer, org.apache.http.impl.conn.Wire);
     method public org.apache.http.io.HttpTransportMetrics getMetrics();
     method public boolean isDataAvailable(int) throws java.io.IOException;
@@ -56690,7 +56690,7 @@ package org.apache.http.impl.conn {
     method public int readLine(org.apache.http.util.CharArrayBuffer) throws java.io.IOException;
   }
 
-  public class LoggingSessionOutputBuffer implements org.apache.http.io.SessionOutputBuffer {
+  public deprecated class LoggingSessionOutputBuffer implements org.apache.http.io.SessionOutputBuffer {
     ctor public LoggingSessionOutputBuffer(org.apache.http.io.SessionOutputBuffer, org.apache.http.impl.conn.Wire);
     method public void flush() throws java.io.IOException;
     method public org.apache.http.io.HttpTransportMetrics getMetrics();
@@ -56701,7 +56701,7 @@ package org.apache.http.impl.conn {
     method public void writeLine(java.lang.String) throws java.io.IOException;
   }
 
-  public class ProxySelectorRoutePlanner implements org.apache.http.conn.routing.HttpRoutePlanner {
+  public deprecated class ProxySelectorRoutePlanner implements org.apache.http.conn.routing.HttpRoutePlanner {
     ctor public ProxySelectorRoutePlanner(org.apache.http.conn.scheme.SchemeRegistry, java.net.ProxySelector);
     method protected java.net.Proxy chooseProxy(java.util.List<java.net.Proxy>, org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext);
     method protected org.apache.http.HttpHost determineProxy(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException;
@@ -56713,7 +56713,7 @@ package org.apache.http.impl.conn {
     field protected org.apache.http.conn.scheme.SchemeRegistry schemeRegistry;
   }
 
-  public class SingleClientConnManager implements org.apache.http.conn.ClientConnectionManager {
+  public deprecated class SingleClientConnManager implements org.apache.http.conn.ClientConnectionManager {
     ctor public SingleClientConnManager(org.apache.http.params.HttpParams, org.apache.http.conn.scheme.SchemeRegistry);
     method protected final void assertStillUp() throws java.lang.IllegalStateException;
     method public void closeExpiredConnections();
@@ -56746,7 +56746,7 @@ package org.apache.http.impl.conn {
     method protected void shutdown() throws java.io.IOException;
   }
 
-  public class Wire {
+  public deprecated class Wire {
     ctor public Wire(org.apache.commons.logging.Log);
     method public boolean enabled();
     method public void input(java.io.InputStream) throws java.io.IOException;
@@ -56765,7 +56765,7 @@ package org.apache.http.impl.conn {
 
 package org.apache.http.impl.conn.tsccm {
 
-  public abstract class AbstractConnPool implements org.apache.http.impl.conn.tsccm.RefQueueHandler {
+  public abstract deprecated class AbstractConnPool implements org.apache.http.impl.conn.tsccm.RefQueueHandler {
     ctor protected AbstractConnPool();
     method protected void closeConnection(org.apache.http.conn.OperatedClientConnection);
     method public void closeExpiredConnections();
@@ -56786,24 +56786,24 @@ package org.apache.http.impl.conn.tsccm {
     field protected java.lang.ref.ReferenceQueue refQueue;
   }
 
-  public class BasicPoolEntry extends org.apache.http.impl.conn.AbstractPoolEntry {
+  public deprecated class BasicPoolEntry extends org.apache.http.impl.conn.AbstractPoolEntry {
     ctor public BasicPoolEntry(org.apache.http.conn.ClientConnectionOperator, org.apache.http.conn.routing.HttpRoute, java.lang.ref.ReferenceQueue<java.lang.Object>);
     method protected final org.apache.http.conn.OperatedClientConnection getConnection();
     method protected final org.apache.http.conn.routing.HttpRoute getPlannedRoute();
     method protected final org.apache.http.impl.conn.tsccm.BasicPoolEntryRef getWeakRef();
   }
 
-  public class BasicPoolEntryRef extends java.lang.ref.WeakReference {
+  public deprecated class BasicPoolEntryRef extends java.lang.ref.WeakReference {
     ctor public BasicPoolEntryRef(org.apache.http.impl.conn.tsccm.BasicPoolEntry, java.lang.ref.ReferenceQueue<java.lang.Object>);
     method public final org.apache.http.conn.routing.HttpRoute getRoute();
   }
 
-  public class BasicPooledConnAdapter extends org.apache.http.impl.conn.AbstractPooledConnAdapter {
+  public deprecated class BasicPooledConnAdapter extends org.apache.http.impl.conn.AbstractPooledConnAdapter {
     ctor protected BasicPooledConnAdapter(org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager, org.apache.http.impl.conn.AbstractPoolEntry);
     method protected org.apache.http.impl.conn.AbstractPoolEntry getPoolEntry();
   }
 
-  public class ConnPoolByRoute extends org.apache.http.impl.conn.tsccm.AbstractConnPool {
+  public deprecated class ConnPoolByRoute extends org.apache.http.impl.conn.tsccm.AbstractConnPool {
     ctor public ConnPoolByRoute(org.apache.http.conn.ClientConnectionOperator, org.apache.http.params.HttpParams);
     method protected org.apache.http.impl.conn.tsccm.BasicPoolEntry createEntry(org.apache.http.impl.conn.tsccm.RouteSpecificPool, org.apache.http.conn.ClientConnectionOperator);
     method protected java.util.Queue<org.apache.http.impl.conn.tsccm.BasicPoolEntry> createFreeConnQueue();
@@ -56829,16 +56829,16 @@ package org.apache.http.impl.conn.tsccm {
     field protected java.util.Queue waitingThreads;
   }
 
-  public abstract interface PoolEntryRequest {
+  public abstract deprecated interface PoolEntryRequest {
     method public abstract void abortRequest();
     method public abstract org.apache.http.impl.conn.tsccm.BasicPoolEntry getPoolEntry(long, java.util.concurrent.TimeUnit) throws org.apache.http.conn.ConnectionPoolTimeoutException, java.lang.InterruptedException;
   }
 
-  public abstract interface RefQueueHandler {
+  public abstract deprecated interface RefQueueHandler {
     method public abstract void handleReference(java.lang.ref.Reference<?>);
   }
 
-  public class RefQueueWorker implements java.lang.Runnable {
+  public deprecated class RefQueueWorker implements java.lang.Runnable {
     ctor public RefQueueWorker(java.lang.ref.ReferenceQueue<?>, org.apache.http.impl.conn.tsccm.RefQueueHandler);
     method public void run();
     method public void shutdown();
@@ -56847,7 +56847,7 @@ package org.apache.http.impl.conn.tsccm {
     field protected volatile java.lang.Thread workerThread;
   }
 
-  public class RouteSpecificPool {
+  public deprecated class RouteSpecificPool {
     ctor public RouteSpecificPool(org.apache.http.conn.routing.HttpRoute, int);
     method public org.apache.http.impl.conn.tsccm.BasicPoolEntry allocEntry(java.lang.Object);
     method public void createdEntry(org.apache.http.impl.conn.tsccm.BasicPoolEntry);
@@ -56870,7 +56870,7 @@ package org.apache.http.impl.conn.tsccm {
     field protected final java.util.Queue waitingThreads;
   }
 
-  public class ThreadSafeClientConnManager implements org.apache.http.conn.ClientConnectionManager {
+  public deprecated class ThreadSafeClientConnManager implements org.apache.http.conn.ClientConnectionManager {
     ctor public ThreadSafeClientConnManager(org.apache.http.params.HttpParams, org.apache.http.conn.scheme.SchemeRegistry);
     method public void closeExpiredConnections();
     method public void closeIdleConnections(long, java.util.concurrent.TimeUnit);
@@ -56887,7 +56887,7 @@ package org.apache.http.impl.conn.tsccm {
     field protected org.apache.http.conn.scheme.SchemeRegistry schemeRegistry;
   }
 
-  public class WaitingThread {
+  public deprecated class WaitingThread {
     ctor public WaitingThread(java.util.concurrent.locks.Condition, org.apache.http.impl.conn.tsccm.RouteSpecificPool);
     method public boolean await(java.util.Date) throws java.lang.InterruptedException;
     method public final java.util.concurrent.locks.Condition getCondition();
@@ -56897,7 +56897,7 @@ package org.apache.http.impl.conn.tsccm {
     method public void wakeup();
   }
 
-  public class WaitingThreadAborter {
+  public deprecated class WaitingThreadAborter {
     ctor public WaitingThreadAborter();
     method public void abort();
     method public void setWaitingThread(org.apache.http.impl.conn.tsccm.WaitingThread);
@@ -56907,13 +56907,13 @@ package org.apache.http.impl.conn.tsccm {
 
 package org.apache.http.impl.cookie {
 
-  public abstract class AbstractCookieAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public abstract deprecated class AbstractCookieAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public AbstractCookieAttributeHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public abstract class AbstractCookieSpec implements org.apache.http.cookie.CookieSpec {
+  public abstract deprecated class AbstractCookieSpec implements org.apache.http.cookie.CookieSpec {
     ctor public AbstractCookieSpec();
     method protected org.apache.http.cookie.CookieAttributeHandler findAttribHandler(java.lang.String);
     method protected org.apache.http.cookie.CookieAttributeHandler getAttribHandler(java.lang.String);
@@ -56921,7 +56921,7 @@ package org.apache.http.impl.cookie {
     method public void registerAttribHandler(java.lang.String, org.apache.http.cookie.CookieAttributeHandler);
   }
 
-  public class BasicClientCookie implements org.apache.http.cookie.ClientCookie java.lang.Cloneable org.apache.http.cookie.SetCookie {
+  public deprecated class BasicClientCookie implements org.apache.http.cookie.ClientCookie java.lang.Cloneable org.apache.http.cookie.SetCookie {
     ctor public BasicClientCookie(java.lang.String, java.lang.String);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public boolean containsAttribute(java.lang.String);
@@ -56948,48 +56948,48 @@ package org.apache.http.impl.cookie {
     method public void setVersion(int);
   }
 
-  public class BasicClientCookie2 extends org.apache.http.impl.cookie.BasicClientCookie implements org.apache.http.cookie.SetCookie2 {
+  public deprecated class BasicClientCookie2 extends org.apache.http.impl.cookie.BasicClientCookie implements org.apache.http.cookie.SetCookie2 {
     ctor public BasicClientCookie2(java.lang.String, java.lang.String);
     method public void setCommentURL(java.lang.String);
     method public void setDiscard(boolean);
     method public void setPorts(int[]);
   }
 
-  public class BasicCommentHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
+  public deprecated class BasicCommentHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
     ctor public BasicCommentHandler();
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BasicDomainHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class BasicDomainHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public BasicDomainHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BasicExpiresHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
+  public deprecated class BasicExpiresHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
     ctor public BasicExpiresHandler(java.lang.String[]);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BasicMaxAgeHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
+  public deprecated class BasicMaxAgeHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
     ctor public BasicMaxAgeHandler();
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BasicPathHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class BasicPathHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public BasicPathHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BasicSecureHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
+  public deprecated class BasicSecureHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
     ctor public BasicSecureHandler();
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BestMatchSpec implements org.apache.http.cookie.CookieSpec {
+  public deprecated class BestMatchSpec implements org.apache.http.cookie.CookieSpec {
     ctor public BestMatchSpec(java.lang.String[], boolean);
     ctor public BestMatchSpec();
     method public java.util.List<org.apache.http.Header> formatCookies(java.util.List<org.apache.http.cookie.Cookie>);
@@ -57000,12 +57000,12 @@ package org.apache.http.impl.cookie {
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class BestMatchSpecFactory implements org.apache.http.cookie.CookieSpecFactory {
+  public deprecated class BestMatchSpecFactory implements org.apache.http.cookie.CookieSpecFactory {
     ctor public BestMatchSpecFactory();
     method public org.apache.http.cookie.CookieSpec newInstance(org.apache.http.params.HttpParams);
   }
 
-  public class BrowserCompatSpec extends org.apache.http.impl.cookie.CookieSpecBase {
+  public deprecated class BrowserCompatSpec extends org.apache.http.impl.cookie.CookieSpecBase {
     ctor public BrowserCompatSpec(java.lang.String[]);
     ctor public BrowserCompatSpec();
     method public java.util.List<org.apache.http.Header> formatCookies(java.util.List<org.apache.http.cookie.Cookie>);
@@ -57015,12 +57015,12 @@ package org.apache.http.impl.cookie {
     field protected static final java.lang.String[] DATE_PATTERNS;
   }
 
-  public class BrowserCompatSpecFactory implements org.apache.http.cookie.CookieSpecFactory {
+  public deprecated class BrowserCompatSpecFactory implements org.apache.http.cookie.CookieSpecFactory {
     ctor public BrowserCompatSpecFactory();
     method public org.apache.http.cookie.CookieSpec newInstance(org.apache.http.params.HttpParams);
   }
 
-  public abstract class CookieSpecBase extends org.apache.http.impl.cookie.AbstractCookieSpec {
+  public abstract deprecated class CookieSpecBase extends org.apache.http.impl.cookie.AbstractCookieSpec {
     ctor public CookieSpecBase();
     method protected static java.lang.String getDefaultDomain(org.apache.http.cookie.CookieOrigin);
     method protected static java.lang.String getDefaultPath(org.apache.http.cookie.CookieOrigin);
@@ -57029,12 +57029,12 @@ package org.apache.http.impl.cookie {
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class DateParseException extends java.lang.Exception {
+  public deprecated class DateParseException extends java.lang.Exception {
     ctor public DateParseException();
     ctor public DateParseException(java.lang.String);
   }
 
-  public final class DateUtils {
+  public final deprecated class DateUtils {
     method public static java.lang.String formatDate(java.util.Date);
     method public static java.lang.String formatDate(java.util.Date, java.lang.String);
     method public static java.util.Date parseDate(java.lang.String) throws org.apache.http.impl.cookie.DateParseException;
@@ -57046,17 +57046,17 @@ package org.apache.http.impl.cookie {
     field public static final java.lang.String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
   }
 
-  public class NetscapeDomainHandler extends org.apache.http.impl.cookie.BasicDomainHandler {
+  public deprecated class NetscapeDomainHandler extends org.apache.http.impl.cookie.BasicDomainHandler {
     ctor public NetscapeDomainHandler();
   }
 
-  public class NetscapeDraftHeaderParser {
+  public deprecated class NetscapeDraftHeaderParser {
     ctor public NetscapeDraftHeaderParser();
     method public org.apache.http.HeaderElement parseHeader(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
     field public static final org.apache.http.impl.cookie.NetscapeDraftHeaderParser DEFAULT;
   }
 
-  public class NetscapeDraftSpec extends org.apache.http.impl.cookie.CookieSpecBase {
+  public deprecated class NetscapeDraftSpec extends org.apache.http.impl.cookie.CookieSpecBase {
     ctor public NetscapeDraftSpec(java.lang.String[]);
     ctor public NetscapeDraftSpec();
     method public java.util.List<org.apache.http.Header> formatCookies(java.util.List<org.apache.http.cookie.Cookie>);
@@ -57066,19 +57066,19 @@ package org.apache.http.impl.cookie {
     field protected static final java.lang.String EXPIRES_PATTERN = "EEE, dd-MMM-yyyy HH:mm:ss z";
   }
 
-  public class NetscapeDraftSpecFactory implements org.apache.http.cookie.CookieSpecFactory {
+  public deprecated class NetscapeDraftSpecFactory implements org.apache.http.cookie.CookieSpecFactory {
     ctor public NetscapeDraftSpecFactory();
     method public org.apache.http.cookie.CookieSpec newInstance(org.apache.http.params.HttpParams);
   }
 
-  public class RFC2109DomainHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class RFC2109DomainHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public RFC2109DomainHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2109Spec extends org.apache.http.impl.cookie.CookieSpecBase {
+  public deprecated class RFC2109Spec extends org.apache.http.impl.cookie.CookieSpecBase {
     ctor public RFC2109Spec(java.lang.String[], boolean);
     ctor public RFC2109Spec();
     method protected void formatCookieAsVer(org.apache.http.util.CharArrayBuffer, org.apache.http.cookie.Cookie, int);
@@ -57089,31 +57089,31 @@ package org.apache.http.impl.cookie {
     method public java.util.List<org.apache.http.cookie.Cookie> parse(org.apache.http.Header, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2109SpecFactory implements org.apache.http.cookie.CookieSpecFactory {
+  public deprecated class RFC2109SpecFactory implements org.apache.http.cookie.CookieSpecFactory {
     ctor public RFC2109SpecFactory();
     method public org.apache.http.cookie.CookieSpec newInstance(org.apache.http.params.HttpParams);
   }
 
-  public class RFC2109VersionHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
+  public deprecated class RFC2109VersionHandler extends org.apache.http.impl.cookie.AbstractCookieAttributeHandler {
     ctor public RFC2109VersionHandler();
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2965CommentUrlAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class RFC2965CommentUrlAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public RFC2965CommentUrlAttributeHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2965DiscardAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class RFC2965DiscardAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public RFC2965DiscardAttributeHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2965DomainAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class RFC2965DomainAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public RFC2965DomainAttributeHandler();
     method public boolean domainMatch(java.lang.String, java.lang.String);
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
@@ -57121,24 +57121,24 @@ package org.apache.http.impl.cookie {
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2965PortAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class RFC2965PortAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public RFC2965PortAttributeHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
     method public void validate(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin) throws org.apache.http.cookie.MalformedCookieException;
   }
 
-  public class RFC2965Spec extends org.apache.http.impl.cookie.RFC2109Spec {
+  public deprecated class RFC2965Spec extends org.apache.http.impl.cookie.RFC2109Spec {
     ctor public RFC2965Spec();
     ctor public RFC2965Spec(java.lang.String[], boolean);
   }
 
-  public class RFC2965SpecFactory implements org.apache.http.cookie.CookieSpecFactory {
+  public deprecated class RFC2965SpecFactory implements org.apache.http.cookie.CookieSpecFactory {
     ctor public RFC2965SpecFactory();
     method public org.apache.http.cookie.CookieSpec newInstance(org.apache.http.params.HttpParams);
   }
 
-  public class RFC2965VersionAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
+  public deprecated class RFC2965VersionAttributeHandler implements org.apache.http.cookie.CookieAttributeHandler {
     ctor public RFC2965VersionAttributeHandler();
     method public boolean match(org.apache.http.cookie.Cookie, org.apache.http.cookie.CookieOrigin);
     method public void parse(org.apache.http.cookie.SetCookie, java.lang.String) throws org.apache.http.cookie.MalformedCookieException;
@@ -57149,24 +57149,24 @@ package org.apache.http.impl.cookie {
 
 package org.apache.http.impl.entity {
 
-  public class EntityDeserializer {
+  public deprecated class EntityDeserializer {
     ctor public EntityDeserializer(org.apache.http.entity.ContentLengthStrategy);
     method public org.apache.http.HttpEntity deserialize(org.apache.http.io.SessionInputBuffer, org.apache.http.HttpMessage) throws org.apache.http.HttpException, java.io.IOException;
     method protected org.apache.http.entity.BasicHttpEntity doDeserialize(org.apache.http.io.SessionInputBuffer, org.apache.http.HttpMessage) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class EntitySerializer {
+  public deprecated class EntitySerializer {
     ctor public EntitySerializer(org.apache.http.entity.ContentLengthStrategy);
     method protected java.io.OutputStream doSerialize(org.apache.http.io.SessionOutputBuffer, org.apache.http.HttpMessage) throws org.apache.http.HttpException, java.io.IOException;
     method public void serialize(org.apache.http.io.SessionOutputBuffer, org.apache.http.HttpMessage, org.apache.http.HttpEntity) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class LaxContentLengthStrategy implements org.apache.http.entity.ContentLengthStrategy {
+  public deprecated class LaxContentLengthStrategy implements org.apache.http.entity.ContentLengthStrategy {
     ctor public LaxContentLengthStrategy();
     method public long determineLength(org.apache.http.HttpMessage) throws org.apache.http.HttpException;
   }
 
-  public class StrictContentLengthStrategy implements org.apache.http.entity.ContentLengthStrategy {
+  public deprecated class StrictContentLengthStrategy implements org.apache.http.entity.ContentLengthStrategy {
     ctor public StrictContentLengthStrategy();
     method public long determineLength(org.apache.http.HttpMessage) throws org.apache.http.HttpException;
   }
@@ -57175,7 +57175,7 @@ package org.apache.http.impl.entity {
 
 package org.apache.http.impl.io {
 
-  public abstract class AbstractMessageParser implements org.apache.http.io.HttpMessageParser {
+  public abstract deprecated class AbstractMessageParser implements org.apache.http.io.HttpMessageParser {
     ctor public AbstractMessageParser(org.apache.http.io.SessionInputBuffer, org.apache.http.message.LineParser, org.apache.http.params.HttpParams);
     method public org.apache.http.HttpMessage parse() throws org.apache.http.HttpException, java.io.IOException;
     method protected abstract org.apache.http.HttpMessage parseHead(org.apache.http.io.SessionInputBuffer) throws org.apache.http.HttpException, java.io.IOException, org.apache.http.ParseException;
@@ -57183,7 +57183,7 @@ package org.apache.http.impl.io {
     field protected final org.apache.http.message.LineParser lineParser;
   }
 
-  public abstract class AbstractMessageWriter implements org.apache.http.io.HttpMessageWriter {
+  public abstract deprecated class AbstractMessageWriter implements org.apache.http.io.HttpMessageWriter {
     ctor public AbstractMessageWriter(org.apache.http.io.SessionOutputBuffer, org.apache.http.message.LineFormatter, org.apache.http.params.HttpParams);
     method public void write(org.apache.http.HttpMessage) throws org.apache.http.HttpException, java.io.IOException;
     method protected abstract void writeHeadLine(org.apache.http.HttpMessage) throws java.io.IOException;
@@ -57192,7 +57192,7 @@ package org.apache.http.impl.io {
     field protected final org.apache.http.io.SessionOutputBuffer sessionBuffer;
   }
 
-  public abstract class AbstractSessionInputBuffer implements org.apache.http.io.SessionInputBuffer {
+  public abstract deprecated class AbstractSessionInputBuffer implements org.apache.http.io.SessionInputBuffer {
     ctor public AbstractSessionInputBuffer();
     method protected int fillBuffer() throws java.io.IOException;
     method public org.apache.http.io.HttpTransportMetrics getMetrics();
@@ -57205,7 +57205,7 @@ package org.apache.http.impl.io {
     method public java.lang.String readLine() throws java.io.IOException;
   }
 
-  public abstract class AbstractSessionOutputBuffer implements org.apache.http.io.SessionOutputBuffer {
+  public abstract deprecated class AbstractSessionOutputBuffer implements org.apache.http.io.SessionOutputBuffer {
     ctor public AbstractSessionOutputBuffer();
     method public void flush() throws java.io.IOException;
     method protected void flushBuffer() throws java.io.IOException;
@@ -57218,13 +57218,13 @@ package org.apache.http.impl.io {
     method public void writeLine(org.apache.http.util.CharArrayBuffer) throws java.io.IOException;
   }
 
-  public class ChunkedInputStream extends java.io.InputStream {
+  public deprecated class ChunkedInputStream extends java.io.InputStream {
     ctor public ChunkedInputStream(org.apache.http.io.SessionInputBuffer);
     method public org.apache.http.Header[] getFooters();
     method public int read() throws java.io.IOException;
   }
 
-  public class ChunkedOutputStream extends java.io.OutputStream {
+  public deprecated class ChunkedOutputStream extends java.io.OutputStream {
     ctor public ChunkedOutputStream(org.apache.http.io.SessionOutputBuffer, int) throws java.io.IOException;
     ctor public ChunkedOutputStream(org.apache.http.io.SessionOutputBuffer) throws java.io.IOException;
     method public void finish() throws java.io.IOException;
@@ -57234,37 +57234,37 @@ package org.apache.http.impl.io {
     method protected void writeClosingChunk() throws java.io.IOException;
   }
 
-  public class ContentLengthInputStream extends java.io.InputStream {
+  public deprecated class ContentLengthInputStream extends java.io.InputStream {
     ctor public ContentLengthInputStream(org.apache.http.io.SessionInputBuffer, long);
     method public int read() throws java.io.IOException;
   }
 
-  public class ContentLengthOutputStream extends java.io.OutputStream {
+  public deprecated class ContentLengthOutputStream extends java.io.OutputStream {
     ctor public ContentLengthOutputStream(org.apache.http.io.SessionOutputBuffer, long);
     method public void write(int) throws java.io.IOException;
   }
 
-  public class HttpRequestParser extends org.apache.http.impl.io.AbstractMessageParser {
+  public deprecated class HttpRequestParser extends org.apache.http.impl.io.AbstractMessageParser {
     ctor public HttpRequestParser(org.apache.http.io.SessionInputBuffer, org.apache.http.message.LineParser, org.apache.http.HttpRequestFactory, org.apache.http.params.HttpParams);
     method protected org.apache.http.HttpMessage parseHead(org.apache.http.io.SessionInputBuffer) throws org.apache.http.HttpException, java.io.IOException, org.apache.http.ParseException;
   }
 
-  public class HttpRequestWriter extends org.apache.http.impl.io.AbstractMessageWriter {
+  public deprecated class HttpRequestWriter extends org.apache.http.impl.io.AbstractMessageWriter {
     ctor public HttpRequestWriter(org.apache.http.io.SessionOutputBuffer, org.apache.http.message.LineFormatter, org.apache.http.params.HttpParams);
     method protected void writeHeadLine(org.apache.http.HttpMessage) throws java.io.IOException;
   }
 
-  public class HttpResponseParser extends org.apache.http.impl.io.AbstractMessageParser {
+  public deprecated class HttpResponseParser extends org.apache.http.impl.io.AbstractMessageParser {
     ctor public HttpResponseParser(org.apache.http.io.SessionInputBuffer, org.apache.http.message.LineParser, org.apache.http.HttpResponseFactory, org.apache.http.params.HttpParams);
     method protected org.apache.http.HttpMessage parseHead(org.apache.http.io.SessionInputBuffer) throws org.apache.http.HttpException, java.io.IOException, org.apache.http.ParseException;
   }
 
-  public class HttpResponseWriter extends org.apache.http.impl.io.AbstractMessageWriter {
+  public deprecated class HttpResponseWriter extends org.apache.http.impl.io.AbstractMessageWriter {
     ctor public HttpResponseWriter(org.apache.http.io.SessionOutputBuffer, org.apache.http.message.LineFormatter, org.apache.http.params.HttpParams);
     method protected void writeHeadLine(org.apache.http.HttpMessage) throws java.io.IOException;
   }
 
-  public class HttpTransportMetricsImpl implements org.apache.http.io.HttpTransportMetrics {
+  public deprecated class HttpTransportMetricsImpl implements org.apache.http.io.HttpTransportMetrics {
     ctor public HttpTransportMetricsImpl();
     method public long getBytesTransferred();
     method public void incrementBytesTransferred(long);
@@ -57272,22 +57272,22 @@ package org.apache.http.impl.io {
     method public void setBytesTransferred(long);
   }
 
-  public class IdentityInputStream extends java.io.InputStream {
+  public deprecated class IdentityInputStream extends java.io.InputStream {
     ctor public IdentityInputStream(org.apache.http.io.SessionInputBuffer);
     method public int read() throws java.io.IOException;
   }
 
-  public class IdentityOutputStream extends java.io.OutputStream {
+  public deprecated class IdentityOutputStream extends java.io.OutputStream {
     ctor public IdentityOutputStream(org.apache.http.io.SessionOutputBuffer);
     method public void write(int) throws java.io.IOException;
   }
 
-  public class SocketInputBuffer extends org.apache.http.impl.io.AbstractSessionInputBuffer {
+  public deprecated class SocketInputBuffer extends org.apache.http.impl.io.AbstractSessionInputBuffer {
     ctor public SocketInputBuffer(java.net.Socket, int, org.apache.http.params.HttpParams) throws java.io.IOException;
     method public boolean isDataAvailable(int) throws java.io.IOException;
   }
 
-  public class SocketOutputBuffer extends org.apache.http.impl.io.AbstractSessionOutputBuffer {
+  public deprecated class SocketOutputBuffer extends org.apache.http.impl.io.AbstractSessionOutputBuffer {
     ctor public SocketOutputBuffer(java.net.Socket, int, org.apache.http.params.HttpParams) throws java.io.IOException;
   }
 
@@ -57295,20 +57295,20 @@ package org.apache.http.impl.io {
 
 package org.apache.http.io {
 
-  public abstract interface HttpMessageParser {
+  public abstract deprecated interface HttpMessageParser {
     method public abstract org.apache.http.HttpMessage parse() throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpMessageWriter {
+  public abstract deprecated interface HttpMessageWriter {
     method public abstract void write(org.apache.http.HttpMessage) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpTransportMetrics {
+  public abstract deprecated interface HttpTransportMetrics {
     method public abstract long getBytesTransferred();
     method public abstract void reset();
   }
 
-  public abstract interface SessionInputBuffer {
+  public abstract deprecated interface SessionInputBuffer {
     method public abstract org.apache.http.io.HttpTransportMetrics getMetrics();
     method public abstract boolean isDataAvailable(int) throws java.io.IOException;
     method public abstract int read(byte[], int, int) throws java.io.IOException;
@@ -57318,7 +57318,7 @@ package org.apache.http.io {
     method public abstract java.lang.String readLine() throws java.io.IOException;
   }
 
-  public abstract interface SessionOutputBuffer {
+  public abstract deprecated interface SessionOutputBuffer {
     method public abstract void flush() throws java.io.IOException;
     method public abstract org.apache.http.io.HttpTransportMetrics getMetrics();
     method public abstract void write(byte[], int, int) throws java.io.IOException;
@@ -57332,7 +57332,7 @@ package org.apache.http.io {
 
 package org.apache.http.message {
 
-  public abstract class AbstractHttpMessage implements org.apache.http.HttpMessage {
+  public abstract deprecated class AbstractHttpMessage implements org.apache.http.HttpMessage {
     ctor protected AbstractHttpMessage(org.apache.http.params.HttpParams);
     ctor protected AbstractHttpMessage();
     method public void addHeader(org.apache.http.Header);
@@ -57355,7 +57355,7 @@ package org.apache.http.message {
     field protected org.apache.http.params.HttpParams params;
   }
 
-  public class BasicHeader implements java.lang.Cloneable org.apache.http.Header {
+  public deprecated class BasicHeader implements java.lang.Cloneable org.apache.http.Header {
     ctor public BasicHeader(java.lang.String, java.lang.String);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public org.apache.http.HeaderElement[] getElements() throws org.apache.http.ParseException;
@@ -57363,7 +57363,7 @@ package org.apache.http.message {
     method public java.lang.String getValue();
   }
 
-  public class BasicHeaderElement implements java.lang.Cloneable org.apache.http.HeaderElement {
+  public deprecated class BasicHeaderElement implements java.lang.Cloneable org.apache.http.HeaderElement {
     ctor public BasicHeaderElement(java.lang.String, java.lang.String, org.apache.http.NameValuePair[]);
     ctor public BasicHeaderElement(java.lang.String, java.lang.String);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
@@ -57375,7 +57375,7 @@ package org.apache.http.message {
     method public java.lang.String getValue();
   }
 
-  public class BasicHeaderElementIterator implements org.apache.http.HeaderElementIterator {
+  public deprecated class BasicHeaderElementIterator implements org.apache.http.HeaderElementIterator {
     ctor public BasicHeaderElementIterator(org.apache.http.HeaderIterator, org.apache.http.message.HeaderValueParser);
     ctor public BasicHeaderElementIterator(org.apache.http.HeaderIterator);
     method public boolean hasNext();
@@ -57384,7 +57384,7 @@ package org.apache.http.message {
     method public void remove() throws java.lang.UnsupportedOperationException;
   }
 
-  public class BasicHeaderIterator implements org.apache.http.HeaderIterator {
+  public deprecated class BasicHeaderIterator implements org.apache.http.HeaderIterator {
     ctor public BasicHeaderIterator(org.apache.http.Header[], java.lang.String);
     method protected boolean filterHeader(int);
     method protected int findNext(int);
@@ -57397,7 +57397,7 @@ package org.apache.http.message {
     field protected java.lang.String headerName;
   }
 
-  public class BasicHeaderValueFormatter implements org.apache.http.message.HeaderValueFormatter {
+  public deprecated class BasicHeaderValueFormatter implements org.apache.http.message.HeaderValueFormatter {
     ctor public BasicHeaderValueFormatter();
     method protected void doFormatValue(org.apache.http.util.CharArrayBuffer, java.lang.String, boolean);
     method protected int estimateElementsLen(org.apache.http.HeaderElement[]);
@@ -57419,7 +57419,7 @@ package org.apache.http.message {
     field public static final java.lang.String UNSAFE_CHARS = "\"\\";
   }
 
-  public class BasicHeaderValueParser implements org.apache.http.message.HeaderValueParser {
+  public deprecated class BasicHeaderValueParser implements org.apache.http.message.HeaderValueParser {
     ctor public BasicHeaderValueParser();
     method protected org.apache.http.HeaderElement createHeaderElement(java.lang.String, java.lang.String, org.apache.http.NameValuePair[]);
     method protected org.apache.http.NameValuePair createNameValuePair(java.lang.String, java.lang.String);
@@ -57435,7 +57435,7 @@ package org.apache.http.message {
     field public static final org.apache.http.message.BasicHeaderValueParser DEFAULT;
   }
 
-  public class BasicHttpEntityEnclosingRequest extends org.apache.http.message.BasicHttpRequest implements org.apache.http.HttpEntityEnclosingRequest {
+  public deprecated class BasicHttpEntityEnclosingRequest extends org.apache.http.message.BasicHttpRequest implements org.apache.http.HttpEntityEnclosingRequest {
     ctor public BasicHttpEntityEnclosingRequest(java.lang.String, java.lang.String);
     ctor public BasicHttpEntityEnclosingRequest(java.lang.String, java.lang.String, org.apache.http.ProtocolVersion);
     ctor public BasicHttpEntityEnclosingRequest(org.apache.http.RequestLine);
@@ -57444,7 +57444,7 @@ package org.apache.http.message {
     method public void setEntity(org.apache.http.HttpEntity);
   }
 
-  public class BasicHttpRequest extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.HttpRequest {
+  public deprecated class BasicHttpRequest extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.HttpRequest {
     ctor public BasicHttpRequest(java.lang.String, java.lang.String);
     ctor public BasicHttpRequest(java.lang.String, java.lang.String, org.apache.http.ProtocolVersion);
     ctor public BasicHttpRequest(org.apache.http.RequestLine);
@@ -57452,7 +57452,7 @@ package org.apache.http.message {
     method public org.apache.http.RequestLine getRequestLine();
   }
 
-  public class BasicHttpResponse extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.HttpResponse {
+  public deprecated class BasicHttpResponse extends org.apache.http.message.AbstractHttpMessage implements org.apache.http.HttpResponse {
     ctor public BasicHttpResponse(org.apache.http.StatusLine, org.apache.http.ReasonPhraseCatalog, java.util.Locale);
     ctor public BasicHttpResponse(org.apache.http.StatusLine);
     ctor public BasicHttpResponse(org.apache.http.ProtocolVersion, int, java.lang.String);
@@ -57470,7 +57470,7 @@ package org.apache.http.message {
     method public void setStatusLine(org.apache.http.ProtocolVersion, int, java.lang.String);
   }
 
-  public class BasicLineFormatter implements org.apache.http.message.LineFormatter {
+  public deprecated class BasicLineFormatter implements org.apache.http.message.LineFormatter {
     ctor public BasicLineFormatter();
     method public org.apache.http.util.CharArrayBuffer appendProtocolVersion(org.apache.http.util.CharArrayBuffer, org.apache.http.ProtocolVersion);
     method protected void doFormatHeader(org.apache.http.util.CharArrayBuffer, org.apache.http.Header);
@@ -57488,7 +57488,7 @@ package org.apache.http.message {
     field public static final org.apache.http.message.BasicLineFormatter DEFAULT;
   }
 
-  public class BasicLineParser implements org.apache.http.message.LineParser {
+  public deprecated class BasicLineParser implements org.apache.http.message.LineParser {
     ctor public BasicLineParser(org.apache.http.ProtocolVersion);
     ctor public BasicLineParser();
     method protected org.apache.http.ProtocolVersion createProtocolVersion(int, int);
@@ -57508,7 +57508,7 @@ package org.apache.http.message {
     field protected final org.apache.http.ProtocolVersion protocol;
   }
 
-  public class BasicListHeaderIterator implements org.apache.http.HeaderIterator {
+  public deprecated class BasicListHeaderIterator implements org.apache.http.HeaderIterator {
     ctor public BasicListHeaderIterator(java.util.List, java.lang.String);
     method protected boolean filterHeader(int);
     method protected int findNext(int);
@@ -57522,14 +57522,14 @@ package org.apache.http.message {
     field protected int lastIndex;
   }
 
-  public class BasicNameValuePair implements java.lang.Cloneable org.apache.http.NameValuePair {
+  public deprecated class BasicNameValuePair implements java.lang.Cloneable org.apache.http.NameValuePair {
     ctor public BasicNameValuePair(java.lang.String, java.lang.String);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public java.lang.String getName();
     method public java.lang.String getValue();
   }
 
-  public class BasicRequestLine implements java.lang.Cloneable org.apache.http.RequestLine {
+  public deprecated class BasicRequestLine implements java.lang.Cloneable org.apache.http.RequestLine {
     ctor public BasicRequestLine(java.lang.String, java.lang.String, org.apache.http.ProtocolVersion);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public java.lang.String getMethod();
@@ -57537,7 +57537,7 @@ package org.apache.http.message {
     method public java.lang.String getUri();
   }
 
-  public class BasicStatusLine implements java.lang.Cloneable org.apache.http.StatusLine {
+  public deprecated class BasicStatusLine implements java.lang.Cloneable org.apache.http.StatusLine {
     ctor public BasicStatusLine(org.apache.http.ProtocolVersion, int, java.lang.String);
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public org.apache.http.ProtocolVersion getProtocolVersion();
@@ -57545,7 +57545,7 @@ package org.apache.http.message {
     method public int getStatusCode();
   }
 
-  public class BasicTokenIterator implements org.apache.http.TokenIterator {
+  public deprecated class BasicTokenIterator implements org.apache.http.TokenIterator {
     ctor public BasicTokenIterator(org.apache.http.HeaderIterator);
     method protected java.lang.String createToken(java.lang.String, int, int);
     method protected int findNext(int) throws org.apache.http.ParseException;
@@ -57567,7 +57567,7 @@ package org.apache.http.message {
     field protected int searchPos;
   }
 
-  public class BufferedHeader implements java.lang.Cloneable org.apache.http.FormattedHeader {
+  public deprecated class BufferedHeader implements java.lang.Cloneable org.apache.http.FormattedHeader {
     ctor public BufferedHeader(org.apache.http.util.CharArrayBuffer) throws org.apache.http.ParseException;
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
     method public org.apache.http.util.CharArrayBuffer getBuffer();
@@ -57577,7 +57577,7 @@ package org.apache.http.message {
     method public int getValuePos();
   }
 
-  public class HeaderGroup implements java.lang.Cloneable {
+  public deprecated class HeaderGroup implements java.lang.Cloneable {
     ctor public HeaderGroup();
     method public void addHeader(org.apache.http.Header);
     method public void clear();
@@ -57596,28 +57596,28 @@ package org.apache.http.message {
     method public void updateHeader(org.apache.http.Header);
   }
 
-  public abstract interface HeaderValueFormatter {
+  public abstract deprecated interface HeaderValueFormatter {
     method public abstract org.apache.http.util.CharArrayBuffer formatElements(org.apache.http.util.CharArrayBuffer, org.apache.http.HeaderElement[], boolean);
     method public abstract org.apache.http.util.CharArrayBuffer formatHeaderElement(org.apache.http.util.CharArrayBuffer, org.apache.http.HeaderElement, boolean);
     method public abstract org.apache.http.util.CharArrayBuffer formatNameValuePair(org.apache.http.util.CharArrayBuffer, org.apache.http.NameValuePair, boolean);
     method public abstract org.apache.http.util.CharArrayBuffer formatParameters(org.apache.http.util.CharArrayBuffer, org.apache.http.NameValuePair[], boolean);
   }
 
-  public abstract interface HeaderValueParser {
+  public abstract deprecated interface HeaderValueParser {
     method public abstract org.apache.http.HeaderElement[] parseElements(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
     method public abstract org.apache.http.HeaderElement parseHeaderElement(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
     method public abstract org.apache.http.NameValuePair parseNameValuePair(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
     method public abstract org.apache.http.NameValuePair[] parseParameters(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
   }
 
-  public abstract interface LineFormatter {
+  public abstract deprecated interface LineFormatter {
     method public abstract org.apache.http.util.CharArrayBuffer appendProtocolVersion(org.apache.http.util.CharArrayBuffer, org.apache.http.ProtocolVersion);
     method public abstract org.apache.http.util.CharArrayBuffer formatHeader(org.apache.http.util.CharArrayBuffer, org.apache.http.Header);
     method public abstract org.apache.http.util.CharArrayBuffer formatRequestLine(org.apache.http.util.CharArrayBuffer, org.apache.http.RequestLine);
     method public abstract org.apache.http.util.CharArrayBuffer formatStatusLine(org.apache.http.util.CharArrayBuffer, org.apache.http.StatusLine);
   }
 
-  public abstract interface LineParser {
+  public abstract deprecated interface LineParser {
     method public abstract boolean hasProtocolVersion(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor);
     method public abstract org.apache.http.Header parseHeader(org.apache.http.util.CharArrayBuffer) throws org.apache.http.ParseException;
     method public abstract org.apache.http.ProtocolVersion parseProtocolVersion(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
@@ -57625,7 +57625,7 @@ package org.apache.http.message {
     method public abstract org.apache.http.StatusLine parseStatusLine(org.apache.http.util.CharArrayBuffer, org.apache.http.message.ParserCursor) throws org.apache.http.ParseException;
   }
 
-  public class ParserCursor {
+  public deprecated class ParserCursor {
     ctor public ParserCursor(int, int);
     method public boolean atEnd();
     method public int getLowerBound();
@@ -57638,7 +57638,7 @@ package org.apache.http.message {
 
 package org.apache.http.params {
 
-  public abstract class AbstractHttpParams implements org.apache.http.params.HttpParams {
+  public abstract deprecated class AbstractHttpParams implements org.apache.http.params.HttpParams {
     ctor protected AbstractHttpParams();
     method public boolean getBooleanParameter(java.lang.String, boolean);
     method public double getDoubleParameter(java.lang.String, double);
@@ -57652,7 +57652,7 @@ package org.apache.http.params {
     method public org.apache.http.params.HttpParams setLongParameter(java.lang.String, long);
   }
 
-  public final class BasicHttpParams extends org.apache.http.params.AbstractHttpParams implements java.lang.Cloneable java.io.Serializable {
+  public final deprecated class BasicHttpParams extends org.apache.http.params.AbstractHttpParams implements java.lang.Cloneable java.io.Serializable {
     ctor public BasicHttpParams();
     method public void clear();
     method public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
@@ -57666,7 +57666,7 @@ package org.apache.http.params {
     method public void setParameters(java.lang.String[], java.lang.Object);
   }
 
-  public abstract interface CoreConnectionPNames {
+  public abstract deprecated interface CoreConnectionPNames {
     field public static final java.lang.String CONNECTION_TIMEOUT = "http.connection.timeout";
     field public static final java.lang.String MAX_HEADER_COUNT = "http.connection.max-header-count";
     field public static final java.lang.String MAX_LINE_LENGTH = "http.connection.max-line-length";
@@ -57677,7 +57677,7 @@ package org.apache.http.params {
     field public static final java.lang.String TCP_NODELAY = "http.tcp.nodelay";
   }
 
-  public abstract interface CoreProtocolPNames {
+  public abstract deprecated interface CoreProtocolPNames {
     field public static final java.lang.String HTTP_CONTENT_CHARSET = "http.protocol.content-charset";
     field public static final java.lang.String HTTP_ELEMENT_CHARSET = "http.protocol.element-charset";
     field public static final java.lang.String ORIGIN_SERVER = "http.origin-server";
@@ -57688,7 +57688,7 @@ package org.apache.http.params {
     field public static final java.lang.String WAIT_FOR_CONTINUE = "http.protocol.wait-for-continue";
   }
 
-  public final class DefaultedHttpParams extends org.apache.http.params.AbstractHttpParams {
+  public final deprecated class DefaultedHttpParams extends org.apache.http.params.AbstractHttpParams {
     ctor public DefaultedHttpParams(org.apache.http.params.HttpParams, org.apache.http.params.HttpParams);
     method public org.apache.http.params.HttpParams copy();
     method public org.apache.http.params.HttpParams getDefaults();
@@ -57697,12 +57697,12 @@ package org.apache.http.params {
     method public org.apache.http.params.HttpParams setParameter(java.lang.String, java.lang.Object);
   }
 
-  public abstract class HttpAbstractParamBean {
+  public abstract deprecated class HttpAbstractParamBean {
     ctor public HttpAbstractParamBean(org.apache.http.params.HttpParams);
     field protected final org.apache.http.params.HttpParams params;
   }
 
-  public class HttpConnectionParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class HttpConnectionParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public HttpConnectionParamBean(org.apache.http.params.HttpParams);
     method public void setConnectionTimeout(int);
     method public void setLinger(int);
@@ -57712,7 +57712,7 @@ package org.apache.http.params {
     method public void setTcpNoDelay(boolean);
   }
 
-  public final class HttpConnectionParams implements org.apache.http.params.CoreConnectionPNames {
+  public final deprecated class HttpConnectionParams implements org.apache.http.params.CoreConnectionPNames {
     method public static int getConnectionTimeout(org.apache.http.params.HttpParams);
     method public static int getLinger(org.apache.http.params.HttpParams);
     method public static int getSoTimeout(org.apache.http.params.HttpParams);
@@ -57727,7 +57727,7 @@ package org.apache.http.params {
     method public static void setTcpNoDelay(org.apache.http.params.HttpParams, boolean);
   }
 
-  public abstract interface HttpParams {
+  public abstract deprecated interface HttpParams {
     method public abstract org.apache.http.params.HttpParams copy();
     method public abstract boolean getBooleanParameter(java.lang.String, boolean);
     method public abstract double getDoubleParameter(java.lang.String, double);
@@ -57744,7 +57744,7 @@ package org.apache.http.params {
     method public abstract org.apache.http.params.HttpParams setParameter(java.lang.String, java.lang.Object);
   }
 
-  public class HttpProtocolParamBean extends org.apache.http.params.HttpAbstractParamBean {
+  public deprecated class HttpProtocolParamBean extends org.apache.http.params.HttpAbstractParamBean {
     ctor public HttpProtocolParamBean(org.apache.http.params.HttpParams);
     method public void setContentCharset(java.lang.String);
     method public void setHttpElementCharset(java.lang.String);
@@ -57753,7 +57753,7 @@ package org.apache.http.params {
     method public void setVersion(org.apache.http.HttpVersion);
   }
 
-  public final class HttpProtocolParams implements org.apache.http.params.CoreProtocolPNames {
+  public final deprecated class HttpProtocolParams implements org.apache.http.params.CoreProtocolPNames {
     method public static java.lang.String getContentCharset(org.apache.http.params.HttpParams);
     method public static java.lang.String getHttpElementCharset(org.apache.http.params.HttpParams);
     method public static java.lang.String getUserAgent(org.apache.http.params.HttpParams);
@@ -57770,7 +57770,7 @@ package org.apache.http.params {
 
 package org.apache.http.protocol {
 
-  public class BasicHttpContext implements org.apache.http.protocol.HttpContext {
+  public deprecated class BasicHttpContext implements org.apache.http.protocol.HttpContext {
     ctor public BasicHttpContext();
     ctor public BasicHttpContext(org.apache.http.protocol.HttpContext);
     method public java.lang.Object getAttribute(java.lang.String);
@@ -57778,7 +57778,7 @@ package org.apache.http.protocol {
     method public void setAttribute(java.lang.String, java.lang.Object);
   }
 
-  public final class BasicHttpProcessor implements java.lang.Cloneable org.apache.http.protocol.HttpProcessor org.apache.http.protocol.HttpRequestInterceptorList org.apache.http.protocol.HttpResponseInterceptorList {
+  public final deprecated class BasicHttpProcessor implements java.lang.Cloneable org.apache.http.protocol.HttpProcessor org.apache.http.protocol.HttpRequestInterceptorList org.apache.http.protocol.HttpResponseInterceptorList {
     ctor public BasicHttpProcessor();
     method public final void addInterceptor(org.apache.http.HttpRequestInterceptor);
     method public final void addInterceptor(org.apache.http.HttpRequestInterceptor, int);
@@ -57807,7 +57807,7 @@ package org.apache.http.protocol {
     field protected java.util.List responseInterceptors;
   }
 
-  public final class DefaultedHttpContext implements org.apache.http.protocol.HttpContext {
+  public final deprecated class DefaultedHttpContext implements org.apache.http.protocol.HttpContext {
     ctor public DefaultedHttpContext(org.apache.http.protocol.HttpContext, org.apache.http.protocol.HttpContext);
     method public java.lang.Object getAttribute(java.lang.String);
     method public org.apache.http.protocol.HttpContext getDefaults();
@@ -57815,7 +57815,7 @@ package org.apache.http.protocol {
     method public void setAttribute(java.lang.String, java.lang.Object);
   }
 
-  public abstract interface ExecutionContext {
+  public abstract deprecated interface ExecutionContext {
     field public static final java.lang.String HTTP_CONNECTION = "http.connection";
     field public static final java.lang.String HTTP_PROXY_HOST = "http.proxy_host";
     field public static final java.lang.String HTTP_REQUEST = "http.request";
@@ -57824,7 +57824,7 @@ package org.apache.http.protocol {
     field public static final java.lang.String HTTP_TARGET_HOST = "http.target_host";
   }
 
-  public final class HTTP {
+  public final deprecated class HTTP {
     method public static boolean isWhitespace(char);
     field public static final java.lang.String ASCII = "ASCII";
     field public static final java.lang.String CHARSET_PARAM = "; charset=";
@@ -57858,28 +57858,28 @@ package org.apache.http.protocol {
     field public static final java.lang.String UTF_8 = "UTF-8";
   }
 
-  public abstract interface HttpContext {
+  public abstract deprecated interface HttpContext {
     method public abstract java.lang.Object getAttribute(java.lang.String);
     method public abstract java.lang.Object removeAttribute(java.lang.String);
     method public abstract void setAttribute(java.lang.String, java.lang.Object);
     field public static final java.lang.String RESERVED_PREFIX = "http.";
   }
 
-  public class HttpDateGenerator {
+  public deprecated class HttpDateGenerator {
     ctor public HttpDateGenerator();
     method public synchronized java.lang.String getCurrentDate();
     field public static final java.util.TimeZone GMT;
     field public static final java.lang.String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
   }
 
-  public abstract interface HttpExpectationVerifier {
+  public abstract deprecated interface HttpExpectationVerifier {
     method public abstract void verify(org.apache.http.HttpRequest, org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException;
   }
 
-  public abstract interface HttpProcessor implements org.apache.http.HttpRequestInterceptor org.apache.http.HttpResponseInterceptor {
+  public abstract deprecated interface HttpProcessor implements org.apache.http.HttpRequestInterceptor org.apache.http.HttpResponseInterceptor {
   }
 
-  public class HttpRequestExecutor {
+  public deprecated class HttpRequestExecutor {
     ctor public HttpRequestExecutor();
     method protected boolean canResponseHaveBody(org.apache.http.HttpRequest, org.apache.http.HttpResponse);
     method protected org.apache.http.HttpResponse doReceiveResponse(org.apache.http.HttpRequest, org.apache.http.HttpClientConnection, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
@@ -57889,11 +57889,11 @@ package org.apache.http.protocol {
     method public void preProcess(org.apache.http.HttpRequest, org.apache.http.protocol.HttpProcessor, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public abstract interface HttpRequestHandler {
+  public abstract deprecated interface HttpRequestHandler {
     method public abstract void handle(org.apache.http.HttpRequest, org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class HttpRequestHandlerRegistry implements org.apache.http.protocol.HttpRequestHandlerResolver {
+  public deprecated class HttpRequestHandlerRegistry implements org.apache.http.protocol.HttpRequestHandlerResolver {
     ctor public HttpRequestHandlerRegistry();
     method public org.apache.http.protocol.HttpRequestHandler lookup(java.lang.String);
     method protected deprecated boolean matchUriRequestPattern(java.lang.String, java.lang.String);
@@ -57902,11 +57902,11 @@ package org.apache.http.protocol {
     method public void unregister(java.lang.String);
   }
 
-  public abstract interface HttpRequestHandlerResolver {
+  public abstract deprecated interface HttpRequestHandlerResolver {
     method public abstract org.apache.http.protocol.HttpRequestHandler lookup(java.lang.String);
   }
 
-  public abstract interface HttpRequestInterceptorList {
+  public abstract deprecated interface HttpRequestInterceptorList {
     method public abstract void addRequestInterceptor(org.apache.http.HttpRequestInterceptor);
     method public abstract void addRequestInterceptor(org.apache.http.HttpRequestInterceptor, int);
     method public abstract void clearRequestInterceptors();
@@ -57916,7 +57916,7 @@ package org.apache.http.protocol {
     method public abstract void setInterceptors(java.util.List);
   }
 
-  public abstract interface HttpResponseInterceptorList {
+  public abstract deprecated interface HttpResponseInterceptorList {
     method public abstract void addResponseInterceptor(org.apache.http.HttpResponseInterceptor);
     method public abstract void addResponseInterceptor(org.apache.http.HttpResponseInterceptor, int);
     method public abstract void clearResponseInterceptors();
@@ -57926,7 +57926,7 @@ package org.apache.http.protocol {
     method public abstract void setInterceptors(java.util.List);
   }
 
-  public class HttpService {
+  public deprecated class HttpService {
     ctor public HttpService(org.apache.http.protocol.HttpProcessor, org.apache.http.ConnectionReuseStrategy, org.apache.http.HttpResponseFactory);
     method protected void doService(org.apache.http.HttpRequest, org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
     method public org.apache.http.params.HttpParams getParams();
@@ -57940,61 +57940,61 @@ package org.apache.http.protocol {
     method public void setResponseFactory(org.apache.http.HttpResponseFactory);
   }
 
-  public class RequestConnControl implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestConnControl implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestConnControl();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestContent implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestContent implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestContent();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestDate implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestDate implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestDate();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestExpectContinue implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestExpectContinue implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestExpectContinue();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestTargetHost implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestTargetHost implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestTargetHost();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class RequestUserAgent implements org.apache.http.HttpRequestInterceptor {
+  public deprecated class RequestUserAgent implements org.apache.http.HttpRequestInterceptor {
     ctor public RequestUserAgent();
     method public void process(org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class ResponseConnControl implements org.apache.http.HttpResponseInterceptor {
+  public deprecated class ResponseConnControl implements org.apache.http.HttpResponseInterceptor {
     ctor public ResponseConnControl();
     method public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class ResponseContent implements org.apache.http.HttpResponseInterceptor {
+  public deprecated class ResponseContent implements org.apache.http.HttpResponseInterceptor {
     ctor public ResponseContent();
     method public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class ResponseDate implements org.apache.http.HttpResponseInterceptor {
+  public deprecated class ResponseDate implements org.apache.http.HttpResponseInterceptor {
     ctor public ResponseDate();
     method public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class ResponseServer implements org.apache.http.HttpResponseInterceptor {
+  public deprecated class ResponseServer implements org.apache.http.HttpResponseInterceptor {
     ctor public ResponseServer();
     method public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException;
   }
 
-  public class SyncBasicHttpContext extends org.apache.http.protocol.BasicHttpContext {
+  public deprecated class SyncBasicHttpContext extends org.apache.http.protocol.BasicHttpContext {
     ctor public SyncBasicHttpContext(org.apache.http.protocol.HttpContext);
   }
 
-  public class UriPatternMatcher {
+  public deprecated class UriPatternMatcher {
     ctor public UriPatternMatcher();
     method public java.lang.Object lookup(java.lang.String);
     method protected boolean matchUriRequestPattern(java.lang.String, java.lang.String);
@@ -58007,7 +58007,7 @@ package org.apache.http.protocol {
 
 package org.apache.http.util {
 
-  public final class ByteArrayBuffer {
+  public final deprecated class ByteArrayBuffer {
     ctor public ByteArrayBuffer(int);
     method public void append(byte[], int, int);
     method public void append(int);
@@ -58024,7 +58024,7 @@ package org.apache.http.util {
     method public byte[] toByteArray();
   }
 
-  public final class CharArrayBuffer {
+  public final deprecated class CharArrayBuffer {
     ctor public CharArrayBuffer(int);
     method public void append(char[], int, int);
     method public void append(java.lang.String);
@@ -58050,7 +58050,7 @@ package org.apache.http.util {
     method public char[] toCharArray();
   }
 
-  public final class EncodingUtils {
+  public final deprecated class EncodingUtils {
     method public static byte[] getAsciiBytes(java.lang.String);
     method public static java.lang.String getAsciiString(byte[], int, int);
     method public static java.lang.String getAsciiString(byte[]);
@@ -58059,18 +58059,18 @@ package org.apache.http.util {
     method public static java.lang.String getString(byte[], java.lang.String);
   }
 
-  public final class EntityUtils {
+  public final deprecated class EntityUtils {
     method public static java.lang.String getContentCharSet(org.apache.http.HttpEntity) throws org.apache.http.ParseException;
     method public static byte[] toByteArray(org.apache.http.HttpEntity) throws java.io.IOException;
     method public static java.lang.String toString(org.apache.http.HttpEntity, java.lang.String) throws java.io.IOException, org.apache.http.ParseException;
     method public static java.lang.String toString(org.apache.http.HttpEntity) throws java.io.IOException, org.apache.http.ParseException;
   }
 
-  public final class ExceptionUtils {
+  public final deprecated class ExceptionUtils {
     method public static void initCause(java.lang.Throwable, java.lang.Throwable);
   }
 
-  public final class LangUtils {
+  public final deprecated class LangUtils {
     method public static boolean equals(java.lang.Object, java.lang.Object);
     method public static boolean equals(java.lang.Object[], java.lang.Object[]);
     method public static int hashCode(int, int);
@@ -58080,7 +58080,7 @@ package org.apache.http.util {
     field public static final int HASH_SEED = 17; // 0x11
   }
 
-  public class VersionInfo {
+  public deprecated class VersionInfo {
     ctor protected VersionInfo(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method protected static final org.apache.http.util.VersionInfo fromMap(java.lang.String, java.util.Map, java.lang.ClassLoader);
     method public final java.lang.String getClassloader();
