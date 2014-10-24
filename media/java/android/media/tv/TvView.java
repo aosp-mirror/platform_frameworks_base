@@ -88,6 +88,10 @@ public class TvView extends ViewGroup {
     private float mStreamVolume;
     private int mVideoWidth = VIDEO_SIZE_VALUE_UNKNOWN;
     private int mVideoHeight = VIDEO_SIZE_VALUE_UNKNOWN;
+    private int mCaptionEnabled;
+    private String mAppPrivateCommandAction;
+    private Bundle mAppPrivateCommandData;
+
     private boolean mSurfaceChanged;
     private int mSurfaceFormat;
     private int mSurfaceWidth;
@@ -100,7 +104,6 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewRight;
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
-    private int mCaptionEnabled;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -421,10 +424,10 @@ public class TvView extends ViewGroup {
      * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
      * TvInputService.Session.appPrivateCommand()} on the current TvView.
      *
-     * @param action Name of the command to be performed. This <em>must</em> be a scoped name, i.e.
-     *            prefixed with a package name you own, so that different developers will not create
-     *            conflicting commands.
-     * @param data Any data to include with the command.
+     * @param action The name of the private command to send. This <em>must</em> be a scoped name,
+     *            i.e. prefixed with a package name you own, so that different developers will not
+     *            create conflicting commands.
+     * @param data An optional bundle to send with the command.
      * @hide
      */
     @SystemApi
@@ -434,6 +437,13 @@ public class TvView extends ViewGroup {
         }
         if (mSession != null) {
             mSession.sendAppPrivateCommand(action, data);
+        } else {
+            Log.w(TAG, "sendAppPrivateCommand - session not created (action " + action + " cached)");
+            if (mAppPrivateCommandAction != null) {
+                Log.w(TAG, "previous cached action " + action + " removed");
+            }
+            mAppPrivateCommandAction = action;
+            mAppPrivateCommandData = data;
         }
     }
 
@@ -619,6 +629,9 @@ public class TvView extends ViewGroup {
     }
 
     private void release() {
+        mAppPrivateCommandAction = null;
+        mAppPrivateCommandData = null;
+
         setSessionSurface(null);
         removeSessionOverlayView();
         mUseRequestedSurfaceLayout = false;
@@ -861,6 +874,12 @@ public class TvView extends ViewGroup {
                 mSession.tune(mChannelUri, mTuneParams);
                 if (mHasStreamVolume) {
                     mSession.setStreamVolume(mStreamVolume);
+                }
+                if (mAppPrivateCommandAction != null) {
+                    mSession.sendAppPrivateCommand(
+                            mAppPrivateCommandAction, mAppPrivateCommandData);
+                    mAppPrivateCommandAction = null;
+                    mAppPrivateCommandData = null;
                 }
             } else {
                 mSessionCallback = null;
