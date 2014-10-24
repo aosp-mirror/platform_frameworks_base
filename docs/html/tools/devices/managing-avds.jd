@@ -31,6 +31,12 @@ parent.link=index.html
   <p>From the main screen, you can create, delete, repair and start AVDs as well as see the details
   of each AVD. </p>
 
+
+  <p class="note"><strong>Note:</strong> The emulator system images include experimental 
+64-bit system images along with standard 32-bit system images. The 64-bit system images 
+require the Intel x86 Emulator Accelerator (HAXM) Rev.5 which can be downloaded from the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> <em>Extras</em> folder.
+  </p>
   
   <h2 id="createavd">Creating an AVD</h2>
 
