@@ -541,6 +541,20 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void onNotificationActionClick(int callingUid, int callingPid, String key,
+                int actionIndex) {
+            synchronized (mNotificationList) {
+                EventLogTags.writeNotificationActionClicked(key, actionIndex);
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r == null) {
+                    Log.w(TAG, "No notification with key: " + key);
+                    return;
+                }
+                // TODO: Log action click via UsageStats.
+            }
+        }
+
+        @Override
         public void onNotificationClear(int callingUid, int callingPid,
                 String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
