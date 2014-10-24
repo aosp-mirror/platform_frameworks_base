@@ -69,6 +69,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -266,6 +267,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) {
                 Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
+            logActionClick(view);
             // The intent we are sending is for the application, which
             // won't have permission to immediately start an activity after
             // the user switches to home.  We know it is safe to do at this
@@ -306,6 +308,37 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else {
                 return super.onClickHandler(view, pendingIntent, fillInIntent);
             }
+        }
+
+        private void logActionClick(View view) {
+            ViewParent parent = view.getParent();
+            String key = getNotificationKeyForParent(parent);
+            if (key == null) {
+                Log.w(TAG, "Couldn't determine notification for click.");
+                return;
+            }
+            int index = -1;
+            // If this is a default template, determine the index of the button.
+            if (view.getId() == com.android.internal.R.id.action0 &&
+                    parent != null && parent instanceof ViewGroup) {
+                ViewGroup actionGroup = (ViewGroup) parent;
+                index = actionGroup.indexOfChild(view);
+            }
+            try {
+                mBarService.onNotificationActionClick(key, index);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
+
+        private String getNotificationKeyForParent(ViewParent parent) {
+            while (parent != null) {
+                if (parent instanceof ExpandableNotificationRow) {
+                    return ((ExpandableNotificationRow) parent).getStatusBarNotification().getKey();
+                }
+                parent = parent.getParent();
+            }
+            return null;
         }
 
         private boolean superOnClickHandler(View view, PendingIntent pendingIntent,
