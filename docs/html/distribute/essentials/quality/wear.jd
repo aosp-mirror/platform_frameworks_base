@@ -1,6 +1,6 @@
 page.title=Wear App Quality
 page.tags="wear","wearables","quality","guidelines"
-page.metaDescription=Wearables are small factor devices that are built for glanceability and require unique design and functionality.
+page.metaDescription=Wearables are smaller devices that are built for glanceability and require unique apps to provide just the right information at the the right time.
 page.image=/distribute/images/gp-wear-quality.png
 @jd:body
 
@@ -158,7 +158,7 @@ page.image=/distribute/images/gp-wear-quality.png
 </tr>
 
 <tr>
-  <td rowspan="1" id="gestures">
+  <td rowspan="2" id="gestures">
     Gestures
   </td>
 
@@ -169,6 +169,19 @@ page.image=/distribute/images/gp-wear-quality.png
     <p style="margin-bottom:.5em;">
       Full-screen activities use long press for the sole purpose of prompting to quit.
       <br/>
+      (<a href="{@docRoot}training/wearables/ui/exit.html">Learn how</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-GD">
+    WR-GD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      If the app disables the swipe-to-dismiss gesture in a full-screen activity, it responds to the
+      long-press-to-dismiss gesture in that activity.
       (<a href="{@docRoot}training/wearables/ui/exit.html">Learn how</a>)
     </p>
   </td>
@@ -212,16 +225,32 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
 </tr>
 
 <tr>
-  <td rowspan="2" id="layout">
+  <td rowspan="3" id="layout">
     Layout
   </td>
 
-  <td id="WR-LL">
-    WR-LL
+  <td id="WR-LS">
+    WR-LS
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App user interface is formatted appropriately for both square and round displays.
+      App user interface is formatted appropriately for square displays. App content fits within
+      the physical display area and no text or controls are cut off by the screen edges.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">Learn how</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-LR">
+    WR-LR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App user interface is formatted appropriately for round displays. App content fits within
+      the physical display area and no text or controls are cut off by the screen edges.
+      <br/>
       (<a href="{@docRoot}training/wearables/ui/layouts.html">Learn how</a>)
     </p>
   </td>
