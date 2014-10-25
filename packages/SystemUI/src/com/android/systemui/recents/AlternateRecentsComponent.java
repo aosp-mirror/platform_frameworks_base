@@ -126,6 +126,9 @@ public class AlternateRecentsComponent {
                 }
             }
         }
+
+        // When we start, preload the metadata associated with the previous tasks
+        RecentsTaskLoader.getInstance().preload(mContext);
     }
 
     public void onBootCompleted() {

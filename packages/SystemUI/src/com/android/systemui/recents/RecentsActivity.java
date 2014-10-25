@@ -28,6 +28,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -102,8 +104,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         @Override
         public void run() {
             // Mark Recents as no longer visible
-            AlternateRecentsComponent.notifyVisibilityChanged(false);
-            mVisible = false;
+            onRecentsActivityVisibilityChanged(false);
             // Finish Recents
             if (mLaunchIntent != null) {
                 if (mLaunchOpts != null) {
@@ -155,6 +156,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHome(false);
+                // Start preloading some tasks in the background
+                RecentsTaskLoader.getInstance().preload(RecentsActivity.this);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // When the search activity changes, update the Search widget
                 refreshSearchWidget();
@@ -425,6 +428,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
+    /** Called when the configuration changes. */
     void onConfigurationChange() {
         // Update RecentsConfiguration
         mConfig = RecentsConfiguration.reinitialize(this,
@@ -435,6 +439,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
         // Animate the SystemUI scrim views
         mScrimViews.startEnterRecentsAnimation();
+    }
+
+    /** Handles changes to the activity visibility. */
+    void onRecentsActivityVisibilityChanged(boolean visible) {
+        if (!visible) {
+            AlternateRecentsComponent.notifyVisibilityChanged(visible);
+        }
+        mVisible = visible;
     }
 
     @Override
@@ -473,7 +485,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         super.onResume();
 
         // Mark Recents as visible
-        mVisible = true;
+        onRecentsActivityVisibilityChanged(true);
     }
 
     @Override
@@ -605,8 +617,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onTaskViewClicked() {
         // Mark recents as no longer visible
-        AlternateRecentsComponent.notifyVisibilityChanged(false);
-        mVisible = false;
+        onRecentsActivityVisibilityChanged(false);
     }
 
     @Override
