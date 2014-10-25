@@ -861,7 +861,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         public void run() {
             mPendingSelectionNotifier = null;
 
-            if (mDataChanged) {
+            if (mDataChanged && getViewRootImpl() != null
+                    && getViewRootImpl().isLayoutRequested()) {
                 // Data has changed between when this SelectionNotifier was
                 // posted and now. Postpone the notification until the next
                 // layout is complete and we run checkSelectionChanged().
