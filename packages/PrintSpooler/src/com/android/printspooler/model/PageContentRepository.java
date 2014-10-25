@@ -24,6 +24,7 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -462,6 +463,7 @@ public final class PageContentRepository {
                     }
                     Intent intent = new Intent(PdfManipulationService.ACTION_GET_RENDERER);
                     intent.setClass(mContext, PdfManipulationService.class);
+                    intent.setData(Uri.fromParts("fake-scheme", String.valueOf(hashCode()), null));
                     mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
                     mBoundToService = true;
                 }
