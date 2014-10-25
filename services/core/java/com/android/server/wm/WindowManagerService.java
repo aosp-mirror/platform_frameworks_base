@@ -4000,6 +4000,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (changed) {
                 mFocusedApp = newFocus;
                 mInputMonitor.setFocusedAppLw(newFocus);
+                setFocusedStackFrame();
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setFocusedApp");
+                SurfaceControl.openTransaction();
+                try {
+                    setFocusedStackLayer();
+                } finally {
+                    SurfaceControl.closeTransaction();
+                    if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
+                }
             }
 
             if (moveFocusNow && changed) {
