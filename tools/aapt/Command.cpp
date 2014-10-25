@@ -308,6 +308,7 @@ enum {
     PUBLIC_KEY_ATTR = 0x010103a6,
     CATEGORY_ATTR = 0x010103e8,
     BANNER_ATTR = 0x10103f2,
+    ISGAME_ATTR = 0x10103f4,
 };
 
 String8 getComponentName(String8 &pkgName, String8 &componentName) {
@@ -1125,11 +1126,33 @@ int doDump(Bundle* bundle)
                                     error.string());
                             goto bail;
                         }
+
+                        String8 banner = AaptXml::getResolvedAttribute(res, tree, BANNER_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:banner' attribute: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
                         printf("application: label='%s' ",
                                 ResTable::normalizeForOutput(label.string()).string());
-                        printf("icon='%s'\n", ResTable::normalizeForOutput(icon.string()).string());
+                        printf("icon='%s'", ResTable::normalizeForOutput(icon.string()).string());
+                        if (banner != "") {
+                            printf(" banner='%s'", ResTable::normalizeForOutput(banner.string()).string());
+                        }
+                        printf("\n");
                         if (testOnly != 0) {
                             printf("testOnly='%d'\n", testOnly);
+                        }
+
+                        int32_t isGame = AaptXml::getResolvedIntegerAttribute(res, tree,
+                                ISGAME_ATTR, 0, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:isGame' attribute: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
+                        if (isGame != 0) {
+                            printf("application-isGame\n");
                         }
 
                         int32_t debuggable = AaptXml::getResolvedIntegerAttribute(res, tree,
