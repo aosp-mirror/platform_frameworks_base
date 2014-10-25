@@ -160,10 +160,13 @@ interface IImsCallSession {
     void resume(in ImsStreamMediaProfile profile);
 
     /**
-     * Merges the active & hold call. When it succeeds, {@link Listener#callSessionMerged}
-     * is called.
+     * Merges the active & hold call. When the merge starts,
+     * {@link Listener#callSessionMergeStarted} is called.
+     * {@link Listener#callSessionMergeComplete} is called if the merge is successful, and
+     * {@link Listener#callSessionMergeFailed} is called if the merge fails.
      *
-     * @see Listener#callSessionMerged, Listener#callSessionMergeFailed
+     * @see Listener#callSessionMergeStarted, Listener#callSessionMergeComplete,
+     *      Listener#callSessionMergeFailed
      */
     void merge();
 
