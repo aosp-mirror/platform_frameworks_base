@@ -57,21 +57,21 @@ public class SubscriptionManager implements BaseColumns {
     public static final int DEFAULT_SLOT_ID = Integer.MAX_VALUE;
 
     /** Indicates the user should be asked which subscription to use. */
-    public static final long ASK_USER_SUB_ID = -1001;
+    public static final int ASK_USER_SUB_ID = -1001;
 
     /** An invalid subscription identifier */
-    public static final long INVALID_SUB_ID = -1000;
+    public static final int INVALID_SUB_ID = -1000;
 
     /** Indicates the caller wants the default sub id. */
-    public static final long DEFAULT_SUB_ID = Long.MAX_VALUE;
+    public static final int DEFAULT_SUB_ID = Integer.MAX_VALUE;
 
     /** Minimum possible subid that represents a subscription */
     /** @hide */
-    public static final long MIN_SUB_ID_VALUE = 0;
+    public static final int MIN_SUB_ID_VALUE = 0;
 
     /** Maximum possible subid that represents a subscription */
     /** @hide */
-    public static final long MAX_SUB_ID_VALUE = DEFAULT_SUB_ID - 1;
+    public static final int MAX_SUB_ID_VALUE = DEFAULT_SUB_ID - 1;
 
 
     /** @hide */
@@ -265,7 +265,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param subId The unique SubInfoRecord index in database
      * @return SubInfoRecord, maybe null
      */
-    public static SubInfoRecord getSubInfoForSubscriber(long subId) {
+    public static SubInfoRecord getSubInfoForSubscriber(int subId) {
         if (!isValidSubId(subId)) {
             logd("[getSubInfoForSubscriberx]- invalid subId");
             return null;
@@ -475,7 +475,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the number of records updated
      * @hide
      */
-    public static int setColor(int color, long subId) {
+    public static int setColor(int color, int subId) {
         if (VDBG) logd("[setColor]+ color:" + color + " subId:" + subId);
         int size = sSimBackgroundDarkRes.length;
         if (!isValidSubId(subId) || color < 0 || color >= size) {
@@ -505,7 +505,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the number of records updated
      * @hide
      */
-    public static int setDisplayName(String displayName, long subId) {
+    public static int setDisplayName(String displayName, int subId) {
         return setDisplayName(displayName, subId, NAME_SOURCE_UNDEFINDED);
     }
 
@@ -518,7 +518,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the number of records updated or -1 if invalid subId
      * @hide
      */
-    public static int setDisplayName(String displayName, long subId, long nameSource) {
+    public static int setDisplayName(String displayName, int subId, long nameSource) {
         if (VDBG) {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
                     + " nameSource:" + nameSource);
@@ -550,7 +550,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the number of records updated
      * @hide
      */
-    public static int setDisplayNumber(String number, long subId) {
+    public static int setDisplayNumber(String number, int subId) {
         if (number == null || !isValidSubId(subId)) {
             logd("[setDisplayNumber]- fail");
             return -1;
@@ -578,7 +578,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the number of records updated
      * @hide
      */
-    public static int setDisplayNumberFormat(int format, long subId) {
+    public static int setDisplayNumberFormat(int format, int subId) {
         if (VDBG) logd("[setDisplayNumberFormat]+ format:" + format + " subId:" + subId);
         if (format < 0 || !isValidSubId(subId)) {
             logd("[setDisplayNumberFormat]- fail, return -1");
@@ -607,7 +607,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the number of records updated
      * @hide
      */
-    public static int setDataRoaming(int roaming, long subId) {
+    public static int setDataRoaming(int roaming, int subId) {
         if (VDBG) logd("[setDataRoaming]+ roaming:" + roaming + " subId:" + subId);
         if (roaming < 0 || !isValidSubId(subId)) {
             logd("[setDataRoaming]- fail");
@@ -633,7 +633,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return slotId as a positive integer or a negative value if an error either
      * SIM_NOT_INSERTED or INVALID_SLOT_ID.
      */
-    public static int getSlotId(long subId) {
+    public static int getSlotId(int subId) {
         if (!isValidSubId(subId)) {
             logd("[getSlotId]- fail");
         }
@@ -654,13 +654,13 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static long[] getSubId(int slotId) {
+    public static int[] getSubId(int slotId) {
         if (!isValidSlotId(slotId)) {
             logd("[getSubId]- fail");
             return null;
         }
 
-        long[] subId = null;
+        int[] subId = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -675,7 +675,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static int getPhoneId(long subId) {
+    public static int getPhoneId(int subId) {
         if (!isValidSubId(subId)) {
             logd("[getPhoneId]- fail");
             return INVALID_PHONE_ID;
@@ -732,8 +732,8 @@ public class SubscriptionManager implements BaseColumns {
      * getDefaultDataSubId().
      * @hide
      */
-    public static long getDefaultSubId() {
-        long subId = INVALID_SUB_ID;
+    public static int getDefaultSubId() {
+        int subId = INVALID_SUB_ID;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -749,8 +749,8 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static long getDefaultVoiceSubId() {
-        long subId = INVALID_SUB_ID;
+    public static int getDefaultVoiceSubId() {
+        int subId = INVALID_SUB_ID;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -766,7 +766,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static void setDefaultVoiceSubId(long subId) {
+    public static void setDefaultVoiceSubId(int subId) {
         if (VDBG) logd("setDefaultVoiceSubId sub id = " + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -791,8 +791,8 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * @return subId of the DefaultSms subscription or the value INVALID_SUB_ID if an error.
      */
-    public static long getDefaultSmsSubId() {
-        long subId = INVALID_SUB_ID;
+    public static int getDefaultSmsSubId() {
+        int subId = INVALID_SUB_ID;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -808,7 +808,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static void setDefaultSmsSubId(long subId) {
+    public static void setDefaultSmsSubId(int subId) {
         if (VDBG) logd("setDefaultSmsSubId sub id = " + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -831,8 +831,8 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static long getDefaultDataSubId() {
-        long subId = INVALID_SUB_ID;
+    public static int getDefaultDataSubId() {
+        int subId = INVALID_SUB_ID;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -848,7 +848,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static void setDefaultDataSubId(long subId) {
+    public static void setDefaultDataSubId(int subId) {
         if (VDBG) logd("setDataSubscription sub id = " + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -919,7 +919,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * @return true if a valid subId else false
      */
-    public static boolean isValidSubId(long subId) {
+    public static boolean isValidSubId(int subId) {
         return subId > INVALID_SUB_ID ;
     }
 
@@ -928,7 +928,7 @@ public class SubscriptionManager implements BaseColumns {
      * usable subId means its neither a INVALID_SUB_ID nor a DEFAUL_SUB_ID.
      * @hide
      */
-    public static boolean isUsableSubIdValue(long subId) {
+    public static boolean isUsableSubIdValue(int subId) {
         return subId >= MIN_SUB_ID_VALUE && subId <= MAX_SUB_ID_VALUE;
     }
 
@@ -952,7 +952,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
-        long[] subIds = SubscriptionManager.getSubId(phoneId);
+        int[] subIds = SubscriptionManager.getSubId(phoneId);
         if (subIds != null && subIds.length > 0) {
             putPhoneIdAndSubIdExtra(intent, phoneId, subIds[0]);
         } else {
@@ -961,7 +961,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, long subId) {
+    public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, int subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
@@ -975,8 +975,8 @@ public class SubscriptionManager implements BaseColumns {
      *         is never null but the length maybe 0.
      * @hide
      */
-    public static long[] getActiveSubIdList() {
-        long[] subId = null;
+    public static int[] getActiveSubIdList() {
+        int[] subId = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -988,7 +988,7 @@ public class SubscriptionManager implements BaseColumns {
         }
 
         if (subId == null) {
-            subId = new long[0];
+            subId = new int[0];
         }
 
         return subId;

@@ -21,9 +21,9 @@ import android.os.Parcel;
 
 public class DcParamObject implements Parcelable {
 
-    private long mSubId;
+    private int mSubId;
 
-    public DcParamObject(long subId) {
+    public DcParamObject(int subId) {
         mSubId = subId;
     }
 
@@ -40,7 +40,7 @@ public class DcParamObject implements Parcelable {
     }
 
     private void readFromParcel(Parcel in) {
-        mSubId = in.readLong();
+        mSubId = in.readInt();
     }
 
     public static final Parcelable.Creator<DcParamObject> CREATOR = new Parcelable.Creator<DcParamObject>() {
@@ -52,7 +52,7 @@ public class DcParamObject implements Parcelable {
         }
     };
 
-    public long getSubId() {
+    public int getSubId() {
         return mSubId;
     }
 }

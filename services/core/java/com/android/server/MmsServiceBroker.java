@@ -219,7 +219,7 @@ public class MmsServiceBroker extends SystemService {
     // Service API calls implementation, proxied to the real MmsService in "com.android.mms.service"
     private final class BinderService extends IMms.Stub {
         @Override
-        public void sendMessage(long subId, String callingPkg, Uri contentUri,
+        public void sendMessage(int subId, String callingPkg, Uri contentUri,
                 String locationUrl, Bundle configOverrides, PendingIntent sentIntent)
                         throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
@@ -232,7 +232,7 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public void downloadMessage(long subId, String callingPkg, String locationUrl,
+        public void downloadMessage(int subId, String callingPkg, String locationUrl,
                 Uri contentUri, Bundle configOverrides,
                 PendingIntent downloadedIntent) throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.RECEIVE_MMS,
@@ -259,7 +259,7 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public Bundle getCarrierConfigValues(long subId) throws RemoteException {
+        public Bundle getCarrierConfigValues(int subId) throws RemoteException {
             return getServiceGuarded().getCarrierConfigValues(subId);
         }
 
@@ -360,7 +360,7 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public void sendStoredMessage(long subId, String callingPkg, Uri messageUri,
+        public void sendStoredMessage(int subId, String callingPkg, Uri messageUri,
                 Bundle configOverrides, PendingIntent sentIntent) throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS,
                     "Send stored MMS message");

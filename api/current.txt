@@ -28715,8 +28715,8 @@ package android.telephony {
     method public void downloadMultimediaMessage(android.content.Context, java.lang.String, android.net.Uri, android.os.Bundle, android.app.PendingIntent);
     method public android.os.Bundle getCarrierConfigValues();
     method public static android.telephony.SmsManager getDefault();
-    method public static android.telephony.SmsManager getSmsManagerForSubscriber(long);
-    method public long getSubId();
+    method public static android.telephony.SmsManager getSmsManagerForSubscriber(int);
+    method public int getSubId();
     method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(android.content.Context, android.net.Uri, java.lang.String, android.os.Bundle, android.app.PendingIntent);
@@ -28834,7 +28834,7 @@ package android.telephony {
 
   public class SubInfoRecord implements android.os.Parcelable {
     ctor public SubInfoRecord();
-    ctor public SubInfoRecord(long, java.lang.String, int, java.lang.String, int, int, java.lang.String, int, int, int[], int, int);
+    ctor public SubInfoRecord(int, java.lang.String, int, java.lang.String, int, int, java.lang.String, int, int, int[], int, int);
     method public int describeContents();
     method public int getColor();
     method public android.graphics.drawable.BitmapDrawable getIconDrawable();
@@ -28852,22 +28852,22 @@ package android.telephony {
     field public java.lang.String number;
     field public int[] simIconRes;
     field public int slotId;
-    field public long subId;
+    field public int subId;
   }
 
   public class SubscriptionManager implements android.provider.BaseColumns {
     method public static java.util.List<android.telephony.SubInfoRecord> getActiveSubInfoList();
-    method public static long getDefaultSmsSubId();
-    method public static int getSlotId(long);
-    method public static android.telephony.SubInfoRecord getSubInfoForSubscriber(long);
+    method public static int getDefaultSmsSubId();
+    method public static int getSlotId(int);
+    method public static android.telephony.SubInfoRecord getSubInfoForSubscriber(int);
     method public static java.util.List<android.telephony.SubInfoRecord> getSubInfoUsingSlotId(int);
-    method public static boolean isValidSubId(long);
-    field public static final long ASK_USER_SUB_ID = -1001L; // 0xfffffffffffffc17L
+    method public static boolean isValidSubId(int);
+    field public static final int ASK_USER_SUB_ID = -1001; // 0xfffffc17
     field public static final int DEFAULT_PHONE_ID = 2147483647; // 0x7fffffff
-    field public static final long DEFAULT_SUB_ID = 9223372036854775807L; // 0x7fffffffffffffffL
+    field public static final int DEFAULT_SUB_ID = 2147483647; // 0x7fffffff
     field public static final int INVALID_PHONE_ID = -1000; // 0xfffffc18
     field public static final int INVALID_SLOT_ID = -1000; // 0xfffffc18
-    field public static final long INVALID_SUB_ID = -1000L; // 0xfffffffffffffc18L
+    field public static final int INVALID_SUB_ID = -1000; // 0xfffffc18
     field public static final java.lang.String MCC = "mcc";
     field public static final java.lang.String MNC = "mnc";
     field public static final int SIM_NOT_INSERTED = -1; // 0xffffffff
