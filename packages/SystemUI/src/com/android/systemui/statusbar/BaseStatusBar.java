@@ -297,7 +297,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                         // close the shade if it was open
                         if (handled) {
-                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                                    true /* force */);
                             visibilityChanged(false);
                         }
                         // Wait for activity start.
@@ -374,7 +375,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
                 if (BANNER_ACTION_SETUP.equals(action)) {
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                            true /* force */);
                     mContext.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_REDACTION)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
@@ -799,7 +801,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         }
                     }
                 });
-                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
                 return true;
             }
         }, false /* afterKeyguardGone */);
@@ -1564,7 +1566,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                     }.start();
 
                     // close the shade if it was open
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                            true /* force */);
                     visibilityChanged(false);
 
                     return mIntent != null && mIntent.isActivity();
