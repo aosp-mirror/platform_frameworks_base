@@ -32,8 +32,14 @@ import java.util.List;
 import java.util.MissingResourceException;
 
 /**
- * Describes a distinct account, line of service or call placement method that the system
- * can use to place phone calls.
+ * Represents a distinct method to place or receive a phone call. Apps which can place calls and
+ * want those calls to be integrated into the dialer and in-call UI should build an instance of
+ * this class and register it with the system using {@link TelecomManager#registerPhoneAccount}.
+ * <p>
+ * {@link TelecomManager} uses registered {@link PhoneAccount}s to present the user with
+ * alternative options when placing a phone call. When building a {@link PhoneAccount}, the app
+ * should supply a valid {@link PhoneAccountHandle} that references the {@link ConnectionService}
+ * implementation Telecom will use to interact with the app.
  */
 public class PhoneAccount implements Parcelable {
 
@@ -56,7 +62,7 @@ public class PhoneAccount implements Parcelable {
      * traditional SIM-based telephony calls. This account will be treated as a distinct method
      * for placing calls alongside the traditional SIM-based telephony stack. This flag is
      * distinct from {@link #CAPABILITY_CONNECTION_MANAGER} in that it is not allowed to manage
-     * calls from or use the built-in telephony stack to place its calls.
+     * or place calls from the built-in telephony stack.
      * <p>
      * See {@link #getCapabilities}
      * <p>
@@ -114,6 +120,9 @@ public class PhoneAccount implements Parcelable {
     private final CharSequence mShortDescription;
     private final List<String> mSupportedUriSchemes;
 
+    /**
+     * Helper class for creating a {@link PhoneAccount}.
+     */
     public static class Builder {
         private PhoneAccountHandle mAccountHandle;
         private Uri mAddress;
@@ -124,6 +133,9 @@ public class PhoneAccount implements Parcelable {
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
 
+        /**
+         * Creates a builder with the specified {@link PhoneAccountHandle} and label.
+         */
         public Builder(PhoneAccountHandle accountHandle, CharSequence label) {
             this.mAccountHandle = accountHandle;
             this.mLabel = label;
@@ -146,26 +158,56 @@ public class PhoneAccount implements Parcelable {
             mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
         }
 
+        /**
+         * Sets the address. See {@link PhoneAccount#getAddress}.
+         *
+         * @param value The address of the phone account.
+         * @return The builder.
+         */
         public Builder setAddress(Uri value) {
             this.mAddress = value;
             return this;
         }
 
+        /**
+         * Sets the subscription address. See {@link PhoneAccount#getSubscriptionAddress}.
+         *
+         * @param value The subscription address.
+         * @return The builder.
+         */
         public Builder setSubscriptionAddress(Uri value) {
             this.mSubscriptionAddress = value;
             return this;
         }
 
+        /**
+         * Sets the capabilities. See {@link PhoneAccount#getCapabilities}.
+         *
+         * @param value The capabilities to set.
+         * @return The builder.
+         */
         public Builder setCapabilities(int value) {
             this.mCapabilities = value;
             return this;
         }
 
+        /**
+         * Sets the icon resource ID. See {@link PhoneAccount#getIconResId}.
+         *
+         * @param value The resource ID of the icon.
+         * @return The builder.
+         */
         public Builder setIconResId(int value) {
             this.mIconResId = value;
             return this;
         }
 
+        /**
+         * Sets the short description. See {@link PhoneAccount#getShortDescription}.
+         *
+         * @param value The short description.
+         * @return The builder.
+         */
         public Builder setShortDescription(CharSequence value) {
             this.mShortDescription = value;
             return this;
@@ -175,7 +217,7 @@ public class PhoneAccount implements Parcelable {
          * Specifies an additional URI scheme supported by the {@link PhoneAccount}.
          *
          * @param uriScheme The URI scheme.
-         * @return The Builder.
+         * @return The builder.
          * @hide
          */
         public Builder addSupportedUriScheme(String uriScheme) {
@@ -189,7 +231,7 @@ public class PhoneAccount implements Parcelable {
          * Specifies the URI schemes supported by the {@link PhoneAccount}.
          *
          * @param uriSchemes The URI schemes.
-         * @return The Builder.
+         * @return The builder.
          */
         public Builder setSupportedUriSchemes(List<String> uriSchemes) {
             mSupportedUriSchemes.clear();
@@ -362,7 +404,8 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * The icon resource ID for the icon of this {@code PhoneAccount}.
+     * The icon resource ID for the icon of this {@code PhoneAccount}. Telecom will search for the
+     * icon using the package name specified in the {@link PhoneAccountHandle}.
      *
      * @return A resource ID.
      */
