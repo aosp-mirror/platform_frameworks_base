@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"uw eigen contactkaart aanpassen"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Hiermee kan de app persoonlijke profielgegevens wijzigen of toevoegen die op uw apparaat zijn opgeslagen, zoals uw naam en contactgegevens. Dit betekent dat de app u kan identificeren en uw profielgegevens naar anderen kan verzenden."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"lichaamssensoren (zoals hartslagmeters)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Toestaan dat de app toegang krijgt tot gegevens van sensoren die u gebruikt om te meten wat er gebeurt in uw lichaam, zoals de hartslag."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die uw lichamelijke conditie controleren, zoals uw hartslag."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"uw sociale stream lezen"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Hiermee kan de app toegang krijgen tot sociale updates van u en uw vrienden en deze synchroniseren. Wees voorzichtig bij het delen van informatie: hiermee kan de app communicatie lezen tussen u en uw vrienden op sociale netwerken, ongeacht de vertrouwelijkheid. Opmerking: deze toestemming kan niet worden afgedwongen voor alle sociale netwerken."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"schrijven naar sociale streams"</string>

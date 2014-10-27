@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"endre ditt eget kontaktkort"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Lar appen endre eller legge til personlig profilinformasjon som er lagret på enheten din, som for eksempel navn og kontaktinformasjon. Dette betyr at appen kan identifisere deg og sende profilinformasjonen din til andre."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kroppssensorer (som pulsmålere)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Gir appen tillatelse til å bruke data fra sensorer du bruker til å måle det som skjer i kroppen din, som f.eks. pulsen."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Gir appen tilgang til data fra sensorer som overvåker den fysiske tilstanden din, for eksempel hjertefrekvensen din."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lese din sosiale strøm"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Lar appen lese og synkronisere sosiale oppdateringer fra deg selv og vennene dine. Vær forsiktig når du deler informasjon - med denne tillatelsen kan appen lese kommunikasjon mellom deg og vennene dine på sosiale nettverk, uavhengig av konfidensialitet. Vær oppmerksom på at denne tillatelsen kanskje ikke gjelder for alle sosiale nettverk."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrive i din sosiale strøm"</string>
@@ -1757,10 +1757,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Hvis du vil avslutte modusen for denne skjermen, trykker og holder du på Tilbake og Oversikt samtidig."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil avslutte modusen for denne skjermen, trykker og holder du på Oversikt."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Hvis du vil avslutte én-appsmodusen for denne skjermen, trykker og holder du på Tilbake og Oversikt samtidig."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil avslutte én-appsmodusen for denne skjermen, trykker og holder du på Oversikt."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skjermen er festet. Løsning er ikke tillatt av organisasjonen din."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruke skjermfesting?"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruke én-appsmodus?"</string>
     <string name="lock_to_app_description" msgid="4120623404152035221">"Én-appsmodus låser skjermen til én bestemt side.\n\nHvis du vil avslutte modusen, trykker og holder du på Tilbake og Oversikt samtidig."</string>
     <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Én-appsmodus låser skjermen til én bestemt side.\n\nHvis du vil avslutte modusen, trykker og holder du på Oversikt."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEI TAKK"</string>

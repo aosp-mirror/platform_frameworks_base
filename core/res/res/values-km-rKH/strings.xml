@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"កែ​កាត​ទំនាក់ទំនង​ផ្ទាល់​ខ្លួន​របស់​អ្នក"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ឲ្យ​កម្មវិធី​ប្ដូរ ឬ​បន្ថែម​ព័ត៌មាន​ប្រវត្តិរូប​ផ្ទាល់​ខ្លួន​ដែល​បាន​រក្សាទុក​ក្នុង​ឧបករណ៍​របស់​អ្នក ដូចជា ឈ្មោះ និង​ព័ត៌មាន​ទំនាក់ទំនង​របស់​អ្នក។ នេះ​មាន​ន័យ​ថា​កម្មវិធី​អាច​កំណត់​អ្នក និង​ផ្ញើ​ព័ត៌មាន​ប្រវត្តិរូប​របស់​អ្នក​ទៅ​អ្នក​ផ្សេង។"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ឧបករណ៍ចាប់សញ្ញារាងកាយ(ដូចជាម៉ាស៊ីនវាស់ចង្វាក់បេះដូង)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"​ឲ្យ​​កម្មវិធី​ដើម្បី​ចូល​ដំណើរការ​ទិន្នន័យ​ពី​ឧបករណ៍​ចាប់​សញ្ញា​ដែល​អ្នក​ប្រើ​ ដើម្បី​វាស់​ពី​អ្វី​ដែល​កំពុង​កើត​ឡើង​នៅ​ខាង​ក្នុង​ខ្លួន​របស់​អ្នក​ដូច​ជា​ចង្វាក់​បេះដូង​។"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ទិន្នន័យ​ពី​ឧបករណ៍​ចាប់​សញ្ញា​ដែល​តាមដាន​លក្ខខណ្ឌ​សុខភាព​របស់​អ្នក ដូច​ជា​ចង្វាក់​បេះដូង។"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"អាន​ចរន្ត​​សង្គម​របស់​អ្នក"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ និង​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្នភាព​សង្គម​ពី​អ្នក​ និង​មិត្តភ័ក្ដិ។ ប្រយ័ត្ន​ពេល​ចែករំលែក​ព័ត៌មាន វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​អាន​ការ​ទាក់ទង​រវាង​អ្នក​ និង​មិត្តភ័ក្ដិ​លើ​បណ្ដាញ​សង្គម ទាក់ទង​នឹង​ព័ត៌មាន​សម្ងាត់។ ចំណាំ៖​ សិទ្ធិ​នេះ​មិន​អាច​ត្រូវ​បាន​​អនុវត្ត​លើ​បណ្ដាញ​សង្គម​ទាំង​អស់​បាន​ទេ។"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"សរសេរ​ទៅ​ចរន្ត​សង្គម​របស់​អ្នក"</string>
@@ -1615,7 +1615,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"កូដ PIN មិន​ដូច​គ្នា"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ដើម្បី​ដោះ​សោ ចូល​ក្នុង​គណនី Google ។"</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ី​ម៉ែ​ល​)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ីមែល​)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ចូល"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។"</string>

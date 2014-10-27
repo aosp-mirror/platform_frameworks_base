@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"ændre dit eget kontaktkort"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Tillader, at appen kan ændre eller tilføje oplysninger i din personlige profil, der er gemt på din enhed, f.eks. dit navn eller dine kontaktoplysninger. Dette betyder, at andre apps kan identificere dig og sende profiloplysninger til andre."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kropssensorer (f.eks. pulsmålere)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Tillader, at appen får adgang til data fra sensorer, du bruger til at måle, hvad der sker inde i din krop, f.eks. din puls."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Giver appen adgang til data fra sensorer, der overvåger din fysiske tilstand, f.eks. din puls."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"læse din sociale strøm"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tillader, at appen kan få adgang til og synkronisere sociale opdateringer fra dig og dine venner. Vær forsigtig, når du deler oplysninger – med denne tilladelse kan appen læse kommunikation mellem dig og dine venner på sociale netværk, uanset fortrolighed. Bemærk! Denne tilladelse håndhæves muligvis ikke på alle sociale netværk."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrive i din sociale strøm"</string>

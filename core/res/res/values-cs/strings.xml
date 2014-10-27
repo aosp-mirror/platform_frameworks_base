@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"úprava vaší vlastní vizitky"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Umožňuje aplikaci změnit nebo přidat údaje osobního profilu uložené v zařízení, například jméno nebo kontaktní údaje. Znamená to, že vás aplikace může identifikovat a odeslat údaje z profilu dalším aplikacím."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"tělesné senzory (například snímače tepu)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Umožňuje aplikaci přistupovat k datům ze senzorů, pomocí kterých měříte činnost svého těla, například tep."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikaci používat data ze senzorů, které sledují vaši fyzickou kondici, například tepovou frekvenci."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čtení vašeho sociálního streamu"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikaci získat přístup k sociálním aktualizacím od vašich přátel a synchronizaci těchto aktualizací. Při sdílení informací buďte opatrní – toto oprávnění umožňuje aplikaci číst komunikaci mezi vámi a vašimi přáteli v sociálních sítích bez ohledu na její důvěrnost. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zápis do sociálního streamu"</string>

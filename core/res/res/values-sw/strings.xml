@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"rekebisha kadi yako mwenyewe ya mawasiliano"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Inaruhusu programu kubadilisha au kuongeza taarifa ya maelezo mafupi ya kibinafsi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na taarifa ya anwani. Hii inamaanisha kuwa programu inaweza kukutambua na inaweza kutuma taarifa ya maelezo yako mafupi kwa wengine."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"vipima hali ya mwili (kama mpigo wa moyo)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Huruhusu programu kufikia data kutoka kwenye vipima mawimbi unavyotumia kupima kinachoendelea mwilini mwako kama vile mpigo wa moyo."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Huruhusu programu kufikia data kutoka vihisi vinavyofuatilia hali yako ya kimwili, kama vile mapigo ya moyo."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"soma mipasho yako wa kijamii"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Huruhusu programu kufikia na kupatanisha masasisho ya kijamii kutoka kwa marafiki zako. Kuwa makini wakati unashiriki taarifa -- hii huruhusu programu kusoma mawasiliano kati yako na marafiki zako kwenye mitandao jamii, bila kujali usiri. Kumbuka: idhini hii haiwezi kutekelezwa kwenye mitandao yote ya jamii."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"kuandikia mipasho yako wa kijamii"</string>
