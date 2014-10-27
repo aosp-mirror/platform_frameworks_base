@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"verander jou eie kontakkaart"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Laat die program toe om persoonlike profielinligting, soos jou naam en kontakinligting, wat op jou toestel gestoor is, te verander of daarby te voeg. Dit beteken dat die program jou kan identifiseer en moontlik jou profielinligting na ander mense kan stuur."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"liggaamsensors (soos hartklopmonitors)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Laat die program toe om toegang tot data te verkry vanaf sensors wat jy gebruik om te meet wat binne jou liggaam aangaan, soos hartklop."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Laat die program toe om toegang te verkry tot data van sensors af wat jou fisieke toestand, soos jou polsslag, monitor."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lees jou sosiale stroom"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Laat die program toe om toegang tot sosiale opdaterings van jou en jou vriende te verkry en dit te sinkroniseer. Wees versigtig wanneer jy inligting deel -- dit laat die program toe om kommunikasie tussen jou en jou vriende op sosiale netwerke te lees, ongeag vertroulikheid. Let wel: hierdie toestemming mag dalk nie op alle sosiale netwerke afgedwing word nie."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skryf aan jou sosiale stroom"</string>

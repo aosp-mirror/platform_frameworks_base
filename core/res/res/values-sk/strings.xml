@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"upraviť vlastnú kartu kontaktu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Umožňuje aplikácii zmeniť alebo pridať do osobného profilu informácie uložené vo vašom zariadení, ako je vaše meno a kontaktné informácie. Znamená to, že vás aplikácia môže identifikovať a odoslať informácie o vašom profile ostatným aplikáciám."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"telesné senzory (napr. snímače tepu)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Umožňuje aplikácii pristupovať k údajom zo senzorov, pomocou ktorých meriate činnosť svojho tela, napríklad tep."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikácii získať prístup k údajom senzorov monitorujúcich vašu fyzickú kondíciu (napríklad pulz)."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čítať váš sociálny stream"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikácii pristupovať k sociálnym aktualizáciám od vás a vašich priateľov a synchronizovať ich. Pri zdieľaní informácií dávajte pozor – toto povolenie umožňuje aplikácii čítať komunikáciu medzi vami a vašimi priateľmi v sociálnych sieťach, a to bez ohľadu na jej dôvernosť. Poznámka: Toto povolenie nie je možné vynucovať v prípade všetkých sociálnych sietí."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"písať do vášho sociálneho streamu"</string>

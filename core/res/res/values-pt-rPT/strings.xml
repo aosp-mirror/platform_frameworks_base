@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"modificar o próprio cartão de contacto"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permite que a aplicação altere ou adicione dados de perfil pessoais guardados no dispositivo, tais como o seu nome e informações de contacto. Isto significa que outras aplicações podem identificá-lo e enviar os seus dados de perfil a terceiros."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"sensores corporais (como monitores do ritmo cardíaco)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Permite à aplicação aceder a dados de sensores que o utilizador usa para medir o que está a acontecer no seu corpo, por exemplo o ritmo cardíaco."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que a aplicação aceda a dados de sensores que monitorizam a sua condição física, como o ritmo cardíaco."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ler o seu fluxo social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permite que a aplicação aceda e sincronize atualizações de redes sociais suas e dos seus amigos. Tenha cuidado ao partilhar informações, pois esta ação permite que a aplicação leia comunicações entre si e os seus amigos nas redes sociais, independentemente do grau de confidencialidade. Nota: esta autorização pode não ser aplicada a todas as redes sociais."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"escrever para o seu fluxo social"</string>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"የራስዎን የዕውቂያ ካርድ ያስተካክሉ"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"መተግበሪያው ልክ እንደ ስምዎ እና የእውቂያ መረጃዎ ያሉ በመሳሪያዎ ላይ የተከማቹ የግል መገለጫ መረጃዎችን እንዲቀይር ወይም እንዲያክልባቸው ይፈቅድለታል። ይህም ማለት መተግበሪያው ለይቶ ሊያውቅዎ እና የመገለጫ መረጃዎን ለሌሎች ሊልክ ይችላል።"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"የሰውነት መመርመሪያዎች (እንደ የልብ ምት መቆጣጠሪያዎች)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"መተግበሪያው እርስዎ በሰውነትዎ ውስጥ እየተካሄዱ ያሉ እንደ የልብ ምት የመሳሰሉ ነገሮችን ለመለካት የሚጠቀሙበትን ውሂብ ከመመርመሪያዎቹ ላይ እንዲደርስ ይፈቅድለታል።"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"እንደ የእርስዎ የልብ ምት የመሳሰሉ ያሉበትን አካላዊ ሁኔታ ከሚቆጣጠሩ ሰውነት ዳሳሾች ውሂብ ላይ እንዲደርስ ለመተግበሪያው ይፈቅደለታል።"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"የእርስዎን ማህበራዊ የውይይት ክፍሎች ያንብቡ"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"መተግበሪያው የአንተንና የጓኞችህን ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስላቸው ይፈቅድለታል። መረጃ ስታጋራ ተጠንቀቅ -- ይህ መተግበሪያው ሚስጥራዊነትን ከግምት ሳያስገባ በማህበራዊ አውታረ መረቦች በአንተ እና በጓደኞችህ መካከል የሚደረጉ ግንኙነቶችን እንዲያነብ ይፈቅድለታል። ማስታወሻ፦ ይህ ፈቃድ ለሁሉም ማህበራዊ አውታር መረቦች ላይ ላይፈጸም ይችላል።"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ የእርስዎ ማህበራዊ የውይይት ክፍሎች ይጻፉ"</string>

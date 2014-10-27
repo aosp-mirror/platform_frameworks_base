@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"تعديل بطاقة جهة الاتصال الخاصة"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"للسماح للتطبيق بتغيير المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز أو الإضافة إليها، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"للسماح للتطبيق بالدخول إلى البيانات من أجهزة الاستشعار التي تستخدمها لقياس ما يجري داخل جسمك، مثل معدل ضربات القلب."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"للسماح للتطبيق بالدخول إلى البيانات من المستشعرات التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"قراءة المشاركات الاجتماعية"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"للسماح للتطبيق بالدخول إلى التحديثات الاجتماعية منك ومن أصدقائك ومزامنتها. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق قراءة عمليات التواصل بينك وبين أصدقائك على الشبكات الاجتماعية، بغض النظر عن مدى السرية. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"كتابة إلى المشاركات الاجتماعية"</string>
@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"تم تحديد <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"رجوع\" و\"عرض عام\" في آن واحد مع الاستمرار."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"عرض عام\" مع الاستمرار."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"رجوع\" و\"نظرة عامة\" في آن واحد مع الاستمرار."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"نظرة عامة\" مع الاستمرار."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"الشاشة مثبتة. لا تسمح منظمتك بإلغاء التثبيت."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"هل تريد استخدام تثبيت الشاشة؟"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"يؤدي تثبيت الشاشة إلى تأمين الشاشة في العرض المفرد.\n\nلإلغاء التثبيت، المس \"رجوع\" و\"عرض عام\" في آن واحد مع الاستمرار."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"يؤدي تثبيت الشاشة إلى قفل الشاشة في العرض المفرد.\n\nلإلغاء التثبيت، يمكنك لمس \"عرض عام\" مع الاستمرار."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"يؤدي تثبيت الشاشة إلى تأمين الشاشة في العرض المفرد.\n\nلإلغاء التثبيت، المس \"رجوع\" و\"نظرة عامة\" في آن واحد مع الاستمرار."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"يؤدي تثبيت الشاشة إلى قفل الشاشة في العرض المفرد.\n\nلإلغاء التثبيت، يمكنك لمس \"نظرة عامة\" مع الاستمرار."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"لا، شكرًا"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"بدء"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
