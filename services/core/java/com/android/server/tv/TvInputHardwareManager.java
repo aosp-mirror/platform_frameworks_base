@@ -191,7 +191,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             String inputId = mHardwareInputIdMap.get(deviceId);
             if (inputId != null) {
                 mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                        convertConnectedToState(config.length > 0), 0, inputId).sendToTarget();
+                        convertConnectedToState(configs.length > 0), 0, inputId).sendToTarget();
             }
             try {
                 connection.getCallbackLocked().onStreamConfigChanged(configs);
