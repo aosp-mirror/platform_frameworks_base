@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -840,56 +889,115 @@ Summary:
       <div id="subclasses-direct-summary"
               style="display: none;"
               >
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.AppViewBuilder.html">HitBuilders.AppViewBuilder</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.AppViewBuilder.html">HitBuilders.AppViewBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This class is deprecated.
     This class has been deprecated in favor of the new ScreenViewBuilder class. The
  two classes are semantically similar but the latter is consistent across all the Google
  Analytics platforms.
-</em>&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.EventBuilder.html">HitBuilders.EventBuilder</a></td>
-              <td class="jd-descrcol" width="100%">A Builder object to build event hits.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.ExceptionBuilder.html">HitBuilders.ExceptionBuilder</a></td>
-              <td class="jd-descrcol" width="100%">Exception builder allows you to measure the number and type of caught and uncaught crashes
- and exceptions that occur in your app.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.ItemBuilder.html">HitBuilders.ItemBuilder</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+</em>&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.EventBuilder.html">HitBuilders.EventBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          A Builder object to build event hits.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.ExceptionBuilder.html">HitBuilders.ExceptionBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Exception builder allows you to measure the number and type of caught and uncaught crashes
+ and exceptions that occur in your app.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.ItemBuilder.html">HitBuilders.ItemBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This class is deprecated.
     This class has been deprecated in favor of a richer set of APIs on all the HitBuilder
  classes. With the new approach, simply use addProduct, addImpression, addPromo and setAction
  to add ecommerce data to any of the hits.
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></td>
-              <td class="jd-descrcol" width="100%">Class to build a screen view hit.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.SocialBuilder.html">HitBuilders.SocialBuilder</a></td>
-              <td class="jd-descrcol" width="100%">A Builder object to build social event hits.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.TimingBuilder.html">HitBuilders.TimingBuilder</a></td>
-              <td class="jd-descrcol" width="100%">Hit builder used to collect timing related data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.TransactionBuilder.html">HitBuilders.TransactionBuilder</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+</em>&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Class to build a screen view hit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.SocialBuilder.html">HitBuilders.SocialBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          A Builder object to build social event hits.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.TimingBuilder.html">HitBuilders.TimingBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Hit builder used to collect timing related data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/HitBuilders.TransactionBuilder.html">HitBuilders.TransactionBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This class is deprecated.
     This class has been deprecated in favor of a richer set of APIs on all the HitBuilder
  classes. With the new approach, simply use addProduct, addImpression, addPromo and setAction
  to add ecommerce data to any of the hits.
-</em>&nbsp;</td>
-          </tr>
+</em>&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -1001,7 +1109,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addImpression(com.google.android.gms.analytics.ecommerce.Product, java.lang.String)">addImpression</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/Product.html">Product</a> product, String impressionList)</nobr>
 
-        <div class="jd-descrdiv">Adds a product impression to the hit.</div>
+        <div class="jd-descrdiv">
+          Adds a product impression to the hit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1019,7 +1132,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addProduct(com.google.android.gms.analytics.ecommerce.Product)">addProduct</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/Product.html">Product</a> product)</nobr>
 
-        <div class="jd-descrdiv">Adds product information to be sent with a given hit.</div>
+        <div class="jd-descrdiv">
+          Adds product information to be sent with a given hit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1037,7 +1155,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addPromotion(com.google.android.gms.analytics.ecommerce.Promotion)">addPromotion</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/Promotion.html">Promotion</a> promotion)</nobr>
 
-        <div class="jd-descrdiv">Adds promotion related information to the hit.</div>
+        <div class="jd-descrdiv">
+          Adds promotion related information to the hit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1055,8 +1178,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#build()">build</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Builds a <code><a href="/reference/java/util/Map.html">Map</a></code> of parameters and values that can be set on the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>
- object.</div>
+        <div class="jd-descrdiv">
+          Builds a <code><a href="/reference/java/util/Map.html">Map</a></code> of parameters and values that can be set on the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>
+ object.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1074,7 +1202,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#set(java.lang.String, java.lang.String)">set</a></span>(String paramName, String paramValue)</nobr>
 
-        <div class="jd-descrdiv">Sets the value for the given parameter name.</div>
+        <div class="jd-descrdiv">
+          Sets the value for the given parameter name.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1092,7 +1225,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setAll(java.util.Map<java.lang.String, java.lang.String>)">setAll</a></span>(Map&lt;String,&nbsp;String&gt; params)</nobr>
 
-        <div class="jd-descrdiv">Adds a set of key, value pairs to the hit builder.</div>
+        <div class="jd-descrdiv">
+          Adds a set of key, value pairs to the hit builder.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1110,8 +1248,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setCampaignParamsFromUrl(java.lang.String)">setCampaignParamsFromUrl</a></span>(String utmParams)</nobr>
 
-        <div class="jd-descrdiv">Parses and translates utm campaign parameters to analytics campaign param
- and returns them as a map.</div>
+        <div class="jd-descrdiv">
+          Parses and translates utm campaign parameters to analytics campaign param
+ and returns them as a map.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1129,7 +1272,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setCustomDimension(int, java.lang.String)">setCustomDimension</a></span>(int index, String dimension)</nobr>
 
-        <div class="jd-descrdiv">Adds a custom dimension to the current hit builder.</div>
+        <div class="jd-descrdiv">
+          Adds a custom dimension to the current hit builder.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1147,7 +1295,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setCustomMetric(int, float)">setCustomMetric</a></span>(int index, float metric)</nobr>
 
-        <div class="jd-descrdiv">Adds a custom metric to the current hit builder.</div>
+        <div class="jd-descrdiv">
+          Adds a custom metric to the current hit builder.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1197,7 +1350,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setProductAction(com.google.android.gms.analytics.ecommerce.ProductAction)">setProductAction</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a> action)</nobr>
 
-        <div class="jd-descrdiv">Sets a product action for all the products included in this hit.</div>
+        <div class="jd-descrdiv">
+          Sets a product action for all the products included in this hit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1215,7 +1373,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setPromotionAction(java.lang.String)">setPromotionAction</a></span>(String action)</nobr>
 
-        <div class="jd-descrdiv">Adds an action associated with the promotions in a given hit.</div>
+        <div class="jd-descrdiv">
+          Adds an action associated with the promotions in a given hit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1260,7 +1423,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setHitType(java.lang.String)">setHitType</a></span>(String hitType)</nobr>
 
-        <div class="jd-descrdiv">Sets the type of the hit to be sent.</div>
+        <div class="jd-descrdiv">
+          Sets the type of the hit to be sent.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1539,6 +1707,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1578,6 +1749,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Adds a product impression to the hit. The product can be optionally associated with a
  named impression list.
 </p></div>
@@ -1608,6 +1782,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Adds product information to be sent with a given hit. The action provided in
  <code><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setProductAction(com.google.android.gms.analytics.ecommerce.ProductAction)">setProductAction(ProductAction)</a></code> affects how the products passed in through this method get
@@ -1641,6 +1818,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Adds promotion related information to the hit.
 </p></div>
 
@@ -1670,6 +1850,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Builds a <code><a href="/reference/java/util/Map.html">Map</a></code> of parameters and values that can be set on the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>
  object.</p></div>
@@ -1706,6 +1889,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the value for the given parameter name. These values will be added to the hit when
  it is built. This function should only be used for advanced cases where none of the
@@ -1758,6 +1944,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Adds a set of key, value pairs to the hit builder. These values will be added to the hit
  when it is built. This function should only be used for advanced cases where none of the
  explicit setters work. This function should usually be called after all the
@@ -1803,6 +1992,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Parses and translates utm campaign parameters to analytics campaign param
  and returns them as a map.</p></div>
@@ -1871,6 +2063,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Adds a custom dimension to the current hit builder. Calling this method with the same
  index will overwrite the previous dimension with the new one. Refer
  <a href="http://goo.gl/igziD2">http://goo.gl/igziD2</a> for details on how to set the
@@ -1920,6 +2115,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Adds a custom metric to the current hit builder. Calling this method with the same
  index will overwrite the previous metric with the new one. Refer
@@ -1971,6 +2169,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2000,6 +2201,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2028,6 +2232,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets a product action for all the products included in this hit. The action and its
  associated properties affect how the products added through <code><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addProduct(com.google.android.gms.analytics.ecommerce.Product)">addProduct(Product)</a></code> are
@@ -2060,6 +2267,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Adds an action associated with the promotions in a given hit. Valid values for an action
  are defined in <code><a href="/reference/com/google/android/gms/analytics/ecommerce/Promotion.html">Promotion</a></code> class.
@@ -2101,6 +2311,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2129,6 +2342,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the type of the hit to be sent. This can be used to reuse the builder object for
  multiple hit types. See <a href="http://goo.gl/kMRwhS">http://goo.gl/kMRwhS</a> for

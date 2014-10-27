@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -793,6 +839,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -874,7 +923,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.MediaChannelResult.html">RemoteMediaPlayer.MediaChannelResult</a></td>
-      <td class="jd-descrcol" width="100%">Result of a media command.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result of a media command.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -886,7 +940,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnMetadataUpdatedListener.html">RemoteMediaPlayer.OnMetadataUpdatedListener</a></td>
-      <td class="jd-descrcol" width="100%">The listener interface for tracking metadata changes.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        The listener interface for tracking metadata changes.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -898,7 +957,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html">RemoteMediaPlayer.OnStatusUpdatedListener</a></td>
-      <td class="jd-descrcol" width="100%">The listener interface for tracking player status changes.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        The listener interface for tracking player status changes.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -923,57 +987,97 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#RESUME_STATE_PAUSE">RESUME_STATE_PAUSE</a></td>
-        <td class="jd-descrcol" width="100%">A resume state indicating that the player should be paused, regardless of its current state.</td>
+        <td class="jd-descrcol" width="100%">
+          A resume state indicating that the player should be paused, regardless of its current state.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#RESUME_STATE_PLAY">RESUME_STATE_PLAY</a></td>
-        <td class="jd-descrcol" width="100%">A resume state indicating that the player should be playing, regardless of its current state.</td>
+        <td class="jd-descrcol" width="100%">
+          A resume state indicating that the player should be playing, regardless of its current state.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#RESUME_STATE_UNCHANGED">RESUME_STATE_UNCHANGED</a></td>
-        <td class="jd-descrcol" width="100%">A resume state indicating that the player state should be left unchanged.</td>
+        <td class="jd-descrcol" width="100%">
+          A resume state indicating that the player state should be left unchanged.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#STATUS_CANCELED">STATUS_CANCELED</a></td>
-        <td class="jd-descrcol" width="100%">A status indicating that a request was canceled.</td>
+        <td class="jd-descrcol" width="100%">
+          A status indicating that a request was canceled.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#STATUS_FAILED">STATUS_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">A status indicating that a request failed.</td>
+        <td class="jd-descrcol" width="100%">
+          A status indicating that a request failed.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#STATUS_REPLACED">STATUS_REPLACED</a></td>
-        <td class="jd-descrcol" width="100%">A status indicating that the request's progress is no longer being tracked because another
- request of the same type has been made before the first request completed.</td>
+        <td class="jd-descrcol" width="100%">
+          A status indicating that the request's progress is no longer being tracked because another
+ request of the same type has been made before the first request completed.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#STATUS_SUCCEEDED">STATUS_SUCCEEDED</a></td>
-        <td class="jd-descrcol" width="100%">A status indicating that a request completed successfully.</td>
+        <td class="jd-descrcol" width="100%">
+          A status indicating that a request completed successfully.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#STATUS_TIMED_OUT">STATUS_TIMED_OUT</a></td>
-        <td class="jd-descrcol" width="100%">A status indicating that a request has timed out.</td>
+        <td class="jd-descrcol" width="100%">
+          A status indicating that a request has timed out.
+
+
+
+        </td>
     </tr>
     
     
@@ -1038,8 +1142,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#getApproximateStreamPosition()">getApproximateStreamPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the approximate stream position as calculated from the last received stream
- information and the elapsed wall-time since that update.</div>
+        <div class="jd-descrdiv">
+          Returns the approximate stream position as calculated from the last received stream
+ information and the elapsed wall-time since that update.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1057,7 +1166,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#getMediaInfo()">getMediaInfo</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the current media information, if any.</div>
+        <div class="jd-descrdiv">
+          Returns the current media information, if any.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1075,7 +1189,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#getMediaStatus()">getMediaStatus</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the current media status, if any.</div>
+        <div class="jd-descrdiv">
+          Returns the current media status, if any.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1093,7 +1212,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#getNamespace()">getNamespace</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the media control namespace.</div>
+        <div class="jd-descrdiv">
+          Returns the media control namespace.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1111,7 +1235,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#getStreamDuration()">getStreamDuration</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Convenience method for getting the stream duration.</div>
+        <div class="jd-descrdiv">
+          Convenience method for getting the stream duration.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1258,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#load(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.cast.MediaInfo, boolean)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a> mediaInfo, boolean autoplay)</nobr>
         
-        <div class="jd-descrdiv">Loads and optionally starts playback of a new media item.</div>
+        <div class="jd-descrdiv">
+          Loads and optionally starts playback of a new media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1147,7 +1281,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#load(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.cast.MediaInfo, boolean, long, long[], org.json.JSONObject)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a> mediaInfo, boolean autoplay, long playPosition, long[] activeTrackIds, JSONObject customData)</nobr>
 
-        <div class="jd-descrdiv">Loads and optionally starts playback of a new media item.</div>
+        <div class="jd-descrdiv">
+          Loads and optionally starts playback of a new media item.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1165,7 +1304,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#load(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.cast.MediaInfo)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a> mediaInfo)</nobr>
         
-        <div class="jd-descrdiv">Loads and automatically starts playback of a new media item.</div>
+        <div class="jd-descrdiv">
+          Loads and automatically starts playback of a new media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1183,7 +1327,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#load(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.cast.MediaInfo, boolean, long)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a> mediaInfo, boolean autoplay, long playPosition)</nobr>
         
-        <div class="jd-descrdiv">Loads and optionally starts playback of a new media item.</div>
+        <div class="jd-descrdiv">
+          Loads and optionally starts playback of a new media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1201,7 +1350,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#load(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.cast.MediaInfo, boolean, long, org.json.JSONObject)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a> mediaInfo, boolean autoplay, long playPosition, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Loads and optionally starts playback of a new media item.</div>
+        <div class="jd-descrdiv">
+          Loads and optionally starts playback of a new media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1219,7 +1373,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#onMessageReceived(com.google.android.gms.cast.CastDevice, java.lang.String, java.lang.String)">onMessageReceived</a></span>(<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a> castDevice, String namespace, String message)</nobr>
         
-        <div class="jd-descrdiv">Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.</div>
+        <div class="jd-descrdiv">
+          Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1237,7 +1396,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#pause(com.google.android.gms.common.api.GoogleApiClient)">pause</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Pauses playback of the current media item.</div>
+        <div class="jd-descrdiv">
+          Pauses playback of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1255,7 +1419,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#pause(com.google.android.gms.common.api.GoogleApiClient, org.json.JSONObject)">pause</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Pauses playback of the current media item.</div>
+        <div class="jd-descrdiv">
+          Pauses playback of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1273,7 +1442,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#play(com.google.android.gms.common.api.GoogleApiClient, org.json.JSONObject)">play</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Begins (or resumes) playback of the current media item.</div>
+        <div class="jd-descrdiv">
+          Begins (or resumes) playback of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1291,7 +1465,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#play(com.google.android.gms.common.api.GoogleApiClient)">play</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Begins (or resumes) playback of the current media item.</div>
+        <div class="jd-descrdiv">
+          Begins (or resumes) playback of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1309,7 +1488,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#requestStatus(com.google.android.gms.common.api.GoogleApiClient)">requestStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Requests updated media status information from the receiver.</div>
+        <div class="jd-descrdiv">
+          Requests updated media status information from the receiver.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1327,7 +1511,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#seek(com.google.android.gms.common.api.GoogleApiClient, long)">seek</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, long position)</nobr>
         
-        <div class="jd-descrdiv">Seeks to a new position within the current media item.</div>
+        <div class="jd-descrdiv">
+          Seeks to a new position within the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1345,7 +1534,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#seek(com.google.android.gms.common.api.GoogleApiClient, long, int, org.json.JSONObject)">seek</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, long position, int resumeState, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Seeks to a new position within the current media item.</div>
+        <div class="jd-descrdiv">
+          Seeks to a new position within the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1363,7 +1557,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#seek(com.google.android.gms.common.api.GoogleApiClient, long, int)">seek</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, long position, int resumeState)</nobr>
         
-        <div class="jd-descrdiv">Seeks to a new position within the current media item.</div>
+        <div class="jd-descrdiv">
+          Seeks to a new position within the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1381,7 +1580,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setActiveMediaTracks(com.google.android.gms.common.api.GoogleApiClient, long[])">setActiveMediaTracks</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, long[] trackIds)</nobr>
 
-        <div class="jd-descrdiv">Sets the active media tracks.</div>
+        <div class="jd-descrdiv">
+          Sets the active media tracks.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1399,7 +1603,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setOnMetadataUpdatedListener(com.google.android.gms.cast.RemoteMediaPlayer.OnMetadataUpdatedListener)">setOnMetadataUpdatedListener</a></span>(<a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnMetadataUpdatedListener.html">RemoteMediaPlayer.OnMetadataUpdatedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Sets the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnMetadataUpdatedListener.html">RemoteMediaPlayer.OnMetadataUpdatedListener</a></code> to get metadata updates.</div>
+        <div class="jd-descrdiv">
+          Sets the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnMetadataUpdatedListener.html">RemoteMediaPlayer.OnMetadataUpdatedListener</a></code> to get metadata updates.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1417,7 +1626,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setOnStatusUpdatedListener(com.google.android.gms.cast.RemoteMediaPlayer.OnStatusUpdatedListener)">setOnStatusUpdatedListener</a></span>(<a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html">RemoteMediaPlayer.OnStatusUpdatedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Sets the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html">RemoteMediaPlayer.OnStatusUpdatedListener</a></code> to get status updates.</div>
+        <div class="jd-descrdiv">
+          Sets the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html">RemoteMediaPlayer.OnStatusUpdatedListener</a></code> to get status updates.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1435,7 +1649,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setStreamMute(com.google.android.gms.common.api.GoogleApiClient, boolean, org.json.JSONObject)">setStreamMute</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean muteState, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Toggles the stream muting.</div>
+        <div class="jd-descrdiv">
+          Toggles the stream muting.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1453,7 +1672,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setStreamMute(com.google.android.gms.common.api.GoogleApiClient, boolean)">setStreamMute</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean muteState)</nobr>
         
-        <div class="jd-descrdiv">Toggles the stream muting.</div>
+        <div class="jd-descrdiv">
+          Toggles the stream muting.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1471,7 +1695,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setStreamVolume(com.google.android.gms.common.api.GoogleApiClient, double, org.json.JSONObject)">setStreamVolume</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, double volume, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Sets the stream volume.</div>
+        <div class="jd-descrdiv">
+          Sets the stream volume.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1489,7 +1718,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setStreamVolume(com.google.android.gms.common.api.GoogleApiClient, double)">setStreamVolume</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, double volume)</nobr>
         
-        <div class="jd-descrdiv">Sets the stream volume of the current media item.</div>
+        <div class="jd-descrdiv">
+          Sets the stream volume of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1507,7 +1741,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#setTextTrackStyle(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.cast.TextTrackStyle)">setTextTrackStyle</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/cast/TextTrackStyle.html">TextTrackStyle</a> trackStyle)</nobr>
 
-        <div class="jd-descrdiv">Sets the text track style.</div>
+        <div class="jd-descrdiv">
+          Sets the text track style.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1525,7 +1764,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#stop(com.google.android.gms.common.api.GoogleApiClient)">stop</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Stops playback of the current media item.</div>
+        <div class="jd-descrdiv">
+          Stops playback of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1543,7 +1787,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html#stop(com.google.android.gms.common.api.GoogleApiClient, org.json.JSONObject)">stop</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, JSONObject customData)</nobr>
         
-        <div class="jd-descrdiv">Stops playback of the current media item.</div>
+        <div class="jd-descrdiv">
+          Stops playback of the current media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1797,7 +2046,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html#onMessageReceived(com.google.android.gms.cast.CastDevice, java.lang.String, java.lang.String)">onMessageReceived</a></span>(<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a> castDevice, String namespace, String message)</nobr>
         
-        <div class="jd-descrdiv">Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.</div>
+        <div class="jd-descrdiv">
+          Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1857,6 +2111,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A resume state indicating that the player should be paused, regardless of its current state.
 </p></div>
 
@@ -1896,6 +2153,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A resume state indicating that the player should be playing, regardless of its current state.
 </p></div>
 
@@ -1935,6 +2195,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A resume state indicating that the player state should be left unchanged. </p></div>
 
     
@@ -1973,6 +2236,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request was canceled. </p></div>
 
     
@@ -2011,6 +2277,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request failed. </p></div>
 
     
@@ -2049,6 +2318,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A status indicating that the request's progress is no longer being tracked because another
  request of the same type has been made before the first request completed. This applies to
  requests such as volume change, where a new request invalidates the results of a previous
@@ -2091,6 +2363,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request completed successfully. </p></div>
 
     
@@ -2129,6 +2404,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request has timed out. </p></div>
 
     
@@ -2182,6 +2460,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2226,6 +2507,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the approximate stream position as calculated from the last received stream
  information and the elapsed wall-time since that update.</p></div>
   <div class="jd-tagdata">
@@ -2261,6 +2545,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current media information, if any.
 </p></div>
 
@@ -2291,6 +2578,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current media status, if any.
 </p></div>
 
@@ -2321,6 +2611,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the media control namespace.
 </p></div>
 
@@ -2351,6 +2644,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Convenience method for getting the stream duration.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2385,6 +2681,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads and optionally starts playback of a new media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2436,6 +2735,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Loads and optionally starts playback of a new media item. The media item starts playback at
  <code>playPosition</code>. This method optionally sends custom data as a <code><a href="/reference/org/json/JSONObject.html">JSONObject</a></code> with
@@ -2507,6 +2809,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads and automatically starts playback of a new media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2555,6 +2860,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads and optionally starts playback of a new media item. The media item starts playback at
  <code>playPosition</code>.</p></div>
   <div class="jd-tagdata">
@@ -2613,6 +2921,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads and optionally starts playback of a new media item. The media item starts playback at
  <code>playPosition</code>. This method optionally sends custom data as a <code><a href="/reference/org/json/JSONObject.html">JSONObject</a></code> with
  the load request.</p></div>
@@ -2677,6 +2988,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2724,6 +3038,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Pauses playback of the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2768,6 +3085,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Pauses playback of the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2817,6 +3137,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Begins (or resumes) playback of the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2866,6 +3189,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Begins (or resumes) playback of the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2910,6 +3236,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests updated media status information from the receiver. <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html">RemoteMediaPlayer.OnStatusUpdatedListener</a></code>
  callback will be triggered, when the updated media status has been received. This will also
  update the internal state of the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html">RemoteMediaPlayer</a></code> object with the current state of
@@ -2958,6 +3287,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Seeks to a new position within the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3006,6 +3338,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Seeks to a new position within the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3063,6 +3398,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Seeks to a new position within the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3115,6 +3453,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the active media tracks.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3163,6 +3504,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnMetadataUpdatedListener.html">RemoteMediaPlayer.OnMetadataUpdatedListener</a></code> to get metadata updates.
 </p></div>
 
@@ -3193,6 +3537,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html">RemoteMediaPlayer.OnStatusUpdatedListener</a></code> to get status updates.
 </p></div>
 
@@ -3223,6 +3570,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Toggles the stream muting.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3276,6 +3626,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Toggles the stream muting.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3324,6 +3677,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the stream volume. If <code>volume</code> is outside of the range [0.0, 1.0], then the value
  will be clipped.</p></div>
   <div class="jd-tagdata">
@@ -3387,6 +3743,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the stream volume of the current media item. When the stream volume has been updated,
  <code><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.OnStatusUpdatedListener.html#onStatusUpdated()">onStatusUpdated()</a></code> will be called.</p></div>
   <div class="jd-tagdata">
@@ -3445,6 +3804,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text track style.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3502,6 +3864,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stops playback of the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3546,6 +3911,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stops playback of the current media item.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>

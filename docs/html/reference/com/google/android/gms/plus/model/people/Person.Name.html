@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -771,6 +817,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -870,7 +919,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#getFamilyName()">getFamilyName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The family name (last name) of this person.</div>
+        <div class="jd-descrdiv">
+          The family name (last name) of this person.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -888,7 +942,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#getFormatted()">getFormatted</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The full name of this person, including middle names, suffixes, etc.</div>
+        <div class="jd-descrdiv">
+          The full name of this person, including middle names, suffixes, etc.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -906,7 +965,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#getGivenName()">getGivenName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The given name (first name) of this person.</div>
+        <div class="jd-descrdiv">
+          The given name (first name) of this person.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -924,7 +988,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#getHonorificPrefix()">getHonorificPrefix</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The honorific prefixes (such as "Dr." or "Mrs.") for this person.</div>
+        <div class="jd-descrdiv">
+          The honorific prefixes (such as "Dr." or "Mrs.") for this person.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -942,7 +1011,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#getHonorificSuffix()">getHonorificSuffix</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The honorific suffixes (such as "Jr.") for this person.</div>
+        <div class="jd-descrdiv">
+          The honorific suffixes (such as "Jr.") for this person.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -960,7 +1034,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#getMiddleName()">getMiddleName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The middle name of this person.</div>
+        <div class="jd-descrdiv">
+          The middle name of this person.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -978,7 +1057,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#hasFamilyName()">hasFamilyName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "familyName" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv">
+          Indicates whether the "familyName" field is explicitly set to a value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -996,7 +1080,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#hasFormatted()">hasFormatted</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "formatted" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv">
+          Indicates whether the "formatted" field is explicitly set to a value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1014,7 +1103,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#hasGivenName()">hasGivenName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "givenName" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv">
+          Indicates whether the "givenName" field is explicitly set to a value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1032,7 +1126,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#hasHonorificPrefix()">hasHonorificPrefix</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "honorificPrefix" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv">
+          Indicates whether the "honorificPrefix" field is explicitly set to a value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1050,7 +1149,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#hasHonorificSuffix()">hasHonorificSuffix</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "honorificSuffix" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv">
+          Indicates whether the "honorificSuffix" field is explicitly set to a value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1068,7 +1172,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html#hasMiddleName()">hasMiddleName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "middleName" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv">
+          Indicates whether the "middleName" field is explicitly set to a value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1120,7 +1229,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1138,7 +1252,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1214,6 +1333,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The family name (last name) of this person.
 </p></div>
 
@@ -1244,6 +1366,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The full name of this person, including middle names, suffixes, etc.
 </p></div>
 
@@ -1274,6 +1399,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The given name (first name) of this person.
 </p></div>
 
@@ -1304,6 +1432,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The honorific prefixes (such as "Dr." or "Mrs.") for this person.
 </p></div>
 
@@ -1334,6 +1465,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The honorific suffixes (such as "Jr.") for this person.
 </p></div>
 
@@ -1364,6 +1498,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The middle name of this person.
 </p></div>
 
@@ -1394,6 +1531,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "familyName" field is explicitly set to a value.
 </p></div>
 
@@ -1424,6 +1564,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "formatted" field is explicitly set to a value.
 </p></div>
 
@@ -1454,6 +1597,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "givenName" field is explicitly set to a value.
 </p></div>
 
@@ -1484,6 +1630,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "honorificPrefix" field is explicitly set to a value.
 </p></div>
 
@@ -1514,6 +1663,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "honorificSuffix" field is explicitly set to a value.
 </p></div>
 
@@ -1544,6 +1696,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "middleName" field is explicitly set to a value.
 </p></div>
 

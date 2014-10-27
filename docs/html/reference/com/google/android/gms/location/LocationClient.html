@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -793,6 +839,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -886,8 +935,13 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a></td>
-      <td class="jd-descrcol" width="100%">The listener for receiving callbacks when the operation to add geofences
- completes.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        The listener for receiving callbacks when the operation to add geofences
+ completes.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -899,8 +953,13 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a></td>
-      <td class="jd-descrcol" width="100%">The listener for receiving callbacks when the operation to remove
- geofences completes.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        The listener for receiving callbacks when the operation to remove
+ geofences completes.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -925,16 +984,26 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html#KEY_LOCATION_CHANGED">KEY_LOCATION_CHANGED</a></td>
-        <td class="jd-descrcol" width="100%">Key used for a Bundle extra holding a Location value when a location change is broadcast
- using a PendingIntent.</td>
+        <td class="jd-descrcol" width="100%">
+          Key used for a Bundle extra holding a Location value when a location change is broadcast
+ using a PendingIntent.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html#KEY_MOCK_LOCATION">KEY_MOCK_LOCATION</a></td>
-        <td class="jd-descrcol" width="100%">Key used for the Bundle extra in Location object holding a boolean indicating whether
- the location was set using <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Key used for the Bundle extra in Location object holding a boolean indicating whether
+ the location was set using <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code>.
+
+
+
+        </td>
     </tr>
     
     
@@ -970,7 +1039,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#LocationClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">LocationClient</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
         
-        <div class="jd-descrdiv">Creates a <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.</div>
+        <div class="jd-descrdiv">
+          Creates a <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1001,8 +1075,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#addGeofences(java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener)">addGeofences</a></span>(List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, PendingIntent pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Sets alerts to be notified when the device enters or exits one of the
- specified geofences.</div>
+        <div class="jd-descrdiv">
+          Sets alerts to be notified when the device enters or exits one of the
+ specified geofences.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1020,7 +1099,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#connect()">connect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Connects the client to Google Play services.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1038,7 +1122,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#disconnect()">disconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Closes the connection to Google Play services.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1056,8 +1145,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getErrorCode(android.content.Intent)">getErrorCode</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Returns the error code that explains the error that triggered this
- intent.</div>
+        <div class="jd-descrdiv">
+          Returns the error code that explains the error that triggered this
+ intent.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1075,7 +1169,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getGeofenceTransition(android.content.Intent)">getGeofenceTransition</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Returns the transition type of geofence transition alert.</div>
+        <div class="jd-descrdiv">
+          Returns the transition type of geofence transition alert.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1093,7 +1192,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getLastLocation()">getLastLocation</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the best most recent location currently available.</div>
+        <div class="jd-descrdiv">
+          Returns the best most recent location currently available.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1111,7 +1215,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getTriggeringGeofences(android.content.Intent)">getTriggeringGeofences</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Returns a list of geofences that triggers this geofence transition alert.</div>
+        <div class="jd-descrdiv">
+          Returns a list of geofences that triggers this geofence transition alert.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1238,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getTriggeringLocation(android.content.Intent)">getTriggeringLocation</a></span>(Intent intent)</nobr>
 
-        <div class="jd-descrdiv">Gets the location that triggered geofence transition.</div>
+        <div class="jd-descrdiv">
+          Gets the location that triggered geofence transition.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1147,7 +1261,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#hasError(android.content.Intent)">hasError</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Whether an error triggered this intent.</div>
+        <div class="jd-descrdiv">
+          Whether an error triggered this intent.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1165,8 +1284,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#isConnected()">isConnected</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is currently connected to the service, so that
+ requests to other methods will succeed.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1184,7 +1308,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#isConnecting()">isConnecting</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is attempting to connect to the service.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is attempting to connect to the service.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1202,8 +1331,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection events.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1221,8 +1355,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection failed events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection failed events.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1240,7 +1379,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1258,8 +1402,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection failed events from this
+ <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1277,7 +1426,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences</a></span>(List&lt;String&gt; geofenceRequestIds, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes geofences by their request IDs.</div>
+        <div class="jd-descrdiv">
+          Removes geofences by their request IDs.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1295,7 +1449,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences</a></span>(PendingIntent pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes all geofences associated with the given <code>pendingIntent</code>.</div>
+        <div class="jd-descrdiv">
+          Removes all geofences associated with the given <code>pendingIntent</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1313,7 +1472,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeLocationUpdates(com.google.android.gms.location.LocationListener)">removeLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes all location updates for the given location listener.</div>
+        <div class="jd-descrdiv">
+          Removes all location updates for the given location listener.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1331,7 +1495,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeLocationUpdates(android.app.PendingIntent)">removeLocationUpdates</a></span>(PendingIntent callbackIntent)</nobr>
         
-        <div class="jd-descrdiv">Removes all location updates for the given pending intent.</div>
+        <div class="jd-descrdiv">
+          Removes all location updates for the given pending intent.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1349,7 +1518,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, android.app.PendingIntent)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, PendingIntent callbackIntent)</nobr>
         
-        <div class="jd-descrdiv">Requests location updates with a callback on the specified PendingIntent.</div>
+        <div class="jd-descrdiv">
+          Requests location updates with a callback on the specified PendingIntent.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1367,7 +1541,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Requests location updates.</div>
+        <div class="jd-descrdiv">
+          Requests location updates.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1385,7 +1564,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</nobr>
         
-        <div class="jd-descrdiv">Requests location updates with a callback on the specified Looper thread.</div>
+        <div class="jd-descrdiv">
+          Requests location updates with a callback on the specified Looper thread.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1403,7 +1587,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation</a></span>(Location mockLocation)</nobr>
         
-        <div class="jd-descrdiv">Sets the mock location to be used for the location provider.</div>
+        <div class="jd-descrdiv">
+          Sets the mock location to be used for the location provider.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1421,7 +1610,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockMode(boolean)">setMockMode</a></span>(boolean isMockMode)</nobr>
         
-        <div class="jd-descrdiv">Sets whether or not the location provider is in mock mode.</div>
+        <div class="jd-descrdiv">
+          Sets whether or not the location provider is in mock mode.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1439,7 +1633,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection listener from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection listener from this <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1457,7 +1656,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1711,7 +1915,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Connects the client to Google Play services.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1729,7 +1938,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#disconnect()">disconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Closes the connection to Google Play services.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1747,8 +1961,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnected()">isConnected</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is currently connected to the service, so that
+ requests to other methods will succeed.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1766,7 +1985,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnecting()">isConnecting</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is attempting to connect to the service.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is attempting to connect to the service.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1784,8 +2008,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection events.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1803,8 +2032,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection failed events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection failed events.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1822,7 +2056,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1840,8 +2079,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection failed events from this
+ <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1859,7 +2103,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection listener from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection listener from this <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1877,7 +2126,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1937,6 +2191,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Key used for a Bundle extra holding a Location value when a location change is broadcast
  using a PendingIntent.
 </p></div>
@@ -1976,6 +2233,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Key used for the Bundle extra in Location object holding a boolean indicating whether
  the location was set using <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code>.  If the value is false this
  extra is not set.
@@ -2031,6 +2291,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Creates a <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2094,6 +2357,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets alerts to be notified when the device enters or exits one of the
  specified geofences. If an existing geofence with the same request ID is
  already registered, the old geofence is replaced by the new one, and the
@@ -2198,6 +2464,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. This method returns immediately, and connects to
  the service in the background. If the connection is successful,
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> is called. On a
@@ -2231,6 +2500,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Closes the connection to Google Play services. No calls can be made on this object
  after calling this method.</p></div>
 
@@ -2261,6 +2533,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the error code that explains the error that triggered this
  intent.</p></div>
   <div class="jd-tagdata">
@@ -2306,6 +2581,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the transition type of geofence transition alert.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2351,6 +2629,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the best most recent location currently available.
  <p>
  If a location is not available, which should happen very rarely, null will be returned. The
@@ -2388,6 +2669,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a list of geofences that triggers this geofence transition alert.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2432,6 +2716,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the location that triggered geofence transition. Triggering location
  is only available if the calling app links against Google Play services
@@ -2479,6 +2766,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Whether an error triggered this intent.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2523,6 +2813,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is currently connected to the service, so that
  requests to other methods will succeed.  Applications should guard
  client actions caused by the user with a call to this method.</p></div>
@@ -2559,6 +2852,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is attempting to connect to the service.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2593,6 +2889,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
  receive connection events.</p></div>
   <div class="jd-tagdata">
@@ -2637,6 +2936,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
  receive connection failed events.</p></div>
   <div class="jd-tagdata">
@@ -2681,6 +2983,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
  If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
  method will be called immediately.  Applications should balance calls to this method with
@@ -2733,6 +3038,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
  <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if the service
  is not already connected, the listener's
@@ -2785,6 +3093,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes geofences by their request IDs. Request ID is specified when you
  create a <code><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></code> by calling
  <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setRequestId(java.lang.String)">setRequestId(String)</a></code>.
@@ -2863,6 +3174,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes all geofences associated with the given <code>pendingIntent</code>.
  <p>
  Warning: please use <code><a href="/reference/android/app/PendingIntent.html#FLAG_UPDATE_CURRENT">FLAG_UPDATE_CURRENT</a></code>
@@ -2942,6 +3256,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes all location updates for the given location listener.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2981,6 +3298,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes all location updates for the given pending intent.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3020,6 +3340,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests location updates with a callback on the specified PendingIntent.
  <p>
  This method is suited for the background use cases, more specifically
@@ -3074,6 +3397,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests location updates.
  <p>
  This method is suited for the foreground use cases, more specifically
@@ -3130,6 +3456,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests location updates with a callback on the specified Looper thread.
  <p>
  This method is suited for the foreground use cases,more specifically
@@ -3189,6 +3518,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the mock location to be used for the location provider.  This location will be used
  in place of any actual locations from the underlying providers (network or gps).
 
@@ -3246,6 +3578,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether or not the location provider is in mock mode.
 
  <p>The underlying providers (network and gps) will be stopped (except by direct
@@ -3308,6 +3643,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GooglePlayServicesClient</code>. Note that removing
  a listener does not generate any callbacks.
  <p>
@@ -3351,6 +3689,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
  Note that removing a listener does not generate any callbacks.
  <p>

@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -805,6 +851,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -896,7 +945,12 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#EXTRA_ACTIVITY_RESULT">EXTRA_ACTIVITY_RESULT</a></td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
@@ -935,14 +989,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
@@ -973,7 +1037,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1000,7 +1069,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           ActivityRecognitionResultCreator</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
       
     
@@ -1031,7 +1105,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#ActivityRecognitionResult(java.util.List<com.google.android.gms.location.DetectedActivity>, long, long)">ActivityRecognitionResult</a></span>(List&lt;<a href="/reference/com/google/android/gms/location/DetectedActivity.html">DetectedActivity</a>&gt; probableActivities, long time, long elapsedRealtimeMillis)</nobr>
         
-        <div class="jd-descrdiv">Constructs an ActivityRecognitionResult.</div>
+        <div class="jd-descrdiv">
+          Constructs an ActivityRecognitionResult.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1049,7 +1128,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#ActivityRecognitionResult(com.google.android.gms.location.DetectedActivity, long, long)">ActivityRecognitionResult</a></span>(<a href="/reference/com/google/android/gms/location/DetectedActivity.html">DetectedActivity</a> mostProbableActivity, long time, long elapsedRealtimeMillis)</nobr>
         
-        <div class="jd-descrdiv">Constructs an ActivityRecognitionResult from a single activity.</div>
+        <div class="jd-descrdiv">
+          Constructs an ActivityRecognitionResult from a single activity.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1096,7 +1180,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#extractResult(android.content.Intent)">extractResult</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Extracts the ActivityRecognitionResult from an Intent.</div>
+        <div class="jd-descrdiv">
+          Extracts the ActivityRecognitionResult from an Intent.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1114,7 +1203,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#getActivityConfidence(int)">getActivityConfidence</a></span>(int activityType)</nobr>
         
-        <div class="jd-descrdiv">Returns the confidence of the given activity type.</div>
+        <div class="jd-descrdiv">
+          Returns the confidence of the given activity type.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1132,9 +1226,14 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#getElapsedRealtimeMillis()">getElapsedRealtimeMillis</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the elapsed real time of this detection in milliseconds since
+        <div class="jd-descrdiv">
+          Returns the elapsed real time of this detection in milliseconds since
  boot, including time spent in sleep as obtained by
- SystemClock.elapsedRealtime().</div>
+ SystemClock.elapsedRealtime().
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1152,7 +1251,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#getMostProbableActivity()">getMostProbableActivity</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the most probable activity of the user.</div>
+        <div class="jd-descrdiv">
+          Returns the most probable activity of the user.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1170,8 +1274,13 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#getProbableActivities()">getProbableActivities</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the list of activities that where detected with the confidence
- value associated with each activity.</div>
+        <div class="jd-descrdiv">
+          Returns the list of activities that where detected with the confidence
+ value associated with each activity.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1189,8 +1298,13 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#getTime()">getTime</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the UTC time of this detection, in milliseconds since January 1,
- 1970.</div>
+        <div class="jd-descrdiv">
+          Returns the UTC time of this detection, in milliseconds since January 1,
+ 1970.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1208,7 +1322,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html#hasResult(android.content.Intent)">hasResult</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Returns true if an Intent contains an ActivityRecognitionResult.</div>
+        <div class="jd-descrdiv">
+          Returns true if an Intent contains an ActivityRecognitionResult.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1570,6 +1689,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1617,6 +1739,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1657,6 +1782,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs an ActivityRecognitionResult.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1706,6 +1834,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs an ActivityRecognitionResult from a single activity.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1769,6 +1900,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1798,6 +1932,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Extracts the ActivityRecognitionResult from an Intent.
  <p>
  This is a utility function which extracts the ActivityRecognitionResult
@@ -1837,6 +1974,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the confidence of the given activity type.
 </p></div>
 
@@ -1867,6 +2007,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the elapsed real time of this detection in milliseconds since
  boot, including time spent in sleep as obtained by
  SystemClock.elapsedRealtime().
@@ -1899,6 +2042,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the most probable activity of the user.
 </p></div>
 
@@ -1929,6 +2075,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the list of activities that where detected with the confidence
  value associated with each activity. The activities are sorted by most
  probable activity first.
@@ -1966,6 +2115,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the UTC time of this detection, in milliseconds since January 1,
  1970.
 </p></div>
@@ -1997,6 +2149,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if an Intent contains an ActivityRecognitionResult.
  <p>
  This is a utility function that can be called from inside an intent
@@ -2035,6 +2190,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2064,6 +2222,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

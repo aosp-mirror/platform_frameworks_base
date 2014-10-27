@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -867,8 +916,13 @@ Summary:
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener</a></td>
-      <td class="jd-descrcol" width="100%">A listener for when the StreetViewPanoramaCamera changes
-&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A listener for when the StreetViewPanoramaCamera changes
+&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -880,8 +934,13 @@ Summary:
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaChangeListener</a></td>
-      <td class="jd-descrcol" width="100%">A listener for when the Street View panorama loads a new panorama
-&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A listener for when the Street View panorama loads a new panorama
+&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -893,7 +952,12 @@ Summary:
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaClickListener.html">StreetViewPanorama.OnStreetViewPanoramaClickListener</a></td>
-      <td class="jd-descrcol" width="100%">Callback interface for when the user taps on the panorama.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Callback interface for when the user taps on the panorama.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -942,8 +1006,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#animateTo(com.google.android.gms.maps.model.StreetViewPanoramaCamera, long)">animateTo</a></span>(<a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaCamera.html">StreetViewPanoramaCamera</a> camera, long duration)</nobr>
 
-        <div class="jd-descrdiv">Changes the current camera position, orientation and zoom, to a given position over a
- specified duration</div>
+        <div class="jd-descrdiv">
+          Changes the current camera position, orientation and zoom, to a given position over a
+ specified duration
+
+
+
+        </div>
 
   </td></tr>
 
@@ -961,8 +1030,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#getLocation()">getLocation</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the current location of the user and information regarding the current panorama's
- adjacent panoramas</div>
+        <div class="jd-descrdiv">
+          Returns the current location of the user and information regarding the current panorama's
+ adjacent panoramas
+
+
+
+        </div>
 
   </td></tr>
 
@@ -980,7 +1054,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#getPanoramaCamera()">getPanoramaCamera</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the current orientation and zoom</div>
+        <div class="jd-descrdiv">
+          Returns the current orientation and zoom
+
+
+
+        </div>
 
   </td></tr>
 
@@ -998,7 +1077,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#isPanningGesturesEnabled()">isPanningGesturesEnabled</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns whether or not the panning gestures are enabled for the user</div>
+        <div class="jd-descrdiv">
+          Returns whether or not the panning gestures are enabled for the user
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1016,7 +1100,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#isStreetNamesEnabled()">isStreetNamesEnabled</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns whether or not the street names appear on the panorama</div>
+        <div class="jd-descrdiv">
+          Returns whether or not the street names appear on the panorama
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1034,7 +1123,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#isUserNavigationEnabled()">isUserNavigationEnabled</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns whether or not the navigation is enabled for the user.</div>
+        <div class="jd-descrdiv">
+          Returns whether or not the navigation is enabled for the user.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1052,7 +1146,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#isZoomGesturesEnabled()">isZoomGesturesEnabled</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns whether or not the zoom gestures are enabled for the user</div>
+        <div class="jd-descrdiv">
+          Returns whether or not the zoom gestures are enabled for the user
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1070,8 +1169,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#orientationToPoint(com.google.android.gms.maps.model.StreetViewPanoramaOrientation)">orientationToPoint</a></span>(<a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.html">StreetViewPanoramaOrientation</a> orientation)</nobr>
 
-        <div class="jd-descrdiv">Returns a screen location that corresponds to an orientation
- (<code><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.html">StreetViewPanoramaOrientation</a></code>).</div>
+        <div class="jd-descrdiv">
+          Returns a screen location that corresponds to an orientation
+ (<code><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.html">StreetViewPanoramaOrientation</a></code>).
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1089,7 +1193,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#pointToOrientation(android.graphics.Point)">pointToOrientation</a></span>(Point point)</nobr>
 
-        <div class="jd-descrdiv">Returns the orientation that corresponds to a screen location.</div>
+        <div class="jd-descrdiv">
+          Returns the orientation that corresponds to a screen location.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1107,7 +1216,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setOnStreetViewPanoramaCameraChangeListener(com.google.android.gms.maps.StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener)">setOnStreetViewPanoramaCameraChangeListener</a></span>(<a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Sets a callback that's invoked when the camera changes</div>
+        <div class="jd-descrdiv">
+          Sets a callback that's invoked when the camera changes
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1125,7 +1239,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setOnStreetViewPanoramaChangeListener(com.google.android.gms.maps.StreetViewPanorama.OnStreetViewPanoramaChangeListener)">setOnStreetViewPanoramaChangeListener</a></span>(<a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaChangeListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Sets a callback that's invoked when the panorama changes</div>
+        <div class="jd-descrdiv">
+          Sets a callback that's invoked when the panorama changes
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1143,7 +1262,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setOnStreetViewPanoramaClickListener(com.google.android.gms.maps.StreetViewPanorama.OnStreetViewPanoramaClickListener)">setOnStreetViewPanoramaClickListener</a></span>(<a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaClickListener.html">StreetViewPanorama.OnStreetViewPanoramaClickListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Sets a callback that's invoked when the panorama is tapped.</div>
+        <div class="jd-descrdiv">
+          Sets a callback that's invoked when the panorama is tapped.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1161,7 +1285,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setPanningGesturesEnabled(boolean)">setPanningGesturesEnabled</a></span>(boolean enablePanning)</nobr>
 
-        <div class="jd-descrdiv">Sets whether the user is able to use panning gestures</div>
+        <div class="jd-descrdiv">
+          Sets whether the user is able to use panning gestures
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1179,7 +1308,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setPosition(com.google.android.gms.maps.model.LatLng)">setPosition</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> position)</nobr>
 
-        <div class="jd-descrdiv">Sets the StreetViewPanorama to a given location</div>
+        <div class="jd-descrdiv">
+          Sets the StreetViewPanorama to a given location
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1197,7 +1331,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setPosition(java.lang.String)">setPosition</a></span>(String panoId)</nobr>
 
-        <div class="jd-descrdiv">Sets the StreetViewPanorama to a given location</div>
+        <div class="jd-descrdiv">
+          Sets the StreetViewPanorama to a given location
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1215,7 +1354,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setPosition(com.google.android.gms.maps.model.LatLng, int)">setPosition</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> position, int radius)</nobr>
 
-        <div class="jd-descrdiv">Sets the StreetViewPanorama to a given location</div>
+        <div class="jd-descrdiv">
+          Sets the StreetViewPanorama to a given location
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1233,7 +1377,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setStreetNamesEnabled(boolean)">setStreetNamesEnabled</a></span>(boolean enableStreetNames)</nobr>
 
-        <div class="jd-descrdiv">Sets whether the user is able to see street names on panoramas</div>
+        <div class="jd-descrdiv">
+          Sets whether the user is able to see street names on panoramas
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1251,7 +1400,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setUserNavigationEnabled(boolean)">setUserNavigationEnabled</a></span>(boolean enableUserNavigation)</nobr>
 
-        <div class="jd-descrdiv">Sets whether the user is able to move to another panorama</div>
+        <div class="jd-descrdiv">
+          Sets whether the user is able to move to another panorama
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1269,7 +1423,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html#setZoomGesturesEnabled(boolean)">setZoomGesturesEnabled</a></span>(boolean enableZoom)</nobr>
 
-        <div class="jd-descrdiv">Sets whether the user is able to use zoom gestures</div>
+        <div class="jd-descrdiv">
+          Sets whether the user is able to use zoom gestures
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1555,6 +1714,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Changes the current camera position, orientation and zoom, to a given position over a
  specified duration</p></div>
   <div class="jd-tagdata">
@@ -1600,6 +1762,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current location of the user and information regarding the current panorama's
  adjacent panoramas</p></div>
   <div class="jd-tagdata">
@@ -1635,6 +1800,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current orientation and zoom</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1668,6 +1836,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether or not the panning gestures are enabled for the user</p></div>
   <div class="jd-tagdata">
@@ -1703,6 +1874,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether or not the street names appear on the panorama</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1736,6 +1910,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether or not the navigation is enabled for the user. This includes double tapping
  as well as using the navigation links</p></div>
@@ -1772,6 +1949,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether or not the zoom gestures are enabled for the user</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1805,6 +1985,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a screen location that corresponds to an orientation
  (<code><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.html">StreetViewPanoramaOrientation</a></code>). The screen location is in screen pixels
@@ -1855,6 +2038,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the orientation that corresponds to a screen location. The screen location is
  specified in screen pixels (not display pixels) relative to the top left of the Street View
  panorama (not the top left of the whole screen).</p></div>
@@ -1902,6 +2088,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets a callback that's invoked when the camera changes</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1941,6 +2130,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets a callback that's invoked when the panorama changes</p></div>
   <div class="jd-tagdata">
@@ -1982,6 +2174,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets a callback that's invoked when the panorama is tapped.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2022,6 +2217,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether the user is able to use panning gestures</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2060,6 +2258,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the StreetViewPanorama to a given location</p></div>
   <div class="jd-tagdata">
@@ -2100,6 +2301,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the StreetViewPanorama to a given location</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2138,6 +2342,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the StreetViewPanorama to a given location</p></div>
   <div class="jd-tagdata">
@@ -2183,6 +2390,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether the user is able to see street names on panoramas</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2222,6 +2432,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether the user is able to move to another panorama</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2260,6 +2473,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether the user is able to use zoom gestures</p></div>
   <div class="jd-tagdata">

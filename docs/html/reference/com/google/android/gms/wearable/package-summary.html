@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -129,7 +142,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -139,6 +152,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -361,7 +378,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -729,79 +775,204 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></td>
-              <td class="jd-descrcol" width="100%">Exposes an API for components to read or write <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s and <code><a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></code>s.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains a single data item.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataListener.html">DataApi.DataListener</a></td>
-              <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener(GoogleApiClient, DataApi.DataListener)</a></code> to receive data events.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains the number of deleted items.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains a file descriptor for the requested asset.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEvent.html">DataEvent</a></td>
-              <td class="jd-descrcol" width="100%">Data interface for data events.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></td>
-              <td class="jd-descrcol" width="100%">The base object of data stored in the Android Wear network.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemAsset.html">DataItemAsset</a></td>
-              <td class="jd-descrcol" width="100%">A reference to an asset stored in a data item.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.html">MessageApi</a></td>
-              <td class="jd-descrcol" width="100%">Exposes an API for components to send messages to other nodes.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.MessageListener.html">MessageApi.MessageListener</a></td>
-              <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/wearable/MessageApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener)">addListener(GoogleApiClient, MessageApi.MessageListener)</a></code> to receive message events.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.SendMessageResult.html">MessageApi.SendMessageResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains the request id assigned to the message.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageEvent.html">MessageEvent</a></td>
-              <td class="jd-descrcol" width="100%">Information about a message received by a listener.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Node.html">Node</a></td>
-              <td class="jd-descrcol" width="100%">Information about a particular node in the Android Wear network.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.html">NodeApi</a></td>
-              <td class="jd-descrcol" width="100%">Exposes an API for to learn about local or connected Nodes.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetConnectedNodesResult.html">NodeApi.GetConnectedNodesResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains a list of connected nodes.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetLocalNodeResult.html">NodeApi.GetLocalNodeResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains the name and id that represents this device.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html">NodeApi.NodeListener</a></td>
-              <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/wearable/NodeApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.NodeApi.NodeListener)">addListener(GoogleApiClient, NodeApi.NodeListener)</a></code> to receive node events.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          Exposes an API for components to read or write <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s and <code><a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></code>s.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains a single data item.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataListener.html">DataApi.DataListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener(GoogleApiClient, DataApi.DataListener)</a></code> to receive data events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains the number of deleted items.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains a file descriptor for the requested asset.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEvent.html">DataEvent</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data interface for data events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></td>
+        <td class="jd-descrcol" width="100%">
+          The base object of data stored in the Android Wear network.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemAsset.html">DataItemAsset</a></td>
+        <td class="jd-descrcol" width="100%">
+          A reference to an asset stored in a data item.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.html">MessageApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          Exposes an API for components to send messages to other nodes.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.MessageListener.html">MessageApi.MessageListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/wearable/MessageApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener)">addListener(GoogleApiClient, MessageApi.MessageListener)</a></code> to receive message events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.SendMessageResult.html">MessageApi.SendMessageResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains the request id assigned to the message.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageEvent.html">MessageEvent</a></td>
+        <td class="jd-descrcol" width="100%">
+          Information about a message received by a listener.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Node.html">Node</a></td>
+        <td class="jd-descrcol" width="100%">
+          Information about a particular node in the Android Wear network.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.html">NodeApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          Exposes an API for to learn about local or connected Nodes.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetConnectedNodesResult.html">NodeApi.GetConnectedNodesResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains a list of connected nodes.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetLocalNodeResult.html">NodeApi.GetLocalNodeResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains the name and id that represents this device.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html">NodeApi.NodeListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/wearable/NodeApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.NodeApi.NodeListener)">addListener(GoogleApiClient, NodeApi.NodeListener)</a></code> to receive node events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 
@@ -810,57 +981,144 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></td>
-              <td class="jd-descrcol" width="100%">An asset is a binary blob shared between data items that is replicated across the wearable
- network on demand.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure holding references to a set of events.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a></td>
-              <td class="jd-descrcol" width="100%">A map of data supported by <code><a href="/reference/com/google/android/gms/wearable/PutDataMapRequest.html">PutDataMapRequest</a></code> and <code><a href="/reference/com/google/android/gms/wearable/DataMapItem.html">DataMapItem</a></code>s.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataMapItem.html">DataMapItem</a></td>
-              <td class="jd-descrcol" width="100%">Creates a new dataItem-like object containing structured and serializable data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/PutDataMapRequest.html">PutDataMapRequest</a></td>
-              <td class="jd-descrcol" width="100%">PutDataMapRequest is a DataMap-aware version of <code><a href="/reference/com/google/android/gms/wearable/PutDataRequest.html">PutDataRequest</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/PutDataRequest.html">PutDataRequest</a></td>
-              <td class="jd-descrcol" width="100%">PutDataRequest is used to create new data items in the Android Wear network.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Wearable.html">Wearable</a></td>
-              <td class="jd-descrcol" width="100%">An API for the Android Wear platform.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Wearable.WearableOptions.html">Wearable.WearableOptions</a></td>
-              <td class="jd-descrcol" width="100%">API configuration parameters for Wearable API.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Wearable.WearableOptions.Builder.html">Wearable.WearableOptions.Builder</a></td>
-              <td class="jd-descrcol" width="100%">&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html">WearableListenerService</a></td>
-              <td class="jd-descrcol" width="100%">Receives events from other nodes, such as data changes, messages or connectivity events.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/WearableStatusCodes.html">WearableStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%">Error codes for wearable API failures.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></td>
+        <td class="jd-descrcol" width="100%">
+          An asset is a binary blob shared between data items that is replicated across the wearable
+ network on demand.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure holding references to a set of events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a></td>
+        <td class="jd-descrcol" width="100%">
+          A map of data supported by <code><a href="/reference/com/google/android/gms/wearable/PutDataMapRequest.html">PutDataMapRequest</a></code> and <code><a href="/reference/com/google/android/gms/wearable/DataMapItem.html">DataMapItem</a></code>s.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataMapItem.html">DataMapItem</a></td>
+        <td class="jd-descrcol" width="100%">
+          Creates a new dataItem-like object containing structured and serializable data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/PutDataMapRequest.html">PutDataMapRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          PutDataMapRequest is a DataMap-aware version of <code><a href="/reference/com/google/android/gms/wearable/PutDataRequest.html">PutDataRequest</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/PutDataRequest.html">PutDataRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          PutDataRequest is used to create new data items in the Android Wear network.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Wearable.html">Wearable</a></td>
+        <td class="jd-descrcol" width="100%">
+          An API for the Android Wear platform.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Wearable.WearableOptions.html">Wearable.WearableOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          API configuration parameters for Wearable API.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/Wearable.WearableOptions.Builder.html">Wearable.WearableOptions.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          &nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html">WearableListenerService</a></td>
+        <td class="jd-descrcol" width="100%">
+          Receives events from other nodes, such as data changes, messages or connectivity events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/WearableStatusCodes.html">WearableStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          Error codes for wearable API failures.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 

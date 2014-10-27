@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -863,7 +912,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#adSize">adSize</a></td>
-          <td class="jd-descrcol" width="100%">The size of the ad.</td>
+          <td class="jd-descrcol" width="100%">
+            The size of the ad.
+
+
+
+          </td>
       </tr>
       
     
@@ -874,7 +928,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#adSizes">adSizes</a></td>
-          <td class="jd-descrcol" width="100%">A comma-separated list of the supported ad sizes.</td>
+          <td class="jd-descrcol" width="100%">
+            A comma-separated list of the supported ad sizes.
+
+
+
+          </td>
       </tr>
       
     
@@ -885,7 +944,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#adUnitId">adUnitId</a></td>
-          <td class="jd-descrcol" width="100%">The ad unit ID.</td>
+          <td class="jd-descrcol" width="100%">
+            The ad unit ID.
+
+
+
+          </td>
       </tr>
       
     
@@ -896,7 +960,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#allowShortcuts">allowShortcuts</a></td>
-          <td class="jd-descrcol" width="100%">Whether or not global search is enabled for this corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            Whether or not global search is enabled for this corpus.
+
+
+
+          </td>
       </tr>
       
     
@@ -907,8 +976,13 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#appTheme">appTheme</a></td>
-          <td class="jd-descrcol" width="100%">Theme to be used for the Wallet selector
-         <p>Must be one of the following constant values.</td>
+          <td class="jd-descrcol" width="100%">
+            Theme to be used for the Wallet selector
+         <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
 
 
@@ -919,7 +993,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#buyButtonAppearance">buyButtonAppearance</a></td>
-          <td class="jd-descrcol" width="100%">Appearance of the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            Appearance of the buy button.
+
+
+
+          </td>
       </tr>
 
 
@@ -930,7 +1009,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#buyButtonHeight">buyButtonHeight</a></td>
-          <td class="jd-descrcol" width="100%">Height of the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            Height of the buy button.
+
+
+
+          </td>
       </tr>
 
 
@@ -941,7 +1025,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#buyButtonText">buyButtonText</a></td>
-          <td class="jd-descrcol" width="100%">Text on the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            Text on the buy button.
+
+
+
+          </td>
       </tr>
 
 
@@ -952,7 +1041,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#buyButtonWidth">buyButtonWidth</a></td>
-          <td class="jd-descrcol" width="100%">Width of the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            Width of the buy button.
+
+
+
+          </td>
       </tr>
 
 
@@ -963,7 +1057,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#cameraBearing">cameraBearing</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a floating point value, such as "<code>1.2</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a floating point value, such as "<code>1.2</code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -974,7 +1073,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLat">cameraTargetLat</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a floating point value, such as "<code>1.2</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a floating point value, such as "<code>1.2</code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -985,7 +1089,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLng">cameraTargetLng</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a floating point value, such as "<code>1.2</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a floating point value, such as "<code>1.2</code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -996,7 +1105,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#cameraTilt">cameraTilt</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a floating point value, such as "<code>1.2</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a floating point value, such as "<code>1.2</code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1007,7 +1121,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#cameraZoom">cameraZoom</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a floating point value, such as "<code>1.2</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a floating point value, such as "<code>1.2</code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1018,8 +1137,13 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#contentProviderUri">contentProviderUri</a></td>
-          <td class="jd-descrcol" width="100%">The URI of the content provider that the index should crawl to get the data for this
-    corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            The URI of the content provider that the index should crawl to get the data for this
+    corpus.
+
+
+
+          </td>
       </tr>
       
     
@@ -1030,7 +1154,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#corpusId">corpusId</a></td>
-          <td class="jd-descrcol" width="100%">The ID of the corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            The ID of the corpus.
+
+
+
+          </td>
       </tr>
       
     
@@ -1041,7 +1170,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#corpusVersion">corpusVersion</a></td>
-          <td class="jd-descrcol" width="100%">The version of the corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            The version of the corpus.
+
+
+
+          </td>
       </tr>
       
     
@@ -1052,7 +1186,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#defaultIntentAction">defaultIntentAction</a></td>
-          <td class="jd-descrcol" width="100%">The default value for the global search section <code>default_intent_action</code>.</td>
+          <td class="jd-descrcol" width="100%">
+            The default value for the global search section <code>default_intent_action</code>.
+
+
+
+          </td>
       </tr>
       
     
@@ -1063,7 +1202,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#defaultIntentActivity">defaultIntentActivity</a></td>
-          <td class="jd-descrcol" width="100%">The default value for the global search section <code>default_intent_aactivity</code>.</td>
+          <td class="jd-descrcol" width="100%">
+            The default value for the global search section <code>default_intent_aactivity</code>.
+
+
+
+          </td>
       </tr>
       
     
@@ -1074,7 +1218,12 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#defaultIntentData">defaultIntentData</a></td>
-          <td class="jd-descrcol" width="100%">The default value for the global search section <code>default_intent_data</code>.</td>
+          <td class="jd-descrcol" width="100%">
+            The default value for the global search section <code>default_intent_data</code>.
+
+
+
+          </td>
       </tr>
       
     
@@ -1085,8 +1234,13 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#environment">environment</a></td>
-          <td class="jd-descrcol" width="100%">Google Wallet environment to use
-         <p>Must be one of the following constant values.</td>
+          <td class="jd-descrcol" width="100%">
+            Google Wallet environment to use
+         <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
 
 
@@ -1097,7 +1251,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#featureType">featureType</a></td>
-          <td class="jd-descrcol" width="100%">The type of this feature.</td>
+          <td class="jd-descrcol" width="100%">
+            The type of this feature.
+
+
+
+          </td>
       </tr>
       
     
@@ -1108,8 +1267,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#fragmentMode">fragmentMode</a></td>
-          <td class="jd-descrcol" width="100%">Fragment mode
-         <p>Must be one of the following constant values.</td>
+          <td class="jd-descrcol" width="100%">
+            Fragment mode
+         <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
 
 
@@ -1120,9 +1284,14 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#fragmentStyle">fragmentStyle</a></td>
-          <td class="jd-descrcol" width="100%">A style resource specifing attributes to customize the look and feel of WalletFragment
+          <td class="jd-descrcol" width="100%">
+            A style resource specifing attributes to customize the look and feel of WalletFragment
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1133,7 +1302,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#indexPrefixes">indexPrefixes</a></td>
-          <td class="jd-descrcol" width="100%">Indicates if this section should support prefix matching.</td>
+          <td class="jd-descrcol" width="100%">
+            Indicates if this section should support prefix matching.
+
+
+
+          </td>
       </tr>
       
     
@@ -1144,7 +1318,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#inputEnabled">inputEnabled</a></td>
-          <td class="jd-descrcol" width="100%">Whether or not this corpus could be useful input for IME.</td>
+          <td class="jd-descrcol" width="100%">
+            Whether or not this corpus could be useful input for IME.
+
+
+
+          </td>
       </tr>
 
 
@@ -1155,7 +1334,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#mapType">mapType</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be one of the following constant values.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
       
     
@@ -1166,9 +1350,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsBackground">maskedWalletDetailsBackground</a></td>
-          <td class="jd-descrcol" width="100%">Masked wallet details background
+          <td class="jd-descrcol" width="100%">
+            Masked wallet details background
          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1179,9 +1368,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsButtonBackground">maskedWalletDetailsButtonBackground</a></td>
-          <td class="jd-descrcol" width="100%">"Change" button background in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            "Change" button background in masked wallet details view
          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1192,9 +1386,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsButtonTextAppearance">maskedWalletDetailsButtonTextAppearance</a></td>
-          <td class="jd-descrcol" width="100%">TextAppearance for the "Change" button in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            TextAppearance for the "Change" button in masked wallet details view
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1205,9 +1404,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsHeaderTextAppearance">maskedWalletDetailsHeaderTextAppearance</a></td>
-          <td class="jd-descrcol" width="100%">TextAppearance for headers describing masked wallet details
+          <td class="jd-descrcol" width="100%">
+            TextAppearance for headers describing masked wallet details
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1218,8 +1422,13 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsLogoImageType">maskedWalletDetailsLogoImageType</a></td>
-          <td class="jd-descrcol" width="100%">Type of the wallet logo image in masked wallet details view
-         <p>Must be one of the following constant values.</td>
+          <td class="jd-descrcol" width="100%">
+            Type of the wallet logo image in masked wallet details view
+         <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
       
     
@@ -1230,9 +1439,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsLogoTextColor">maskedWalletDetailsLogoTextColor</a></td>
-          <td class="jd-descrcol" width="100%">Color of the Google Wallet logo text in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            Color of the Google Wallet logo text in masked wallet details view
          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
-"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".</td>
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1243,9 +1457,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#maskedWalletDetailsTextAppearance">maskedWalletDetailsTextAppearance</a></td>
-          <td class="jd-descrcol" width="100%">TextAppearance for masked wallet details
+          <td class="jd-descrcol" width="100%">
+            TextAppearance for masked wallet details
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1256,7 +1475,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#noIndex">noIndex</a></td>
-          <td class="jd-descrcol" width="100%">Indicates if this section should not be indexed.</td>
+          <td class="jd-descrcol" width="100%">
+            Indicates if this section should not be indexed.
+
+
+
+          </td>
       </tr>
       
     
@@ -1267,7 +1491,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#paramName">paramName</a></td>
-          <td class="jd-descrcol" width="100%">The name of this parameter.</td>
+          <td class="jd-descrcol" width="100%">
+            The name of this parameter.
+
+
+
+          </td>
       </tr>
       
     
@@ -1278,7 +1507,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#paramValue">paramValue</a></td>
-          <td class="jd-descrcol" width="100%">The value of this parameter.</td>
+          <td class="jd-descrcol" width="100%">
+            The value of this parameter.
+
+
+
+          </td>
       </tr>
       
     
@@ -1289,7 +1523,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#schemaOrgProperty">schemaOrgProperty</a></td>
-          <td class="jd-descrcol" width="100%">Section corresponds to this schema.org property.</td>
+          <td class="jd-descrcol" width="100%">
+            Section corresponds to this schema.org property.
+
+
+
+          </td>
       </tr>
 
 
@@ -1300,7 +1539,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#schemaOrgType">schemaOrgType</a></td>
-          <td class="jd-descrcol" width="100%">schema.org type of documents in this corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            schema.org type of documents in this corpus.
+
+
+
+          </td>
       </tr>
 
 
@@ -1311,7 +1555,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#searchEnabled">searchEnabled</a></td>
-          <td class="jd-descrcol" width="100%">Whether or not global search is enabled for this app.</td>
+          <td class="jd-descrcol" width="100%">
+            Whether or not global search is enabled for this app.
+
+
+
+          </td>
       </tr>
       
     
@@ -1322,7 +1571,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#searchLabel">searchLabel</a></td>
-          <td class="jd-descrcol" width="100%">A localized string to identify this app's data within the global search app.</td>
+          <td class="jd-descrcol" width="100%">
+            A localized string to identify this app's data within the global search app.
+
+
+
+          </td>
       </tr>
       
     
@@ -1333,7 +1587,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionContent">sectionContent</a></td>
-          <td class="jd-descrcol" width="100%">The content of this global search section.</td>
+          <td class="jd-descrcol" width="100%">
+            The content of this global search section.
+
+
+
+          </td>
       </tr>
       
     
@@ -1344,7 +1603,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionFormat">sectionFormat</a></td>
-          <td class="jd-descrcol" width="100%">The format of the section.</td>
+          <td class="jd-descrcol" width="100%">
+            The format of the section.
+
+
+
+          </td>
       </tr>
       
     
@@ -1355,7 +1619,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionId">sectionId</a></td>
-          <td class="jd-descrcol" width="100%">The ID of the section.</td>
+          <td class="jd-descrcol" width="100%">
+            The ID of the section.
+
+
+
+          </td>
       </tr>
       
     
@@ -1366,7 +1635,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionType">sectionType</a></td>
-          <td class="jd-descrcol" width="100%">The type of global search section for this mapping.</td>
+          <td class="jd-descrcol" width="100%">
+            The type of global search section for this mapping.
+
+
+
+          </td>
       </tr>
       
     
@@ -1377,7 +1651,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionWeight">sectionWeight</a></td>
-          <td class="jd-descrcol" width="100%">The weight of the section.</td>
+          <td class="jd-descrcol" width="100%">
+            The weight of the section.
+
+
+
+          </td>
       </tr>
       
     
@@ -1388,7 +1667,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#settingsDescription">settingsDescription</a></td>
-          <td class="jd-descrcol" width="100%">A localized string to describe this apps data within the global search apps settings.</td>
+          <td class="jd-descrcol" width="100%">
+            A localized string to describe this apps data within the global search apps settings.
+
+
+
+          </td>
       </tr>
       
     
@@ -1399,7 +1683,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sourceClass">sourceClass</a></td>
-          <td class="jd-descrcol" width="100%">Class of the source.</td>
+          <td class="jd-descrcol" width="100%">
+            Class of the source.
+
+
+
+          </td>
       </tr>
       
     
@@ -1410,7 +1699,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#subsectionSeparator">subsectionSeparator</a></td>
-          <td class="jd-descrcol" width="100%">Subsection separator.</td>
+          <td class="jd-descrcol" width="100%">
+            Subsection separator.
+
+
+
+          </td>
       </tr>
       
     
@@ -1421,7 +1715,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#toAddressesSection">toAddressesSection</a></td>
-          <td class="jd-descrcol" width="100%">Sections containing entities communicated with in a given document.</td>
+          <td class="jd-descrcol" width="100%">
+            Sections containing entities communicated with in a given document.
+
+
+
+          </td>
       </tr>
 
 
@@ -1432,7 +1731,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#trimmable">trimmable</a></td>
-          <td class="jd-descrcol" width="100%">Indicates if documents from this corpus can be trimmed when the index reaches its quota.</td>
+          <td class="jd-descrcol" width="100%">
+            Indicates if documents from this corpus can be trimmed when the index reaches its quota.
+
+
+
+          </td>
       </tr>
 
 
@@ -1443,7 +1747,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1454,7 +1763,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiRotateGestures">uiRotateGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1465,7 +1779,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiScrollGestures">uiScrollGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1476,7 +1795,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiTiltGestures">uiTiltGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1487,7 +1811,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiZoomControls">uiZoomControls</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1498,7 +1827,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiZoomGestures">uiZoomGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1509,7 +1843,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#useViewLifecycle">useViewLifecycle</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1520,9 +1859,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></td>
-          <td class="jd-descrcol" width="100%">If this section is non-empty, the document is considered to be input by the user if
+          <td class="jd-descrcol" width="100%">
+            If this section is non-empty, the document is considered to be input by the user if
         either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
-        value.</td>
+        value.
+
+
+
+          </td>
       </tr>
 
 
@@ -1533,7 +1877,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#userInputTag">userInputTag</a></td>
-          <td class="jd-descrcol" width="100%">Tag name for documents that contain data input by the user.</td>
+          <td class="jd-descrcol" width="100%">
+            Tag name for documents that contain data input by the user.
+
+
+
+          </td>
       </tr>
 
 
@@ -1544,8 +1893,13 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></td>
-          <td class="jd-descrcol" width="100%">If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
-        to be considered input by user.</td>
+          <td class="jd-descrcol" width="100%">
+            If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
+        to be considered input by user.
+
+
+
+          </td>
       </tr>
 
 
@@ -1556,7 +1910,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#zOrderOnTop">zOrderOnTop</a></td>
-          <td class="jd-descrcol" width="100%"><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1862,6 +2221,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The size of the ad. It must be one of BANNER, FULL_BANNER, LEADERBOARD,
     MEDIUM_RECTANGLE, SMART_BANNER, WIDE_SKYSCRAPER, or
     &lt;width&gt;x&lt;height&gt;.
@@ -1900,6 +2262,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A comma-separated list of the supported ad sizes. The sizes must be one of
     BANNER, FULL_BANNER, LEADERBOARD, MEDIUM_RECTANGLE, SMART_BANNER,
     WIDE_SKYSCRAPER, or &lt;width&gt;x&lt;height&gt;.
@@ -1938,6 +2303,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The ad unit ID. 
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -1973,6 +2341,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Whether or not global search is enabled for this corpus. Optional; defaults to
       <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>GlobalSearchCorpus</code>
       element did not exist.
@@ -2018,6 +2389,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Theme to be used for the Wallet selector
          <p>Must be one of the following constant values.</p>
 <table>
@@ -2055,6 +2429,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Appearance of the buy button. Must be one of "classic", "grayscale" and "monochrome"
          <p>Must be one of the following constant values.</p>
@@ -2094,6 +2471,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Height of the buy button. This includes an 8dp padding (4dp on each side) used for
              pressed and focused states of the button. The value can be a specific height, e.g.
@@ -2144,6 +2524,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Text on the buy button. Must be one of "buy_with_google", "buy_now" and "book_now"
          <p>Must be one of the following constant values.</p>
 <table>
@@ -2182,6 +2565,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Width of the buy button. This includes an 8dp padding (4dp on each side) used for
              pressed and focused states of the button. The value can be a specific width, e.g.
@@ -2232,6 +2618,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -2266,6 +2655,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -2300,6 +2692,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -2334,6 +2729,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -2368,6 +2766,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -2402,6 +2803,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The URI of the content provider that the index should crawl to get the data for this
     corpus. Required. This string must not change between configurations.
 
@@ -2439,6 +2843,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The ID of the corpus. Required. This string must not change between configurations. 
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -2474,6 +2881,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The version of the corpus. Optional; defaults to <code>"0"</code>. This string must not change
       between configurations.
 
@@ -2510,6 +2920,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The default value for the global search section <code>default_intent_action</code>. Optional.
       This string must not change between configurations.
@@ -2548,6 +2961,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The default value for the global search section <code>default_intent_aactivity</code>. Optional.
       This string must not change between configurations.
 
@@ -2585,6 +3001,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The default value for the global search section <code>default_intent_data</code>. Optional.
       This string must not change between configurations.
 
@@ -2621,6 +3040,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Google Wallet environment to use
          <p>Must be one of the following constant values.</p>
@@ -2660,6 +3082,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The type of this feature. Required.
          <p>Must be one of the following constant values.</p>
@@ -2711,6 +3136,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Fragment mode
          <p>Must be one of the following constant values.</p>
 <table>
@@ -2749,6 +3177,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A style resource specifing attributes to customize the look and feel of WalletFragment
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -2779,6 +3210,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Indicates if this section should support prefix matching. Optional; defaults to
       <code>false</code>.
@@ -2817,6 +3251,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Whether or not this corpus could be useful input for IME. Optional; defaults to
         <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>IMECorpus</code>
         element did not exist.
@@ -2854,6 +3291,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be one of the following constant values.</p>
 <table>
@@ -2895,6 +3335,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Masked wallet details background
          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -2928,6 +3371,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>"Change" button background in masked wallet details view
          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -2961,6 +3407,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>TextAppearance for the "Change" button in masked wallet details view
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -2992,6 +3441,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>TextAppearance for headers describing masked wallet details
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -3023,6 +3475,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Type of the wallet logo image in masked wallet details view
          <p>Must be one of the following constant values.</p>
 <table>
@@ -3061,6 +3516,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Color of the Google Wallet logo text in masked wallet details view
          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
@@ -3097,6 +3555,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>TextAppearance for masked wallet details
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -3128,6 +3589,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates if this section should not be indexed. Optional; defaults to <code>false</code>. 
          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
@@ -3163,6 +3627,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The name of this parameter. Required. 
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -3198,6 +3665,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The value of this parameter. Optional. 
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -3232,6 +3702,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Section corresponds to this schema.org property. Optional.
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -3268,6 +3741,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>schema.org type of documents in this corpus. Optional.
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -3303,6 +3779,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Whether or not global search is enabled for this app. Optional; defaults to <code>true</code>.
       If set to <code>false</code>, it will be treated as if the <code>GlobalSearch</code> element did not
       exist.
@@ -3341,6 +3820,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A localized string to identify this app's data within the global search app. Required.
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -3376,6 +3858,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The content of this global search section. This is a global search section template string.
       It should contain a reference to a string which can change between configurations.
 
@@ -3413,6 +3898,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The format of the section. Optional; default to <code>plain</code>. 
          <p>Must be one of the following constant values.</p>
 <table>
@@ -3453,6 +3941,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The ID of the section. Required. This string must not change between configurations. 
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -3488,6 +3979,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The type of global search section for this mapping. 
          <p>Must be one of the following constant values.</p>
 <table>
@@ -3533,6 +4027,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The weight of the section. Optional; defaults to 1. 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
@@ -3568,6 +4065,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A localized string to describe this apps data within the global search apps settings.
       Optional.
 
@@ -3604,6 +4104,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Class of the source. One of the following: email, contact, and instant-message.
          <p>Must be one of the following constant values.</p>
@@ -3644,6 +4147,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Subsection separator. Optional. If not provided, the section is not split into
       subsections.
 
@@ -3680,6 +4186,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sections containing entities communicated with in a given document.
         Entities can be names, email addresses or phone numbers.
@@ -3718,6 +4227,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates if documents from this corpus can be trimmed when the index reaches its quota.
       Optional; defaults to <code>true</code>.
 
@@ -3755,6 +4267,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3789,6 +4304,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3823,6 +4341,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3857,6 +4378,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3891,6 +4415,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3925,6 +4452,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3959,6 +4489,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -3992,6 +4525,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>If this section is non-empty, the document is considered to be input by the user if
         either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
@@ -4031,6 +4567,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Tag name for documents that contain data input by the user. Optional.
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
@@ -4065,6 +4604,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
         to be considered input by user.
@@ -4103,6 +4645,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -4149,6 +4694,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

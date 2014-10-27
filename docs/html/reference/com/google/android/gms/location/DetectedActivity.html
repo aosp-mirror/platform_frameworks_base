@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -805,6 +851,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -890,56 +939,96 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#IN_VEHICLE">IN_VEHICLE</a></td>
-        <td class="jd-descrcol" width="100%">The device is in a vehicle, such as a car.</td>
+        <td class="jd-descrcol" width="100%">
+          The device is in a vehicle, such as a car.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#ON_BICYCLE">ON_BICYCLE</a></td>
-        <td class="jd-descrcol" width="100%">The device is on a bicycle.</td>
+        <td class="jd-descrcol" width="100%">
+          The device is on a bicycle.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#ON_FOOT">ON_FOOT</a></td>
-        <td class="jd-descrcol" width="100%">The device is on a user who is walking or running.</td>
+        <td class="jd-descrcol" width="100%">
+          The device is on a user who is walking or running.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#RUNNING">RUNNING</a></td>
-        <td class="jd-descrcol" width="100%">The device is on a user who is running.</td>
+        <td class="jd-descrcol" width="100%">
+          The device is on a user who is running.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#STILL">STILL</a></td>
-        <td class="jd-descrcol" width="100%">The device is still (not moving).</td>
+        <td class="jd-descrcol" width="100%">
+          The device is still (not moving).
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#TILTING">TILTING</a></td>
-        <td class="jd-descrcol" width="100%">The device angle relative to gravity changed significantly.</td>
+        <td class="jd-descrcol" width="100%">
+          The device angle relative to gravity changed significantly.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#UNKNOWN">UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">Unable to detect the current activity.</td>
+        <td class="jd-descrcol" width="100%">
+          Unable to detect the current activity.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#WALKING">WALKING</a></td>
-        <td class="jd-descrcol" width="100%">The device is on a user who is walking.</td>
+        <td class="jd-descrcol" width="100%">
+          The device is on a user who is walking.
+
+
+
+        </td>
     </tr>
 
 
@@ -978,14 +1067,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
@@ -1016,7 +1115,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1043,7 +1147,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           DetectedActivityCreator</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
       
     
@@ -1074,7 +1183,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#DetectedActivity(int, int)">DetectedActivity</a></span>(int activityType, int confidence)</nobr>
         
-        <div class="jd-descrdiv">Constructs a DetectedActivity.</div>
+        <div class="jd-descrdiv">
+          Constructs a DetectedActivity.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1121,8 +1235,13 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#getConfidence()">getConfidence</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns a value from 0 to 100 indicating the likelihood that the user is performing this
- activity.</div>
+        <div class="jd-descrdiv">
+          Returns a value from 0 to 100 indicating the likelihood that the user is performing this
+ activity.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1140,7 +1259,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/DetectedActivity.html#getType()">getType</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the type of activity that was detected.</div>
+        <div class="jd-descrdiv">
+          Returns the type of activity that was detected.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1502,6 +1626,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The device is in a vehicle, such as a car.
 </p></div>
 
@@ -1541,6 +1668,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The device is on a bicycle.
 </p></div>
 
@@ -1580,6 +1710,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The device is on a user who is walking or running.
 </p></div>
 
@@ -1618,6 +1751,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The device is on a user who is running. This is a sub-activity of ON_FOOT.
 </p></div>
@@ -1658,6 +1794,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The device is still (not moving).
 </p></div>
 
@@ -1697,6 +1836,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The device angle relative to gravity changed significantly. This often occurs when a device
  is picked up from a desk or a user who is sitting stands up.
 </p></div>
@@ -1737,6 +1879,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Unable to detect the current activity.
 </p></div>
 
@@ -1775,6 +1920,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The device is on a user who is walking. This is a sub-activity of ON_FOOT.
 </p></div>
@@ -1825,6 +1973,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1865,6 +2016,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a DetectedActivity.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1924,6 +2078,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1953,6 +2110,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a value from 0 to 100 indicating the likelihood that the user is performing this
  activity.
  <p>
@@ -1997,6 +2157,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the type of activity that was detected.
 </p></div>
 
@@ -2027,6 +2190,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2056,6 +2222,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

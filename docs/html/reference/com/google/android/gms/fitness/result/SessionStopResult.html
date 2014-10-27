@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -808,6 +854,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -842,7 +891,7 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Result of a SessionStopRequest.
+<p itemprop="articleBody">Result of <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">stopSession(GoogleApiClient, String)</a></code>.
  <p>
  The method <code><a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html#getStatus()">getStatus()</a></code> can be be used to confirm if the request was successful.
  <p>
@@ -921,14 +970,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -961,7 +1020,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -988,7 +1052,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           Creator&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html">SessionStopResult</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
 
 
@@ -1055,7 +1124,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html#getSessions()">getSessions</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the list of sessions that were stopped by the request.</div>
+        <div class="jd-descrdiv">
+          Returns the list of sessions that were stopped by the request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1073,7 +1147,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html#getStatus()">getStatus</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the status of the call to Google Fit.</div>
+        <div class="jd-descrdiv">
+          Returns the status of the call to Google Fit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1496,6 +1575,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
 
@@ -1544,6 +1626,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1573,6 +1658,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1601,6 +1689,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the list of sessions that were stopped by the request.  Returns an empty list if no
  active session was stopped.
@@ -1632,6 +1723,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the status of the call to Google Fit.  <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> can be used to
  determine whether the call succeeded.  In the case of failure, you can inspect the status to
@@ -1665,6 +1759,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1694,6 +1791,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1722,6 +1822,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

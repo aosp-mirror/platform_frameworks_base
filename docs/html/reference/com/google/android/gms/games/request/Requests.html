@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -808,7 +857,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.LoadRequestsResult.html">Requests.LoadRequestsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when requests have loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when requests have loaded.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -820,7 +874,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.UpdateRequestsResult.html">Requests.UpdateRequestsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when requests are updated.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when requests are updated.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -845,77 +904,132 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#EXTRA_REQUESTS">EXTRA_REQUESTS</a></td>
-        <td class="jd-descrcol" width="100%">Used to return a list of <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> objects.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to return a list of <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> objects.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_DEFAULT_LIFETIME_DAYS">REQUEST_DEFAULT_LIFETIME_DAYS</a></td>
-        <td class="jd-descrcol" width="100%">Value used to signal the server to use the default request lifetime.</td>
+        <td class="jd-descrcol" width="100%">
+          Value used to signal the server to use the default request lifetime.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_DIRECTION_INBOUND">REQUEST_DIRECTION_INBOUND</a></td>
-        <td class="jd-descrcol" width="100%">Load only inbound requests (where the loading player is the recipient).</td>
+        <td class="jd-descrcol" width="100%">
+          Load only inbound requests (where the loading player is the recipient).
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_DIRECTION_OUTBOUND">REQUEST_DIRECTION_OUTBOUND</a></td>
-        <td class="jd-descrcol" width="100%">Load only outbound requests (where the loading player is the sender).</td>
+        <td class="jd-descrcol" width="100%">
+          Load only outbound requests (where the loading player is the sender).
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_FAIL">REQUEST_UPDATE_OUTCOME_FAIL</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the request update failed.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the request update failed.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_RETRY">REQUEST_UPDATE_OUTCOME_RETRY</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the request update failed but should be retried.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the request update failed but should be retried.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_SUCCESS">REQUEST_UPDATE_OUTCOME_SUCCESS</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the request update was a success.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the request update was a success.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_TYPE_ACCEPT">REQUEST_UPDATE_TYPE_ACCEPT</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the request should be accepted.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the request should be accepted.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_TYPE_DISMISS">REQUEST_UPDATE_TYPE_DISMISS</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the request should be dismissed.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the request should be dismissed.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#SORT_ORDER_EXPIRING_SOON_FIRST">SORT_ORDER_EXPIRING_SOON_FIRST</a></td>
-        <td class="jd-descrcol" width="100%">Sort requests with the requests expiring soonest first.</td>
+        <td class="jd-descrcol" width="100%">
+          Sort requests with the requests expiring soonest first.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.html#SORT_ORDER_SOCIAL_AGGREGATION">SORT_ORDER_SOCIAL_AGGREGATION</a></td>
-        <td class="jd-descrcol" width="100%">Sort requests such that requests from players in the user's circles are returned first.</td>
+        <td class="jd-descrcol" width="100%">
+          Sort requests such that requests from players in the user's circles are returned first.
+
+
+
+        </td>
     </tr>
 
 
@@ -955,7 +1069,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#acceptRequest(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">acceptRequest</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String requestId)</nobr>
 
-        <div class="jd-descrdiv">Accepts the specified request.</div>
+        <div class="jd-descrdiv">
+          Accepts the specified request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -973,7 +1092,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#acceptRequests(com.google.android.gms.common.api.GoogleApiClient, java.util.List<java.lang.String>)">acceptRequests</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, List&lt;String&gt; requestIds)</nobr>
 
-        <div class="jd-descrdiv">Accepts the specified requests as a batch operation.</div>
+        <div class="jd-descrdiv">
+          Accepts the specified requests as a batch operation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -991,7 +1115,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#dismissRequest(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">dismissRequest</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String requestId)</nobr>
 
-        <div class="jd-descrdiv">Dismisses the specified request.</div>
+        <div class="jd-descrdiv">
+          Dismisses the specified request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1009,7 +1138,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#dismissRequests(com.google.android.gms.common.api.GoogleApiClient, java.util.List<java.lang.String>)">dismissRequests</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, List&lt;String&gt; requestIds)</nobr>
 
-        <div class="jd-descrdiv">Dismisses the specified requests as a batch operation.</div>
+        <div class="jd-descrdiv">
+          Dismisses the specified requests as a batch operation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1027,7 +1161,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#getGameRequestsFromBundle(android.os.Bundle)">getGameRequestsFromBundle</a></span>(Bundle extras)</nobr>
 
-        <div class="jd-descrdiv">This method takes a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> list provided.</div>
+        <div class="jd-descrdiv">
+          This method takes a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> list provided.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1045,8 +1184,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#getGameRequestsFromInboxResponse(android.content.Intent)">getGameRequestsFromInboxResponse</a></span>(Intent response)</nobr>
 
-        <div class="jd-descrdiv">This method takes an <code><a href="/reference/android/content/Intent.html">Intent</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> list provided
- as an extra.</div>
+        <div class="jd-descrdiv">
+          This method takes an <code><a href="/reference/android/content/Intent.html">Intent</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> list provided
+ as an extra.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1064,7 +1208,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#getInboxIntent(com.google.android.gms.common.api.GoogleApiClient)">getInboxIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Returns an intent that will let the user see and manage any outstanding requests.</div>
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user see and manage any outstanding requests.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1082,7 +1231,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#getMaxLifetimeDays(com.google.android.gms.common.api.GoogleApiClient)">getMaxLifetimeDays</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Gets the maximum lifetime of a request in days.</div>
+        <div class="jd-descrdiv">
+          Gets the maximum lifetime of a request in days.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1100,7 +1254,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#getMaxPayloadSize(com.google.android.gms.common.api.GoogleApiClient)">getMaxPayloadSize</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Gets the maximum data size of a request payload in bytes.</div>
+        <div class="jd-descrdiv">
+          Gets the maximum data size of a request payload in bytes.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1118,7 +1277,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#getSendIntent(com.google.android.gms.common.api.GoogleApiClient, int, byte[], int, android.graphics.Bitmap, java.lang.String)">getSendIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int type, byte[] payload, int requestLifetimeDays, Bitmap icon, String description)</nobr>
 
-        <div class="jd-descrdiv">Returns an intent that will let the user send a request to another player.</div>
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user send a request to another player.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1136,7 +1300,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#loadRequests(com.google.android.gms.common.api.GoogleApiClient, int, int, int)">loadRequests</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int requestDirection, int types, int sortOrder)</nobr>
 
-        <div class="jd-descrdiv">Loads requests for the current game.</div>
+        <div class="jd-descrdiv">
+          Loads requests for the current game.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1154,7 +1323,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#registerRequestListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.request.OnRequestReceivedListener)">registerRequestListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/request/OnRequestReceivedListener.html">OnRequestReceivedListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Register a listener to intercept incoming requests for the currently signed-in user.</div>
+        <div class="jd-descrdiv">
+          Register a listener to intercept incoming requests for the currently signed-in user.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1172,7 +1346,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/request/Requests.html#unregisterRequestListener(com.google.android.gms.common.api.GoogleApiClient)">unregisterRequestListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Unregisters this client's request listener, if any.</div>
+        <div class="jd-descrdiv">
+          Unregisters this client's request listener, if any.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1232,6 +1411,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to return a list of <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> objects. Retrieve with
  <code><a href="/reference/android/content/Intent.html#getParcelableArrayListExtra(java.lang.String)">getParcelableArrayListExtra(String)</a></code> or
  <code><a href="/reference/android/os/Bundle.html#getParcelableArrayList(java.lang.String)">getParcelableArrayList(String)</a></code>.
@@ -1272,6 +1454,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Value used to signal the server to use the default request lifetime.
 </p></div>
 
@@ -1310,6 +1495,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Load only inbound requests (where the loading player is the recipient).
 </p></div>
@@ -1350,6 +1538,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Load only outbound requests (where the loading player is the sender).
 </p></div>
 
@@ -1389,6 +1580,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the request update failed. </p></div>
 
 
@@ -1426,6 +1620,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the request update failed but should be retried. </p></div>
 
@@ -1465,6 +1662,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the request update was a success. </p></div>
 
 
@@ -1502,6 +1702,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the request should be accepted. </p></div>
 
@@ -1541,6 +1744,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the request should be dismissed. </p></div>
 
 
@@ -1578,6 +1784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sort requests with the requests expiring soonest first.
 </p></div>
@@ -1617,6 +1826,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sort requests such that requests from players in the user's circles are returned first.
 </p></div>
@@ -1680,6 +1892,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Accepts the specified request. If the result of this operation is
  <code><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_SUCCESS">REQUEST_UPDATE_OUTCOME_SUCCESS</a></code>, the player successfully accepted the
  request.
@@ -1731,6 +1946,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Accepts the specified requests as a batch operation. If the result of this operation is
  <code><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_SUCCESS">REQUEST_UPDATE_OUTCOME_SUCCESS</a></code>, the player successfully accepted the
@@ -1784,6 +2002,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Dismisses the specified request. If the result of this operation is
  <code><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_SUCCESS">REQUEST_UPDATE_OUTCOME_SUCCESS</a></code>, the request will be deleted from local
  storage. Note that dismissing a request does not inform the sender of the action.
@@ -1835,6 +2056,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Dismisses the specified requests as a batch operation. If the result of this operation is
  <code><a href="/reference/com/google/android/gms/games/request/Requests.html#REQUEST_UPDATE_OUTCOME_SUCCESS">REQUEST_UPDATE_OUTCOME_SUCCESS</a></code>, the requests will be deleted from local
@@ -1888,6 +2112,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>This method takes a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> list provided.
  If the <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> is invalid or does not contain the correct data, this method returns an
  empty list.</p></div>
@@ -1932,6 +2159,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>This method takes an <code><a href="/reference/android/content/Intent.html">Intent</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/request/GameRequest.html">GameRequest</a></code> list provided
  as an extra. Specifically, this method is useful in parsing the returned <code><a href="/reference/android/content/Intent.html">Intent</a></code> that
@@ -1985,6 +2215,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user see and manage any outstanding requests. Note that
  this must be invoked using <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that the
  identity of the calling package can be established.
@@ -2037,6 +2270,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum lifetime of a request in days. This is guaranteed to be at least 14 days.
  <p>
  If the service cannot be reached for some reason, this will return -1.
@@ -2084,6 +2320,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum data size of a request payload in bytes. Guaranteed to be at least 2 KB. May
  increase in the future.
@@ -2133,6 +2372,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user send a request to another player. Note that this
  must be invoked using <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that the
@@ -2214,6 +2456,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads requests for the current game. Requests with any of the specified types will be
  returned.
  <p>
@@ -2281,6 +2526,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Register a listener to intercept incoming requests for the currently signed-in user. If a
  listener is registered by this method, the incoming request will not generate a status bar
  notification as long as this client remains connected.
@@ -2333,6 +2581,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters this client's request listener, if any. Any new requests will generate status bar
  notifications as normal.
