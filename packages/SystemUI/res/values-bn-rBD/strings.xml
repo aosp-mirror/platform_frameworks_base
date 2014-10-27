@@ -275,7 +275,8 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সতর্কতা"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"আপনার সাম্প্রতিক স্ক্রীনগুলো এখানে দেখা যাবে"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"অ্যাপ্লিকেশানের তথ্য"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"অ্যাপ্লিকেশানে লক করুন"</string>
+    <!-- no translation found for recents_lock_to_app_button_label (6942899049072506044) -->
+    <skip />
     <string name="recents_search_bar_label" msgid="8074997400187836677">"অনুসন্ধান"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> শুরু করা যায়নি৷"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"চার্জ হয়েছে"</string>
