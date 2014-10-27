@@ -60,7 +60,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return whether it hung up
      */
-    boolean endCallForSubscriber(long subId);
+    boolean endCallForSubscriber(int subId);
 
     /**
      * Answer the currently-ringing call.
@@ -94,7 +94,7 @@ interface ITelephony {
      * TODO: this should be a oneway call (especially since it's called
      * directly from the key queue thread).
      */
-    void answerRingingCallForSubscriber(long subId);
+    void answerRingingCallForSubscriber(int subId);
 
     /**
      * Silence the ringer if an incoming call is currently ringing.
@@ -121,7 +121,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return true if the phone state is OFFHOOK.
      */
-    boolean isOffhookForSubscriber(long subId);
+    boolean isOffhookForSubscriber(int subId);
 
     /**
      * Check if an incoming phone call is ringing or call waiting
@@ -130,7 +130,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return true if the phone state is RINGING.
      */
-    boolean isRingingForSubscriber(long subId);
+    boolean isRingingForSubscriber(int subId);
 
     /**
      * Check if an incoming phone call is ringing or call waiting.
@@ -150,7 +150,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return true if the phone state is IDLE.
      */
-    boolean isIdleForSubscriber(long subId);
+    boolean isIdleForSubscriber(int subId);
 
     /**
      * Check to see if the radio is on or not.
@@ -163,7 +163,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return returns true if the radio is on.
      */
-    boolean isRadioOnForSubscriber(long subId);
+    boolean isRadioOnForSubscriber(int subId);
 
     /**
      * Check if the SIM pin lock is enabled.
@@ -185,7 +185,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return whether the operation was a success.
      */
-    boolean supplyPinForSubscriber(long subId, String pin);
+    boolean supplyPinForSubscriber(int subId, String pin);
 
     /**
      * Supply puk to unlock the SIM and set SIM pin to new pin.
@@ -204,7 +204,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return whether the operation was a success.
      */
-    boolean supplyPukForSubscriber(long subId, String puk, String pin);
+    boolean supplyPukForSubscriber(int subId, String puk, String pin);
 
     /**
      * Supply a pin to unlock the SIM.  Blocks until a result is determined.
@@ -222,7 +222,7 @@ interface ITelephony {
      * @return retValue[0] = Phone.PIN_RESULT_SUCCESS on success. Otherwise error code
      *         retValue[1] = number of attempts remaining if known otherwise -1
      */
-    int[] supplyPinReportResultForSubscriber(long subId, String pin);
+    int[] supplyPinReportResultForSubscriber(int subId, String pin);
 
     /**
      * Supply puk to unlock the SIM and set SIM pin to new pin.
@@ -244,7 +244,7 @@ interface ITelephony {
      * @return retValue[0] = Phone.PIN_RESULT_SUCCESS on success. Otherwise error code
      *         retValue[1] = number of attempts remaining if known otherwise -1
      */
-    int[] supplyPukReportResultForSubscriber(long subId, String puk, String pin);
+    int[] supplyPukReportResultForSubscriber(int subId, String puk, String pin);
 
     /**
      * Handles PIN MMI commands (PIN/PIN2/PUK/PUK2), which are initiated
@@ -263,7 +263,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return true if MMI command is executed.
      */
-    boolean handlePinMmiForSubscriber(long subId, String dialString);
+    boolean handlePinMmiForSubscriber(int subId, String dialString);
 
     /**
      * Toggles the radio on or off.
@@ -274,7 +274,7 @@ interface ITelephony {
      * Toggles the radio on or off on particular subId.
      * @param subId user preferred subId.
      */
-    void toggleRadioOnOffForSubscriber(long subId);
+    void toggleRadioOnOffForSubscriber(int subId);
 
     /**
      * Set the radio to on or off
@@ -285,7 +285,7 @@ interface ITelephony {
      * Set the radio to on or off on particular subId.
      * @param subId user preferred subId.
      */
-    boolean setRadioForSubscriber(long subId, boolean turnOn);
+    boolean setRadioForSubscriber(int subId, boolean turnOn);
 
     /**
      * Set the radio to on or off unconditionally
@@ -301,7 +301,7 @@ interface ITelephony {
      * Request to update location information for a subscrition in service state
      * @param subId user preferred subId.
      */
-    void updateServiceLocationForSubscriber(long subId);
+    void updateServiceLocationForSubscriber(int subId);
 
     /**
      * Enable location update notifications.
@@ -312,7 +312,7 @@ interface ITelephony {
      * Enable location update notifications.
      * @param subId user preferred subId.
      */
-    void enableLocationUpdatesForSubscriber(long subId);
+    void enableLocationUpdatesForSubscriber(int subId);
 
     /**
      * Disable location update notifications.
@@ -323,7 +323,7 @@ interface ITelephony {
      * Disable location update notifications.
      * @param subId user preferred subId.
      */
-    void disableLocationUpdatesForSubscriber(long subId);
+    void disableLocationUpdatesForSubscriber(int subId);
 
     /**
      * Allow mobile data connections.
@@ -352,7 +352,7 @@ interface ITelephony {
     /**
      * Returns the call state for a subId.
      */
-     int getCallStateForSubscriber(long subId);
+     int getCallStateForSubscriber(int subId);
 
      int getDataActivity();
      int getDataState();
@@ -370,7 +370,7 @@ interface ITelephony {
      * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
      * @param subId user preferred subId.
      */
-    int getActivePhoneTypeForSubscriber(long subId);
+    int getActivePhoneTypeForSubscriber(int subId);
 
     /**
      * Returns the CDMA ERI icon index to display
@@ -381,7 +381,7 @@ interface ITelephony {
      * Returns the CDMA ERI icon index to display on particular subId.
      * @param subId user preferred subId.
      */
-    int getCdmaEriIconIndexForSubscriber(long subId);
+    int getCdmaEriIconIndexForSubscriber(int subId);
 
     /**
      * Returns the CDMA ERI icon mode,
@@ -396,7 +396,7 @@ interface ITelephony {
      * 1 - FLASHING
      * @param subId user preferred subId.
      */
-    int getCdmaEriIconModeForSubscriber(long subId);
+    int getCdmaEriIconModeForSubscriber(int subId);
 
     /**
      * Returns the CDMA ERI text,
@@ -407,7 +407,7 @@ interface ITelephony {
      * Returns the CDMA ERI text for particular subId,
      * @param subId user preferred subId.
      */
-    String getCdmaEriTextForSubscriber(long subId);
+    String getCdmaEriTextForSubscriber(int subId);
 
     /**
      * Returns true if OTA service provisioning needs to run.
@@ -426,7 +426,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * Returns the unread count of voicemails
      */
-    int getVoiceMessageCountForSubscriber(long subId);
+    int getVoiceMessageCountForSubscriber(int subId);
 
     /**
       * Returns the network type for data transmission
@@ -438,7 +438,7 @@ interface ITelephony {
      * @param subId user preferred subId.
      * Returns the network type
      */
-    int getNetworkTypeForSubscriber(long subId);
+    int getNetworkTypeForSubscriber(int subId);
 
     /**
       * Returns the network type for data transmission
@@ -450,7 +450,7 @@ interface ITelephony {
       * @param subId user preferred subId.
       * Returns the network type
       */
-    int getDataNetworkTypeForSubscriber(long subId);
+    int getDataNetworkTypeForSubscriber(int subId);
 
     /**
       * Returns the network type for voice
@@ -462,7 +462,7 @@ interface ITelephony {
       * @param subId user preferred subId.
       * Returns the network type
       */
-    int getVoiceNetworkTypeForSubscriber(long subId);
+    int getVoiceNetworkTypeForSubscriber(int subId);
 
     /**
      * Return true if an ICC card is present
@@ -474,7 +474,7 @@ interface ITelephony {
      * @param slotId user preferred slotId.
      * Return true if an ICC card is present
      */
-    boolean hasIccCardUsingSlotId(long slotId);
+    boolean hasIccCardUsingSlotId(int slotId);
 
     /**
      * Return if the current radio is LTE on CDMA. This
@@ -494,7 +494,7 @@ interface ITelephony {
      * @return {@link Phone#LTE_ON_CDMA_UNKNOWN}, {@link Phone#LTE_ON_CDMA_FALSE}
      * or {@link PHone#LTE_ON_CDMA_TRUE}
      */
-    int getLteOnCdmaModeForSubscriber(long subId);
+    int getLteOnCdmaModeForSubscriber(int subId);
 
     /**
      * Returns the all observed cell information of the device.
@@ -689,13 +689,13 @@ interface ITelephony {
      * Return MDN string for CDMA phone.
      * @param subId user preferred subId.
      */
-    String getCdmaMdn(long subId);
+    String getCdmaMdn(int subId);
 
     /**
      * Return MIN string for CDMA phone.
      * @param subId user preferred subId.
      */
-    String getCdmaMin(long subId);
+    String getCdmaMin(int subId);
 
     /**
      * Has the calling application been granted special privileges by the carrier.
@@ -733,7 +733,7 @@ interface ITelephony {
      * @param subId for which the simplified UI should be enabled or disabled.
      * @param enable true means enabling the simplified UI.
      */
-    void enableSimplifiedNetworkSettingsForSubscriber(long subId, boolean enable);
+    void enableSimplifiedNetworkSettingsForSubscriber(int subId, boolean enable);
 
     /**
      * Get whether a simplified Mobile Network Settings UI is enabled for the
@@ -742,7 +742,7 @@ interface ITelephony {
      * @param subId for which the simplified UI should be enabled or disabled.
      * @return true if the simplified UI is enabled.
      */
-    boolean getSimplifiedNetworkSettingsEnabledForSubscriber(long subId);
+    boolean getSimplifiedNetworkSettingsEnabledForSubscriber(int subId);
 
     /**
      * Set the line 1 phone number string and its alphatag for the current ICCID
@@ -754,7 +754,7 @@ interface ITelephony {
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
      */
-    void setLine1NumberForDisplayForSubscriber(long subId, String alphaTag, String number);
+    void setLine1NumberForDisplayForSubscriber(int subId, String alphaTag, String number);
 
     /**
      * Returns the displayed dialing number string if it was set previously via
@@ -763,7 +763,7 @@ interface ITelephony {
      * @param subId whose dialing number for line 1 is returned.
      * @return the displayed dialing number if set, or null if not set.
      */
-    String getLine1NumberForDisplay(long subId);
+    String getLine1NumberForDisplay(int subId);
 
     /**
      * Returns the displayed alphatag of the dialing number if it was set
@@ -773,7 +773,7 @@ interface ITelephony {
      * @return the displayed alphatag of the dialing number if set, or null if
      *         not set.
      */
-    String getLine1AlphaTagForDisplay(long subId);
+    String getLine1AlphaTagForDisplay(int subId);
 
     /**
      * Override the operator branding for the current ICCID.

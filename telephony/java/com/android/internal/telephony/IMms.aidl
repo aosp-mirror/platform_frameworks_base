@@ -39,7 +39,7 @@ interface IMms {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
-    void sendMessage(long subId, String callingPkg, in Uri contentUri,
+    void sendMessage(int subId, String callingPkg, in Uri contentUri,
             String locationUrl, in Bundle configOverrides, in PendingIntent sentIntent);
 
     /**
@@ -56,7 +56,7 @@ interface IMms {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      */
-    void downloadMessage(long subId, String callingPkg, String locationUrl,
+    void downloadMessage(int subId, String callingPkg, String locationUrl,
             in Uri contentUri, in Bundle configOverrides,
             in PendingIntent downloadedIntent);
 
@@ -99,7 +99,7 @@ interface IMms {
      *
      * @param subId the SIM id
      */
-    Bundle getCarrierConfigValues(long subId);
+    Bundle getCarrierConfigValues(int subId);
 
     /**
      * Import a text message into system's SMS store
@@ -204,7 +204,7 @@ interface IMms {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
-    void sendStoredMessage(long subId, String callingPkg, in Uri messageUri,
+    void sendStoredMessage(int subId, String callingPkg, in Uri messageUri,
             in Bundle configOverrides, in PendingIntent sentIntent);
 
     /**
