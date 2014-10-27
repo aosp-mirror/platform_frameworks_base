@@ -275,7 +275,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ការ​ព្រមាន"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"អេក្រង់​បច្ចុប្បន្ន​របស់​អ្នក​បង្ហាញ​នៅ​ទីនេះ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ព័ត៌មាន​កម្មវិធី"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"ចាក់​សោ​ទៅ​កម្មវិធី"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ការ​ភ្ជាប់​អេក្រង់"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ស្វែងរក"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APP">%s</xliff:g> ទេ។"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម"</string>
