@@ -16,6 +16,9 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.media.Image;
@@ -30,6 +33,8 @@ import android.os.Message;
 import android.view.Surface;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.util.Arrays;
@@ -253,7 +258,7 @@ final public class MediaCodec {
          * {@link #BUFFER_FLAG_END_OF_STREAM}.
          */
         public void set(
-                int newOffset, int newSize, long newTimeUs, int newFlags) {
+                int newOffset, int newSize, long newTimeUs, @BufferFlag int newFlags) {
             offset = newOffset;
             size = newSize;
             presentationTimeUs = newTimeUs;
@@ -293,6 +298,7 @@ final public class MediaCodec {
          * be an empty buffer, whose sole purpose is to carry the end-of-stream
          * marker.
          */
+        @BufferFlag
         public int flags;
     };
 
@@ -325,6 +331,18 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_END_OF_STREAM = 4;
 
+    /** @hide */
+    @IntDef(
+        flag = true,
+        value = {
+            BUFFER_FLAG_SYNC_FRAME,
+            BUFFER_FLAG_KEY_FRAME,
+            BUFFER_FLAG_CODEC_CONFIG,
+            BUFFER_FLAG_END_OF_STREAM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BufferFlag {}
+
     private EventHandler mEventHandler;
     private Callback mCallback;
 
@@ -339,13 +357,13 @@ final public class MediaCodec {
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
 
-        public EventHandler(MediaCodec codec, Looper looper) {
+        public EventHandler(@NonNull MediaCodec codec, @NonNull Looper looper) {
             super(looper);
             mCodec = codec;
         }
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case EVENT_CALLBACK:
                 {
@@ -364,7 +382,7 @@ final public class MediaCodec {
             }
         }
 
-        private void handleCallback(Message msg) {
+        private void handleCallback(@NonNull Message msg) {
             if (mCallback == null) {
                 return;
             }
@@ -438,7 +456,8 @@ final public class MediaCodec {
      * @throws IllegalArgumentException if type is not a valid mime type.
      * @throws NullPointerException if type is null.
      */
-    public static MediaCodec createDecoderByType(String type)
+    @NonNull
+    public static MediaCodec createDecoderByType(@NonNull String type)
             throws IOException {
         return new MediaCodec(type, true /* nameIsType */, false /* encoder */);
     }
@@ -450,7 +469,8 @@ final public class MediaCodec {
      * @throws IllegalArgumentException if type is not a valid mime type.
      * @throws NullPointerException if type is null.
      */
-    public static MediaCodec createEncoderByType(String type)
+    @NonNull
+    public static MediaCodec createEncoderByType(@NonNull String type)
             throws IOException {
         return new MediaCodec(type, true /* nameIsType */, true /* encoder */);
     }
@@ -464,14 +484,15 @@ final public class MediaCodec {
      * @throws IllegalArgumentException if name is not valid.
      * @throws NullPointerException if name is null.
      */
-    public static MediaCodec createByCodecName(String name)
+    @NonNull
+    public static MediaCodec createByCodecName(@NonNull String name)
             throws IOException {
         return new MediaCodec(
                 name, false /* nameIsType */, false /* unused */);
     }
 
     private MediaCodec(
-            String name, boolean nameIsType, boolean encoder) {
+            @NonNull String name, boolean nameIsType, boolean encoder) {
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -524,15 +545,26 @@ final public class MediaCodec {
      */
     public static final int CONFIGURE_FLAG_ENCODE = 1;
 
+    /** @hide */
+    @IntDef(flag = true, value = { CONFIGURE_FLAG_ENCODE })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConfigureFlag {}
+
     /**
      * Configures a component.
      *
      * @param format The format of the input data (decoder) or the desired
-     *               format of the output data (encoder).
+     *               format of the output data (encoder). Passing {@code null}
+     *               as {@code format} is equivalent to passing an
+     *               {@link MediaFormat#MediaFormat an empty mediaformat}.
      * @param surface Specify a surface on which to render the output of this
-     *                decoder.
+     *                decoder. Pass {@code null} as {@code surface} if the
+     *                codec does not generate raw video output (e.g. not a video
+     *                decoder) and/or if you want to configure the codec for
+     *                {@link ByteBuffer} output.
      * @param crypto  Specify a crypto object to facilitate secure decryption
-     *                of the media data.
+     *                of the media data. Pass {@code null} as {@code crypto} for
+     *                non-secure codecs.
      * @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
      *                component as an encoder.
      * @throws IllegalArgumentException if the surface has been released (or is invalid),
@@ -544,14 +576,14 @@ final public class MediaCodec {
      * @throws CodecException upon codec error.
      */
     public void configure(
-            MediaFormat format,
-            Surface surface, MediaCrypto crypto, int flags) {
-        Map<String, Object> formatMap = format.getMap();
-
+            @Nullable MediaFormat format,
+            @Nullable Surface surface, @Nullable MediaCrypto crypto,
+            @ConfigureFlag int flags) {
         String[] keys = null;
         Object[] values = null;
 
         if (format != null) {
+            Map<String, Object> formatMap = format.getMap();
             keys = new String[formatMap.size()];
             values = new Object[formatMap.size()];
 
@@ -578,11 +610,11 @@ final public class MediaCodec {
         native_configure(keys, values, surface, crypto, flags);
     }
 
-    private native final void native_setCallback(Callback cb);
+    private native final void native_setCallback(@Nullable Callback cb);
 
     private native final void native_configure(
-            String[] keys, Object[] values,
-            Surface surface, MediaCrypto crypto, int flags);
+            @Nullable String[] keys, @Nullable Object[] values,
+            @Nullable Surface surface, @Nullable MediaCrypto crypto, @ConfigureFlag int flags);
 
     /**
      * Requests a Surface to use as the input to an encoder, in place of input buffers.  This
@@ -596,6 +628,7 @@ final public class MediaCodec {
      * unexpected results.
      * @throws IllegalStateException if not in the Configured state.
      */
+    @NonNull
     public native final Surface createInputSurface();
 
     /**
@@ -669,7 +702,7 @@ final public class MediaCodec {
      * Thrown when an internal codec error occurs.
      */
     public final static class CodecException extends IllegalStateException {
-        CodecException(int errorCode, int actionCode, String detailMessage, int reason) {
+        CodecException(int errorCode, int actionCode, @Nullable String detailMessage, int reason) {
             super(detailMessage);
             mErrorCode = errorCode;
             mReason = reason;
@@ -704,6 +737,7 @@ final public class MediaCodec {
          * The reason could be one of {@link #REASON_HARDWARE} or {@link #REASON_RECLAIMED}.
          *
          */
+        @ReasonCode
         public int getReason() {
             return mReason;
         }
@@ -725,7 +759,7 @@ final public class MediaCodec {
          * since this string will not be localized or generally
          * comprehensible to end-users.
          */
-        public String getDiagnosticInfo() {
+        public @NonNull String getDiagnosticInfo() {
             return mDiagnosticInfo;
         }
 
@@ -742,6 +776,14 @@ final public class MediaCodec {
          */
         public static final int REASON_RECLAIMED = 1;
 
+        /** @hide */
+        @IntDef({
+            REASON_HARDWARE,
+            REASON_RECLAIMED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ReasonCode {}
+
         /* Must be in sync with android_media_MediaCodec.cpp */
         private final static int ACTION_TRANSIENT = 1;
         private final static int ACTION_RECOVERABLE = 2;
@@ -756,7 +798,7 @@ final public class MediaCodec {
      * Thrown when a crypto error occurs while queueing a secure input buffer.
      */
     public final static class CryptoException extends RuntimeException {
-        public CryptoException(int errorCode, String detailMessage) {
+        public CryptoException(int errorCode, @Nullable String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
         }
@@ -789,9 +831,20 @@ final public class MediaCodec {
          */
         public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4;
 
+        /** @hide */
+        @IntDef({
+            ERROR_NO_KEY,
+            ERROR_KEY_EXPIRED,
+            ERROR_RESOURCE_BUSY,
+            ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface CryptoErrorCode {}
+
         /**
          * Retrieve the error code associated with a CryptoException
          */
+        @CryptoErrorCode
         public int getErrorCode() {
             return mErrorCode;
         }
@@ -885,10 +938,10 @@ final public class MediaCodec {
     public final static class CryptoInfo {
         public void set(
                 int newNumSubSamples,
-                int[] newNumBytesOfClearData,
-                int[] newNumBytesOfEncryptedData,
-                byte[] newKey,
-                byte[] newIV,
+                @NonNull int[] newNumBytesOfClearData,
+                @NonNull int[] newNumBytesOfEncryptedData,
+                @NonNull byte[] newKey,
+                @NonNull byte[] newIV,
                 int newMode) {
             numSubSamples = newNumSubSamples;
             numBytesOfClearData = newNumBytesOfClearData;
@@ -970,7 +1023,7 @@ final public class MediaCodec {
     public final void queueSecureInputBuffer(
             int index,
             int offset,
-            CryptoInfo info,
+            @NonNull CryptoInfo info,
             long presentationTimeUs,
             int flags) throws CryptoException {
         synchronized(mBufferLock) {
@@ -989,7 +1042,7 @@ final public class MediaCodec {
     private native final void native_queueSecureInputBuffer(
             int index,
             int offset,
-            CryptoInfo info,
+            @NonNull CryptoInfo info,
             long presentationTimeUs,
             int flags) throws CryptoException;
 
@@ -1043,6 +1096,15 @@ final public class MediaCodec {
      */
     public static final int INFO_OUTPUT_BUFFERS_CHANGED = -3;
 
+    /** @hide */
+    @IntDef({
+        INFO_TRY_AGAIN_LATER,
+        INFO_OUTPUT_FORMAT_CHANGED,
+        INFO_OUTPUT_BUFFERS_CHANGED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OutputBufferInfo {}
+
     /**
      * Dequeue an output buffer, block at most "timeoutUs" microseconds.
      * Returns the index of an output buffer that has been successfully
@@ -1053,8 +1115,9 @@ final public class MediaCodec {
      *         or codec is configured in asynchronous mode.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @OutputBufferInfo
     public final int dequeueOutputBuffer(
-            BufferInfo info, long timeoutUs) {
+            @NonNull BufferInfo info, long timeoutUs) {
         int res = native_dequeueOutputBuffer(info, timeoutUs);
         synchronized(mBufferLock) {
             if (res == INFO_OUTPUT_BUFFERS_CHANGED) {
@@ -1067,7 +1130,7 @@ final public class MediaCodec {
     }
 
     private native final int native_dequeueOutputBuffer(
-            BufferInfo info, long timeoutUs);
+            @NonNull BufferInfo info, long timeoutUs);
 
     /**
      * If you are done with a buffer, use this call to return the buffer to
@@ -1176,6 +1239,7 @@ final public class MediaCodec {
      *                               Configured state.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @NonNull
     public final MediaFormat getOutputFormat() {
         return new MediaFormat(getFormatNative(false /* input */));
     }
@@ -1190,6 +1254,7 @@ final public class MediaCodec {
      *                               Configured state.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @NonNull
     public final MediaFormat getInputFormat() {
         return new MediaFormat(getFormatNative(true /* input */));
     }
@@ -1203,12 +1268,15 @@ final public class MediaCodec {
      * @return the format for the output buffer, or null if the index
      * is not a dequeued output buffer.
      */
+    @NonNull
     public final MediaFormat getOutputFormat(int index) {
         return new MediaFormat(getOutputFormatNative(index));
     }
 
+    @NonNull
     private native final Map<String, Object> getFormatNative(boolean input);
 
+    @NonNull
     private native final Map<String, Object> getOutputFormatNative(int index);
 
     // used to track dequeued buffers
@@ -1230,12 +1298,12 @@ final public class MediaCodec {
                 }
             }
 
-            public void setImage(Image image) {
+            public void setImage(@Nullable Image image) {
                 free();
                 mImage = image;
             }
 
-            public void setByteBuffer(ByteBuffer buffer) {
+            public void setByteBuffer(@Nullable ByteBuffer buffer) {
                 free();
                 mByteBuffer = buffer;
             }
@@ -1252,7 +1320,7 @@ final public class MediaCodec {
             }
         }
 
-        public void put(int index, ByteBuffer newBuffer) {
+        public void put(int index, @Nullable ByteBuffer newBuffer) {
             CodecBuffer buffer = mMap.get(index);
             if (buffer == null) { // likely
                 buffer = new CodecBuffer();
@@ -1261,7 +1329,7 @@ final public class MediaCodec {
             buffer.setByteBuffer(newBuffer);
         }
 
-        public void put(int index, Image newImage) {
+        public void put(int index, @Nullable Image newImage) {
             CodecBuffer buffer = mMap.get(index);
             if (buffer == null) { // likely
                 buffer = new CodecBuffer();
@@ -1285,7 +1353,7 @@ final public class MediaCodec {
     final private Object mBufferLock;
 
     private final void invalidateByteBuffer(
-            ByteBuffer[] buffers, int index) {
+            @Nullable ByteBuffer[] buffers, int index) {
         if (buffers != null && index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -1295,7 +1363,7 @@ final public class MediaCodec {
     }
 
     private final void validateInputByteBuffer(
-            ByteBuffer[] buffers, int index) {
+            @Nullable ByteBuffer[] buffers, int index) {
         if (buffers != null && index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -1306,7 +1374,7 @@ final public class MediaCodec {
     }
 
     private final void revalidateByteBuffer(
-            ByteBuffer[] buffers, int index) {
+            @Nullable ByteBuffer[] buffers, int index) {
         synchronized(mBufferLock) {
             if (buffers != null && index >= 0 && index < buffers.length) {
                 ByteBuffer buffer = buffers[index];
@@ -1318,7 +1386,7 @@ final public class MediaCodec {
     }
 
     private final void validateOutputByteBuffer(
-            ByteBuffer[] buffers, int index, BufferInfo info) {
+            @Nullable ByteBuffer[] buffers, int index, @NonNull BufferInfo info) {
         if (buffers != null && index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -1328,7 +1396,7 @@ final public class MediaCodec {
         }
     }
 
-    private final void invalidateByteBuffers(ByteBuffer[] buffers) {
+    private final void invalidateByteBuffers(@Nullable ByteBuffer[] buffers) {
         if (buffers != null) {
             for (ByteBuffer buffer: buffers) {
                 if (buffer != null) {
@@ -1338,14 +1406,14 @@ final public class MediaCodec {
         }
     }
 
-    private final void freeByteBuffer(ByteBuffer buffer) {
+    private final void freeByteBuffer(@Nullable ByteBuffer buffer) {
         if (buffer != null /* && buffer.isDirect() */) {
             // all of our ByteBuffers are direct
             java.nio.NioUtils.freeDirectBuffer(buffer);
         }
     }
 
-    private final void freeByteBuffers(ByteBuffer[] buffers) {
+    private final void freeByteBuffers(@Nullable ByteBuffer[] buffers) {
         if (buffers != null) {
             for (ByteBuffer buffer: buffers) {
                 freeByteBuffer(buffer);
@@ -1388,13 +1456,14 @@ final public class MediaCodec {
      * @deprecated Use the new {@link #getInputBuffer} method instead
      * each time an input buffer is dequeued.
      *
-     * <b>Note:</b>As of API 21, dequeued input buffers are
+     * <b>Note:</b> As of API 21, dequeued input buffers are
      * automatically {@link java.nio.Buffer#clear cleared}.
      *
      * @throws IllegalStateException if not in the Executing state,
      *         or codec is configured in asynchronous mode.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @NonNull
     public ByteBuffer[] getInputBuffers() {
         if (mCachedInputBuffers == null) {
             throw new IllegalStateException();
@@ -1415,7 +1484,7 @@ final public class MediaCodec {
      * each time an output buffer is dequeued.  This method is not
      * supported if codec is configured in asynchronous mode.
      *
-     * <b>Note:</b>As of API 21, the position and limit of output
+     * <b>Note:</b> As of API 21, the position and limit of output
      * buffers that are dequeued will be set to the valid data
      * range.
      *
@@ -1423,6 +1492,7 @@ final public class MediaCodec {
      *         or codec is configured in asynchronous mode.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @NonNull
     public ByteBuffer[] getOutputBuffers() {
         if (mCachedOutputBuffers == null) {
             throw new IllegalStateException();
@@ -1449,6 +1519,7 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @Nullable
     public ByteBuffer getInputBuffer(int index) {
         ByteBuffer newBuffer = getBuffer(true /* input */, index);
         synchronized(mBufferLock) {
@@ -1477,6 +1548,7 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @Nullable
     public Image getInputImage(int index) {
         Image newImage = getImage(true /* input */, index);
         synchronized(mBufferLock) {
@@ -1505,6 +1577,7 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @Nullable
     public ByteBuffer getOutputBuffer(int index) {
         ByteBuffer newBuffer = getBuffer(false /* input */, index);
         synchronized(mBufferLock) {
@@ -1532,6 +1605,7 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
+    @Nullable
     public Image getOutputImage(int index) {
         Image newImage = getImage(false /* input */, index);
         synchronized(mBufferLock) {
@@ -1552,19 +1626,28 @@ final public class MediaCodec {
      */
     public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2;
 
+    /** @hide */
+    @IntDef({
+        VIDEO_SCALING_MODE_SCALE_TO_FIT,
+        VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VideoScalingMode {}
+
     /**
      * If a surface has been specified in a previous call to {@link #configure}
      * specifies the scaling mode to use. The default is "scale to fit".
      * @throws IllegalArgumentException if mode is not recognized.
      * @throws IllegalStateException if in the Uninitialized state.
      */
-    public native final void setVideoScalingMode(int mode);
+    public native final void setVideoScalingMode(@VideoScalingMode int mode);
 
     /**
      * Get the component name. If the codec was created by createDecoderByType
      * or createEncoderByType, what component is chosen is not known beforehand.
      * @throws IllegalStateException if in the Uninitialized state.
      */
+    @NonNull
     public native final String getName();
 
     /**
@@ -1592,9 +1675,12 @@ final public class MediaCodec {
 
     /**
      * Communicate additional parameter changes to the component instance.
+     * <b>Note:</b> Some of these parameter changes may silently fail to apply.
+     *
+     * @param params The bundle of parameters to set.
      * @throws IllegalStateException if in the Uninitialized state.
      */
-    public final void setParameters(Bundle params) {
+    public final void setParameters(@Nullable Bundle params) {
         if (params == null) {
             return;
         }
@@ -1626,9 +1712,11 @@ final public class MediaCodec {
      * {@code flush}, you must call {@link #start} to "resume" receiving input buffers,
      * even if an input surface was created.
      *
-     * @param cb The callback that will run.
+     * @param cb The callback that will run.  Use {@code null} to clear a previously
+     *           set callback (before {@link #configure configure} is called and run
+     *           in synchronous mode).
      */
-    public void setCallback(/* MediaCodec. */ Callback cb) {
+    public void setCallback(@Nullable /* MediaCodec. */ Callback cb) {
         if (mEventHandler != null) {
             // set java callback on handler
             Message msg = mEventHandler.obtainMessage(EVENT_SET_CALLBACK, 0, 0, cb);
@@ -1652,7 +1740,7 @@ final public class MediaCodec {
          * @param codec The MediaCodec object.
          * @param index The index of the available input buffer.
          */
-        public abstract void onInputBufferAvailable(MediaCodec codec, int index);
+        public abstract void onInputBufferAvailable(@NonNull MediaCodec codec, int index);
 
         /**
          * Called when an output buffer becomes available.
@@ -1661,7 +1749,8 @@ final public class MediaCodec {
          * @param index The index of the available output buffer.
          * @param info Info regarding the available output buffer {@link MediaCodec.BufferInfo}.
          */
-        public abstract void onOutputBufferAvailable(MediaCodec codec, int index, BufferInfo info);
+        public abstract void onOutputBufferAvailable(
+                @NonNull MediaCodec codec, int index, @NonNull BufferInfo info);
 
         /**
          * Called when the MediaCodec encountered an error
@@ -1669,7 +1758,7 @@ final public class MediaCodec {
          * @param codec The MediaCodec object.
          * @param e The {@link MediaCodec.CodecException} object describing the error.
          */
-        public abstract void onError(MediaCodec codec, CodecException e);
+        public abstract void onError(@NonNull MediaCodec codec, @NonNull CodecException e);
 
         /**
          * Called when the output format has changed
@@ -1677,18 +1766,19 @@ final public class MediaCodec {
          * @param codec The MediaCodec object.
          * @param format The new output format.
          */
-        public abstract void onOutputFormatChanged(MediaCodec codec, MediaFormat format);
+        public abstract void onOutputFormatChanged(
+                @NonNull MediaCodec codec, @NonNull MediaFormat format);
     }
 
     private void postEventFromNative(
-            int what, int arg1, int arg2, Object obj) {
+            int what, int arg1, int arg2, @Nullable Object obj) {
         if (mEventHandler != null) {
             Message msg = mEventHandler.obtainMessage(what, arg1, arg2, obj);
             mEventHandler.sendMessage(msg);
         }
     }
 
-    private native final void setParameters(String[] keys, Object[] values);
+    private native final void setParameters(@NonNull String[] keys, @NonNull Object[] values);
 
     /**
      * Get the codec info. If the codec was created by createDecoderByType
@@ -1696,20 +1786,24 @@ final public class MediaCodec {
      * and thus the caller does not have the MediaCodecInfo.
      * @throws IllegalStateException if in the Uninitialized state.
      */
+    @NonNull
     public MediaCodecInfo getCodecInfo() {
         return MediaCodecList.getInfoFor(getName());
     }
 
+    @NonNull
     private native final ByteBuffer[] getBuffers(boolean input);
 
+    @Nullable
     private native final ByteBuffer getBuffer(boolean input, int index);
 
+    @Nullable
     private native final Image getImage(boolean input, int index);
 
     private static native final void native_init();
 
     private native final void native_setup(
-            String name, boolean nameIsType, boolean encoder);
+            @NonNull String name, boolean nameIsType, boolean encoder);
 
     private native final void native_finalize();
 
@@ -1756,6 +1850,7 @@ final public class MediaCodec {
             return mTimestamp;
         }
 
+        @NonNull
         public Plane[] getPlanes() {
             checkValid();
             return Arrays.copyOf(mPlanes, mPlanes.length);
@@ -1774,7 +1869,7 @@ final public class MediaCodec {
          * The crop rectangle specifies the region of valid pixels in the image,
          * using coordinates in the largest-resolution plane.
          */
-        public void setCropRect(Rect cropRect) {
+        public void setCropRect(@Nullable Rect cropRect) {
             if (mIsReadOnly) {
                 throw new ReadOnlyBufferException();
             }
@@ -1787,7 +1882,7 @@ final public class MediaCodec {
             }
         }
 
-        private int readInt(ByteBuffer buffer, boolean asLong) {
+        private int readInt(@NonNull ByteBuffer buffer, boolean asLong) {
             if (asLong) {
                 return (int)buffer.getLong();
             } else {
@@ -1796,8 +1891,8 @@ final public class MediaCodec {
         }
 
         public MediaImage(
-                ByteBuffer buffer, ByteBuffer info, boolean readOnly,
-                long timestamp, int xOffset, int yOffset, Rect cropRect) {
+                @NonNull ByteBuffer buffer, @NonNull ByteBuffer info, boolean readOnly,
+                long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
             mFormat = ImageFormat.YUV_420_888;
             mTimestamp = timestamp;
             mIsValid = true;
@@ -1863,7 +1958,7 @@ final public class MediaCodec {
         }
 
         private class MediaPlane extends Plane {
-            public MediaPlane(ByteBuffer buffer, int rowInc, int colInc) {
+            public MediaPlane(@NonNull ByteBuffer buffer, int rowInc, int colInc) {
                 mData = buffer;
                 mRowInc = rowInc;
                 mColInc = colInc;
@@ -1882,6 +1977,7 @@ final public class MediaCodec {
             }
 
             @Override
+            @NonNull
             public ByteBuffer getBuffer() {
                 checkValid();
                 return mData;

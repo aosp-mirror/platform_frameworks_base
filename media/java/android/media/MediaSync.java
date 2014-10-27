@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.Looper;
@@ -120,9 +121,10 @@ final public class MediaSync {
          *
          * @param sync The MediaSync object.
          * @param audioBuffer The returned audio buffer.
+         * @param bufferIndex The index associated with the audio buffer
          */
         public abstract void onReturnAudioBuffer(
-                MediaSync sync, ByteBuffer audioBuffer, int bufferIndex);
+                @NonNull MediaSync sync, @NonNull ByteBuffer audioBuffer, int bufferIndex);
     }
 
     private static final String TAG = "MediaSync";
@@ -138,7 +140,7 @@ final public class MediaSync {
         public int mSizeInBytes;
         long mPresentationTimeUs;
 
-        public AudioBuffer(ByteBuffer byteBuffer, int bufferIndex,
+        public AudioBuffer(@NonNull ByteBuffer byteBuffer, int bufferIndex,
                            int sizeInBytes, long presentationTimeUs) {
             mByteBuffer = byteBuffer;
             mBufferIndex = bufferIndex;
@@ -200,13 +202,17 @@ final public class MediaSync {
 
     /**
      * Sets an asynchronous callback for actionable MediaSync events.
-     * It shouldn't be called inside callback.
+     * <p>
+     * This method can be called multiple times to update a previously set callback. If the
+     * handler is changed, undelivered notifications scheduled for the old handler may be dropped.
+     * <p>
+     * <b>Do not call this inside callback.</b>
      *
-     * @param cb The callback that will run.
-     * @param handler The Handler that will run the callback. Using null means to use MediaSync's
+     * @param cb The callback that will run. Use {@code null} to stop receiving callbacks.
+     * @param handler The Handler that will run the callback. Use {@code null} to use MediaSync's
      *     internal handler if it exists.
      */
-    public void setCallback(/* MediaSync. */ Callback cb, Handler handler) {
+    public void setCallback(@Nullable /* MediaSync. */ Callback cb, @Nullable Handler handler) {
         synchronized(mCallbackLock) {
             if (handler != null) {
                 mCallbackHandler = handler;
@@ -235,11 +241,11 @@ final public class MediaSync {
      * @throws IllegalStateException if not in the Initialized state, or another surface
      *     has already been configured.
      */
-    public void configureSurface(Surface surface) {
+    public void configureSurface(@Nullable Surface surface) {
         native_configureSurface(surface);
     }
 
-    private native final void native_configureSurface(Surface surface);
+    private native final void native_configureSurface(@Nullable Surface surface);
 
     /**
      * Configures the audio track for MediaSync.
@@ -249,7 +255,7 @@ final public class MediaSync {
      * @throws IllegalStateException if not in the Initialized state, or another audio track
      *     has already been configured.
      */
-    public void configureAudioTrack(AudioTrack audioTrack) {
+    public void configureAudioTrack(@Nullable AudioTrack audioTrack) {
         // AudioTrack has sanity check for configured sample rate.
         int nativeSampleRateInHz = (audioTrack == null ? 0 : audioTrack.getSampleRate());
 
@@ -261,7 +267,7 @@ final public class MediaSync {
     }
 
     private native final void native_configureAudioTrack(
-            AudioTrack audioTrack, int nativeSampleRateInHz);
+            @Nullable AudioTrack audioTrack, int nativeSampleRateInHz);
 
     /**
      * Requests a Surface to use as the input. This may only be called after
@@ -272,6 +278,7 @@ final public class MediaSync {
      * @throws IllegalStateException if not configured, or another input surface has
      *     already been created.
      */
+    @NonNull
     public native final Surface createInputSurface();
 
     /**
@@ -412,7 +419,7 @@ final public class MediaSync {
         return native_getTimestamp(timestamp);
     }
 
-    private native final boolean native_getTimestamp(MediaTimestamp timestamp);
+    private native final boolean native_getTimestamp(@NonNull MediaTimestamp timestamp);
 
     /**
      * Queues the audio data asynchronously for playback (AudioTrack must be in streaming mode).
@@ -427,7 +434,8 @@ final public class MediaSync {
      *     has not been done correctly.
      */
     public void queueAudio(
-            ByteBuffer audioData, int bufferIndex, int sizeInBytes, long presentationTimeUs) {
+            @NonNull ByteBuffer audioData, int bufferIndex, int sizeInBytes,
+            long presentationTimeUs) {
         if (mAudioTrack == null || mAudioThread == null) {
             throw new IllegalStateException(
                     "AudioTrack is NOT configured or audio thread is not created");
@@ -489,7 +497,7 @@ final public class MediaSync {
     private native final void native_updateQueuedAudioData(
             int sizeInBytes, long presentationTimeUs);
 
-    private final void postReturnByteBuffer(final AudioBuffer audioBuffer) {
+    private final void postReturnByteBuffer(@NonNull final AudioBuffer audioBuffer) {
         synchronized(mCallbackLock) {
             if (mCallbackHandler != null) {
                 final MediaSync sync = this;

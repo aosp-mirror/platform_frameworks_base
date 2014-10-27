@@ -16,6 +16,9 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -27,6 +30,8 @@ import android.os.IBinder;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -69,21 +74,26 @@ final public class MediaExtractor {
      * Sets the data source (MediaDataSource) to use.
      *
      * @param dataSource the MediaDataSource for the media you want to extract from
+     *
+     * @throws IllegalArgumentException if dataSource is invalid.
      */
-    public native final void setDataSource(MediaDataSource dataSource) throws IllegalArgumentException, IOException;
+    public native final void setDataSource(@NonNull MediaDataSource dataSource)
+        throws IOException;
 
     /**
      * Sets the data source as a content Uri.
      *
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to extract from.
-     * @param headers the headers to be sent together with the request for the data
+     * @param headers the headers to be sent together with the request for the data.
+     *        This can be {@code null} if no specific headers are to be sent with the
+     *        request.
      */
     public final void setDataSource(
-            Context context, Uri uri, Map<String, String> headers)
+            @NonNull Context context, @NonNull Uri uri, @Nullable Map<String, String> headers)
         throws IOException {
         String scheme = uri.getScheme();
-        if(scheme == null || scheme.equals("file")) {
+        if (scheme == null || scheme.equals("file")) {
             setDataSource(uri.getPath());
             return;
         }
@@ -122,9 +132,11 @@ final public class MediaExtractor {
      * Sets the data source (file-path or http URL) to use.
      *
      * @param path the path of the file, or the http URL
-     * @param headers the headers associated with the http request for the stream you want to play
+     * @param headers the headers associated with the http request for the stream you want to play.
+     *        This can be {@code null} if no specific headers are to be sent with the
+     *        request.
      */
-    public final void setDataSource(String path, Map<String, String> headers)
+    public final void setDataSource(@NonNull String path, @Nullable Map<String, String> headers)
         throws IOException {
         String[] keys = null;
         String[] values = null;
@@ -149,10 +161,10 @@ final public class MediaExtractor {
     }
 
     private native final void nativeSetDataSource(
-            IBinder httpServiceBinder,
-            String path,
-            String[] keys,
-            String[] values) throws IOException;
+            @NonNull IBinder httpServiceBinder,
+            @NonNull String path,
+            @Nullable String[] keys,
+            @Nullable String[] values) throws IOException;
 
     /**
      * Sets the data source (file-path or http URL) to use.
@@ -166,7 +178,7 @@ final public class MediaExtractor {
      * As an alternative, the application could first open the file for reading,
      * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
      */
-    public final void setDataSource(String path) throws IOException {
+    public final void setDataSource(@NonNull String path) throws IOException {
         nativeSetDataSource(
                 MediaHTTPService.createHttpServiceBinderIfNecessary(path),
                 path,
@@ -180,7 +192,7 @@ final public class MediaExtractor {
      *
      * @param fd the FileDescriptor for the file you want to extract from.
      */
-    public final void setDataSource(FileDescriptor fd) throws IOException {
+    public final void setDataSource(@NonNull FileDescriptor fd) throws IOException {
         setDataSource(fd, 0, 0x7ffffffffffffffL);
     }
 
@@ -194,7 +206,7 @@ final public class MediaExtractor {
      * @param length the length in bytes of the data to be extracted
      */
     public native final void setDataSource(
-            FileDescriptor fd, long offset, long length) throws IOException;
+            @NonNull FileDescriptor fd, long offset, long length) throws IOException;
 
     @Override
     protected void finalize() {
@@ -217,7 +229,9 @@ final public class MediaExtractor {
      * Get the PSSH info if present.
      * @return a map of uuid-to-bytes, with the uuid specifying
      * the crypto scheme, and the bytes being the data specific to that scheme.
+     * This can be {@code null} if the source does not contain PSSH info.
      */
+    @Nullable
     public Map<UUID, byte[]> getPsshInfo() {
         Map<UUID, byte[]> psshMap = null;
         Map<String, Object> formatMap = getFileFormatNative();
@@ -243,16 +257,19 @@ final public class MediaExtractor {
         return psshMap;
     }
 
+    @NonNull
     private native Map<String, Object> getFileFormatNative();
 
     /**
      * Get the track format at the specified index.
      * More detail on the representation can be found at {@link android.media.MediaCodec}
      */
+    @NonNull
     public MediaFormat getTrackFormat(int index) {
         return new MediaFormat(getTrackFormatNative(index));
     }
 
+    @NonNull
     private native Map<String, Object> getTrackFormatNative(int index);
 
     /**
@@ -284,11 +301,20 @@ final public class MediaExtractor {
      */
     public static final int SEEK_TO_CLOSEST_SYNC        = 2;
 
+    /** @hide */
+    @IntDef({
+        SEEK_TO_PREVIOUS_SYNC,
+        SEEK_TO_NEXT_SYNC,
+        SEEK_TO_CLOSEST_SYNC,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SeekMode {}
+
     /**
      * All selected tracks seek near the requested time according to the
      * specified mode.
      */
-    public native void seekTo(long timeUs, int mode);
+    public native void seekTo(long timeUs, @SeekMode int mode);
 
     /**
      * Advance to the next sample. Returns false if no more sample data
@@ -305,7 +331,7 @@ final public class MediaExtractor {
      * @param byteBuf the destination byte buffer
      * @return the sample size (or -1 if no more samples are available).
      */
-    public native int readSampleData(ByteBuffer byteBuf, int offset);
+    public native int readSampleData(@NonNull ByteBuffer byteBuf, int offset);
 
     /**
      * Returns the track index the current sample originates from (or -1
@@ -334,9 +360,20 @@ final public class MediaExtractor {
      */
     public static final int SAMPLE_FLAG_ENCRYPTED = 2;
 
+    /** @hide */
+    @IntDef(
+        flag = true,
+        value = {
+            SAMPLE_FLAG_SYNC,
+            SAMPLE_FLAG_ENCRYPTED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SampleFlag {}
+
     /**
      * Returns the current sample's flags.
      */
+    @SampleFlag
     public native int getSampleFlags();
 
     /**
@@ -347,7 +384,7 @@ final public class MediaExtractor {
      *             to be filled in.
      * @return true iff the sample flags contain {@link #SAMPLE_FLAG_ENCRYPTED}
      */
-    public native boolean getSampleCryptoInfo(MediaCodec.CryptoInfo info);
+    public native boolean getSampleCryptoInfo(@NonNull MediaCodec.CryptoInfo info);
 
     /**
      * Returns an estimate of how much data is presently cached in memory

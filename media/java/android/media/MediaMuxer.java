@@ -16,12 +16,18 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.media.MediaCodec;
 import android.media.MediaCodec.BufferInfo;
 import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -80,19 +86,27 @@ final public class MediaMuxer {
         public static final int MUXER_OUTPUT_WEBM   = 1;
     };
 
+    /** @hide */
+    @IntDef({
+        OutputFormat.MUXER_OUTPUT_MPEG_4,
+        OutputFormat.MUXER_OUTPUT_WEBM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Format {}
+
     // All the native functions are listed here.
-    private static native long nativeSetup(FileDescriptor fd, int format);
+    private static native long nativeSetup(@NonNull FileDescriptor fd, int format);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeStart(long nativeObject);
     private static native void nativeStop(long nativeObject);
-    private static native int nativeAddTrack(long nativeObject, String[] keys,
-            Object[] values);
-    private static native void nativeSetOrientationHint(long nativeObject,
-            int degrees);
+    private static native int nativeAddTrack(
+            long nativeObject, @NonNull String[] keys, @NonNull Object[] values);
+    private static native void nativeSetOrientationHint(
+            long nativeObject, int degrees);
     private static native void nativeSetLocation(long nativeObject, int latitude, int longitude);
-    private static native void nativeWriteSampleData(long nativeObject,
-            int trackIndex, ByteBuffer byteBuf,
-            int offset, int size, long presentationTimeUs, int flags);
+    private static native void nativeWriteSampleData(
+            long nativeObject, int trackIndex, @NonNull ByteBuffer byteBuf,
+            int offset, int size, long presentationTimeUs, @MediaCodec.BufferFlag int flags);
 
     // Muxer internal states.
     private static final int MUXER_STATE_UNINITIALIZED  = -1;
@@ -115,7 +129,7 @@ final public class MediaMuxer {
      * @see android.media.MediaMuxer.OutputFormat
      * @throws IOException if failed to open the file for write
      */
-    public MediaMuxer(String path, int format) throws IOException {
+    public MediaMuxer(@NonNull String path, @Format int format) throws IOException {
         if (path == null) {
             throw new IllegalArgumentException("path must not be null");
         }
@@ -246,11 +260,12 @@ final public class MediaMuxer {
 
     /**
      * Adds a track with the specified format.
-     * @param format The media format for the track.
+     * @param format The media format for the track.  This must not be an empty
+     *               MediaFormat.
      * @return The track index for this newly added track, and it should be used
      * in the {@link #writeSampleData}.
      */
-    public int addTrack(MediaFormat format) {
+    public int addTrack(@NonNull MediaFormat format) {
         if (format == null) {
             throw new IllegalArgumentException("format must not be null.");
         }
@@ -302,8 +317,8 @@ final public class MediaMuxer {
      * MediaMuxer uses the flags provided in {@link MediaCodec.BufferInfo},
      * to signal sync frames.
      */
-    public void writeSampleData(int trackIndex, ByteBuffer byteBuf,
-            BufferInfo bufferInfo) {
+    public void writeSampleData(int trackIndex, @NonNull ByteBuffer byteBuf,
+            @NonNull BufferInfo bufferInfo) {
         if (trackIndex < 0 || trackIndex > mLastTrackIndex) {
             throw new IllegalArgumentException("trackIndex is invalid");
         }
