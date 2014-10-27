@@ -25,10 +25,12 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -44,6 +46,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
+import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
@@ -242,12 +245,16 @@ public abstract class TvInputService extends Service {
      * Base class for derived classes to implement to provide a TV input session.
      */
     public abstract static class Session implements KeyEvent.Callback {
+        private static final int DETACH_OVERLAY_VIEW_TIMEOUT = 5000;
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
         final Handler mHandler;
         private WindowManager.LayoutParams mWindowParams;
         private Surface mSurface;
+        private Context mContext;
+        private FrameLayout mOverlayViewContainer;
         private View mOverlayView;
+        private OverlayViewCleanUpTask mOverlayViewCleanUpTask;
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
@@ -264,6 +271,7 @@ public abstract class TvInputService extends Service {
          * @param context The context of the application
          */
         public Session(Context context) {
+            mContext = context;
             mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             mHandler = new Handler(context.getMainLooper());
         }
@@ -853,7 +861,6 @@ public abstract class TvInputService extends Service {
          * session.
          */
         void release() {
-            removeOverlayView(true);
             onRelease();
             if (mSurface != null) {
                 mSurface.release();
@@ -863,6 +870,9 @@ public abstract class TvInputService extends Service {
                 mSessionCallback = null;
                 mPendingActions.clear();
             }
+            // Removes the overlay view lastly so that any hanging on the main thread can be handled
+            // in {@link #scheduleOverlayViewCleanup}.
+            removeOverlayView(true);
         }
 
         /**
@@ -947,9 +957,8 @@ public abstract class TvInputService extends Service {
          * @param frame A position of the overlay view.
          */
         void createOverlayView(IBinder windowToken, Rect frame) {
-            if (mOverlayView != null) {
-                mWindowManager.removeView(mOverlayView);
-                mOverlayView = null;
+            if (mOverlayViewContainer != null) {
+                removeOverlayView(false);
             }
             if (DEBUG) Log.d(TAG, "create overlay view(" + frame + ")");
             mWindowToken = windowToken;
@@ -962,6 +971,15 @@ public abstract class TvInputService extends Service {
             if (mOverlayView == null) {
                 return;
             }
+            if (mOverlayViewCleanUpTask != null) {
+                mOverlayViewCleanUpTask.cancel(true);
+                mOverlayViewCleanUpTask = null;
+            }
+            // Creates a container view to check hanging on the overlay view detaching.
+            // Adding/removing the overlay view to/from the container make the view attach/detach
+            // logic run on the main thread.
+            mOverlayViewContainer = new FrameLayout(mContext);
+            mOverlayViewContainer.addView(mOverlayView);
             // TvView's window type is TYPE_APPLICATION_MEDIA and we want to create
             // an overlay window above the media window but below the application window.
             int type = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -978,7 +996,7 @@ public abstract class TvInputService extends Service {
                     WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
             mWindowParams.gravity = Gravity.START | Gravity.TOP;
             mWindowParams.token = windowToken;
-            mWindowManager.addView(mOverlayView, mWindowParams);
+            mWindowManager.addView(mOverlayViewContainer, mWindowParams);
         }
 
         /**
@@ -995,29 +1013,47 @@ public abstract class TvInputService extends Service {
                 onOverlayViewSizeChanged(frame.right - frame.left, frame.bottom - frame.top);
             }
             mOverlayFrame = frame;
-            if (!mOverlayViewEnabled || mOverlayView == null) {
+            if (!mOverlayViewEnabled || mOverlayViewContainer == null) {
                 return;
             }
             mWindowParams.x = frame.left;
             mWindowParams.y = frame.top;
             mWindowParams.width = frame.right - frame.left;
             mWindowParams.height = frame.bottom - frame.top;
-            mWindowManager.updateViewLayout(mOverlayView, mWindowParams);
+            mWindowManager.updateViewLayout(mOverlayViewContainer, mWindowParams);
         }
 
         /**
          * Removes the current overlay view.
          */
         void removeOverlayView(boolean clearWindowToken) {
-            if (DEBUG) Log.d(TAG, "removeOverlayView(" + mOverlayView + ")");
+            if (DEBUG) Log.d(TAG, "removeOverlayView(" + mOverlayViewContainer + ")");
             if (clearWindowToken) {
                 mWindowToken = null;
                 mOverlayFrame = null;
             }
-            if (mOverlayView != null) {
-                mWindowManager.removeView(mOverlayView);
+            if (mOverlayViewContainer != null) {
+                // Removes the overlay view from the view hierarchy in advance so that it can be
+                // cleaned up in the {@link OverlayViewCleanUpTask} if the remove process is
+                // hanging.
+                mOverlayViewContainer.removeView(mOverlayView);
                 mOverlayView = null;
+                mWindowManager.removeView(mOverlayViewContainer);
+                mOverlayViewContainer = null;
                 mWindowParams = null;
+            }
+        }
+
+        /**
+         * Schedules a task which checks whether the overlay view is detached and kills the process
+         * if it is not. Note that this method is expected to be called in a non-main thread.
+         */
+        void scheduleOverlayViewCleanup() {
+            View overlayViewParent = mOverlayViewContainer;
+            if (overlayViewParent != null) {
+                mOverlayViewCleanUpTask = new OverlayViewCleanUpTask();
+                mOverlayViewCleanUpTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        overlayViewParent);
             }
         }
 
@@ -1050,22 +1086,22 @@ public abstract class TvInputService extends Service {
                     }
                 }
             }
-            if (mOverlayView == null || !mOverlayView.isAttachedToWindow()) {
+            if (mOverlayViewContainer == null || !mOverlayViewContainer.isAttachedToWindow()) {
                 return TvInputManager.Session.DISPATCH_NOT_HANDLED;
             }
-            if (!mOverlayView.hasWindowFocus()) {
-                mOverlayView.getViewRootImpl().windowFocusChanged(true, true);
+            if (!mOverlayViewContainer.hasWindowFocus()) {
+                mOverlayViewContainer.getViewRootImpl().windowFocusChanged(true, true);
             }
-            if (isNavigationKey && mOverlayView.hasFocusable()) {
+            if (isNavigationKey && mOverlayViewContainer.hasFocusable()) {
                 // If mOverlayView has focusable views, navigation key events should be always
                 // handled. If not, it can make the application UI navigation messed up.
                 // For example, in the case that the left-most view is focused, a left key event
                 // will not be handled in ViewRootImpl. Then, the left key event will be handled in
                 // the application during the UI navigation of the TV input.
-                mOverlayView.getViewRootImpl().dispatchInputEvent(event);
+                mOverlayViewContainer.getViewRootImpl().dispatchInputEvent(event);
                 return TvInputManager.Session.DISPATCH_HANDLED;
             } else {
-                mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
+                mOverlayViewContainer.getViewRootImpl().dispatchInputEvent(event, receiver);
                 return TvInputManager.Session.DISPATCH_IN_PROGRESS;
             }
         }
@@ -1093,6 +1129,27 @@ public abstract class TvInputService extends Service {
                         mHandler.post(action);
                     }
                 }
+            }
+        }
+
+        private final class OverlayViewCleanUpTask extends AsyncTask<View, Void, Void> {
+            @Override
+            protected Void doInBackground(View... views) {
+                View overlayViewParent = views[0];
+                try {
+                    Thread.sleep(DETACH_OVERLAY_VIEW_TIMEOUT);
+                } catch (InterruptedException e) {
+                    return null;
+                }
+                if (isCancelled()) {
+                    return null;
+                }
+                if (overlayViewParent.isAttachedToWindow()) {
+                    Log.e(TAG, "Time out on releasing overlay view. Killing "
+                            + overlayViewParent.getContext().getPackageName());
+                    Process.killProcess(Process.myPid());
+                }
+                return null;
             }
         }
     }
