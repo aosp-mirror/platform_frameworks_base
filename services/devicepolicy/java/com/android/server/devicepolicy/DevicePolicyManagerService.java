@@ -45,6 +45,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
@@ -4275,8 +4276,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 try {
                     ApplicationInfo applicationInfo = pm.getApplicationInfo(enabledPackage,
                             PackageManager.GET_UNINSTALLED_PACKAGES, userIdToCheck);
-                    systemService = (applicationInfo.flags
-                            & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    systemService = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 } catch (RemoteException e) {
                     Log.i(LOG_TAG, "Can't talk to package managed", e);
                 }
@@ -4410,15 +4410,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     IPackageManager pm = AppGlobals.getPackageManager();
                     if (installedServices != null) {
                         for (AccessibilityServiceInfo service : installedServices) {
-                            String packageName = service.getResolveInfo().serviceInfo.packageName;
-                            try {
-                                ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
-                                        PackageManager.GET_UNINSTALLED_PACKAGES, userId);
-                                if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                                    result.add(packageName);
-                                }
-                            } catch (RemoteException e) {
-                                Log.i(LOG_TAG, "Accessibility service in missing package", e);
+                            ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
+                            ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
+                            if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                result.add(serviceInfo.packageName);
                             }
                         }
                     }
@@ -4569,16 +4564,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     IPackageManager pm = AppGlobals.getPackageManager();
                     if (imes != null) {
                         for (InputMethodInfo ime : imes) {
-                            String packageName = ime.getPackageName();
-                            try {
-                                ApplicationInfo applicationInfo = pm.getApplicationInfo(
-                                        packageName, PackageManager.GET_UNINSTALLED_PACKAGES,
-                                        userId);
-                                if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                                    result.add(packageName);
-                                }
-                            } catch (RemoteException e) {
-                                Log.i(LOG_TAG, "Input method for missing package", e);
+                            ServiceInfo serviceInfo = ime.getServiceInfo();
+                            ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
+                            if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                result.add(serviceInfo.packageName);
                             }
                         }
                     }
@@ -4945,7 +4934,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throws RemoteException {
         ApplicationInfo appInfo = pm.getApplicationInfo(packageName, GET_UNINSTALLED_PACKAGES,
                 userId);
-        return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0;
+        return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     @Override
