@@ -5702,6 +5702,17 @@
         <attr name="reparent" format="boolean"/>
     </declare-styleable>
 
+    <!-- Use <code>changeBounds</code>as the root tag of the XML resource that
+         describes a {@link android.transition.ChangeBounds} transition.
+         The attributes of the {@link android.R.styleable#Transition Transition}
+         resource are available in addition to the specific attributes of ChangeBounds
+         described here. -->
+    <declare-styleable name="ChangeBounds">
+        <!-- Resize the view by adjusting the clipBounds rather than changing the
+             dimensions of the view itself. The default value is false. -->
+        <attr name="resizeClip" format="boolean"/>
+    </declare-styleable>
+
     <!-- Use <code>transitionManager</code> as the root tag of the XML resource that
          describes a {@link android.transition.TransitionManager
          TransitionManager}. -->

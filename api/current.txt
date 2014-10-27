@@ -1002,6 +1002,7 @@ package android {
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
+    field public static final int resizeClip = 16844033; // 0x1010501
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
     field public static final int resource = 16842789; // 0x1010025
@@ -31316,6 +31317,7 @@ package android.transition {
     ctor public ChangeBounds(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
+    method public boolean getResizeClip();
     method public deprecated void setReparent(boolean);
     method public void setResizeClip(boolean);
   }
