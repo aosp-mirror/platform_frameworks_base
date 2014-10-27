@@ -10405,6 +10405,60 @@ public class PackageManagerService extends IPackageManager.Stub {
         String oldCodePath = null;
         boolean systemApp = false;
         synchronized (mPackages) {
+            // Check if installing already existing package
+            if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
+                String oldName = mSettings.mRenamedPackages.get(pkgName);
+                if (pkg.mOriginalPackages != null
+                        && pkg.mOriginalPackages.contains(oldName)
+                        && mPackages.containsKey(oldName)) {
+                    // This package is derived from an original package,
+                    // and this device has been updating from that original
+                    // name.  We must continue using the original name, so
+                    // rename the new package here.
+                    pkg.setPackageName(oldName);
+                    pkgName = pkg.packageName;
+                    replace = true;
+                    if (DEBUG_INSTALL) Slog.d(TAG, "Replacing existing renamed package: oldName="
+                            + oldName + " pkgName=" + pkgName);
+                } else if (mPackages.containsKey(pkgName)) {
+                    // This package, under its official name, already exists
+                    // on the device; we should replace it.
+                    replace = true;
+                    if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing pacakge: " + pkgName);
+                }
+            }
+
+            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            if (ps != null) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
+
+                // Quick sanity check that we're signed correctly if updating;
+                // we'll check this again later when scanning, but we want to
+                // bail early here before tripping over redefined permissions.
+                if (!ps.keySetData.isUsingUpgradeKeySets() || ps.sharedUser != null) {
+                    try {
+                        verifySignaturesLP(ps, pkg);
+                    } catch (PackageManagerException e) {
+                        res.setError(e.error, e.getMessage());
+                        return;
+                    }
+                } else {
+                    if (!checkUpgradeKeySetLP(ps, pkg)) {
+                        res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
+                                + pkg.packageName + " upgrade keys do not match the "
+                                + "previously installed version");
+                        return;
+                    }
+                }
+
+                oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
+                if (ps.pkg != null && ps.pkg.applicationInfo != null) {
+                    systemApp = (ps.pkg.applicationInfo.flags &
+                            ApplicationInfo.FLAG_SYSTEM) != 0;
+                }
+                res.origUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
+            }
+
             // Check whether the newly-scanned package wants to define an already-defined perm
             int N = pkg.permissions.size();
             for (int i = N-1; i >= 0; i--) {
@@ -10445,38 +10499,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            // Check if installing already existing package
-            if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
-                String oldName = mSettings.mRenamedPackages.get(pkgName);
-                if (pkg.mOriginalPackages != null
-                        && pkg.mOriginalPackages.contains(oldName)
-                        && mPackages.containsKey(oldName)) {
-                    // This package is derived from an original package,
-                    // and this device has been updating from that original
-                    // name.  We must continue using the original name, so
-                    // rename the new package here.
-                    pkg.setPackageName(oldName);
-                    pkgName = pkg.packageName;
-                    replace = true;
-                    if (DEBUG_INSTALL) Slog.d(TAG, "Replacing existing renamed package: oldName="
-                            + oldName + " pkgName=" + pkgName);
-                } else if (mPackages.containsKey(pkgName)) {
-                    // This package, under its official name, already exists
-                    // on the device; we should replace it.
-                    replace = true;
-                    if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing pacakge: " + pkgName);
-                }
-            }
-            PackageSetting ps = mSettings.mPackages.get(pkgName);
-            if (ps != null) {
-                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
-                oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
-                if (ps.pkg != null && ps.pkg.applicationInfo != null) {
-                    systemApp = (ps.pkg.applicationInfo.flags &
-                            ApplicationInfo.FLAG_SYSTEM) != 0;
-                }
-                res.origUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
-            }
         }
 
         if (systemApp && onSd) {
