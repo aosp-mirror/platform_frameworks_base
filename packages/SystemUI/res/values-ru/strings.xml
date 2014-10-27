@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Здесь будут показаны недавние приложения."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"Показан 1 экран."</item>
-    <item quantity="other" msgid="5523506463832158203">"Показано экранов: %d."</item>
+    <item quantity="one" msgid="3969335317929254918">"В обзоре 1 экран."</item>
+    <item quantity="other" msgid="5523506463832158203">"Экранов в обзоре: %d."</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нет уведомлений"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текущие"</string>
@@ -277,7 +277,8 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Здесь будут показаны недавние приложения"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Сведения о приложении"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"Блокировать в приложении"</string>
+    <!-- no translation found for recents_lock_to_app_button_label (6942899049072506044) -->
+    <skip />
     <string name="recents_search_bar_label" msgid="8074997400187836677">"поиск"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Не удалось запустить приложение \"<xliff:g id="APP">%s</xliff:g>\""</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Батарея заряжена"</string>
