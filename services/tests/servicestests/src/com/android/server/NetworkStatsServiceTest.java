@@ -932,7 +932,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expect(mSettings.getPollInterval()).andReturn(HOUR_IN_MILLIS).anyTimes();
         expect(mSettings.getTimeCacheMaxAge()).andReturn(DAY_IN_MILLIS).anyTimes();
         expect(mSettings.getSampleEnabled()).andReturn(true).anyTimes();
-        expect(mSettings.getReportXtOverDev()).andReturn(true).anyTimes();
 
         final Config config = new Config(bucketDuration, deleteAge, deleteAge);
         expect(mSettings.getDevConfig()).andReturn(config).anyTimes();
