@@ -26,7 +26,6 @@ import android.os.RemoteException;
  */
 class GpsNavigationMessageListenerTransport
         extends LocalListenerHelper<GpsNavigationMessageEvent.Listener> {
-    private final Context mContext;
     private final ILocationManager mLocationManager;
 
     private final IGpsNavigationMessageListener mListenerTransport = new ListenerTransport();
@@ -34,8 +33,7 @@ class GpsNavigationMessageListenerTransport
     public GpsNavigationMessageListenerTransport(
             Context context,
             ILocationManager locationManager) {
-        super("GpsNavigationMessageListenerTransport");
-        mContext = context;
+        super(context, "GpsNavigationMessageListenerTransport");
         mLocationManager = locationManager;
     }
 
@@ -43,7 +41,7 @@ class GpsNavigationMessageListenerTransport
     protected boolean registerWithServer() throws RemoteException {
         return mLocationManager.addGpsNavigationMessageListener(
                 mListenerTransport,
-                mContext.getPackageName());
+                getContext().getPackageName());
     }
 
     @Override
@@ -62,7 +60,19 @@ class GpsNavigationMessageListenerTransport
                     listener.onGpsNavigationMessageReceived(event);
                 }
             };
+            foreach(operation);
+        }
 
+        @Override
+        public void onStatusChanged(final int status) {
+            ListenerOperation<GpsNavigationMessageEvent.Listener> operation =
+                    new ListenerOperation<GpsNavigationMessageEvent.Listener>() {
+                @Override
+                public void execute(GpsNavigationMessageEvent.Listener listener)
+                        throws RemoteException {
+                    listener.onStatusChanged(status);
+                }
+            };
             foreach(operation);
         }
     }

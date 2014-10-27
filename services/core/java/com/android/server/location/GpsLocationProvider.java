@@ -162,6 +162,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
+    private static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
+    private static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
+    private static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
 
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
@@ -348,20 +351,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final ILocationManager mILocationManager;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
-    private GpsStatusListenerHelper mListenerHelper = new GpsStatusListenerHelper() {
-        @Override
-        protected boolean isSupported() {
-            return GpsLocationProvider.isSupported();
-        }
-
-        @Override
-        protected boolean registerWithService() {
-            return true;
-        }
-
-        @Override
-        protected void unregisterFromService() {}
-    };
+    private final GpsStatusListenerHelper mListenerHelper;
+    private final GpsMeasurementsProvider mGpsMeasurementsProvider;
+    private final GpsNavigationMessageProvider mGpsNavigationMessageProvider;
 
     // Handler for processing events
     private Handler mHandler;
@@ -406,41 +398,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         @Override
         public void removeGpsStatusListener(IGpsStatusListener listener) {
             mListenerHelper.removeListener(listener);
-        }
-    };
-
-    private final GpsMeasurementsProvider mGpsMeasurementsProvider = new GpsMeasurementsProvider() {
-        @Override
-        public boolean isSupported() {
-            return native_is_measurement_supported();
-        }
-
-        @Override
-        protected boolean registerWithService() {
-            return native_start_measurement_collection();
-        }
-
-        @Override
-        protected void unregisterFromService() {
-            native_stop_measurement_collection();
-        }
-    };
-
-    private final GpsNavigationMessageProvider mGpsNavigationMessageProvider =
-            new GpsNavigationMessageProvider() {
-        @Override
-        protected boolean isSupported() {
-            return native_is_navigation_message_supported();
-        }
-
-        @Override
-        protected boolean registerWithService() {
-            return native_start_navigation_message_collection();
-        }
-
-        @Override
-        protected void unregisterFromService() {
-            native_stop_navigation_message_collection();
         }
     };
 
@@ -694,6 +651,62 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         mHandler.getLooper());
             }
         });
+
+        mListenerHelper = new GpsStatusListenerHelper(mHandler) {
+            @Override
+            protected boolean isAvailableInPlatform() {
+                return GpsLocationProvider.isSupported();
+            }
+
+            @Override
+            protected boolean isGpsEnabled() {
+                return isEnabled();
+            }
+        };
+
+        mGpsMeasurementsProvider = new GpsMeasurementsProvider(mHandler) {
+            @Override
+            public boolean isAvailableInPlatform() {
+                return native_is_measurement_supported();
+            }
+
+            @Override
+            protected boolean registerWithService() {
+                return native_start_measurement_collection();
+            }
+
+            @Override
+            protected void unregisterFromService() {
+                native_stop_measurement_collection();
+            }
+
+            @Override
+            protected boolean isGpsEnabled() {
+                return isEnabled();
+            }
+        };
+
+        mGpsNavigationMessageProvider = new GpsNavigationMessageProvider(mHandler) {
+            @Override
+            protected boolean isAvailableInPlatform() {
+                return native_is_navigation_message_supported();
+            }
+
+            @Override
+            protected boolean registerWithService() {
+                return native_start_navigation_message_collection();
+            }
+
+            @Override
+            protected void unregisterFromService() {
+                native_stop_navigation_message_collection();
+            }
+
+            @Override
+            protected boolean isGpsEnabled() {
+                return isEnabled();
+            }
+        };
     }
 
     private void listenForBroadcasts() {
@@ -1443,7 +1456,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (wasNavigating != mNavigating) {
-            mListenerHelper.onStatusChanged(mNavigating);
+            mListenerHelper.onGpsEnabledChanged(mNavigating);
+            mGpsMeasurementsProvider.onGpsEnabledChanged(mNavigating);
+            mGpsNavigationMessageProvider.onGpsEnabledChanged(mNavigating);
 
             // send an intent to notify that the GPS has been enabled or disabled
             Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
@@ -1596,6 +1611,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
             mPeriodicTimeInjection = true;
             requestUtcTime();
         }
+
+        mGpsMeasurementsProvider.onCapabilitiesUpdated(
+                (capabilities & GPS_CAPABILITY_MEASUREMENTS) == GPS_CAPABILITY_MEASUREMENTS);
+        mGpsNavigationMessageProvider.onCapabilitiesUpdated(
+                (capabilities & GPS_CAPABILITY_NAV_MESSAGES) == GPS_CAPABILITY_NAV_MESSAGES);
     }
 
     /**
