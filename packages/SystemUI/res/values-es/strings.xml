@@ -298,7 +298,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Vuelve a tocar para abrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Desliza el dedo hacia arriba para desbloquear"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Desliza el dedo hacia la izquierda para acceder al teléfono"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Desliza el dedo hacia la derecha para acceder al teléfono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Desliza el dedo hacia la izquierda para acceder a la cámara"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Nada"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioridad"</string>
