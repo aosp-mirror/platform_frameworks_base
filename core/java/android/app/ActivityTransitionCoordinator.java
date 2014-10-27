@@ -711,7 +711,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void moveSharedElementsToOverlay() {
-        if (!mWindow.getSharedElementsUseOverlay()) {
+        if (mWindow == null || !mWindow.getSharedElementsUseOverlay()) {
             return;
         }
         int numSharedElements = mSharedElements.size();
