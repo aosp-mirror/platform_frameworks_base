@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import java.util.Set;
 import android.net.Uri;
 import android.util.FastImmutableArraySet;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -736,7 +736,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     /**
      * All filters that have been registered.
      */
-    private final HashSet<F> mFilters = new HashSet<F>();
+    private final ArraySet<F> mFilters = new ArraySet<F>();
 
     /**
      * All of the MIME types that have been registered, such as "image/jpeg",

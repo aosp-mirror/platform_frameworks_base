@@ -74,7 +74,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -380,7 +379,7 @@ public class PackageParser {
      */
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            HashSet<String> grantedPermissions, PackageUserState state) {
+            ArraySet<String> grantedPermissions, PackageUserState state) {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, UserHandle.getCallingUserId());
@@ -401,7 +400,7 @@ public class PackageParser {
 
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            HashSet<String> grantedPermissions, PackageUserState state, int userId) {
+            ArraySet<String> grantedPermissions, PackageUserState state, int userId) {
 
         if (!checkUseInstalledOrHidden(flags, state)) {
             return null;

@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import java.util.HashSet;
+import android.util.ArraySet;
 
 /**
  * Settings data for a particular shared user ID we know about.
@@ -29,7 +29,7 @@ final class SharedUserSetting extends GrantedPermissions {
     // flags that are associated with this uid, regardless of any package flags
     int uidFlags;
 
-    final HashSet<PackageSetting> packages = new HashSet<PackageSetting>();
+    final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();
 
