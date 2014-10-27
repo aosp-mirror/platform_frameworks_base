@@ -843,7 +843,7 @@ public class AudioService extends IAudioService.Stub {
         int ringerMode = ringerModeFromSettings;
         // sanity check in case the settings are restored from a device with incompatible
         // ringer modes
-        if (!AudioManager.isValidRingerMode(ringerMode)) {
+        if (!isValidRingerMode(ringerMode)) {
             ringerMode = AudioManager.RINGER_MODE_NORMAL;
         }
         if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
@@ -1733,9 +1733,14 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void ensureValidRingerMode(int ringerMode) {
-        if (!AudioManager.isValidRingerMode(ringerMode)) {
+        if (!isValidRingerMode(ringerMode)) {
             throw new IllegalArgumentException("Bad ringer mode " + ringerMode);
         }
+    }
+
+    /** @see AudioManager#isValidRingerMode(int) */
+    public boolean isValidRingerMode(int ringerMode) {
+        return ringerMode >= 0 && ringerMode <= AudioManager.RINGER_MODE_MAX;
     }
 
     /** @see AudioManager#setRingerMode(int) */
@@ -1743,7 +1748,7 @@ public class AudioService extends IAudioService.Stub {
         if (mUseFixedVolume || isPlatformTelevision()) {
             return;
         }
-
+        ensureValidRingerMode(ringerMode);
         if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }

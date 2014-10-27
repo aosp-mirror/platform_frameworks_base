@@ -512,8 +512,11 @@ public class AudioManager {
      */
     public static final int RINGER_MODE_NORMAL = 2;
 
-    // maximum valid ringer mode value. Values must start from 0 and be contiguous.
-    private static final int RINGER_MODE_MAX = RINGER_MODE_NORMAL;
+    /**
+     * Maximum valid ringer mode value. Values must start from 0 and be contiguous.
+     * @hide
+     */
+    public static final int RINGER_MODE_MAX = RINGER_MODE_NORMAL;
 
     /**
      * Vibrate type that corresponds to the ringer.
@@ -887,7 +890,13 @@ public class AudioManager {
         if (ringerMode < 0 || ringerMode > RINGER_MODE_MAX) {
             return false;
         }
-        return true;
+        IAudioService service = getService();
+        try {
+            return service.isValidRingerMode(ringerMode);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isValidRingerMode", e);
+            return false;
+        }
     }
 
     /**
