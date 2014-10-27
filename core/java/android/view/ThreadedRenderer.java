@@ -255,6 +255,9 @@ public class ThreadedRenderer extends HardwareRenderer {
             mProfilingEnabled = wantProfiling;
             changed = true;
         }
+        if (changed) {
+            invalidateRoot();
+        }
         return changed;
     }
 
