@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"שינוי כרטיס איש הקשר שלך"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"מאפשר לאפליקציה לשנות או להוסיף נתונים לפרטי הפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי הקשר שלך. משמעות הדבר שהאפליקציה יכולה לזהות אותך ועשוי לשלוח את פרטי הפרופיל שלך לאנשים אחרים."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"חיישני גוף (כמו מוניטורים עבור קצב לב)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"מאפשר לאפליקציה לגשת לנתוני חיישנים שבהם אתה משתמש כדי למדוד פעילות המתרחשת בתוך הגוף, כמו קצב לב."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"מאפשר לאפליקציה לגשת אל נתוני חיישנים העוקבים אחר מצבך הגופני, כמו קצב הלב."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"קריאת הזרם החברתי שלך"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"מאפשר לאפליקציה גישה ויכולת סנכרון של עדכונים חברתיים שאתה וחבריך מבצעים. היזהר בעת שיתוף מידע -- הדבר מתיר לאפליקציה לקרוא התכתבויות בינך ובין חבריך ברשתות חברתיות, ללא התחשבות בסודיות. שים לב: ייתכן שאישור זה לא נאכף בכל הרשתות החברתיות."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"כתיבה בזרם החברתי שלך"</string>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"自分の連絡先カードの変更"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の変更と追加をアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ボディーセンサー（心拍数モニターなど）"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"心拍数など、体内の変化の測定に使用するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"心拍数など、身体状態を監視するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ソーシャルストリームを読む"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>

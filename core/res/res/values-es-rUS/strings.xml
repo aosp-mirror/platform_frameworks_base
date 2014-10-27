@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"modif. tarjeta contacto propia"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permite que la aplicación modifique la información del perfil personal almacenada en el dispositivo, como el nombre o la información de contacto, o que agregue contenido a esa información. Esto significa que puede identificarte y enviar la información de tu perfil a otros usuarios."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"sensores corporales (frec. card)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Permite que la aplicación acceda a datos de sensores que utilizas para medir lo que sucede en tu cuerpo, como la frecuencia cardíaca."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la aplicación acceda a datos de sensores que controlan tu condición física, como el ritmo cardíaco."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Lectura de tu muro social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permite que la aplicación acceda a las actualizaciones de tus redes sociales y las de tus amigos, y que las sincronice. Ten cuidado al compartir información, ya que la aplicación puede utilizar este permiso para leer las conversaciones que tengas con tus amigos en las redes sociales sin tener en cuenta si son confidenciales. Nota: Este permiso no se puede utilizar en todas las redes sociales."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Escritura en tu muro social"</string>
@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> borrado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para dejar de fijar esta pantalla, mantén presionados los botones para volver y Descripción general al mismo tiempo."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para dejar de fijar esta pantalla, mantén presionado el botón Descripción general."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para dejar de fijar esta pantalla, mantén presionados los botones para volver y Recientes al mismo tiempo."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para dejar de fijar esta pantalla, mantén presionado el botón Recientes."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La pantalla está fija. La organización no permite dejar de fijar la pantalla."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"¿Utilizar función para fijar la pantalla?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"La función para fijar la pantalla bloquea la pantalla en una vista única.\n\nPara dejar de fijar la pantalla, mantén presionados los botones para volver y Descripción general al mismo tiempo."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"La función para fijar la pantalla bloquea la pantalla en una vista única.\n\nPara dejar de fijar la pantalla, mantén presionado el botón Descripción general."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"La función para fijar la pantalla bloquea la pantalla en una vista única.\n\nPara dejar de fijar la pantalla, mantén presionados los botones para volver y Recientes al mismo tiempo."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"La función para fijar la pantalla bloquea la pantalla en una vista única.\n\nPara dejar de fijar la pantalla, mantén presionado el botón Recientes."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRACIAS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fija"</string>

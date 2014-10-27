@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"修改您自己的名片"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允许该应用更改或添加您设备上存储的个人资料信息，例如您的姓名和联系信息。这意味着该应用可以识别您的身份，并可能将您的个人资料信息发送给他人。"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"人体传感器（如心跳速率检测器）"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"允许应用访问您用于测量身体状况（如心跳速率）的传感器中的数据。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允许该应用存取监测您身体状况的传感器所收集的数据，例如您的心率。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"读取您的社交信息流"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允许该应用访问并同步您和朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用读取您与社交网络上的朋友之间的交流信息。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"写入您的社交信息流"</string>

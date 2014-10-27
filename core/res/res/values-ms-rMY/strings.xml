@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"ubah suai kad kenalan sendiri"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Membenarkan apl menukar atau menambah maklumat profil peribadi yang disimpan pada peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna apl boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"penderia (spt. denyut jantung)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Membenarkan apl mengakses data dari penderia yang anda gunakan untuk mengukur perkara yang berlaku dalam tubuh anda, seperti kadar denyutan jantung."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Membenarkan apl mengakses data dari penderia yang memantau keadaan fizikal anda, seperti kadar denyutan jantung anda."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"baca aliran sosial anda"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Membenarkan apl mengakses dan menyegerakkan kemas kini sosial daripada anda dan rakan anda. Berhati-hati semasa berkongsi maklumat - ini membenarkan apl untuk membaca komunikasi di antara anda dan rakan anda pada rangkaian sosial tanpa mengira kerahsiaan. Nota: kebenaran ini tidak boleh dikuatkuasakan pada semua rangkaian sosial."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"tulis ke aliran sosial anda"</string>
@@ -1757,12 +1757,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> dipilih"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> dipadamkan"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kerja <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk menyahsemat skrin ini, sentuh dan tahan Kembali serta Gambaran Keseluruhan pada masa yang sama."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk menyahsemat skrin ini, sentuh dan tahan Gambaran Keseluruhan."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk menyahsemat skrin ini, sentuh dan tahan Kembali serta Ikhtisar pada masa yang sama."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk menyahsemat skrin ini, sentuh dan tahan Ikhtisar."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skrin disemat. Menyahsemat tidak dibenarkan oleh organisasi anda."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Gunakan penyematan skrin?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Penyematan skrin mengunci paparan dalam pandangan tunggal.\n\nUntuk menyahsemat, sentuh dan tahan Kembali serta Gambaran Keseluruhan pada masa yang sama."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Penyematan skrin mengunci paparan dalam pandangan tunggal.\n\nUntuk menyahsemat, sentuh dan tahan Gambaran Keseluruhan."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Penyematan skrin mengunci paparan dalam pandangan tunggal.\n\nUntuk menyahsemat, sentuh dan tahan Kembali serta Ikhtisar pada masa yang sama."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Penyematan skrin mengunci paparan dalam pandangan tunggal.\n\nUntuk menyahsemat, sentuh dan tahan Ikhtisar."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"TIDAK, TERIMA KASIH"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"MULA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrin disemat"</string>

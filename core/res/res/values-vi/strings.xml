@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"sửa đổi thẻ liên hệ của riêng bạn"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Cho phép ứng dụng thay đổi hoặc thêm vào thông tin tiểu sử cá nhân được lưu trữ trên thiết bị, chẳng hạn như tên và thông tin liên hệ của bạn. Điều này có nghĩa là ứng dụng có thể xác định danh tính của bạn và gửi thông tin tiểu sử của bạn cho người khác."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"cảm biến cơ thể (như máy đo nhịp tim)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Cho phép ứng dụng truy cập dữ liệu từ cảm biến mà bạn sử dụng để đo những gì đang diễn ra bên trong cơ thể của bạn, chẳng hạn như nhịp tim."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Cho phép ứng dụng truy cập dữ liệu từ bộ cảm biến giám sát tình trạng thể chất của bạn, ví dụ như nhịp tim."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"đọc luồng xã hội của bạn"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Cho phép ứng dụng truy cập và đồng bộ hóa các cập nhật xã hội của bạn và bạn bè bạn. Hãy cẩn trọng khi chia sẻ thông tin -- việc này có thể cho phép ứng dụng đọc thông tin liên lạc giữa bạn và bạn bè bạn trên các mạng xã hội, bất kể tính bí mật là gì. Lưu ý: quyền này có thể không được thực thi trên tất cả các mạng xã hội."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ghi luồng xã hội của bạn"</string>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"나만의 연락처 카드 수정"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"앱이 기기에 저장된 개인 프로필 정보(예: 사용자 이름, 연락처 정보 등)를 변경 또는 추가할 수 있도록 허용합니다. 이는 앱이 사용자를 확인하고 다른 사용자에게 해당 프로필 정보를 전송할 수 있다는 것을 의미합니다."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"신체 센서(예: 심박수 모니터)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"앱이 신체 변화(예: 심박수) 측정을 위해 사용하는 센서의 데이터에 액세스하도록 허용합니다."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"앱이 심박수와 같은 신체 상태를 모니터링하는 센서의 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"소셜 스트림 읽기"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"앱이 사용자와 친구의 최신 소셜 소식에 액세스하고 동기화할 수 있도록 허용합니다. 이 경우 앱이 비밀유지와 관계 없이 소셜 네트워크에서 사용자와 친구가 주고받는 내용을 읽을 수 있으므로, 정보를 공유할 때 주의해야 합니다. 참고: 이 권한이 적용되지 않는 소셜 네트워크도 있습니다."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"소셜 스트림에 쓰기"</string>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"muutke oma kontaktikaarti"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Võimaldab rakendusel muuta või lisada seadmesse salvestatud isiklikku profiiliteavet, näiteks teie nime ja kontaktteavet. See tähendab, et rakendus saab teid tuvastada ja saata teie profiiliteavet teistele."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kehaandurid (nt pulsilugeja)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Lubab rakendusel saada juurdepääsu selliste andurite andmetele, mida kasutate kehas toimuva (nt pulsi) mõõtmiseks."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Lubab rakendusel hankida juurdepääsu andmetele anduritest, mis jälgivad teie füüsilist seisundit, nt südame löögisagedust."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Sotsiaalvoo lugemine"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Annab rakendusele juurdepääsu ja võimaldab sünkroonida teie ja teie sõprade sotsiaalseid värskendusi. Olge teabe jagamisel ettevaatlik – see võimaldab rakendusel lugeda teie suhtlusi sõpradega suhtlusvõrgustikes konfidentsiaalsusest hoolimata. Märkus: see luba ei pruugi jõustuda kõigis suhtlusvõrgustikes."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Sotsiaalvoogu kirjutamine"</string>

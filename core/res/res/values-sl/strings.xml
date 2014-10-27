@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"spreminj. vaše osebne vizitke"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Aplikaciji omogoča spreminjanje ali dodajanje osebnih podatkov v profilu, ki so shranjeni v napravi, na primer ime in podatki za stik. To pomeni, da vas lahko aplikacija prepozna in vaše podatke v profilu pošlje drugim."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"tipala telesnih funkcij (npr. merilniki srčnega utripa)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Aplikaciji dovoli dostop do podatkov tipal, ki jih uporabljate za merjenje procesov v telesu, kot je srčni utrip."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Aplikaciji omogoča dostop do podatkov tipal, ki nadzirajo vaše fizično stanje, med drugim vaš srčni utrip."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"branje vašega družabnega toka"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogoča dostop do vaših objav in objav vaših prijateljev v družabnih omrežjih ter njihovo sinhronizacijo. Previdno pri objavljanju informacij – aplikacija lahko s tem bere komunikacijo med vami in prijatelji v družabnih omrežjih, ne glede na zasebnost. Opomba: Tega dovoljenja ni mogoče uveljaviti v vseh družabnih omrežjih."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje v vaš družabni tok"</string>

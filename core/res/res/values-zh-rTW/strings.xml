@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"修改自己的聯絡資訊"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允許應用程式新增或變更裝置上儲存的個人資料，例如您的姓名和聯絡資訊。這項設定可讓應用程式識別您的身分，並可能將您的個人資料傳送給他人。"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"身體感應器 (例如心律監測器)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"允許應用程式存取感應器從您的身體測得的資料，例如心跳頻率。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感測器所收集的資料 (這類感測器可監測您的體能狀態，例如您的心跳速率)。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"讀取您的社交串流"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允許應用程式存取並同步處理您和好友的最新動態。因此，當您分享資訊時請小心，因為這項權限可讓應用程式讀取您和好友在社交網路上的私人通訊，包括機密通訊。注意：並非所有社交網路皆適用於這項權限。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"寫入您的社交串流"</string>

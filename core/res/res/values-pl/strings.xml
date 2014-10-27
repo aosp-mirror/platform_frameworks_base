@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"zmiana własnej karty kontaktu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Pozwala aplikacji na zmianę lub dodanie osobistych informacji przechowywanych w Twoim profilu na urządzeniu (np. imienia i nazwiska lub adresu). Oznacza to, że aplikacja może Cię zidentyfikować i wysłać informacje z Twojego profilu do innych osób."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"czujniki ciała (np. monitorujące tętno)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Zezwala aplikacji na dostęp do danych z czujników mierzących procesy zachodzące w ciele, np. bicie serca (tętno)."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Pozwala aplikacji na dostęp do danych z czujników, które monitorują Twój stan fizyczny (np. tętno)."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"odczyt sieci społecznościowych"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Pozwala aplikacji na odczyt i synchronizację informacji publikowanych przez Ciebie i Twoich znajomych w sieciach społecznościowych. Zachowaj ostrożność, udostępniając informacje. Aplikacja z tym uprawnieniem może odczytać całą komunikację, którą prowadzisz ze swoimi znajomymi w sieciach społecznościowych, niezależnie od jej poufności. Uwaga: to uprawnienie może nie być egzekwowane we wszystkich sieciach społecznościowych."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zapis sieci społecznościowych"</string>

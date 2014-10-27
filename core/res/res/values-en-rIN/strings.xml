@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"modify your own contact card"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Allows the app to change or add to personal profile information stored on your device, such as your name and contact information. This means that the app can identify you and may send your profile information to others."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"body sensors (like heart rate monitors)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Allows the app to access data from sensors that you use to measure what’s happening inside your body, such as heart rate."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Allows the app to access data from sensors that monitor your physical condition, such as your heart rate."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"read your social stream"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Allows the app to access and sync social updates from you and your friends. Be careful when sharing information - this allows the app to read communications between you and your friends on social networks, regardless of confidentiality. Note: this permission may not be enforced on all social networks."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"write to your social stream"</string>
