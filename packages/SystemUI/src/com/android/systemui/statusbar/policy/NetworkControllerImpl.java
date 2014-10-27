@@ -164,8 +164,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public interface SignalCluster {
         void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-                String contentDescription, String typeContentDescription, boolean roaming,
-                boolean isTypeIconWide);
+                String contentDescription, String typeContentDescription, boolean isTypeIconWide);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
@@ -386,7 +385,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mDataTypeIconId,
                     mContentDescriptionWimax,
                     mContentDescriptionDataType,
-                    mDataTypeIconId == TelephonyIcons.ROAMING_ICON,
                     false /* isTypeIconWide */ );
         } else {
             // normal mobile data
@@ -396,7 +394,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mDataTypeIconId,
                     mContentDescriptionPhoneSignal,
                     mContentDescriptionDataType,
-                    mDataTypeIconId == TelephonyIcons.ROAMING_ICON,
                     isTypeIconWide(mDataTypeIconId));
         }
         cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
@@ -1606,7 +1603,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             mDemoDataTypeIconId,
                             "Demo",
                             "Demo",
-                            mDemoDataTypeIconId == TelephonyIcons.ROAMING_ICON,
                             isTypeIconWide(mDemoDataTypeIconId));
                 }
                 refreshViews();
