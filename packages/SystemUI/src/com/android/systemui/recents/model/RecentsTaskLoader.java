@@ -171,6 +171,9 @@ class TaskResourceLoader implements Runnable {
                 }
             } else {
                 SystemServicesProxy ssp = mSystemServicesProxy;
+                // If we've stopped the loader, then fall thorugh to the above logic to wait on
+                // the load thread
+                if (ssp == null) continue;
 
                 // Load the next item from the queue
                 final Task t = mLoadQueue.nextTask();
