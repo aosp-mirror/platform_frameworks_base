@@ -275,7 +275,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> warning"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Your recent screens appear here"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Application Info"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"lock to app"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Could not start <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Charged"</string>

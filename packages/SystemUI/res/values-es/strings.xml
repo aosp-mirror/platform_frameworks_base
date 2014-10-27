@@ -275,7 +275,8 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Aquí aparecerán tus pantallas recientes"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Información de la aplicación"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"bloqueo de aplicación"</string>
+    <!-- no translation found for recents_lock_to_app_button_label (6942899049072506044) -->
+    <skip />
     <string name="recents_search_bar_label" msgid="8074997400187836677">"buscar"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"No se ha podido iniciar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Cargada"</string>
@@ -296,7 +297,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Vuelve a tocar para abrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Desliza el dedo hacia arriba para desbloquear"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Desliza el dedo hacia la izquierda para acceder al teléfono"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Desliza el dedo hacia la derecha para acceder al teléfono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Desliza el dedo hacia la izquierda para acceder a la cámara"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Nada"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioridad"</string>
