@@ -1126,7 +1126,7 @@ private:
     String8 mName;
 
     friend class DisplayListRenderer;
-    friend class Layer;
+    friend struct Layer;
     friend class TextSetupFunctor;
     friend class DrawBitmapOp;
     friend class DrawPatchOp;

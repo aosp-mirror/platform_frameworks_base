@@ -2,6 +2,14 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
+# Too many unused parameters in external/skia/include and this directory.
+# getConfig in external/skia/include/core/SkBitmap.h is deprecated.
+# Allow Gnu extension: in-class initializer of static 'const float' member.
+LOCAL_CLANG_CFLAGS += \
+    -Wno-unused-parameter \
+    -Wno-deprecated-declarations \
+    -Wno-gnu-static-float-init
+
 # Only build libhwui when USE_OPENGL_RENDERER is
 # defined in the current device/board configuration
 ifeq ($(USE_OPENGL_RENDERER),true)
