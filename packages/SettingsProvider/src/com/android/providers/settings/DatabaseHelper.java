@@ -568,7 +568,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadSetting(stmt, Settings.System.VOLUME_BLUETOOTH_SCO,
-                        AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
+                        AudioService.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -2169,25 +2169,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + " VALUES(?,?);");
 
             loadSetting(stmt, Settings.System.VOLUME_MUSIC,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_MUSIC));
             loadSetting(stmt, Settings.System.VOLUME_RING,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_RING]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_RING));
             loadSetting(stmt, Settings.System.VOLUME_SYSTEM,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_SYSTEM]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_SYSTEM));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_VOICE,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_VOICE_CALL]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_VOICE_CALL));
             loadSetting(stmt, Settings.System.VOLUME_ALARM,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_ALARM]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_ALARM));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_NOTIFICATION,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_NOTIFICATION]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_NOTIFICATION));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_BLUETOOTH_SCO,
-                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
+                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
 
             // By default:
             // - ringtones, notification, system and music streams are affected by ringer mode
