@@ -32,8 +32,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import static com.android.internal.util.ArrayUtils.appendInt;
 
@@ -50,7 +48,7 @@ public class SystemConfig {
 
     // These are the built-in uid -> permission mappings that were read from the
     // system configuration files.
-    final SparseArray<HashSet<String>> mSystemPermissions = new SparseArray<>();
+    final SparseArray<ArraySet<String>> mSystemPermissions = new SparseArray<>();
 
     // These are the built-in shared libraries that were read from the
     // system configuration files.  Keys are the library names; strings are the
@@ -59,7 +57,7 @@ public class SystemConfig {
 
     // These are the features this devices supports that were read from the
     // system configuration files.
-    final HashMap<String, FeatureInfo> mAvailableFeatures = new HashMap<>();
+    final ArrayMap<String, FeatureInfo> mAvailableFeatures = new ArrayMap<>();
 
     public static final class PermissionEntry {
         public final String name;
@@ -94,7 +92,7 @@ public class SystemConfig {
         return mGlobalGids;
     }
 
-    public SparseArray<HashSet<String>> getSystemPermissions() {
+    public SparseArray<ArraySet<String>> getSystemPermissions() {
         return mSystemPermissions;
     }
 
@@ -102,7 +100,7 @@ public class SystemConfig {
         return mSharedLibraries;
     }
 
-    public HashMap<String, FeatureInfo> getAvailableFeatures() {
+    public ArrayMap<String, FeatureInfo> getAvailableFeatures() {
         return mAvailableFeatures;
     }
 
@@ -252,9 +250,9 @@ public class SystemConfig {
                         continue;
                     }
                     perm = perm.intern();
-                    HashSet<String> perms = mSystemPermissions.get(uid);
+                    ArraySet<String> perms = mSystemPermissions.get(uid);
                     if (perms == null) {
-                        perms = new HashSet<String>();
+                        perms = new ArraySet<String>();
                         mSystemPermissions.put(uid, perms);
                     }
                     perms.add(perm);
