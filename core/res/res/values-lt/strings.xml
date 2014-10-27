@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"keisti jūsų kontaktinę kortelę"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Leidžiama programai keisti įrenginyje saugomą asmeninę profilio informaciją, pvz., vardą, pavardę ir kontaktinę informaciją, arba jos pridėti. Tai reiškia, kad programa gali nustatyti tapatybę ir siųsti profilio informaciją kitiems."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kūno jut. (pvz., pulso d. t.)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Programai leidžiama pasiekti naudojamų jutiklių duomenis, siekiant įvertinti, kas vyksta jūsų kūne, pvz., pulso dažnį."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Programai leidžiama pasiekti duomenis, gautus iš jutiklių, stebinčių fizinę būseną, pvz., širdies ritmą."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"skaityti socialinį srautą"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Leidžiama programai pasiekti ir sinchronizuoti viešas naujienas iš jūsų ir jūsų draugų. Būkite atidūs bendrindami informaciją – programai leidžiama skaityti korespondenciją tarp jūsų ir draugų viešuosiuose tinkluose, neatsižvelgiant į konfidencialumą. Pastaba: šis leidimas negali būti taikomas visuose viešuosiuose tinkluose."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"rašyti į socialinį srautą"</string>

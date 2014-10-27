@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"mainīt manu vizītkarti"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Ļauj lietotnei mainīt ierīcē saglabāto personīgā profila informāciju, piemēram, jūsu vārdu un kontaktinformāciju, vai pievienot tai citu informāciju. Tas nozīmē, ka lietotne var jūs identificēt un var nosūtīt jūsu profila informāciju citām personām."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ķermeņa sensori (piemēram, sirdsdarbības monitori)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Ļauj lietotnei piekļūt to sensoru datiem, kurus izmantojat, lai novērtētu ķermeņa procesus, piemēram, sirdsdarbību."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ļauj lietotnei piekļūt to sensoru datiem, kuri pārrauga jūsu fizisko stāvokli (piemēram, sirdsdarbības ātrumu)."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lasīt jūsu soc. tīklu straumi"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Ļauj lietotnei piekļūt sociālajiem atjauninājumiem no jums un jūsu draugiem un sinhronizēt tos. Esiet piesardzīgs, kad kopīgojat informāciju, — šādi lietotne var lasīt sociālajos tīklos ar draugiem veikto saziņu, neraugoties uz konfidencialitāti. Piezīme: šo atļauju nedrīkst piemērot visiem sociālajiem tīkliem."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"rakstīt sociālo tīklu straumē"</string>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"breyta tengiliðaspjaldinu þínu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Leyfir forriti að breyta eða bæta við persónulegum prófílupplýsingum sem vistaðar eru í tækinu, t.d. nafni og samskiptaupplýsingum. Þetta þýðir að forritið veit hver þú ert og getur sent prófílupplýsingarnar þínar til annarra."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"líkamsskynjarar (s.s. hjartsláttarmælar)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Leyfir forriti að fá aðgang að gögnum frá skynjurum sem þú notar til að mæla líkamsstarfsemi þína, svo sem hjartslátt."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Veitir forritinu aðgang að gögnum frá skynjurum sem fylgjast með líkamsstarfsemi þinni, svo sem hjartslætti."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lesa samfélagsstrauminn þinn"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Leyfir forriti að fá aðgang að og samstilla samfélagsuppfærslur þínar og vina þinna. Sýndu aðgát þegar þú deilir upplýsingum; þetta gerir forritinu kleift að lesa samskipti þín og vina þinna í netsamfélögum. Athugaðu: Ekki er víst að þessi heimild sé virt í öllum netsamfélögum."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrifa í samfélagsstrauminn þinn"</string>

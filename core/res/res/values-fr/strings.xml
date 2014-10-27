@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"modifier votre fiche de contact"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permet à l\'application de modifier les informations de profil stockées sur votre appareil, telles que votre nom et vos coordonnées, ou d\'en ajouter. Elle peut alors vous identifier et envoyer vos informations de profil à des tiers."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"capteurs corporels (tels que les cardiofréquencemètres)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Permet à l\'application d\'accéder aux données des capteurs utilisés pour mesurer des valeurs physiologiques, telles que votre fréquence cardiaque."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permet à l\'application d\'accéder aux données des capteurs qui contrôlent votre condition physique, comme votre rythme cardiaque."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lire votre flux de réseau social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permet à l\'application d\'accéder à vos mises à jour sur les réseaux sociaux, ainsi qu\'à celles de vos amis, et de les synchroniser. Soyez prudent lorsque vous partagez des informations. Cette autorisation permet à l\'application de lire les communications entre vous et vos amis sur les réseaux sociaux, indépendamment de leur caractère confidentiel. Remarque : il est possible que cette autorisation ne soit pas appliquée sur tous les réseaux sociaux."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"écrire sur votre flux social"</string>
@@ -1762,12 +1762,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"\"<xliff:g id="ITEM">%1$s</xliff:g>\" sélectionné"</string>
     <string name="deleted_key" msgid="7659477886625566590">"\"<xliff:g id="KEY">%1$s</xliff:g>\" supprimé"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage, appuyez de manière prolongée et simultanée sur \"Retour\" et \"Vue d\'ensemble\"."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pour annuler l\'épinglage, appuyez de manière prolongée sur \"Vue d\'ensemble\"."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage, appuyez de manière prolongée et simultanée sur \"Retour\" et \"Aperçu\"."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pour annuler l\'épinglage, appuyez de manière prolongée sur \"Aperçu\"."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"L\'écran est épinglé. L\'annulation de l\'épinglage n\'est pas autorisée par votre organisation."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Utiliser l\'épinglage d\'écran ?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, appuyez de manière prolongée et simultanée sur \"Retour\" et \"Vue d\'ensemble\"."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, appuyez de manière prolongée sur \"Vue d\'ensemble\"."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, appuyez de manière prolongée et simultanée sur \"Retour\" et \"Aperçu\"."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, appuyez de manière prolongée sur \"Aperçu\"."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NON, MERCI"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ACTIVER"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé."</string>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"izmjena vaše kontaktne kartice"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Aplikaciji omogućuje promjenu ili dodavanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime i kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"senzori tjelesnih funkcija (npr. monitori otkucaja srca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Aplikaciji omogućuje pristup podacima iz senzora koje upotrebljavate za mjerenje onoga što se odvija u vašem tijelu, poput otkucaja srca."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Omogućuje aplikaciji pristup podacima sa senzora koji nadziru vaše fizičko stanje, na primjer, broj otkucaja srca."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čitanje društvenog streama"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogućuje pristup vašim ažuriranjima na društvenim mrežama i ažuriranjima vaših prijatelja, kao i sinkronizaciju tih ažuriranja. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje čitanje poruka između vas i vaših prijatelja na društvenim mrežama, neovisno o povjerljivosti. Napomena: ta se dozvola možda ne primjenjuje na svim društvenim mrežama."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje društvenog streama"</string>
