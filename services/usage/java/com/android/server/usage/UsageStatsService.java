@@ -38,6 +38,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -349,8 +350,12 @@ public class UsageStatsService extends SystemService implements
     private class BinderService extends IUsageStatsManager.Stub {
 
         private boolean hasPermission(String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid == Process.SYSTEM_UID) {
+                return true;
+            }
             final int mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
-                    Binder.getCallingUid(), callingPackage);
+                    callingUid, callingPackage);
             if (mode == AppOpsManager.MODE_DEFAULT) {
                 // The default behavior here is to check if PackageManager has given the app
                 // permission.
