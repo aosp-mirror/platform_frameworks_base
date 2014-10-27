@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
@@ -57,9 +58,11 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
 
     // highlighted time
     private Calendar mSelectedDay = Calendar.getInstance();
-    private SimpleMonthAdapter mAdapter;
-
     private Calendar mTempDay = Calendar.getInstance();
+    private Calendar mMinDate = Calendar.getInstance();
+    private Calendar mMaxDate = Calendar.getInstance();
+
+    private SimpleMonthAdapter mAdapter;
 
     // which month should be displayed/highlighted [0-11]
     private int mCurrentMonthDisplayed;
@@ -75,6 +78,7 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
 
     public DayPickerView(Context context, DatePickerController controller) {
         super(context);
+
         init();
         setController(controller);
     }
@@ -95,6 +99,41 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         setDrawSelectorOnTop(false);
 
         setUpListView();
+    }
+
+    public void setRange(Calendar minDate, Calendar maxDate) {
+        mMinDate.setTimeInMillis(minDate.getTimeInMillis());
+        mMaxDate.setTimeInMillis(maxDate.getTimeInMillis());
+
+        mAdapter.setRange(mMinDate, mMaxDate);
+
+        if (constrainCalendar(mSelectedDay, mMinDate, mMaxDate)) {
+            goTo(mSelectedDay, false, true, true);
+        }
+    }
+
+    /**
+     * Constrains the supplied calendar to stay within the min and max
+     * calendars, returning <code>true</code> if the supplied calendar
+     * was modified.
+     *
+     * @param value The calendar to constrain
+     * @param min The minimum calendar
+     * @param max The maximum calendar
+     * @return True if <code>value</code> was modified
+     */
+    private boolean constrainCalendar(Calendar value, Calendar min, Calendar max) {
+        if (value.compareTo(min) < 0) {
+            value.setTimeInMillis(min.getTimeInMillis());
+            return true;
+        }
+
+        if (value.compareTo(max) > 0) {
+            value.setTimeInMillis(max.getTimeInMillis());
+            return true;
+        }
+
+        return false;
     }
 
     public void onChange() {
@@ -137,23 +176,16 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         setFriction(ViewConfiguration.getScrollFriction() * mFriction);
     }
 
-    private int getDiffMonths(Calendar start, Calendar end){
+    private int getDiffMonths(Calendar start, Calendar end) {
         final int diffYears = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
         final int diffMonths = end.get(Calendar.MONTH) - start.get(Calendar.MONTH) + 12 * diffYears;
         return diffMonths;
     }
 
     private int getPositionFromDay(Calendar day) {
-        final int diffMonthMax = getDiffMonths(mController.getMinDate(), mController.getMaxDate());
-        int diffMonth = getDiffMonths(mController.getMinDate(), day);
-
-        if (diffMonth < 0 ) {
-            diffMonth = 0;
-        } else if (diffMonth > diffMonthMax) {
-            diffMonth = diffMonthMax;
-        }
-
-        return diffMonth;
+        final int diffMonthMax = getDiffMonths(mMinDate, mMaxDate);
+        final int diffMonth = getDiffMonths(mMinDate, day);
+        return MathUtils.constrain(diffMonth, 0, diffMonthMax);
     }
 
     /**
@@ -171,8 +203,7 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
      *            visible
      * @return Whether or not the view animated to the new location
      */
-    public boolean goTo(Calendar day, boolean animate, boolean setSelected,
-                        boolean forceScroll) {
+    public boolean goTo(Calendar day, boolean animate, boolean setSelected, boolean forceScroll) {
 
         // Set the selected day
         if (setSelected) {
@@ -464,10 +495,10 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         }
 
         // Figure out what month is showing.
-        int firstVisiblePosition = getFirstVisiblePosition();
-        int month = firstVisiblePosition % 12;
-        int year = firstVisiblePosition / 12 + mController.getMinYear();
-        Calendar day = Calendar.getInstance();
+        final int firstVisiblePosition = getFirstVisiblePosition();
+        final int month = firstVisiblePosition % 12;
+        final int year = firstVisiblePosition / 12 + mMinDate.get(Calendar.YEAR);
+        final Calendar day = Calendar.getInstance();
         day.set(year, month, 1);
 
         // Scroll either forward or backward one month.

@@ -52,8 +52,6 @@ import java.util.Locale;
  * within the specified month.
  */
 class SimpleMonthView extends View {
-    private static final String TAG = "SimpleMonthView";
-
     private static final int DEFAULT_HEIGHT = 32;
     private static final int MIN_HEIGHT = 10;
 
@@ -67,14 +65,14 @@ class SimpleMonthView extends View {
 
     private static final int DAY_SEPARATOR_WIDTH = 1;
 
+    private final Formatter mFormatter;
+    private final StringBuilder mStringBuilder;
+
     private final int mMiniDayNumberTextSize;
     private final int mMonthLabelTextSize;
     private final int mMonthDayLabelTextSize;
     private final int mMonthHeaderSize;
     private final int mDaySelectedCircleSize;
-
-    // used for scaling to the device density
-    private static float mScale = 0;
 
     /** Single-letter (when available) formatter for the day of week label. */
     private SimpleDateFormat mDayFormatter = new SimpleDateFormat("EEEEE", Locale.getDefault());
@@ -91,9 +89,6 @@ class SimpleMonthView extends View {
 
     private Paint mMonthTitlePaint;
     private Paint mMonthDayLabelPaint;
-
-    private final Formatter mFormatter;
-    private final StringBuilder mStringBuilder;
 
     private int mMonth;
     private int mYear;
@@ -155,11 +150,14 @@ class SimpleMonthView extends View {
         this(context, attrs, R.attr.datePickerStyle);
     }
 
-    public SimpleMonthView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs);
+    public SimpleMonthView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public SimpleMonthView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         final Resources res = context.getResources();
-
         mDayOfWeekTypeface = res.getString(R.string.day_of_week_label_typeface);
         mMonthTitleTypeface = res.getString(R.string.sans_serif);
 
